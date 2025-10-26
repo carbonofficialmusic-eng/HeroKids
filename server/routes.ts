@@ -145,77 +145,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/family-members", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const parsed = insertFamilyMemberSchema.parse(req.body);
       
-      // Check if this is initial setup (has familyName) or adding a new member (uses current user's family)
-      const isInitialSetup = !!req.body.familyName;
+      // Check if user already has a family member profile
+      const existingMember = await storage.getFamilyMemberByUserId(userId);
       
-      let familyName = parsed.familyName;
-      
-      // If not initial setup, get family from current user
-      if (!isInitialSetup) {
-        const currentMember = await storage.getFamilyMemberByUserId(userId);
-        if (!currentMember) {
-          return res.status(404).json({ message: "You must be part of a family to add members" });
-        }
-        if (currentMember.role !== "parent") {
+      if (existingMember) {
+        // Adding a new member - user must be a parent
+        if (existingMember.role !== "parent") {
           return res.status(403).json({ message: "Only parents can add family members" });
         }
-        familyName = currentMember.familyName;
-      }
-      
-      // Check if family exists, create if not
-      let family = await storage.getFamily(familyName);
-      if (!family) {
-        family = await storage.createFamily({
-          familyName: familyName,
-          subscriptionTier: "free",
+        
+        const parsed = insertFamilyMemberSchema.parse(req.body);
+        const familyName = existingMember.familyName;
+        
+        // Get family for tier checking
+        const family = await storage.getFamily(familyName);
+        if (!family) {
+          return res.status(404).json({ message: "Family not found" });
+        }
+        
+        // Check subscription tier limits
+        const tierLimits: Record<string, number> = {
+          free: 2,
+          family: 4,
+          family_plus: 6,
+          hero_pro: Infinity,
+        };
+        
+        const currentCount = await storage.getFamilyMemberCount(familyName);
+        const limit = tierLimits[family.subscriptionTier];
+        
+        if (currentCount >= limit) {
+          return res.status(403).json({
+            message: `Your ${family.subscriptionTier} plan is limited to ${limit} members. Upgrade to add more family members.`,
+            currentTier: family.subscriptionTier,
+            currentCount,
+            limit,
+          });
+        }
+        
+        // Generate a cryptographically secure join code
+        const crypto = await import('crypto');
+        const joinCode = crypto.randomBytes(4).toString('hex').substring(0, 6).toUpperCase();
+        
+        // Create member with join code (no userId yet)
+        const member = await storage.createFamilyMember({
+          ...parsed,
+          familyName,
+          joinCode,
         });
-      }
-      
-      // Check subscription tier limits
-      const tierLimits: Record<string, number> = {
-        free: 2,
-        family: 4,
-        family_plus: 6,
-        hero_pro: Infinity,
-      };
-      
-      const currentCount = await storage.getFamilyMemberCount(familyName);
-      const limit = tierLimits[family.subscriptionTier];
-      
-      if (currentCount >= limit) {
-        return res.status(403).json({
-          message: `Your ${family.subscriptionTier} plan is limited to ${limit} members. Upgrade to add more family members.`,
-          currentTier: family.subscriptionTier,
-          currentCount,
-          limit,
+        
+        // Broadcast new member to family
+        broadcastToFamily(member.familyName, {
+          type: "member_joined",
+          member,
         });
-      }
-      
-      // For initial setup, link to current user. For adding members, create with join code
-      let memberData: any = {
-        ...parsed,
-        familyName,
-      };
-      
-      if (isInitialSetup) {
-        memberData.userId = userId;
+        
+        res.json(member);
       } else {
-        // Generate a unique 6-character join code
-        const joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-        memberData.joinCode = joinCode;
+        // Initial setup - creating first member for this user
+        const parsed = insertFamilyMemberSchema.parse(req.body);
+        
+        // Check if family exists, create if not
+        let family = await storage.getFamily(parsed.familyName);
+        if (!family) {
+          family = await storage.createFamily({
+            familyName: parsed.familyName,
+            subscriptionTier: "free",
+          });
+        }
+        
+        // Check subscription tier limits
+        const tierLimits: Record<string, number> = {
+          free: 2,
+          family: 4,
+          family_plus: 6,
+          hero_pro: Infinity,
+        };
+        
+        const currentCount = await storage.getFamilyMemberCount(parsed.familyName);
+        const limit = tierLimits[family.subscriptionTier];
+        
+        if (currentCount >= limit) {
+          return res.status(403).json({
+            message: `Your ${family.subscriptionTier} plan is limited to ${limit} members. Upgrade to add more family members.`,
+            currentTier: family.subscriptionTier,
+            currentCount,
+            limit,
+          });
+        }
+        
+        // Create member linked to current user
+        const member = await storage.createFamilyMember({
+          ...parsed,
+          userId,
+        });
+        
+        // Broadcast new member to family
+        broadcastToFamily(member.familyName, {
+          type: "member_joined",
+          member,
+        });
+        
+        res.json(member);
       }
-      
-      const member = await storage.createFamilyMember(memberData);
-      
-      // Broadcast new member to family
-      broadcastToFamily(member.familyName, {
-        type: "member_joined",
-        member,
-      });
-      
-      res.json(member);
     } catch (error: any) {
       console.error("Error creating family member:", error);
       res.status(400).json({ message: error.message || "Failed to create family member" });
