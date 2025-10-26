@@ -1,0 +1,498 @@
+import type { Express } from "express";
+import express from "express";
+import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
+import multer from "multer";
+import { join } from "path";
+import { mkdir } from "fs/promises";
+import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema } from "@shared/schema";
+
+// Configure multer for photo uploads
+const uploadDir = join(process.cwd(), "uploads", "task-proofs");
+
+// Ensure upload directory exists
+mkdir(uploadDir, { recursive: true }).catch(console.error);
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: uploadDir,
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + '-' + file.originalname);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+});
+
+// WebSocket connection management
+const wsClients = new Map<string, Set<WebSocket>>();
+
+// Track uploaded photos to prevent URL spoofing
+const uploadedPhotos = new Map<string, { memberId: string; taskId: string; timestamp: number }>();
+
+// Clean up old uploads every hour
+setInterval(() => {
+  const oneHourAgo = Date.now() - (60 * 60 * 1000);
+  for (const [photoUrl, data] of uploadedPhotos.entries()) {
+    if (data.timestamp < oneHourAgo) {
+      uploadedPhotos.delete(photoUrl);
+    }
+  }
+}, 60 * 60 * 1000);
+
+function broadcastToFamily(familyName: string, message: any) {
+  const clients = wsClients.get(familyName);
+  if (clients) {
+    const messageStr = JSON.stringify(message);
+    clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(messageStr);
+      }
+    });
+  }
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve uploaded files
+  app.use('/uploads', (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  });
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
+
+  // Auth middleware
+  await setupAuth(app);
+
+  // Auth routes
+  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Family member routes
+  app.get("/api/family-members/current", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      res.json(member);
+    } catch (error) {
+      console.error("Error fetching current family member:", error);
+      res.status(500).json({ message: "Failed to fetch family member" });
+    }
+  });
+
+  app.get("/api/family-members", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const currentMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!currentMember) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const members = await storage.getFamilyMembersByFamily(currentMember.familyName);
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching family members:", error);
+      res.status(500).json({ message: "Failed to fetch family members" });
+    }
+  });
+
+  app.post("/api/family-members", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const parsed = insertFamilyMemberSchema.parse(req.body);
+      
+      const member = await storage.createFamilyMember({
+        ...parsed,
+        userId,
+      });
+      
+      // Broadcast new member to family
+      broadcastToFamily(member.familyName, {
+        type: "member_joined",
+        member,
+      });
+      
+      res.json(member);
+    } catch (error: any) {
+      console.error("Error creating family member:", error);
+      res.status(400).json({ message: error.message || "Failed to create family member" });
+    }
+  });
+
+  // Task routes
+  app.get("/api/tasks", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const tasks = await storage.getTasksByFamily(member.familyName);
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ message: "Failed to fetch tasks" });
+    }
+  });
+
+  app.post("/api/tasks", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can create tasks
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can create tasks" });
+      }
+      
+      const parsed = insertTaskSchema.parse(req.body);
+      
+      // Parse dueDate if provided as string
+      const taskData = {
+        ...parsed,
+        dueDate: parsed.dueDate ? new Date(parsed.dueDate) : null,
+      };
+      
+      const task = await storage.createTask(taskData);
+      
+      // Broadcast new task to family
+      broadcastToFamily(member.familyName, {
+        type: "task_created",
+        task,
+      });
+      
+      res.json(task);
+    } catch (error: any) {
+      console.error("Error creating task:", error);
+      res.status(400).json({ message: error.message || "Failed to create task" });
+    }
+  });
+
+  // Photo upload endpoint for task proof
+  app.post("/api/tasks/:taskId/upload-proof", isAuthenticated, upload.single('photo'), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { taskId } = req.params;
+      
+      if (!req.file) {
+        return res.status(422).json({ message: "No photo file provided" });
+      }
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const task = await storage.getTask(taskId);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      if (task.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Task not in your family" });
+      }
+      
+      // Generate URL for the uploaded file
+      const photoUrl = `/uploads/task-proofs/${req.file.filename}`;
+      
+      // Track this upload to prevent URL spoofing
+      uploadedPhotos.set(photoUrl, {
+        memberId: member.id,
+        taskId: taskId,
+        timestamp: Date.now(),
+      });
+      
+      res.json({ photoUrl });
+    } catch (error: any) {
+      console.error("Error uploading proof photo:", error);
+      res.status(500).json({ message: "Failed to upload photo" });
+    }
+  });
+
+  app.post("/api/tasks/:taskId/complete", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { taskId } = req.params;
+      const { proofPhotoUrl } = req.body;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const task = await storage.getTask(taskId);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      if (task.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Forbidden: Task not in your family" });
+      }
+      
+      if (task.status !== "active") {
+        return res.status(422).json({ message: "Validation failed: Task is not active" });
+      }
+      
+      // Validate photo proof
+      if (task.requiresProof) {
+        if (!proofPhotoUrl) {
+          return res.status(422).json({ message: "Validation failed: Photo proof is required" });
+        }
+        
+        // Verify the photo was uploaded for this task and family
+        const uploadData = uploadedPhotos.get(proofPhotoUrl);
+        if (!uploadData || uploadData.taskId !== taskId) {
+          return res.status(422).json({ message: "Validation failed: Invalid or expired photo proof" });
+        }
+        
+        // Verify the uploader and completer are both in the same family
+        const uploader = await storage.getFamilyMember(uploadData.memberId);
+        if (!uploader || uploader.familyName !== member.familyName) {
+          return res.status(422).json({ message: "Validation failed: Photo proof from different family" });
+        }
+        
+        // Remove from tracking after verification
+        uploadedPhotos.delete(proofPhotoUrl);
+      }
+      
+      // Create completion record
+      const completion = await storage.createTaskCompletion({
+        taskId: task.id,
+        memberId: member.id,
+        pointsEarned: task.points,
+        proofPhotoUrl: proofPhotoUrl || null,
+      });
+      
+      // Update member points
+      const newTotalPoints = member.totalPoints + task.points;
+      const newWeeklyPoints = member.weeklyPoints + task.points;
+      const newMonthlyPoints = member.monthlyPoints + task.points;
+      
+      await storage.updateFamilyMemberPoints(
+        member.id,
+        newTotalPoints,
+        newWeeklyPoints,
+        newMonthlyPoints
+      );
+      
+      // Add to points history
+      await storage.addPointsHistory({
+        memberId: member.id,
+        points: task.points,
+        reason: `Completed: ${task.title}`,
+        taskId: task.id,
+      });
+      
+      // Handle recurring tasks
+      if (task.recurrence !== "none") {
+        // Calculate next due date based on recurrence
+        let nextDueDate: Date | null = null;
+        const now = new Date();
+        
+        if (task.dueDate) {
+          const currentDue = new Date(task.dueDate);
+          switch (task.recurrence) {
+            case "daily":
+              nextDueDate = new Date(currentDue.setDate(currentDue.getDate() + 1));
+              break;
+            case "weekly":
+              nextDueDate = new Date(currentDue.setDate(currentDue.getDate() + 7));
+              break;
+            case "monthly":
+              nextDueDate = new Date(currentDue.setMonth(currentDue.getMonth() + 1));
+              break;
+          }
+        } else {
+          // For tasks without due dates, set next occurrence based on current time
+          switch (task.recurrence) {
+            case "daily":
+              nextDueDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+              break;
+            case "weekly":
+              nextDueDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+              break;
+            case "monthly":
+              nextDueDate = new Date(now);
+              nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+              break;
+          }
+        }
+        
+        // Mark current instance as completed first to prevent duplicates
+        await storage.updateTaskStatus(taskId, "completed");
+        
+        // Create new instance of the recurring task
+        const newTask = await storage.createTask({
+          familyName: task.familyName,
+          createdBy: task.createdBy,
+          title: task.title,
+          description: task.description,
+          points: task.points,
+          dueDate: nextDueDate,
+          recurrence: task.recurrence,
+          status: "active",
+          requiresProof: task.requiresProof,
+          iconEmoji: task.iconEmoji,
+        });
+        
+        // Copy all task assignments to the new instance
+        const assignedMemberIds = await storage.getTaskAssignmentsByTask(taskId);
+        for (const memberId of assignedMemberIds) {
+          await storage.createTaskAssignment({
+            taskId: newTask.id,
+            memberId: memberId,
+          });
+        }
+      } else {
+        // Non-recurring tasks are simply marked as completed
+        await storage.updateTaskStatus(taskId, "completed");
+      }
+      
+      // Get updated member data
+      const updatedMember = await storage.getFamilyMember(member.id);
+      
+      // Broadcast completion to family
+      broadcastToFamily(member.familyName, {
+        type: "task_completed",
+        taskId: task.id,
+        member: updatedMember,
+        pointsEarned: task.points,
+      });
+      
+      res.json({
+        success: true,
+        pointsEarned: task.points,
+        newTotalPoints: newTotalPoints,
+        completion,
+      });
+    } catch (error: any) {
+      console.error("Error completing task:", error);
+      res.status(500).json({ message: "Failed to complete task" });
+    }
+  });
+
+  // Reward routes
+  app.get("/api/rewards", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const rewards = await storage.getRewardsByFamily(member.familyName);
+      res.json(rewards);
+    } catch (error) {
+      console.error("Error fetching rewards:", error);
+      res.status(500).json({ message: "Failed to fetch rewards" });
+    }
+  });
+
+  app.post("/api/rewards", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can create rewards
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can create rewards" });
+      }
+      
+      const parsed = insertRewardSchema.parse(req.body);
+      const reward = await storage.createReward(parsed);
+      
+      // Broadcast new reward to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_created",
+        reward,
+      });
+      
+      res.json(reward);
+    } catch (error: any) {
+      console.error("Error creating reward:", error);
+      res.status(400).json({ message: error.message || "Failed to create reward" });
+    }
+  });
+
+  const httpServer = createServer(app);
+
+  // WebSocket server for real-time updates
+  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+
+  wss.on("connection", (ws: WebSocket, req: any) => {
+    console.log("WebSocket client connected");
+    
+    let familyName: string | null = null;
+
+    ws.on("message", (message: string) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        if (data.type === "join_family") {
+          familyName = data.familyName;
+          
+          if (!wsClients.has(familyName)) {
+            wsClients.set(familyName, new Set());
+          }
+          wsClients.get(familyName)!.add(ws);
+          
+          console.log(`Client joined family: ${familyName}`);
+        }
+      } catch (error) {
+        console.error("Error handling WebSocket message:", error);
+      }
+    });
+
+    ws.on("close", () => {
+      if (familyName) {
+        const clients = wsClients.get(familyName);
+        if (clients) {
+          clients.delete(ws);
+          if (clients.size === 0) {
+            wsClients.delete(familyName);
+          }
+        }
+        console.log(`Client left family: ${familyName}`);
+      }
+    });
+
+    ws.on("error", (error) => {
+      console.error("WebSocket error:", error);
+    });
+  });
+
+  return httpServer;
+}

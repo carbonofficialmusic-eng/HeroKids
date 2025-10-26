@@ -1,0 +1,219 @@
+import {
+  users,
+  familyMembers,
+  tasks,
+  taskAssignments,
+  taskCompletions,
+  rewards,
+  pointsHistory,
+  type User,
+  type UpsertUser,
+  type FamilyMember,
+  type InsertFamilyMember,
+  type Task,
+  type InsertTask,
+  type InsertTaskAssignment,
+  type InsertTaskCompletion,
+  type Reward,
+  type InsertReward,
+  type InsertPointsHistory,
+  type TaskCompletion,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc } from "drizzle-orm";
+
+export interface IStorage {
+  // User operations (required for Replit Auth)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+
+  // Family member operations
+  getFamilyMember(id: string): Promise<FamilyMember | undefined>;
+  getFamilyMemberByUserId(userId: string): Promise<FamilyMember | undefined>;
+  getFamilyMembersByFamily(familyName: string): Promise<FamilyMember[]>;
+  createFamilyMember(member: InsertFamilyMember): Promise<FamilyMember>;
+  updateFamilyMemberPoints(
+    id: string,
+    totalPoints: number,
+    weeklyPoints: number,
+    monthlyPoints: number
+  ): Promise<void>;
+
+  // Task operations
+  getTask(id: string): Promise<Task | undefined>;
+  getTasksByFamily(familyName: string): Promise<Task[]>;
+  createTask(task: InsertTask): Promise<Task>;
+  updateTaskStatus(id: string, status: "active" | "completed" | "archived"): Promise<void>;
+
+  // Task assignment operations
+  createTaskAssignment(assignment: InsertTaskAssignment): Promise<void>;
+  getTaskAssignmentsByMember(memberId: string): Promise<string[]>;
+  getTaskAssignmentsByTask(taskId: string): Promise<string[]>;
+
+  // Task completion operations
+  createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion>;
+  getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]>;
+
+  // Reward operations
+  getRewardsByFamily(familyName: string): Promise<Reward[]>;
+  createReward(reward: InsertReward): Promise<Reward>;
+
+  // Points history operations
+  addPointsHistory(history: InsertPointsHistory): Promise<void>;
+}
+
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Family member operations
+  async getFamilyMember(id: string): Promise<FamilyMember | undefined> {
+    const [member] = await db
+      .select()
+      .from(familyMembers)
+      .where(eq(familyMembers.id, id));
+    return member;
+  }
+
+  async getFamilyMemberByUserId(userId: string): Promise<FamilyMember | undefined> {
+    const [member] = await db
+      .select()
+      .from(familyMembers)
+      .where(eq(familyMembers.userId, userId));
+    return member;
+  }
+
+  async getFamilyMembersByFamily(familyName: string): Promise<FamilyMember[]> {
+    return await db
+      .select()
+      .from(familyMembers)
+      .where(eq(familyMembers.familyName, familyName))
+      .orderBy(desc(familyMembers.totalPoints));
+  }
+
+  async createFamilyMember(memberData: InsertFamilyMember): Promise<FamilyMember> {
+    const [member] = await db
+      .insert(familyMembers)
+      .values(memberData)
+      .returning();
+    return member;
+  }
+
+  async updateFamilyMemberPoints(
+    id: string,
+    totalPoints: number,
+    weeklyPoints: number,
+    monthlyPoints: number
+  ): Promise<void> {
+    await db
+      .update(familyMembers)
+      .set({ totalPoints, weeklyPoints, monthlyPoints, updatedAt: new Date() })
+      .where(eq(familyMembers.id, id));
+  }
+
+  // Task operations
+  async getTask(id: string): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    return task;
+  }
+
+  async getTasksByFamily(familyName: string): Promise<Task[]> {
+    return await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.familyName, familyName))
+      .orderBy(desc(tasks.createdAt));
+  }
+
+  async createTask(taskData: InsertTask): Promise<Task> {
+    const [task] = await db.insert(tasks).values(taskData).returning();
+    return task;
+  }
+
+  async updateTaskStatus(
+    id: string,
+    status: "active" | "completed" | "archived"
+  ): Promise<void> {
+    await db
+      .update(tasks)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(tasks.id, id));
+  }
+
+  // Task assignment operations
+  async createTaskAssignment(assignmentData: InsertTaskAssignment): Promise<void> {
+    await db.insert(taskAssignments).values(assignmentData);
+  }
+
+  async getTaskAssignmentsByMember(memberId: string): Promise<string[]> {
+    const assignments = await db
+      .select()
+      .from(taskAssignments)
+      .where(eq(taskAssignments.memberId, memberId));
+    return assignments.map((a) => a.taskId);
+  }
+
+  async getTaskAssignmentsByTask(taskId: string): Promise<string[]> {
+    const assignments = await db
+      .select()
+      .from(taskAssignments)
+      .where(eq(taskAssignments.taskId, taskId));
+    return assignments.map((a) => a.memberId);
+  }
+
+  // Task completion operations
+  async createTaskCompletion(completionData: InsertTaskCompletion): Promise<TaskCompletion> {
+    const [completion] = await db
+      .insert(taskCompletions)
+      .values(completionData)
+      .returning();
+    return completion;
+  }
+
+  async getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]> {
+    return await db
+      .select()
+      .from(taskCompletions)
+      .where(eq(taskCompletions.memberId, memberId))
+      .orderBy(desc(taskCompletions.completedAt));
+  }
+
+  // Reward operations
+  async getRewardsByFamily(familyName: string): Promise<Reward[]> {
+    return await db
+      .select()
+      .from(rewards)
+      .where(eq(rewards.familyName, familyName))
+      .orderBy(rewards.pointThreshold);
+  }
+
+  async createReward(rewardData: InsertReward): Promise<Reward> {
+    const [reward] = await db.insert(rewards).values(rewardData).returning();
+    return reward;
+  }
+
+  // Points history operations
+  async addPointsHistory(historyData: InsertPointsHistory): Promise<void> {
+    await db.insert(pointsHistory).values(historyData);
+  }
+}
+
+export const storage = new DatabaseStorage();
