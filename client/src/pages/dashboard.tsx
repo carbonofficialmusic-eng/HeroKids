@@ -35,6 +35,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
@@ -125,6 +126,12 @@ export default function Dashboard() {
     },
   });
 
+  // Handle task click
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setTaskDialogOpen(true);
+  };
+
   // Create task
   const createTaskMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -138,6 +145,7 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       setTaskDialogOpen(false);
+      setSelectedTask(null);
       toast({
         title: "Task created!",
         description: "The task has been added to the list.",
@@ -316,7 +324,10 @@ export default function Dashboard() {
                     Add Reward
                   </Button>
                   <Button
-                    onClick={() => setTaskDialogOpen(true)}
+                    onClick={() => {
+                      setSelectedTask(null);
+                      setTaskDialogOpen(true);
+                    }}
                     data-testid="button-add-task"
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -332,7 +343,10 @@ export default function Dashboard() {
                   <p className="text-muted-foreground mb-6">
                     Create your first task to get started!
                   </p>
-                  <Button onClick={() => setTaskDialogOpen(true)} data-testid="button-create-first-task">
+                  <Button onClick={() => {
+                    setSelectedTask(null);
+                    setTaskDialogOpen(true);
+                  }} data-testid="button-create-first-task">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Task
                   </Button>
@@ -340,7 +354,7 @@ export default function Dashboard() {
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
                   {activeTasks.map((task) => (
-                    <TaskCard key={task.id} task={task} showAssignee />
+                    <TaskCard key={task.id} task={task} showAssignee onClick={handleTaskClick} />
                   ))}
                 </div>
               )}
@@ -421,6 +435,7 @@ export default function Dashboard() {
                         onComplete={(taskId) => completeTaskMutation.mutate(taskId)}
                         isCompleting={completeTaskMutation.isPending}
                         showAssignee={false}
+                        onClick={handleTaskClick}
                       />
                     ))}
                   </div>
@@ -500,11 +515,15 @@ export default function Dashboard() {
         <>
           <TaskDialog
             open={taskDialogOpen}
-            onOpenChange={setTaskDialogOpen}
+            onOpenChange={(open) => {
+              setTaskDialogOpen(open);
+              if (!open) setSelectedTask(null);
+            }}
             onSubmit={(data) => createTaskMutation.mutate(data)}
             isSubmitting={createTaskMutation.isPending}
             familyName={member.familyName}
             createdBy={member.id}
+            editingTask={selectedTask}
           />
           <RewardDialog
             open={rewardDialogOpen}
