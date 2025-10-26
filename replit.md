@@ -4,6 +4,17 @@
 
 HomeHero is a full-stack web application that transforms household chores into an engaging game for families. Children earn points by completing tasks, compete on leaderboards, and unlock rewards - making household responsibilities fun and motivating. The application features real-time updates, photo verification for task completion, and a playful, age-appropriate design inspired by gamified learning apps like Duolingo and Habitica.
 
+## Recent Changes
+
+**October 26, 2025 - Edit Profile Feature**:
+- Added EditMemberDialog component for updating member profiles
+- Users can now edit their own avatar, display name, and color
+- Parents can edit any family member's profile
+- Added PUT `/api/family-members/:memberId` endpoint with permission checking
+- Profile updates broadcast in real-time to all family members via WebSocket
+- Settings icon button in dashboard header provides easy access
+- Fixed race condition bug by passing memberId explicitly to mutation
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
