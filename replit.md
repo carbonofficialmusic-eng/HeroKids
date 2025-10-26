@@ -41,12 +41,22 @@ Preferred communication style: Simple, everyday language.
 - `/api/tasks/*` - Task CRUD operations
 - `/api/rewards/*` - Reward management
 - `/api/task-completions/*` - Task completion with photo upload support
+- `/api/upload-avatar` - Profile picture upload endpoint
 
-**File Upload Handling**: Multer middleware for photo verification of task completions. Images are stored in `uploads/task-proofs/` with:
+**File Upload Handling**: Multer middleware for photo uploads supporting both task completion proofs and custom profile pictures:
+
+**Task Completion Photos** (`uploads/task-proofs/`):
 - 5MB file size limit
 - Image file type validation
 - Unique filename generation using timestamps
 - Photo URL tracking to prevent spoofing
+
+**Custom Profile Pictures** (`uploads/avatars/`):
+- 5MB file size limit
+- Image file type validation
+- Unique filename generation using timestamps
+- Optional upload - users can choose between pre-made animal avatars or custom photos
+- Callback-based state synchronization for clearing custom uploads
 
 **WebSocket Server**: WebSocket server running alongside Express for real-time communication. Clients join "family rooms" based on their family name, enabling targeted broadcasts for family-specific events (task creation, completion, member joining).
 
@@ -103,8 +113,10 @@ Preferred communication style: Simple, everyday language.
 - WebSocket support for Drizzle ORM via `@neondatabase/serverless` and `ws` package
 
 **Asset Storage**:
-- Local filesystem storage for uploaded task completion photos
-- Avatar assets stored in `attached_assets/generated_images/`
+- Local filesystem storage for uploaded task completion photos (`uploads/task-proofs/`)
+- Custom profile pictures stored in `uploads/avatars/`
+- Pre-made avatar assets stored in `attached_assets/generated_images/` (6 animal avatars: fox, bear, rabbit, cat, penguin, lion)
+- All uploads served via `/uploads` static route
 - Future consideration: Migration to cloud storage (S3, Cloudinary) for production scalability
 
 **Fonts**: 
