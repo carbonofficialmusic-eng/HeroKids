@@ -18,6 +18,7 @@ import { z } from "zod";
 export const roleEnum = pgEnum("role", ["parent", "child"]);
 export const taskStatusEnum = pgEnum("task_status", ["active", "completed", "archived"]);
 export const recurrenceEnum = pgEnum("recurrence", ["none", "daily", "weekly", "monthly"]);
+export const subscriptionTierEnum = pgEnum("subscription_tier", ["free", "family", "family_plus", "hero_pro"]);
 
 // Session storage table - Required for Replit Auth
 export const sessions = pgTable(
@@ -44,11 +45,31 @@ export const users = pgTable("users", {
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Families - Family groups with subscription tiers
+export const families = pgTable("families", {
+  familyName: varchar("family_name").primaryKey(),
+  subscriptionTier: subscriptionTierEnum("subscription_tier").notNull().default("free"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const familiesRelations = relations(families, ({ many }) => ({
+  members: many(familyMembers),
+}));
+
+export const insertFamilySchema = createInsertSchema(families).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertFamily = z.infer<typeof insertFamilySchema>;
+export type Family = typeof families.$inferSelect;
+
 // Family members - Individual family members with avatars and roles
 export const familyMembers = pgTable("family_members", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  familyName: varchar("family_name").notNull(), // Group identifier for families
+  familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
   displayName: varchar("display_name").notNull(),
   role: roleEnum("role").notNull().default("child"),
   avatarUrl: varchar("avatar_url"),
@@ -64,6 +85,10 @@ export const familyMembersRelations = relations(familyMembers, ({ one, many }) =
   user: one(users, {
     fields: [familyMembers.userId],
     references: [users.id],
+  }),
+  family: one(families, {
+    fields: [familyMembers.familyName],
+    references: [families.familyName],
   }),
   tasksCreated: many(tasks),
   taskAssignments: many(taskAssignments),
@@ -221,3 +246,32 @@ export const insertPointsHistorySchema = createInsertSchema(pointsHistory).omit(
 
 export type InsertPointsHistory = z.infer<typeof insertPointsHistorySchema>;
 export type PointsHistory = typeof pointsHistory.$inferSelect;
+
+// Reward redemptions - Track when rewards are claimed
+export const rewardRedemptions = pgTable("reward_redemptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  rewardId: varchar("reward_id").notNull().references(() => rewards.id, { onDelete: "cascade" }),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  pointsSpent: integer("points_spent").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, approved, completed
+  redeemedAt: timestamp("redeemed_at").defaultNow(),
+});
+
+export const rewardRedemptionsRelations = relations(rewardRedemptions, ({ one }) => ({
+  reward: one(rewards, {
+    fields: [rewardRedemptions.rewardId],
+    references: [rewards.id],
+  }),
+  member: one(familyMembers, {
+    fields: [rewardRedemptions.memberId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertRewardRedemptionSchema = createInsertSchema(rewardRedemptions).omit({
+  id: true,
+  redeemedAt: true,
+});
+
+export type InsertRewardRedemption = z.infer<typeof insertRewardRedemptionSchema>;
+export type RewardRedemption = typeof rewardRedemptions.$inferSelect;

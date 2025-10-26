@@ -15,9 +15,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Plus, LogOut, Trophy, Gift, Star } from "lucide-react";
+import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 import type { FamilyMember, Task, Reward } from "@shared/schema";
 
 export default function Dashboard() {
@@ -54,6 +55,16 @@ export default function Dashboard() {
   // Fetch rewards
   const { data: rewards = [] } = useQuery<Reward[]>({
     queryKey: ["/api/rewards"],
+    enabled: !!member,
+  });
+
+  // Fetch family subscription tier
+  const { data: familyData } = useQuery<{
+    familyName: string;
+    subscriptionTier: string;
+    memberCount: number;
+  }>({
+    queryKey: ["/api/families/current"],
     enabled: !!member,
   });
 
@@ -119,6 +130,32 @@ export default function Dashboard() {
     },
   });
 
+  // Redeem reward
+  const redeemRewardMutation = useMutation({
+    mutationFn: async (rewardId: string) => {
+      return await apiRequest("POST", `/api/rewards/${rewardId}/redeem`, {});
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      toast({
+        title: "Reward redeemed!",
+        description: data.message,
+      });
+      setCelebration({
+        points: -data.redemption.pointsSpent,
+        message: `You redeemed: ${data.redemption.title || 'reward'}!`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to redeem",
+        description: error.message || "Not enough points",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (memberLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -160,6 +197,24 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {familyData && (
+              <Link href="/pricing">
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer hover-elevate"
+                  data-testid="badge-current-tier"
+                >
+                  <Crown className="h-3 w-3 mr-1" />
+                  {familyData.subscriptionTier === "free"
+                    ? "Free"
+                    : familyData.subscriptionTier === "family"
+                    ? "Family"
+                    : familyData.subscriptionTier === "family_plus"
+                    ? "Family+"
+                    : "HeroPro"}
+                </Badge>
+              </Link>
+            )}
             <PointCounter
               points={member.weeklyPoints}
               size="compact"
@@ -185,11 +240,17 @@ export default function Dashboard() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-3">
                 <h1 className="text-3xl font-black font-accent" data-testid="text-page-title">
                   Family Tasks
                 </h1>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
+                  <Link href="/analytics">
+                    <Button variant="outline" data-testid="button-analytics">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Analytics
+                    </Button>
+                  </Link>
                   <Button
                     onClick={() => setRewardDialogOpen(true)}
                     variant="outline"
@@ -333,22 +394,40 @@ export default function Dashboard() {
                               {reward.description}
                             </p>
                           )}
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 mb-3">
                             <Badge
                               variant={
-                                member.weeklyPoints >= reward.pointThreshold
+                                member.totalPoints >= reward.pointThreshold
                                   ? "default"
                                   : "secondary"
                               }
                             >
                               {reward.pointThreshold} points
                             </Badge>
-                            {member.weeklyPoints >= reward.pointThreshold && (
+                            {member.totalPoints >= reward.pointThreshold && (
                               <span className="text-xs font-semibold text-green-600">
                                 You can claim this!
                               </span>
                             )}
                           </div>
+                          <Button
+                            onClick={() => redeemRewardMutation.mutate(reward.id)}
+                            disabled={
+                              member.totalPoints < reward.pointThreshold ||
+                              redeemRewardMutation.isPending
+                            }
+                            size="sm"
+                            className="w-full"
+                            data-testid={`button-redeem-${reward.id}`}
+                          >
+                            {redeemRewardMutation.isPending ? (
+                              "Redeeming..."
+                            ) : member.totalPoints >= reward.pointThreshold ? (
+                              "Redeem Now!"
+                            ) : (
+                              `Need ${reward.pointThreshold - member.totalPoints} more points`
+                            )}
+                          </Button>
                         </div>
                       </div>
                     </Card>

@@ -7,7 +7,7 @@ import { join } from "path";
 import { mkdir } from "fs/promises";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema } from "@shared/schema";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema } from "@shared/schema";
 
 // Configure multer for photo uploads
 const uploadDir = join(process.cwd(), "uploads", "task-proofs");
@@ -84,6 +84,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Family routes
+  app.get("/api/families/current", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      const memberCount = await storage.getFamilyMemberCount(member.familyName);
+      
+      res.json({ ...family, memberCount });
+    } catch (error) {
+      console.error("Error fetching family:", error);
+      res.status(500).json({ message: "Failed to fetch family" });
+    }
+  });
+
   // Family member routes
   app.get("/api/family-members/current", isAuthenticated, async (req: any, res) => {
     try {
@@ -122,6 +146,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const parsed = insertFamilyMemberSchema.parse(req.body);
+      
+      // Check if family exists, create if not
+      let family = await storage.getFamily(parsed.familyName);
+      if (!family) {
+        family = await storage.createFamily({
+          familyName: parsed.familyName,
+          subscriptionTier: "free",
+        });
+      }
+      
+      // Check subscription tier limits
+      const tierLimits: Record<string, number> = {
+        free: 2,
+        family: 4,
+        family_plus: 6,
+        hero_pro: Infinity,
+      };
+      
+      const currentCount = await storage.getFamilyMemberCount(parsed.familyName);
+      const limit = tierLimits[family.subscriptionTier];
+      
+      if (currentCount >= limit) {
+        return res.status(403).json({
+          message: `Your ${family.subscriptionTier} plan is limited to ${limit} members. Upgrade to add more family members.`,
+          currentTier: family.subscriptionTier,
+          currentCount,
+          limit,
+        });
+      }
       
       const member = await storage.createFamilyMember({
         ...parsed,
@@ -444,6 +497,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating reward:", error);
       res.status(400).json({ message: error.message || "Failed to create reward" });
+    }
+  });
+
+  // Redeem a reward
+  app.post("/api/rewards/:rewardId/redeem", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { rewardId } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get the reward
+      const rewards = await storage.getRewardsByFamily(member.familyName);
+      const reward = rewards.find(r => r.id === rewardId);
+      
+      if (!reward) {
+        return res.status(404).json({ message: "Reward not found" });
+      }
+      
+      if (!reward.isActive) {
+        return res.status(400).json({ message: "Reward is not active" });
+      }
+      
+      // Check if member has enough points
+      if (member.totalPoints < reward.pointThreshold) {
+        return res.status(400).json({ 
+          message: `Not enough points. Need ${reward.pointThreshold}, have ${member.totalPoints}` 
+        });
+      }
+      
+      // Deduct points
+      const newTotalPoints = member.totalPoints - reward.pointThreshold;
+      await storage.updateFamilyMemberPoints(
+        member.id,
+        newTotalPoints,
+        member.weeklyPoints,
+        member.monthlyPoints
+      );
+      
+      // Create redemption record
+      const redemption = await storage.createRewardRedemption({
+        rewardId: reward.id,
+        memberId: member.id,
+        pointsSpent: reward.pointThreshold,
+        status: "pending",
+      });
+      
+      // Add to points history
+      await storage.addPointsHistory({
+        memberId: member.id,
+        points: -reward.pointThreshold,
+        reason: `Redeemed: ${reward.title}`,
+        taskId: null,
+      });
+      
+      // Broadcast redemption to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_redeemed",
+        redemption,
+        member: { ...member, totalPoints: newTotalPoints },
+      });
+      
+      res.json({ 
+        redemption, 
+        newTotalPoints,
+        message: `Successfully redeemed ${reward.title}!` 
+      });
+    } catch (error: any) {
+      console.error("Error redeeming reward:", error);
+      res.status(500).json({ message: "Failed to redeem reward" });
+    }
+  });
+
+  // Get reward redemptions for current family
+  app.get("/api/redemptions", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const redemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
+      res.json(redemptions);
+    } catch (error) {
+      console.error("Error fetching redemptions:", error);
+      res.status(500).json({ message: "Failed to fetch redemptions" });
     }
   });
 

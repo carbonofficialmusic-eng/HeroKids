@@ -1,13 +1,17 @@
 import {
   users,
+  families,
   familyMembers,
   tasks,
   taskAssignments,
   taskCompletions,
   rewards,
+  rewardRedemptions,
   pointsHistory,
   type User,
   type UpsertUser,
+  type Family,
+  type InsertFamily,
   type FamilyMember,
   type InsertFamilyMember,
   type Task,
@@ -16,6 +20,8 @@ import {
   type InsertTaskCompletion,
   type Reward,
   type InsertReward,
+  type RewardRedemption,
+  type InsertRewardRedemption,
   type InsertPointsHistory,
   type TaskCompletion,
 } from "@shared/schema";
@@ -27,10 +33,16 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
 
+  // Family operations
+  getFamily(familyName: string): Promise<Family | undefined>;
+  createFamily(family: InsertFamily): Promise<Family>;
+  updateFamilyTier(familyName: string, tier: "free" | "family" | "family_plus" | "hero_pro"): Promise<void>;
+
   // Family member operations
   getFamilyMember(id: string): Promise<FamilyMember | undefined>;
   getFamilyMemberByUserId(userId: string): Promise<FamilyMember | undefined>;
   getFamilyMembersByFamily(familyName: string): Promise<FamilyMember[]>;
+  getFamilyMemberCount(familyName: string): Promise<number>;
   createFamilyMember(member: InsertFamilyMember): Promise<FamilyMember>;
   updateFamilyMemberPoints(
     id: string,
@@ -38,6 +50,8 @@ export interface IStorage {
     weeklyPoints: number,
     monthlyPoints: number
   ): Promise<void>;
+  resetAllWeeklyPoints(): Promise<void>;
+  resetAllMonthlyPoints(): Promise<void>;
 
   // Task operations
   getTask(id: string): Promise<Task | undefined>;
@@ -57,6 +71,11 @@ export interface IStorage {
   // Reward operations
   getRewardsByFamily(familyName: string): Promise<Reward[]>;
   createReward(reward: InsertReward): Promise<Reward>;
+  
+  // Reward redemption operations
+  createRewardRedemption(redemption: InsertRewardRedemption): Promise<RewardRedemption>;
+  getRewardRedemptionsByFamily(familyName: string): Promise<RewardRedemption[]>;
+  getRewardRedemptionsByMember(memberId: string): Promise<RewardRedemption[]>;
 
   // Points history operations
   addPointsHistory(history: InsertPointsHistory): Promise<void>;
@@ -84,6 +103,30 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  // Family operations
+  async getFamily(familyName: string): Promise<Family | undefined> {
+    const [family] = await db
+      .select()
+      .from(families)
+      .where(eq(families.familyName, familyName));
+    return family;
+  }
+
+  async createFamily(familyData: InsertFamily): Promise<Family> {
+    const [family] = await db.insert(families).values(familyData).returning();
+    return family;
+  }
+
+  async updateFamilyTier(
+    familyName: string,
+    tier: "free" | "family" | "family_plus" | "hero_pro"
+  ): Promise<void> {
+    await db
+      .update(families)
+      .set({ subscriptionTier: tier, updatedAt: new Date() })
+      .where(eq(families.familyName, familyName));
+  }
+
   // Family member operations
   async getFamilyMember(id: string): Promise<FamilyMember | undefined> {
     const [member] = await db
@@ -109,6 +152,14 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(familyMembers.totalPoints));
   }
 
+  async getFamilyMemberCount(familyName: string): Promise<number> {
+    const members = await db
+      .select()
+      .from(familyMembers)
+      .where(eq(familyMembers.familyName, familyName));
+    return members.length;
+  }
+
   async createFamilyMember(memberData: InsertFamilyMember): Promise<FamilyMember> {
     const [member] = await db
       .insert(familyMembers)
@@ -127,6 +178,18 @@ export class DatabaseStorage implements IStorage {
       .update(familyMembers)
       .set({ totalPoints, weeklyPoints, monthlyPoints, updatedAt: new Date() })
       .where(eq(familyMembers.id, id));
+  }
+
+  async resetAllWeeklyPoints(): Promise<void> {
+    await db
+      .update(familyMembers)
+      .set({ weeklyPoints: 0, updatedAt: new Date() });
+  }
+
+  async resetAllMonthlyPoints(): Promise<void> {
+    await db
+      .update(familyMembers)
+      .set({ monthlyPoints: 0, updatedAt: new Date() });
   }
 
   // Task operations
@@ -208,6 +271,32 @@ export class DatabaseStorage implements IStorage {
   async createReward(rewardData: InsertReward): Promise<Reward> {
     const [reward] = await db.insert(rewards).values(rewardData).returning();
     return reward;
+  }
+  
+  // Reward redemption operations
+  async createRewardRedemption(redemptionData: InsertRewardRedemption): Promise<RewardRedemption> {
+    const [redemption] = await db
+      .insert(rewardRedemptions)
+      .values(redemptionData)
+      .returning();
+    return redemption;
+  }
+
+  async getRewardRedemptionsByFamily(familyName: string): Promise<RewardRedemption[]> {
+    return await db
+      .select()
+      .from(rewardRedemptions)
+      .innerJoin(familyMembers, eq(rewardRedemptions.memberId, familyMembers.id))
+      .where(eq(familyMembers.familyName, familyName))
+      .then((rows) => rows.map((r) => r.reward_redemptions));
+  }
+
+  async getRewardRedemptionsByMember(memberId: string): Promise<RewardRedemption[]> {
+    return await db
+      .select()
+      .from(rewardRedemptions)
+      .where(eq(rewardRedemptions.memberId, memberId))
+      .orderBy(desc(rewardRedemptions.redeemedAt));
   }
 
   // Points history operations
