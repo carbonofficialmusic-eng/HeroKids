@@ -29,6 +29,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Sparkles } from "lucide-react";
 
 const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
@@ -46,6 +49,74 @@ interface TaskDialogProps {
 }
 
 const taskIcons = ["⭐", "🧹", "🍽️", "🗑️", "🧺", "🛁", "🌱", "📚", "🐕", "🚗"];
+
+// Predefined task templates for common chores
+const taskTemplates = [
+  {
+    id: "clean-room",
+    title: "Clean Your Room",
+    description: "Pick up toys, make bed, organize desk",
+    points: 30,
+    iconEmoji: "🧹",
+    requiresProof: true,
+  },
+  {
+    id: "dishes",
+    title: "Do the Dishes",
+    description: "Wash and dry all dishes, clean the sink",
+    points: 25,
+    iconEmoji: "🍽️",
+    requiresProof: false,
+  },
+  {
+    id: "homework",
+    title: "Complete Homework",
+    description: "Finish all assigned homework for today",
+    points: 40,
+    iconEmoji: "📚",
+    requiresProof: false,
+  },
+  {
+    id: "trash",
+    title: "Take Out Trash",
+    description: "Take trash bins to the curb",
+    points: 15,
+    iconEmoji: "🗑️",
+    requiresProof: false,
+  },
+  {
+    id: "laundry",
+    title: "Fold Laundry",
+    description: "Fold clean clothes and put them away",
+    points: 35,
+    iconEmoji: "🧺",
+    requiresProof: false,
+  },
+  {
+    id: "pet-care",
+    title: "Feed the Pet",
+    description: "Give food and fresh water to pet",
+    points: 20,
+    iconEmoji: "🐕",
+    requiresProof: false,
+  },
+  {
+    id: "vacuum",
+    title: "Vacuum Living Room",
+    description: "Vacuum the living room and hallway",
+    points: 30,
+    iconEmoji: "🧹",
+    requiresProof: true,
+  },
+  {
+    id: "garden",
+    title: "Water Plants",
+    description: "Water all indoor and outdoor plants",
+    points: 20,
+    iconEmoji: "🌱",
+    requiresProof: false,
+  },
+];
 
 export function TaskDialog({
   open,
@@ -76,12 +147,58 @@ export function TaskDialog({
     form.reset();
   };
 
+  const applyTemplate = (template: typeof taskTemplates[0]) => {
+    form.setValue("title", template.title);
+    form.setValue("description", template.description);
+    form.setValue("points", template.points);
+    form.setValue("iconEmoji", template.iconEmoji);
+    form.setValue("requiresProof", template.requiresProof);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-task">
         <DialogHeader>
           <DialogTitle className="text-2xl font-accent">Create New Task</DialogTitle>
         </DialogHeader>
+
+        {/* Quick Templates Section */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold">Quick Templates</h3>
+            <Badge variant="secondary">Popular</Badge>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {taskTemplates.map((template) => (
+              <Card
+                key={template.id}
+                className="p-3 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                onClick={() => applyTemplate(template)}
+                data-testid={`template-${template.id}`}
+              >
+                <div className="flex items-start gap-2">
+                  <span className="text-2xl">{template.iconEmoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm truncate">{template.title}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <span>{template.points} pts</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">Or customize</span>
+          </div>
+        </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
