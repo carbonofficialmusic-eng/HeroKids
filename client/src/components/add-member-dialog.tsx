@@ -54,6 +54,8 @@ export function AddMemberDialog({
 }: AddMemberDialogProps) {
   const [selectedAvatar, setSelectedAvatar] = useState(avatarAssets[0].url);
   const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
+  const [uploadedAvatarFile, setUploadedAvatarFile] = useState<File | null>(null);
+  const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
 
   const form = useForm<AddMemberForm>({
     resolver: zodResolver(addMemberSchema),
@@ -63,10 +65,43 @@ export function AddMemberDialog({
     },
   });
 
-  const handleSubmit = (data: AddMemberForm) => {
+  const handleCustomUpload = (file: File) => {
+    setUploadedAvatarFile(file);
+  };
+
+  const handleClearCustomUpload = () => {
+    setUploadedAvatarFile(null);
+    setUploadedAvatarUrl(null);
+  };
+
+  const handleSubmit = async (data: AddMemberForm) => {
+    let finalAvatarUrl = selectedAvatar;
+
+    // If user uploaded a custom avatar, upload it first
+    if (uploadedAvatarFile) {
+      try {
+        const formData = new FormData();
+        formData.append('avatar', uploadedAvatarFile);
+
+        const response = await fetch('/api/upload-avatar', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const { avatarUrl } = await response.json();
+          finalAvatarUrl = avatarUrl;
+          setUploadedAvatarUrl(avatarUrl);
+        }
+      } catch (error) {
+        console.error('Error uploading avatar:', error);
+        // Continue with default avatar on error
+      }
+    }
+
     onSubmit({
       ...data,
-      avatarUrl: selectedAvatar,
+      avatarUrl: finalAvatarUrl,
       color: selectedColor,
       familyName,
     });
@@ -129,6 +164,9 @@ export function AddMemberDialog({
               selectedColor={selectedColor}
               onAvatarSelect={setSelectedAvatar}
               onColorSelect={setSelectedColor}
+              onCustomUpload={handleCustomUpload}
+              onClearCustomUpload={handleClearCustomUpload}
+              uploadedAvatarUrl={uploadedAvatarUrl}
             />
 
             <DialogFooter>

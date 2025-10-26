@@ -11,9 +11,11 @@ import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertR
 
 // Configure multer for photo uploads
 const uploadDir = join(process.cwd(), "uploads", "task-proofs");
+const avatarUploadDir = join(process.cwd(), "uploads", "avatars");
 
-// Ensure upload directory exists
+// Ensure upload directories exist
 mkdir(uploadDir, { recursive: true }).catch(console.error);
+mkdir(avatarUploadDir, { recursive: true }).catch(console.error);
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -21,6 +23,24 @@ const upload = multer({
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       cb(null, uniqueSuffix + '-' + file.originalname);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+});
+
+const avatarUpload = multer({
+  storage: multer.diskStorage({
+    destination: avatarUploadDir,
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, 'avatar-' + uniqueSuffix + '-' + file.originalname);
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
@@ -252,6 +272,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating family member:", error);
       res.status(400).json({ message: error.message || "Failed to create family member" });
+    }
+  });
+
+  // Avatar upload endpoint
+  app.post("/api/upload-avatar", isAuthenticated, avatarUpload.single('avatar'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No avatar file provided" });
+      }
+      
+      // Generate URL for the uploaded file
+      const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+      
+      res.json({ avatarUrl });
+    } catch (error: any) {
+      console.error("Error uploading avatar:", error);
+      res.status(500).json({ message: "Failed to upload avatar" });
     }
   });
 
