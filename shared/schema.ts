@@ -73,6 +73,7 @@ export const familyMembersRelations = relations(familyMembers, ({ one, many }) =
 
 export const insertFamilyMemberSchema = createInsertSchema(familyMembers).omit({
   id: true,
+  userId: true, // Populated from authenticated session
   createdAt: true,
   updatedAt: true,
 });
