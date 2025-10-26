@@ -27,6 +27,7 @@ export function useWebSocket(familyName: string | null) {
 
           switch (data.type) {
             case "task_created":
+            case "task_updated":
             case "task_completed":
               // Invalidate tasks and family members to refetch
               queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });

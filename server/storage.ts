@@ -57,6 +57,7 @@ export interface IStorage {
   getTask(id: string): Promise<Task | undefined>;
   getTasksByFamily(familyName: string): Promise<Task[]>;
   createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: string, task: Partial<InsertTask>): Promise<Task>;
   updateTaskStatus(id: string, status: "active" | "completed" | "archived"): Promise<void>;
 
   // Task assignment operations
@@ -209,6 +210,15 @@ export class DatabaseStorage implements IStorage {
   async createTask(taskData: InsertTask): Promise<Task> {
     const [task] = await db.insert(tasks).values(taskData).returning();
     return task;
+  }
+
+  async updateTask(id: string, taskUpdate: Partial<InsertTask>): Promise<Task> {
+    const [updated] = await db
+      .update(tasks)
+      .set({ ...taskUpdate, updatedAt: new Date() })
+      .where(eq(tasks.id, id))
+      .returning();
+    return updated as Task;
   }
 
   async updateTaskStatus(

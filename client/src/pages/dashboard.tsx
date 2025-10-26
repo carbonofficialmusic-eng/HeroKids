@@ -153,6 +153,26 @@ export default function Dashboard() {
     },
   });
 
+  // Update task
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const taskData = {
+        ...data,
+        dueDate: data.dueDate && data.dueDate.trim() !== "" ? data.dueDate : undefined,
+      };
+      return await apiRequest("PUT", `/api/tasks/${id}`, taskData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      setTaskDialogOpen(false);
+      setSelectedTask(null);
+      toast({
+        title: "Task updated!",
+        description: "The task has been updated successfully.",
+      });
+    },
+  });
+
   // Complete task
   const completeTaskMutation = useMutation({
     mutationFn: async (taskId: string) => {
@@ -519,8 +539,14 @@ export default function Dashboard() {
               setTaskDialogOpen(open);
               if (!open) setSelectedTask(null);
             }}
-            onSubmit={(data) => createTaskMutation.mutate(data)}
-            isSubmitting={createTaskMutation.isPending}
+            onSubmit={(data) => {
+              if (selectedTask) {
+                updateTaskMutation.mutate({ id: selectedTask.id, data });
+              } else {
+                createTaskMutation.mutate(data);
+              }
+            }}
+            isSubmitting={createTaskMutation.isPending || updateTaskMutation.isPending}
             familyName={member.familyName}
             createdBy={member.id}
             editingTask={selectedTask}

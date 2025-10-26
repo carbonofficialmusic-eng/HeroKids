@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTaskSchema, type Task } from "@shared/schema";
 import { z } from "zod";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -130,22 +131,7 @@ export function TaskDialog({
 }: TaskDialogProps) {
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskFormSchema),
-    defaultValues: editingTask ? {
-      familyName: editingTask.familyName,
-      createdBy: editingTask.createdBy,
-      title: editingTask.title,
-      description: editingTask.description || "",
-      points: editingTask.points,
-      dueDate: editingTask.dueDate 
-        ? (editingTask.dueDate instanceof Date 
-            ? editingTask.dueDate.toISOString().split('T')[0] 
-            : editingTask.dueDate)
-        : "",
-      recurrence: editingTask.recurrence,
-      status: editingTask.status,
-      requiresProof: editingTask.requiresProof,
-      iconEmoji: editingTask.iconEmoji || "⭐",
-    } : {
+    defaultValues: {
       familyName,
       createdBy,
       title: "",
@@ -159,9 +145,45 @@ export function TaskDialog({
     },
   });
 
+  // Reset form when dialog opens or editingTask changes
+  useEffect(() => {
+    if (open) {
+      if (editingTask) {
+        form.reset({
+          familyName: editingTask.familyName,
+          createdBy: editingTask.createdBy,
+          title: editingTask.title,
+          description: editingTask.description || "",
+          points: editingTask.points,
+          dueDate: editingTask.dueDate 
+            ? (editingTask.dueDate instanceof Date 
+                ? editingTask.dueDate.toISOString().split('T')[0] 
+                : editingTask.dueDate)
+            : "",
+          recurrence: editingTask.recurrence,
+          status: editingTask.status,
+          requiresProof: editingTask.requiresProof,
+          iconEmoji: editingTask.iconEmoji || "⭐",
+        });
+      } else {
+        form.reset({
+          familyName,
+          createdBy,
+          title: "",
+          description: "",
+          points: 10,
+          dueDate: "",
+          recurrence: "none",
+          status: "active",
+          requiresProof: false,
+          iconEmoji: "⭐",
+        });
+      }
+    }
+  }, [open, editingTask, familyName, createdBy, form]);
+
   const handleSubmit = (data: TaskFormData) => {
     onSubmit(data);
-    form.reset();
   };
 
   const applyTemplate = (template: typeof taskTemplates[0]) => {
@@ -388,10 +410,10 @@ export function TaskDialog({
               <Button
                 type="submit"
                 className="flex-1"
-                disabled={isSubmitting || !!editingTask}
+                disabled={isSubmitting}
                 data-testid="button-submit-task"
               >
-                {isSubmitting ? "Creating..." : editingTask ? "View Only" : "Create Task"}
+                {isSubmitting ? (editingTask ? "Updating..." : "Creating...") : editingTask ? "Update Task" : "Create Task"}
               </Button>
             </div>
           </form>

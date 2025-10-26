@@ -310,6 +310,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/tasks/:taskId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { taskId } = req.params;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Only parents can update tasks
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update tasks" });
+      }
+
+      // Verify task exists and belongs to the same family
+      const existingTask = await storage.getTask(taskId);
+      if (!existingTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      if (existingTask.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Cannot update tasks from other families" });
+      }
+
+      // Parse and update the task
+      const parsed = insertTaskSchema.partial().parse(req.body);
+      const taskData = {
+        ...parsed,
+        dueDate: parsed.dueDate ? new Date(parsed.dueDate) : undefined,
+      };
+      
+      const updatedTask = await storage.updateTask(taskId, taskData);
+
+      // Broadcast task update to family
+      broadcastToFamily(member.familyName, {
+        type: "task_updated",
+        task: updatedTask,
+      });
+
+      res.json(updatedTask);
+    } catch (error: any) {
+      console.error("Error updating task:", error);
+      res.status(400).json({ message: error.message || "Failed to update task" });
+    }
+  });
+
   // Photo upload endpoint for task proof
   app.post("/api/tasks/:taskId/upload-proof", isAuthenticated, upload.single('photo'), async (req: any, res) => {
     try {
