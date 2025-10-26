@@ -32,7 +32,7 @@ const TIERS = [
     name: "Family",
     icon: Trophy,
     memberLimit: 4,
-    price: "$9",
+    price: "$3",
     period: "per month",
     description: "Great for small families",
     features: [
@@ -50,7 +50,7 @@ const TIERS = [
     name: "Family+",
     icon: Zap,
     memberLimit: 6,
-    price: "$15",
+    price: "$9",
     period: "per month",
     description: "For larger families",
     features: [
