@@ -180,7 +180,7 @@ export function TaskDialog({
         });
       }
     }
-  }, [open, editingTask, familyName, createdBy, form]);
+  }, [open, editingTask, familyName, createdBy]);
 
   const handleSubmit = (data: TaskFormData) => {
     onSubmit(data);
