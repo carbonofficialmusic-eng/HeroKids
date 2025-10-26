@@ -68,7 +68,7 @@ const TIERS = [
     name: "HeroPro",
     icon: Crown,
     memberLimit: Infinity,
-    price: "$25",
+    price: "$15",
     period: "per month",
     description: "Ultimate family management",
     features: [
