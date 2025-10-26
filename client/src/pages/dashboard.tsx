@@ -9,6 +9,7 @@ import { Leaderboard } from "@/components/leaderboard";
 import { TaskDialog } from "@/components/task-dialog";
 import { RewardDialog } from "@/components/reward-dialog";
 import { AddMemberDialog } from "@/components/add-member-dialog";
+import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus } from "lucide-react";
+import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus, Settings } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -38,6 +39,8 @@ export default function Dashboard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
+  const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
+  const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
   const [celebration, setCelebration] = useState<{
     points: number;
@@ -121,6 +124,30 @@ export default function Dashboard() {
       toast({
         title: "Failed to add member",
         description: error.message || "Unable to add member. You may have reached your tier limit.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Edit family member
+  const editMemberMutation = useMutation({
+    mutationFn: async ({ memberId, data }: { memberId: string; data: any }) => {
+      return await apiRequest("PUT", `/api/family-members/${memberId}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      setEditMemberDialogOpen(false);
+      setMemberToEdit(null);
+      toast({
+        title: "Profile updated!",
+        description: "Your profile has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to update profile",
+        description: error.message || "Unable to update profile.",
         variant: "destructive",
       });
     },
@@ -262,15 +289,30 @@ export default function Dashboard() {
       <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-lg gradient-celebration flex items-center justify-center">
-              <Trophy className="h-6 w-6 text-white" />
-            </div>
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={member.avatarUrl || undefined} />
+              <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
+                {member.displayName[0]}
+              </AvatarFallback>
+            </Avatar>
             <div>
               <div className="text-sm text-muted-foreground">{member.familyName}</div>
               <div className="font-semibold" data-testid="text-user-name">
                 {member.displayName}
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setMemberToEdit(member);
+                setEditMemberDialogOpen(true);
+              }}
+              data-testid="button-edit-profile"
+              aria-label="Edit profile"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
           </div>
           <div className="flex items-center gap-3">
             {familyData && (
@@ -566,6 +608,17 @@ export default function Dashboard() {
             familyName={member.familyName}
           />
         </>
+      )}
+
+      {/* Edit Profile Dialog - Available to all members */}
+      {member && (
+        <EditMemberDialog
+          open={editMemberDialogOpen}
+          onOpenChange={setEditMemberDialogOpen}
+          onSubmit={(memberId, data) => editMemberMutation.mutate({ memberId, data })}
+          isSubmitting={editMemberMutation.isPending}
+          member={memberToEdit}
+        />
       )}
 
       {/* Join Code Dialog */}

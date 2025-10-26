@@ -275,6 +275,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/family-members/:memberId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { memberId } = req.params;
+      
+      // Get current member to verify permissions
+      const currentMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!currentMember) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get the member being updated
+      const memberToUpdate = await storage.getFamilyMemberById(memberId);
+      
+      if (!memberToUpdate) {
+        return res.status(404).json({ message: "Member to update not found" });
+      }
+      
+      // Verify they're in the same family
+      if (memberToUpdate.familyName !== currentMember.familyName) {
+        return res.status(403).json({ message: "Cannot update members from other families" });
+      }
+      
+      // Only allow updating own profile or if you're a parent
+      if (memberToUpdate.id !== currentMember.id && currentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update other members' profiles" });
+      }
+      
+      // Update the member
+      const updates = {
+        displayName: req.body.displayName,
+        avatarUrl: req.body.avatarUrl,
+        color: req.body.color,
+      };
+      
+      const updatedMember = await storage.updateFamilyMember(memberId, updates);
+      
+      // Broadcast update to family
+      broadcastToFamily(currentMember.familyName, {
+        type: "member_updated",
+        member: updatedMember,
+      });
+      
+      res.json(updatedMember);
+    } catch (error: any) {
+      console.error("Error updating family member:", error);
+      res.status(400).json({ message: error.message || "Failed to update family member" });
+    }
+  });
+
   // Avatar upload endpoint
   app.post("/api/upload-avatar", isAuthenticated, avatarUpload.single('avatar'), async (req: any, res) => {
     try {

@@ -40,10 +40,12 @@ export interface IStorage {
 
   // Family member operations
   getFamilyMember(id: string): Promise<FamilyMember | undefined>;
+  getFamilyMemberById(id: string): Promise<FamilyMember | undefined>;
   getFamilyMemberByUserId(userId: string): Promise<FamilyMember | undefined>;
   getFamilyMembersByFamily(familyName: string): Promise<FamilyMember[]>;
   getFamilyMemberCount(familyName: string): Promise<number>;
   createFamilyMember(member: InsertFamilyMember): Promise<FamilyMember>;
+  updateFamilyMember(id: string, updates: Partial<InsertFamilyMember>): Promise<FamilyMember>;
   updateFamilyMemberPoints(
     id: string,
     totalPoints: number,
@@ -167,6 +169,23 @@ export class DatabaseStorage implements IStorage {
       .values(memberData)
       .returning();
     return member;
+  }
+
+  async getFamilyMemberById(id: string): Promise<FamilyMember | undefined> {
+    const [member] = await db
+      .select()
+      .from(familyMembers)
+      .where(eq(familyMembers.id, id));
+    return member;
+  }
+
+  async updateFamilyMember(id: string, updates: Partial<InsertFamilyMember>): Promise<FamilyMember> {
+    const [updated] = await db
+      .update(familyMembers)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(familyMembers.id, id))
+      .returning();
+    return updated as FamilyMember;
   }
 
   async updateFamilyMemberPoints(
