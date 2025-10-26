@@ -85,7 +85,12 @@ export default function Dashboard() {
   // Create task
   const createTaskMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/tasks", data);
+      // Transform empty dueDate string to null
+      const taskData = {
+        ...data,
+        dueDate: data.dueDate && data.dueDate.trim() !== "" ? data.dueDate : undefined,
+      };
+      return await apiRequest("POST", "/api/tasks", taskData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
