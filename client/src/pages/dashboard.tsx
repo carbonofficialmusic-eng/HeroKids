@@ -8,6 +8,7 @@ import { TaskCard } from "@/components/task-card";
 import { Leaderboard } from "@/components/leaderboard";
 import { TaskDialog } from "@/components/task-dialog";
 import { RewardDialog } from "@/components/reward-dialog";
+import { AddMemberDialog } from "@/components/add-member-dialog";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3 } from "lucide-react";
+import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -26,6 +27,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
+  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [celebration, setCelebration] = useState<{
     points: number;
     message: string;
@@ -78,6 +80,29 @@ export default function Dashboard() {
       toast({
         title: "Welcome to HomeHero!",
         description: "Your profile has been created.",
+      });
+    },
+  });
+
+  // Add family member
+  const addMemberMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/family-members", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+      setAddMemberDialogOpen(false);
+      toast({
+        title: "Member added!",
+        description: "The new family member can now join and earn points.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to add member",
+        description: error.message || "Unable to add member. You may have reached your tier limit.",
+        variant: "destructive",
       });
     },
   });
@@ -256,6 +281,14 @@ export default function Dashboard() {
                       Analytics
                     </Button>
                   </Link>
+                  <Button
+                    onClick={() => setAddMemberDialogOpen(true)}
+                    variant="outline"
+                    data-testid="button-add-member"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add Member
+                  </Button>
                   <Button
                     onClick={() => setRewardDialogOpen(true)}
                     variant="outline"
@@ -460,6 +493,13 @@ export default function Dashboard() {
             onOpenChange={setRewardDialogOpen}
             onSubmit={(data) => createRewardMutation.mutate(data)}
             isSubmitting={createRewardMutation.isPending}
+            familyName={member.familyName}
+          />
+          <AddMemberDialog
+            open={addMemberDialogOpen}
+            onOpenChange={setAddMemberDialogOpen}
+            onSubmit={(data) => addMemberMutation.mutate(data)}
+            isSubmitting={addMemberMutation.isPending}
             familyName={member.familyName}
           />
         </>
