@@ -12,6 +12,7 @@ interface TaskCardProps {
   onComplete?: (taskId: string) => void;
   isCompleting?: boolean;
   showAssignee?: boolean;
+  onClick?: (task: Task) => void;
 }
 
 export function TaskCard({
@@ -20,11 +21,13 @@ export function TaskCard({
   onComplete,
   isCompleting = false,
   showAssignee = true,
+  onClick,
 }: TaskCardProps) {
   return (
     <Card
-      className="p-6 hover-elevate active-elevate-2 transition-all"
+      className="p-6 hover-elevate active-elevate-2 transition-all cursor-pointer"
       data-testid={`card-task-${task.id}`}
+      onClick={() => onClick?.(task)}
     >
       <div className="flex items-start gap-4">
         <div className="text-5xl" data-testid={`text-task-icon-${task.id}`}>
@@ -91,7 +94,10 @@ export function TaskCard({
           {onComplete && (
             <Button
               className="w-full"
-              onClick={() => onComplete(task.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onComplete(task.id);
+              }}
               disabled={isCompleting}
               data-testid={`button-complete-task-${task.id}`}
             >

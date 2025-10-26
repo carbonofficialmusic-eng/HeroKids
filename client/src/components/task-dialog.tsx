@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertTaskSchema } from "@shared/schema";
+import { insertTaskSchema, type Task } from "@shared/schema";
 import { z } from "zod";
 import {
   Dialog,
@@ -46,6 +46,7 @@ interface TaskDialogProps {
   isSubmitting?: boolean;
   familyName: string;
   createdBy: string;
+  editingTask?: Task | null;
 }
 
 const taskIcons = ["⭐", "🧹", "🍽️", "🗑️", "🧺", "🛁", "🌱", "📚", "🐕", "🚗"];
@@ -125,10 +126,26 @@ export function TaskDialog({
   isSubmitting = false,
   familyName,
   createdBy,
+  editingTask,
 }: TaskDialogProps) {
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskFormSchema),
-    defaultValues: {
+    defaultValues: editingTask ? {
+      familyName: editingTask.familyName,
+      createdBy: editingTask.createdBy,
+      title: editingTask.title,
+      description: editingTask.description || "",
+      points: editingTask.points,
+      dueDate: editingTask.dueDate 
+        ? (editingTask.dueDate instanceof Date 
+            ? editingTask.dueDate.toISOString().split('T')[0] 
+            : editingTask.dueDate)
+        : "",
+      recurrence: editingTask.recurrence,
+      status: editingTask.status,
+      requiresProof: editingTask.requiresProof,
+      iconEmoji: editingTask.iconEmoji || "⭐",
+    } : {
       familyName,
       createdBy,
       title: "",
@@ -159,10 +176,13 @@ export function TaskDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-task">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-accent">Create New Task</DialogTitle>
+          <DialogTitle className="text-2xl font-accent">
+            {editingTask ? "View Task" : "Create New Task"}
+          </DialogTitle>
         </DialogHeader>
 
-        {/* Quick Templates Section */}
+        {/* Quick Templates Section - Only show when creating */}
+        {!editingTask && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
@@ -190,7 +210,9 @@ export function TaskDialog({
             ))}
           </div>
         </div>
+        )}
 
+        {!editingTask && (
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
@@ -199,6 +221,7 @@ export function TaskDialog({
             <span className="bg-background px-2 text-muted-foreground">Or customize</span>
           </div>
         </div>
+        )}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -365,10 +388,10 @@ export function TaskDialog({
               <Button
                 type="submit"
                 className="flex-1"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !!editingTask}
                 data-testid="button-submit-task"
               >
-                {isSubmitting ? "Creating..." : "Create Task"}
+                {isSubmitting ? "Creating..." : editingTask ? "View Only" : "Create Task"}
               </Button>
             </div>
           </form>
