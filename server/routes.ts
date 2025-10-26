@@ -147,11 +147,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const parsed = insertFamilyMemberSchema.parse(req.body);
       
+      // Check if this is initial setup (has familyName) or adding a new member (uses current user's family)
+      const isInitialSetup = !!req.body.familyName;
+      
+      let familyName = parsed.familyName;
+      
+      // If not initial setup, get family from current user
+      if (!isInitialSetup) {
+        const currentMember = await storage.getFamilyMemberByUserId(userId);
+        if (!currentMember) {
+          return res.status(404).json({ message: "You must be part of a family to add members" });
+        }
+        if (currentMember.role !== "parent") {
+          return res.status(403).json({ message: "Only parents can add family members" });
+        }
+        familyName = currentMember.familyName;
+      }
+      
       // Check if family exists, create if not
-      let family = await storage.getFamily(parsed.familyName);
+      let family = await storage.getFamily(familyName);
       if (!family) {
         family = await storage.createFamily({
-          familyName: parsed.familyName,
+          familyName: familyName,
           subscriptionTier: "free",
         });
       }
@@ -164,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hero_pro: Infinity,
       };
       
-      const currentCount = await storage.getFamilyMemberCount(parsed.familyName);
+      const currentCount = await storage.getFamilyMemberCount(familyName);
       const limit = tierLimits[family.subscriptionTier];
       
       if (currentCount >= limit) {
@@ -176,10 +193,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const member = await storage.createFamilyMember({
+      // For initial setup, link to current user. For adding members, create with join code
+      let memberData: any = {
         ...parsed,
-        userId,
-      });
+        familyName,
+      };
+      
+      if (isInitialSetup) {
+        memberData.userId = userId;
+      } else {
+        // Generate a unique 6-character join code
+        const joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        memberData.joinCode = joinCode;
+      }
+      
+      const member = await storage.createFamilyMember(memberData);
       
       // Broadcast new member to family
       broadcastToFamily(member.familyName, {

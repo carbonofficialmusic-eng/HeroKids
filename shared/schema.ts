@@ -68,12 +68,13 @@ export type Family = typeof families.$inferSelect;
 // Family members - Individual family members with avatars and roles
 export const familyMembers = pgTable("family_members", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
   familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
   displayName: varchar("display_name").notNull(),
   role: roleEnum("role").notNull().default("child"),
   avatarUrl: varchar("avatar_url"),
   color: varchar("color").notNull().default("#8B5CF6"), // User's theme color
+  joinCode: varchar("join_code").unique(), // Code for unclaimed profiles
   totalPoints: integer("total_points").notNull().default(0),
   weeklyPoints: integer("weekly_points").notNull().default(0),
   monthlyPoints: integer("monthly_points").notNull().default(0),

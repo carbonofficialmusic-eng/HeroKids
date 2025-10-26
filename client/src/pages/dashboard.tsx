@@ -16,6 +16,15 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +37,7 @@ export default function Dashboard() {
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
+  const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
   const [celebration, setCelebration] = useState<{
     points: number;
     message: string;
@@ -89,13 +99,21 @@ export default function Dashboard() {
     mutationFn: async (data: any) => {
       return await apiRequest("POST", "/api/family-members", data);
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
       setAddMemberDialogOpen(false);
+      
+      // Show join code if member was created with one
+      if (data.joinCode) {
+        setNewMemberJoinCode(data.joinCode);
+      }
+      
       toast({
         title: "Member added!",
-        description: "The new family member can now join and earn points.",
+        description: data.joinCode 
+          ? "Share the join code with them to access their profile." 
+          : "The new family member can now join and earn points.",
       });
     },
     onError: (error: any) => {
@@ -504,6 +522,29 @@ export default function Dashboard() {
           />
         </>
       )}
+
+      {/* Join Code Dialog */}
+      <AlertDialog open={!!newMemberJoinCode} onOpenChange={() => setNewMemberJoinCode(null)}>
+        <AlertDialogContent data-testid="dialog-join-code">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Family Member Added!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Share this join code with the new member so they can access their profile and start earning points!
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="bg-muted p-6 rounded-lg text-center my-4">
+            <div className="text-sm text-muted-foreground mb-2">Join Code</div>
+            <div className="text-4xl font-black font-accent tracking-wider" data-testid="text-join-code">
+              {newMemberJoinCode}
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setNewMemberJoinCode(null)} data-testid="button-close-join-code">
+              Got it!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Celebration */}
       {celebration && (
