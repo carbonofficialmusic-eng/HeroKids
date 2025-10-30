@@ -77,8 +77,9 @@ export interface IStorage {
   
   // Reward redemption operations
   createRewardRedemption(redemption: InsertRewardRedemption): Promise<RewardRedemption>;
-  getRewardRedemptionsByFamily(familyName: string): Promise<RewardRedemption[]>;
+  getRewardRedemptionsByFamily(familyName: string): Promise<any[]>;
   getRewardRedemptionsByMember(memberId: string): Promise<RewardRedemption[]>;
+  updateRewardRedemptionStatus(id: string, status: string): Promise<void>;
 
   // Points history operations
   addPointsHistory(history: InsertPointsHistory): Promise<void>;
@@ -311,13 +312,33 @@ export class DatabaseStorage implements IStorage {
     return redemption;
   }
 
-  async getRewardRedemptionsByFamily(familyName: string): Promise<RewardRedemption[]> {
+  async getRewardRedemptionsByFamily(familyName: string): Promise<any[]> {
     return await db
-      .select()
+      .select({
+        id: rewardRedemptions.id,
+        rewardId: rewardRedemptions.rewardId,
+        memberId: rewardRedemptions.memberId,
+        pointsSpent: rewardRedemptions.pointsSpent,
+        status: rewardRedemptions.status,
+        redeemedAt: rewardRedemptions.redeemedAt,
+        reward: {
+          id: rewards.id,
+          title: rewards.title,
+          description: rewards.description,
+          pointThreshold: rewards.pointThreshold,
+        },
+        member: {
+          id: familyMembers.id,
+          displayName: familyMembers.displayName,
+          avatarUrl: familyMembers.avatarUrl,
+          color: familyMembers.color,
+        },
+      })
       .from(rewardRedemptions)
+      .innerJoin(rewards, eq(rewardRedemptions.rewardId, rewards.id))
       .innerJoin(familyMembers, eq(rewardRedemptions.memberId, familyMembers.id))
       .where(eq(familyMembers.familyName, familyName))
-      .then((rows) => rows.map((r) => r.reward_redemptions));
+      .orderBy(desc(rewardRedemptions.redeemedAt));
   }
 
   async getRewardRedemptionsByMember(memberId: string): Promise<RewardRedemption[]> {
@@ -326,6 +347,13 @@ export class DatabaseStorage implements IStorage {
       .from(rewardRedemptions)
       .where(eq(rewardRedemptions.memberId, memberId))
       .orderBy(desc(rewardRedemptions.redeemedAt));
+  }
+
+  async updateRewardRedemptionStatus(id: string, status: string): Promise<void> {
+    await db
+      .update(rewardRedemptions)
+      .set({ status })
+      .where(eq(rewardRedemptions.id, id));
   }
 
   // Points history operations

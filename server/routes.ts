@@ -857,10 +857,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get reward redemptions for current family
-  app.get("/api/redemptions", isAuthenticated, async (req: any, res) => {
+  app.get("/api/reward-redemptions", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -871,6 +874,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching redemptions:", error);
       res.status(500).json({ message: "Failed to fetch redemptions" });
+    }
+  });
+
+  // Update reward redemption status (parents only)
+  app.patch("/api/reward-redemptions/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+      const { status } = req.body;
+
+      // Get real member (not acting member) to check permissions
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Only parents can update redemption status
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update reward status" });
+      }
+
+      // Validate status
+      if (!["pending", "approved", "completed"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be: pending, approved, or completed" });
+      }
+
+      // Get the redemption to verify it belongs to the same family
+      const familyRedemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
+      const redemption = familyRedemptions.find(r => r.id === id);
+
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+
+      // Update the redemption status
+      await storage.updateRewardRedemptionStatus(id, status);
+
+      // Broadcast update to family
+      broadcastToFamily(member.familyName, {
+        type: "redemption_updated",
+        redemptionId: id,
+        status,
+      });
+
+      res.json({ message: "Redemption status updated successfully", status });
+    } catch (error) {
+      console.error("Error updating redemption:", error);
+      res.status(500).json({ message: "Failed to update redemption" });
     }
   });
 
