@@ -74,6 +74,7 @@ export interface IStorage {
   // Reward operations
   getRewardsByFamily(familyName: string): Promise<Reward[]>;
   createReward(reward: InsertReward): Promise<Reward>;
+  deleteReward(id: string): Promise<void>;
   
   // Reward redemption operations
   createRewardRedemption(redemption: InsertRewardRedemption): Promise<RewardRedemption>;
@@ -301,6 +302,10 @@ export class DatabaseStorage implements IStorage {
   async createReward(rewardData: InsertReward): Promise<Reward> {
     const [reward] = await db.insert(rewards).values(rewardData).returning();
     return reward;
+  }
+
+  async deleteReward(id: string): Promise<void> {
+    await db.delete(rewards).where(eq(rewards.id, id));
   }
   
   // Reward redemption operations
