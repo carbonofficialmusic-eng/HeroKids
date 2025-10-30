@@ -315,8 +315,10 @@ export default function Dashboard() {
     );
   }
 
-  // Use realMember to determine permissions (not the acting member)
-  const isParent = realMember?.role === "parent";
+  // Use acting member's role to show correct view (parent/child)
+  const isParent = member?.role === "parent";
+  // Use real member's role to show parent-only UI elements (like switch button)
+  const isRealParent = realMember?.role === "parent";
   const activeTasks = tasks.filter((t) => t.status === "active");
   const activeRewards = rewards.filter((r) => r.isActive);
 
@@ -338,7 +340,7 @@ export default function Dashboard() {
                 {member.displayName}
               </div>
             </div>
-            {isParent && (
+            {isRealParent && (
               <Button
                 variant="ghost"
                 size="icon"
