@@ -10,6 +10,7 @@ import { TaskDialog } from "@/components/task-dialog";
 import { RewardDialog } from "@/components/reward-dialog";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
+import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,8 @@ export default function Dashboard() {
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
+  const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
+  const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
   const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
   const [celebration, setCelebration] = useState<{
     points: number;
@@ -202,12 +205,14 @@ export default function Dashboard() {
 
   // Complete task
   const completeTaskMutation = useMutation({
-    mutationFn: async (taskId: string) => {
-      return await apiRequest("POST", `/api/tasks/${taskId}/complete`, {});
+    mutationFn: async ({ taskId, proofPhotoUrl }: { taskId: string; proofPhotoUrl?: string }) => {
+      return await apiRequest("POST", `/api/tasks/${taskId}/complete`, { proofPhotoUrl });
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      setCompletionDialogOpen(false);
+      setTaskToComplete(null);
       
       if (data.pointsEarned) {
         setCelebration({
@@ -494,7 +499,10 @@ export default function Dashboard() {
                       <TaskCard
                         key={task.id}
                         task={task}
-                        onComplete={(taskId) => completeTaskMutation.mutate(taskId)}
+                        onComplete={() => {
+                          setTaskToComplete(task);
+                          setCompletionDialogOpen(true);
+                        }}
                         isCompleting={completeTaskMutation.isPending}
                         showAssignee={false}
                         onClick={handleTaskClick}
@@ -620,6 +628,15 @@ export default function Dashboard() {
           member={memberToEdit}
         />
       )}
+
+      {/* Task Completion Dialog */}
+      <TaskCompletionDialog
+        open={completionDialogOpen}
+        onOpenChange={setCompletionDialogOpen}
+        task={taskToComplete}
+        onComplete={(taskId, proofPhotoUrl) => completeTaskMutation.mutate({ taskId, proofPhotoUrl })}
+        isSubmitting={completeTaskMutation.isPending}
+      />
 
       {/* Join Code Dialog */}
       <AlertDialog open={!!newMemberJoinCode} onOpenChange={() => setNewMemberJoinCode(null)}>
