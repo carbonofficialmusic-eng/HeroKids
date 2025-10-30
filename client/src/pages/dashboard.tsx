@@ -419,6 +419,12 @@ export default function Dashboard() {
                       Analytics
                     </Button>
                   </Link>
+                  <Link href="/rewards-board">
+                    <Button variant="outline" data-testid="button-rewards-board">
+                      <Gift className="h-4 w-4 mr-2" />
+                      Rewards Board
+                    </Button>
+                  </Link>
                   <Button
                     onClick={() => setAddMemberDialogOpen(true)}
                     variant="outline"
