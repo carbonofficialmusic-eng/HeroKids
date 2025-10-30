@@ -422,7 +422,17 @@ export default function Dashboard() {
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
                   {activeTasks.map((task) => (
-                    <TaskCard key={task.id} task={task} showAssignee onClick={handleTaskClick} />
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      showAssignee
+                      onClick={handleTaskClick}
+                      onComplete={() => {
+                        setTaskToComplete(task);
+                        setCompletionDialogOpen(true);
+                      }}
+                      isCompleting={completeTaskMutation.isPending}
+                    />
                   ))}
                 </div>
               )}
