@@ -6,6 +6,18 @@ HomeHero is a full-stack web application that transforms household chores into a
 
 ## Recent Changes
 
+**October 30, 2025 - Rewards Board Feature**:
+- Implemented complete reward redemption and approval workflow
+- Created dedicated Rewards Board page (/rewards-board) for viewing all family redemptions
+- Added three-state redemption status workflow: pending → approved → completed
+- Parents can approve pending redemptions and mark them as fulfilled
+- Children can only view their own redemptions, parents see all family redemptions
+- Real-time updates via WebSocket when redemption status changes
+- Fixed reward redemption endpoint to use actingAsMemberId from session for correct point attribution
+- Added parent-only controls with permission checks based on authenticated user (not acting member)
+- Navigation link to Rewards Board visible only in parent view
+- Comprehensive test coverage of complete redemption flow
+
 **October 30, 2025 - Permission System Fix**:
 - Fixed permission checks so children cannot edit/add tasks, members, or rewards
 - Implemented dual permission model:
