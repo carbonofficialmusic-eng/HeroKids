@@ -20,12 +20,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AvatarSelector } from "./avatar-selector";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
 import type { FamilyMember } from "@shared/schema";
 
 const editMemberSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
+  role: z.enum(["parent", "child"]),
 });
 
 type EditMemberForm = z.infer<typeof editMemberSchema>;
@@ -36,6 +44,7 @@ interface EditMemberDialogProps {
   onSubmit: (memberId: string, data: EditMemberForm & { avatarUrl: string; color: string }) => void;
   isSubmitting?: boolean;
   member: FamilyMember | null;
+  currentUserRole?: "parent" | "child";
 }
 
 export function EditMemberDialog({ 
@@ -43,7 +52,8 @@ export function EditMemberDialog({
   onOpenChange, 
   onSubmit, 
   isSubmitting = false,
-  member
+  member,
+  currentUserRole
 }: EditMemberDialogProps) {
   const [selectedAvatar, setSelectedAvatar] = useState(member?.avatarUrl || avatarAssets[0].url);
   const [selectedColor, setSelectedColor] = useState(member?.color || colorOptions[0].value);
@@ -54,6 +64,7 @@ export function EditMemberDialog({
     resolver: zodResolver(editMemberSchema),
     defaultValues: {
       displayName: member?.displayName || "",
+      role: member?.role || "child",
     },
   });
 
@@ -62,6 +73,7 @@ export function EditMemberDialog({
     if (member) {
       form.reset({
         displayName: member.displayName,
+        role: member.role,
       });
       setSelectedAvatar(member.avatarUrl || avatarAssets[0].url);
       setSelectedColor(member.color || colorOptions[0].value);
@@ -140,6 +152,28 @@ export function EditMemberDialog({
                       data-testid="input-edit-member-name"
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-edit-role">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="parent" data-testid="option-role-parent">Parent</SelectItem>
+                      <SelectItem value="child" data-testid="option-role-child">Child</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

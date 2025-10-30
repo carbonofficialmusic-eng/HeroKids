@@ -309,6 +309,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         displayName: req.body.displayName,
         avatarUrl: req.body.avatarUrl,
         color: req.body.color,
+        role: req.body.role,
       };
       
       const updatedMember = await storage.updateFamilyMember(memberId, updates);
