@@ -826,13 +826,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Deduct points
+      // Deduct points from all totals
       const newTotalPoints = member.totalPoints - reward.pointThreshold;
+      const newWeeklyPoints = member.weeklyPoints - reward.pointThreshold;
+      const newMonthlyPoints = member.monthlyPoints - reward.pointThreshold;
       await storage.updateFamilyMemberPoints(
         member.id,
         newTotalPoints,
-        member.weeklyPoints,
-        member.monthlyPoints
+        newWeeklyPoints,
+        newMonthlyPoints
       );
       
       // Create redemption record
