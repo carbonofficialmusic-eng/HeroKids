@@ -6,6 +6,16 @@ HomeHero is a full-stack web application that transforms household chores into a
 
 ## Recent Changes
 
+**October 30, 2025 - Switch Member Feature**:
+- Added session-based member switching for parents to test different family member views
+- Parents can click the User2 icon to switch to act as any family member
+- All actions (task completion, points earned) correctly go to the member you're acting as
+- Switch button remains visible even when acting as a child (uses real user's role)
+- Added POST `/api/family-members/switch` endpoint (parents only)
+- Added GET `/api/family-members/real` endpoint to get authenticated user's real member
+- Updated task completion endpoint to check session.actingAsMemberId for correct point attribution
+- SwitchMemberDialog component shows all family members with avatars and roles
+
 **October 26, 2025 - Edit Profile Feature**:
 - Added EditMemberDialog component for updating member profiles
 - Users can now edit their own avatar, display name, and color
