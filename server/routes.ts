@@ -8,6 +8,7 @@ import { mkdir } from "fs/promises";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema } from "@shared/schema";
+import "./types";
 
 // Configure multer for photo uploads
 const uploadDir = join(process.cwd(), "uploads", "task-proofs");
@@ -131,6 +132,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Family member routes
   app.get("/api/family-members/current", isAuthenticated, async (req: any, res) => {
     try {
+      // Check if we're acting as another member
+      if (req.session.actingAsMemberId) {
+        const actingAsMember = await storage.getFamilyMember(req.session.actingAsMemberId);
+        if (actingAsMember) {
+          return res.json(actingAsMember);
+        }
+        // If acting as member not found, clear the session and fall through
+        delete req.session.actingAsMemberId;
+      }
+      
       const userId = req.user.claims.sub;
       const member = await storage.getFamilyMemberByUserId(userId);
       
@@ -142,6 +153,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching current family member:", error);
       res.status(500).json({ message: "Failed to fetch family member" });
+    }
+  });
+
+  // Switch member (parents only)
+  app.post("/api/family-members/switch", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const realMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!realMember) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can switch members
+      if (realMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can switch members" });
+      }
+      
+      const { memberId } = req.body;
+      
+      // If no memberId provided, switch back to self
+      if (!memberId) {
+        delete req.session.actingAsMemberId;
+        return res.json({ message: "Switched back to self", member: realMember });
+      }
+      
+      // Verify the target member exists and is in the same family
+      const targetMember = await storage.getFamilyMember(memberId);
+      
+      if (!targetMember) {
+        return res.status(404).json({ message: "Target member not found" });
+      }
+      
+      if (targetMember.familyName !== realMember.familyName) {
+        return res.status(403).json({ message: "Cannot switch to member from different family" });
+      }
+      
+      // Set the session to act as this member
+      req.session.actingAsMemberId = memberId;
+      
+      res.json({ message: "Switched member successfully", member: targetMember });
+    } catch (error) {
+      console.error("Error switching member:", error);
+      res.status(500).json({ message: "Failed to switch member" });
     }
   });
 
