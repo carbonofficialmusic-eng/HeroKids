@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +32,19 @@ export function TaskCompletionDialog({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setUploadedPhoto(null);
+      setUploadedPhotoUrl(null);
+      setPreviewUrl(null);
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  }, [open]);
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,6 +87,7 @@ export function TaskCompletionDialog({
           setUploadedPhotoUrl(photoUrl);
           // Now complete the task with the photo URL
           onComplete(task.id, photoUrl);
+          setIsUploading(false);
         } else {
           const error = await response.json();
           alert(error.message || 'Failed to upload photo');
@@ -86,14 +100,12 @@ export function TaskCompletionDialog({
         setIsUploading(false);
         return;
       }
-      setIsUploading(false);
     } else {
       // No photo needed or already uploaded
       onComplete(task.id, uploadedPhotoUrl || undefined);
     }
 
-    // Reset state
-    handleRemovePhoto();
+    // Don't reset state here - let the mutation's onSuccess handler close the dialog
   };
 
   const canSubmit = !task?.requiresProof || (task.requiresProof && uploadedPhoto);

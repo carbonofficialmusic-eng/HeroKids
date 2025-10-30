@@ -211,6 +211,7 @@ export default function Dashboard() {
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setCompletionDialogOpen(false);
       setTaskToComplete(null);
       
@@ -505,7 +506,6 @@ export default function Dashboard() {
                         }}
                         isCompleting={completeTaskMutation.isPending}
                         showAssignee={false}
-                        onClick={handleTaskClick}
                       />
                     ))}
                   </div>

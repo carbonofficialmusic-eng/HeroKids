@@ -25,7 +25,7 @@ export function TaskCard({
 }: TaskCardProps) {
   return (
     <Card
-      className="p-6 hover-elevate active-elevate-2 transition-all cursor-pointer"
+      className={`p-6 transition-all ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
       data-testid={`card-task-${task.id}`}
       onClick={() => onClick?.(task)}
     >
