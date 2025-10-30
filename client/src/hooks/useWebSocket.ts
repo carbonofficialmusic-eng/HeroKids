@@ -35,6 +35,7 @@ export function useWebSocket(familyName: string | null) {
               break;
 
             case "reward_created":
+            case "reward_deleted":
               queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
               break;
 
