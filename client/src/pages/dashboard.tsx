@@ -683,8 +683,8 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Switch Member Dialog - Parents only */}
-      {member && isParent && (
+      {/* Switch Member Dialog - Real parents only (always available even when acting as child) */}
+      {member && isRealParent && (
         <SwitchMemberDialog
           open={switchMemberDialogOpen}
           onOpenChange={setSwitchMemberDialogOpen}
