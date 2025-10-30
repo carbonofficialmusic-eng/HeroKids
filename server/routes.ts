@@ -791,6 +791,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete a reward
+  app.delete("/api/rewards/:rewardId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { rewardId } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete rewards
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete rewards" });
+      }
+      
+      // Verify reward belongs to this family
+      const rewards = await storage.getRewardsByFamily(member.familyName);
+      const reward = rewards.find(r => r.id === rewardId);
+      
+      if (!reward) {
+        return res.status(404).json({ message: "Reward not found" });
+      }
+      
+      await storage.deleteReward(rewardId);
+      
+      // Broadcast reward deletion to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_deleted",
+        rewardId,
+      });
+      
+      res.json({ message: "Reward deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting reward:", error);
+      res.status(500).json({ message: "Failed to delete reward" });
+    }
+  });
+
   // Redeem a reward
   app.post("/api/rewards/:rewardId/redeem", isAuthenticated, async (req: any, res) => {
     try {
