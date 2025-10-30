@@ -52,9 +52,15 @@ export default function Dashboard() {
     message: string;
   } | null>(null);
 
-  // Fetch current family member
+  // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
+    enabled: !!user,
+  });
+
+  // Fetch real user's member record (to determine permissions)
+  const { data: realMember } = useQuery<FamilyMember>({
+    queryKey: ["/api/family-members/real"],
     enabled: !!user,
   });
 
@@ -309,7 +315,8 @@ export default function Dashboard() {
     );
   }
 
-  const isParent = member.role === "parent";
+  // Use realMember to determine permissions (not the acting member)
+  const isParent = realMember?.role === "parent";
   const activeTasks = tasks.filter((t) => t.status === "active");
   const activeRewards = rewards.filter((r) => r.isActive);
 

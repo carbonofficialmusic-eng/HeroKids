@@ -156,6 +156,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get the real authenticated user's member record (not acting as)
+  app.get("/api/family-members/real", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      res.json(member);
+    } catch (error) {
+      console.error("Error fetching real family member:", error);
+      res.status(500).json({ message: "Failed to fetch family member" });
+    }
+  });
+
   // Switch member (parents only)
   app.post("/api/family-members/switch", isAuthenticated, async (req: any, res) => {
     try {
@@ -548,7 +565,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { taskId } = req.params;
       const { proofPhotoUrl } = req.body;
       
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Check if we're acting as another member
+      let member;
+      if (req.session.actingAsMemberId) {
+        member = await storage.getFamilyMember(req.session.actingAsMemberId);
+        if (!member) {
+          // If acting as member not found, clear the session and fall through
+          delete req.session.actingAsMemberId;
+        }
+      }
+      
+      // If not acting as someone or actingAs member not found, use real user
+      if (!member) {
+        member = await storage.getFamilyMemberByUserId(userId);
+      }
+      
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
       }

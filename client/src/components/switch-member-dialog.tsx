@@ -60,7 +60,7 @@ export function SwitchMemberDialog({
               data-testid={`button-select-member-${member.id}`}
             >
               <Avatar className="h-10 w-10">
-                <AvatarImage src={member.avatarUrl} alt={member.displayName} />
+                <AvatarImage src={member.avatarUrl || undefined} alt={member.displayName} />
                 <AvatarFallback style={{ backgroundColor: member.color }}>
                   <User className="h-5 w-5" />
                 </AvatarFallback>
