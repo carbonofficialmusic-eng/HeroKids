@@ -10,6 +10,7 @@ import { TaskDialog } from "@/components/task-dialog";
 import { RewardDialog } from "@/components/reward-dialog";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
+import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -27,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus, Settings } from "lucide-react";
+import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus, Settings, User2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -41,6 +42,7 @@ export default function Dashboard() {
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
+  const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
@@ -151,6 +153,28 @@ export default function Dashboard() {
       toast({
         title: "Failed to update profile",
         description: error.message || "Unable to update profile.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Switch member (parents only)
+  const switchMemberMutation = useMutation({
+    mutationFn: async (memberId: string | null) => {
+      return await apiRequest("POST", "/api/family-members/switch", { memberId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      setSwitchMemberDialogOpen(false);
+      toast({
+        title: "Switched member!",
+        description: "You are now acting as a different family member.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to switch member",
+        description: error.message || "Unable to switch member.",
         variant: "destructive",
       });
     },
@@ -307,6 +331,17 @@ export default function Dashboard() {
                 {member.displayName}
               </div>
             </div>
+            {isParent && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSwitchMemberDialogOpen(true)}
+                data-testid="button-switch-member"
+                aria-label="Switch member"
+              >
+                <User2 className="h-5 w-5" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -636,6 +671,18 @@ export default function Dashboard() {
           onSubmit={(memberId, data) => editMemberMutation.mutate({ memberId, data })}
           isSubmitting={editMemberMutation.isPending}
           member={memberToEdit}
+        />
+      )}
+
+      {/* Switch Member Dialog - Parents only */}
+      {member && isParent && (
+        <SwitchMemberDialog
+          open={switchMemberDialogOpen}
+          onOpenChange={setSwitchMemberDialogOpen}
+          members={familyMembers}
+          currentMember={member}
+          onSwitch={(memberId) => switchMemberMutation.mutate(memberId)}
+          isSubmitting={switchMemberMutation.isPending}
         />
       )}
 
