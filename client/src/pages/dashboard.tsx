@@ -277,13 +277,14 @@ export default function Dashboard() {
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       toast({
         title: "Reward redeemed!",
         description: data.message,
       });
       setCelebration({
-        points: -data.redemption.pointsSpent,
-        message: `You redeemed: ${data.redemption.title || 'reward'}!`,
+        points: data.redemption?.pointsSpent ? -data.redemption.pointsSpent : 0,
+        message: data.message || 'Reward redeemed successfully!',
       });
     },
     onError: (error: any) => {

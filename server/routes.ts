@@ -256,24 +256,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "Family not found" });
         }
         
-        // Check subscription tier limits
-        const tierLimits: Record<string, number> = {
-          free: 2,
-          family: 4,
-          family_plus: 6,
-          hero_pro: Infinity,
-        };
+        // Check subscription tier limits (bypass in test/development environment)
+        const bypassTierLimits = process.env.BYPASS_TIER_LIMITS === "true" || process.env.NODE_ENV === "development";
         
-        const currentCount = await storage.getFamilyMemberCount(familyName);
-        const limit = tierLimits[family.subscriptionTier];
-        
-        if (currentCount >= limit) {
-          return res.status(403).json({
-            message: `Your ${family.subscriptionTier} plan is limited to ${limit} members. Upgrade to add more family members.`,
-            currentTier: family.subscriptionTier,
-            currentCount,
-            limit,
-          });
+        if (!bypassTierLimits) {
+          const tierLimits: Record<string, number> = {
+            free: 2,
+            family: 4,
+            family_plus: 6,
+            hero_pro: Infinity,
+          };
+          
+          const currentCount = await storage.getFamilyMemberCount(familyName);
+          const limit = tierLimits[family.subscriptionTier];
+          
+          if (currentCount >= limit) {
+            return res.status(403).json({
+              message: `Your ${family.subscriptionTier} plan is limited to ${limit} members. Upgrade to add more family members.`,
+              currentTier: family.subscriptionTier,
+              currentCount,
+              limit,
+            });
+          }
         }
         
         // Generate a cryptographically secure join code
@@ -307,24 +311,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        // Check subscription tier limits
-        const tierLimits: Record<string, number> = {
-          free: 2,
-          family: 4,
-          family_plus: 6,
-          hero_pro: Infinity,
-        };
+        // Check subscription tier limits (bypass in test/development environment)
+        const bypassTierLimits = process.env.BYPASS_TIER_LIMITS === "true" || process.env.NODE_ENV === "development";
         
-        const currentCount = await storage.getFamilyMemberCount(parsed.familyName);
-        const limit = tierLimits[family.subscriptionTier];
-        
-        if (currentCount >= limit) {
-          return res.status(403).json({
-            message: `Your ${family.subscriptionTier} plan is limited to ${limit} members. Upgrade to add more family members.`,
-            currentTier: family.subscriptionTier,
-            currentCount,
-            limit,
-          });
+        if (!bypassTierLimits) {
+          const tierLimits: Record<string, number> = {
+            free: 2,
+            family: 4,
+            family_plus: 6,
+            hero_pro: Infinity,
+          };
+          
+          const currentCount = await storage.getFamilyMemberCount(parsed.familyName);
+          const limit = tierLimits[family.subscriptionTier];
+          
+          if (currentCount >= limit) {
+            return res.status(403).json({
+              message: `Your ${family.subscriptionTier} plan is limited to ${limit} members. Upgrade to add more family members.`,
+              currentTier: family.subscriptionTier,
+              currentCount,
+              limit,
+            });
+          }
         }
         
         // Create member linked to current user
@@ -789,7 +797,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { rewardId } = req.params;
       
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Use acting member if available, otherwise use authenticated user
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
       }

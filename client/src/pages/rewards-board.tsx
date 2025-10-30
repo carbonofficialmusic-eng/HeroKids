@@ -73,7 +73,7 @@ export default function RewardsBoard() {
   // Update redemption status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      return await apiRequest(`/api/reward-redemptions/${id}`, "PATCH", { status });
+      return await apiRequest("PATCH", `/api/reward-redemptions/${id}`, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
