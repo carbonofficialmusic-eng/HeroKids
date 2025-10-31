@@ -75,7 +75,8 @@ export const familyMembers = pgTable("family_members", {
   avatarUrl: varchar("avatar_url"),
   color: varchar("color").notNull().default("#8B5CF6"), // User's theme color
   joinCode: varchar("join_code").unique(), // Code for unclaimed profiles
-  totalPoints: integer("total_points").notNull().default(0),
+  totalEarned: integer("total_earned").notNull().default(0), // Lifetime achievement points (never decreases)
+  totalPoints: integer("total_points").notNull().default(0), // Available balance for redeeming rewards
   weeklyPoints: integer("weekly_points").notNull().default(0),
   monthlyPoints: integer("monthly_points").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
