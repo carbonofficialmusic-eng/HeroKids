@@ -598,10 +598,13 @@ export default function Dashboard() {
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center">
               <div className="mb-2">
-                <PointCounter points={member.totalPoints} size="hero" showAnimation />
+                <PointCounter points={member.totalEarned} size="hero" showAnimation />
               </div>
-              <p className="text-sm font-semibold text-muted-foreground mb-4">
-                Lifetime Points
+              <p className="text-sm font-semibold text-muted-foreground mb-1">
+                Total Earned
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Available Points: {member.totalPoints}
               </p>
               <h1 className="text-3xl font-black font-accent mb-2" data-testid="text-child-welcome">
                 Hi, {member.displayName}!
