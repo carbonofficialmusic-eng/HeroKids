@@ -404,6 +404,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/family-members/:memberId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { memberId } = req.params;
+      
+      // Get current member to verify permissions
+      const currentMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!currentMember) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete members
+      if (currentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete family members" });
+      }
+      
+      // Get the member being deleted
+      const memberToDelete = await storage.getFamilyMemberById(memberId);
+      
+      if (!memberToDelete) {
+        return res.status(404).json({ message: "Member to delete not found" });
+      }
+      
+      // Verify they're in the same family
+      if (memberToDelete.familyName !== currentMember.familyName) {
+        return res.status(403).json({ message: "Cannot delete members from other families" });
+      }
+      
+      // Delete the member
+      await storage.deleteFamilyMember(memberId);
+      
+      // Broadcast deletion to family
+      broadcastToFamily(currentMember.familyName, {
+        type: "member_deleted",
+        memberId,
+      });
+      
+      res.json({ message: "Family member deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting family member:", error);
+      res.status(500).json({ message: "Failed to delete family member" });
+    }
+  });
+
   // Avatar upload endpoint
   app.post("/api/upload-avatar", isAuthenticated, avatarUpload.single('avatar'), async (req: any, res) => {
     try {
