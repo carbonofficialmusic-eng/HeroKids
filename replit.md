@@ -6,6 +6,11 @@ HomeHero is a full-stack web application that transforms household chores into a
 
 ## Recent Changes
 
+**October 31, 2025 - Point Labels Clarification**:
+- Added "Lifetime Points" label below the main point counter in child view for clarity
+- Changed weekly points display from "This week: X points" to "Weekly Points: X" for consistency
+- Labels help eliminate confusion about which points are used for rewards (lifetime) vs leaderboard (weekly)
+
 **October 31, 2025 - Edit, Delete Rewards & Child Rewards Board Access**:
 - Added ability for parents to edit and delete rewards
 - Edit button (pencil icon) and delete button (trash icon) appear in top-right corner of reward cards in parent view only
