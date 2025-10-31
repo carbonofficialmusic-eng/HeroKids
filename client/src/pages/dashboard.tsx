@@ -794,28 +794,44 @@ export default function Dashboard() {
             </Tabs>
 
             {/* Available Rewards */}
-            {activeRewards.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold font-accent">Rewards You Can Earn</h2>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setRequestRewardDialogOpen(true)}
-                      data-testid="button-request-reward"
-                    >
-                      <Lightbulb className="h-4 w-4 mr-2" />
-                      Request Reward
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold font-accent">Rewards You Can Earn</h2>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRequestRewardDialogOpen(true)}
+                    data-testid="button-request-reward"
+                  >
+                    <Lightbulb className="h-4 w-4 mr-2" />
+                    Request Reward
+                  </Button>
+                  <Link href="/rewards-board">
+                    <Button variant="outline" size="sm" data-testid="button-rewards-board-child">
+                      <Gift className="h-4 w-4 mr-2" />
+                      My Rewards
                     </Button>
-                    <Link href="/rewards-board">
-                      <Button variant="outline" size="sm" data-testid="button-rewards-board-child">
-                        <Gift className="h-4 w-4 mr-2" />
-                        My Rewards
-                      </Button>
-                    </Link>
-                  </div>
+                  </Link>
                 </div>
+              </div>
+              {activeRewards.length === 0 ? (
+                <Card className="p-12 text-center">
+                  <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-bold font-accent mb-2">No rewards available</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Request a reward and your parents will review it!
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setRequestRewardDialogOpen(true)}
+                    data-testid="button-request-reward-empty"
+                  >
+                    <Lightbulb className="h-4 w-4 mr-2" />
+                    Request Your First Reward
+                  </Button>
+                </Card>
+              ) : (
                 <div className="grid md:grid-cols-2 gap-4">
                   {activeRewards.map((reward) => (
                     <Card key={reward.id} className="p-6" data-testid={`card-reward-${reward.id}`}>
@@ -869,8 +885,8 @@ export default function Dashboard() {
                     </Card>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
