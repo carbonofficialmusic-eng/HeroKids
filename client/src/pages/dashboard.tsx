@@ -597,9 +597,12 @@ export default function Dashboard() {
           /* Child View */
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center">
-              <div className="mb-4">
+              <div className="mb-2">
                 <PointCounter points={member.totalPoints} size="hero" showAnimation />
               </div>
+              <p className="text-sm font-semibold text-muted-foreground mb-4">
+                Lifetime Points
+              </p>
               <h1 className="text-3xl font-black font-accent mb-2" data-testid="text-child-welcome">
                 Hi, {member.displayName}!
               </h1>
@@ -607,7 +610,7 @@ export default function Dashboard() {
                 Complete tasks to earn points and climb the leaderboard
               </p>
               <p className="text-sm text-muted-foreground">
-                This week: {member.weeklyPoints} points
+                Weekly Points: {member.weeklyPoints}
               </p>
             </div>
 
