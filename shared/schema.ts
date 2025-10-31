@@ -220,6 +220,43 @@ export const insertRewardSchema = createInsertSchema(rewards).omit({
 export type InsertReward = z.infer<typeof insertRewardSchema>;
 export type Reward = typeof rewards.$inferSelect;
 
+// Reward requests - Children can request new rewards for parent approval
+export const rewardRequests = pgTable("reward_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyName: varchar("family_name").notNull(),
+  requestedBy: varchar("requested_by").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  pointThreshold: integer("point_threshold").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, approved, declined
+  reviewedBy: varchar("reviewed_by").references(() => familyMembers.id, { onDelete: "set null" }),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const rewardRequestsRelations = relations(rewardRequests, ({ one }) => ({
+  requester: one(familyMembers, {
+    fields: [rewardRequests.requestedBy],
+    references: [familyMembers.id],
+  }),
+  reviewer: one(familyMembers, {
+    fields: [rewardRequests.reviewedBy],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertRewardRequestSchema = createInsertSchema(rewardRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  reviewedBy: true,
+  reviewedAt: true,
+});
+
+export type InsertRewardRequest = z.infer<typeof insertRewardRequestSchema>;
+export type RewardRequest = typeof rewardRequests.$inferSelect;
+
 // Points history - Detailed tracking of point changes
 export const pointsHistory = pgTable("points_history", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
