@@ -614,7 +614,15 @@ export default function Dashboard() {
             {/* Available Rewards */}
             {activeRewards.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold font-accent mb-4">Rewards You Can Earn</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold font-accent">Rewards You Can Earn</h2>
+                  <Link href="/rewards-board">
+                    <Button variant="outline" size="sm" data-testid="button-rewards-board-child">
+                      <Gift className="h-4 w-4 mr-2" />
+                      My Rewards
+                    </Button>
+                  </Link>
+                </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   {activeRewards.map((reward) => (
                     <Card key={reward.id} className="p-6" data-testid={`card-reward-${reward.id}`}>
