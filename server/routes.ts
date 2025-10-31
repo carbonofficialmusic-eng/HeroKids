@@ -1026,6 +1026,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create a reward request (children only)
+  app.post("/api/reward-requests", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { title, description, pointThreshold } = req.body;
+      
+      // Use acting member if available, otherwise use authenticated user
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Validate input
+      if (!title || !pointThreshold || pointThreshold < 1) {
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+      
+      // Create the request
+      const request = await storage.createRewardRequest({
+        familyName: member.familyName,
+        requestedBy: member.id,
+        title,
+        description: description || null,
+        pointThreshold,
+        status: "pending",
+      });
+      
+      // Broadcast to family (especially parents)
+      broadcastToFamily(member.familyName, {
+        type: "reward_request_created",
+        request,
+        requester: {
+          id: member.id,
+          displayName: member.displayName,
+          avatarUrl: member.avatarUrl,
+          color: member.color,
+        },
+      });
+      
+      res.status(201).json(request);
+    } catch (error: any) {
+      console.error("Error creating reward request:", error);
+      res.status(500).json({ message: "Failed to create reward request" });
+    }
+  });
+
+  // Get all reward requests for the current family
+  app.get("/api/reward-requests", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const requests = await storage.getRewardRequestsByFamily(member.familyName);
+      res.json(requests);
+    } catch (error: any) {
+      console.error("Error fetching reward requests:", error);
+      res.status(500).json({ message: "Failed to fetch reward requests" });
+    }
+  });
+
+  // Approve or decline a reward request (parents only)
+  app.patch("/api/reward-requests/:requestId/:action", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { requestId, action } = req.params;
+      
+      if (action !== "approve" && action !== "decline") {
+        return res.status(400).json({ message: "Invalid action" });
+      }
+      
+      // Get authenticated user's member (not acting member)
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can approve/decline requests
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can review reward requests" });
+      }
+      
+      // Get the request
+      const requests = await storage.getRewardRequestsByFamily(member.familyName);
+      const request = requests.find(r => r.id === requestId);
+      
+      if (!request) {
+        return res.status(404).json({ message: "Request not found" });
+      }
+      
+      if (request.status !== "pending") {
+        return res.status(400).json({ message: "Request has already been reviewed" });
+      }
+      
+      const newStatus = action === "approve" ? "approved" : "declined";
+      
+      // Update the request status
+      await storage.updateRewardRequestStatus(requestId, newStatus, member.id);
+      
+      // If approved, create the actual reward
+      if (action === "approve") {
+        const reward = await storage.createReward({
+          familyName: member.familyName,
+          title: request.title,
+          description: request.description || null,
+          pointThreshold: request.pointThreshold,
+          isActive: true,
+        });
+        
+        // Broadcast the new reward
+        broadcastToFamily(member.familyName, {
+          type: "reward_created",
+          reward,
+        });
+      }
+      
+      // Broadcast the request update
+      broadcastToFamily(member.familyName, {
+        type: "reward_request_updated",
+        requestId,
+        status: newStatus,
+      });
+      
+      res.json({ message: `Request ${newStatus}`, status: newStatus });
+    } catch (error: any) {
+      console.error("Error updating reward request:", error);
+      res.status(500).json({ message: "Failed to update reward request" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time updates

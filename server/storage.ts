@@ -7,6 +7,7 @@ import {
   taskCompletions,
   rewards,
   rewardRedemptions,
+  rewardRequests,
   pointsHistory,
   type User,
   type UpsertUser,
@@ -22,6 +23,8 @@ import {
   type InsertReward,
   type RewardRedemption,
   type InsertRewardRedemption,
+  type RewardRequest,
+  type InsertRewardRequest,
   type InsertPointsHistory,
   type TaskCompletion,
 } from "@shared/schema";
@@ -83,6 +86,11 @@ export interface IStorage {
   getRewardRedemptionsByFamily(familyName: string): Promise<any[]>;
   getRewardRedemptionsByMember(memberId: string): Promise<RewardRedemption[]>;
   updateRewardRedemptionStatus(id: string, status: string): Promise<void>;
+
+  // Reward request operations
+  createRewardRequest(request: InsertRewardRequest): Promise<RewardRequest>;
+  getRewardRequestsByFamily(familyName: string): Promise<any[]>;
+  updateRewardRequestStatus(id: string, status: string, reviewedBy: string): Promise<void>;
 
   // Points history operations
   addPointsHistory(history: InsertPointsHistory): Promise<void>;
@@ -371,6 +379,42 @@ export class DatabaseStorage implements IStorage {
       .update(rewardRedemptions)
       .set({ status })
       .where(eq(rewardRedemptions.id, id));
+  }
+
+  // Reward request operations
+  async createRewardRequest(requestData: InsertRewardRequest): Promise<RewardRequest> {
+    const [request] = await db.insert(rewardRequests).values(requestData).returning();
+    return request;
+  }
+
+  async getRewardRequestsByFamily(familyName: string): Promise<any[]> {
+    return await db
+      .select({
+        id: rewardRequests.id,
+        title: rewardRequests.title,
+        description: rewardRequests.description,
+        pointThreshold: rewardRequests.pointThreshold,
+        status: rewardRequests.status,
+        createdAt: rewardRequests.createdAt,
+        reviewedAt: rewardRequests.reviewedAt,
+        requester: {
+          id: familyMembers.id,
+          displayName: familyMembers.displayName,
+          avatarUrl: familyMembers.avatarUrl,
+          color: familyMembers.color,
+        },
+      })
+      .from(rewardRequests)
+      .innerJoin(familyMembers, eq(rewardRequests.requestedBy, familyMembers.id))
+      .where(eq(rewardRequests.familyName, familyName))
+      .orderBy(desc(rewardRequests.createdAt));
+  }
+
+  async updateRewardRequestStatus(id: string, status: string, reviewedBy: string): Promise<void> {
+    await db
+      .update(rewardRequests)
+      .set({ status, reviewedBy, reviewedAt: new Date(), updatedAt: new Date() })
+      .where(eq(rewardRequests.id, id));
   }
 
   // Points history operations
