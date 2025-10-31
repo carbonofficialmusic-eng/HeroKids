@@ -598,13 +598,16 @@ export default function Dashboard() {
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center">
               <div className="mb-4">
-                <PointCounter points={member.weeklyPoints} size="hero" showAnimation />
+                <PointCounter points={member.totalPoints} size="hero" showAnimation />
               </div>
               <h1 className="text-3xl font-black font-accent mb-2" data-testid="text-child-welcome">
                 Hi, {member.displayName}!
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-2">
                 Complete tasks to earn points and climb the leaderboard
+              </p>
+              <p className="text-sm text-muted-foreground">
+                This week: {member.weeklyPoints} points
               </p>
             </div>
 

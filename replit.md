@@ -17,6 +17,8 @@ HomeHero is a full-stack web application that transforms household chores into a
 - Fixed point deduction bug in reward redemption - now correctly deducts from total, weekly, and monthly points
 - Added "My Rewards" button to child view so children can access the Rewards Board to track their redeemed rewards
 - Children see only their own redemptions on the Rewards Board, parents see all family redemptions
+- Fixed child view to display total points (instead of weekly) to match reward redemption logic
+- Child view now shows "This week: X points" below main display for weekly progress tracking
 
 **October 30, 2025 - Rewards Board Feature**:
 - Implemented complete reward redemption and approval workflow
