@@ -55,6 +55,7 @@ export function useWebSocket(familyName: string | null) {
 
             case "member_joined":
             case "member_updated":
+            case "member_deleted":
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/real"] });

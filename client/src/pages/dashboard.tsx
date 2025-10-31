@@ -174,6 +174,27 @@ export default function Dashboard() {
     },
   });
 
+  // Delete family member (parents only)
+  const deleteMemberMutation = useMutation({
+    mutationFn: async (memberId: string) => {
+      return await apiRequest("DELETE", `/api/family-members/${memberId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      toast({
+        title: "Member deleted",
+        description: "Family member has been removed successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to delete member",
+        description: error.message || "Unable to delete member.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Switch member (parents only)
   const switchMemberMutation = useMutation({
     mutationFn: async (memberId: string | null) => {
@@ -762,6 +783,47 @@ export default function Dashboard() {
 
             {/* Sidebar */}
             <div className="space-y-6">
+              {/* Family Members Management */}
+              {isRealParent && (
+                <Card className="p-6">
+                  <h2 className="text-2xl font-bold font-accent mb-4">Family Members</h2>
+                  <div className="space-y-3">
+                    {familyMembers.map((familyMember) => (
+                      <div
+                        key={familyMember.id}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 relative"
+                        data-testid={`member-card-${familyMember.id}`}
+                      >
+                        <Avatar className="h-10 w-10" style={{ borderWidth: "3px", borderColor: familyMember.color }}>
+                          <AvatarImage src={familyMember.avatarUrl || undefined} />
+                          <AvatarFallback style={{ backgroundColor: familyMember.color }} className="text-white">
+                            {familyMember.displayName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold" data-testid={`text-member-name-${familyMember.id}`}>
+                            {familyMember.displayName}
+                          </div>
+                          <div className="text-xs text-muted-foreground capitalize">
+                            {familyMember.role}
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => deleteMemberMutation.mutate(familyMember.id)}
+                          disabled={deleteMemberMutation.isPending}
+                          data-testid={`button-delete-member-${familyMember.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+              
               <Leaderboard members={familyMembers} period="week" />
             </div>
           </div>
