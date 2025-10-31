@@ -6,10 +6,15 @@ HomeHero is a full-stack web application that transforms household chores into a
 
 ## Recent Changes
 
-**October 31, 2025 - Point Labels Clarification**:
-- Added "Lifetime Points" label below the main point counter in child view for clarity
-- Changed weekly points display from "This week: X points" to "Weekly Points: X" for consistency
-- Labels help eliminate confusion about which points are used for rewards (lifetime) vs leaderboard (weekly)
+**October 31, 2025 - Dual-Point System Implementation**:
+- Implemented dual-point system to make achievements more motivating for children
+- Added `totalEarned` field to track lifetime achievement points (never decreases)
+- Renamed `totalPoints` to represent available balance for redeeming rewards (can decrease)
+- Child view now shows "Total Earned" as the big display number (always grows up!)
+- Below shows "Available Points: X" (spendable balance) and "Weekly Points: X" (leaderboard)
+- When completing tasks: both totalEarned and totalPoints increase
+- When redeeming rewards: totalEarned stays the same, only totalPoints decreases
+- This creates a more positive experience where kids always see their achievements growing
 
 **October 31, 2025 - Edit, Delete Rewards & Child Rewards Board Access**:
 - Added ability for parents to edit and delete rewards
