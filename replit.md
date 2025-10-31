@@ -6,12 +6,14 @@ HomeHero is a full-stack web application that transforms household chores into a
 
 ## Recent Changes
 
-**October 31, 2025 - Delete Rewards & Child Rewards Board Access**:
-- Added ability for parents to delete rewards
-- Delete button appears in top-right corner of reward cards (trash icon) in parent view only
-- Only visible to real parents (isRealParent check) - children cannot see or delete rewards
-- DELETE /api/rewards/:rewardId endpoint with parent-only permission check
-- Real-time updates via WebSocket when reward is deleted (reward_deleted event)
+**October 31, 2025 - Edit, Delete Rewards & Child Rewards Board Access**:
+- Added ability for parents to edit and delete rewards
+- Edit button (pencil icon) and delete button (trash icon) appear in top-right corner of reward cards in parent view only
+- Only visible to real parents (isRealParent check) - children cannot see or modify rewards
+- PUT /api/rewards/:rewardId endpoint for editing rewards (parent-only permission)
+- DELETE /api/rewards/:rewardId endpoint for deleting rewards (parent-only permission)
+- RewardDialog component now supports both create and edit modes
+- Real-time updates via WebSocket when reward is updated or deleted (reward_updated, reward_deleted events)
 - Fixed point deduction bug in reward redemption - now correctly deducts from total, weekly, and monthly points
 - Added "My Rewards" button to child view so children can access the Rewards Board to track their redeemed rewards
 - Children see only their own redemptions on the Rewards Board, parents see all family redemptions
