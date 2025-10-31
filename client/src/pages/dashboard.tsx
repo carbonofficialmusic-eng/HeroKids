@@ -43,6 +43,7 @@ export default function Dashboard() {
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
+  const [requestToEdit, setRequestToEdit] = useState<any>(null);
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
@@ -408,6 +409,29 @@ export default function Dashboard() {
     },
   });
 
+  // Update reward request
+  const updateRewardRequestMutation = useMutation({
+    mutationFn: async ({ requestId, data }: { requestId: string; data: any }) => {
+      return await apiRequest("PATCH", `/api/reward-requests/${requestId}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      setRequestRewardDialogOpen(false);
+      setRequestToEdit(null);
+      toast({
+        title: "Request updated!",
+        description: "The reward request has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to update",
+        description: error.message || "Unable to update request.",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (memberLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -640,10 +664,21 @@ export default function Dashboard() {
                             </div>
                             <div className="flex gap-2">
                               <Button
+                                onClick={() => {
+                                  setRequestToEdit(request);
+                                  setRequestRewardDialogOpen(true);
+                                }}
+                                variant="outline"
+                                size="sm"
+                                data-testid={`button-edit-request-${request.id}`}
+                              >
+                                <Pencil className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                              <Button
                                 onClick={() => approveRewardRequestMutation.mutate(request.id)}
                                 disabled={approveRewardRequestMutation.isPending || declineRewardRequestMutation.isPending}
                                 size="sm"
-                                className="flex-1"
                                 data-testid={`button-approve-request-${request.id}`}
                               >
                                 <Check className="h-4 w-4 mr-1" />
@@ -654,7 +689,6 @@ export default function Dashboard() {
                                 disabled={approveRewardRequestMutation.isPending || declineRewardRequestMutation.isPending}
                                 variant="outline"
                                 size="sm"
-                                className="flex-1"
                                 data-testid={`button-decline-request-${request.id}`}
                               >
                                 <X className="h-4 w-4 mr-1" />
@@ -968,14 +1002,24 @@ export default function Dashboard() {
         isSubmitting={completeTaskMutation.isPending}
       />
 
-      {/* Reward Request Dialog - Children only */}
-      {member && !isParent && (
+      {/* Reward Request Dialog - Children to create, Parents to edit */}
+      {member && (
         <RewardRequestDialog
           open={requestRewardDialogOpen}
-          onOpenChange={setRequestRewardDialogOpen}
-          onSubmit={(data) => createRewardRequestMutation.mutate(data)}
-          isSubmitting={createRewardRequestMutation.isPending}
+          onOpenChange={(open) => {
+            setRequestRewardDialogOpen(open);
+            if (!open) setRequestToEdit(null);
+          }}
+          onSubmit={(data) => {
+            if (requestToEdit) {
+              updateRewardRequestMutation.mutate({ requestId: requestToEdit.id, data });
+            } else {
+              createRewardRequestMutation.mutate(data);
+            }
+          }}
+          isSubmitting={createRewardRequestMutation.isPending || updateRewardRequestMutation.isPending}
           familyName={member.familyName}
+          request={requestToEdit}
         />
       )}
 

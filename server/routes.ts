@@ -1094,6 +1094,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update a reward request (parents only)
+  app.patch("/api/reward-requests/:requestId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { requestId } = req.params;
+      const { title, description, pointThreshold } = req.body;
+      
+      // Get authenticated user's member (not acting member)
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can edit requests
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can edit reward requests" });
+      }
+      
+      // Get the request
+      const requests = await storage.getRewardRequestsByFamily(member.familyName);
+      const request = requests.find(r => r.id === requestId);
+      
+      if (!request) {
+        return res.status(404).json({ message: "Request not found" });
+      }
+      
+      if (request.status !== "pending") {
+        return res.status(400).json({ message: "Only pending requests can be edited" });
+      }
+      
+      // Validate input
+      if (!title || !pointThreshold || pointThreshold < 1) {
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+      
+      // Update the request
+      await storage.updateRewardRequest(requestId, {
+        title,
+        description: description || null,
+        pointThreshold,
+      });
+      
+      // Broadcast the update
+      broadcastToFamily(member.familyName, {
+        type: "reward_request_updated",
+        requestId,
+      });
+      
+      res.json({ message: "Request updated successfully" });
+    } catch (error: any) {
+      console.error("Error updating reward request:", error);
+      res.status(500).json({ message: "Failed to update reward request" });
+    }
+  });
+
   // Approve or decline a reward request (parents only)
   app.patch("/api/reward-requests/:requestId/:action", isAuthenticated, async (req: any, res) => {
     try {

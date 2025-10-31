@@ -90,6 +90,7 @@ export interface IStorage {
   // Reward request operations
   createRewardRequest(request: InsertRewardRequest): Promise<RewardRequest>;
   getRewardRequestsByFamily(familyName: string): Promise<any[]>;
+  updateRewardRequest(id: string, data: { title: string; description: string | null; pointThreshold: number }): Promise<void>;
   updateRewardRequestStatus(id: string, status: string, reviewedBy: string): Promise<void>;
 
   // Points history operations
@@ -408,6 +409,13 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(familyMembers, eq(rewardRequests.requestedBy, familyMembers.id))
       .where(eq(rewardRequests.familyName, familyName))
       .orderBy(desc(rewardRequests.createdAt));
+  }
+
+  async updateRewardRequest(id: string, data: { title: string; description: string | null; pointThreshold: number }): Promise<void> {
+    await db
+      .update(rewardRequests)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(rewardRequests.id, id));
   }
 
   async updateRewardRequestStatus(id: string, status: string, reviewedBy: string): Promise<void> {

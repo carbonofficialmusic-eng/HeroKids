@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, Pencil } from "lucide-react";
 
 const rewardRequestFormSchema = z.object({
   title: z.string().min(1, "Please enter a reward title"),
@@ -35,6 +36,7 @@ interface RewardRequestDialogProps {
   onSubmit: (data: RewardRequestFormData) => void;
   isSubmitting?: boolean;
   familyName: string;
+  request?: { id: string; title: string; description: string | null; pointThreshold: number } | null;
 }
 
 export function RewardRequestDialog({
@@ -43,7 +45,10 @@ export function RewardRequestDialog({
   onSubmit,
   isSubmitting = false,
   familyName,
+  request = null,
 }: RewardRequestDialogProps) {
+  const isEditing = !!request;
+  
   const form = useForm<RewardRequestFormData>({
     resolver: zodResolver(rewardRequestFormSchema),
     defaultValues: {
@@ -52,6 +57,22 @@ export function RewardRequestDialog({
       pointThreshold: 50,
     },
   });
+
+  useEffect(() => {
+    if (request) {
+      form.reset({
+        title: request.title,
+        description: request.description || "",
+        pointThreshold: request.pointThreshold,
+      });
+    } else {
+      form.reset({
+        title: "",
+        description: "",
+        pointThreshold: 50,
+      });
+    }
+  }, [request, form]);
 
   const handleSubmit = (data: RewardRequestFormData) => {
     onSubmit(data);
@@ -64,14 +85,23 @@ export function RewardRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md" data-testid="dialog-request-reward">
+      <DialogContent className="max-w-md" data-testid={isEditing ? "dialog-edit-request" : "dialog-request-reward"}>
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <Lightbulb className="h-6 w-6 text-primary" />
-            <DialogTitle className="text-2xl font-accent">Request a Reward</DialogTitle>
+            {isEditing ? (
+              <Pencil className="h-6 w-6 text-primary" />
+            ) : (
+              <Lightbulb className="h-6 w-6 text-primary" />
+            )}
+            <DialogTitle className="text-2xl font-accent">
+              {isEditing ? "Edit Reward Request" : "Request a Reward"}
+            </DialogTitle>
           </div>
           <DialogDescription>
-            Tell your parents what reward you'd like to earn! They'll review your request.
+            {isEditing 
+              ? "Adjust the reward details before approving."
+              : "Tell your parents what reward you'd like to earn! They'll review your request."
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -147,9 +177,9 @@ export function RewardRequestDialog({
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                data-testid="button-submit-request"
+                data-testid={isEditing ? "button-save-request" : "button-submit-request"}
               >
-                {isSubmitting ? "Sending..." : "Send Request"}
+                {isSubmitting ? (isEditing ? "Saving..." : "Sending...") : (isEditing ? "Save Changes" : "Send Request")}
               </Button>
             </div>
           </form>
