@@ -6,6 +6,22 @@ HomeHero is a full-stack web application that transforms household chores into a
 
 ## Recent Changes
 
+**October 31, 2025 - Reward Request Feature**:
+- Implemented child-initiated reward request system allowing children to propose rewards for parent approval
+- Created `rewardRequests` table with status tracking (pending, approved, declined)
+- Children can submit reward requests with title, description, and suggested point cost via "Request Reward" button
+- "Request Reward" button now always visible in child view (even when no rewards exist) with friendly empty state
+- Parents see pending requests in a dedicated section above rewards list on dashboard
+- Parents can approve requests (automatically creates the reward) or decline them
+- Added POST /api/reward-requests endpoint for creating requests
+- Added GET /api/reward-requests endpoint for fetching family requests
+- Added PATCH /api/reward-requests/:requestId/approve endpoint (parents only) - creates reward on approval
+- Added PATCH /api/reward-requests/:requestId/decline endpoint (parents only)
+- RewardRequestDialog component provides child-friendly interface for submitting requests
+- Real-time WebSocket updates via reward_request_created and reward_request_updated events
+- Permission checks ensure only authenticated parents can approve/decline requests
+- Comprehensive E2E test coverage of complete request workflow (submit, approve, decline)
+
 **October 31, 2025 - Dual-Point System Implementation**:
 - Implemented dual-point system to make achievements more motivating for children
 - Added `totalEarned` field to track lifetime achievement points (never decreases)
