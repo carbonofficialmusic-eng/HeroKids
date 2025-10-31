@@ -617,19 +617,7 @@ export default function Dashboard() {
                 <h2 className="text-2xl font-bold font-accent mb-4">Rewards You Can Earn</h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   {activeRewards.map((reward) => (
-                    <Card key={reward.id} className="p-6 relative" data-testid={`card-reward-${reward.id}`}>
-                      {isRealParent && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute top-2 right-2 h-8 w-8"
-                          onClick={() => deleteRewardMutation.mutate(reward.id)}
-                          disabled={deleteRewardMutation.isPending}
-                          data-testid={`button-delete-reward-${reward.id}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                    <Card key={reward.id} className="p-6" data-testid={`card-reward-${reward.id}`}>
                       <div className="flex items-start gap-3">
                         <div className="h-12 w-12 rounded-full gradient-winner flex items-center justify-center shrink-0">
                           <Gift className="h-6 w-6 text-white" />
