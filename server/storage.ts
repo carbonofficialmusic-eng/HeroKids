@@ -48,6 +48,7 @@ export interface IStorage {
   updateFamilyMember(id: string, updates: Partial<InsertFamilyMember>): Promise<FamilyMember>;
   updateFamilyMemberPoints(
     id: string,
+    totalEarned: number,
     totalPoints: number,
     weeklyPoints: number,
     monthlyPoints: number
@@ -193,13 +194,14 @@ export class DatabaseStorage implements IStorage {
 
   async updateFamilyMemberPoints(
     id: string,
+    totalEarned: number,
     totalPoints: number,
     weeklyPoints: number,
     monthlyPoints: number
   ): Promise<void> {
     await db
       .update(familyMembers)
-      .set({ totalPoints, weeklyPoints, monthlyPoints, updatedAt: new Date() })
+      .set({ totalEarned, totalPoints, weeklyPoints, monthlyPoints, updatedAt: new Date() })
       .where(eq(familyMembers.id, id));
   }
 

@@ -636,12 +636,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Update member points
-      const newTotalPoints = member.totalPoints + task.points;
+      const newTotalEarned = member.totalEarned + task.points; // Lifetime achievement (never decreases)
+      const newTotalPoints = member.totalPoints + task.points; // Available balance
       const newWeeklyPoints = member.weeklyPoints + task.points;
       const newMonthlyPoints = member.monthlyPoints + task.points;
       
       await storage.updateFamilyMemberPoints(
         member.id,
+        newTotalEarned,
         newTotalPoints,
         newWeeklyPoints,
         newMonthlyPoints
@@ -907,12 +909,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Deduct points from all totals
+      // Deduct points from available balance and weekly/monthly (but not totalEarned - that's lifetime achievement!)
+      const newTotalEarned = member.totalEarned; // Lifetime achievement never decreases
       const newTotalPoints = member.totalPoints - reward.pointThreshold;
       const newWeeklyPoints = member.weeklyPoints - reward.pointThreshold;
       const newMonthlyPoints = member.monthlyPoints - reward.pointThreshold;
       await storage.updateFamilyMemberPoints(
         member.id,
+        newTotalEarned,
         newTotalPoints,
         newWeeklyPoints,
         newMonthlyPoints
