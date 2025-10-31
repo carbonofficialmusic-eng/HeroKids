@@ -63,11 +63,11 @@ const uploadedPhotos = new Map<string, { memberId: string; taskId: string; times
 // Clean up old uploads every hour
 setInterval(() => {
   const oneHourAgo = Date.now() - (60 * 60 * 1000);
-  for (const [photoUrl, data] of uploadedPhotos.entries()) {
+  Array.from(uploadedPhotos.entries()).forEach(([photoUrl, data]) => {
     if (data.timestamp < oneHourAgo) {
       uploadedPhotos.delete(photoUrl);
     }
-  }
+  });
 }, 60 * 60 * 1000);
 
 function broadcastToFamily(familyName: string, message: any) {
@@ -336,10 +336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Create member linked to current user
-        const member = await storage.createFamilyMember({
-          ...parsed,
-          userId,
-        });
+        const member = await storage.createFamilyMember(parsed);
         
         // Broadcast new member to family
         broadcastToFamily(member.familyName, {
@@ -1234,15 +1231,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const data = JSON.parse(message.toString());
         
-        if (data.type === "join_family") {
-          familyName = data.familyName;
+        if (data.type === "join_family" && typeof data.familyName === "string") {
+          const family = data.familyName;
+          familyName = family;
           
-          if (!wsClients.has(familyName)) {
-            wsClients.set(familyName, new Set());
+          if (!wsClients.has(family)) {
+            wsClients.set(family, new Set());
           }
-          wsClients.get(familyName)!.add(ws);
+          wsClients.get(family)!.add(ws);
           
-          console.log(`Client joined family: ${familyName}`);
+          console.log(`Client joined family: ${family}`);
         }
       } catch (error) {
         console.error("Error handling WebSocket message:", error);
