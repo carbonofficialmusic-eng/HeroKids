@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertRewardRequestSchema } from "@shared/schema";
 import { z } from "zod";
 import {
   Dialog,
@@ -22,7 +21,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Lightbulb } from "lucide-react";
 
-type RewardRequestFormData = z.infer<typeof insertRewardRequestSchema>;
+const rewardRequestFormSchema = z.object({
+  title: z.string().min(1, "Please enter a reward title"),
+  description: z.string().optional(),
+  pointThreshold: z.number().min(1, "Points must be at least 1"),
+});
+
+type RewardRequestFormData = z.infer<typeof rewardRequestFormSchema>;
 
 interface RewardRequestDialogProps {
   open: boolean;
@@ -40,24 +45,20 @@ export function RewardRequestDialog({
   familyName,
 }: RewardRequestDialogProps) {
   const form = useForm<RewardRequestFormData>({
-    resolver: zodResolver(insertRewardRequestSchema),
+    resolver: zodResolver(rewardRequestFormSchema),
     defaultValues: {
-      familyName,
       title: "",
       description: "",
       pointThreshold: 50,
-      status: "pending",
     },
   });
 
   const handleSubmit = (data: RewardRequestFormData) => {
     onSubmit(data);
     form.reset({
-      familyName,
       title: "",
       description: "",
       pointThreshold: 50,
-      status: "pending",
     });
   };
 
