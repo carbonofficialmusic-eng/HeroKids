@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertRewardSchema } from "@shared/schema";
+import { insertRewardSchema, type Reward } from "@shared/schema";
 import { z } from "zod";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,7 @@ interface RewardDialogProps {
   onSubmit: (data: RewardFormData) => void;
   isSubmitting?: boolean;
   familyName: string;
+  reward?: Reward | null;
 }
 
 export function RewardDialog({
@@ -38,7 +40,10 @@ export function RewardDialog({
   onSubmit,
   isSubmitting = false,
   familyName,
+  reward = null,
 }: RewardDialogProps) {
+  const isEditing = !!reward;
+
   const form = useForm<RewardFormData>({
     resolver: zodResolver(insertRewardSchema),
     defaultValues: {
@@ -50,16 +55,39 @@ export function RewardDialog({
     },
   });
 
+  // Reset form when reward changes
+  useEffect(() => {
+    if (reward) {
+      form.reset({
+        familyName: reward.familyName,
+        title: reward.title,
+        description: reward.description || "",
+        pointThreshold: reward.pointThreshold,
+        isActive: reward.isActive,
+      });
+    } else {
+      form.reset({
+        familyName,
+        title: "",
+        description: "",
+        pointThreshold: 100,
+        isActive: true,
+      });
+    }
+  }, [reward, familyName, form]);
+
   const handleSubmit = (data: RewardFormData) => {
     onSubmit(data);
-    form.reset();
+    if (!isEditing) {
+      form.reset();
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md" data-testid="dialog-create-reward">
+      <DialogContent className="max-w-md" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"}>
         <DialogHeader>
-          <DialogTitle className="text-2xl font-accent">Create Reward</DialogTitle>
+          <DialogTitle className="text-2xl font-accent">{isEditing ? "Edit Reward" : "Create Reward"}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -163,7 +191,7 @@ export function RewardDialog({
                 disabled={isSubmitting}
                 data-testid="button-submit-reward"
               >
-                {isSubmitting ? "Creating..." : "Create Reward"}
+                {isSubmitting ? (isEditing ? "Saving..." : "Creating...") : (isEditing ? "Save Changes" : "Create Reward")}
               </Button>
             </div>
           </form>
