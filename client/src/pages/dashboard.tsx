@@ -8,6 +8,7 @@ import { TaskCard } from "@/components/task-card";
 import { Leaderboard } from "@/components/leaderboard";
 import { TaskDialog } from "@/components/task-dialog";
 import { RewardDialog } from "@/components/reward-dialog";
+import { RewardRequestDialog } from "@/components/reward-request-dialog";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SwitchMemberDialog } from "@/components/switch-member-dialog";
@@ -28,11 +29,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus, Settings, User2, Trash2, Pencil } from "lucide-react";
+import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus, Settings, User2, Trash2, Pencil, Lightbulb, Check, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
-import type { FamilyMember, Task, Reward } from "@shared/schema";
+import type { FamilyMember, Task, Reward, RewardRequest } from "@shared/schema";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -41,6 +42,7 @@ export default function Dashboard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
+  const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
@@ -83,6 +85,12 @@ export default function Dashboard() {
   // Fetch rewards
   const { data: rewards = [] } = useQuery<Reward[]>({
     queryKey: ["/api/rewards"],
+    enabled: !!member,
+  });
+
+  // Fetch reward requests
+  const { data: rewardRequests = [] } = useQuery<RewardRequest[]>({
+    queryKey: ["/api/reward-requests"],
     enabled: !!member,
   });
 
@@ -335,6 +343,71 @@ export default function Dashboard() {
     },
   });
 
+  // Create reward request
+  const createRewardRequestMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/reward-requests", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      setRequestRewardDialogOpen(false);
+      toast({
+        title: "Request sent!",
+        description: "Your reward request has been sent to your parents for review.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to send request",
+        description: error.message || "Unable to send reward request.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Approve reward request
+  const approveRewardRequestMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      return await apiRequest("PATCH", `/api/reward-requests/${requestId}/approve`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
+      toast({
+        title: "Request approved!",
+        description: "The reward has been added and is now available to earn.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to approve",
+        description: error.message || "Unable to approve request.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Decline reward request
+  const declineRewardRequestMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      return await apiRequest("PATCH", `/api/reward-requests/${requestId}/decline`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      toast({
+        title: "Request declined",
+        description: "The reward request has been declined.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to decline",
+        description: error.message || "Unable to decline request.",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (memberLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -530,6 +603,71 @@ export default function Dashboard() {
                 </div>
               )}
 
+              {/* Pending Reward Requests Section */}
+              {isRealParent && rewardRequests.filter(r => r.status === "pending").length > 0 && (
+                <div>
+                  <h2 className="text-2xl font-bold font-accent mb-4">Pending Reward Requests</h2>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {rewardRequests
+                      .filter(r => r.status === "pending")
+                      .map((request) => {
+                        const requester = familyMembers.find(m => m.id === request.requestedBy);
+                        return (
+                          <Card key={request.id} className="p-6" data-testid={`card-request-${request.id}`}>
+                            <div className="flex items-start gap-3 mb-4">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage src={requester?.avatarUrl || undefined} />
+                                <AvatarFallback style={{ backgroundColor: requester?.color }} className="text-white">
+                                  {requester?.displayName[0] || '?'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="font-bold">{request.title}</h3>
+                                  <Badge variant="secondary">
+                                    {request.pointThreshold} pts
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground mb-1">
+                                  Requested by {requester?.displayName || 'Unknown'}
+                                </p>
+                                {request.description && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {request.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={() => approveRewardRequestMutation.mutate(request.id)}
+                                disabled={approveRewardRequestMutation.isPending || declineRewardRequestMutation.isPending}
+                                size="sm"
+                                className="flex-1"
+                                data-testid={`button-approve-request-${request.id}`}
+                              >
+                                <Check className="h-4 w-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                onClick={() => declineRewardRequestMutation.mutate(request.id)}
+                                disabled={approveRewardRequestMutation.isPending || declineRewardRequestMutation.isPending}
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                                data-testid={`button-decline-request-${request.id}`}
+                              >
+                                <X className="h-4 w-4 mr-1" />
+                                Decline
+                              </Button>
+                            </div>
+                          </Card>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
               {/* Rewards Section */}
               {activeRewards.length > 0 && (
                 <div>
@@ -660,12 +798,23 @@ export default function Dashboard() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-bold font-accent">Rewards You Can Earn</h2>
-                  <Link href="/rewards-board">
-                    <Button variant="outline" size="sm" data-testid="button-rewards-board-child">
-                      <Gift className="h-4 w-4 mr-2" />
-                      My Rewards
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setRequestRewardDialogOpen(true)}
+                      data-testid="button-request-reward"
+                    >
+                      <Lightbulb className="h-4 w-4 mr-2" />
+                      Request Reward
                     </Button>
-                  </Link>
+                    <Link href="/rewards-board">
+                      <Button variant="outline" size="sm" data-testid="button-rewards-board-child">
+                        <Gift className="h-4 w-4 mr-2" />
+                        My Rewards
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   {activeRewards.map((reward) => (
@@ -802,6 +951,17 @@ export default function Dashboard() {
         onComplete={(taskId, proofPhotoUrl) => completeTaskMutation.mutate({ taskId, proofPhotoUrl })}
         isSubmitting={completeTaskMutation.isPending}
       />
+
+      {/* Reward Request Dialog - Children only */}
+      {member && !isParent && (
+        <RewardRequestDialog
+          open={requestRewardDialogOpen}
+          onOpenChange={setRequestRewardDialogOpen}
+          onSubmit={(data) => createRewardRequestMutation.mutate(data)}
+          isSubmitting={createRewardRequestMutation.isPending}
+          familyName={member.familyName}
+        />
+      )}
 
       {/* Join Code Dialog */}
       <AlertDialog open={!!newMemberJoinCode} onOpenChange={() => setNewMemberJoinCode(null)}>

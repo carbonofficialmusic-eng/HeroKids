@@ -40,6 +40,11 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
               break;
 
+            case "reward_request_created":
+            case "reward_request_updated":
+              queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+              break;
+
             case "reward_redeemed":
             case "redemption_updated":
               // Invalidate family members (points changed) and reward redemptions
