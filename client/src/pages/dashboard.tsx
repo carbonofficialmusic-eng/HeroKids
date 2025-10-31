@@ -28,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus, Settings, User2, Trash2 } from "lucide-react";
+import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus, Settings, User2, Trash2, Pencil } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -40,6 +40,7 @@ export default function Dashboard() {
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
+  const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
@@ -262,9 +263,26 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       setRewardDialogOpen(false);
+      setSelectedReward(null);
       toast({
         title: "Reward created!",
         description: "The reward is now available to earn.",
+      });
+    },
+  });
+
+  // Update reward
+  const updateRewardMutation = useMutation({
+    mutationFn: async ({ rewardId, data }: { rewardId: string; data: any }) => {
+      return await apiRequest("PUT", `/api/rewards/${rewardId}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
+      setRewardDialogOpen(false);
+      setSelectedReward(null);
+      toast({
+        title: "Reward updated!",
+        description: "The reward has been successfully updated.",
       });
     },
   });
@@ -456,7 +474,10 @@ export default function Dashboard() {
                     Add Member
                   </Button>
                   <Button
-                    onClick={() => setRewardDialogOpen(true)}
+                    onClick={() => {
+                      setSelectedReward(null);
+                      setRewardDialogOpen(true);
+                    }}
                     variant="outline"
                     data-testid="button-add-reward"
                   >
@@ -517,16 +538,30 @@ export default function Dashboard() {
                     {activeRewards.map((reward) => (
                       <Card key={reward.id} className="p-6 relative overflow-visible" data-testid={`card-reward-${reward.id}`}>
                         {isRealParent && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-2 right-2 h-8 w-8"
-                            onClick={() => deleteRewardMutation.mutate(reward.id)}
-                            disabled={deleteRewardMutation.isPending}
-                            data-testid={`button-delete-reward-${reward.id}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="absolute top-2 right-2 flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => {
+                                setSelectedReward(reward);
+                                setRewardDialogOpen(true);
+                              }}
+                              data-testid={`button-edit-reward-${reward.id}`}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => deleteRewardMutation.mutate(reward.id)}
+                              disabled={deleteRewardMutation.isPending}
+                              data-testid={`button-delete-reward-${reward.id}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         )}
                         <div className="flex items-start gap-3">
                           <div className="h-12 w-12 rounded-full gradient-winner flex items-center justify-center shrink-0">
@@ -706,9 +741,16 @@ export default function Dashboard() {
           <RewardDialog
             open={rewardDialogOpen}
             onOpenChange={setRewardDialogOpen}
-            onSubmit={(data) => createRewardMutation.mutate(data)}
-            isSubmitting={createRewardMutation.isPending}
+            onSubmit={(data) => {
+              if (selectedReward) {
+                updateRewardMutation.mutate({ rewardId: selectedReward.id, data });
+              } else {
+                createRewardMutation.mutate(data);
+              }
+            }}
+            isSubmitting={createRewardMutation.isPending || updateRewardMutation.isPending}
             familyName={member.familyName}
+            reward={selectedReward}
           />
           <AddMemberDialog
             open={addMemberDialogOpen}
