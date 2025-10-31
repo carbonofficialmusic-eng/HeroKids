@@ -49,6 +49,7 @@ export interface IStorage {
   getFamilyMemberCount(familyName: string): Promise<number>;
   createFamilyMember(member: InsertFamilyMember): Promise<FamilyMember>;
   updateFamilyMember(id: string, updates: Partial<InsertFamilyMember>): Promise<FamilyMember>;
+  deleteFamilyMember(id: string): Promise<void>;
   updateFamilyMemberPoints(
     id: string,
     totalEarned: number,
@@ -199,6 +200,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(familyMembers.id, id))
       .returning();
     return updated as FamilyMember;
+  }
+
+  async deleteFamilyMember(id: string): Promise<void> {
+    await db.delete(familyMembers).where(eq(familyMembers.id, id));
   }
 
   async updateFamilyMemberPoints(
