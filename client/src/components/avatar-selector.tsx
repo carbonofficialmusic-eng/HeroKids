@@ -117,6 +117,7 @@ export function AvatarSelector({
             {avatarAssets.map((avatar) => (
               <Button
                 key={avatar.id}
+                type="button"
                 variant="outline"
                 className={`h-24 p-2 relative ${
                   selectedAvatar === avatar.url ? "ring-4 ring-primary" : ""
@@ -149,6 +150,7 @@ export function AvatarSelector({
           {colorOptions.map((color) => (
             <Button
               key={color.id}
+              type="button"
               variant="outline"
               className={`h-12 p-0 relative ${
                 selectedColor === color.value ? "ring-4 ring-primary" : ""
