@@ -118,7 +118,7 @@ export function TaskCompletionDialog({
         <DialogHeader>
           <DialogTitle>Complete Task</DialogTitle>
           <DialogDescription>
-            Confirm task completion to earn your points!
+            Submit your task completion for parent approval
           </DialogDescription>
         </DialogHeader>
 
@@ -209,7 +209,7 @@ export function TaskCompletionDialog({
             disabled={!canSubmit || isSubmitting || isUploading}
             data-testid="button-submit-complete"
           >
-            {isSubmitting || isUploading ? "Submitting..." : "Complete & Earn Points!"}
+            {isSubmitting || isUploading ? "Submitting..." : "Submit for Approval"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -34,6 +34,24 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               break;
 
+            case "completion_pending":
+              // Child submitted task for approval
+              queryClient.invalidateQueries({ queryKey: ["/api/task-completions/pending"] });
+              break;
+
+            case "completion_approved":
+              // Parent approved task completion - update points and tasks
+              queryClient.invalidateQueries({ queryKey: ["/api/task-completions/pending"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+              break;
+
+            case "completion_rejected":
+              // Parent rejected task completion
+              queryClient.invalidateQueries({ queryKey: ["/api/task-completions/pending"] });
+              break;
+
             case "reward_created":
             case "reward_updated":
             case "reward_deleted":
