@@ -61,6 +61,16 @@ export default function RewardsBoard() {
   const isParent = member?.role === "parent";
   const isRealParent = realMember?.role === "parent";
 
+  // Debug logging
+  console.log("Rewards Board Debug:", {
+    member: member?.displayName,
+    memberRole: member?.role,
+    realMember: realMember?.displayName,
+    realMemberRole: realMember?.role,
+    isParent,
+    isRealParent
+  });
+
   // WebSocket connection for real-time updates
   useWebSocket(member?.familyName || null);
 
