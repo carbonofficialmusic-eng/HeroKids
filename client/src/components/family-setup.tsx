@@ -20,35 +20,52 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AvatarSelector } from "./avatar-selector";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
-import { Users } from "lucide-react";
+import { Users, UserPlus } from "lucide-react";
 
-const familyMemberSchema = z.object({
+const createFamilySchema = z.object({
   familyName: z.string().min(1, "Family name is required"),
   displayName: z.string().min(1, "Display name is required"),
   role: z.enum(["parent", "child"]),
 });
 
-type FamilyMemberForm = z.infer<typeof familyMemberSchema>;
+const joinFamilySchema = z.object({
+  joinCode: z.string().length(6, "Join code must be 6 characters"),
+  displayName: z.string().min(1, "Display name is required"),
+});
+
+type CreateFamilyForm = z.infer<typeof createFamilySchema>;
+type JoinFamilyForm = z.infer<typeof joinFamilySchema>;
+type FamilyMemberForm = CreateFamilyForm;
 
 interface FamilySetupProps {
   onComplete: (data: FamilyMemberForm & { avatarUrl: string; color: string }) => void;
+  onJoin: (data: JoinFamilyForm & { avatarUrl: string; color: string }) => void;
   isSubmitting?: boolean;
 }
 
-export function FamilySetup({ onComplete, isSubmitting = false }: FamilySetupProps) {
+export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: FamilySetupProps) {
   const [selectedAvatar, setSelectedAvatar] = useState(avatarAssets[0].url);
   const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
   const [uploadedAvatarFile, setUploadedAvatarFile] = useState<File | null>(null);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
 
-  const form = useForm<FamilyMemberForm>({
-    resolver: zodResolver(familyMemberSchema),
+  const createForm = useForm<CreateFamilyForm>({
+    resolver: zodResolver(createFamilySchema),
     defaultValues: {
       familyName: "",
       displayName: "",
       role: "parent",
+    },
+  });
+
+  const joinForm = useForm<JoinFamilyForm>({
+    resolver: zodResolver(joinFamilySchema),
+    defaultValues: {
+      joinCode: "",
+      displayName: "",
     },
   });
 
@@ -61,10 +78,8 @@ export function FamilySetup({ onComplete, isSubmitting = false }: FamilySetupPro
     setUploadedAvatarUrl(null);
   };
 
-  const onSubmit = async (data: FamilyMemberForm) => {
+  const uploadAvatar = async () => {
     let finalAvatarUrl = selectedAvatar;
-
-    // If user uploaded a custom avatar, upload it first
     if (uploadedAvatarFile) {
       try {
         const formData = new FormData();
@@ -82,11 +97,23 @@ export function FamilySetup({ onComplete, isSubmitting = false }: FamilySetupPro
         }
       } catch (error) {
         console.error('Error uploading avatar:', error);
-        // Continue with default avatar on error
       }
     }
+    return finalAvatarUrl;
+  };
 
+  const onCreateSubmit = async (data: CreateFamilyForm) => {
+    const finalAvatarUrl = await uploadAvatar();
     onComplete({
+      ...data,
+      avatarUrl: finalAvatarUrl,
+      color: selectedColor,
+    });
+  };
+
+  const onJoinSubmit = async (data: JoinFamilyForm) => {
+    const finalAvatarUrl = await uploadAvatar();
+    onJoin({
       ...data,
       avatarUrl: finalAvatarUrl,
       color: selectedColor,
@@ -108,87 +135,170 @@ export function FamilySetup({ onComplete, isSubmitting = false }: FamilySetupPro
           </p>
         </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="familyName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Family Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="e.g., The Smiths"
-                      {...field}
-                      data-testid="input-family-name"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Tabs defaultValue="create" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="create" data-testid="tab-create-family">
+              <Users className="h-4 w-4 mr-2" />
+              Create Family
+            </TabsTrigger>
+            <TabsTrigger value="join" data-testid="tab-join-family">
+              <UserPlus className="h-4 w-4 mr-2" />
+              Join Family
+            </TabsTrigger>
+          </TabsList>
 
-            <FormField
-              control={form.control}
-              name="displayName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="e.g., Mom, Dad, Alex"
-                      {...field}
-                      data-testid="input-display-name"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <TabsContent value="create">
+            <Form {...createForm}>
+              <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-6">
+                <FormField
+                  control={createForm.control}
+                  name="familyName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Family Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., The Smiths"
+                          {...field}
+                          data-testid="input-family-name"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your Role</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger data-testid="select-role">
-                        <SelectValue placeholder="Select your role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="parent" data-testid="option-role-parent">Parent</SelectItem>
-                      <SelectItem value="child" data-testid="option-role-child">Child</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={createForm.control}
+                  name="displayName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Your Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., Mom, Dad, Alex"
+                          {...field}
+                          data-testid="input-display-name"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <AvatarSelector
-              selectedAvatar={selectedAvatar}
-              selectedColor={selectedColor}
-              onAvatarSelect={setSelectedAvatar}
-              onColorSelect={setSelectedColor}
-              onCustomUpload={handleCustomUpload}
-              onClearCustomUpload={handleClearCustomUpload}
-              uploadedAvatarUrl={uploadedAvatarUrl}
-            />
+                <FormField
+                  control={createForm.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Your Role</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-role">
+                            <SelectValue placeholder="Select your role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="parent" data-testid="option-role-parent">Parent</SelectItem>
+                          <SelectItem value="child" data-testid="option-role-child">Child</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={isSubmitting}
-              data-testid="button-complete-setup"
-            >
-              {isSubmitting ? "Setting up..." : "Complete Setup"}
-            </Button>
-          </form>
-        </Form>
+                <AvatarSelector
+                  selectedAvatar={selectedAvatar}
+                  selectedColor={selectedColor}
+                  onAvatarSelect={setSelectedAvatar}
+                  onColorSelect={setSelectedColor}
+                  onCustomUpload={handleCustomUpload}
+                  onClearCustomUpload={handleClearCustomUpload}
+                  uploadedAvatarUrl={uploadedAvatarUrl}
+                />
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  disabled={isSubmitting}
+                  data-testid="button-complete-setup"
+                >
+                  {isSubmitting ? "Creating Family..." : "Create Family"}
+                </Button>
+              </form>
+            </Form>
+          </TabsContent>
+
+          <TabsContent value="join">
+            <Form {...joinForm}>
+              <form onSubmit={joinForm.handleSubmit(onJoinSubmit)} className="space-y-6">
+                <FormField
+                  control={joinForm.control}
+                  name="joinCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Join Code</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter 6-character code"
+                          maxLength={6}
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                          data-testid="input-join-code"
+                          className="text-center text-2xl font-mono tracking-wider"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Ask a parent in your family for the join code
+                      </p>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={joinForm.control}
+                  name="displayName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Your Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., Liv, Alex, Sam"
+                          {...field}
+                          data-testid="input-join-display-name"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <AvatarSelector
+                  selectedAvatar={selectedAvatar}
+                  selectedColor={selectedColor}
+                  onAvatarSelect={setSelectedAvatar}
+                  onColorSelect={setSelectedColor}
+                  onCustomUpload={handleCustomUpload}
+                  onClearCustomUpload={handleClearCustomUpload}
+                  uploadedAvatarUrl={uploadedAvatarUrl}
+                />
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  disabled={isSubmitting}
+                  data-testid="button-join-family"
+                >
+                  {isSubmitting ? "Joining..." : "Join Family"}
+                </Button>
+              </form>
+            </Form>
+          </TabsContent>
+        </Tabs>
       </Card>
     </div>
   );
