@@ -45,10 +45,12 @@ export interface IStorage {
   getFamilyMember(id: string): Promise<FamilyMember | undefined>;
   getFamilyMemberById(id: string): Promise<FamilyMember | undefined>;
   getFamilyMemberByUserId(userId: string): Promise<FamilyMember | undefined>;
+  getFamilyMemberByJoinCode(joinCode: string): Promise<FamilyMember | undefined>;
   getFamilyMembersByFamily(familyName: string): Promise<FamilyMember[]>;
   getFamilyMemberCount(familyName: string): Promise<number>;
   createFamilyMember(member: InsertFamilyMember): Promise<FamilyMember>;
   updateFamilyMember(id: string, updates: Partial<InsertFamilyMember>): Promise<FamilyMember>;
+  linkUserToFamilyMember(id: string, userId: string, updates: { displayName: string; avatarUrl: string; color: string }): Promise<FamilyMember>;
   deleteFamilyMember(id: string): Promise<void>;
   updateFamilyMemberPoints(
     id: string,
@@ -158,6 +160,32 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(familyMembers)
       .where(eq(familyMembers.userId, userId));
+    return member;
+  }
+
+  async getFamilyMemberByJoinCode(joinCode: string): Promise<FamilyMember | undefined> {
+    const [member] = await db
+      .select()
+      .from(familyMembers)
+      .where(eq(familyMembers.joinCode, joinCode));
+    return member;
+  }
+
+  async linkUserToFamilyMember(
+    id: string,
+    userId: string,
+    updates: { displayName: string; avatarUrl: string; color: string }
+  ): Promise<FamilyMember> {
+    const [member] = await db
+      .update(familyMembers)
+      .set({
+        userId,
+        displayName: updates.displayName,
+        avatarUrl: updates.avatarUrl,
+        color: updates.color,
+      })
+      .where(eq(familyMembers.id, id))
+      .returning();
     return member;
   }
 

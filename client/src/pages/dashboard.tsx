@@ -119,6 +119,27 @@ export default function Dashboard() {
     },
   });
 
+  // Join family with join code
+  const joinFamilyMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/join-family", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      toast({
+        title: "Welcome to the family!",
+        description: "You've successfully joined your family.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to join family",
+        description: error.message || "Invalid join code or the code has already been used.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Add family member
   const addMemberMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -468,7 +489,8 @@ export default function Dashboard() {
     return (
       <FamilySetup
         onComplete={(data) => setupMutation.mutate(data)}
-        isSubmitting={setupMutation.isPending}
+        onJoin={(data) => joinFamilyMutation.mutate(data)}
+        isSubmitting={setupMutation.isPending || joinFamilyMutation.isPending}
       />
     );
   }

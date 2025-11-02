@@ -5,6 +5,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import multer from "multer";
 import { join } from "path";
 import { mkdir } from "fs/promises";
+import { z } from "zod";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema } from "@shared/schema";
@@ -349,6 +350,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating family member:", error);
       res.status(400).json({ message: error.message || "Failed to create family member" });
+    }
+  });
+
+  // Join family with join code
+  app.post("/api/join-family", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Validate and parse request body
+      const joinFamilySchema = z.object({
+        joinCode: z.string().length(6, "Join code must be 6 characters"),
+        displayName: z.string().min(1, "Display name is required"),
+        avatarUrl: z.string().min(1, "Avatar is required"),
+        color: z.string().min(1, "Color is required"),
+      });
+      
+      const parsed = joinFamilySchema.parse(req.body);
+      
+      // Normalize join code to uppercase for case-insensitive comparison
+      const normalizedJoinCode = parsed.joinCode.toUpperCase();
+      
+      // Check if user already has a family member profile
+      const existingMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (existingMember) {
+        return res.status(400).json({ message: "You are already part of a family" });
+      }
+      
+      // Find the member record with this join code
+      const memberWithCode = await storage.getFamilyMemberByJoinCode(normalizedJoinCode);
+      
+      if (!memberWithCode) {
+        return res.status(404).json({ message: "Invalid join code" });
+      }
+      
+      // Check if this member slot is already claimed
+      if (memberWithCode.userId) {
+        return res.status(400).json({ message: "This join code has already been used" });
+      }
+      
+      // Update the member with the user's ID and profile info
+      const updatedMember = await storage.linkUserToFamilyMember(
+        memberWithCode.id,
+        userId,
+        { 
+          displayName: parsed.displayName, 
+          avatarUrl: parsed.avatarUrl, 
+          color: parsed.color 
+        }
+      );
+      
+      // Broadcast member joined to family
+      broadcastToFamily(updatedMember.familyName, {
+        type: "member_joined",
+        member: updatedMember,
+      });
+      
+      res.json(updatedMember);
+    } catch (error: any) {
+      console.error("Error joining family:", error);
+      res.status(400).json({ message: error.message || "Failed to join family" });
     }
   });
 
