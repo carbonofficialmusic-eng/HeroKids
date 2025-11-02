@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Star, Trophy, Users, CheckCircle, Zap } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import logoUrl from "@assets/A708B97F-2199-4C99-A66F-C3BA6238381B_1762070025130.png";
 
 export default function Landing() {
   return (
@@ -9,10 +10,13 @@ export default function Landing() {
       {/* Header */}
       <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg gradient-celebration flex items-center justify-center">
-              <Trophy className="h-6 w-6 text-white" />
-            </div>
+          <div className="flex items-center gap-3">
+            <img 
+              src={logoUrl} 
+              alt="HomeHero Logo" 
+              className="h-12 w-12 rounded-lg"
+              data-testid="img-logo"
+            />
             <span className="text-2xl font-black font-accent" data-testid="text-app-name">
               HomeHero
             </span>
