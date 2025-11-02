@@ -85,7 +85,7 @@ export function RewardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"}>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-accent">{isEditing ? "Edit Reward" : "Create Reward"}</DialogTitle>
         </DialogHeader>
