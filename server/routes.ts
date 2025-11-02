@@ -669,109 +669,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         uploadedPhotos.delete(proofPhotoUrl);
       }
       
-      // Create pending completion record (points awarded only after parent approval)
+      // Create completion record
       const completion = await storage.createTaskCompletion({
         taskId: task.id,
         memberId: member.id,
         pointsEarned: task.points,
         proofPhotoUrl: proofPhotoUrl || null,
-        status: "pending",
       });
       
-      // Broadcast pending completion to family for parent review
-      broadcastToFamily(member.familyName, {
-        type: "completion_pending",
-        taskId: task.id,
-        memberId: member.id,
-        completionId: completion.id,
-        task: task,
-      });
-      
-      res.json({
-        success: true,
-        message: "Task submitted for parent approval",
-        completion,
-      });
-    } catch (error: any) {
-      console.error("Error completing task:", error);
-      res.status(500).json({ message: "Failed to complete task" });
-    }
-  });
-
-  // Get pending task completions for parent approval
-  app.get("/api/task-completions/pending", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const realMember = await storage.getFamilyMemberByUserId(userId);
-      
-      if (!realMember) {
-        return res.status(404).json({ message: "Family member not found" });
-      }
-      
-      // Only parents can view pending completions
-      if (realMember.role !== "parent") {
-        return res.status(403).json({ message: "Only parents can view pending task completions" });
-      }
-      
-      const pendingCompletions = await storage.getPendingCompletionsByFamily(realMember.familyName);
-      res.json(pendingCompletions);
-    } catch (error: any) {
-      console.error("Error fetching pending completions:", error);
-      res.status(500).json({ message: "Failed to fetch pending completions" });
-    }
-  });
-
-  // Approve a task completion (parent only)
-  app.patch("/api/task-completions/:completionId/approve", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { completionId } = req.params;
-      
-      // Use real user for parent check (not actingAs)
-      const realMember = await storage.getFamilyMemberByUserId(userId);
-      if (!realMember) {
-        return res.status(404).json({ message: "Family member not found" });
-      }
-      
-      // Only parents can approve completions
-      if (realMember.role !== "parent") {
-        return res.status(403).json({ message: "Only parents can approve task completions" });
-      }
-      
-      // Get the completion to verify it exists and is pending
-      const completion = await storage.getTaskCompletion(completionId);
-      if (!completion) {
-        return res.status(404).json({ message: "Task completion not found" });
-      }
-      
-      if (completion.status !== "pending") {
-        return res.status(422).json({ message: "Task completion is not pending" });
-      }
-      
-      // Get the task and member
-      const task = await storage.getTask(completion.taskId);
-      if (!task) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      
-      const member = await storage.getFamilyMember(completion.memberId);
-      if (!member) {
-        return res.status(404).json({ message: "Member not found" });
-      }
-      
-      // Verify they're in the same family
-      if (task.familyName !== realMember.familyName || member.familyName !== realMember.familyName) {
-        return res.status(403).json({ message: "Forbidden: Not in the same family" });
-      }
-      
-      // Approve the completion (status already verified as pending above)
-      await storage.approveTaskCompletion(completionId, realMember.id);
-      
-      // Award points to the member
-      const newTotalEarned = member.totalEarned + completion.pointsEarned;
-      const newTotalPoints = member.totalPoints + completion.pointsEarned;
-      const newWeeklyPoints = member.weeklyPoints + completion.pointsEarned;
-      const newMonthlyPoints = member.monthlyPoints + completion.pointsEarned;
+      // Update member points
+      const newTotalEarned = member.totalEarned + task.points; // Lifetime achievement (never decreases)
+      const newTotalPoints = member.totalPoints + task.points; // Available balance
+      const newWeeklyPoints = member.weeklyPoints + task.points;
+      const newMonthlyPoints = member.monthlyPoints + task.points;
       
       await storage.updateFamilyMemberPoints(
         member.id,
@@ -784,12 +694,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add to points history
       await storage.addPointsHistory({
         memberId: member.id,
-        points: completion.pointsEarned,
+        points: task.points,
         reason: `Completed: ${task.title}`,
         taskId: task.id,
       });
       
-      // Handle recurring tasks and task status
+      // Handle recurring tasks
       if (task.recurrence !== "none") {
         // Calculate next due date based on recurrence
         let nextDueDate: Date | null = null;
@@ -809,6 +719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break;
           }
         } else {
+          // For tasks without due dates, set next occurrence based on current time
           switch (task.recurrence) {
             case "daily":
               nextDueDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -823,8 +734,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        // Mark current instance as completed
-        await storage.updateTaskStatus(task.id, "completed");
+        // Mark current instance as completed first to prevent duplicates
+        await storage.updateTaskStatus(taskId, "completed");
         
         // Create new instance of the recurring task
         const newTask = await storage.createTask({
@@ -841,7 +752,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         // Copy all task assignments to the new instance
-        const assignedMemberIds = await storage.getTaskAssignmentsByTask(task.id);
+        const assignedMemberIds = await storage.getTaskAssignmentsByTask(taskId);
         for (const memberId of assignedMemberIds) {
           await storage.createTaskAssignment({
             taskId: newTask.id,
@@ -850,83 +761,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } else {
         // Non-recurring tasks are simply marked as completed
-        await storage.updateTaskStatus(task.id, "completed");
+        await storage.updateTaskStatus(taskId, "completed");
       }
       
       // Get updated member data
       const updatedMember = await storage.getFamilyMember(member.id);
       
-      // Broadcast approval to family
-      broadcastToFamily(realMember.familyName, {
-        type: "completion_approved",
-        completionId: completionId,
+      // Broadcast completion to family
+      broadcastToFamily(member.familyName, {
+        type: "task_completed",
         taskId: task.id,
         member: updatedMember,
-        pointsEarned: completion.pointsEarned,
+        pointsEarned: task.points,
       });
       
       res.json({
         success: true,
-        message: "Task completion approved",
-        pointsEarned: completion.pointsEarned,
+        pointsEarned: task.points,
+        newTotalPoints: newTotalPoints,
+        completion,
       });
     } catch (error: any) {
-      console.error("Error approving task completion:", error);
-      res.status(500).json({ message: "Failed to approve task completion" });
-    }
-  });
-
-  // Reject a task completion (parent only)
-  app.patch("/api/task-completions/:completionId/reject", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { completionId } = req.params;
-      
-      // Use real user for parent check (not actingAs)
-      const realMember = await storage.getFamilyMemberByUserId(userId);
-      if (!realMember) {
-        return res.status(404).json({ message: "Family member not found" });
-      }
-      
-      // Only parents can reject completions
-      if (realMember.role !== "parent") {
-        return res.status(403).json({ message: "Only parents can reject task completions" });
-      }
-      
-      // Get the completion to verify it exists and is pending
-      const completion = await storage.getTaskCompletion(completionId);
-      if (!completion) {
-        return res.status(404).json({ message: "Task completion not found" });
-      }
-      
-      if (completion.status !== "pending") {
-        return res.status(422).json({ message: "Task completion is not pending" });
-      }
-      
-      // Get the member to verify same family
-      const member = await storage.getFamilyMember(completion.memberId);
-      if (!member || member.familyName !== realMember.familyName) {
-        return res.status(403).json({ message: "Forbidden: Not in the same family" });
-      }
-      
-      // Reject the completion
-      await storage.rejectTaskCompletion(completionId);
-      
-      // Broadcast rejection to family
-      broadcastToFamily(realMember.familyName, {
-        type: "completion_rejected",
-        completionId: completionId,
-        taskId: completion.taskId,
-        memberId: member.id,
-      });
-      
-      res.json({
-        success: true,
-        message: "Task completion rejected",
-      });
-    } catch (error: any) {
-      console.error("Error rejecting task completion:", error);
-      res.status(500).json({ message: "Failed to reject task completion" });
+      console.error("Error completing task:", error);
+      res.status(500).json({ message: "Failed to complete task" });
     }
   });
 

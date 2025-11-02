@@ -95,12 +95,6 @@ export default function Dashboard() {
     enabled: !!member,
   });
 
-  // Fetch pending task completions (for parent review)
-  const { data: pendingCompletions = [] } = useQuery<any[]>({
-    queryKey: ["/api/task-completions/pending"],
-    enabled: !!member && realMember?.role === "parent",
-  });
-
   // Fetch family subscription tier
   const { data: familyData } = useQuery<{
     familyName: string;
@@ -282,10 +276,12 @@ export default function Dashboard() {
       setCompletionDialogOpen(false);
       setTaskToComplete(null);
       
-      toast({
-        title: "Task submitted!",
-        description: "Your task is waiting for parent approval.",
-      });
+      if (data.pointsEarned) {
+        setCelebration({
+          points: data.pointsEarned,
+          message: "Awesome job!",
+        });
+      }
     },
   });
 
@@ -429,50 +425,6 @@ export default function Dashboard() {
       toast({
         title: "Failed to decline",
         description: error.message || "Unable to decline request.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Approve task completion
-  const approveCompletionMutation = useMutation({
-    mutationFn: async (completionId: string) => {
-      return await apiRequest("PATCH", `/api/task-completions/${completionId}/approve`, {});
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/task-completions/pending"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      toast({
-        title: "Task approved!",
-        description: "Points have been awarded.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to approve",
-        description: error.message || "Unable to approve task completion.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Reject task completion
-  const rejectCompletionMutation = useMutation({
-    mutationFn: async (completionId: string) => {
-      return await apiRequest("PATCH", `/api/task-completions/${completionId}/reject`, {});
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/task-completions/pending"] });
-      toast({
-        title: "Task rejected",
-        description: "The completion has been rejected.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to reject",
-        description: error.message || "Unable to reject task completion.",
         variant: "destructive",
       });
     },
@@ -693,77 +645,6 @@ export default function Dashboard() {
                       isCompleting={completeTaskMutation.isPending}
                     />
                   ))}
-                </div>
-              )}
-
-              {/* Pending Task Completions Section */}
-              {isRealParent && pendingCompletions.length > 0 && (
-                <div>
-                  <h2 className="text-2xl font-bold font-accent mb-4">Pending Task Approvals</h2>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {pendingCompletions.map((completion) => (
-                      <Card key={completion.id} className="p-6" data-testid={`card-completion-${completion.id}`}>
-                        <div className="flex items-start gap-3 mb-4">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={completion.member.avatarUrl || undefined} />
-                            <AvatarFallback style={{ backgroundColor: completion.member.color }} className="text-white">
-                              {completion.member.displayName[0] || '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-bold">{completion.task.title}</h3>
-                              <Badge variant="secondary">
-                                {completion.pointsEarned} pts
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground mb-1">
-                              Completed by {completion.member.displayName}
-                            </p>
-                            {completion.task.description && (
-                              <p className="text-sm text-muted-foreground mb-2">
-                                {completion.task.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Photo Proof Preview */}
-                        {completion.proofPhotoUrl && (
-                          <div className="mb-4 rounded-lg overflow-hidden border">
-                            <img 
-                              src={completion.proofPhotoUrl} 
-                              alt="Task proof" 
-                              className="w-full h-48 object-cover"
-                              data-testid={`img-proof-${completion.id}`}
-                            />
-                          </div>
-                        )}
-                        
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => approveCompletionMutation.mutate(completion.id)}
-                            disabled={approveCompletionMutation.isPending || rejectCompletionMutation.isPending}
-                            className="flex-1"
-                            data-testid={`button-approve-completion-${completion.id}`}
-                          >
-                            <Check className="h-4 w-4 mr-1" />
-                            Approve
-                          </Button>
-                          <Button
-                            onClick={() => rejectCompletionMutation.mutate(completion.id)}
-                            disabled={approveCompletionMutation.isPending || rejectCompletionMutation.isPending}
-                            variant="outline"
-                            className="flex-1"
-                            data-testid={`button-reject-completion-${completion.id}`}
-                          >
-                            <X className="h-4 w-4 mr-1" />
-                            Reject
-                          </Button>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
                 </div>
               )}
 

@@ -19,7 +19,6 @@ export const roleEnum = pgEnum("role", ["parent", "child"]);
 export const taskStatusEnum = pgEnum("task_status", ["active", "completed", "archived"]);
 export const recurrenceEnum = pgEnum("recurrence", ["none", "daily", "weekly", "monthly"]);
 export const subscriptionTierEnum = pgEnum("subscription_tier", ["free", "family", "family_plus", "hero_pro"]);
-export const completionStatusEnum = pgEnum("completion_status", ["pending", "approved", "rejected"]);
 
 // Session storage table - Required for Replit Auth
 export const sessions = pgTable(
@@ -178,10 +177,7 @@ export const taskCompletions = pgTable("task_completions", {
   memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
   proofPhotoUrl: varchar("proof_photo_url"),
   pointsEarned: integer("points_earned").notNull(),
-  status: completionStatusEnum("status").notNull().default("pending"),
   completedAt: timestamp("completed_at").defaultNow(),
-  approvedAt: timestamp("approved_at"),
-  approvedBy: varchar("approved_by").references(() => familyMembers.id, { onDelete: "set null" }),
 });
 
 export const taskCompletionsRelations = relations(taskCompletions, ({ one }) => ({
@@ -193,17 +189,11 @@ export const taskCompletionsRelations = relations(taskCompletions, ({ one }) => 
     fields: [taskCompletions.memberId],
     references: [familyMembers.id],
   }),
-  approver: one(familyMembers, {
-    fields: [taskCompletions.approvedBy],
-    references: [familyMembers.id],
-  }),
 }));
 
 export const insertTaskCompletionSchema = createInsertSchema(taskCompletions).omit({
   id: true,
   completedAt: true,
-  approvedAt: true,
-  approvedBy: true,
 });
 
 export type InsertTaskCompletion = z.infer<typeof insertTaskCompletionSchema>;
