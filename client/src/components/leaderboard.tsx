@@ -29,11 +29,22 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
     return null;
   };
 
+  const getTitle = () => {
+    if (period === "week") return "This Week's Leaderboard";
+    if (period === "month") return "This Month's Leaderboard";
+    return "All-Time Leaderboard";
+  };
+
   return (
     <Card className="p-6" data-testid="card-leaderboard">
       <h2 className="text-2xl font-bold font-accent mb-6" data-testid="text-leaderboard-title">
-        Leaderboard
+        {getTitle()}
       </h2>
+      <p className="text-sm text-muted-foreground mb-6" data-testid="text-leaderboard-subtitle">
+        {period === "month" && "Points earned this month - resets on the 1st"}
+        {period === "week" && "Points earned this week"}
+        {period === "all" && "Total points earned all time"}
+      </p>
 
       {/* Podium display for top 3 */}
       {top3.length > 0 && (
