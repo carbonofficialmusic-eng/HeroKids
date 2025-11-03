@@ -68,6 +68,12 @@ Preferred communication style: Simple, everyday language.
     -   Parents always see the leaderboard regardless of setting
     -   Real-time sync via WebSocket when settings change
     -   Controlled Tabs state prevents UI issues when toggling while viewing leaderboard
+-   **Add Member Moved to Settings**: "Add Member" functionality relocated from Dashboard to Settings
+    -   Dashboard simplified - no longer has Add Member button
+    -   Settings page is now the single place to add family members
+    -   Join code dialog displays properly after member creation
+    -   Fixed critical bug: initial family member creation now includes userId association
+    -   Fixed response parsing: mutations properly parse JSON to access joinCode
 
 ### Known Issues
 -   **CRITICAL**: Task completion awards points immediately without parent approval - approval system needs implementation
