@@ -347,12 +347,15 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      console.log("Redemption response data:", data);
+      console.log("Redemption object:", data.redemption);
       toast({
         title: "Reward redeemed!",
         description: data.message,
       });
       const pointsSpent = data.redemption?.pointsSpent || 0;
       const rewardTitle = data.redemption?.rewardTitle || 'Reward';
+      console.log("Points spent:", pointsSpent, "Reward title:", rewardTitle);
       setCelebration({
         points: -pointsSpent,
         message: `${rewardTitle} - ${pointsSpent} points`,
