@@ -588,53 +588,71 @@ export default function Dashboard() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <h1 className="text-3xl font-black font-accent" data-testid="text-page-title">
-                  Family Tasks
-                </h1>
-                <div className="flex gap-2 flex-wrap">
-                  <Link href="/analytics">
-                    <Button variant="outline" data-testid="button-analytics">
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      Analytics
-                    </Button>
-                  </Link>
-                  <Link href="/rewards-board">
-                    <Button variant="outline" data-testid="button-rewards-board">
-                      <Gift className="h-4 w-4 mr-2" />
-                      Rewards Board
-                    </Button>
-                  </Link>
-                  <Button
-                    onClick={() => setAddMemberDialogOpen(true)}
-                    variant="outline"
-                    data-testid="button-add-member"
-                  >
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Add Member
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setSelectedReward(null);
-                      setRewardDialogOpen(true);
-                    }}
-                    variant="outline"
-                    data-testid="button-add-reward"
-                  >
-                    <Gift className="h-4 w-4 mr-2" />
-                    Add Reward
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setSelectedTask(null);
-                      setTaskDialogOpen(true);
-                    }}
-                    data-testid="button-add-task"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Task
-                  </Button>
+              {/* Stats Section */}
+              <div className="text-center">
+                <div className="mb-2">
+                  <PointCounter points={member.totalEarned} size="hero" showAnimation />
                 </div>
+                <p className="text-sm font-semibold text-muted-foreground mb-1">
+                  Total Earned
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Available Points: {member.totalPoints}
+                </p>
+                <h1 className="text-3xl font-black font-accent mb-2" data-testid="text-page-title">
+                  Hi, {member.displayName}!
+                </h1>
+                <p className="text-muted-foreground mb-2">
+                  Manage your family's tasks and rewards
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Weekly Points: {member.weeklyPoints}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-center flex-wrap gap-2">
+                <Link href="/analytics">
+                  <Button variant="outline" data-testid="button-analytics">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Analytics
+                  </Button>
+                </Link>
+                <Link href="/rewards-board">
+                  <Button variant="outline" data-testid="button-rewards-board">
+                    <Gift className="h-4 w-4 mr-2" />
+                    Rewards Board
+                  </Button>
+                </Link>
+                <Button
+                  onClick={() => setAddMemberDialogOpen(true)}
+                  variant="outline"
+                  data-testid="button-add-member"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add Member
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSelectedReward(null);
+                    setRewardDialogOpen(true);
+                  }}
+                  variant="outline"
+                  data-testid="button-add-reward"
+                >
+                  <Gift className="h-4 w-4 mr-2" />
+                  Add Reward
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSelectedTask(null);
+                    setTaskDialogOpen(true);
+                  }}
+                  data-testid="button-add-task"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Task
+                </Button>
               </div>
 
               {activeTasks.length === 0 ? (
