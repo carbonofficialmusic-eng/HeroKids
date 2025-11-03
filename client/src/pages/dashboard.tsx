@@ -288,7 +288,8 @@ export default function Dashboard() {
   // Complete task
   const completeTaskMutation = useMutation({
     mutationFn: async ({ taskId, proofPhotoUrl }: { taskId: string; proofPhotoUrl?: string }) => {
-      return await apiRequest("POST", `/api/tasks/${taskId}/complete`, { proofPhotoUrl });
+      const res = await apiRequest("POST", `/api/tasks/${taskId}/complete`, { proofPhotoUrl });
+      return await res.json();
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
@@ -341,21 +342,19 @@ export default function Dashboard() {
   // Redeem reward
   const redeemRewardMutation = useMutation({
     mutationFn: async (rewardId: string) => {
-      return await apiRequest("POST", `/api/rewards/${rewardId}/redeem`, {});
+      const res = await apiRequest("POST", `/api/rewards/${rewardId}/redeem`, {});
+      return await res.json();
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
-      console.log("Redemption response data:", data);
-      console.log("Redemption object:", data.redemption);
       toast({
         title: "Reward redeemed!",
         description: data.message,
       });
       const pointsSpent = data.redemption?.pointsSpent || 0;
       const rewardTitle = data.redemption?.rewardTitle || 'Reward';
-      console.log("Points spent:", pointsSpent, "Reward title:", rewardTitle);
       setCelebration({
         points: -pointsSpent,
         message: `${rewardTitle} - ${pointsSpent} points`,
