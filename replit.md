@@ -58,9 +58,21 @@ Preferred communication style: Simple, everyday language.
 -   **Parent Dashboard Enhancements**: Parents can redeem rewards and view same statistics as children
 -   **Redemption Celebration Fix**: Celebration now displays correct reward name and points spent (e.g., "Sleeping at a friend - 30 points")
 -   **Custom Logo**: HomeHero logo (blue house with red cape) added to landing page
+-   **Monthly Leaderboard**: Leaderboard now shows "Points Earned This Month" instead of available balance
+    -   Redeeming rewards no longer affects leaderboard ranking
+    -   True competition for who worked hardest this month
+    -   Automatically resets on the 1st of each month
 
 ### Known Issues
 -   **CRITICAL**: Task completion awards points immediately without parent approval - approval system needs implementation
 -   Join codes are one-time use and cryptographically secure
 -   Mobile dialogs use `max-h-[90vh] overflow-y-auto` for proper scrolling
 -   Tier limits bypassed in development mode for testing
+
+### Technical Notes
+-   **Points System**: 
+    -   `totalEarned`: Lifetime achievement (never decreases)
+    -   `totalPoints`: Available balance for spending on rewards (decreases when redeeming)
+    -   `weeklyPoints`: Points earned this week (never decreases, resets Monday)
+    -   `monthlyPoints`: Points earned this month (never decreases, resets 1st of month)
+-   **Auth Fix**: Updated upsertUser to use email as conflict target instead of id

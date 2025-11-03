@@ -1013,11 +1013,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Deduct points from available balance and weekly/monthly (but not totalEarned - that's lifetime achievement!)
+      // Deduct points ONLY from available balance (totalPoints)
+      // Weekly/Monthly points represent "earned this period" and should never decrease
       const newTotalEarned = member.totalEarned; // Lifetime achievement never decreases
-      const newTotalPoints = member.totalPoints - reward.pointThreshold;
-      const newWeeklyPoints = member.weeklyPoints - reward.pointThreshold;
-      const newMonthlyPoints = member.monthlyPoints - reward.pointThreshold;
+      const newTotalPoints = member.totalPoints - reward.pointThreshold; // Only this decreases
+      const newWeeklyPoints = member.weeklyPoints; // Stays the same - earned this week
+      const newMonthlyPoints = member.monthlyPoints; // Stays the same - earned this month
       await storage.updateFamilyMemberPoints(
         member.id,
         newTotalEarned,
