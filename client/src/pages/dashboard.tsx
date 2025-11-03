@@ -900,7 +900,7 @@ export default function Dashboard() {
                 </Card>
               )}
               
-              <Leaderboard members={familyMembers} period="week" />
+              <Leaderboard members={familyMembers} period="month" />
             </div>
           </div>
         ) : (
@@ -961,7 +961,7 @@ export default function Dashboard() {
               </TabsContent>
 
               <TabsContent value="leaderboard" className="mt-6">
-                <Leaderboard members={familyMembers} period="week" />
+                <Leaderboard members={familyMembers} period="month" />
               </TabsContent>
             </Tabs>
 
