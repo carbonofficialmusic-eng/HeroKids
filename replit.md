@@ -62,14 +62,16 @@ Preferred communication style: Simple, everyday language.
     -   Redeeming rewards no longer affects leaderboard ranking
     -   True competition for who worked hardest this month
     -   Automatically resets on the 1st of each month
--   **Family Settings**: Parents can now control leaderboard visibility for children
+-   **Family Settings & Leaderboard Visibility**: Parents control leaderboard visibility for all child views
     -   New Settings page accessible only to parents at `/settings`
     -   Toggle to show/hide leaderboard for children
-    -   Parents always see the leaderboard regardless of setting
+    -   **Parents always see leaderboard in parent view** (regardless of setting)
+    -   **When acting as children, parents respect the visibility setting** (new behavior)
     -   Real-time sync via WebSocket when settings change
     -   Controlled Tabs state prevents UI issues when toggling while viewing leaderboard
+    -   Auto-resets to "Active Tasks" tab when leaderboard becomes unavailable
 -   **Family Member Management in Settings**: Complete member management relocated to Settings page
-    -   Dashboard simplified - no longer has Add Member button
+    -   Dashboard simplified - removed redundant Family Members section (already shown in leaderboard)
     -   Settings page is now the central hub for family administration
     -   **Member List Display**: Shows all family members with avatars, names, roles, and points
     -   **Add Members**: Create new members with join code generation
@@ -91,4 +93,6 @@ Preferred communication style: Simple, everyday language.
     -   `totalPoints`: Available balance for spending on rewards (decreases when redeeming)
     -   `weeklyPoints`: Points earned this week (never decreases, resets Monday)
     -   `monthlyPoints`: Points earned this month (never decreases, resets 1st of month)
--   **Auth Fix**: Updated upsertUser to use email as conflict target instead of id
+-   **Auth Fixes**: 
+    -   Updated upsertUser to use `users.id` as conflict target (prevents foreign key violations)
+    -   Removed unique constraint from email field (allows testing flexibility while maintaining OIDC sub as primary identifier)

@@ -106,11 +106,11 @@ export default function Dashboard() {
 
   // Reset child tab to "active" when leaderboard becomes unavailable
   useEffect(() => {
-    const showLeaderboardToChild = familyData?.showLeaderboard !== false || realMember?.role === 'parent';
+    const showLeaderboardToChild = familyData?.showLeaderboard !== false;
     if (!showLeaderboardToChild && childActiveTab === "leaderboard") {
       setChildActiveTab("active");
     }
-  }, [familyData?.showLeaderboard, realMember?.role, childActiveTab]);
+  }, [familyData?.showLeaderboard, childActiveTab]);
 
   // Setup family member
   const setupMutation = useMutation({
@@ -840,9 +840,9 @@ export default function Dashboard() {
             </div>
 
             <Tabs value={childActiveTab} onValueChange={setChildActiveTab} className="w-full">
-              <TabsList className={`grid w-full ${(familyData?.showLeaderboard !== false || realMember?.role === 'parent') ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              <TabsList className={`grid w-full ${familyData?.showLeaderboard !== false ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 <TabsTrigger value="active" data-testid="tab-active-tasks">Active Tasks</TabsTrigger>
-                {(familyData?.showLeaderboard !== false || realMember?.role === 'parent') && (
+                {familyData?.showLeaderboard !== false && (
                   <TabsTrigger value="leaderboard" data-testid="tab-leaderboard">Leaderboard</TabsTrigger>
                 )}
               </TabsList>
@@ -874,7 +874,7 @@ export default function Dashboard() {
                 )}
               </TabsContent>
 
-              {(familyData?.showLeaderboard !== false || realMember?.role === 'parent') && (
+              {familyData?.showLeaderboard !== false && (
                 <TabsContent value="leaderboard" className="mt-6">
                   <Leaderboard members={familyMembers} period="month" />
                 </TabsContent>
