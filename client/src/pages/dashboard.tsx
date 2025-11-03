@@ -171,27 +171,6 @@ export default function Dashboard() {
     },
   });
 
-  // Delete family member (parents only)
-  const deleteMemberMutation = useMutation({
-    mutationFn: async (memberId: string) => {
-      return await apiRequest("DELETE", `/api/family-members/${memberId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
-      toast({
-        title: "Member deleted",
-        description: "Family member has been removed successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to delete member",
-        description: error.message || "Unable to delete member.",
-        variant: "destructive",
-      });
-    },
-  });
-
   // Switch member (parents only)
   const switchMemberMutation = useMutation({
     mutationFn: async (memberId: string | null) => {
@@ -858,16 +837,6 @@ export default function Dashboard() {
                             {familyMember.role}
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => deleteMemberMutation.mutate(familyMember.id)}
-                          disabled={deleteMemberMutation.isPending}
-                          data-testid={`button-delete-member-${familyMember.id}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </div>
                     ))}
                   </div>
