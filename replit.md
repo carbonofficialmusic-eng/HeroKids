@@ -50,3 +50,17 @@ Preferred communication style: Simple, everyday language.
 -   **UI Components**: Radix UI, shadcn/ui, Tailwind CSS, lucide-react.
 -   **Build & Development**: Vite, esbuild, tsx, Replit-specific plugins.
 -   **Validation**: Zod for schema validation; Drizzle-Zod for integration.
+
+## Recent Changes (November 2025)
+
+### Completed Features
+-   **Join Family Feature**: 6-character case-insensitive join codes for adding family members on separate devices
+-   **Parent Dashboard Enhancements**: Parents can redeem rewards and view same statistics as children
+-   **Redemption Celebration Fix**: Celebration now displays correct reward name and points spent (e.g., "Sleeping at a friend - 30 points")
+-   **Custom Logo**: HomeHero logo (blue house with red cape) added to landing page
+
+### Known Issues
+-   **CRITICAL**: Task completion awards points immediately without parent approval - approval system needs implementation
+-   Join codes are one-time use and cryptographically secure
+-   Mobile dialogs use `max-h-[90vh] overflow-y-auto` for proper scrolling
+-   Tier limits bypassed in development mode for testing
