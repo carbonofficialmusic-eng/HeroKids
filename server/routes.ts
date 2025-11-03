@@ -395,7 +395,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Create member linked to current user
-        const member = await storage.createFamilyMember(parsed);
+        const member = await storage.createFamilyMember({
+          ...parsed,
+          userId, // Associate with authenticated user
+        });
         
         // Broadcast new member to family
         broadcastToFamily(member.familyName, {

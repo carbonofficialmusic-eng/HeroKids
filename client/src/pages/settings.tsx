@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,16 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { ChevronLeft, Trophy } from "lucide-react";
+import { AddMemberDialog } from "@/components/add-member-dialog";
+import { ChevronLeft, Trophy, UserPlus } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { FamilyMember, Family } from "@shared/schema";
 
 export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
+  const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -51,6 +64,36 @@ export default function Settings() {
       toast({
         title: "Error",
         description: "Failed to update settings. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add member mutation
+  const addMemberMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/family-members", data);
+      return await response.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+      setAddMemberDialogOpen(false);
+      
+      // Show join code if member was created with one
+      if (data.joinCode) {
+        setNewMemberJoinCode(data.joinCode);
+      } else {
+        toast({
+          title: "Success!",
+          description: "Family member added successfully.",
+        });
+      }
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add family member. Please try again.",
         variant: "destructive",
       });
     },
@@ -121,6 +164,28 @@ export default function Settings() {
 
         {/* Settings Cards */}
         <div className="space-y-4">
+          {/* Family Members Settings */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-primary" />
+                <CardTitle>Family Members</CardTitle>
+              </div>
+              <CardDescription>
+                Add new members to your family. Each member gets their own profile and can complete tasks.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => setAddMemberDialogOpen(true)}
+                data-testid="button-add-member"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Member
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Leaderboard Settings */}
           <Card>
             <CardHeader>
@@ -159,6 +224,46 @@ export default function Settings() {
           {/* Future settings can be added here */}
         </div>
       </div>
+
+      {/* Add Member Dialog */}
+      {member && (
+        <AddMemberDialog
+          open={addMemberDialogOpen}
+          onOpenChange={setAddMemberDialogOpen}
+          onSubmit={(data) => addMemberMutation.mutate(data)}
+          isSubmitting={addMemberMutation.isPending}
+          familyName={member.familyName}
+        />
+      )}
+
+      {/* Join Code Alert Dialog */}
+      <AlertDialog open={!!newMemberJoinCode} onOpenChange={() => setNewMemberJoinCode(null)}>
+        <AlertDialogContent data-testid="dialog-join-code">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Member Added Successfully!</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p>
+                A new family member profile has been created. Share this join code with them
+                so they can access their account on their own device:
+              </p>
+              <div className="bg-primary/10 p-4 rounded-lg text-center">
+                <p className="text-xs text-muted-foreground mb-1">Join Code</p>
+                <p className="text-3xl font-bold tracking-wider text-primary" data-testid="text-join-code">
+                  {newMemberJoinCode}
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                This code can only be used once. After they join, you'll both be part of the same family.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setNewMemberJoinCode(null)} data-testid="button-close-join-code">
+              Got it!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

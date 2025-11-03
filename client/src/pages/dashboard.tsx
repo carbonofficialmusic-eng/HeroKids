@@ -9,7 +9,6 @@ import { Leaderboard } from "@/components/leaderboard";
 import { TaskDialog } from "@/components/task-dialog";
 import { RewardDialog } from "@/components/reward-dialog";
 import { RewardRequestDialog } from "@/components/reward-request-dialog";
-import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
@@ -29,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, UserPlus, Settings, User2, Trash2, Pencil, Lightbulb, Check, X } from "lucide-react";
+import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, Settings, User2, Trash2, Pencil, Lightbulb, Check, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -44,13 +43,11 @@ export default function Dashboard() {
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
   const [requestToEdit, setRequestToEdit] = useState<any>(null);
-  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
-  const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
   const [celebration, setCelebration] = useState<{
     points: number;
     message: string;
@@ -145,37 +142,6 @@ export default function Dashboard() {
       toast({
         title: "Failed to join family",
         description: error.message || "Invalid join code or the code has already been used.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Add family member
-  const addMemberMutation = useMutation({
-    mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/family-members", data);
-    },
-    onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
-      setAddMemberDialogOpen(false);
-      
-      // Show join code if member was created with one
-      if (data.joinCode) {
-        setNewMemberJoinCode(data.joinCode);
-      }
-      
-      toast({
-        title: "Member added!",
-        description: data.joinCode 
-          ? "Share the join code with them to access their profile." 
-          : "The new family member can now join and earn points.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to add member",
-        description: error.message || "Unable to add member. You may have reached your tier limit.",
         variant: "destructive",
       });
     },
@@ -645,14 +611,6 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 <Button
-                  onClick={() => setAddMemberDialogOpen(true)}
-                  variant="outline"
-                  data-testid="button-add-member"
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add Member
-                </Button>
-                <Button
                   onClick={() => {
                     setSelectedReward(null);
                     setRewardDialogOpen(true);
@@ -1118,13 +1076,6 @@ export default function Dashboard() {
             familyName={member.familyName}
             reward={selectedReward}
           />
-          <AddMemberDialog
-            open={addMemberDialogOpen}
-            onOpenChange={setAddMemberDialogOpen}
-            onSubmit={(data) => addMemberMutation.mutate(data)}
-            isSubmitting={addMemberMutation.isPending}
-            familyName={member.familyName}
-          />
         </>
       )}
 
@@ -1180,29 +1131,6 @@ export default function Dashboard() {
           request={requestToEdit}
         />
       )}
-
-      {/* Join Code Dialog */}
-      <AlertDialog open={!!newMemberJoinCode} onOpenChange={() => setNewMemberJoinCode(null)}>
-        <AlertDialogContent data-testid="dialog-join-code">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Family Member Added!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Share this join code with the new member so they can access their profile and start earning points!
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="bg-muted p-6 rounded-lg text-center my-4">
-            <div className="text-sm text-muted-foreground mb-2">Join Code</div>
-            <div className="text-4xl font-black font-accent tracking-wider" data-testid="text-join-code">
-              {newMemberJoinCode}
-            </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setNewMemberJoinCode(null)} data-testid="button-close-join-code">
-              Got it!
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Celebration */}
       {celebration && (
