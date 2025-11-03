@@ -68,9 +68,13 @@ Preferred communication style: Simple, everyday language.
     -   Parents always see the leaderboard regardless of setting
     -   Real-time sync via WebSocket when settings change
     -   Controlled Tabs state prevents UI issues when toggling while viewing leaderboard
--   **Add Member Moved to Settings**: "Add Member" functionality relocated from Dashboard to Settings
+-   **Family Member Management in Settings**: Complete member management relocated to Settings page
     -   Dashboard simplified - no longer has Add Member button
-    -   Settings page is now the single place to add family members
+    -   Settings page is now the central hub for family administration
+    -   **Member List Display**: Shows all family members with avatars, names, roles, and points
+    -   **Add Members**: Create new members with join code generation
+    -   **Delete Members**: Remove members with confirmation dialog (cannot delete yourself)
+    -   Safety checks: UI hides delete button for yourself, backend prevents self-deletion
     -   Join code dialog displays properly after member creation
     -   Fixed critical bug: initial family member creation now includes userId association
     -   Fixed response parsing: mutations properly parse JSON to access joinCode
