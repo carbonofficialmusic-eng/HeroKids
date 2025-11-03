@@ -791,9 +791,41 @@ export default function Dashboard() {
                                 {reward.description}
                               </p>
                             )}
-                            <Badge variant="secondary" data-testid={`badge-reward-points-${reward.id}`}>
-                              {reward.pointThreshold} points
-                            </Badge>
+                            <div className="flex items-center gap-2 mb-3">
+                              <Badge
+                                variant={
+                                  member.totalPoints >= reward.pointThreshold
+                                    ? "default"
+                                    : "secondary"
+                                }
+                                data-testid={`badge-reward-points-${reward.id}`}
+                              >
+                                {reward.pointThreshold} points
+                              </Badge>
+                              {member.totalPoints >= reward.pointThreshold && (
+                                <span className="text-xs font-semibold text-green-600">
+                                  You can claim this!
+                                </span>
+                              )}
+                            </div>
+                            <Button
+                              onClick={() => redeemRewardMutation.mutate(reward.id)}
+                              disabled={
+                                member.totalPoints < reward.pointThreshold ||
+                                redeemRewardMutation.isPending
+                              }
+                              size="sm"
+                              className="w-full"
+                              data-testid={`button-redeem-${reward.id}`}
+                            >
+                              {redeemRewardMutation.isPending ? (
+                                "Redeeming..."
+                              ) : member.totalPoints >= reward.pointThreshold ? (
+                                "Redeem Now!"
+                              ) : (
+                                `Need ${reward.pointThreshold - member.totalPoints} more points`
+                              )}
+                            </Button>
                           </div>
                         </div>
                       </Card>
