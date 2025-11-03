@@ -62,6 +62,12 @@ Preferred communication style: Simple, everyday language.
     -   Redeeming rewards no longer affects leaderboard ranking
     -   True competition for who worked hardest this month
     -   Automatically resets on the 1st of each month
+-   **Family Settings**: Parents can now control leaderboard visibility for children
+    -   New Settings page accessible only to parents at `/settings`
+    -   Toggle to show/hide leaderboard for children
+    -   Parents always see the leaderboard regardless of setting
+    -   Real-time sync via WebSocket when settings change
+    -   Controlled Tabs state prevents UI issues when toggling while viewing leaderboard
 
 ### Known Issues
 -   **CRITICAL**: Task completion awards points immediately without parent approval - approval system needs implementation
