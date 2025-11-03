@@ -40,6 +40,7 @@ export interface IStorage {
   getFamily(familyName: string): Promise<Family | undefined>;
   createFamily(family: InsertFamily): Promise<Family>;
   updateFamilyTier(familyName: string, tier: "free" | "family" | "family_plus" | "hero_pro"): Promise<void>;
+  updateFamilySettings(familyName: string, settings: { showLeaderboard: boolean }): Promise<void>;
 
   // Family member operations
   getFamilyMember(id: string): Promise<FamilyMember | undefined>;
@@ -143,6 +144,16 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(families)
       .set({ subscriptionTier: tier, updatedAt: new Date() })
+      .where(eq(families.familyName, familyName));
+  }
+
+  async updateFamilySettings(
+    familyName: string,
+    settings: { showLeaderboard: boolean }
+  ): Promise<void> {
+    await db
+      .update(families)
+      .set({ showLeaderboard: settings.showLeaderboard, updatedAt: new Date() })
       .where(eq(families.familyName, familyName));
   }
 

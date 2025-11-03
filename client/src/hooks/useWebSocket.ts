@@ -61,6 +61,12 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/real"] });
               break;
 
+            case "settings_updated":
+              // Invalidate family settings and current family data
+              queryClient.invalidateQueries({ queryKey: ["/api/families/settings"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+              break;
+
             default:
               console.log("Unknown WebSocket message type:", data.type);
           }

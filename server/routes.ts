@@ -130,6 +130,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get family settings (includes showLeaderboard)
+  app.get("/api/families/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      res.json(family);
+    } catch (error) {
+      console.error("Error fetching family settings:", error);
+      res.status(500).json({ message: "Failed to fetch family settings" });
+    }
+  });
+
+  // Update family settings (parents only)
+  app.patch("/api/families/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Only parents can update settings
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update family settings" });
+      }
+      
+      const { showLeaderboard } = req.body;
+      
+      if (typeof showLeaderboard !== "boolean") {
+        return res.status(400).json({ message: "showLeaderboard must be a boolean" });
+      }
+      
+      await storage.updateFamilySettings(member.familyName, { showLeaderboard });
+      
+      // Broadcast settings change to all family members
+      broadcastToFamily(member.familyName, {
+        type: "settings_updated",
+        settings: { showLeaderboard },
+      });
+      
+      res.json({ message: "Settings updated successfully" });
+    } catch (error) {
+      console.error("Error updating family settings:", error);
+      res.status(500).json({ message: "Failed to update family settings" });
+    }
+  });
+
   // Family member routes
   app.get("/api/family-members/current", isAuthenticated, async (req: any, res) => {
     try {

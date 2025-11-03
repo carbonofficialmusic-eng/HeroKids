@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -55,6 +55,7 @@ export default function Dashboard() {
     points: number;
     message: string;
   } | null>(null);
+  const [childActiveTab, setChildActiveTab] = useState<string>("active");
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -100,10 +101,19 @@ export default function Dashboard() {
     familyName: string;
     subscriptionTier: string;
     memberCount: number;
+    showLeaderboard?: boolean;
   }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
   });
+
+  // Reset child tab to "active" when leaderboard becomes unavailable
+  useEffect(() => {
+    const showLeaderboardToChild = familyData?.showLeaderboard !== false || realMember?.role === 'parent';
+    if (!showLeaderboardToChild && childActiveTab === "leaderboard") {
+      setChildActiveTab("active");
+    }
+  }, [familyData?.showLeaderboard, realMember?.role, childActiveTab]);
 
   // Setup family member
   const setupMutation = useMutation({
@@ -622,6 +632,12 @@ export default function Dashboard() {
                     Analytics
                   </Button>
                 </Link>
+                <Link href="/settings">
+                  <Button variant="outline" data-testid="button-settings">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </Button>
+                </Link>
                 <Link href="/rewards-board">
                   <Button variant="outline" data-testid="button-rewards-board">
                     <Gift className="h-4 w-4 mr-2" />
@@ -927,10 +943,12 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <Tabs defaultValue="active" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+            <Tabs value={childActiveTab} onValueChange={setChildActiveTab} className="w-full">
+              <TabsList className={`grid w-full ${(familyData?.showLeaderboard !== false || realMember?.role === 'parent') ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 <TabsTrigger value="active" data-testid="tab-active-tasks">Active Tasks</TabsTrigger>
-                <TabsTrigger value="leaderboard" data-testid="tab-leaderboard">Leaderboard</TabsTrigger>
+                {(familyData?.showLeaderboard !== false || realMember?.role === 'parent') && (
+                  <TabsTrigger value="leaderboard" data-testid="tab-leaderboard">Leaderboard</TabsTrigger>
+                )}
               </TabsList>
 
               <TabsContent value="active" className="space-y-4 mt-6">
@@ -960,9 +978,11 @@ export default function Dashboard() {
                 )}
               </TabsContent>
 
-              <TabsContent value="leaderboard" className="mt-6">
-                <Leaderboard members={familyMembers} period="month" />
-              </TabsContent>
+              {(familyData?.showLeaderboard !== false || realMember?.role === 'parent') && (
+                <TabsContent value="leaderboard" className="mt-6">
+                  <Leaderboard members={familyMembers} period="month" />
+                </TabsContent>
+              )}
             </Tabs>
 
             {/* Available Rewards */}

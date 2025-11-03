@@ -49,6 +49,7 @@ export type User = typeof users.$inferSelect;
 export const families = pgTable("families", {
   familyName: varchar("family_name").primaryKey(),
   subscriptionTier: subscriptionTierEnum("subscription_tier").notNull().default("free"),
+  showLeaderboard: boolean("show_leaderboard").notNull().default(true), // Parents can hide leaderboard from children
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

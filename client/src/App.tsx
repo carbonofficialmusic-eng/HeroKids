@@ -11,6 +11,7 @@ import Dashboard from "@/pages/dashboard";
 import Pricing from "@/pages/pricing";
 import Analytics from "@/pages/analytics";
 import RewardsBoard from "@/pages/rewards-board";
+import Settings from "@/pages/settings";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -25,6 +26,7 @@ function Router() {
           <Route path="/pricing" component={Pricing} />
           <Route path="/analytics" component={Analytics} />
           <Route path="/rewards-board" component={RewardsBoard} />
+          <Route path="/settings" component={Settings} />
         </>
       )}
       <Route component={NotFound} />
