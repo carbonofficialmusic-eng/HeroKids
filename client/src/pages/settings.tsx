@@ -7,19 +7,22 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AddMemberDialog } from "@/components/add-member-dialog";
-import { ChevronLeft, Trophy, UserPlus } from "lucide-react";
+import { ChevronLeft, Trophy, UserPlus, Trash2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import type { FamilyMember, Family } from "@shared/schema";
 
 export default function Settings() {
@@ -28,6 +31,7 @@ export default function Settings() {
   const [, setLocation] = useLocation();
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
+  const [memberToDelete, setMemberToDelete] = useState<FamilyMember | null>(null);
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -44,6 +48,12 @@ export default function Settings() {
   // Fetch family data including settings
   const { data: familyData, isLoading: familyLoading } = useQuery<Family>({
     queryKey: ["/api/families/settings"],
+    enabled: !!member,
+  });
+
+  // Fetch all family members
+  const { data: familyMembers, isLoading: membersLoading } = useQuery<FamilyMember[]>({
+    queryKey: ["/api/family-members"],
     enabled: !!member,
   });
 
@@ -94,6 +104,30 @@ export default function Settings() {
       toast({
         title: "Error",
         description: "Failed to add family member. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete member mutation
+  const deleteMemberMutation = useMutation({
+    mutationFn: async (memberId: string) => {
+      const response = await apiRequest("DELETE", `/api/family-members/${memberId}`, undefined);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+      setMemberToDelete(null);
+      toast({
+        title: "Member removed",
+        description: "Family member has been removed successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to remove family member. Please try again.",
         variant: "destructive",
       });
     },
@@ -172,13 +206,74 @@ export default function Settings() {
                 <CardTitle>Family Members</CardTitle>
               </div>
               <CardDescription>
-                Add new members to your family. Each member gets their own profile and can complete tasks.
+                Manage your family members. Add new members or remove existing ones.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              {/* Members List */}
+              {membersLoading ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  Loading members...
+                </div>
+              ) : familyMembers && familyMembers.length > 0 ? (
+                <div className="space-y-2">
+                  {familyMembers.map((familyMember) => {
+                    const isCurrentUser = familyMember.id === member?.id;
+                    return (
+                      <div
+                        key={familyMember.id}
+                        className="flex items-center justify-between p-3 rounded-lg border bg-card hover-elevate"
+                        data-testid={`member-item-${familyMember.id}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={familyMember.avatarUrl || undefined} alt={familyMember.displayName} />
+                            <AvatarFallback style={{ backgroundColor: familyMember.color }}>
+                              {familyMember.displayName.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium" data-testid={`member-name-${familyMember.id}`}>
+                                {familyMember.displayName}
+                              </span>
+                              {isCurrentUser && (
+                                <Badge variant="secondary" className="text-xs">You</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span className="capitalize">{familyMember.role}</span>
+                              <span>•</span>
+                              <span>{familyMember.totalPoints} points</span>
+                            </div>
+                          </div>
+                        </div>
+                        {!isCurrentUser && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setMemberToDelete(familyMember)}
+                            disabled={deleteMemberMutation.isPending}
+                            data-testid={`button-delete-member-${familyMember.id}`}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-muted-foreground">
+                  No family members yet. Add your first member below.
+                </div>
+              )}
+
+              {/* Add Member Button */}
               <Button
                 onClick={() => setAddMemberDialogOpen(true)}
                 data-testid="button-add-member"
+                className="w-full"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
                 Add Member
@@ -260,6 +355,35 @@ export default function Settings() {
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setNewMemberJoinCode(null)} data-testid="button-close-join-code">
               Got it!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!memberToDelete} onOpenChange={() => setMemberToDelete(null)}>
+        <AlertDialogContent data-testid="dialog-delete-member">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Family Member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove <strong>{memberToDelete?.displayName}</strong> from your family?
+              This will delete all their tasks, points history, and progress. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => setMemberToDelete(null)}
+              data-testid="button-cancel-delete"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => memberToDelete && deleteMemberMutation.mutate(memberToDelete.id)}
+              disabled={deleteMemberMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete"
+            >
+              {deleteMemberMutation.isPending ? "Removing..." : "Remove Member"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

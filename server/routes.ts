@@ -555,6 +555,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (memberToDelete.familyName !== currentMember.familyName) {
         return res.status(403).json({ message: "Cannot delete members from other families" });
       }
+
+      // Prevent self-deletion
+      if (memberToDelete.id === currentMember.id) {
+        return res.status(400).json({ message: "Cannot delete yourself" });
+      }
       
       // Delete the member
       await storage.deleteFamilyMember(memberId);
