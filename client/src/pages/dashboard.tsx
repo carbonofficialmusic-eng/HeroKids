@@ -351,9 +351,11 @@ export default function Dashboard() {
         title: "Reward redeemed!",
         description: data.message,
       });
+      const pointsSpent = data.redemption?.pointsSpent || 0;
+      const rewardTitle = data.redemption?.rewardTitle || 'Reward';
       setCelebration({
-        points: data.redemption?.pointsSpent ? -data.redemption.pointsSpent : 0,
-        message: data.message || 'Reward redeemed successfully!',
+        points: -pointsSpent,
+        message: `${rewardTitle} - ${pointsSpent} points`,
       });
     },
     onError: (error: any) => {

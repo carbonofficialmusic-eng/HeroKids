@@ -1050,7 +1050,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json({ 
-        redemption, 
+        redemption: {
+          ...redemption,
+          rewardTitle: reward.title,
+        },
         newTotalPoints,
         message: `Successfully redeemed ${reward.title}!` 
       });
