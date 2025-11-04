@@ -91,6 +91,15 @@ Preferred communication style: Simple, everyday language.
     -   **Progress Tracking**: rewardsRedeemed counter tracks unlock progress
     -   Celebration animation when equipping skins
     -   Accessible via Palette icon in dashboard header
+-   **Themed Backgrounds System**: Complete app theme transformation based on active skin
+    -   6 unique themed backgrounds matching each skin (jungle, city streets, garden, galaxy, skyline, kitchen)
+    -   Backgrounds imported using @assets Vite alias for optimal performance
+    -   Applied app-wide via BackgroundWrapper component in App.tsx
+    -   Smooth 0.8s crossfade transitions using opacity animation on layered elements
+    -   Dark gradient overlay (95%/90%/95% background opacity) ensures text readability across all themes
+    -   Real-time background updates via WebSocket when family members change skins
+    -   Backgrounds persist across all pages (dashboard, skins, settings, rewards, etc.)
+    -   Graceful fallbacks for unauthenticated users and members without active skins
 -   **Celebration Display Fix**: Points now display correctly as "-30 pts" instead of "+-30 pts" for reward redemptions
 
 ### Known Issues
