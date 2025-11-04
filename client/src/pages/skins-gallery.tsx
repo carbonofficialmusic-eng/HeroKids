@@ -4,9 +4,10 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Lock, Check, Trophy } from "lucide-react";
+import { Loader2, Lock, Check, Trophy, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SuccessCelebration } from "@/components/success-celebration";
+import { Link } from "wouter";
 
 interface Skin {
   id: string;
@@ -67,6 +68,13 @@ export default function SkinsGallery() {
   return (
     <>
       <div className="container mx-auto p-6 max-w-6xl">
+        <Link href="/dashboard">
+          <Button variant="ghost" className="mb-4" data-testid="button-back-to-dashboard">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
+        
         <div className="mb-8">
           <h1 className="text-4xl font-bold font-accent mb-2 gradient-text">
             Character Skins
