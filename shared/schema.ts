@@ -80,6 +80,9 @@ export const familyMembers = pgTable("family_members", {
   totalPoints: integer("total_points").notNull().default(0), // Available balance for redeeming rewards
   weeklyPoints: integer("weekly_points").notNull().default(0),
   monthlyPoints: integer("monthly_points").notNull().default(0),
+  rewardsRedeemed: integer("rewards_redeemed").notNull().default(0), // Counter for unlocking skins
+  unlockedSkins: text("unlocked_skins").array().notNull().default(sql`ARRAY[]::text[]`), // Array of unlocked skin IDs
+  activeSkinId: varchar("active_skin_id"), // Currently selected skin
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -315,3 +318,20 @@ export const insertRewardRedemptionSchema = createInsertSchema(rewardRedemptions
 
 export type InsertRewardRedemption = z.infer<typeof insertRewardRedemptionSchema>;
 export type RewardRedemption = typeof rewardRedemptions.$inferSelect;
+
+// Skins - Unlockable character skins for avatars
+export const skins = pgTable("skins", {
+  id: varchar("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  imageUrl: varchar("image_url").notNull(),
+  unlockThreshold: integer("unlock_threshold").notNull(), // Number of rewards redeemed required to unlock
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSkinSchema = createInsertSchema(skins).omit({
+  createdAt: true,
+});
+
+export type InsertSkin = z.infer<typeof insertSkinSchema>;
+export type Skin = typeof skins.$inferSelect;
