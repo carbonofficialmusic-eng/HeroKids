@@ -78,9 +78,9 @@ export default function Analytics() {
   const colors = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4"];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40">
+      <header className="border-b sticky top-0 backdrop-blur-md z-40">
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
           <Link href="/">
             <Button variant="ghost" size="icon" data-testid="button-back">

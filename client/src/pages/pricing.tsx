@@ -103,9 +103,9 @@ export default function Pricing() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40">
+      <header className="border-b sticky top-0 backdrop-blur-md z-40">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/">
             <Button variant="ghost" data-testid="button-back-home">

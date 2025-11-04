@@ -6,9 +6,9 @@ import logoUrl from "@assets/A708B97F-2199-4C99-A66F-C3BA6238381B_1762070025130.
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+      <header className="border-b sticky top-0 backdrop-blur-md z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img 
