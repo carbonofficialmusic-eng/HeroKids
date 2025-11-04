@@ -121,6 +121,13 @@ Preferred communication style: Simple, everyday language.
         -   Hidden when only one family member exists (nothing to switch to)
         -   Parents can switch even when acting as children (to switch back)
         -   Children never see Switch Member
+-   **Custom Recurring Tasks**: Tasks can recur automatically after a specified number of days
+    -   **Recurrence Days**: Parents can set tasks to recur after 1-365 days
+    -   **Task Availability**: When a recurring task is completed, it automatically becomes unavailable and reappears after the specified days
+    -   **Task Persistence**: Recurring tasks stay "active" (not marked "completed") and update their `nextAvailableDate` instead
+    -   **Automatic Filtering**: Backend filters tasks to only show those that are currently available (nextAvailableDate is null or in the past)
+    -   **UI Integration**: TaskDialog includes input field for custom recurrence days with validation
+    -   **Points Award**: Points are awarded immediately upon completion (same as non-recurring tasks)
 
 ### Known Issues
 -   **CRITICAL**: Task completion awards points immediately without parent approval - approval system needs implementation
