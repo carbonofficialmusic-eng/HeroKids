@@ -112,6 +112,7 @@ Preferred communication style: Simple, everyday language.
     -   **Dropdown Actions**: Edit Profile, Character Skins, Family Settings (parent only), Switch Member (parent only when 2+ members), Theme Toggle, Logout
     -   Added `max-w-7xl` width constraint to header and content for better alignment on wide screens
     -   All functionality preserved with proper test IDs maintained
+    -   **Settings Button Removed**: Removed duplicate Settings button from parent dashboard main content (only in dropdown now)
     -   **Family Settings Visibility**: Only shown when acting member is a parent (uses `isParent`, not `isRealParent`)
         -   Children never see Family Settings
         -   Parents acting as children don't see Family Settings

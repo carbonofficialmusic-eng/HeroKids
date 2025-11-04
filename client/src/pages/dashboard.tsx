@@ -556,12 +556,6 @@ export default function Dashboard() {
                     Analytics
                   </Button>
                 </Link>
-                <Link href="/settings">
-                  <Button variant="outline" data-testid="button-settings">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Settings
-                  </Button>
-                </Link>
                 <Link href="/rewards-board">
                   <Button variant="outline" data-testid="button-rewards-board">
                     <Gift className="h-4 w-4 mr-2" />
