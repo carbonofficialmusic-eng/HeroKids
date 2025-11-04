@@ -71,19 +71,15 @@ export function ProfileMenu({
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/skins" data-testid="menu-item-skins">
-            <a className="flex items-center w-full">
-              <Palette className="mr-2 h-4 w-4" />
-              <span>Character Skins</span>
-            </a>
+            <Palette className="mr-2 h-4 w-4" />
+            <span>Character Skins</span>
           </Link>
         </DropdownMenuItem>
         {isParent && (
           <DropdownMenuItem asChild>
             <Link href="/settings" data-testid="menu-item-settings">
-              <a className="flex items-center w-full">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Family Settings</span>
-              </a>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Family Settings</span>
             </Link>
           </DropdownMenuItem>
         )}
