@@ -79,11 +79,6 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
         />
       )}
       
-      <div 
-        className="fixed inset-0 bg-gradient-to-b from-background/95 via-background/90 to-background/95 pointer-events-none"
-        style={{ zIndex: 0 }}
-      />
-      
       <div className="relative" style={{ zIndex: 1 }}>
         {children}
       </div>
