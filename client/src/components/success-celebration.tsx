@@ -52,7 +52,7 @@ export function SuccessCelebration({
             className="text-8xl font-black font-accent gradient-text-celebration mb-4"
             data-testid="text-points-earned"
           >
-            +{points} pts
+            {points > 0 ? '+' : ''}{points} pts
           </div>
           <div className="text-3xl font-bold text-white" data-testid="text-celebration-message">
             {message}
