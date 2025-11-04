@@ -56,7 +56,7 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
   }, [backgroundUrl, currentBg]);
 
   return (
-    <div className="min-h-screen relative bg-background">
+    <div className="min-h-screen relative">
       {previousBg && (
         <div 
           className="fixed inset-0 bg-cover bg-center theme-background-layer"
@@ -79,12 +79,10 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
         />
       )}
       
-      {(currentBg || previousBg) && (
-        <div 
-          className="fixed inset-0 bg-gradient-to-b from-background/95 via-background/90 to-background/95 pointer-events-none"
-          style={{ zIndex: 0 }}
-        />
-      )}
+      <div 
+        className="fixed inset-0 bg-gradient-to-b from-background/95 via-background/90 to-background/95 pointer-events-none"
+        style={{ zIndex: 0 }}
+      />
       
       <div className="relative" style={{ zIndex: 1 }}>
         {children}
