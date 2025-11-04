@@ -298,12 +298,11 @@ export default function Settings() {
                   <Label htmlFor="show-leaderboard" className="text-base">
                     Show leaderboard to children
                   </Label>
-                  <p className="text-sm text-muted-foreground">
-                    {familyData?.showLeaderboard 
-                      ? "Children can see the monthly leaderboard and compete with each other."
-                      : "The leaderboard is hidden from children. Focus on motivation instead of competition."
-                    }
-                  </p>
+                  {!familyData?.showLeaderboard && (
+                    <p className="text-sm text-muted-foreground">
+                      The leaderboard is hidden from children. Focus on motivation instead of competition.
+                    </p>
+                  )}
                 </div>
                 <Switch
                   id="show-leaderboard"
