@@ -139,6 +139,7 @@ export function TaskDialog({
       points: 10,
       dueDate: "",
       recurrence: "none",
+      recurrenceDays: undefined,
       status: "active",
       requiresProof: false,
       iconEmoji: "⭐",
@@ -161,6 +162,7 @@ export function TaskDialog({
                 : editingTask.dueDate)
             : "",
           recurrence: editingTask.recurrence,
+          recurrenceDays: editingTask.recurrenceDays || undefined,
           status: editingTask.status,
           requiresProof: editingTask.requiresProof,
           iconEmoji: editingTask.iconEmoji || "⭐",
@@ -174,6 +176,7 @@ export function TaskDialog({
           points: 10,
           dueDate: "",
           recurrence: "none",
+          recurrenceDays: undefined,
           status: "active",
           requiresProof: false,
           iconEmoji: "⭐",
@@ -370,6 +373,32 @@ export function TaskDialog({
                       <SelectItem value="monthly">Monthly</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="recurrenceDays"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Repeat Every (Custom Days)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="365"
+                      placeholder="e.g., 3 for every 3 days"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                      data-testid="input-recurrence-days"
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Set how many days until this task repeats after completion. Leave empty for one-time tasks.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
