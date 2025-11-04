@@ -1,0 +1,112 @@
+import { useState } from "react";
+import { Link } from "wouter";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
+import type { FamilyMember } from "@shared/schema";
+import { getAvatarUrl } from "@/lib/skins";
+
+interface ProfileMenuProps {
+  member: FamilyMember;
+  isRealParent: boolean;
+  onEditProfile: () => void;
+  onSwitchMember: () => void;
+}
+
+export function ProfileMenu({
+  member,
+  isRealParent,
+  onEditProfile,
+  onSwitchMember,
+}: ProfileMenuProps) {
+  const { theme, setTheme } = useTheme();
+  const [open, setOpen] = useState(false);
+
+  const handleThemeToggle = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 h-auto"
+          data-testid="button-profile-menu"
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
+            <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
+              {member.displayName[0]}
+            </AvatarFallback>
+          </Avatar>
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{member.displayName}</p>
+            <p className="text-xs leading-none text-muted-foreground">{member.familyName}</p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onEditProfile} data-testid="menu-item-edit-profile">
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Edit Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/skins" data-testid="menu-item-skins">
+            <a className="flex items-center w-full">
+              <Palette className="mr-2 h-4 w-4" />
+              <span>Character Skins</span>
+            </a>
+          </Link>
+        </DropdownMenuItem>
+        {isRealParent && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/settings" data-testid="menu-item-settings">
+                <a className="flex items-center w-full">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Family Settings</span>
+                </a>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onSwitchMember} data-testid="menu-item-switch-member">
+              <User2 className="mr-2 h-4 w-4" />
+              <span>Switch Member</span>
+            </DropdownMenuItem>
+          </>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleThemeToggle} data-testid="menu-item-theme-toggle">
+          {theme === "dark" ? (
+            <Sun className="mr-2 h-4 w-4" />
+          ) : (
+            <Moon className="mr-2 h-4 w-4" />
+          )}
+          <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => (window.location.href = "/api/logout")}
+          data-testid="menu-item-logout"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Logout</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
