@@ -96,9 +96,10 @@ Preferred communication style: Simple, everyday language.
     -   Backgrounds imported using @assets Vite alias for optimal performance
     -   Applied app-wide via BackgroundWrapper component in App.tsx
     -   Smooth 0.8s crossfade transitions using opacity animation on layered elements
-    -   **Frosted Glass UI**: All cards and panels are semi-transparent (75% opacity) with backdrop blur
+    -   **Frosted Glass UI**: Cards use Tailwind opacity utilities (`bg-card/75`, `border-card-border/30`) with backdrop blur
     -   Background images fully visible through UI components while maintaining text readability
-    -   Card borders are 30% opacity for subtle definition
+    -   Implementation: Card component applies 75% opacity backgrounds and 30% opacity borders using Tailwind utilities
+    -   Backdrop blur (`backdrop-blur-md`) ensures text remains readable over themed backgrounds
     -   Real-time background updates via WebSocket when family members change skins
     -   Backgrounds persist across all pages (dashboard, skins, settings, rewards, etc.)
     -   Graceful fallbacks for unauthenticated users and members without active skins
