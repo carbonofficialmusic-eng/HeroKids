@@ -104,7 +104,7 @@ export interface IStorage {
 
   // Skin operations
   getSkins(): Promise<any[]>;
-  updateFamilyMemberActiveSkin(memberId: string, skinId: string): Promise<void>;
+  updateFamilyMemberActiveSkin(memberId: string, skinId: string | null): Promise<void>;
   unlockSkin(memberId: string, skinId: string): Promise<void>;
   incrementRewardsRedeemed(memberId: string): Promise<number>;
 }
@@ -500,7 +500,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(skins);
   }
 
-  async updateFamilyMemberActiveSkin(memberId: string, skinId: string): Promise<void> {
+  async updateFamilyMemberActiveSkin(memberId: string, skinId: string | null): Promise<void> {
     await db
       .update(familyMembers)
       .set({ activeSkinId: skinId })

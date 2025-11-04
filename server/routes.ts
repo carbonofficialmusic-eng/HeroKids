@@ -398,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const member = await storage.createFamilyMember({
           ...parsed,
           userId, // Associate with authenticated user
-        });
+        } as any);
         
         // Broadcast new member to family
         broadcastToFamily(member.familyName, {
@@ -1230,7 +1230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Find skins that should be unlocked but aren't yet
         const newlyUnlockedSkins = allSkins.filter(skin => 
           skin.unlockThreshold <= newRewardsCount && 
-          !fullMember.unlockedSkins.includes(skin.id)
+          fullMember && !fullMember.unlockedSkins.includes(skin.id)
         );
         
         // Unlock new skins
@@ -1516,8 +1516,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Verify skin exists and is unlocked
-      if (!member.unlockedSkins.includes(skinId)) {
+      // Allow null to reset to default avatar, otherwise verify skin is unlocked
+      if (skinId !== null && !member.unlockedSkins.includes(skinId)) {
         return res.status(403).json({ message: "Skin not unlocked" });
       }
       
@@ -1530,7 +1530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         skinId,
       });
       
-      res.json({ message: "Skin selected", skinId });
+      res.json({ message: skinId ? "Skin selected" : "Reset to default avatar", skinId });
     } catch (error: any) {
       console.error("Error selecting skin:", error);
       res.status(500).json({ message: "Failed to select skin" });
