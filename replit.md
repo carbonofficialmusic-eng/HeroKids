@@ -82,14 +82,15 @@ Preferred communication style: Simple, everyday language.
     -   Fixed response parsing: mutations properly parse JSON to access joinCode
 -   **Unlockable Character Skins System**: Gamified progression through reward redemptions
     -   6 unique character skins (Dinosaur, Police, Plants, Space Explorer, Superhero, Chef)
-    -   Skins unlock based on total rewards redeemed (0, 3, 6, 9, 12, 15 rewards)
+    -   **Unlock Thresholds**: Skins unlock based on total rewards redeemed (Dino at 3, Police at 6, Plants at 9, Space at 12, Superhero at 15, Chef at 18)
+    -   **New members start with no skins unlocked** - they use their default custom avatar until earning rewards
     -   New `/skins` page displays all skins with lock/unlock states and progress bars
     -   Active skin displays across all avatars app-wide (dashboard, leaderboard, tasks, etc.)
     -   **Unlock Flow**: Skins unlock when parent approves reward redemptions
-    -   **Auto-selection**: First unlocked skin auto-equips if no skin selected
+    -   **Use Default Avatar**: Users can deselect character skins to return to their custom avatar (activeSkinId set to null)
     -   **Real-time Updates**: Skin unlocks and selection broadcast via WebSocket
     -   **Progress Tracking**: rewardsRedeemed counter tracks unlock progress
-    -   Celebration animation when equipping skins
+    -   Celebration animation when equipping skins or switching to default avatar
     -   Accessible via Palette icon in dashboard header
 -   **Themed Backgrounds System**: Complete app theme transformation based on active skin
     -   6 unique themed backgrounds matching each skin (jungle, city streets, garden, galaxy, skyline, kitchen)

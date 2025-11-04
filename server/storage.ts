@@ -233,12 +233,8 @@ export class DatabaseStorage implements IStorage {
       .values(memberData)
       .returning();
     
-    // Auto-unlock the first skin (Dinosaur, threshold 0) for new members
-    const allSkins = await this.getSkins();
-    const firstSkin = allSkins.find(skin => skin.unlockThreshold === 0);
-    if (firstSkin) {
-      await this.unlockSkin(member.id, firstSkin.id);
-    }
+    // New members start with no skins unlocked
+    // They will unlock skins as they redeem rewards (Dino at 3, Police at 6, etc.)
     
     return member;
   }
