@@ -199,13 +199,14 @@ export function TaskDialog({
   }, [open, editingTask, familyName, createdBy]);
 
   const handleSubmit = (data: TaskFormData) => {
-    // Clear the field that's not being used based on mode
+    // Create a copy and clear the field that's not being used based on mode
+    const submitData = { ...data };
     if (recurrenceMode === "standard") {
-      data.recurrenceDays = undefined;
+      submitData.recurrenceDays = undefined;
     } else {
-      data.recurrence = "none";
+      submitData.recurrence = "none";
     }
-    onSubmit(data);
+    onSubmit(submitData);
   };
   
   const handleRecurrenceModeChange = (mode: "standard" | "custom") => {
