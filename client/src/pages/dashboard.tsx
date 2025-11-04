@@ -523,9 +523,9 @@ export default function Dashboard() {
       <div className="container mx-auto max-w-7xl px-4 py-8">
         {isParent ? (
           /* Parent View */
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="space-y-8">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-6">
               {/* Stats Section */}
               <div className="text-center">
                 <div className="mb-2">
@@ -782,8 +782,8 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
+            {/* Leaderboard Section */}
+            <div>
               <Leaderboard members={familyMembers} period="month" />
             </div>
           </div>
