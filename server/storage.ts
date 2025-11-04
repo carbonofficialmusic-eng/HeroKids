@@ -530,13 +530,36 @@ export class DatabaseStorage implements IStorage {
       .from(familyMembers)
       .where(eq(familyMembers.id, memberId));
     
-    if (member && !member.unlockedSkins.includes(skinId)) {
-      const updatedSkins = [...member.unlockedSkins, skinId];
-      await db
-        .update(familyMembers)
-        .set({ unlockedSkins: updatedSkins })
-        .where(eq(familyMembers.id, memberId));
+    if (!member) {
+      throw new Error("Member not found");
     }
+    
+    // Don't unlock if already unlocked
+    if (member.unlockedSkins.includes(skinId)) {
+      return;
+    }
+    
+    // Get skin details to verify unlock threshold
+    const [skin] = await db
+      .select()
+      .from(skins)
+      .where(eq(skins.id, skinId));
+    
+    if (!skin) {
+      throw new Error(`Skin ${skinId} not found`);
+    }
+    
+    // Verify member meets the unlock threshold
+    if (member.rewardsRedeemed < skin.unlockThreshold) {
+      throw new Error(`Cannot unlock ${skin.name} - requires ${skin.unlockThreshold} rewards, member has ${member.rewardsRedeemed}`);
+    }
+    
+    // Unlock the skin
+    const updatedSkins = [...member.unlockedSkins, skinId];
+    await db
+      .update(familyMembers)
+      .set({ unlockedSkins: updatedSkins })
+      .where(eq(familyMembers.id, memberId));
   }
 
   async incrementRewardsRedeemed(memberId: string): Promise<number> {
