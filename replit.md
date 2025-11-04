@@ -105,6 +105,13 @@ Preferred communication style: Simple, everyday language.
     -   Backgrounds persist across all pages (dashboard, skins, settings, rewards, etc.)
     -   Graceful fallbacks for unauthenticated users and members without active skins
 -   **Celebration Display Fix**: Points now display correctly as "-30 pts" instead of "+-30 pts" for reward redemptions
+-   **Header Refactoring**: Cleaner, more compact dashboard header with dropdown menu
+    -   Created ProfileMenu component consolidating all header actions
+    -   **Left Side**: Avatar + Member Name only (simplified from 4 buttons)
+    -   **Right Side**: Tier badge + Points counter + ProfileMenu dropdown
+    -   **Dropdown Actions**: Edit Profile, Character Skins, Family Settings (parent only), Switch Member (parent only), Theme Toggle, Logout
+    -   Added `max-w-7xl` width constraint to header and content for better alignment on wide screens
+    -   All functionality preserved with proper test IDs maintained
 
 ### Known Issues
 -   **CRITICAL**: Task completion awards points immediately without parent approval - approval system needs implementation
