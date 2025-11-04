@@ -13,7 +13,7 @@ import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { SuccessCelebration } from "@/components/success-celebration";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ProfileMenu } from "@/components/profile-menu";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, Settings, User2, Trash2, Pencil, Lightbulb, Check, X, Palette } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Trash2, Pencil, Lightbulb, Check, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -466,8 +466,8 @@ export default function Dashboard() {
     <div className="min-h-screen">
       {/* Header */}
       <header className="border-b sticky top-0 backdrop-blur-md z-40">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
               <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
               <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
@@ -480,39 +480,6 @@ export default function Dashboard() {
                 {member.displayName}
               </div>
             </div>
-            {isRealParent && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSwitchMemberDialogOpen(true)}
-                data-testid="button-switch-member"
-                aria-label="Switch member"
-              >
-                <User2 className="h-5 w-5" />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setMemberToEdit(member);
-                setEditMemberDialogOpen(true);
-              }}
-              data-testid="button-edit-profile"
-              aria-label="Edit profile"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
-            <Link href="/skins">
-              <Button
-                variant="ghost"
-                size="icon"
-                data-testid="button-skins"
-                aria-label="Character Skins"
-              >
-                <Palette className="h-5 w-5" />
-              </Button>
-            </Link>
           </div>
           <div className="flex items-center gap-3">
             {familyData && (
@@ -538,21 +505,20 @@ export default function Dashboard() {
               size="compact"
               showAnimation
             />
-            <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => (window.location.href = "/api/logout")}
-              data-testid="button-logout"
-              aria-label="Logout"
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
+            <ProfileMenu
+              member={member}
+              isRealParent={isRealParent}
+              onEditProfile={() => {
+                setMemberToEdit(member);
+                setEditMemberDialogOpen(true);
+              }}
+              onSwitchMember={() => setSwitchMemberDialogOpen(true)}
+            />
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto max-w-7xl px-4 py-8">
         {isParent ? (
           /* Parent View */
           <div className="grid lg:grid-cols-3 gap-8">

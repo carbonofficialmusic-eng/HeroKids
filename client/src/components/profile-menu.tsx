@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/components/theme-provider";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 
