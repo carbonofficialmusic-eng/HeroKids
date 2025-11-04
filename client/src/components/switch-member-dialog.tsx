@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, User } from "lucide-react";
 import type { FamilyMember } from "@shared/schema";
+import { getAvatarUrl } from "@/lib/skins";
 
 interface SwitchMemberDialogProps {
   open: boolean;
@@ -60,7 +61,7 @@ export function SwitchMemberDialog({
               data-testid={`button-select-member-${member.id}`}
             >
               <Avatar className="h-10 w-10">
-                <AvatarImage src={member.avatarUrl || undefined} alt={member.displayName} />
+                <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} alt={member.displayName} />
                 <AvatarFallback style={{ backgroundColor: member.color }}>
                   <User className="h-5 w-5" />
                 </AvatarFallback>

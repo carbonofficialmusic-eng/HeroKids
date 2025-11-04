@@ -413,6 +413,8 @@ export class DatabaseStorage implements IStorage {
           displayName: familyMembers.displayName,
           avatarUrl: familyMembers.avatarUrl,
           color: familyMembers.color,
+          unlockedSkins: familyMembers.unlockedSkins,
+          activeSkinId: familyMembers.activeSkinId,
         },
       })
       .from(rewardRedemptions)

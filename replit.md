@@ -80,6 +80,18 @@ Preferred communication style: Simple, everyday language.
     -   Join code dialog displays properly after member creation
     -   Fixed critical bug: initial family member creation now includes userId association
     -   Fixed response parsing: mutations properly parse JSON to access joinCode
+-   **Unlockable Character Skins System**: Gamified progression through reward redemptions
+    -   6 unique character skins (Dinosaur, Police, Plants, Space Explorer, Superhero, Chef)
+    -   Skins unlock based on total rewards redeemed (0, 3, 6, 9, 12, 15 rewards)
+    -   New `/skins` page displays all skins with lock/unlock states and progress bars
+    -   Active skin displays across all avatars app-wide (dashboard, leaderboard, tasks, etc.)
+    -   **Unlock Flow**: Skins unlock when parent approves reward redemptions
+    -   **Auto-selection**: First unlocked skin auto-equips if no skin selected
+    -   **Real-time Updates**: Skin unlocks and selection broadcast via WebSocket
+    -   **Progress Tracking**: rewardsRedeemed counter tracks unlock progress
+    -   Celebration animation when equipping skins
+    -   Accessible via Palette icon in dashboard header
+-   **Celebration Display Fix**: Points now display correctly as "-30 pts" instead of "+-30 pts" for reward redemptions
 
 ### Known Issues
 -   **CRITICAL**: Task completion awards points immediately without parent approval - approval system needs implementation

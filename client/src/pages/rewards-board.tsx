@@ -9,6 +9,7 @@ import { CheckCircle2, Clock, Gift, Sparkles, Home } from "lucide-react";
 import { format } from "date-fns";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Link } from "wouter";
+import { getAvatarUrl } from "@/lib/skins";
 
 type FamilyMember = {
   id: string;
@@ -40,6 +41,7 @@ type RedemptionWithDetails = {
     id: string;
     displayName: string;
     avatarUrl: string | null;
+    activeSkinId: string | null;
     color: string;
   };
 };
@@ -182,7 +184,7 @@ export default function RewardsBoard() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3 flex-1">
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={redemption.member.avatarUrl || undefined} />
+                      <AvatarImage src={getAvatarUrl(redemption.member.activeSkinId, redemption.member.avatarUrl)} />
                       <AvatarFallback 
                         className="text-white font-bold"
                         style={{ backgroundColor: redemption.member.color }}

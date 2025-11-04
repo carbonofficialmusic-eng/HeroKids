@@ -24,6 +24,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { FamilyMember, Family } from "@shared/schema";
+import { getAvatarUrl } from "@/lib/skins";
 
 export default function Settings() {
   const { user } = useAuth();
@@ -227,7 +228,7 @@ export default function Settings() {
                       >
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={familyMember.avatarUrl || undefined} alt={familyMember.displayName} />
+                            <AvatarImage src={getAvatarUrl(familyMember.activeSkinId, familyMember.avatarUrl)} alt={familyMember.displayName} />
                             <AvatarFallback style={{ backgroundColor: familyMember.color }}>
                               {familyMember.displayName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>

@@ -1216,6 +1216,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update the redemption status
       await storage.updateRewardRedemptionStatus(id, status);
 
+      // If approved, increment rewards redeemed and check for skin unlocks
+      if (status === "approved" && redemption.status !== "approved") {
+        // Fetch full member data to access unlockedSkins and activeSkinId
+        let fullMember = await storage.getFamilyMemberById(redemption.memberId);
+        if (!fullMember) {
+          return res.status(404).json({ message: "Member not found" });
+        }
+        
+        const newRewardsCount = await storage.incrementRewardsRedeemed(fullMember.id);
+        const allSkins = await storage.getSkins();
+        
+        // Find skins that should be unlocked but aren't yet
+        const newlyUnlockedSkins = allSkins.filter(skin => 
+          skin.unlockThreshold <= newRewardsCount && 
+          !fullMember.unlockedSkins.includes(skin.id)
+        );
+        
+        // Unlock new skins
+        for (const skin of newlyUnlockedSkins) {
+          await storage.unlockSkin(fullMember.id, skin.id);
+        }
+        
+        // Refresh member data after unlocking to get updated unlockedSkins and activeSkinId
+        if (newlyUnlockedSkins.length > 0) {
+          const refreshedMember = await storage.getFamilyMemberById(redemption.memberId);
+          if (refreshedMember) {
+            fullMember = refreshedMember;
+          }
+        }
+        
+        // Auto-select first skin if none selected (only after refresh so we have current state)
+        if (newlyUnlockedSkins.length > 0 && !fullMember.activeSkinId) {
+          await storage.updateFamilyMemberActiveSkin(fullMember.id, newlyUnlockedSkins[0].id);
+        }
+        
+        // Broadcast skin unlocks if any
+        if (newlyUnlockedSkins.length > 0) {
+          broadcastToFamily(member.familyName, {
+            type: "skins_unlocked",
+            memberId: fullMember.id,
+            skins: newlyUnlockedSkins.map(s => ({ id: s.id, name: s.name })),
+          });
+        }
+      }
+
       // Broadcast update to family
       broadcastToFamily(member.familyName, {
         type: "redemption_updated",

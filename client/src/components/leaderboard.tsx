@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Trophy, Medal, Award } from "lucide-react";
 import type { FamilyMember } from "@shared/schema";
+import { getAvatarUrl } from "@/lib/skins";
 
 interface LeaderboardProps {
   members: FamilyMember[];
@@ -54,7 +55,7 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
             <div className="flex flex-col items-center" data-testid={`podium-rank-2`}>
               <div className="mb-2">{getTrophyIcon(1)}</div>
               <Avatar className="h-12 w-12 mb-2" style={{ borderWidth: "4px", borderColor: top3[1].color }}>
-                <AvatarImage src={top3[1].avatarUrl || undefined} />
+                <AvatarImage src={getAvatarUrl(top3[1].activeSkinId, top3[1].avatarUrl)} />
                 <AvatarFallback style={{ backgroundColor: top3[1].color }} className="text-white">
                   {top3[1].displayName[0]}
                 </AvatarFallback>
@@ -73,7 +74,7 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
             <div className="flex flex-col items-center transform -translate-y-4" data-testid={`podium-rank-1`}>
               <div className="mb-2">{getTrophyIcon(0)}</div>
               <Avatar className="h-16 w-16 mb-2" style={{ borderWidth: "4px", borderColor: top3[0].color }}>
-                <AvatarImage src={top3[0].avatarUrl || undefined} />
+                <AvatarImage src={getAvatarUrl(top3[0].activeSkinId, top3[0].avatarUrl)} />
                 <AvatarFallback style={{ backgroundColor: top3[0].color }} className="text-white">
                   {top3[0].displayName[0]}
                 </AvatarFallback>
@@ -92,7 +93,7 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
             <div className="flex flex-col items-center" data-testid={`podium-rank-3`}>
               <div className="mb-2">{getTrophyIcon(2)}</div>
               <Avatar className="h-12 w-12 mb-2" style={{ borderWidth: "4px", borderColor: top3[2].color }}>
-                <AvatarImage src={top3[2].avatarUrl || undefined} />
+                <AvatarImage src={getAvatarUrl(top3[2].activeSkinId, top3[2].avatarUrl)} />
                 <AvatarFallback style={{ backgroundColor: top3[2].color }} className="text-white">
                   {top3[2].displayName[0]}
                 </AvatarFallback>
@@ -123,7 +124,7 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
                   {rank}
                 </div>
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={member.avatarUrl || undefined} />
+                  <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
                   <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
                     {member.displayName[0]}
                   </AvatarFallback>

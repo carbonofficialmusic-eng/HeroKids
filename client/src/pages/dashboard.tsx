@@ -28,11 +28,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, Settings, User2, Trash2, Pencil, Lightbulb, Check, X } from "lucide-react";
+import { Plus, LogOut, Trophy, Gift, Star, Crown, BarChart3, Settings, User2, Trash2, Pencil, Lightbulb, Check, X, Palette } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import type { FamilyMember, Task, Reward, RewardRequest } from "@shared/schema";
+import { getAvatarUrl } from "@/lib/skins";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -468,7 +469,7 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={member.avatarUrl || undefined} />
+              <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
               <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
                 {member.displayName[0]}
               </AvatarFallback>
@@ -502,6 +503,16 @@ export default function Dashboard() {
             >
               <Settings className="h-5 w-5" />
             </Button>
+            <Link href="/skins">
+              <Button
+                variant="ghost"
+                size="icon"
+                data-testid="button-skins"
+                aria-label="Character Skins"
+              >
+                <Palette className="h-5 w-5" />
+              </Button>
+            </Link>
           </div>
           <div className="flex items-center gap-3">
             {familyData && (
@@ -658,7 +669,7 @@ export default function Dashboard() {
                           <Card key={request.id} className="p-6" data-testid={`card-request-${request.id}`}>
                             <div className="flex items-start gap-3 mb-4">
                               <Avatar className="h-10 w-10">
-                                <AvatarImage src={requester?.avatarUrl || undefined} />
+                                <AvatarImage src={getAvatarUrl(requester?.activeSkinId, requester?.avatarUrl)} />
                                 <AvatarFallback style={{ backgroundColor: requester?.color }} className="text-white">
                                   {requester?.displayName[0] || '?'}
                                 </AvatarFallback>

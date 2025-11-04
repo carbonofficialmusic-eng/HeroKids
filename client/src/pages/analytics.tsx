@@ -20,6 +20,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { FamilyMember, Task } from "@shared/schema";
+import { getAvatarUrl } from "@/lib/skins";
 
 export default function Analytics() {
   const { user } = useAuth();
@@ -180,7 +181,7 @@ export default function Analytics() {
                         {member.rank}
                       </div>
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={member.avatarUrl || undefined} />
+                        <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
                         <AvatarFallback>{member.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">

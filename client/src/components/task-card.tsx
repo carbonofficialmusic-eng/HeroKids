@@ -5,6 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, Camera, CheckCircle } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
 import { format } from "date-fns";
+import { getAvatarUrl } from "@/lib/skins";
 
 interface TaskCardProps {
   task: Task;
@@ -76,7 +77,7 @@ export function TaskCard({
             {showAssignee && assignedTo && (
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
-                  <AvatarImage src={assignedTo.avatarUrl || undefined} />
+                  <AvatarImage src={getAvatarUrl(assignedTo.activeSkinId, assignedTo.avatarUrl)} />
                   <AvatarFallback
                     style={{ backgroundColor: assignedTo.color }}
                     className="text-white text-xs"
