@@ -109,9 +109,17 @@ Preferred communication style: Simple, everyday language.
     -   Created ProfileMenu component consolidating all header actions
     -   **Left Side**: Avatar + Member Name only (simplified from 4 buttons)
     -   **Right Side**: Tier badge + Points counter + ProfileMenu dropdown
-    -   **Dropdown Actions**: Edit Profile, Character Skins, Family Settings (parent only), Switch Member (parent only), Theme Toggle, Logout
+    -   **Dropdown Actions**: Edit Profile, Character Skins, Family Settings (parent only), Switch Member (parent only when 2+ members), Theme Toggle, Logout
     -   Added `max-w-7xl` width constraint to header and content for better alignment on wide screens
     -   All functionality preserved with proper test IDs maintained
+    -   **Family Settings Visibility**: Only shown when acting member is a parent (uses `isParent`, not `isRealParent`)
+        -   Children never see Family Settings
+        -   Parents acting as children don't see Family Settings
+        -   Only parents in parent view see Family Settings
+    -   **Switch Member Visibility**: Only shown when real user is parent AND there are 2+ family members
+        -   Hidden when only one family member exists (nothing to switch to)
+        -   Parents can switch even when acting as children (to switch back)
+        -   Children never see Switch Member
 
 ### Known Issues
 -   **CRITICAL**: Task completion awards points immediately without parent approval - approval system needs implementation
