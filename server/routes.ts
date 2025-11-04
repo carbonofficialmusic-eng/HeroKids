@@ -827,8 +827,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         taskId: task.id,
       });
       
-      // Handle recurring tasks
-      if (task.recurrence !== "none") {
+      // Handle recurring tasks with custom days interval
+      if (task.recurrenceDays) {
+        // Calculate next available date based on custom interval
+        const now = new Date();
+        const nextAvailableDate = new Date(now.getTime() + task.recurrenceDays * 24 * 60 * 60 * 1000);
+        
+        // Update the task's nextAvailableDate instead of marking completed
+        await storage.updateTaskNextAvailableDate(taskId, nextAvailableDate);
+      } else if (task.recurrence !== "none") {
+        // Handle old-style recurring tasks (daily/weekly/monthly)
         // Calculate next due date based on recurrence
         let nextDueDate: Date | null = null;
         const now = new Date();

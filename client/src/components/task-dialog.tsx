@@ -36,6 +36,7 @@ import { Sparkles } from "lucide-react";
 
 const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
+  recurrenceDays: z.number().int().min(1).max(365).optional(),
 });
 
 type TaskFormData = z.infer<typeof taskFormSchema>;

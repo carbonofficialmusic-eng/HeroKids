@@ -71,6 +71,7 @@ export interface IStorage {
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: string, task: Partial<InsertTask>): Promise<Task>;
   updateTaskStatus(id: string, status: "active" | "completed" | "archived"): Promise<void>;
+  updateTaskNextAvailableDate(id: string, nextAvailableDate: Date): Promise<void>;
 
   // Task assignment operations
   createTaskAssignment(assignment: InsertTaskAssignment): Promise<void>;
@@ -320,6 +321,16 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(tasks)
       .set({ status, updatedAt: new Date() })
+      .where(eq(tasks.id, id));
+  }
+
+  async updateTaskNextAvailableDate(
+    id: string,
+    nextAvailableDate: Date
+  ): Promise<void> {
+    await db
+      .update(tasks)
+      .set({ nextAvailableDate, updatedAt: new Date() })
       .where(eq(tasks.id, id));
   }
 
