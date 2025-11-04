@@ -15,6 +15,7 @@ import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon } from "lucide
 import { useTheme } from "@/components/theme-provider";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
+import logoUrl from "@assets/A708B97F-2199-4C99-A66F-C3BA6238381B_1762070025130.png";
 
 interface ProfileMenuProps {
   member: FamilyMember;
@@ -59,9 +60,17 @@ export function ProfileMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{member.displayName}</p>
-            <p className="text-xs leading-none text-muted-foreground">{member.familyName}</p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">{member.displayName}</p>
+              <p className="text-xs leading-none text-muted-foreground">{member.familyName}</p>
+            </div>
+            <img 
+              src={logoUrl} 
+              alt="HomeHero Logo" 
+              className="h-10 w-10 rounded-lg shrink-0"
+              data-testid="img-menu-logo"
+            />
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
