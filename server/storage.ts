@@ -232,6 +232,14 @@ export class DatabaseStorage implements IStorage {
       .insert(familyMembers)
       .values(memberData)
       .returning();
+    
+    // Auto-unlock the first skin (Dinosaur, threshold 0) for new members
+    const allSkins = await this.getSkins();
+    const firstSkin = allSkins.find(skin => skin.unlockThreshold === 0);
+    if (firstSkin) {
+      await this.unlockSkin(member.id, firstSkin.id);
+    }
+    
     return member;
   }
 

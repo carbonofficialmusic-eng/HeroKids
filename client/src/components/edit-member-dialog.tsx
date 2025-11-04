@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/select";
 import { AvatarSelector } from "./avatar-selector";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
+import { getAvatarUrl } from "@/lib/skins";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { FamilyMember } from "@shared/schema";
 
 const editMemberSchema = z.object({
@@ -178,6 +180,21 @@ export function EditMemberDialog({
                 </FormItem>
               )}
             />
+
+            {member.activeSkinId && (
+              <div className="space-y-2" data-testid="active-skin-preview">
+                <FormLabel>Current Display Avatar</FormLabel>
+                <div className="flex items-center gap-3 p-3 rounded-md bg-muted">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} alt={member.displayName} />
+                    <AvatarFallback>{member.displayName[0]?.toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <p className="text-sm text-muted-foreground">
+                    You have an active character skin equipped. This overrides your avatar selection.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <AvatarSelector
               selectedAvatar={selectedAvatar}
