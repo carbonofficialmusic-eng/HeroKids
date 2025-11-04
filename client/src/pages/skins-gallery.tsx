@@ -8,6 +8,7 @@ import { Loader2, Lock, Check, Trophy, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { Link } from "wouter";
+import { SKIN_IMAGES } from "@/lib/skins";
 
 interface Skin {
   id: string;
@@ -111,14 +112,20 @@ export default function SkinsGallery() {
 
               <CardHeader className="pb-4">
                 <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
-                  <img
-                    src={skin.imageUrl}
-                    alt={skin.name}
-                    className={`w-full h-full object-cover ${
-                      !skin.isUnlocked ? "filter grayscale opacity-40" : ""
-                    }`}
-                    data-testid={`img-skin-${skin.id}`}
-                  />
+                  {SKIN_IMAGES[skin.id] ? (
+                    <img
+                      src={SKIN_IMAGES[skin.id]}
+                      alt={skin.name}
+                      className={`w-full h-full object-cover ${
+                        !skin.isUnlocked ? "filter grayscale opacity-40" : ""
+                      }`}
+                      data-testid={`img-skin-${skin.id}`}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
+                      No Image
+                    </div>
+                  )}
                   {!skin.isUnlocked && (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
