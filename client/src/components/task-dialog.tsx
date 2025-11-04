@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTaskSchema, type Task } from "@shared/schema";
 import { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +32,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Sparkles } from "lucide-react";
 
 const taskFormSchema = insertTaskSchema.extend({
@@ -130,6 +131,9 @@ export function TaskDialog({
   createdBy,
   editingTask,
 }: TaskDialogProps) {
+  // Track which recurrence mode is selected
+  const [recurrenceMode, setRecurrenceMode] = useState<"standard" | "custom">("standard");
+  
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
@@ -151,6 +155,13 @@ export function TaskDialog({
   useEffect(() => {
     if (open) {
       if (editingTask) {
+        // Determine mode based on which field has a value
+        if (editingTask.recurrenceDays) {
+          setRecurrenceMode("custom");
+        } else {
+          setRecurrenceMode("standard");
+        }
+        
         form.reset({
           familyName: editingTask.familyName,
           createdBy: editingTask.createdBy,
@@ -169,6 +180,7 @@ export function TaskDialog({
           iconEmoji: editingTask.iconEmoji || "⭐",
         });
       } else {
+        setRecurrenceMode("standard");
         form.reset({
           familyName,
           createdBy,
@@ -187,7 +199,25 @@ export function TaskDialog({
   }, [open, editingTask, familyName, createdBy]);
 
   const handleSubmit = (data: TaskFormData) => {
+    // Clear the field that's not being used based on mode
+    if (recurrenceMode === "standard") {
+      data.recurrenceDays = undefined;
+    } else {
+      data.recurrence = "none";
+    }
     onSubmit(data);
+  };
+  
+  const handleRecurrenceModeChange = (mode: "standard" | "custom") => {
+    setRecurrenceMode(mode);
+    // Clear the opposite field when switching modes
+    if (mode === "standard") {
+      form.setValue("recurrenceDays", undefined);
+      form.setValue("recurrence", "none");
+    } else {
+      form.setValue("recurrence", "none");
+      form.setValue("recurrenceDays", undefined);
+    }
   };
 
   const applyTemplate = (template: typeof taskTemplates[0]) => {
@@ -324,7 +354,7 @@ export function TaskDialog({
                       min={10}
                       max={100}
                       step={5}
-                      value={[field.value]}
+                      value={[field.value || 10]}
                       onValueChange={(vals) => field.onChange(vals[0])}
                       data-testid="slider-task-points"
                     />
@@ -355,55 +385,95 @@ export function TaskDialog({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="recurrence"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Repeat</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger data-testid="select-task-recurrence">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">One-time</SelectItem>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-4">
+              <div>
+                <FormLabel>Recurrence Type</FormLabel>
+                <RadioGroup
+                  value={recurrenceMode}
+                  onValueChange={handleRecurrenceModeChange}
+                  className="grid grid-cols-2 gap-4 mt-2"
+                  data-testid="radio-recurrence-mode"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="standard" id="standard" data-testid="radio-standard" />
+                    <label
+                      htmlFor="standard"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      Standard Recurrence
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="custom" id="custom" data-testid="radio-custom" />
+                    <label
+                      htmlFor="custom"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      Custom Days
+                    </label>
+                  </div>
+                </RadioGroup>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {recurrenceMode === "standard" 
+                    ? "Choose from preset intervals (one-time, daily, weekly, monthly)"
+                    : "Set a custom number of days for the task to repeat"}
+                </p>
+              </div>
 
-            <FormField
-              control={form.control}
-              name="recurrenceDays"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Repeat Every (Custom Days)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="1"
-                      max="365"
-                      placeholder="e.g., 3 for every 3 days"
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                      data-testid="input-recurrence-days"
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Set how many days until this task repeats after completion. Leave empty for one-time tasks.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
+              {recurrenceMode === "standard" && (
+                <FormField
+                  control={form.control}
+                  name="recurrence"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Repeat Schedule</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-task-recurrence">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">One-time</SelectItem>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-            />
+
+              {recurrenceMode === "custom" && (
+                <FormField
+                  control={form.control}
+                  name="recurrenceDays"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Repeat Every (Days)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="1"
+                          max="365"
+                          placeholder="e.g., 3 for every 3 days"
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          data-testid="input-recurrence-days"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Task will reappear after this many days following completion (1-365)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
 
             <FormField
               control={form.control}
