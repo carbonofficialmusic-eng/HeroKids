@@ -1109,6 +1109,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         taskId: null,
       });
       
+      // Increment rewards redeemed counter and check for skin unlocks
+      const newRewardsCount = await storage.incrementRewardsRedeemed(member.id);
+      const allSkins = await storage.getSkins();
+      
+      // Find skins that should be unlocked but aren't yet
+      const newlyUnlockedSkins = allSkins.filter(skin => 
+        skin.unlockThreshold <= newRewardsCount && 
+        !member.unlockedSkins.includes(skin.id)
+      );
+      
+      // Unlock new skins
+      for (const skin of newlyUnlockedSkins) {
+        await storage.unlockSkin(member.id, skin.id);
+      }
+      
+      // Auto-select first skin if none selected
+      if (newlyUnlockedSkins.length > 0 && !member.activeSkinId) {
+        await storage.updateFamilyMemberActiveSkin(member.id, newlyUnlockedSkins[0].id);
+      }
+      
       // Broadcast redemption to family
       broadcastToFamily(member.familyName, {
         type: "reward_redeemed",
@@ -1116,12 +1136,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         member: { ...member, totalPoints: newTotalPoints },
       });
       
+      // Broadcast skin unlocks if any
+      if (newlyUnlockedSkins.length > 0) {
+        broadcastToFamily(member.familyName, {
+          type: "skins_unlocked",
+          memberId: member.id,
+          skins: newlyUnlockedSkins.map(s => ({ id: s.id, name: s.name })),
+        });
+      }
+      
       res.json({ 
         redemption: {
           ...redemption,
           rewardTitle: reward.title,
         },
         newTotalPoints,
+        unlockedSkins: newlyUnlockedSkins,
         message: `Successfully redeemed ${reward.title}!` 
       });
     } catch (error: any) {
@@ -1391,6 +1421,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error updating reward request:", error);
       res.status(500).json({ message: "Failed to update reward request" });
+    }
+  });
+
+  // Skins routes
+  app.get("/api/skins", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const allSkins = await storage.getSkins();
+      
+      // Enrich skins with unlock status for this member
+      const skinsWithStatus = allSkins.map(skin => ({
+        ...skin,
+        isUnlocked: member.unlockedSkins.includes(skin.id),
+        isActive: member.activeSkinId === skin.id,
+        canUnlock: member.rewardsRedeemed >= skin.unlockThreshold,
+      }));
+      
+      res.json({
+        skins: skinsWithStatus,
+        rewardsRedeemed: member.rewardsRedeemed,
+      });
+    } catch (error: any) {
+      console.error("Error fetching skins:", error);
+      res.status(500).json({ message: "Failed to fetch skins" });
+    }
+  });
+
+  app.post("/api/skins/select", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { skinId } = req.body;
+      
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Verify skin exists and is unlocked
+      if (!member.unlockedSkins.includes(skinId)) {
+        return res.status(403).json({ message: "Skin not unlocked" });
+      }
+      
+      await storage.updateFamilyMemberActiveSkin(member.id, skinId);
+      
+      // Broadcast skin change to family
+      broadcastToFamily(member.familyName, {
+        type: "skin_changed",
+        memberId: member.id,
+        skinId,
+      });
+      
+      res.json({ message: "Skin selected", skinId });
+    } catch (error: any) {
+      console.error("Error selecting skin:", error);
+      res.status(500).json({ message: "Failed to select skin" });
     }
   });
 

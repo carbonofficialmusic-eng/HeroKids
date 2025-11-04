@@ -9,6 +9,7 @@ import {
   rewardRedemptions,
   rewardRequests,
   pointsHistory,
+  skins,
   type User,
   type UpsertUser,
   type Family,
@@ -27,6 +28,7 @@ import {
   type InsertRewardRequest,
   type InsertPointsHistory,
   type TaskCompletion,
+  type Skin,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -99,6 +101,12 @@ export interface IStorage {
 
   // Points history operations
   addPointsHistory(history: InsertPointsHistory): Promise<void>;
+
+  // Skin operations
+  getSkins(): Promise<any[]>;
+  updateFamilyMemberActiveSkin(memberId: string, skinId: string): Promise<void>;
+  unlockSkin(memberId: string, skinId: string): Promise<void>;
+  incrementRewardsRedeemed(memberId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -475,6 +483,49 @@ export class DatabaseStorage implements IStorage {
   // Points history operations
   async addPointsHistory(historyData: InsertPointsHistory): Promise<void> {
     await db.insert(pointsHistory).values(historyData);
+  }
+
+  // Skin operations
+  async getSkins(): Promise<Skin[]> {
+    return await db.select().from(skins);
+  }
+
+  async updateFamilyMemberActiveSkin(memberId: string, skinId: string): Promise<void> {
+    await db
+      .update(familyMembers)
+      .set({ activeSkinId: skinId })
+      .where(eq(familyMembers.id, memberId));
+  }
+
+  async unlockSkin(memberId: string, skinId: string): Promise<void> {
+    const [member] = await db
+      .select()
+      .from(familyMembers)
+      .where(eq(familyMembers.id, memberId));
+    
+    if (member && !member.unlockedSkins.includes(skinId)) {
+      const updatedSkins = [...member.unlockedSkins, skinId];
+      await db
+        .update(familyMembers)
+        .set({ unlockedSkins: updatedSkins })
+        .where(eq(familyMembers.id, memberId));
+    }
+  }
+
+  async incrementRewardsRedeemed(memberId: string): Promise<number> {
+    const [member] = await db
+      .select()
+      .from(familyMembers)
+      .where(eq(familyMembers.id, memberId));
+    
+    const newCount = (member?.rewardsRedeemed || 0) + 1;
+    
+    await db
+      .update(familyMembers)
+      .set({ rewardsRedeemed: newCount })
+      .where(eq(familyMembers.id, memberId));
+    
+    return newCount;
   }
 }
 
