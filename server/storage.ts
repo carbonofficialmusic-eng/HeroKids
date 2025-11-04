@@ -293,11 +293,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTasksByFamily(familyName: string): Promise<Task[]> {
-    return await db
+    const allTasks = await db
       .select()
       .from(tasks)
       .where(eq(tasks.familyName, familyName))
       .orderBy(desc(tasks.createdAt));
+    
+    // Filter out tasks that are not yet available (nextAvailableDate is in the future)
+    const now = new Date();
+    return allTasks.filter(task => {
+      if (!task.nextAvailableDate) {
+        return true; // No nextAvailableDate means task is always available
+      }
+      // Show task only if nextAvailableDate is in the past or today
+      return new Date(task.nextAvailableDate) <= now;
+    });
   }
 
   async createTask(taskData: InsertTask): Promise<Task> {
