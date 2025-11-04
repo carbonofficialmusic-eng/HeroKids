@@ -46,31 +46,22 @@ export function ProfileMenu({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex items-center gap-2 h-auto"
+          className="flex items-center gap-2 h-auto p-2"
           data-testid="button-profile-menu"
         >
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
-            <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
-              {member.displayName[0]}
-            </AvatarFallback>
-          </Avatar>
-          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          <img 
+            src={logoUrl} 
+            alt="HomeHero Logo" 
+            className="h-10 w-10 rounded-lg"
+            data-testid="img-menu-trigger-logo"
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{member.displayName}</p>
-              <p className="text-xs leading-none text-muted-foreground">{member.familyName}</p>
-            </div>
-            <img 
-              src={logoUrl} 
-              alt="HomeHero Logo" 
-              className="h-10 w-10 rounded-lg shrink-0"
-              data-testid="img-menu-logo"
-            />
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{member.displayName}</p>
+            <p className="text-xs leading-none text-muted-foreground">{member.familyName}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
