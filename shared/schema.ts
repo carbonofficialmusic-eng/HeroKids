@@ -122,6 +122,8 @@ export const tasks = pgTable("tasks", {
   points: integer("points").notNull().default(10),
   dueDate: timestamp("due_date"),
   recurrence: recurrenceEnum("recurrence").notNull().default("none"),
+  recurrenceDays: integer("recurrence_days"), // Custom recurrence interval in days (e.g., 3 for every 3 days)
+  nextAvailableDate: timestamp("next_available_date"), // When task becomes available again after completion
   status: taskStatusEnum("status").notNull().default("active"),
   requiresProof: boolean("requires_proof").notNull().default(false),
   iconEmoji: varchar("icon_emoji").default("⭐"),
