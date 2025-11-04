@@ -22,11 +22,11 @@
 
   --border: 210 10% 88%;
 
-  --card: 210 5% 96% / 0.75;
+  --card: 210 5% 96%;
 
   --card-foreground: 215 20% 15%;
 
-  --card-border: 210 8% 90% / 0.3;
+  --card-border: 210 8% 90%;
 
   --sidebar: 210 5% 94%;
 
@@ -146,11 +146,11 @@
 
   --border: 215 8% 22%;
 
-  --card: 215 8% 14% / 0.75;
+  --card: 215 8% 14%;
 
   --card-foreground: 210 10% 92%;
 
-  --card-border: 215 8% 18% / 0.3;
+  --card-border: 215 8% 18%;
 
   --sidebar: 215 8% 16%;
 
