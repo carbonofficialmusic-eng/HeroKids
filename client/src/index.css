@@ -365,4 +365,8 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  .theme-background-layer {
+    transition: opacity 0.8s ease-in-out;
+  }
 }

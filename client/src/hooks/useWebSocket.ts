@@ -67,6 +67,13 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
               break;
 
+            case "skin_changed":
+              // Invalidate family members and current member to update backgrounds
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
+              break;
+
             default:
               console.log("Unknown WebSocket message type:", data.type);
           }
