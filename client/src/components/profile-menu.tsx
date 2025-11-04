@@ -18,14 +18,18 @@ import { getAvatarUrl } from "@/lib/skins";
 
 interface ProfileMenuProps {
   member: FamilyMember;
+  isParent: boolean;
   isRealParent: boolean;
+  familyMemberCount: number;
   onEditProfile: () => void;
   onSwitchMember: () => void;
 }
 
 export function ProfileMenu({
   member,
+  isParent,
   isRealParent,
+  familyMemberCount,
   onEditProfile,
   onSwitchMember,
 }: ProfileMenuProps) {
@@ -73,21 +77,21 @@ export function ProfileMenu({
             </a>
           </Link>
         </DropdownMenuItem>
-        {isRealParent && (
-          <>
-            <DropdownMenuItem asChild>
-              <Link href="/settings" data-testid="menu-item-settings">
-                <a className="flex items-center w-full">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Family Settings</span>
-                </a>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onSwitchMember} data-testid="menu-item-switch-member">
-              <User2 className="mr-2 h-4 w-4" />
-              <span>Switch Member</span>
-            </DropdownMenuItem>
-          </>
+        {isParent && (
+          <DropdownMenuItem asChild>
+            <Link href="/settings" data-testid="menu-item-settings">
+              <a className="flex items-center w-full">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Family Settings</span>
+              </a>
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {isRealParent && familyMemberCount > 1 && (
+          <DropdownMenuItem onClick={onSwitchMember} data-testid="menu-item-switch-member">
+            <User2 className="mr-2 h-4 w-4" />
+            <span>Switch Member</span>
+          </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleThemeToggle} data-testid="menu-item-theme-toggle">

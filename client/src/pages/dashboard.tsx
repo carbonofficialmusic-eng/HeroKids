@@ -507,7 +507,9 @@ export default function Dashboard() {
             />
             <ProfileMenu
               member={member}
+              isParent={isParent}
               isRealParent={isRealParent}
+              familyMemberCount={familyMembers.length}
               onEditProfile={() => {
                 setMemberToEdit(member);
                 setEditMemberDialogOpen(true);
