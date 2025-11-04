@@ -523,9 +523,9 @@ export default function Dashboard() {
       <div className="container mx-auto max-w-7xl px-4 py-8">
         {isParent ? (
           /* Parent View */
-          <div className="space-y-8">
+          <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
-            <div className="space-y-6">
+            <div className="lg:col-span-2 space-y-6">
               {/* Stats Section */}
               <div className="text-center">
                 <div className="mb-2">
@@ -782,8 +782,8 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Leaderboard Section */}
-            <div>
+            {/* Sidebar */}
+            <div className="space-y-6">
               <Leaderboard members={familyMembers} period="month" />
             </div>
           </div>
@@ -855,25 +855,22 @@ export default function Dashboard() {
 
             {/* Available Rewards */}
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold font-accent">Rewards You Can Earn</h2>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setRequestRewardDialogOpen(true)}
-                    data-testid="button-request-reward"
-                  >
-                    <Lightbulb className="h-4 w-4 mr-2" />
-                    Request Reward
+              <h2 className="text-2xl font-bold font-accent mb-4">Rewards You Can Earn</h2>
+              <div className="flex items-center justify-center flex-wrap gap-2 mb-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setRequestRewardDialogOpen(true)}
+                  data-testid="button-request-reward"
+                >
+                  <Lightbulb className="h-4 w-4 mr-2" />
+                  Request Reward
+                </Button>
+                <Link href="/rewards-board">
+                  <Button variant="outline" data-testid="button-rewards-board-child">
+                    <Gift className="h-4 w-4 mr-2" />
+                    My Rewards
                   </Button>
-                  <Link href="/rewards-board">
-                    <Button variant="outline" size="sm" data-testid="button-rewards-board-child">
-                      <Gift className="h-4 w-4 mr-2" />
-                      My Rewards
-                    </Button>
-                  </Link>
-                </div>
+                </Link>
               </div>
               {activeRewards.length === 0 ? (
                 <Card className="p-12 text-center">
