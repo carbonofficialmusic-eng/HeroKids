@@ -1611,6 +1611,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics route - Family tier and above
+  app.get("/api/analytics", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Check if parent
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can access analytics" });
+      }
+      
+      // Get family tier and check if analytics is allowed
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Check tier access (Family tier and above)
+      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "advancedAnalytics")) {
+        return res.status(403).json({ 
+          message: "Analytics is only available for Family tier and above",
+          tier: family.subscriptionTier,
+          requiredTier: "family"
+        });
+      }
+      
+      // Fetch analytics data
+      const analytics = await storage.getAnalytics(member.familyName);
+      
+      res.json(analytics);
+    } catch (error: any) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time updates

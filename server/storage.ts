@@ -41,7 +41,7 @@ export interface IStorage {
   // Family operations
   getFamily(familyName: string): Promise<Family | undefined>;
   createFamily(family: InsertFamily): Promise<Family>;
-  updateFamilyTier(familyName: string, tier: "free" | "family" | "family_plus" | "hero_pro"): Promise<void>;
+  updateFamilyTier(familyName: string, tier: "free" | "family" | "family_plus" | "family_hero"): Promise<void>;
   updateFamilySettings(familyName: string, settings: { showLeaderboard: boolean }): Promise<void>;
 
   // Family member operations
@@ -111,6 +111,9 @@ export interface IStorage {
 
   // Factory reset operation
   resetFamilyToFactory(familyName: string): Promise<void>;
+
+  // Analytics operations
+  getAnalytics(familyName: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -154,7 +157,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateFamilyTier(
     familyName: string,
-    tier: "free" | "family" | "family_plus" | "hero_pro"
+    tier: "free" | "family" | "family_plus" | "family_hero"
   ): Promise<void> {
     await db
       .update(families)
@@ -710,6 +713,103 @@ export class DatabaseStorage implements IStorage {
         await tx.insert(tasks).values(task);
       }
     });
+  }
+
+  async getAnalytics(familyName: string): Promise<any> {
+    // Get all family members
+    const members = await db
+      .select()
+      .from(familyMembers)
+      .where(eq(familyMembers.familyName, familyName));
+
+    // Get task completions for the last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const completions = await db
+      .select({
+        id: taskCompletions.id,
+        memberId: taskCompletions.memberId,
+        pointsEarned: taskCompletions.pointsEarned,
+        completedAt: taskCompletions.completedAt,
+        memberName: familyMembers.displayName,
+      })
+      .from(taskCompletions)
+      .innerJoin(familyMembers, eq(taskCompletions.memberId, familyMembers.id))
+      .where(and(
+        eq(familyMembers.familyName, familyName),
+        desc(taskCompletions.completedAt)
+      ))
+      .limit(100);
+
+    // Get all tasks for completion rate calculation
+    const allTasks = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.familyName, familyName));
+
+    const allAssignments = await db
+      .select()
+      .from(taskAssignments)
+      .innerJoin(tasks, eq(taskAssignments.taskId, tasks.id))
+      .where(eq(tasks.familyName, familyName));
+
+    // Calculate metrics
+    const totalTasksCompleted = completions.length;
+    const totalTasksAssigned = allAssignments.length;
+    const completionRate = totalTasksAssigned > 0 
+      ? Math.round((totalTasksCompleted / totalTasksAssigned) * 100)
+      : 0;
+
+    // Group completions by day for trend data
+    const dailyPoints: Record<string, number> = {};
+    completions.forEach(completion => {
+      if (completion.completedAt) {
+        const date = new Date(completion.completedAt).toISOString().split('T')[0];
+        dailyPoints[date] = (dailyPoints[date] || 0) + completion.pointsEarned;
+      }
+    });
+
+    // Convert to array for chart
+    const pointsTrend = Object.entries(dailyPoints)
+      .map(([date, points]) => ({ date, points }))
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(-30); // Last 30 days
+
+    // Top performers (sorted by monthly points)
+    const topPerformers = members
+      .map(member => ({
+        id: member.id,
+        name: member.displayName,
+        monthlyPoints: member.monthlyPoints,
+        totalPoints: member.totalPoints,
+        color: member.color,
+      }))
+      .sort((a, b) => b.monthlyPoints - a.monthlyPoints);
+
+    // Recent activity (last 10 completions)
+    const recentActivity = completions.slice(0, 10).map(completion => ({
+      memberName: completion.memberName,
+      pointsEarned: completion.pointsEarned,
+      completedAt: completion.completedAt,
+    }));
+
+    // Family stats
+    const totalPoints = members.reduce((sum, m) => sum + m.totalEarned, 0);
+    const totalMembers = members.length;
+
+    return {
+      completionRate,
+      pointsTrend,
+      topPerformers,
+      recentActivity,
+      stats: {
+        totalPoints,
+        totalMembers,
+        totalTasksCompleted,
+        totalTasksAssigned,
+      },
+    };
   }
 }
 

@@ -1,314 +1,305 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { TrendingUp, Users, Trophy, CheckCircle2, Lock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "wouter";
-import { ArrowLeft, TrendingUp, Award, CheckCircle, Star } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import type { FamilyMember, Task } from "@shared/schema";
-import { getAvatarUrl } from "@/lib/skins";
+import { format } from "date-fns";
+
+interface AnalyticsData {
+  completionRate: number;
+  pointsTrend: Array<{ date: string; points: number }>;
+  topPerformers: Array<{
+    id: string;
+    name: string;
+    monthlyPoints: number;
+    totalPoints: number;
+    color: string;
+  }>;
+  recentActivity: Array<{
+    memberName: string;
+    pointsEarned: number;
+    completedAt: Date;
+  }>;
+  stats: {
+    totalPoints: number;
+    totalMembers: number;
+    totalTasksCompleted: number;
+    totalTasksAssigned: number;
+  };
+}
 
 export default function Analytics() {
   const { user } = useAuth();
+  const { toast } = useToast();
 
-  // Fetch family members
-  const { data: members = [] } = useQuery<FamilyMember[]>({
-    queryKey: ["/api/family-members"],
+  const { data: analytics, isLoading, error } = useQuery<AnalyticsData>({
+    queryKey: ["/api/analytics"],
     enabled: !!user,
   });
 
-  // Fetch tasks
-  const { data: tasks = [] } = useQuery<Task[]>({
-    queryKey: ["/api/tasks"],
-    enabled: !!user,
-  });
-
-  if (!members.length) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Loading analytics...</p>
+      <div className="flex items-center justify-center min-h-screen" data-testid="loading-analytics">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
 
-  // Calculate statistics
-  const completedTasks = tasks.filter((t) => t.status === "completed").length;
-  const activeTasks = tasks.filter((t) => t.status === "active").length;
-  const totalTasks = tasks.length;
-  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  if (error) {
+    const errorMessage = (error as any)?.message || "Unknown error";
+    
+    // Check if it's a tier restriction error
+    if (errorMessage.includes("Family tier")) {
+      return (
+        <div className="container mx-auto p-6 max-w-4xl">
+          <Card className="border-2" data-testid="card-upgrade-prompt">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Analytics Dashboard</CardTitle>
+              <CardDescription>
+                Track your family's progress with detailed analytics
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <p className="text-muted-foreground">
+                Analytics is available for Family tier and above. Upgrade to unlock:
+              </p>
+              <ul className="text-left inline-block space-y-2">
+                <li className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                  <span>Points trends over time</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-primary" />
+                  <span>Top performers leaderboard</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
+                  <span>Task completion rates</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-primary" />
+                  <span>Family performance insights</span>
+                </li>
+              </ul>
+              <div className="pt-4">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Upgrade to <strong>Family tier ($3/month)</strong> or higher
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
 
-  // Points leaderboard
-  const leaderboard = [...members]
-    .sort((a, b) => b.weeklyPoints - a.weeklyPoints)
-    .map((m, index) => ({
-      ...m,
-      rank: index + 1,
-    }));
+    // Other errors
+    toast({
+      title: "Error loading analytics",
+      description: errorMessage,
+      variant: "destructive",
+    });
+    return null;
+  }
 
-  // Member performance data (based on points earned)
-  const memberStats = members.map((member) => {
-    return {
-      name: member.displayName,
-      weeklyPoints: member.weeklyPoints,
-      monthlyPoints: member.monthlyPoints,
-      totalPoints: member.totalPoints,
-    };
-  });
-
-  // Current week data (only showing current snapshot)
-  const currentWeekData = members.map((m) => ({
-    name: m.displayName,
-    points: m.weeklyPoints,
-  }));
-
-  const colors = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4"];
+  if (!analytics) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b sticky top-0 backdrop-blur-md z-40">
-        <div className="container mx-auto px-4 h-16 flex items-center gap-4">
-          <Link href="/">
-            <Button variant="ghost" size="icon" data-testid="button-back">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-xl font-bold" data-testid="text-page-title">
-              Family Analytics
-            </h1>
-            <p className="text-sm text-muted-foreground">Track progress and performance</p>
-          </div>
-        </div>
-      </header>
+    <div className="container mx-auto p-6 space-y-6" data-testid="page-analytics">
+      <div>
+        <h1 className="text-3xl font-bold mb-2" data-testid="heading-analytics">
+          Analytics Dashboard
+        </h1>
+        <p className="text-muted-foreground">
+          Track your family's performance and progress
+        </p>
+      </div>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Overview Stats */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" data-testid="text-total-tasks">{totalTasks}</div>
-              <p className="text-xs text-muted-foreground">
-                {activeTasks} active, {completedTasks} completed
-              </p>
-            </CardContent>
-          </Card>
+      {/* Stats Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card data-testid="card-total-points">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Points Earned</CardTitle>
+            <Trophy className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" data-testid="text-total-points">
+              {analytics.stats.totalPoints.toLocaleString()}
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" data-testid="text-completion-rate">{completionRate}%</div>
-              <p className="text-xs text-muted-foreground">
-                Tasks completed successfully
-              </p>
-            </CardContent>
-          </Card>
+        <Card data-testid="card-completion-rate">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" data-testid="text-completion-rate">
+              {analytics.completionRate}%
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {analytics.stats.totalTasksCompleted} of {analytics.stats.totalTasksAssigned} tasks
+            </p>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Family Members</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" data-testid="text-member-count">{members.length}</div>
-              <p className="text-xs text-muted-foreground">
-                Active participants
-              </p>
-            </CardContent>
-          </Card>
+        <Card data-testid="card-tasks-completed">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Tasks Completed</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" data-testid="text-tasks-completed">
+              {analytics.stats.totalTasksCompleted}
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Points</CardTitle>
-              <Star className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" data-testid="text-total-points">
-                {members.reduce((sum, m) => sum + m.weeklyPoints, 0)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Earned this week
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card data-testid="card-family-members">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Family Members</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" data-testid="text-family-members">
+              {analytics.stats.totalMembers}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Charts and Details */}
-        <Tabs defaultValue="leaderboard" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="leaderboard" data-testid="tab-leaderboard">Leaderboard</TabsTrigger>
-            <TabsTrigger value="trends" data-testid="tab-trends">Points Trends</TabsTrigger>
-            <TabsTrigger value="performance" data-testid="tab-performance">Performance</TabsTrigger>
-          </TabsList>
+      {/* Points Trend Chart */}
+      <Card data-testid="card-points-trend">
+        <CardHeader>
+          <CardTitle>Points Earned Over Time</CardTitle>
+          <CardDescription>Daily points earned by your family (last 30 days)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {analytics.pointsTrend.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={analytics.pointsTrend}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis 
+                  dataKey="date" 
+                  tickFormatter={(date) => format(new Date(date), "MMM d")}
+                  className="text-xs"
+                />
+                <YAxis className="text-xs" />
+                <Tooltip 
+                  labelFormatter={(date) => format(new Date(date as string), "MMM d, yyyy")}
+                  formatter={(value) => [`${value} points`, "Points"]}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="points" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2}
+                  dot={{ fill: "hsl(var(--primary))" }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              <p>No activity data yet. Complete tasks to see trends!</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-          {/* Leaderboard Tab */}
-          <TabsContent value="leaderboard" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Weekly Leaderboard</CardTitle>
-                <CardDescription>Top performers this week</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {leaderboard.map((member, index) => (
-                    <div
-                      key={member.id}
-                      className="flex items-center gap-4 p-4 rounded-lg bg-muted/50"
-                      data-testid={`leaderboard-item-${index}`}
-                    >
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
-                        {member.rank}
-                      </div>
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
-                        <AvatarFallback>{member.displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="font-semibold">{member.displayName}</div>
-                        <div className="text-sm text-muted-foreground capitalize">{member.role}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-lg">{member.weeklyPoints}</div>
-                        <div className="text-xs text-muted-foreground">points</div>
-                      </div>
-                      {index === 0 && (
-                        <Badge variant="default" className="ml-2">
-                          <Star className="h-3 w-3 mr-1" />
-                          Top Performer
-                        </Badge>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Trends Tab */}
-          <TabsContent value="trends" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Weekly Points</CardTitle>
-                <CardDescription>Points earned this week per member</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={currentWeekData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="points" fill="#6366f1" name="Weekly Points" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Task Status Overview</CardTitle>
-                <CardDescription>Current task distribution across the family</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center gap-3">
-                      <div className="h-3 w-3 rounded-full bg-green-500" />
-                      <span className="font-medium">Completed Tasks</span>
-                    </div>
-                    <span className="text-2xl font-bold">{completedTasks}</span>
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Top Performers */}
+        <Card data-testid="card-top-performers">
+          <CardHeader>
+            <CardTitle>Top Performers This Month</CardTitle>
+            <CardDescription>Family members ranked by monthly points</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {analytics.topPerformers.slice(0, 5).map((member, index) => (
+                <div 
+                  key={member.id} 
+                  className="flex items-center gap-4"
+                  data-testid={`performer-${index}`}
+                >
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-sm font-bold">
+                    {index + 1}
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center gap-3">
-                      <div className="h-3 w-3 rounded-full bg-blue-500" />
-                      <span className="font-medium">Active Tasks</span>
-                    </div>
-                    <span className="text-2xl font-bold">{activeTasks}</span>
+                  <div 
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                    style={{ backgroundColor: member.color }}
+                  >
+                    {member.name.charAt(0).toUpperCase()}
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center gap-3">
-                      <div className="h-3 w-3 rounded-full bg-primary" />
-                      <span className="font-medium">Total Tasks</span>
-                    </div>
-                    <span className="text-2xl font-bold">{totalTasks}</span>
+                  <div className="flex-1">
+                    <p className="font-medium" data-testid={`text-performer-name-${index}`}>
+                      {member.name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {member.monthlyPoints} points this month
+                    </p>
                   </div>
+                  {index === 0 && (
+                    <Badge variant="default" data-testid="badge-top-performer">
+                      <Trophy className="w-3 h-3 mr-1" />
+                      #1
+                    </Badge>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              ))}
+              {analytics.topPerformers.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">
+                  No activity yet this month
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Performance Tab */}
-          <TabsContent value="performance" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Member Performance</CardTitle>
-                <CardDescription>Detailed statistics for each family member</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {memberStats.map((stat, index) => (
-                    <div key={index} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold">{stat.name}</span>
-                        <Badge variant="secondary">{stat.totalPoints} total points</Badge>
-                      </div>
-                      <div className="grid grid-cols-3 gap-4">
-                        <Card className="p-3">
-                          <div className="text-xs text-muted-foreground">Weekly</div>
-                          <div className="text-xl font-bold">{stat.weeklyPoints}</div>
-                        </Card>
-                        <Card className="p-3">
-                          <div className="text-xs text-muted-foreground">Monthly</div>
-                          <div className="text-xl font-bold">{stat.monthlyPoints}</div>
-                        </Card>
-                        <Card className="p-3">
-                          <div className="text-xs text-muted-foreground">Total</div>
-                          <div className="text-xl font-bold">{stat.totalPoints}</div>
-                        </Card>
-                      </div>
+        {/* Recent Activity */}
+        <Card data-testid="card-recent-activity">
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Latest task completions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {analytics.recentActivity.map((activity, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center justify-between"
+                  data-testid={`activity-${index}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <div>
+                      <p className="font-medium text-sm" data-testid={`text-activity-member-${index}`}>
+                        {activity.memberName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(activity.completedAt), "MMM d, h:mm a")}
+                      </p>
                     </div>
-                  ))}
+                  </div>
+                  <Badge variant="secondary" data-testid={`badge-activity-points-${index}`}>
+                    +{activity.pointsEarned} pts
+                  </Badge>
                 </div>
-
-                <div className="mt-6">
-                  <h3 className="font-semibold mb-4">Points Comparison</h3>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={memberStats}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="weeklyPoints" fill="#6366f1" name="Weekly Points" />
-                      <Bar dataKey="monthlyPoints" fill="#8b5cf6" name="Monthly Points" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              ))}
+              {analytics.recentActivity.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">
+                  No recent activity
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
