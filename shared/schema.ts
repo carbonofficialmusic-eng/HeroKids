@@ -18,7 +18,8 @@ import { z } from "zod";
 export const roleEnum = pgEnum("role", ["parent", "child"]);
 export const taskStatusEnum = pgEnum("task_status", ["active", "completed", "archived"]);
 export const recurrenceEnum = pgEnum("recurrence", ["none", "daily", "weekly", "monthly"]);
-export const subscriptionTierEnum = pgEnum("subscription_tier", ["free", "family", "family_plus", "hero_pro"]);
+export const subscriptionTierEnum = pgEnum("subscription_tier", ["free", "family", "family_plus", "family_hero"]);
+export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "trialing", "past_due", "canceled", "incomplete"]);
 
 // Session storage table - Required for Replit Auth
 export const sessions = pgTable(
@@ -49,6 +50,10 @@ export type User = typeof users.$inferSelect;
 export const families = pgTable("families", {
   familyName: varchar("family_name").primaryKey(),
   subscriptionTier: subscriptionTierEnum("subscription_tier").notNull().default("free"),
+  subscriptionStatus: subscriptionStatusEnum("subscription_status").default("active"), // Stripe subscription status
+  billingCustomerId: varchar("billing_customer_id"), // Stripe customer ID
+  billingSubscriptionId: varchar("billing_subscription_id"), // Stripe subscription ID
+  tierExpiresAt: timestamp("tier_expires_at"), // When subscription expires (for grace periods)
   showLeaderboard: boolean("show_leaderboard").notNull().default(true), // Parents can hide leaderboard from children
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

@@ -9,6 +9,8 @@ import { z } from "zod";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema } from "@shared/schema";
+import { getMaxMembers, hasFeature, canAddMember } from "@shared/tier-config";
+import type { SubscriptionTier } from "@shared/tier-config";
 import "./types";
 
 // Configure multer for photo uploads
@@ -354,20 +356,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const bypassTierLimits = process.env.BYPASS_TIER_LIMITS === "true" || process.env.NODE_ENV === "development";
         
         if (!bypassTierLimits) {
-          const tierLimits: Record<string, number> = {
-            free: 2,
-            family: 4,
-            family_plus: 6,
-            hero_pro: Infinity,
-          };
-          
           const currentCount = await storage.getFamilyMemberCount(familyName);
-          const limit = tierLimits[family.subscriptionTier];
+          const tier = family.subscriptionTier as SubscriptionTier;
+          const limit = getMaxMembers(tier);
           
-          if (currentCount >= limit) {
+          if (!canAddMember(tier, currentCount)) {
             return res.status(403).json({
-              message: `Your ${family.subscriptionTier} plan is limited to ${limit} members. Upgrade to add more family members.`,
-              currentTier: family.subscriptionTier,
+              message: `Your ${tier} plan is limited to ${limit} members. Upgrade to add more family members.`,
+              currentTier: tier,
               currentCount,
               limit,
             });
@@ -409,20 +405,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const bypassTierLimits = process.env.BYPASS_TIER_LIMITS === "true" || process.env.NODE_ENV === "development";
         
         if (!bypassTierLimits) {
-          const tierLimits: Record<string, number> = {
-            free: 2,
-            family: 4,
-            family_plus: 6,
-            hero_pro: Infinity,
-          };
-          
           const currentCount = await storage.getFamilyMemberCount(parsed.familyName);
-          const limit = tierLimits[family.subscriptionTier];
+          const tier = family.subscriptionTier as SubscriptionTier;
+          const limit = getMaxMembers(tier);
           
-          if (currentCount >= limit) {
+          if (!canAddMember(tier, currentCount)) {
             return res.status(403).json({
-              message: `Your ${family.subscriptionTier} plan is limited to ${limit} members. Upgrade to add more family members.`,
-              currentTier: family.subscriptionTier,
+              message: `Your ${tier} plan is limited to ${limit} members. Upgrade to add more family members.`,
+              currentTier: tier,
               currentCount,
               limit,
             });
@@ -744,6 +734,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const member = await storage.getFamilyMemberByUserId(userId);
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Check if tier allows photo proof uploads
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      const tier = family.subscriptionTier as SubscriptionTier;
+      if (!hasFeature(tier, 'photoProof')) {
+        return res.status(403).json({
+          message: "Photo proof upload requires a Family tier subscription or higher",
+          currentTier: tier,
+          requiredFeature: "photoProof",
+        });
       }
       
       const task = await storage.getTask(taskId);
