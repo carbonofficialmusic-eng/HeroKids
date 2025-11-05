@@ -182,12 +182,18 @@ export type InsertTaskAssignment = z.infer<typeof insertTaskAssignmentSchema>;
 export type TaskAssignment = typeof taskAssignments.$inferSelect;
 
 // Task completions - Track when tasks are completed
+export const completionStatusEnum = pgEnum("completion_status", ["pending", "approved", "rejected"]);
+
 export const taskCompletions = pgTable("task_completions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   taskId: varchar("task_id").notNull().references(() => tasks.id, { onDelete: "cascade" }),
   memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
   proofPhotoUrl: varchar("proof_photo_url"),
   pointsEarned: integer("points_earned").notNull(),
+  status: completionStatusEnum("status").notNull().default("pending"),
+  approvedBy: varchar("approved_by").references(() => familyMembers.id),
+  approvedAt: timestamp("approved_at"),
+  rejectionReason: text("rejection_reason"),
   completedAt: timestamp("completed_at").defaultNow(),
 });
 
@@ -200,11 +206,16 @@ export const taskCompletionsRelations = relations(taskCompletions, ({ one }) => 
     fields: [taskCompletions.memberId],
     references: [familyMembers.id],
   }),
+  approver: one(familyMembers, {
+    fields: [taskCompletions.approvedBy],
+    references: [familyMembers.id],
+  }),
 }));
 
 export const insertTaskCompletionSchema = createInsertSchema(taskCompletions).omit({
   id: true,
   completedAt: true,
+  approvedAt: true,
 });
 
 export type InsertTaskCompletion = z.infer<typeof insertTaskCompletionSchema>;
