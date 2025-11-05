@@ -6,9 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Lock, MessageCircle } from "lucide-react";
+import { Send, Lock, MessageCircle, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { Link } from "wouter";
 
 interface ChatMessage {
   id: string;
@@ -70,8 +71,19 @@ export default function Chat() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen" data-testid="loading-chat">
-        <div className="animate-pulse">Loading chat...</div>
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Family Chat</h1>
+          <Link href="/dashboard">
+            <Button variant="outline" data-testid="button-back-to-dashboard">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
+        <div className="flex items-center justify-center min-h-[60vh]" data-testid="loading-chat">
+          <div className="animate-pulse">Loading chat...</div>
+        </div>
       </div>
     );
   }
@@ -84,6 +96,15 @@ export default function Chat() {
     if (isTierError) {
       return (
         <div className="container mx-auto p-6" data-testid="chat-upgrade-prompt">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold">Family Chat</h1>
+            <Link href="/dashboard">
+              <Button variant="outline" data-testid="button-back-to-dashboard">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Button>
+            </Link>
+          </div>
           <Card className="max-w-2xl mx-auto">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
@@ -126,13 +147,21 @@ export default function Chat() {
 
   return (
     <div className="container mx-auto p-4 h-screen flex flex-col" data-testid="page-chat">
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold mb-2" data-testid="heading-chat">
-          Family Chat
-        </h1>
-        <p className="text-muted-foreground">
-          Chat with your family in real-time
-        </p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2" data-testid="heading-chat">
+            Family Chat
+          </h1>
+          <p className="text-muted-foreground">
+            Chat with your family in real-time
+          </p>
+        </div>
+        <Link href="/dashboard">
+          <Button variant="outline" data-testid="button-back-to-dashboard">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
       </div>
 
       <Card className="flex-1 flex flex-col overflow-hidden">

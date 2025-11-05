@@ -699,20 +699,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot update tasks from other families" });
       }
 
-      // Parse and update the task
-      const parsed: any = insertTaskSchema.partial().parse(req.body);
-      const taskData: any = { ...parsed };
-      
-      // Handle dueDate conversion - empty string should be null
-      if (taskData.dueDate !== undefined) {
-        if (typeof taskData.dueDate === 'string' && taskData.dueDate.trim() === '') {
-          taskData.dueDate = null;
-        } else if (taskData.dueDate) {
-          taskData.dueDate = new Date(taskData.dueDate);
+      // Handle dueDate conversion BEFORE Zod parsing
+      const bodyData: any = { ...req.body };
+      if (bodyData.dueDate !== undefined) {
+        if (typeof bodyData.dueDate === 'string') {
+          if (bodyData.dueDate.trim() === '') {
+            bodyData.dueDate = null;
+          } else {
+            bodyData.dueDate = new Date(bodyData.dueDate);
+          }
         }
       }
       
-      const updatedTask = await storage.updateTask(taskId, taskData);
+      // Parse and update the task
+      const parsed = insertTaskSchema.partial().parse(bodyData);
+      const updatedTask = await storage.updateTask(taskId, parsed);
 
       // Broadcast task update to family
       broadcastToFamily(member.familyName, {
