@@ -15,7 +15,7 @@ import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon } from "lucide
 import { useTheme } from "@/components/theme-provider";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
-import logoUrl from "@assets/A708B97F-2199-4C99-A66F-C3BA6238381B_1762070025130.png";
+import logoUrl from "@assets/A708B97F-2199-4C99-A66F-C3BA6238381B_1762338500327.jpeg";
 
 interface ProfileMenuProps {
   member: FamilyMember;

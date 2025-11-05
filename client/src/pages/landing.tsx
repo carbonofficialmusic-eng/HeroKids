@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Star, Trophy, Users, CheckCircle, Zap } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import logoUrl from "@assets/A708B97F-2199-4C99-A66F-C3BA6238381B_1762070025130.png";
+import logoUrl from "@assets/A708B97F-2199-4C99-A66F-C3BA6238381B_1762338500327.jpeg";
 
 export default function Landing() {
   return (
