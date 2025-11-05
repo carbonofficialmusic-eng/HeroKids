@@ -108,6 +108,9 @@ export interface IStorage {
   updateFamilyMemberActiveSkin(memberId: string, skinId: string | null): Promise<void>;
   unlockSkin(memberId: string, skinId: string): Promise<void>;
   incrementRewardsRedeemed(memberId: string): Promise<number>;
+
+  // Factory reset operation
+  resetFamilyToFactory(familyName: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -576,6 +579,84 @@ export class DatabaseStorage implements IStorage {
       .where(eq(familyMembers.id, memberId));
     
     return newCount;
+  }
+
+  async resetFamilyToFactory(familyName: string): Promise<void> {
+    // Wrap entire operation in a transaction to ensure atomicity
+    await db.transaction(async (tx) => {
+      // Get all family members first (we need their IDs)
+      const members = await tx
+        .select()
+        .from(familyMembers)
+        .where(eq(familyMembers.familyName, familyName));
+      const memberIds = members.map(m => m.id);
+
+      if (memberIds.length === 0) {
+        return; // No members, nothing to reset
+      }
+
+      // Get all family tasks (we'll need task IDs for assignments)
+      const familyTasks = await tx
+        .select()
+        .from(tasks)
+        .where(eq(tasks.familyName, familyName));
+      const taskIds = familyTasks.map(t => t.id);
+
+      // Delete all game data for this family in the correct order
+      // (respecting foreign key constraints - children first, then parents)
+
+      // 1. Delete task completions for all members
+      for (const memberId of memberIds) {
+        await tx.delete(taskCompletions)
+          .where(eq(taskCompletions.memberId, memberId));
+      }
+
+      // 2. Delete task assignments for all tasks in this family
+      for (const taskId of taskIds) {
+        await tx.delete(taskAssignments)
+          .where(eq(taskAssignments.taskId, taskId));
+      }
+
+      // 3. Delete all tasks for this family
+      await tx.delete(tasks)
+        .where(eq(tasks.familyName, familyName));
+
+      // 4. Delete reward redemptions for all members
+      for (const memberId of memberIds) {
+        await tx.delete(rewardRedemptions)
+          .where(eq(rewardRedemptions.memberId, memberId));
+      }
+
+      // 5. Delete all reward requests for this family
+      await tx.delete(rewardRequests)
+        .where(eq(rewardRequests.familyName, familyName));
+
+      // 6. Delete all rewards for this family
+      await tx.delete(rewards)
+        .where(eq(rewards.familyName, familyName));
+
+      // 7. Delete points history for all members
+      for (const memberId of memberIds) {
+        await tx.delete(pointsHistory)
+          .where(eq(pointsHistory.memberId, memberId));
+      }
+
+      // 8. Reset all family member stats to zero
+      for (const memberId of memberIds) {
+        await tx.update(familyMembers)
+          .set({
+            totalEarned: 0,
+            totalPoints: 0,
+            weeklyPoints: 0,
+            monthlyPoints: 0,
+            rewardsRedeemed: 0,
+            unlockedSkins: [],
+            activeSkinId: null,
+            updatedAt: new Date(),
+          })
+          .where(eq(familyMembers.id, memberId));
+      }
+    });
   }
 }
 

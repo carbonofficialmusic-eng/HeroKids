@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AddMemberDialog } from "@/components/add-member-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2 } from "lucide-react";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -33,6 +33,7 @@ export default function Settings() {
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
   const [memberToDelete, setMemberToDelete] = useState<FamilyMember | null>(null);
+  const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false);
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -129,6 +130,31 @@ export default function Settings() {
       toast({
         title: "Error",
         description: "Failed to remove family member. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Factory reset mutation
+  const factoryResetMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/family/reset", {});
+    },
+    onSuccess: () => {
+      // Invalidate all queries to refresh the entire app state
+      queryClient.invalidateQueries();
+      setShowFactoryResetDialog(false);
+      toast({
+        title: "Family Reset Complete",
+        description: "All tasks, rewards, and points have been reset. Your family can start fresh!",
+      });
+      // Redirect to dashboard
+      setLocation("/dashboard");
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to reset family. Please try again.",
         variant: "destructive",
       });
     },
@@ -316,7 +342,42 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* Future settings can be added here */}
+          {/* Factory Reset Settings */}
+          <Card className="border-destructive/50">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-5 w-5 text-destructive" />
+                <CardTitle className="text-destructive">Factory Reset</CardTitle>
+              </div>
+              <CardDescription>
+                Reset your family's game progress back to the beginning. This will delete all tasks, rewards, points, and history.
+                Your family members will remain, but all their progress will be reset to zero.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-destructive/10 p-4 rounded-lg mb-4">
+                <p className="text-sm font-medium mb-2">⚠️ Warning: This action cannot be undone</p>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                  <li>All tasks will be permanently deleted</li>
+                  <li>All rewards will be permanently deleted</li>
+                  <li>All points will be reset to zero</li>
+                  <li>All unlocked skins will be locked again</li>
+                  <li>All history will be permanently deleted</li>
+                  <li>Family members and avatars will be preserved</li>
+                </ul>
+              </div>
+              <Button
+                variant="destructive"
+                onClick={() => setShowFactoryResetDialog(true)}
+                disabled={factoryResetMutation.isPending}
+                data-testid="button-factory-reset"
+                className="w-full"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset to Factory Settings
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
@@ -384,6 +445,57 @@ export default function Settings() {
               data-testid="button-confirm-delete"
             >
               {deleteMemberMutation.isPending ? "Removing..." : "Remove Member"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Factory Reset Confirmation Dialog */}
+      <AlertDialog open={showFactoryResetDialog} onOpenChange={setShowFactoryResetDialog}>
+        <AlertDialogContent data-testid="dialog-factory-reset">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">⚠️ Reset to Factory Settings?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="font-semibold text-foreground">
+                This will permanently delete ALL game data and reset your family back to the beginning.
+              </p>
+              <p>
+                <strong>What will be deleted:</strong>
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>All tasks</li>
+                <li>All rewards and reward requests</li>
+                <li>All points (everyone back to 0)</li>
+                <li>All unlocked skins (everyone back to default)</li>
+                <li>All completion history</li>
+              </ul>
+              <p>
+                <strong>What will be kept:</strong>
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Your family name ({member?.familyName})</li>
+                <li>All family members and their avatars</li>
+              </ul>
+              <p className="font-semibold text-destructive">
+                This action cannot be undone. Are you absolutely sure?
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => setShowFactoryResetDialog(false)}
+              data-testid="button-cancel-reset"
+              disabled={factoryResetMutation.isPending}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => factoryResetMutation.mutate()}
+              disabled={factoryResetMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-reset"
+            >
+              {factoryResetMutation.isPending ? "Resetting..." : "Yes, Reset Everything"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

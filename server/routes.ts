@@ -188,6 +188,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Factory reset - parent only
+  app.post("/api/family/reset", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const actingMemberId = req.session.actingAsMemberId;
+      
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can reset the family
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can reset the family" });
+      }
+      
+      // Perform factory reset
+      await storage.resetFamilyToFactory(member.familyName);
+      
+      // Broadcast reset to all family members
+      broadcastToFamily(member.familyName, {
+        type: "factory_reset",
+        message: "Family has been reset to factory settings",
+      });
+      
+      res.json({ message: "Family reset to factory settings successfully" });
+    } catch (error) {
+      console.error("Error resetting family:", error);
+      res.status(500).json({ message: "Failed to reset family" });
+    }
+  });
+
   // Family member routes
   app.get("/api/family-members/current", isAuthenticated, async (req: any, res) => {
     try {
