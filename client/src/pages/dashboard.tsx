@@ -28,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -254,15 +254,15 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
       setCompletionDialogOpen(false);
       setTaskToComplete(null);
       
-      if (data.pointsEarned) {
-        setCelebration({
-          points: data.pointsEarned,
-          message: "Awesome job!",
-        });
-      }
+      // Show success message - points will be awarded after parent approval
+      toast({
+        title: "Task Submitted!",
+        description: data.message || "Awaiting parent approval for points",
+      });
     },
   });
 
@@ -553,6 +553,12 @@ export default function Dashboard() {
 
               {/* Action Buttons */}
               <div className="flex items-center justify-center flex-wrap gap-2">
+                <Link href="/approvals">
+                  <Button variant="outline" data-testid="button-approvals">
+                    <ClipboardCheck className="h-4 w-4 mr-2" />
+                    Approvals
+                  </Button>
+                </Link>
                 <Link href="/analytics">
                   <Button variant="outline" data-testid="button-analytics">
                     <BarChart3 className="h-4 w-4 mr-2" />

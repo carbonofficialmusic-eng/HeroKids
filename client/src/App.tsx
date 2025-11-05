@@ -13,6 +13,7 @@ import Dashboard from "@/pages/dashboard";
 import Pricing from "@/pages/pricing";
 import Analytics from "@/pages/analytics";
 import Chat from "@/pages/chat";
+import Approvals from "@/pages/approvals";
 import RewardsBoard from "@/pages/rewards-board";
 import Settings from "@/pages/settings";
 import SkinsGallery from "@/pages/skins-gallery";
@@ -102,6 +103,7 @@ function Router() {
             <Route path="/pricing" component={Pricing} />
             <Route path="/analytics" component={Analytics} />
             <Route path="/chat" component={Chat} />
+            <Route path="/approvals" component={Approvals} />
             <Route path="/rewards-board" component={RewardsBoard} />
             <Route path="/skins" component={SkinsGallery} />
             <Route path="/settings" component={Settings} />
