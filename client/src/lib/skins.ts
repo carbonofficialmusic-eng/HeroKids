@@ -7,7 +7,7 @@ import superheroImg from "@assets/generated_images/Female_superhero_character_av
 import chefImg from "@assets/generated_images/Cute_chef_character_avatar_4cecd321.png";
 import halloweenImg from "@assets/generated_images/Cute_Halloween_monster_avatar_ea8b9c0b.png";
 import constructionImg from "@assets/generated_images/Construction_worker_hero_avatar_d1064dc6.png";
-import locomotiveImg from "@assets/generated_images/Train_conductor_hero_avatar_b012c96b.png";
+import locomotiveImg from "@assets/generated_images/Female_train_conductor_hero_avatar_dad8a300.png";
 import dolphinImg from "@assets/generated_images/Dolphin_hero_avatar_19162df6.png";
 
 // Import themed background images
