@@ -1989,6 +1989,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
       
+      console.log("✅ Checkout session created:", {
+        sessionId: session.id,
+        url: session.url,
+        tier,
+        familyName: family.familyName,
+      });
+      
       res.json({ sessionId: session.id, url: session.url });
     } catch (error: any) {
       console.error("Error creating checkout session:", error);

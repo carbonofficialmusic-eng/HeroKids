@@ -113,7 +113,20 @@ export default function Pricing() {
       return await res.json();
     },
     onSuccess: (data: { sessionId: string; url: string }) => {
+      console.log("Checkout session created:", data);
+      
+      if (!data.url) {
+        setProcessingTier(null);
+        toast({
+          title: "Checkout Error",
+          description: "No checkout URL received from server",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Redirect to Stripe Checkout
+      console.log("Redirecting to:", data.url);
       window.location.href = data.url;
     },
     onError: (error: any) => {
