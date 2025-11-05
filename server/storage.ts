@@ -84,6 +84,10 @@ export interface IStorage {
   // Task completion operations
   createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion>;
   getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]>;
+  getPendingCompletionsByFamily(familyName: string): Promise<any[]>;
+  approveTaskCompletion(completionId: string, approvedBy: string): Promise<void>;
+  rejectTaskCompletion(completionId: string, approvedBy: string, rejectionReason: string): Promise<void>;
+  getTaskCompletion(completionId: string): Promise<TaskCompletion | undefined>;
 
   // Reward operations
   getRewardsByFamily(familyName: string): Promise<Reward[]>;
@@ -393,6 +397,66 @@ export class DatabaseStorage implements IStorage {
       .from(taskCompletions)
       .where(eq(taskCompletions.memberId, memberId))
       .orderBy(desc(taskCompletions.completedAt));
+  }
+
+  async getTaskCompletion(completionId: string): Promise<TaskCompletion | undefined> {
+    const [completion] = await db
+      .select()
+      .from(taskCompletions)
+      .where(eq(taskCompletions.id, completionId));
+    return completion;
+  }
+
+  async getPendingCompletionsByFamily(familyName: string): Promise<any[]> {
+    const completions = await db
+      .select({
+        id: taskCompletions.id,
+        taskId: taskCompletions.taskId,
+        taskTitle: tasks.title,
+        taskPoints: tasks.points,
+        memberId: taskCompletions.memberId,
+        memberName: familyMembers.displayName,
+        memberAvatar: familyMembers.avatarUrl,
+        proofPhotoUrl: taskCompletions.proofPhotoUrl,
+        pointsEarned: taskCompletions.pointsEarned,
+        completedAt: taskCompletions.completedAt,
+        status: taskCompletions.status,
+      })
+      .from(taskCompletions)
+      .innerJoin(tasks, eq(taskCompletions.taskId, tasks.id))
+      .innerJoin(familyMembers, eq(taskCompletions.memberId, familyMembers.id))
+      .where(
+        and(
+          eq(familyMembers.familyName, familyName),
+          eq(taskCompletions.status, "pending")
+        )
+      )
+      .orderBy(desc(taskCompletions.completedAt));
+    
+    return completions;
+  }
+
+  async approveTaskCompletion(completionId: string, approvedBy: string): Promise<void> {
+    await db
+      .update(taskCompletions)
+      .set({
+        status: "approved",
+        approvedBy,
+        approvedAt: new Date(),
+      })
+      .where(eq(taskCompletions.id, completionId));
+  }
+
+  async rejectTaskCompletion(completionId: string, approvedBy: string, rejectionReason: string): Promise<void> {
+    await db
+      .update(taskCompletions)
+      .set({
+        status: "rejected",
+        approvedBy,
+        approvedAt: new Date(),
+        rejectionReason,
+      })
+      .where(eq(taskCompletions.id, completionId));
   }
 
   // Reward operations
