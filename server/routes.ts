@@ -837,35 +837,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         uploadedPhotos.delete(proofPhotoUrl);
       }
       
-      // Create completion record
+      // Create completion record with pending status (no points awarded yet)
       const completion = await storage.createTaskCompletion({
         taskId: task.id,
         memberId: member.id,
         pointsEarned: task.points,
         proofPhotoUrl: proofPhotoUrl || null,
+        status: "pending",
       });
       
-      // Update member points
-      const newTotalEarned = member.totalEarned + task.points; // Lifetime achievement (never decreases)
-      const newTotalPoints = member.totalPoints + task.points; // Available balance
-      const newWeeklyPoints = member.weeklyPoints + task.points;
-      const newMonthlyPoints = member.monthlyPoints + task.points;
-      
-      await storage.updateFamilyMemberPoints(
-        member.id,
-        newTotalEarned,
-        newTotalPoints,
-        newWeeklyPoints,
-        newMonthlyPoints
-      );
-      
-      // Add to points history
-      await storage.addPointsHistory({
-        memberId: member.id,
-        points: task.points,
-        reason: `Completed: ${task.title}`,
-        taskId: task.id,
-      });
+      // DO NOT update member points here - they will be awarded upon parent approval
       
       // Handle recurring tasks with custom days interval
       if (task.recurrenceDays) {
@@ -943,18 +924,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get updated member data
       const updatedMember = await storage.getFamilyMember(member.id);
       
-      // Broadcast completion to family
+      // Broadcast pending completion to family (so parents know to approve)
       broadcastToFamily(member.familyName, {
-        type: "task_completed",
+        type: "task_completion_pending",
         taskId: task.id,
+        completionId: completion.id,
         member: updatedMember,
         pointsEarned: task.points,
       });
       
       res.json({
         success: true,
-        pointsEarned: task.points,
-        newTotalPoints: newTotalPoints,
+        message: "Task completion submitted! Awaiting parent approval.",
         completion,
       });
     } catch (error: any) {
