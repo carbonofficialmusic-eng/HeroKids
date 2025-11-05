@@ -326,6 +326,34 @@ export const insertRewardRedemptionSchema = createInsertSchema(rewardRedemptions
 export type InsertRewardRedemption = z.infer<typeof insertRewardRedemptionSchema>;
 export type RewardRedemption = typeof rewardRedemptions.$inferSelect;
 
+// Chat Messages - Family chat messages (Family+ and Family Hero tier)
+export const chatMessages = pgTable("chat_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  message: text("message").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
+  family: one(families, {
+    fields: [chatMessages.familyName],
+    references: [families.familyName],
+  }),
+  member: one(familyMembers, {
+    fields: [chatMessages.memberId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type ChatMessage = typeof chatMessages.$inferSelect;
+
 // Skins - Unlockable character skins for avatars
 export const skins = pgTable("skins", {
   id: varchar("id").primaryKey(),

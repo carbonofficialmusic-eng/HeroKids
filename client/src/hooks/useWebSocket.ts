@@ -74,6 +74,11 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
               break;
 
+            case "chat_message":
+              // Invalidate chat messages to show new message
+              queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+              break;
+
             default:
               console.log("Unknown WebSocket message type:", data.type);
           }

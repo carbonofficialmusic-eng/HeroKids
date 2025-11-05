@@ -8,7 +8,7 @@ import { mkdir } from "fs/promises";
 import { z } from "zod";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema } from "@shared/schema";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import "./types";
@@ -1648,6 +1648,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching analytics:", error);
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Chat endpoints (Family+ and Family Hero tier)
+  app.get("/api/chat", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get family tier and check if chat is allowed
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Check tier access (Family+ tier and above)
+      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat")) {
+        return res.status(403).json({ 
+          message: "Family chat is only available for Family+ tier and above",
+          tier: family.subscriptionTier,
+          requiredTier: "family_plus"
+        });
+      }
+      
+      // Fetch chat messages with clamped limit
+      const rawLimit = parseInt(req.query.limit as string) || 50;
+      const limit = Math.min(Math.max(rawLimit, 1), 100); // Clamp between 1 and 100
+      const messages = await storage.getChatMessages(member.familyName, limit);
+      
+      res.json(messages);
+    } catch (error: any) {
+      console.error("Error fetching chat messages:", error);
+      res.status(500).json({ message: "Failed to fetch chat messages" });
+    }
+  });
+
+  app.post("/api/chat", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get family tier and check if chat is allowed
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Check tier access (Family+ tier and above)
+      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat")) {
+        return res.status(403).json({ 
+          message: "Family chat is only available for Family+ tier and above",
+          tier: family.subscriptionTier,
+          requiredTier: "family_plus"
+        });
+      }
+      
+      // Validate request using schema
+      const validationResult = insertChatMessageSchema.safeParse({
+        familyName: member.familyName,
+        memberId: member.id,
+        message: req.body.message,
+      });
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid message data",
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      // Additional validation for message length
+      if (validationResult.data.message.length > 1000) {
+        return res.status(400).json({ message: "Message too long (max 1000 characters)" });
+      }
+      
+      // Create chat message
+      const newMessage = await storage.createChatMessage(validationResult.data);
+      
+      // Broadcast to family via WebSocket
+      broadcastToFamily(member.familyName, {
+        type: "chat_message",
+        message: {
+          id: newMessage.id,
+          message: newMessage.message,
+          createdAt: newMessage.createdAt,
+          memberId: member.id,
+          memberName: member.displayName,
+          memberColor: member.color,
+          memberAvatarUrl: member.avatarUrl,
+          memberActiveSkinId: member.activeSkinId,
+        },
+      });
+      
+      res.status(201).json(newMessage);
+    } catch (error: any) {
+      console.error("Error creating chat message:", error);
+      res.status(500).json({ message: "Failed to send message" });
     }
   });
 

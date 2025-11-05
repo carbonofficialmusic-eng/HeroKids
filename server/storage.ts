@@ -10,6 +10,7 @@ import {
   rewardRequests,
   pointsHistory,
   skins,
+  chatMessages,
   type User,
   type UpsertUser,
   type Family,
@@ -29,6 +30,8 @@ import {
   type InsertPointsHistory,
   type TaskCompletion,
   type Skin,
+  type ChatMessage,
+  type InsertChatMessage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -114,6 +117,10 @@ export interface IStorage {
 
   // Analytics operations
   getAnalytics(familyName: string): Promise<any>;
+
+  // Chat operations (Family+ and Family Hero tier)
+  getChatMessages(familyName: string, limit?: number): Promise<any[]>;
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -810,6 +817,34 @@ export class DatabaseStorage implements IStorage {
         totalTasksAssigned,
       },
     };
+  }
+
+  // Chat operations
+  async getChatMessages(familyName: string, limit: number = 50): Promise<any[]> {
+    const messages = await db
+      .select({
+        id: chatMessages.id,
+        message: chatMessages.message,
+        createdAt: chatMessages.createdAt,
+        memberId: chatMessages.memberId,
+        memberName: familyMembers.displayName,
+        memberColor: familyMembers.color,
+        memberAvatarUrl: familyMembers.avatarUrl,
+        memberActiveSkinId: familyMembers.activeSkinId,
+      })
+      .from(chatMessages)
+      .innerJoin(familyMembers, eq(chatMessages.memberId, familyMembers.id))
+      .where(eq(chatMessages.familyName, familyName))
+      .orderBy(desc(chatMessages.createdAt))
+      .limit(limit);
+
+    // Return in reverse order (oldest first)
+    return messages.reverse();
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const [newMessage] = await db.insert(chatMessages).values(message).returning();
+    return newMessage;
   }
 }
 

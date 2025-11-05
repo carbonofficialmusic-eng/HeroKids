@@ -28,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -557,6 +557,12 @@ export default function Dashboard() {
                   <Button variant="outline" data-testid="button-analytics">
                     <BarChart3 className="h-4 w-4 mr-2" />
                     Analytics
+                  </Button>
+                </Link>
+                <Link href="/chat">
+                  <Button variant="outline" data-testid="button-chat">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Family Chat
                   </Button>
                 </Link>
                 <Link href="/rewards-board">
