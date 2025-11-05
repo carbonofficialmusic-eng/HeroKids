@@ -944,6 +944,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Task approval routes
+  app.get("/api/tasks/completions/pending", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can view pending completions
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can view pending completions" });
+      }
+      
+      const pendingCompletions = await storage.getPendingCompletionsByFamily(member.familyName);
+      res.json(pendingCompletions);
+    } catch (error: any) {
+      console.error("Error fetching pending completions:", error);
+      res.status(500).json({ message: "Failed to fetch pending completions" });
+    }
+  });
+
+  app.post("/api/tasks/completions/:completionId/approve", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { completionId } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can approve completions
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can approve task completions" });
+      }
+      
+      // Get the completion to verify it exists and get details
+      const completion = await storage.getTaskCompletion(completionId);
+      if (!completion) {
+        return res.status(404).json({ message: "Task completion not found" });
+      }
+      
+      if (completion.status !== "pending") {
+        return res.status(422).json({ message: "Task completion is not pending" });
+      }
+      
+      // Get the child member to update their points
+      const childMember = await storage.getFamilyMember(completion.memberId);
+      if (!childMember) {
+        return res.status(404).json({ message: "Child member not found" });
+      }
+      
+      // Verify both are in the same family
+      if (childMember.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Cannot approve completions from another family" });
+      }
+      
+      // Award points to the child
+      const newTotalEarned = childMember.totalEarned + completion.pointsEarned;
+      const newTotalPoints = childMember.totalPoints + completion.pointsEarned;
+      const newWeeklyPoints = childMember.weeklyPoints + completion.pointsEarned;
+      const newMonthlyPoints = childMember.monthlyPoints + completion.pointsEarned;
+      
+      await storage.updateFamilyMemberPoints(
+        childMember.id,
+        newTotalEarned,
+        newTotalPoints,
+        newWeeklyPoints,
+        newMonthlyPoints
+      );
+      
+      // Add to points history
+      const task = await storage.getTask(completion.taskId);
+      await storage.addPointsHistory({
+        memberId: childMember.id,
+        points: completion.pointsEarned,
+        reason: `Approved: ${task?.title || "Task"}`,
+        taskId: completion.taskId,
+      });
+      
+      // Mark completion as approved
+      await storage.approveTaskCompletion(completionId, member.id);
+      
+      // Get updated member data
+      const updatedChild = await storage.getFamilyMember(childMember.id);
+      
+      // Broadcast approval to family
+      broadcastToFamily(member.familyName, {
+        type: "task_completion_approved",
+        completionId,
+        taskId: completion.taskId,
+        member: updatedChild,
+        pointsEarned: completion.pointsEarned,
+        approvedBy: member.displayName,
+      });
+      
+      res.json({
+        success: true,
+        message: "Task completion approved!",
+        pointsAwarded: completion.pointsEarned,
+        updatedMember: updatedChild,
+      });
+    } catch (error: any) {
+      console.error("Error approving task completion:", error);
+      res.status(500).json({ message: "Failed to approve task completion" });
+    }
+  });
+
+  app.post("/api/tasks/completions/:completionId/reject", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { completionId } = req.params;
+      const { reason } = req.body;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can reject completions
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can reject task completions" });
+      }
+      
+      // Get the completion to verify it exists
+      const completion = await storage.getTaskCompletion(completionId);
+      if (!completion) {
+        return res.status(404).json({ message: "Task completion not found" });
+      }
+      
+      if (completion.status !== "pending") {
+        return res.status(422).json({ message: "Task completion is not pending" });
+      }
+      
+      // Get the child member
+      const childMember = await storage.getFamilyMember(completion.memberId);
+      if (!childMember) {
+        return res.status(404).json({ message: "Child member not found" });
+      }
+      
+      // Verify both are in the same family
+      if (childMember.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Cannot reject completions from another family" });
+      }
+      
+      // Mark completion as rejected
+      await storage.rejectTaskCompletion(completionId, member.id, reason || "Did not meet expectations");
+      
+      // Broadcast rejection to family
+      broadcastToFamily(member.familyName, {
+        type: "task_completion_rejected",
+        completionId,
+        taskId: completion.taskId,
+        memberId: childMember.id,
+        rejectedBy: member.displayName,
+        reason: reason || "Did not meet expectations",
+      });
+      
+      res.json({
+        success: true,
+        message: "Task completion rejected",
+      });
+    } catch (error: any) {
+      console.error("Error rejecting task completion:", error);
+      res.status(500).json({ message: "Failed to reject task completion" });
+    }
+  });
+
   // Reward routes
   app.get("/api/rewards", isAuthenticated, async (req: any, res) => {
     try {
