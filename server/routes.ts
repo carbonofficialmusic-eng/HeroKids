@@ -6,12 +6,18 @@ import multer from "multer";
 import { join } from "path";
 import { mkdir } from "fs/promises";
 import { z } from "zod";
+import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema } from "@shared/schema";
-import { getMaxMembers, hasFeature, canAddMember, getMaxSkins } from "@shared/tier-config";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, type Family } from "@shared/schema";
+import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import "./types";
+
+// Initialize Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2025-10-29.clover",
+});
 
 // Configure multer for photo uploads
 const uploadDir = join(process.cwd(), "uploads", "task-proofs");
@@ -1913,6 +1919,167 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to send message" });
     }
   });
+
+  // ===== Stripe Integration =====
+  
+  // Create Stripe Checkout Session
+  app.post("/api/create-checkout-session", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { tier } = req.body;
+      
+      if (!tier || !["family", "family_plus", "family_hero"].includes(tier)) {
+        return res.status(400).json({ message: "Invalid subscription tier" });
+      }
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member || member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can manage subscriptions" });
+      }
+      
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      const tierConfig = TIER_CONFIG[tier as SubscriptionTier];
+      if (!tierConfig.stripePriceId) {
+        return res.status(400).json({ message: "This tier is not available for purchase" });
+      }
+      
+      // Create or retrieve Stripe customer
+      let customerId = family.billingCustomerId;
+      
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: req.user.claims.email,
+          metadata: {
+            familyName: family.familyName,
+          },
+        });
+        customerId = customer.id;
+        
+        // Update family with customer ID
+        await storage.updateFamily(family.familyName, {
+          billingCustomerId: customerId,
+        });
+      }
+      
+      // Create checkout session
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        mode: "subscription",
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price: tierConfig.stripePriceId,
+            quantity: 1,
+          },
+        ],
+        success_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/?subscription=success`,
+        cancel_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/subscription?canceled=true`,
+        metadata: {
+          familyName: family.familyName,
+          tier: tier,
+        },
+      });
+      
+      res.json({ sessionId: session.id, url: session.url });
+    } catch (error: any) {
+      console.error("Error creating checkout session:", error);
+      res.status(500).json({ message: error.message || "Failed to create checkout session" });
+    }
+  });
+  
+  // Stripe Webhook Handler (requires raw body)
+  app.post("/api/stripe-webhook", 
+    express.raw({ type: "application/json" }),
+    async (req: any, res) => {
+      const sig = req.headers["stripe-signature"];
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      
+      if (!webhookSecret) {
+        console.warn("STRIPE_WEBHOOK_SECRET not configured");
+        return res.status(400).send("Webhook secret not configured");
+      }
+      
+      let event: Stripe.Event;
+      
+      try {
+        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+      } catch (err: any) {
+        console.error("Webhook signature verification failed:", err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+      
+      // Handle the event
+      try {
+        switch (event.type) {
+          case "checkout.session.completed": {
+            const session = event.data.object as Stripe.Checkout.Session;
+            const familyName = session.metadata?.familyName;
+            const tier = session.metadata?.tier as SubscriptionTier;
+            
+            if (familyName && tier) {
+              await storage.updateFamily(familyName, {
+                subscriptionTier: tier,
+                subscriptionStatus: "active",
+                billingSubscriptionId: session.subscription as string,
+              });
+              
+              console.log(`✅ Subscription activated for ${familyName}: ${tier}`);
+            }
+            break;
+          }
+          
+          case "customer.subscription.updated": {
+            const subscription = event.data.object as Stripe.Subscription;
+            const customerId = subscription.customer as string;
+            
+            // Find family by customer ID
+            const families = await storage.getFamilies();
+            const family = families.find((f: Family) => f.billingCustomerId === customerId);
+            
+            if (family) {
+              await storage.updateFamily(family.familyName, {
+                subscriptionStatus: subscription.status as any,
+              });
+              
+              console.log(`📝 Subscription updated for ${family.familyName}: ${subscription.status}`);
+            }
+            break;
+          }
+          
+          case "customer.subscription.deleted": {
+            const subscription = event.data.object as Stripe.Subscription;
+            const customerId = subscription.customer as string;
+            
+            // Find family by customer ID
+            const families = await storage.getFamilies();
+            const family = families.find((f: Family) => f.billingCustomerId === customerId);
+            
+            if (family) {
+              await storage.updateFamily(family.familyName, {
+                subscriptionTier: "free",
+                subscriptionStatus: "canceled",
+              });
+              
+              console.log(`❌ Subscription canceled for ${family.familyName}`);
+            }
+            break;
+          }
+          
+          default:
+            console.log(`Unhandled event type: ${event.type}`);
+        }
+        
+        res.json({ received: true });
+      } catch (error: any) {
+        console.error("Error handling webhook event:", error);
+        res.status(500).json({ message: "Webhook handler error" });
+      }
+    }
+  );
 
   const httpServer = createServer(app);
 
