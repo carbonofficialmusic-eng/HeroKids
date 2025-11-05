@@ -2,10 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp, Users, Trophy, CheckCircle2, Lock } from "lucide-react";
+import { TrendingUp, Users, Trophy, CheckCircle2, Lock, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { Link } from "wouter";
 
 interface AnalyticsData {
   completionRate: number;
@@ -41,8 +43,16 @@ export default function Analytics() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen" data-testid="loading-analytics">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      <div className="container mx-auto p-6">
+        <Link href="/">
+          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
+        <div className="flex items-center justify-center min-h-[60vh]" data-testid="loading-analytics">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
       </div>
     );
   }
@@ -54,6 +64,12 @@ export default function Analytics() {
     if (errorMessage.includes("Family tier")) {
       return (
         <div className="container mx-auto p-6 max-w-4xl">
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
           <Card className="border-2" data-testid="card-upgrade-prompt">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -113,6 +129,12 @@ export default function Analytics() {
   return (
     <div className="container mx-auto p-6 space-y-6" data-testid="page-analytics">
       <div>
+        <Link href="/">
+          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
         <h1 className="text-3xl font-bold mb-2" data-testid="heading-analytics">
           Analytics Dashboard
         </h1>
