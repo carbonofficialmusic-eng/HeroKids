@@ -80,7 +80,7 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
       pushNotifications: false,
       maxSkins: 10, // All skins available through progression
     },
-    stripePriceId: process.env.STRIPE_PRICE_FAMILY, // Set via environment variable
+    stripePriceId: typeof process !== 'undefined' ? process.env.STRIPE_PRICE_FAMILY : undefined,
   },
   family_plus: {
     id: "family_plus",
@@ -103,7 +103,7 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
       pushNotifications: true,
       maxSkins: 10,
     },
-    stripePriceId: process.env.STRIPE_PRICE_FAMILY_PLUS,
+    stripePriceId: typeof process !== 'undefined' ? process.env.STRIPE_PRICE_FAMILY_PLUS : undefined,
   },
   family_hero: {
     id: "family_hero",
@@ -126,7 +126,7 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
       pushNotifications: true,
       maxSkins: 10,
     },
-    stripePriceId: process.env.STRIPE_PRICE_FAMILY_HERO,
+    stripePriceId: typeof process !== 'undefined' ? process.env.STRIPE_PRICE_FAMILY_HERO : undefined,
   },
 };
 

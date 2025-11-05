@@ -2,7 +2,7 @@
 
 ## Overview
 
-HomeHero is a full-stack web application designed to transform household chores into an engaging and motivating game for families. Children earn points, compete on leaderboards, and unlock rewards by completing tasks, fostering responsibility and making chores fun. The application features real-time updates, photo verification for task completion, and a playful, age-appropriate design. HomeHero aims to enhance family cooperation and introduce children to personal responsibility through gamified learning.
+HomeHero is a full-stack web application that gamifies household chores for families. It allows children to earn points, compete on leaderboards, and unlock rewards by completing tasks, fostering responsibility and making chores fun. The application features real-time updates, photo verification for task completion, and a playful, age-appropriate design, aiming to enhance family cooperation and introduce children to personal responsibility.
 
 ## User Preferences
 
@@ -10,149 +10,33 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: React with TypeScript, using Vite.
-- **Routing**: Wouter for client-side routing.
-- **State Management**: TanStack Query for server state management with aggressive caching.
-- **UI Component System**: Radix UI primitives wrapped with custom styling via shadcn/ui, following the "New York" style variant and custom Tailwind configuration.
-- **Design System**: Custom CSS variables for theming (light/dark mode), playful typography (Nunito, Fredoka), gradient effects, elevation system for interactive elements, and rounded corners.
-- **Real-time Updates**: WebSocket connection for live synchronization across family members, using query invalidation for immediate updates.
+### UI/UX Decisions
+- **Design System**: Custom CSS variables for theming (light/dark), playful typography (Nunito, Fredoka), gradient effects, elevation, and rounded corners.
+- **UI Components**: Radix UI primitives wrapped with shadcn/ui ("New York" style).
+- **Themed Backgrounds**: Dynamic backgrounds tied to active character skins with smooth crossfade transitions and frosted glass UI effects.
 
-### Backend Architecture
-- **Framework**: Express.js with TypeScript on Node.js.
-- **API Structure**: RESTful API with endpoints for authentication, family member management, tasks, rewards, task completions, and avatar uploads.
-- **File Upload Handling**: Multer middleware for photo uploads (task proofs, custom avatars) with size limits, image validation, and unique filename generation.
-- **WebSocket Server**: Runs alongside Express, using "family rooms" for targeted real-time broadcasts.
-- **Session Management**: Express-session with PostgreSQL session store (`connect-pg-simple`) for persistent sessions (7-day TTL, secure, httpOnly cookies).
-- **Development Tooling**: Custom Vite integration for serving React app with HMR and handling API routes.
+### Technical Implementations
+- **Frontend**: React with TypeScript (Vite), Wouter for routing, TanStack Query for server state management and caching.
+- **Backend**: Express.js with TypeScript (Node.js), RESTful API.
+- **Real-time Updates**: WebSocket server using "family rooms" for live synchronization.
+- **Authentication**: Replit Auth (OIDC-based) via `openid-client` and Passport.js, with Express-session and PostgreSQL store for persistent, secure sessions.
+- **File Uploads**: Multer middleware for photo uploads (task proofs, avatars).
+- **Subscription Tiers**: 4-tier model (Free, Family, Family+, Family Hero) with progressive feature unlocks enforced by backend middleware. Features include variable member limits, leaderboard types, character skin unlocks, photo proof, recurring tasks, and future analytics/chat.
+- **Gamification Features**: Monthly leaderboards, unlockable character skins based on reward redemptions, custom recurring tasks with availability management, and a factory reset option for parents.
+- **Points System**: Tracks `totalEarned` (lifetime), `totalPoints` (spendable balance), `weeklyPoints`, and `monthlyPoints`.
 
-### Data Storage
-- **Database**: PostgreSQL accessed via Neon's serverless driver.
-- **ORM**: Drizzle ORM for type-safe queries and schema management.
-- **Schema Design**: Includes tables for Users, Family Members (with points tracking), Tasks (with recurrence and photo requirements), Task Assignments, Task Completions (with photo proof URLs), Rewards, Points History, and Sessions.
-- **Database Migrations**: Managed via Drizzle Kit.
-
-### Authentication & Authorization
-- **Authentication Provider**: Replit Auth (OIDC-based) integrated via `openid-client` and Passport.js.
-- **Authentication Flow**: Redirects to Replit for OIDC, establishes a session, and creates/updates user/family member records.
-- **Session Security**: Secure, httpOnly cookies, 7-day session lifetime, CSRF protection, PostgreSQL-stored session data.
-- **Authorization Model**: Role-based (parent vs. child) with API-level permission enforcement.
+### System Design Choices
+- **Data Storage**: PostgreSQL (Neon serverless driver) with Drizzle ORM for type-safe schema and queries.
+- **Authorization**: Role-based (parent vs. child) with API-level enforcement.
+- **Session Management**: Secure, httpOnly cookies with 7-day TTL and CSRF protection.
+- **Development**: Custom Vite integration for React HMR and API routing.
 
 ## External Dependencies
 
--   **Authentication**: Replit Auth OIDC provider (`REPL_ID`, `ISSUER_URL`, `SESSION_SECRET` environment variables required).
--   **Database**: Neon PostgreSQL serverless database (`DATABASE_URL` environment variable required).
--   **Asset Storage**:
-    -   Local filesystem for uploaded task completion photos (`uploads/task-proofs/`) and custom profile pictures (`uploads/avatars/`).
-    -   Pre-made avatar assets in `attached_assets/generated_images/`.
-    -   All uploads served via `/uploads` static route.
+-   **Authentication**: Replit Auth OIDC provider.
+-   **Database**: Neon PostgreSQL serverless database.
+-   **Asset Storage**: Local filesystem for uploaded task completion photos and custom profile pictures; pre-made avatar assets.
 -   **Fonts**: Google Fonts (Nunito, Fredoka).
--   **UI Components**: Radix UI, shadcn/ui, Tailwind CSS, lucide-react.
--   **Build & Development**: Vite, esbuild, tsx, Replit-specific plugins.
--   **Validation**: Zod for schema validation; Drizzle-Zod for integration.
-
-## Recent Changes (November 2025)
-
-### Completed Features
--   **Join Family Feature**: 6-character case-insensitive join codes for adding family members on separate devices
--   **Parent Dashboard Enhancements**: Parents can redeem rewards and view same statistics as children
--   **Redemption Celebration Fix**: Celebration now displays correct reward name and points spent (e.g., "Sleeping at a friend - 30 points")
--   **Custom Logo**: HomeHero logo (blue house with red cape) added to landing page
--   **Monthly Leaderboard**: Leaderboard now shows "Points Earned This Month" instead of available balance
-    -   Redeeming rewards no longer affects leaderboard ranking
-    -   True competition for who worked hardest this month
-    -   Automatically resets on the 1st of each month
--   **Family Settings & Leaderboard Visibility**: Parents control leaderboard visibility for all child views
-    -   New Settings page accessible only to parents at `/settings`
-    -   Toggle to show/hide leaderboard for children
-    -   **Parents always see leaderboard in parent view** (regardless of setting)
-    -   **When acting as children, parents respect the visibility setting** (new behavior)
-    -   Real-time sync via WebSocket when settings change
-    -   Controlled Tabs state prevents UI issues when toggling while viewing leaderboard
-    -   Auto-resets to "Active Tasks" tab when leaderboard becomes unavailable
--   **Family Member Management in Settings**: Complete member management relocated to Settings page
-    -   Dashboard simplified - removed redundant Family Members section (already shown in leaderboard)
-    -   Settings page is now the central hub for family administration
-    -   **Member List Display**: Shows all family members with avatars, names, roles, and points
-    -   **Add Members**: Create new members with join code generation
-    -   **Delete Members**: Remove members with confirmation dialog (cannot delete yourself)
-    -   Safety checks: UI hides delete button for yourself, backend prevents self-deletion
-    -   Join code dialog displays properly after member creation
-    -   Fixed critical bug: initial family member creation now includes userId association
-    -   Fixed response parsing: mutations properly parse JSON to access joinCode
--   **Unlockable Character Skins System**: Gamified progression through reward redemptions
-    -   8 unique character skins (Dinosaur, Female Police Officer, Plants, Space Explorer, Female Superhero, Chef, Halloween Monster, Construction Worker)
-    -   **Unlock Thresholds**: Skins unlock based on total rewards redeemed (Dino at 3, Police at 6, Plants at 9, Space at 12, Superhero at 15, Chef at 18, Halloween at 21, Construction at 24)
-    -   **Female Heroes**: Police Officer and Superhero skins feature female characters for inclusivity
-    -   **New members start with no skins unlocked** - they use their default custom avatar until earning rewards
-    -   New `/skins` page displays all skins with lock/unlock states and progress bars
-    -   Active skin displays across all avatars app-wide (dashboard, leaderboard, tasks, etc.)
-    -   **Unlock Flow**: Skins unlock when parent approves reward redemptions
-    -   **Use Default Avatar**: Users can deselect character skins to return to their custom avatar (activeSkinId set to null)
-    -   **Real-time Updates**: Skin unlocks and selection broadcast via WebSocket
-    -   **Progress Tracking**: rewardsRedeemed counter tracks unlock progress
-    -   Celebration animation when equipping skins or switching to default avatar
-    -   Accessible via Palette icon in dashboard header
--   **Themed Backgrounds System**: Complete app theme transformation based on active skin
-    -   8 unique themed backgrounds matching each skin (jungle, city streets, garden, galaxy, skyline, kitchen, spooky castle, construction site)
-    -   Backgrounds imported using @assets Vite alias for optimal performance
-    -   Applied app-wide via BackgroundWrapper component in App.tsx
-    -   Smooth 0.8s crossfade transitions using opacity animation on layered elements
-    -   **Frosted Glass UI**: Cards use Tailwind opacity utilities (`bg-card/75`, `border-card-border/30`) with backdrop blur
-    -   Background images fully visible through UI components while maintaining text readability
-    -   Implementation: Card component applies 75% opacity backgrounds and 30% opacity borders using Tailwind utilities
-    -   Backdrop blur (`backdrop-blur-md`) ensures text remains readable over themed backgrounds
-    -   Real-time background updates via WebSocket when family members change skins
-    -   Backgrounds persist across all pages (dashboard, skins, settings, rewards, etc.)
-    -   Graceful fallbacks for unauthenticated users and members without active skins
--   **Celebration Display Fix**: Points now display correctly as "-30 pts" instead of "+-30 pts" for reward redemptions
--   **Header Refactoring**: Cleaner, more compact dashboard header with dropdown menu
-    -   Created ProfileMenu component consolidating all header actions
-    -   **Left Side**: Avatar + Member Name only (simplified from 4 buttons)
-    -   **Right Side**: Tier badge + Points counter + ProfileMenu dropdown
-    -   **Dropdown Actions**: Edit Profile, Character Skins, Family Settings (parent only), Switch Member (parent only when 2+ members), Theme Toggle, Logout
-    -   Added `max-w-7xl` width constraint to header and content for better alignment on wide screens
-    -   All functionality preserved with proper test IDs maintained
-    -   **Settings Button Removed**: Removed duplicate Settings button from parent dashboard main content (only in dropdown now)
-    -   **Family Settings Visibility**: Only shown when acting member is a parent (uses `isParent`, not `isRealParent`)
-        -   Children never see Family Settings
-        -   Parents acting as children don't see Family Settings
-        -   Only parents in parent view see Family Settings
-    -   **Switch Member Visibility**: Only shown when real user is parent AND there are 2+ family members
-        -   Hidden when only one family member exists (nothing to switch to)
-        -   Parents can switch even when acting as children (to switch back)
-        -   Children never see Switch Member
--   **Custom Recurring Tasks**: Tasks can recur automatically after a specified number of days
-    -   **Recurrence Days**: Parents can set tasks to recur after 1-365 days
-    -   **Task Availability**: When a recurring task is completed, it automatically becomes unavailable and reappears after the specified days
-    -   **Task Persistence**: Recurring tasks stay "active" (not marked "completed") and update their `nextAvailableDate` instead
-    -   **Automatic Filtering**: Backend filters tasks to only show those that are currently available (nextAvailableDate is null or in the past)
-    -   **UI Integration**: TaskDialog includes input field for custom recurrence days with validation
-    -   **Points Award**: Points are awarded immediately upon completion (same as non-recurring tasks)
--   **Factory Reset Feature**: Parents can reset the entire family game back to the beginning
-    -   **Parent-only access**: Only parents can perform factory reset (verified in backend and UI)
-    -   **Database Transaction**: All reset operations wrapped in transaction for atomicity (all-or-nothing)
-    -   **What Gets Deleted**: All tasks, task assignments, task completions, rewards, reward redemptions, reward requests, points history
-    -   **What Gets Reset**: All member points to 0, unlocked skins to empty array, active skin to null
-    -   **What Gets Preserved**: Family name, all family members, member names and roles, custom avatars
-    -   **Confirmation Dialog**: Strong warning UI with detailed lists of what will be deleted vs preserved
-    -   **WebSocket Notification**: Broadcasts "factory_reset" event to all family members for real-time sync
-    -   **UI Location**: Settings page (`/settings`) in red destructive-styled card
-    -   **Error Handling**: Transaction rollback on any failure prevents partial data corruption
-    -   **Post-Reset**: Redirects to dashboard with success toast, all queries invalidated for fresh state
-
-### Known Issues
--   **CRITICAL**: Task completion awards points immediately without parent approval - approval system needs implementation
--   Join codes are one-time use and cryptographically secure
--   Mobile dialogs use `max-h-[90vh] overflow-y-auto` for proper scrolling
--   Tier limits bypassed in development mode for testing
-
-### Technical Notes
--   **Points System**: 
-    -   `totalEarned`: Lifetime achievement (never decreases)
-    -   `totalPoints`: Available balance for spending on rewards (decreases when redeeming)
-    -   `weeklyPoints`: Points earned this week (never decreases, resets Monday)
-    -   `monthlyPoints`: Points earned this month (never decreases, resets 1st of month)
--   **Auth Fixes**: 
-    -   Updated upsertUser to use `users.id` as conflict target (prevents foreign key violations)
-    -   Removed unique constraint from email field (allows testing flexibility while maintaining OIDC sub as primary identifier)
+-   **UI Libraries**: Radix UI, shadcn/ui, Tailwind CSS, lucide-react.
+-   **Build & Development**: Vite, esbuild, tsx.
+-   **Validation**: Zod (with Drizzle-Zod integration).
