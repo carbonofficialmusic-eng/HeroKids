@@ -1,10 +1,11 @@
 // Import skin images using @assets alias
 import dinosaurImg from "@assets/generated_images/Cute_dinosaur_character_avatar_4f48bda8.png";
-import policeImg from "@assets/generated_images/Cute_police_officer_avatar_c145fb6f.png";
+import policeImg from "@assets/generated_images/Female_police_officer_avatar_ad47a20a.png";
 import plantsImg from "@assets/generated_images/Cute_plant_character_avatar_36aa366b.png";
 import spaceImg from "@assets/generated_images/Cute_space_explorer_avatar_a0b60f1e.png";
-import superheroImg from "@assets/generated_images/Cute_superhero_character_avatar_72557276.png";
+import superheroImg from "@assets/generated_images/Female_superhero_character_avatar_c7f67934.png";
 import chefImg from "@assets/generated_images/Cute_chef_character_avatar_4cecd321.png";
+import halloweenImg from "@assets/generated_images/Cute_Halloween_monster_avatar_ea8b9c0b.png";
 
 // Import themed background images
 import jungleBg from "@assets/generated_images/Jungle_plants_background_3f3fc573.png";
@@ -13,6 +14,7 @@ import gardenBg from "@assets/generated_images/Garden_nature_background_b373f3a6
 import spaceBg from "@assets/generated_images/Space_galaxy_background_8100facc.png";
 import skylineBg from "@assets/generated_images/City_skyline_background_cf75a668.png";
 import kitchenBg from "@assets/generated_images/Kitchen_restaurant_background_877f922e.png";
+import castleBg from "@assets/generated_images/Halloween_castle_background_scene_6acbb0d7.png";
 
 // Skin image mappings
 export const SKIN_IMAGES: Record<string, string> = {
@@ -22,6 +24,7 @@ export const SKIN_IMAGES: Record<string, string> = {
   space: spaceImg,
   superhero: superheroImg,
   chef: chefImg,
+  halloween: halloweenImg,
 };
 
 // Themed background mappings
@@ -32,6 +35,7 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   space: spaceBg,
   superhero: skylineBg,
   chef: kitchenBg,
+  halloween: castleBg,
 };
 
 // Helper to get avatar URL - returns skin image if active, otherwise custom avatar
