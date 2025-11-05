@@ -9,7 +9,7 @@ import { z } from "zod";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema } from "@shared/schema";
-import { getMaxMembers, hasFeature, canAddMember } from "@shared/tier-config";
+import { getMaxMembers, hasFeature, canAddMember, getMaxSkins } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import "./types";
 
@@ -1161,16 +1161,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newRewardsCount = await storage.incrementRewardsRedeemed(member.id);
       const allSkins = await storage.getSkins();
       
-      // Find skins that should be unlocked but aren't yet
-      const newlyUnlockedSkins = allSkins.filter(skin => 
+      // Get family tier to check skin limits
+      const family = await storage.getFamily(member.familyName);
+      const tier = family?.subscriptionTier as SubscriptionTier || "free";
+      const maxSkins = getMaxSkins(tier);
+      let currentUnlockedCount = member.unlockedSkins.length;
+      
+      // Find skins that should be unlocked but aren't yet (respecting tier limits)
+      const eligibleSkins = allSkins.filter(skin => 
         skin.unlockThreshold <= newRewardsCount && 
         !member.unlockedSkins.includes(skin.id)
       );
       
-      // Unlock new skins
-      for (const skin of newlyUnlockedSkins) {
-        await storage.unlockSkin(member.id, skin.id);
+      // Unlock new skins (up to tier limit)
+      const actuallyUnlockedSkins = [];
+      for (const skin of eligibleSkins) {
+        // Check if we've reached the tier limit
+        if (currentUnlockedCount < maxSkins) {
+          await storage.unlockSkin(member.id, skin.id);
+          actuallyUnlockedSkins.push(skin);
+          currentUnlockedCount++;
+        }
       }
+      const newlyUnlockedSkins = actuallyUnlockedSkins;
       
       // Auto-select first skin if none selected
       if (newlyUnlockedSkins.length > 0 && !member.activeSkinId) {
@@ -1275,16 +1288,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const newRewardsCount = await storage.incrementRewardsRedeemed(fullMember.id);
         const allSkins = await storage.getSkins();
         
-        // Find skins that should be unlocked but aren't yet
-        const newlyUnlockedSkins = allSkins.filter(skin => 
+        // Get family tier to check skin limits
+        const family = await storage.getFamily(fullMember.familyName);
+        const tier = family?.subscriptionTier as SubscriptionTier || "free";
+        const maxSkins = getMaxSkins(tier);
+        let currentUnlockedCount = fullMember.unlockedSkins.length;
+        
+        // Find skins that should be unlocked but aren't yet (respecting tier limits)
+        const eligibleSkins = allSkins.filter(skin => 
           skin.unlockThreshold <= newRewardsCount && 
           fullMember && !fullMember.unlockedSkins.includes(skin.id)
         );
         
-        // Unlock new skins
-        for (const skin of newlyUnlockedSkins) {
-          await storage.unlockSkin(fullMember.id, skin.id);
+        // Unlock new skins (up to tier limit)
+        const actuallyUnlockedSkins = [];
+        for (const skin of eligibleSkins) {
+          // Check if we've reached the tier limit
+          if (currentUnlockedCount < maxSkins) {
+            await storage.unlockSkin(fullMember.id, skin.id);
+            actuallyUnlockedSkins.push(skin);
+            currentUnlockedCount++;
+          }
         }
+        const newlyUnlockedSkins = actuallyUnlockedSkins;
         
         // Refresh member data after unlocking to get updated unlockedSkins and activeSkinId
         if (newlyUnlockedSkins.length > 0) {
