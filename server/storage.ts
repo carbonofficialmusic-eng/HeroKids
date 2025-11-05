@@ -517,7 +517,7 @@ export class DatabaseStorage implements IStorage {
 
   // Skin operations
   async getSkins(): Promise<Skin[]> {
-    return await db.select().from(skins);
+    return await db.select().from(skins).orderBy(skins.unlockThreshold);
   }
 
   async updateFamilyMemberActiveSkin(memberId: string, skinId: string | null): Promise<void> {
