@@ -34,6 +34,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import type { FamilyMember, Task, Reward, RewardRequest } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
+import { hasFeature } from "@shared/tier-config";
+import type { SubscriptionTier } from "@shared/tier-config";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -54,6 +56,7 @@ export default function Dashboard() {
     message: string;
   } | null>(null);
   const [childActiveTab, setChildActiveTab] = useState<string>("active");
+  const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("month");
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -784,7 +787,18 @@ export default function Dashboard() {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              <Leaderboard members={familyMembers} period="month" />
+              {/* Leaderboard with tier-gated period selector */}
+              {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
+                <div className="mb-4">
+                  <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="week" data-testid="tab-leaderboard-week">Weekly</TabsTrigger>
+                      <TabsTrigger value="month" data-testid="tab-leaderboard-month">Monthly</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              )}
+              <Leaderboard members={familyMembers} period={leaderboardPeriod} />
             </div>
           </div>
         ) : (
@@ -847,8 +861,16 @@ export default function Dashboard() {
               </TabsContent>
 
               {familyData?.showLeaderboard !== false && (
-                <TabsContent value="leaderboard" className="mt-6">
-                  <Leaderboard members={familyMembers} period="month" />
+                <TabsContent value="leaderboard" className="mt-6 space-y-4">
+                  {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
+                    <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="week" data-testid="tab-leaderboard-period-week">Weekly</TabsTrigger>
+                        <TabsTrigger value="month" data-testid="tab-leaderboard-period-month">Monthly</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  )}
+                  <Leaderboard members={familyMembers} period={leaderboardPeriod} />
                 </TabsContent>
               )}
             </Tabs>
