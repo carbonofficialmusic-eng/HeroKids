@@ -1966,6 +1966,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create checkout session
+      // Construct base URL with proper scheme
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+        : 'http://localhost:5000';
+      
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: "subscription",
@@ -1976,8 +1981,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             quantity: 1,
           },
         ],
-        success_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/?subscription=success`,
-        cancel_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/subscription?canceled=true`,
+        success_url: `${baseUrl}/?subscription=success`,
+        cancel_url: `${baseUrl}/pricing?canceled=true`,
         metadata: {
           familyName: family.familyName,
           tier: tier,
