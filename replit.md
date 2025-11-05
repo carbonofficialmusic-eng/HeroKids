@@ -81,8 +81,8 @@ Preferred communication style: Simple, everyday language.
     -   Fixed critical bug: initial family member creation now includes userId association
     -   Fixed response parsing: mutations properly parse JSON to access joinCode
 -   **Unlockable Character Skins System**: Gamified progression through reward redemptions
-    -   7 unique character skins (Dinosaur, Female Police Officer, Plants, Space Explorer, Female Superhero, Chef, Halloween Monster)
-    -   **Unlock Thresholds**: Skins unlock based on total rewards redeemed (Dino at 3, Police at 6, Plants at 9, Space at 12, Superhero at 15, Chef at 18, Halloween at 21)
+    -   8 unique character skins (Dinosaur, Female Police Officer, Plants, Space Explorer, Female Superhero, Chef, Halloween Monster, Construction Worker)
+    -   **Unlock Thresholds**: Skins unlock based on total rewards redeemed (Dino at 3, Police at 6, Plants at 9, Space at 12, Superhero at 15, Chef at 18, Halloween at 21, Construction at 24)
     -   **Female Heroes**: Police Officer and Superhero skins feature female characters for inclusivity
     -   **New members start with no skins unlocked** - they use their default custom avatar until earning rewards
     -   New `/skins` page displays all skins with lock/unlock states and progress bars
@@ -94,7 +94,7 @@ Preferred communication style: Simple, everyday language.
     -   Celebration animation when equipping skins or switching to default avatar
     -   Accessible via Palette icon in dashboard header
 -   **Themed Backgrounds System**: Complete app theme transformation based on active skin
-    -   7 unique themed backgrounds matching each skin (jungle, city streets, garden, galaxy, skyline, kitchen, spooky castle)
+    -   8 unique themed backgrounds matching each skin (jungle, city streets, garden, galaxy, skyline, kitchen, spooky castle, construction site)
     -   Backgrounds imported using @assets Vite alias for optimal performance
     -   Applied app-wide via BackgroundWrapper component in App.tsx
     -   Smooth 0.8s crossfade transitions using opacity animation on layered elements

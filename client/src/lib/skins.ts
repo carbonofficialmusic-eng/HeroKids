@@ -6,6 +6,7 @@ import spaceImg from "@assets/generated_images/Cute_space_explorer_avatar_a0b60f
 import superheroImg from "@assets/generated_images/Female_superhero_character_avatar_c7f67934.png";
 import chefImg from "@assets/generated_images/Cute_chef_character_avatar_4cecd321.png";
 import halloweenImg from "@assets/generated_images/Cute_Halloween_monster_avatar_ea8b9c0b.png";
+import constructionImg from "@assets/generated_images/Construction_worker_hero_avatar_d1064dc6.png";
 
 // Import themed background images
 import jungleBg from "@assets/generated_images/Jungle_plants_background_3f3fc573.png";
@@ -15,6 +16,7 @@ import spaceBg from "@assets/generated_images/Space_galaxy_background_8100facc.p
 import skylineBg from "@assets/generated_images/City_skyline_background_cf75a668.png";
 import kitchenBg from "@assets/generated_images/Kitchen_restaurant_background_877f922e.png";
 import castleBg from "@assets/generated_images/Halloween_castle_background_scene_6acbb0d7.png";
+import constructionBg from "@assets/generated_images/Construction_site_background_scene_990a32c9.png";
 
 // Skin image mappings
 export const SKIN_IMAGES: Record<string, string> = {
@@ -25,6 +27,7 @@ export const SKIN_IMAGES: Record<string, string> = {
   superhero: superheroImg,
   chef: chefImg,
   halloween: halloweenImg,
+  construction: constructionImg,
 };
 
 // Themed background mappings
@@ -36,6 +39,7 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   superhero: skylineBg,
   chef: kitchenBg,
   halloween: castleBg,
+  construction: constructionBg,
 };
 
 // Helper to get avatar URL - returns skin image if active, otherwise custom avatar
