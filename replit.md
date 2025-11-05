@@ -128,6 +128,17 @@ Preferred communication style: Simple, everyday language.
     -   **Automatic Filtering**: Backend filters tasks to only show those that are currently available (nextAvailableDate is null or in the past)
     -   **UI Integration**: TaskDialog includes input field for custom recurrence days with validation
     -   **Points Award**: Points are awarded immediately upon completion (same as non-recurring tasks)
+-   **Factory Reset Feature**: Parents can reset the entire family game back to the beginning
+    -   **Parent-only access**: Only parents can perform factory reset (verified in backend and UI)
+    -   **Database Transaction**: All reset operations wrapped in transaction for atomicity (all-or-nothing)
+    -   **What Gets Deleted**: All tasks, task assignments, task completions, rewards, reward redemptions, reward requests, points history
+    -   **What Gets Reset**: All member points to 0, unlocked skins to empty array, active skin to null
+    -   **What Gets Preserved**: Family name, all family members, member names and roles, custom avatars
+    -   **Confirmation Dialog**: Strong warning UI with detailed lists of what will be deleted vs preserved
+    -   **WebSocket Notification**: Broadcasts "factory_reset" event to all family members for real-time sync
+    -   **UI Location**: Settings page (`/settings`) in red destructive-styled card
+    -   **Error Handling**: Transaction rollback on any failure prevents partial data corruption
+    -   **Post-Reset**: Redirects to dashboard with success toast, all queries invalidated for fresh state
 
 ### Known Issues
 -   **CRITICAL**: Task completion awards points immediately without parent approval - approval system needs implementation
