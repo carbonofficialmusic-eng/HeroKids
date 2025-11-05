@@ -16,7 +16,7 @@ const TIERS = [
     name: "Free",
     icon: Users,
     memberLimit: 2,
-    price: "$0",
+    price: "€0",
     period: "forever",
     description: "Perfect for getting started",
     features: [
@@ -34,7 +34,7 @@ const TIERS = [
     name: "Family",
     icon: Trophy,
     memberLimit: 4,
-    price: "$3",
+    price: "€2",
     period: "per month",
     description: "Great for small families",
     features: [
@@ -53,7 +53,7 @@ const TIERS = [
     name: "Family+",
     icon: Zap,
     memberLimit: 6,
-    price: "$9",
+    price: "€5",
     period: "per month",
     description: "For larger families",
     features: [
@@ -71,7 +71,7 @@ const TIERS = [
     name: "Family Hero",
     icon: Crown,
     memberLimit: 999,
-    price: "$15",
+    price: "€12",
     period: "per month",
     description: "Ultimate family management",
     features: [
