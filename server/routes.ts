@@ -700,11 +700,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Parse and update the task
-      const parsed = insertTaskSchema.partial().parse(req.body);
-      const taskData = {
-        ...parsed,
-        dueDate: parsed.dueDate ? new Date(parsed.dueDate) : undefined,
-      };
+      const parsed: any = insertTaskSchema.partial().parse(req.body);
+      const taskData: any = { ...parsed };
+      
+      // Handle dueDate conversion - empty string should be null
+      if (taskData.dueDate !== undefined) {
+        if (typeof taskData.dueDate === 'string' && taskData.dueDate.trim() === '') {
+          taskData.dueDate = null;
+        } else if (taskData.dueDate) {
+          taskData.dueDate = new Date(taskData.dueDate);
+        }
+      }
       
       const updatedTask = await storage.updateTask(taskId, taskData);
 

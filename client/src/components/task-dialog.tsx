@@ -234,7 +234,7 @@ export function TaskDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-task">
         <DialogHeader>
           <DialogTitle className="text-2xl font-accent">
-            {editingTask ? "View Task" : "Create New Task"}
+            {editingTask ? "Edit Task" : "Create New Task"}
           </DialogTitle>
         </DialogHeader>
 
