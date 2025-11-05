@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Trophy, Users, Zap, Crown } from "lucide-react";
+import { Check, Trophy, Users, Zap, Crown, Loader2 } from "lucide-react";
 import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import type { FamilyMember } from "@shared/schema";
 
 const TIERS = [
@@ -20,10 +22,10 @@ const TIERS = [
     features: [
       "Up to 2 family members",
       "Unlimited tasks",
-      "Points & leaderboard",
+      "Monthly leaderboard",
       "Custom rewards",
-      "Task photo proofs",
       "Dark mode",
+      "3 unlockable character skins",
     ],
     popular: false,
   },
@@ -38,10 +40,11 @@ const TIERS = [
     features: [
       "Up to 4 family members",
       "Everything in Free",
+      "Photo proof for tasks",
       "Recurring tasks",
-      "Weekly/monthly leaderboards",
-      "Task templates",
-      "Priority support",
+      "Weekly & monthly leaderboards",
+      "Advanced analytics",
+      "10 unlockable character skins",
     ],
     popular: true,
   },
@@ -56,28 +59,28 @@ const TIERS = [
     features: [
       "Up to 6 family members",
       "Everything in Family",
-      "Advanced analytics",
+      "Family chat",
       "Task comments",
       "Push notifications",
-      "Family chat",
+      "All character skins unlocked",
     ],
     popular: false,
   },
   {
-    id: "hero_pro",
-    name: "HeroPro",
+    id: "family_hero",
+    name: "Family Hero",
     icon: Crown,
-    memberLimit: Infinity,
+    memberLimit: 999,
     price: "$15",
     period: "per month",
     description: "Ultimate family management",
     features: [
       "Unlimited family members",
       "Everything in Family+",
-      "Custom integrations",
-      "API access",
-      "Premium templates",
-      "24/7 priority support",
+      "Priority support",
+      "Early access to new features",
+      "Custom integrations (coming soon)",
+      "All future features included",
     ],
     popular: false,
   },
@@ -85,6 +88,8 @@ const TIERS = [
 
 export default function Pricing() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [processingTier, setProcessingTier] = useState<string | null>(null);
 
   // Fetch current family member to get subscription tier
   const { data: member } = useQuery<FamilyMember>({
@@ -102,10 +107,45 @@ export default function Pricing() {
     enabled: !!member,
   });
 
+  const checkoutMutation = useMutation({
+    mutationFn: async (tier: string) => {
+      const res = await apiRequest("POST", "/api/create-checkout-session", { tier });
+      return await res.json();
+    },
+    onSuccess: (data: { sessionId: string; url: string }) => {
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    },
+    onError: (error: any) => {
+      setProcessingTier(null);
+      toast({
+        title: "Checkout Error",
+        description: error.message || "Failed to start checkout process",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleUpgrade = (tierId: string) => {
+    if (!member || member.role !== "parent") {
+      toast({
+        title: "Permission Denied",
+        description: "Only parents can manage subscriptions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setProcessingTier(tierId);
+    checkoutMutation.mutate(tierId);
+  };
+
+  const isParent = member?.role === "parent";
+
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b sticky top-0 backdrop-blur-md z-40">
+      <header className="border-b sticky top-0 backdrop-blur-md z-40 bg-background/80">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/">
             <Button variant="ghost" data-testid="button-back-home">
@@ -124,12 +164,18 @@ export default function Pricing() {
           <p className="text-lg text-muted-foreground">
             Select the perfect plan for your family's needs. All plans include core task management features.
           </p>
+          {!isParent && (
+            <p className="text-sm text-amber-600 dark:text-amber-500 mt-4">
+              Note: Only parents can change subscription plans.
+            </p>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {TIERS.map((tier) => {
             const Icon = tier.icon;
             const isCurrentTier = familyData?.subscriptionTier === tier.id;
+            const isProcessing = processingTier === tier.id;
             
             return (
               <Card
@@ -166,7 +212,7 @@ export default function Pricing() {
                     <span className="text-sm text-muted-foreground">/{tier.period}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {tier.memberLimit === Infinity
+                    {tier.memberLimit === 999
                       ? "Unlimited members"
                       : `Up to ${tier.memberLimit} members`}
                   </p>
@@ -184,10 +230,16 @@ export default function Pricing() {
                 <Button
                   className="w-full"
                   variant={tier.popular ? "default" : "outline"}
-                  disabled={tier.id === "free"}
+                  disabled={tier.id === "free" || isCurrentTier || !isParent || isProcessing}
+                  onClick={() => handleUpgrade(tier.id)}
                   data-testid={`button-select-${tier.id}`}
                 >
-                  {tier.id === "free" ? (
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : tier.id === "free" ? (
                     "Current Plan"
                   ) : isCurrentTier ? (
                     "Current Plan"
@@ -205,11 +257,11 @@ export default function Pricing() {
           <h2 className="text-2xl font-bold font-accent mb-4">Questions?</h2>
           <p className="text-muted-foreground mb-6">
             All plans include unlimited tasks, points tracking, and real-time updates. 
-            Upgrade or downgrade anytime. No long-term contracts.
+            Upgrade or downgrade anytime. Cancel whenever you want, no questions asked.
           </p>
-          <Button variant="outline" data-testid="button-contact-support">
-            Contact Support
-          </Button>
+          <p className="text-sm text-muted-foreground">
+            Payments are securely processed by Stripe. Your subscription will renew automatically each month.
+          </p>
         </div>
       </div>
     </div>
