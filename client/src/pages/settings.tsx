@@ -350,8 +350,8 @@ export default function Settings() {
                 <CardTitle className="text-destructive">Factory Reset</CardTitle>
               </div>
               <CardDescription>
-                Reset your family's game progress back to the beginning. This will delete all tasks, rewards, points, and history.
-                Your family members will remain, but all their progress will be reset to zero.
+                Reset your family's game progress back to the beginning. This will delete all tasks, rewards, points, and history,
+                then create fresh default tasks. Your family members will remain, but all their progress will be reset to zero.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -363,6 +363,7 @@ export default function Settings() {
                   <li>All points will be reset to zero</li>
                   <li>All unlocked skins will be locked again</li>
                   <li>All history will be permanently deleted</li>
+                  <li>Three default tasks will be created (Clean room, Dishes, Vacuum)</li>
                   <li>Family members and avatars will be preserved</li>
                 </ul>
               </div>
@@ -468,6 +469,14 @@ export default function Settings() {
                 <li>All points (everyone back to 0)</li>
                 <li>All unlocked skins (everyone back to default)</li>
                 <li>All completion history</li>
+              </ul>
+              <p>
+                <strong>What will be created:</strong>
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Clean your room (20 pts, daily)</li>
+                <li>Do the dishes (15 pts, daily)</li>
+                <li>Vacuum the house (30 pts, every 3 days)</li>
               </ul>
               <p>
                 <strong>What will be kept:</strong>

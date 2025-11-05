@@ -656,6 +656,59 @@ export class DatabaseStorage implements IStorage {
           })
           .where(eq(familyMembers.id, memberId));
       }
+
+      // 9. Create default tasks for the family
+      const defaultTasks = [
+        {
+          id: crypto.randomUUID(),
+          familyName,
+          title: "Clean your room",
+          description: "Tidy up your bedroom and make your bed",
+          points: 20,
+          category: "Cleaning" as const,
+          recurrence: "daily" as const,
+          recurrenceDays: null,
+          nextAvailableDate: null,
+          requiresPhoto: false,
+          createdBy: memberIds[0], // Assign to first member (typically the parent who created the family)
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: crypto.randomUUID(),
+          familyName,
+          title: "Do the dishes",
+          description: "Wash, dry, and put away all dishes",
+          points: 15,
+          category: "Cleaning" as const,
+          recurrence: "daily" as const,
+          recurrenceDays: null,
+          nextAvailableDate: null,
+          requiresPhoto: false,
+          createdBy: memberIds[0],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: crypto.randomUUID(),
+          familyName,
+          title: "Vacuum the house",
+          description: "Vacuum all carpets and rugs in the house",
+          points: 30,
+          category: "Cleaning" as const,
+          recurrence: "none" as const,
+          recurrenceDays: 3, // Recurs every 3 days
+          nextAvailableDate: null,
+          requiresPhoto: false,
+          createdBy: memberIds[0],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      for (const task of defaultTasks) {
+        await tx.insert(tasks).values(task);
+      }
     });
   }
 }
