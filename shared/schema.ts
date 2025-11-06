@@ -132,6 +132,7 @@ export const tasks = pgTable("tasks", {
   nextAvailableDate: timestamp("next_available_date"), // When task becomes available again after completion
   status: taskStatusEnum("status").notNull().default("active"),
   requiresProof: boolean("requires_proof").notNull().default(false),
+  requiresApproval: boolean("requires_approval").notNull().default(true),
   iconEmoji: varchar("icon_emoji").default("⭐"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
