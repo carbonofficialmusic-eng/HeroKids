@@ -65,10 +65,12 @@ export function ProfileMenu({
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onEditProfile} data-testid="menu-item-edit-profile">
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Edit Profile</span>
-        </DropdownMenuItem>
+        {!isParent && (
+          <DropdownMenuItem onClick={onEditProfile} data-testid="menu-item-edit-profile">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Edit Profile</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link href="/skins" data-testid="menu-item-skins">
             <Palette className="mr-2 h-4 w-4" />
