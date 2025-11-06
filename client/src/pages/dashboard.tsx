@@ -36,6 +36,7 @@ import type { FamilyMember, Task, Reward, RewardRequest } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
+import { celebrateTaskCompletion } from "@/lib/confetti";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -265,9 +266,18 @@ export default function Dashboard() {
       setCompletionDialogOpen(false);
       setTaskToComplete(null);
       
-      // Show success message - points will be awarded after parent approval
+      // Show celebration for auto-approved tasks
+      if (data.autoApproved) {
+        celebrateTaskCompletion();
+        setCelebration({
+          points: data.completion?.pointsEarned || 0,
+          message: data.message || "Great job!",
+        });
+      }
+      
+      // Show success message
       toast({
-        title: "Task Submitted!",
+        title: data.autoApproved ? "🎉 Task Completed!" : "Task Submitted!",
         description: data.message || "Awaiting parent approval for points",
       });
     },

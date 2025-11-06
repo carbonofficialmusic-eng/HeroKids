@@ -6,6 +6,7 @@ import { Calendar, Camera, CheckCircle, Zap } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
 import { format } from "date-fns";
 import { getAvatarUrl } from "@/lib/skins";
+import { motion } from "framer-motion";
 
 interface TaskCardProps {
   task: Task;
@@ -28,15 +29,31 @@ export function TaskCard({
   const isUnavailable = !!(task.nextAvailableDate && new Date(task.nextAvailableDate) > new Date());
   
   return (
-    <Card
-      className={`p-6 transition-all ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''} ${isUnavailable ? 'opacity-60' : ''}`}
-      data-testid={`card-task-${task.id}`}
-      onClick={() => onClick?.(task)}
+    <motion.div
+      initial={false}
+      animate={{
+        opacity: isUnavailable ? 0.6 : 1,
+        scale: 1,
+      }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      whileTap={onClick ? { scale: 0.98 } : undefined}
     >
-      <div className="flex items-start gap-4">
-        <div className={`text-5xl ${isUnavailable ? 'grayscale' : ''}`} data-testid={`text-task-icon-${task.id}`}>
-          {task.iconEmoji}
-        </div>
+      <Card
+        className={`p-6 transition-all ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
+        data-testid={`card-task-${task.id}`}
+        onClick={() => onClick?.(task)}
+      >
+        <div className="flex items-start gap-4">
+          <motion.div
+            className="text-5xl"
+            data-testid={`text-task-icon-${task.id}`}
+            animate={{
+              filter: isUnavailable ? "grayscale(100%)" : "grayscale(0%)",
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            {task.iconEmoji}
+          </motion.div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -47,7 +64,13 @@ export function TaskCard({
                 {task.title}
               </h3>
               {isUnavailable && (
-                <CheckCircle className="h-5 w-5 text-green-500 shrink-0" data-testid={`icon-done-${task.id}`} />
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                >
+                  <CheckCircle className="h-5 w-5 text-green-500 shrink-0" data-testid={`icon-done-${task.id}`} />
+                </motion.div>
               )}
             </div>
             <Badge
@@ -135,5 +158,6 @@ export function TaskCard({
         </div>
       </div>
     </Card>
+    </motion.div>
   );
 }
