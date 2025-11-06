@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Camera, CheckCircle } from "lucide-react";
+import { Calendar, Camera, CheckCircle, Zap } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
 import { format } from "date-fns";
 import { getAvatarUrl } from "@/lib/skins";
@@ -71,6 +71,13 @@ export function TaskCard({
               <div className="flex items-center gap-1" data-testid={`icon-requires-proof-${task.id}`}>
                 <Camera className="h-4 w-4" />
                 <span>Photo required</span>
+              </div>
+            )}
+            
+            {!task.requiresApproval && (
+              <div className="flex items-center gap-1 text-primary" data-testid={`icon-auto-approved-${task.id}`}>
+                <Zap className="h-4 w-4" />
+                <span>Auto-approved</span>
               </div>
             )}
 
