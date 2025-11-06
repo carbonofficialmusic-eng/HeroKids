@@ -2004,25 +2004,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Stripe Webhook Handler (requires raw body)
-  app.post("/api/stripe-webhook", 
-    express.raw({ type: "application/json" }),
-    async (req: any, res) => {
-      const sig = req.headers["stripe-signature"];
-      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-      
-      if (!webhookSecret) {
-        console.warn("STRIPE_WEBHOOK_SECRET not configured");
-        return res.status(400).send("Webhook secret not configured");
-      }
-      
-      let event: Stripe.Event;
-      
-      try {
-        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-      } catch (err: any) {
-        console.error("Webhook signature verification failed:", err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-      }
+  app.post("/api/stripe-webhook", async (req: any, res) => {
+    const sig = req.headers["stripe-signature"];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    
+    console.log("🔔 Webhook received:", { 
+      hasSignature: !!sig, 
+      hasSecret: !!webhookSecret,
+      hasRawBody: !!req.rawBody 
+    });
+    
+    if (!webhookSecret) {
+      console.warn("STRIPE_WEBHOOK_SECRET not configured");
+      return res.status(400).send("Webhook secret not configured");
+    }
+    
+    if (!req.rawBody) {
+      console.error("No raw body available for webhook");
+      return res.status(400).send("No raw body available");
+    }
+    
+    let event: Stripe.Event;
+    
+    try {
+      // Use the rawBody that was saved by the express.json verify callback
+      event = stripe.webhooks.constructEvent(req.rawBody, sig, webhookSecret);
+      console.log("✅ Webhook event verified:", event.type);
+    } catch (err: any) {
+      console.error("Webhook signature verification failed:", err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
       
       // Handle the event
       try {
