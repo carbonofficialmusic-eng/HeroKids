@@ -29,7 +29,12 @@ Preferred communication style: Simple, everyday language.
 
 ### System Design Choices
 - **Data Storage**: PostgreSQL (Neon serverless driver) with Drizzle ORM for type-safe schema and queries.
-- **Authorization**: Role-based (parent vs. child) with API-level enforcement.
+- **Authorization**: Role-based (parent vs. child) with API-level enforcement and role change security safeguards.
+- **Role Change Security**: Multi-layered protection to prevent family lockout:
+  - Parents cannot demote themselves to child role (self-demotion prevention)
+  - Cannot demote the last parent (ensures at least one parent always exists)
+  - Only real authenticated parents can change roles (not "actingAs" sessions)
+  - Role enum validation ensures only "parent" or "child" values accepted
 - **Session Management**: Secure, httpOnly cookies with 7-day TTL and CSRF protection.
 - **Development**: Custom Vite integration for React HMR and API routing.
 
