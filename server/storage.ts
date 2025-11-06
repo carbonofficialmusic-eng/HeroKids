@@ -44,6 +44,7 @@ export interface IStorage {
   // Family operations
   getFamily(familyName: string): Promise<Family | undefined>;
   getFamilies(): Promise<Family[]>;
+  getFamilyByJoinCode(joinCode: string): Promise<Family | undefined>;
   createFamily(family: InsertFamily): Promise<Family>;
   updateFamily(familyName: string, updates: Partial<InsertFamily>): Promise<Family>;
   updateFamilyTier(familyName: string, tier: "free" | "family" | "family_plus" | "family_hero"): Promise<void>;
@@ -203,6 +204,14 @@ export class DatabaseStorage implements IStorage {
     return family;
   }
 
+  async getFamilyByJoinCode(joinCode: string): Promise<Family | undefined> {
+    const [family] = await db
+      .select()
+      .from(families)
+      .where(eq(families.joinCode, joinCode));
+    return family;
+  }
+
   // Family member operations
   async getFamilyMember(id: string): Promise<FamilyMember | undefined> {
     const [member] = await db
@@ -221,11 +230,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFamilyMemberByJoinCode(joinCode: string): Promise<FamilyMember | undefined> {
-    const [member] = await db
-      .select()
-      .from(familyMembers)
-      .where(eq(familyMembers.joinCode, joinCode));
-    return member;
+    // This method is deprecated - join codes are now at the family level
+    // Kept for backwards compatibility only
+    return undefined;
   }
 
   async linkUserToFamilyMember(

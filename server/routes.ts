@@ -376,15 +376,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        // Generate a cryptographically secure join code
-        const crypto = await import('crypto');
-        const joinCode = crypto.randomBytes(4).toString('hex').substring(0, 6).toUpperCase();
-        
-        // Create member with join code (no userId yet)
+        // Create member (no userId - this is a placeholder member)
         const member = await storage.createFamilyMember({
           ...parsed,
           familyName,
-          joinCode,
         });
         
         // Broadcast new member to family
@@ -401,8 +396,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Check if family exists, create if not
         let family = await storage.getFamily(parsed.familyName);
         if (!family) {
+          // Generate a cryptographically secure join code for the family
+          const crypto = await import('crypto');
+          const joinCode = crypto.randomBytes(4).toString('hex').substring(0, 6).toUpperCase();
+          
           family = await storage.createFamily({
             familyName: parsed.familyName,
+            joinCode,
             subscriptionTier: "free",
           });
         }
@@ -456,6 +456,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         displayName: z.string().min(1, "Display name is required"),
         avatarUrl: z.string().min(1, "Avatar is required"),
         color: z.string().min(1, "Color is required"),
+        role: z.enum(["parent", "child"]).optional().default("child"),
       });
       
       const parsed = joinFamilySchema.parse(req.body);
@@ -470,36 +471,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "You are already part of a family" });
       }
       
-      // Find the member record with this join code
-      const memberWithCode = await storage.getFamilyMemberByJoinCode(normalizedJoinCode);
+      // Find the family with this join code
+      const family = await storage.getFamilyByJoinCode(normalizedJoinCode);
       
-      if (!memberWithCode) {
+      if (!family) {
         return res.status(404).json({ message: "Invalid join code" });
       }
       
-      // Check if this member slot is already claimed
-      if (memberWithCode.userId) {
-        return res.status(400).json({ message: "This join code has already been used" });
+      // Check subscription tier limits (bypass in test/development environment)
+      const bypassTierLimits = process.env.BYPASS_TIER_LIMITS === "true" || process.env.NODE_ENV === "development";
+      
+      if (!bypassTierLimits) {
+        const currentCount = await storage.getFamilyMemberCount(family.familyName);
+        const tier = family.subscriptionTier as SubscriptionTier;
+        const limit = getMaxMembers(tier);
+        
+        if (!canAddMember(tier, currentCount)) {
+          return res.status(403).json({
+            message: `This family's ${tier} plan is limited to ${limit} members. Ask them to upgrade to add more members.`,
+            currentTier: tier,
+            currentCount,
+            limit,
+          });
+        }
       }
       
-      // Update the member with the user's ID and profile info
-      const updatedMember = await storage.linkUserToFamilyMember(
-        memberWithCode.id,
+      // Create new member linked to the user
+      const newMember = await storage.createFamilyMember({
+        familyName: family.familyName,
+        displayName: parsed.displayName,
+        avatarUrl: parsed.avatarUrl,
+        color: parsed.color,
+        role: parsed.role,
         userId,
-        { 
-          displayName: parsed.displayName, 
-          avatarUrl: parsed.avatarUrl, 
-          color: parsed.color 
-        }
-      );
+      } as any);
       
       // Broadcast member joined to family
-      broadcastToFamily(updatedMember.familyName, {
+      broadcastToFamily(newMember.familyName, {
         type: "member_joined",
-        member: updatedMember,
+        member: newMember,
       });
       
-      res.json(updatedMember);
+      res.json(newMember);
     } catch (error: any) {
       console.error("Error joining family:", error);
       res.status(400).json({ message: error.message || "Failed to join family" });

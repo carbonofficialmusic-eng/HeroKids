@@ -49,6 +49,7 @@ export type User = typeof users.$inferSelect;
 // Families - Family groups with subscription tiers
 export const families = pgTable("families", {
   familyName: varchar("family_name").primaryKey(),
+  joinCode: varchar("join_code", { length: 6 }).notNull().unique(), // Family-level join code
   subscriptionTier: subscriptionTierEnum("subscription_tier").notNull().default("free"),
   subscriptionStatus: subscriptionStatusEnum("subscription_status").default("active"), // Stripe subscription status
   billingCustomerId: varchar("billing_customer_id"), // Stripe customer ID
@@ -80,7 +81,6 @@ export const familyMembers = pgTable("family_members", {
   role: roleEnum("role").notNull().default("child"),
   avatarUrl: varchar("avatar_url"),
   color: varchar("color").notNull().default("#8B5CF6"), // User's theme color
-  joinCode: varchar("join_code").unique(), // Code for unclaimed profiles
   totalEarned: integer("total_earned").notNull().default(0), // Lifetime achievement points (never decreases)
   totalPoints: integer("total_points").notNull().default(0), // Available balance for redeeming rewards
   weeklyPoints: integer("weekly_points").notNull().default(0),
