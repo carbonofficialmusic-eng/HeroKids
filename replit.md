@@ -24,6 +24,8 @@ Preferred communication style: Simple, everyday language.
 - **Subscription Tiers**: 4-tier model (Free, Family, Family+, Family Hero) with progressive feature unlocks enforced by backend middleware. Features include variable member limits, leaderboard types, character skin unlocks, photo proof, recurring tasks, and future analytics/chat.
 - **Gamification Features**: Monthly leaderboards, unlockable character skins based on reward redemptions, custom recurring tasks with availability management, and a factory reset option for parents.
 - **Points System**: Tracks `totalEarned` (lifetime), `totalPoints` (spendable balance), `weeklyPoints`, and `monthlyPoints`.
+- **Family Chat**: Real-time family messaging (Family+ tier and above) with unread message counters, auto-mark-as-read functionality, and WebSocket synchronization.
+- **Join System**: Family-level join codes (6-character unique codes) for inviting new members to families.
 
 ### System Design Choices
 - **Data Storage**: PostgreSQL (Neon serverless driver) with Drizzle ORM for type-safe schema and queries.
