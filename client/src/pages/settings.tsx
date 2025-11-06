@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw } from "lucide-react";
 import { useLocation } from "wouter";
@@ -205,22 +204,19 @@ export default function Settings() {
     <div className="min-h-screen">
       <div className="container max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setLocation("/")}
-              data-testid="button-back"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold">Family Settings</h1>
-              <p className="text-muted-foreground">Manage your family's HomeHero experience</p>
-            </div>
+        <div className="flex items-center gap-3 mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setLocation("/")}
+            data-testid="button-back"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Family Settings</h1>
+            <p className="text-muted-foreground">Manage your family's HomeHero experience</p>
           </div>
-          <ThemeToggle />
         </div>
 
         {/* Settings Cards */}
