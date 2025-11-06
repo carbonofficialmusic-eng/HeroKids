@@ -867,6 +867,37 @@ export default function Dashboard() {
                 )}
               </TabsList>
 
+              {/* Quick Action Buttons */}
+              <div className="flex items-center justify-center flex-wrap gap-2 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setRequestRewardDialogOpen(true)}
+                  data-testid="button-request-reward"
+                >
+                  <Lightbulb className="h-4 w-4 mr-2" />
+                  Request Reward
+                </Button>
+                <Link href="/rewards-board">
+                  <Button variant="outline" data-testid="button-rewards-board-child">
+                    <Gift className="h-4 w-4 mr-2" />
+                    My Rewards
+                  </Button>
+                </Link>
+                {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") && (
+                  <Link href="/chat">
+                    <Button variant="outline" data-testid="button-chat-child" className="relative">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Family Chat
+                      {unreadChatData && unreadChatData.count > 0 && (
+                        <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1" data-testid="badge-unread-count-child">
+                          {unreadChatData.count}
+                        </Badge>
+                      )}
+                    </Button>
+                  </Link>
+                )}
+              </div>
+
               <TabsContent value="active" className="space-y-4 mt-6">
                 {activeTasks.length === 0 ? (
                   <Card className="p-12 text-center">
@@ -912,35 +943,6 @@ export default function Dashboard() {
             {/* Available Rewards */}
             <div>
               <h2 className="text-2xl font-bold font-accent mb-4">Rewards You Can Earn</h2>
-              <div className="flex items-center justify-center flex-wrap gap-2 mb-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setRequestRewardDialogOpen(true)}
-                  data-testid="button-request-reward"
-                >
-                  <Lightbulb className="h-4 w-4 mr-2" />
-                  Request Reward
-                </Button>
-                <Link href="/rewards-board">
-                  <Button variant="outline" data-testid="button-rewards-board-child">
-                    <Gift className="h-4 w-4 mr-2" />
-                    My Rewards
-                  </Button>
-                </Link>
-                {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") && (
-                  <Link href="/chat">
-                    <Button variant="outline" data-testid="button-chat-child" className="relative">
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Family Chat
-                      {unreadChatData && unreadChatData.count > 0 && (
-                        <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1" data-testid="badge-unread-count-child">
-                          {unreadChatData.count}
-                        </Badge>
-                      )}
-                    </Button>
-                  </Link>
-                )}
-              </div>
               {activeRewards.length === 0 ? (
                 <Card className="p-12 text-center">
                   <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
