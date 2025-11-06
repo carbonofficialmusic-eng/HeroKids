@@ -147,6 +147,7 @@ export function TaskDialog({
       recurrenceDays: undefined,
       status: "active",
       requiresProof: false,
+      requiresApproval: true,
       iconEmoji: "⭐",
     },
   });
@@ -177,6 +178,7 @@ export function TaskDialog({
           recurrenceDays: editingTask.recurrenceDays || undefined,
           status: editingTask.status,
           requiresProof: editingTask.requiresProof,
+          requiresApproval: editingTask.requiresApproval ?? true,
           iconEmoji: editingTask.iconEmoji || "⭐",
         });
       } else {
@@ -192,6 +194,7 @@ export function TaskDialog({
           recurrenceDays: undefined,
           status: "active",
           requiresProof: false,
+          requiresApproval: true,
           iconEmoji: "⭐",
         });
       }
@@ -492,6 +495,28 @@ export function TaskDialog({
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       data-testid="switch-requires-proof"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="requiresApproval"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Parent Approval</FormLabel>
+                    <FormDescription>
+                      Require parent approval before points are awarded
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      data-testid="switch-requires-approval"
                     />
                   </FormControl>
                 </FormItem>
