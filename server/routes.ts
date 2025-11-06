@@ -548,6 +548,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only parents can update other members' profiles" });
       }
       
+      // Security: Prevent role changes that could lock out the family
+      if (req.body.role && req.body.role !== memberToUpdate.role) {
+        // Validate role value
+        if (req.body.role !== "parent" && req.body.role !== "child") {
+          return res.status(400).json({ message: "Invalid role. Must be 'parent' or 'child'." });
+        }
+        
+        // Only parents can change roles
+        if (currentMember.role !== "parent") {
+          return res.status(403).json({ message: "Only parents can change member roles" });
+        }
+        
+        // Prevent self-demotion: parents cannot change their own role to child
+        if (memberToUpdate.id === currentMember.id && req.body.role === "child") {
+          return res.status(400).json({ message: "Parents cannot demote themselves to child. Ask another parent to change your role." });
+        }
+        
+        // Prevent demoting the last parent
+        if (req.body.role === "child" && memberToUpdate.role === "parent") {
+          const allMembers = await storage.getFamilyMembersByFamily(currentMember.familyName);
+          const parentCount = allMembers.filter(m => m.role === "parent").length;
+          
+          if (parentCount <= 1) {
+            return res.status(400).json({ message: "Cannot demote the last parent. At least one parent must remain to manage the family." });
+          }
+        }
+      }
+      
       // Update the member
       const updates = {
         displayName: req.body.displayName,
