@@ -88,6 +88,7 @@ export const familyMembers = pgTable("family_members", {
   rewardsRedeemed: integer("rewards_redeemed").notNull().default(0), // Counter for unlocking skins
   unlockedSkins: text("unlocked_skins").array().notNull().default(sql`ARRAY[]::text[]`), // Array of unlocked skin IDs
   activeSkinId: varchar("active_skin_id"), // Currently selected skin
+  lastReadChatAt: timestamp("last_read_chat_at"), // When member last viewed chat messages
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

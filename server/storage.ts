@@ -34,7 +34,7 @@ import {
   type InsertChatMessage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, gt, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -127,6 +127,8 @@ export interface IStorage {
   // Chat operations (Family+ and Family Hero tier)
   getChatMessages(familyName: string, limit?: number): Promise<any[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  updateLastReadChatAt(memberId: string): Promise<void>;
+  getUnreadMessageCount(memberId: string, familyName: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -924,6 +926,37 @@ export class DatabaseStorage implements IStorage {
   async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
     const [newMessage] = await db.insert(chatMessages).values(message).returning();
     return newMessage;
+  }
+
+  async updateLastReadChatAt(memberId: string): Promise<void> {
+    await db
+      .update(familyMembers)
+      .set({ lastReadChatAt: new Date() })
+      .where(eq(familyMembers.id, memberId));
+  }
+
+  async getUnreadMessageCount(memberId: string, familyName: string): Promise<number> {
+    const [member] = await db
+      .select({ lastReadChatAt: familyMembers.lastReadChatAt })
+      .from(familyMembers)
+      .where(eq(familyMembers.id, memberId));
+
+    if (!member) return 0;
+
+    const lastReadAt = member.lastReadChatAt || new Date(0);
+
+    const [result] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(chatMessages)
+      .where(
+        and(
+          eq(chatMessages.familyName, familyName),
+          gt(chatMessages.createdAt, lastReadAt),
+          sql`${chatMessages.memberId} != ${memberId}` // Don't count own messages
+        )
+      );
+
+    return Number(result?.count || 0);
   }
 }
 

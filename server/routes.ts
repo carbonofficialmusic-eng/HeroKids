@@ -1920,6 +1920,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get unread message count
+  app.get("/api/chat/unread-count", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get family tier and check if chat is allowed
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Check tier access (Family+ tier and above)
+      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat")) {
+        return res.json({ count: 0 }); // Return 0 if feature not available
+      }
+      
+      const count = await storage.getUnreadMessageCount(member.id, member.familyName);
+      res.json({ count });
+    } catch (error: any) {
+      console.error("Error getting unread message count:", error);
+      res.status(500).json({ message: "Failed to get unread count" });
+    }
+  });
+
+  // Mark chat messages as read
+  app.post("/api/chat/mark-read", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      await storage.updateLastReadChatAt(member.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error marking messages as read:", error);
+      res.status(500).json({ message: "Failed to mark messages as read" });
+    }
+  });
+
   // ===== Stripe Integration =====
   
   // Create Stripe Checkout Session
