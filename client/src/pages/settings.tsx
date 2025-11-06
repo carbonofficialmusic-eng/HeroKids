@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { AddMemberDialog } from "@/components/add-member-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw } from "lucide-react";
+import { EditMemberDialog } from "@/components/edit-member-dialog";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +33,8 @@ export default function Settings() {
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
   const [memberToDelete, setMemberToDelete] = useState<FamilyMember | null>(null);
+  const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
+  const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false);
 
   // Fetch current family member (may be acting as someone)
@@ -105,6 +108,31 @@ export default function Settings() {
       toast({
         title: "Error",
         description: "Failed to add family member. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Edit member mutation
+  const editMemberMutation = useMutation({
+    mutationFn: async ({ memberId, data }: { memberId: string; data: any }) => {
+      const response = await apiRequest("PUT", `/api/family-members/${memberId}`, data);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+      setEditMemberDialogOpen(false);
+      setMemberToEdit(null);
+      toast({
+        title: "Member updated",
+        description: "Family member has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update family member. Please try again.",
         variant: "destructive",
       });
     },
@@ -271,17 +299,31 @@ export default function Settings() {
                             </div>
                           </div>
                         </div>
-                        {!isCurrentUser && (
+                        <div className="flex items-center gap-2">
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => setMemberToDelete(familyMember)}
-                            disabled={deleteMemberMutation.isPending}
-                            data-testid={`button-delete-member-${familyMember.id}`}
+                            onClick={() => {
+                              setMemberToEdit(familyMember);
+                              setEditMemberDialogOpen(true);
+                            }}
+                            disabled={editMemberMutation.isPending}
+                            data-testid={`button-edit-member-${familyMember.id}`}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Pencil className="h-4 w-4" />
                           </Button>
-                        )}
+                          {!isCurrentUser && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setMemberToDelete(familyMember)}
+                              disabled={deleteMemberMutation.isPending}
+                              data-testid={`button-delete-member-${familyMember.id}`}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -386,6 +428,18 @@ export default function Settings() {
           onSubmit={(data) => addMemberMutation.mutate(data)}
           isSubmitting={addMemberMutation.isPending}
           familyName={member.familyName}
+        />
+      )}
+
+      {/* Edit Member Dialog */}
+      {memberToEdit && (
+        <EditMemberDialog
+          open={editMemberDialogOpen}
+          onOpenChange={setEditMemberDialogOpen}
+          member={memberToEdit}
+          onSubmit={(memberId, data) => editMemberMutation.mutate({ memberId, data })}
+          isSubmitting={editMemberMutation.isPending}
+          currentUserRole={realMember?.role}
         />
       )}
 
