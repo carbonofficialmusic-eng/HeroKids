@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -239,6 +240,9 @@ export function TaskDialog({
           <DialogTitle className="text-2xl font-accent">
             {editingTask ? "Edit Task" : "Create New Task"}
           </DialogTitle>
+          <DialogDescription>
+            {editingTask ? "Update the details for this task." : "Set up a new task for your family to complete."}
+          </DialogDescription>
         </DialogHeader>
 
         {/* Quick Templates Section - Only show when creating */}

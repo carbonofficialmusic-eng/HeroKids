@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -88,6 +89,9 @@ export function RewardDialog({
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-accent">{isEditing ? "Edit Reward" : "Create Reward"}</DialogTitle>
+          <DialogDescription>
+            {isEditing ? "Update the details for this reward." : "Set up a new reward that family members can redeem with their points."}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

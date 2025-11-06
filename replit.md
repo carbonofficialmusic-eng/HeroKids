@@ -14,6 +14,7 @@ Preferred communication style: Simple, everyday language.
 - **Design System**: Custom CSS variables for theming (light/dark), playful typography (Nunito, Fredoka), gradient effects, elevation, and rounded corners.
 - **UI Components**: Radix UI primitives wrapped with shadcn/ui ("New York" style).
 - **Themed Backgrounds**: Dynamic backgrounds tied to active character skins with smooth crossfade transitions and frosted glass UI effects.
+- **Animations**: Framer Motion for smooth transitions, canvas-confetti for celebratory effects on auto-approved task completions, spring-based animations for task cards, checkmarks, and points counter with 60fps performance.
 
 ### Technical Implementations
 - **Frontend**: React with TypeScript (Vite), Wouter for routing, TanStack Query for server state management and caching.
