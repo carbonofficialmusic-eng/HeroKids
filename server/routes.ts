@@ -927,79 +927,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Handle recurring tasks with custom days interval
-      if (task.recurrenceDays) {
-        // Calculate next available date based on custom interval
+      // Handle recurring tasks
+      if (task.recurrenceDays || task.recurrence !== "none") {
+        // Calculate next available date based on recurrence
         const now = new Date();
-        const nextAvailableDate = new Date(now.getTime() + task.recurrenceDays * 24 * 60 * 60 * 1000);
+        let nextAvailableDate: Date;
         
-        // Update the task's nextAvailableDate instead of marking completed
-        await storage.updateTaskNextAvailableDate(taskId, nextAvailableDate);
-      } else if (task.recurrence !== "none") {
-        // Handle old-style recurring tasks (daily/weekly/monthly)
-        // Calculate next due date based on recurrence
-        let nextDueDate: Date | null = null;
-        const now = new Date();
-        
-        if (task.dueDate) {
-          const currentDue = new Date(task.dueDate);
-          switch (task.recurrence) {
-            case "daily":
-              nextDueDate = new Date(currentDue.setDate(currentDue.getDate() + 1));
-              break;
-            case "weekly":
-              nextDueDate = new Date(currentDue.setDate(currentDue.getDate() + 7));
-              break;
-            case "monthly":
-              nextDueDate = new Date(currentDue.setMonth(currentDue.getMonth() + 1));
-              break;
-          }
+        if (task.recurrenceDays) {
+          // Custom days interval
+          nextAvailableDate = new Date(now.getTime() + task.recurrenceDays * 24 * 60 * 60 * 1000);
         } else {
-          // For tasks without due dates, set next occurrence based on current time
+          // Standard recurrence (daily/weekly/monthly)
           switch (task.recurrence) {
             case "daily":
-              nextDueDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+              nextAvailableDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
               break;
             case "weekly":
-              nextDueDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+              nextAvailableDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
               break;
             case "monthly":
-              nextDueDate = new Date(now);
-              nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+              nextAvailableDate = new Date(now);
+              nextAvailableDate.setMonth(nextAvailableDate.getMonth() + 1);
               break;
+            default:
+              nextAvailableDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
           }
         }
         
-        // Mark current instance as completed first to prevent duplicates
-        await storage.updateTaskStatus(taskId, "completed");
-        
-        // Create new instance of the recurring task
-        // Set nextAvailableDate to prevent task from appearing until the next occurrence
-        const newTask = await storage.createTask({
-          familyName: task.familyName,
-          createdBy: task.createdBy,
-          title: task.title,
-          description: task.description,
-          points: task.points,
-          dueDate: nextDueDate,
-          nextAvailableDate: nextDueDate, // Hide until next occurrence
-          recurrence: task.recurrence,
-          status: "active",
-          requiresProof: task.requiresProof,
-          requiresApproval: task.requiresApproval,
-          iconEmoji: task.iconEmoji,
-        });
-        
-        // Copy all task assignments to the new instance
-        const assignedMemberIds = await storage.getTaskAssignmentsByTask(taskId);
-        for (const memberId of assignedMemberIds) {
-          await storage.createTaskAssignment({
-            taskId: newTask.id,
-            memberId: memberId,
-          });
-        }
+        // Update the task's nextAvailableDate - task stays visible but unavailable
+        await storage.updateTaskNextAvailableDate(taskId, nextAvailableDate);
       } else {
-        // Non-recurring tasks are simply marked as completed
+        // Non-recurring tasks are marked as completed
         await storage.updateTaskStatus(taskId, "completed");
       }
       
