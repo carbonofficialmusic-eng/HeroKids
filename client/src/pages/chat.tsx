@@ -54,6 +54,16 @@ export default function Chat() {
     },
   });
 
+  const markAsReadMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/chat/mark-read", {});
+    },
+    onSuccess: () => {
+      // Invalidate unread count query
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/unread-count"] });
+    },
+  });
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -62,6 +72,13 @@ export default function Chat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Mark messages as read when user views chat
+  useEffect(() => {
+    if (messages.length > 0 && !isLoading) {
+      markAsReadMutation.mutate();
+    }
+  }, [messages.length, isLoading]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();

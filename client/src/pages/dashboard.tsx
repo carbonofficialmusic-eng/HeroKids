@@ -108,6 +108,13 @@ export default function Dashboard() {
     enabled: !!member,
   });
 
+  // Fetch unread chat message count
+  const { data: unreadChatData } = useQuery<{ count: number }>({
+    queryKey: ["/api/chat/unread-count"],
+    enabled: !!member && hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat"),
+    refetchInterval: 10000, // Refetch every 10 seconds
+  });
+
   // Reset child tab to "active" when leaderboard becomes unavailable
   useEffect(() => {
     const showLeaderboardToChild = familyData?.showLeaderboard !== false;
@@ -566,9 +573,14 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 <Link href="/chat">
-                  <Button variant="outline" data-testid="button-chat">
+                  <Button variant="outline" data-testid="button-chat" className="relative">
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Family Chat
+                    {unreadChatData && unreadChatData.count > 0 && (
+                      <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1" data-testid="badge-unread-count">
+                        {unreadChatData.count}
+                      </Badge>
+                    )}
                   </Button>
                 </Link>
                 <Link href="/rewards-board">
@@ -905,6 +917,19 @@ export default function Dashboard() {
                     My Rewards
                   </Button>
                 </Link>
+                {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") && (
+                  <Link href="/chat">
+                    <Button variant="outline" data-testid="button-chat-child" className="relative">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Family Chat
+                      {unreadChatData && unreadChatData.count > 0 && (
+                        <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1" data-testid="badge-unread-count-child">
+                          {unreadChatData.count}
+                        </Badge>
+                      )}
+                    </Button>
+                  </Link>
+                )}
               </div>
               {activeRewards.length === 0 ? (
                 <Card className="p-12 text-center">
