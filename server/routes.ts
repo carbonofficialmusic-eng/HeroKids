@@ -974,6 +974,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateTaskStatus(taskId, "completed");
         
         // Create new instance of the recurring task
+        // Set nextAvailableDate to prevent task from appearing until the next occurrence
         const newTask = await storage.createTask({
           familyName: task.familyName,
           createdBy: task.createdBy,
@@ -981,6 +982,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: task.description,
           points: task.points,
           dueDate: nextDueDate,
+          nextAvailableDate: nextDueDate, // Hide until next occurrence
           recurrence: task.recurrence,
           status: "active",
           requiresProof: task.requiresProof,

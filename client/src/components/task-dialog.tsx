@@ -509,7 +509,7 @@ export function TaskDialog({
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Parent Approval</FormLabel>
                     <FormDescription>
-                      Require parent approval before points are awarded
+                      Turn off for simple daily tasks (brush teeth, make bed) so points are awarded immediately. Keep on for bigger tasks that need verification. Recurring tasks will disappear after completion and return on schedule.
                     </FormDescription>
                   </div>
                   <FormControl>
