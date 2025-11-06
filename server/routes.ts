@@ -891,16 +891,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         uploadedPhotos.delete(proofPhotoUrl);
       }
       
-      // Create completion record with pending status (no points awarded yet)
+      // Determine initial status based on requiresApproval setting
+      const initialStatus = task.requiresApproval ? "pending" : "approved";
+      
+      // Create completion record
       const completion = await storage.createTaskCompletion({
         taskId: task.id,
         memberId: member.id,
         pointsEarned: task.points,
         proofPhotoUrl: proofPhotoUrl || null,
-        status: "pending",
+        status: initialStatus,
       });
       
-      // DO NOT update member points here - they will be awarded upon parent approval
+      // If task doesn't require approval, auto-approve and award points immediately
+      if (!task.requiresApproval) {
+        const newTotalEarned = member.totalEarned + task.points;
+        const newTotalPoints = member.totalPoints + task.points;
+        const newWeeklyPoints = member.weeklyPoints + task.points;
+        const newMonthlyPoints = member.monthlyPoints + task.points;
+        
+        await storage.updateFamilyMemberPoints(
+          member.id,
+          newTotalEarned,
+          newTotalPoints,
+          newWeeklyPoints,
+          newMonthlyPoints
+        );
+        
+        // Add to points history
+        await storage.addPointsHistory({
+          memberId: member.id,
+          points: task.points,
+          reason: `Completed: ${task.title}`,
+          taskId: task.id,
+        });
+      }
       
       // Handle recurring tasks with custom days interval
       if (task.recurrenceDays) {
@@ -959,6 +984,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           recurrence: task.recurrence,
           status: "active",
           requiresProof: task.requiresProof,
+          requiresApproval: task.requiresApproval,
           iconEmoji: task.iconEmoji,
         });
         
@@ -978,19 +1004,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get updated member data
       const updatedMember = await storage.getFamilyMember(member.id);
       
-      // Broadcast pending completion to family (so parents know to approve)
-      broadcastToFamily(member.familyName, {
-        type: "task_completion_pending",
-        taskId: task.id,
-        completionId: completion.id,
-        member: updatedMember,
-        pointsEarned: task.points,
-      });
+      // Broadcast appropriate message based on whether approval was required
+      if (task.requiresApproval) {
+        // Broadcast pending completion to family (so parents know to approve)
+        broadcastToFamily(member.familyName, {
+          type: "task_completion_pending",
+          taskId: task.id,
+          completionId: completion.id,
+          member: updatedMember,
+          pointsEarned: task.points,
+        });
+      } else {
+        // Broadcast auto-approved completion
+        broadcastToFamily(member.familyName, {
+          type: "task_completion_approved",
+          taskId: task.id,
+          completionId: completion.id,
+          member: updatedMember,
+          pointsEarned: task.points,
+        });
+      }
       
       res.json({
         success: true,
-        message: "Task completion submitted! Awaiting parent approval.",
+        message: task.requiresApproval 
+          ? "Task completion submitted! Awaiting parent approval."
+          : `Great job! You earned ${task.points} points!`,
         completion,
+        autoApproved: !task.requiresApproval,
       });
     } catch (error: any) {
       console.error("Error completing task:", error);
