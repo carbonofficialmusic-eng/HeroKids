@@ -81,8 +81,10 @@ export default function SkinsGallery() {
   const isDefaultActive = memberData?.activeSkinId === null || memberData?.activeSkinId === undefined;
   
   // Organize skins by tier
-  const tier1Skins = skins.filter(s => s.pointsRequired === 0);
-  const tier2Skins = skins.filter(s => s.pointsRequired > 0);
+  // Tier 1: 0-500 points (Starter Heroes)
+  // Tier 2: 560-1000 points (Elite Heroes)
+  const tier1Skins = skins.filter(s => s.pointsRequired <= 500);
+  const tier2Skins = skins.filter(s => s.pointsRequired >= 560);
 
   return (
     <>
@@ -162,7 +164,7 @@ export default function SkinsGallery() {
               Starter Heroes
             </h2>
             <p className="text-sm text-muted-foreground">
-              Available to everyone from the start
+              Unlock from 0 to 500 lifetime points earned
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -235,7 +237,7 @@ export default function SkinsGallery() {
                 Elite Heroes
               </h2>
               <p className="text-sm text-muted-foreground">
-                Unlock at 500 lifetime points earned
+                Unlock from 560 to 1000 lifetime points earned
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
