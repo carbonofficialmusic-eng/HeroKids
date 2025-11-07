@@ -38,7 +38,7 @@ export function TaskCard({
       whileTap={onClick ? { scale: 0.98 } : undefined}
     >
       <Card
-        className={`p-4 transition-all ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
+        className={`p-4 transition-all min-h-[140px] ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
         data-testid={`card-task-${task.id}`}
         onClick={() => onClick?.(task)}
       >
