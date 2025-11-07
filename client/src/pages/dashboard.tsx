@@ -28,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Sparkles } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -623,6 +623,12 @@ export default function Dashboard() {
                     Rewards Board
                   </Button>
                 </Link>
+                <Link href="/skins-gallery">
+                  <Button variant="outline" data-testid="button-skins-gallery">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Character Skins
+                  </Button>
+                </Link>
                 {/* Keep Add buttons together on same line */}
                 <div className="flex gap-2">
                   <Button
@@ -939,6 +945,12 @@ export default function Dashboard() {
                   <Button variant="outline" data-testid="button-rewards-board-child">
                     <Gift className="h-4 w-4 mr-2" />
                     My Rewards
+                  </Button>
+                </Link>
+                <Link href="/skins-gallery">
+                  <Button variant="outline" data-testid="button-skins-gallery-child">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Character Skins
                   </Button>
                 </Link>
                 {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") && (
