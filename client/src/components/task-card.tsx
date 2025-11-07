@@ -29,6 +29,7 @@ export function TaskCard({
   
   return (
     <motion.div
+      className="min-h-[140px]"
       initial={false}
       animate={{
         opacity: isUnavailable ? 0.6 : 1,
@@ -38,11 +39,11 @@ export function TaskCard({
       whileTap={onClick ? { scale: 0.98 } : undefined}
     >
       <Card
-        className={`p-4 transition-all min-h-[140px] ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
+        className={`p-4 transition-all min-h-[140px] h-full flex flex-col ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
         data-testid={`card-task-${task.id}`}
         onClick={() => onClick?.(task)}
       >
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 flex-1">
           {/* Icon with points in star */}
           <div className="relative flex-shrink-0">
             <motion.div

@@ -666,7 +666,7 @@ export default function Dashboard() {
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
                   {activeTasks.map((task) => (
-                    <div key={task.id} className="relative group">
+                    <div key={task.id} className="relative group min-h-[140px]">
                       <TaskCard
                         task={task}
                         showAssignee
