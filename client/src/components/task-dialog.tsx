@@ -343,9 +343,13 @@ export function TaskDialog({
                       placeholder="Add more details about the task..."
                       {...field}
                       value={field.value || ""}
+                      maxLength={100}
                       data-testid="input-task-description"
                     />
                   </FormControl>
+                  <FormDescription className="text-xs text-right">
+                    {(field.value || "").length}/100 characters
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
