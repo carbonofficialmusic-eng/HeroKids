@@ -17,7 +17,7 @@ interface Skin {
   name: string;
   description: string;
   imageUrl: string;
-  unlockThreshold: number;
+  pointsRequired: number;
   isUnlocked: boolean;
   isActive: boolean;
   canUnlock: boolean;
@@ -31,7 +31,7 @@ export default function SkinsGallery() {
     queryKey: ["/api/family-members/current"],
   });
 
-  const { data, isLoading } = useQuery<{ skins: Skin[]; rewardsRedeemed: number }>({
+  const { data, isLoading } = useQuery<{ skins: Skin[]; totalEarned: number }>({
     queryKey: ["/api/skins"],
   });
 
@@ -77,8 +77,12 @@ export default function SkinsGallery() {
   }
 
   const skins = data?.skins || [];
-  const rewardsRedeemed = data?.rewardsRedeemed || 0;
+  const totalEarned = data?.totalEarned || 0;
   const isDefaultActive = memberData?.activeSkinId === null || memberData?.activeSkinId === undefined;
+  
+  // Organize skins by tier
+  const tier1Skins = skins.filter(s => s.pointsRequired === 0);
+  const tier2Skins = skins.filter(s => s.pointsRequired > 0);
 
   return (
     <>
@@ -95,65 +99,74 @@ export default function SkinsGallery() {
             Character Skins
           </h1>
           <p className="text-muted-foreground mb-4">
-            Unlock new skins by redeeming rewards! Each skin needs a certain number of reward redemptions.
+            Unlock new skins by earning points! Complete tasks to unlock exclusive character skins.
           </p>
           <div className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-primary" />
             <span className="font-semibold">
-              Rewards Redeemed: {rewardsRedeemed}
+              Lifetime Points Earned: {totalEarned}
             </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Default Avatar Card */}
-          <Card
-            className={`relative overflow-hidden transition-all hover-elevate ${
-              isDefaultActive ? "ring-2 ring-primary" : ""
-            }`}
-            data-testid="card-skin-default"
-          >
-            {isDefaultActive && (
-              <Badge
-                className="absolute top-4 right-4 z-10"
-                data-testid="badge-active-default"
-              >
-                <Check className="h-3 w-3 mr-1" />
-                Active
-              </Badge>
-            )}
+        {/* Default Avatar Card */}
+        <Card
+          className={`relative overflow-hidden transition-all hover-elevate mb-8 ${
+            isDefaultActive ? "ring-2 ring-primary" : ""
+          }`}
+          data-testid="card-skin-default"
+        >
+          {isDefaultActive && (
+            <Badge
+              className="absolute top-4 right-4 z-10"
+              data-testid="badge-active-default"
+            >
+              <Check className="h-3 w-3 mr-1" />
+              Active
+            </Badge>
+          )}
 
-            <CardHeader className="pb-4">
-              <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-                {memberData?.avatarUrl ? (
-                  <Avatar className="h-32 w-32">
-                    <AvatarImage src={memberData.avatarUrl} alt="Your avatar" />
-                    <AvatarFallback>
-                      <User className="h-16 w-16" />
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <User className="h-32 w-32 text-muted-foreground" />
-                )}
-              </div>
-              <CardTitle className="font-accent text-xl">Default Avatar</CardTitle>
-              <CardDescription>Your personal custom avatar</CardDescription>
-            </CardHeader>
+          <CardHeader className="pb-4">
+            <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted flex items-center justify-center max-w-xs mx-auto">
+              {memberData?.avatarUrl ? (
+                <Avatar className="h-32 w-32">
+                  <AvatarImage src={memberData.avatarUrl} alt="Your avatar" />
+                  <AvatarFallback>
+                    <User className="h-16 w-16" />
+                  </AvatarFallback>
+                </Avatar>
+              ) : (
+                <User className="h-32 w-32 text-muted-foreground" />
+              )}
+            </div>
+            <CardTitle className="font-accent text-xl">Default Avatar</CardTitle>
+            <CardDescription>Your personal custom avatar</CardDescription>
+          </CardHeader>
 
-            <CardContent>
-              <Button
-                onClick={() => selectSkinMutation.mutate(null)}
-                disabled={isDefaultActive || selectSkinMutation.isPending}
-                className="w-full"
-                data-testid="button-select-default"
-              >
-                {isDefaultActive ? "Equipped" : "Use Default"}
-              </Button>
-            </CardContent>
-          </Card>
+          <CardContent>
+            <Button
+              onClick={() => selectSkinMutation.mutate(null)}
+              disabled={isDefaultActive || selectSkinMutation.isPending}
+              className="w-full"
+              data-testid="button-select-default"
+            >
+              {isDefaultActive ? "Equipped" : "Use Default"}
+            </Button>
+          </CardContent>
+        </Card>
 
-          {/* Character Skins */}
-          {skins.map((skin) => (
+        {/* Tier 1 - Starter Skins */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
+              Starter Heroes
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Available to everyone from the start
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tier1Skins.map((skin) => (
             <Card
               key={skin.id}
               className={`relative overflow-hidden transition-all hover-elevate ${
@@ -200,42 +213,117 @@ export default function SkinsGallery() {
               </CardHeader>
 
               <CardContent>
-                {skin.isUnlocked ? (
-                  <Button
-                    onClick={() => selectSkinMutation.mutate(skin.id)}
-                    disabled={skin.isActive || selectSkinMutation.isPending}
-                    className="w-full"
-                    data-testid={`button-select-${skin.id}`}
-                  >
-                    {skin.isActive ? "Equipped" : "Equip Skin"}
-                  </Button>
-                ) : (
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Unlock at {skin.unlockThreshold} reward{skin.unlockThreshold !== 1 ? 's' : ''}
-                    </p>
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-primary h-full transition-all"
-                          style={{
-                            width: `${Math.min(
-                              100,
-                              (rewardsRedeemed / skin.unlockThreshold) * 100
-                            )}%`,
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs font-semibold">
-                        {rewardsRedeemed}/{skin.unlockThreshold}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                <Button
+                  onClick={() => selectSkinMutation.mutate(skin.id)}
+                  disabled={skin.isActive || selectSkinMutation.isPending}
+                  className="w-full"
+                  data-testid={`button-select-${skin.id}`}
+                >
+                  {skin.isActive ? "Equipped" : "Equip Skin"}
+                </Button>
               </CardContent>
             </Card>
-          ))}
+            ))}
+          </div>
         </div>
+
+        {/* Tier 2 - Elite Skins */}
+        {tier2Skins.length > 0 && (
+          <div className="mb-8">
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
+                Elite Heroes
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Unlock at 500 lifetime points earned
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tier2Skins.map((skin) => (
+                <Card
+                  key={skin.id}
+                  className={`relative overflow-hidden transition-all hover-elevate ${
+                    skin.isActive ? "ring-2 ring-primary" : ""
+                  }`}
+                  data-testid={`card-skin-${skin.id}`}
+                >
+                  {skin.isActive && (
+                    <Badge
+                      className="absolute top-4 right-4 z-10"
+                      data-testid={`badge-active-${skin.id}`}
+                    >
+                      <Check className="h-3 w-3 mr-1" />
+                      Active
+                    </Badge>
+                  )}
+
+                  <CardHeader className="pb-4">
+                    <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
+                      {SKIN_IMAGES[skin.id] ? (
+                        <img
+                          src={SKIN_IMAGES[skin.id]}
+                          alt={skin.name}
+                          className={`w-full h-full object-cover ${
+                            !skin.isUnlocked ? "filter grayscale opacity-40" : ""
+                          }`}
+                          data-testid={`img-skin-${skin.id}`}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
+                          No Image
+                        </div>
+                      )}
+                      {!skin.isUnlocked && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
+                            <Lock className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <CardTitle className="font-accent text-xl">{skin.name}</CardTitle>
+                    <CardDescription>{skin.description}</CardDescription>
+                  </CardHeader>
+
+                  <CardContent>
+                    {skin.isUnlocked ? (
+                      <Button
+                        onClick={() => selectSkinMutation.mutate(skin.id)}
+                        disabled={skin.isActive || selectSkinMutation.isPending}
+                        className="w-full"
+                        data-testid={`button-select-${skin.id}`}
+                      >
+                        {skin.isActive ? "Equipped" : "Equip Skin"}
+                      </Button>
+                    ) : (
+                      <div className="text-center">
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Unlock at {skin.pointsRequired} points
+                        </p>
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                            <div
+                              className="bg-primary h-full transition-all"
+                              style={{
+                                width: `${Math.min(
+                                  100,
+                                  (totalEarned / skin.pointsRequired) * 100
+                                )}%`,
+                              }}
+                            />
+                          </div>
+                          <span className="text-xs font-semibold">
+                            {totalEarned}/{skin.pointsRequired}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {celebration && (
