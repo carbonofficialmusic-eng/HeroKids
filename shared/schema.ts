@@ -17,7 +17,7 @@ import { z } from "zod";
 // Enums
 export const roleEnum = pgEnum("role", ["parent", "child"]);
 export const taskStatusEnum = pgEnum("task_status", ["active", "completed", "archived"]);
-export const recurrenceEnum = pgEnum("recurrence", ["none", "daily", "weekly", "monthly"]);
+export const recurrenceEnum = pgEnum("recurrence", ["none", "daily", "weekly", "monthly", "yearly"]);
 export const subscriptionTierEnum = pgEnum("subscription_tier", ["free", "family", "family_plus", "family_hero"]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "trialing", "past_due", "canceled", "incomplete"]);
 
