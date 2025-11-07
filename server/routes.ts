@@ -960,6 +960,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               nextAvailableDate.setMonth(nextAvailableDate.getMonth() + 1);
               nextAvailableDate.setHours(0, 0, 0, 0);
               break;
+            case "yearly":
+              // Set to midnight of same date next year
+              nextAvailableDate = new Date(now);
+              nextAvailableDate.setFullYear(nextAvailableDate.getFullYear() + 1);
+              nextAvailableDate.setHours(0, 0, 0, 0);
+              break;
             default:
               // Default to midnight tomorrow
               nextAvailableDate = new Date(now);

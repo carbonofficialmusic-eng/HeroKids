@@ -423,7 +423,7 @@ export function TaskDialog({
                 </RadioGroup>
                 <p className="text-sm text-muted-foreground mt-2">
                   {recurrenceMode === "standard" 
-                    ? "Choose from preset intervals (one-time, daily, weekly, monthly)"
+                    ? "Choose from preset intervals (one-time, daily, weekly, monthly, yearly)"
                     : "Set a custom number of days for the task to repeat"}
                 </p>
               </div>
