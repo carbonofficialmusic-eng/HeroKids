@@ -1169,6 +1169,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mark completion as rejected
       await storage.rejectTaskCompletion(completionId, member.id, reason || "Did not meet expectations");
       
+      // Clear the task's nextAvailableDate so it becomes immediately available again
+      // (For recurring tasks that were set to next recurrence date when completed)
+      await storage.updateTaskNextAvailableDate(completion.taskId, null as any);
+      
       // Broadcast rejection to family
       broadcastToFamily(member.familyName, {
         type: "task_completion_rejected",

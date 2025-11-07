@@ -29,6 +29,9 @@ export function useWebSocket(familyName: string | null) {
             case "task_created":
             case "task_updated":
             case "task_completed":
+            case "task_completion_pending":
+            case "task_completion_approved":
+            case "task_completion_rejected":
               // Invalidate tasks and family members to refetch
               queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
