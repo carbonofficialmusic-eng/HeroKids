@@ -45,26 +45,38 @@ export function PointCounter({
   }, [points, displayPoints, showAnimation]);
 
   const sizeClasses = {
-    compact: "h-12",
+    compact: "h-10",
     standard: "h-16",
     hero: "h-24",
   };
 
+  const paddingClasses = {
+    compact: "px-3",
+    standard: "px-6",
+    hero: "px-6",
+  };
+
   const textSizeClasses = {
-    compact: "text-xl",
+    compact: "text-lg",
     standard: "text-3xl",
     hero: "text-5xl",
   };
 
   const iconSizeClasses = {
-    compact: "h-5 w-5",
+    compact: "h-4 w-4",
     standard: "h-7 w-7",
     hero: "h-10 w-10",
   };
 
+  const gapClasses = {
+    compact: "gap-1.5",
+    standard: "gap-2",
+    hero: "gap-2",
+  };
+
   return (
     <motion.div
-      className={`${sizeClasses[size]} inline-flex items-center gap-2 px-6 rounded-full gradient-celebration`}
+      className={`${sizeClasses[size]} inline-flex items-center ${gapClasses[size]} ${paddingClasses[size]} rounded-full gradient-celebration flex-shrink-0`}
       data-testid="point-counter"
       animate={{
         scale: isAnimating ? [1, 1.1, 1] : 1,
@@ -82,10 +94,10 @@ export function PointCounter({
         }}
         transition={{ duration: 0.5 }}
       >
-        <Star className={`${iconSizeClasses[size]} text-white fill-white`} />
+        <Star className={`${iconSizeClasses[size]} text-white fill-white flex-shrink-0`} />
       </motion.div>
       <span
-        className={`${textSizeClasses[size]} font-black font-accent text-white`}
+        className={`${textSizeClasses[size]} font-black font-accent text-white tabular-nums`}
         data-testid="text-points-value"
       >
         {displayPoints.toLocaleString()}

@@ -46,13 +46,13 @@ export function ProfileMenu({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex items-center gap-2 h-auto p-2"
+          className="flex items-center gap-2 h-auto p-2 flex-shrink-0"
           data-testid="button-profile-menu"
         >
           <img 
             src={logoUrl} 
             alt="HomeHero Logo" 
-            className="h-10 w-10 rounded-lg"
+            className="h-10 w-10 rounded-lg object-contain flex-shrink-0"
             data-testid="img-menu-trigger-logo"
           />
         </Button>
