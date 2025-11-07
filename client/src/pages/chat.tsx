@@ -95,15 +95,13 @@ export default function Chat() {
   if (isLoading) {
     return (
       <div className="container mx-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Family Chat</h1>
-          <Link href="/dashboard">
-            <Button variant="outline" data-testid="button-back-to-dashboard">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </Link>
-        </div>
+        <Link href="/dashboard">
+          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
+        <h1 className="text-3xl font-bold mb-6">Family Chat</h1>
         <div className="flex items-center justify-center min-h-[60vh]" data-testid="loading-chat">
           <div className="animate-pulse">Loading chat...</div>
         </div>
@@ -119,15 +117,13 @@ export default function Chat() {
     if (isTierError) {
       return (
         <div className="container mx-auto p-6" data-testid="chat-upgrade-prompt">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold">Family Chat</h1>
-            <Link href="/dashboard">
-              <Button variant="outline" data-testid="button-back-to-dashboard">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
+          <Link href="/dashboard">
+            <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold mb-6">Family Chat</h1>
           <Card className="max-w-2xl mx-auto">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
@@ -170,21 +166,19 @@ export default function Chat() {
 
   return (
     <div className="container mx-auto p-4 h-screen flex flex-col" data-testid="page-chat">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-3xl font-bold mb-2" data-testid="heading-chat">
-            Family Chat
-          </h1>
-          <p className="text-muted-foreground">
-            Chat with your family in real-time
-          </p>
-        </div>
-        <Link href="/dashboard">
-          <Button variant="outline" data-testid="button-back-to-dashboard">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
-        </Link>
+      <Link href="/dashboard">
+        <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Dashboard
+        </Button>
+      </Link>
+      <div className="mb-4">
+        <h1 className="text-3xl font-bold mb-2" data-testid="heading-chat">
+          Family Chat
+        </h1>
+        <p className="text-muted-foreground">
+          Chat with your family in real-time
+        </p>
       </div>
 
       <Card className="flex-1 flex flex-col overflow-hidden">

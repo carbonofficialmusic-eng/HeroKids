@@ -91,17 +91,15 @@ export default function Approvals() {
     return (
       <div className="min-h-screen p-6">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Clock className="w-6 h-6 text-primary" />
-              <h1 className="text-3xl font-bold">Task Approvals</h1>
-            </div>
-            <Link href="/dashboard">
-              <Button variant="outline" data-testid="button-back-to-dashboard">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
+          <Link href="/dashboard">
+            <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+          <div className="flex items-center gap-2 mb-6">
+            <Clock className="w-6 h-6 text-primary" />
+            <h1 className="text-3xl font-bold">Task Approvals</h1>
           </div>
           <p className="text-muted-foreground">Loading pending task completions...</p>
         </div>
@@ -114,22 +112,20 @@ export default function Approvals() {
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Clock className="w-6 h-6 text-primary" />
-            <h1 className="text-3xl font-bold">Task Approvals</h1>
-            {completions.length > 0 && (
-              <Badge className="ml-2" data-testid="badge-pending-count">
-                {completions.length}
-              </Badge>
-            )}
-          </div>
-          <Link href="/dashboard">
-            <Button variant="outline" data-testid="button-back-to-dashboard">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </Link>
+        <Link href="/dashboard">
+          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
+        <div className="flex items-center gap-2 mb-6">
+          <Clock className="w-6 h-6 text-primary" />
+          <h1 className="text-3xl font-bold">Task Approvals</h1>
+          {completions.length > 0 && (
+            <Badge className="ml-2" data-testid="badge-pending-count">
+              {completions.length}
+            </Badge>
+          )}
         </div>
 
         {completions.length === 0 ? (
