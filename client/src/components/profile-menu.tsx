@@ -11,11 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon } from "lucide-react";
+import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon, Menu } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
-import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 interface ProfileMenuProps {
   member: FamilyMember;
@@ -46,15 +45,11 @@ export function ProfileMenu({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex items-center gap-2 h-auto p-2 flex-shrink-0"
+          size="icon"
+          className="flex-shrink-0"
           data-testid="button-profile-menu"
         >
-          <img 
-            src={logoUrl} 
-            alt="HeroKids Logo" 
-            className="h-10 w-10 rounded-lg object-contain flex-shrink-0"
-            data-testid="img-menu-trigger-logo"
-          />
+          <Menu className="h-5 w-5" data-testid="icon-menu" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
