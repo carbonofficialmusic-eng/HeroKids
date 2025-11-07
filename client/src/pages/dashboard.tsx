@@ -595,19 +595,19 @@ export default function Dashboard() {
               {/* Action Buttons */}
               <div className="flex items-center justify-center flex-wrap gap-2">
                 <Link href="/approvals">
-                  <Button variant="secondary" data-testid="button-approvals">
+                  <Button variant="card" data-testid="button-approvals">
                     <ClipboardCheck className="h-4 w-4 mr-2" />
                     Approvals
                   </Button>
                 </Link>
                 <Link href="/analytics">
-                  <Button variant="secondary" data-testid="button-analytics">
+                  <Button variant="card" data-testid="button-analytics">
                     <BarChart3 className="h-4 w-4 mr-2" />
                     Analytics
                   </Button>
                 </Link>
                 <Link href="/chat">
-                  <Button variant="secondary" data-testid="button-chat" className="relative">
+                  <Button variant="card" data-testid="button-chat" className="relative">
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Family Chat
                     {unreadChatData && unreadChatData.count > 0 && (
@@ -618,7 +618,7 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 <Link href="/rewards-board">
-                  <Button variant="secondary" data-testid="button-rewards-board">
+                  <Button variant="card" data-testid="button-rewards-board">
                     <Gift className="h-4 w-4 mr-2" />
                     Rewards Board
                   </Button>

@@ -19,6 +19,8 @@ const buttonVariants = cva(
           // Inherits the current text color.
           " border [border-color:var(--button-outline)]  shadow-xs active:shadow-none ",
         secondary: "border bg-secondary text-secondary-foreground border border-secondary-border ",
+        // Matches the task card styling with transparent bright grey background
+        card: "bg-card/75 text-card-foreground border border-card-border/30 backdrop-blur-md",
         // Add a transparent border so that when someone toggles a border on later, it doesn't shift layout/size.
         ghost: "border border-transparent",
       },
