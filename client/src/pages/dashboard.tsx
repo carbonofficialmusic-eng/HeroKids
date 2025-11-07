@@ -677,14 +677,14 @@ export default function Dashboard() {
                         }}
                         isCompleting={completeTaskMutation.isPending}
                       />
-                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 bg-card/80 backdrop-blur-sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setTaskToEdit(task);
+                            setSelectedTask(task);
                             setTaskDialogOpen(true);
                           }}
                           data-testid={`button-edit-task-${task.id}`}
