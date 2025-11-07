@@ -113,13 +113,23 @@ export default function Analytics() {
       );
     }
 
-    // Other errors
-    toast({
-      title: "Error loading analytics",
-      description: errorMessage,
-      variant: "destructive",
-    });
-    return null;
+    // Other errors - show error state
+    return (
+      <div className="container mx-auto p-6">
+        <Link href="/">
+          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle>Error Loading Analytics</CardTitle>
+            <CardDescription>{errorMessage}</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
   }
 
   if (!analytics) {
