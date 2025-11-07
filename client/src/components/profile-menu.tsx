@@ -67,7 +67,7 @@ export function ProfileMenu({
           </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild>
-          <Link href="/skins" data-testid="menu-item-skins">
+          <Link href="/skins-gallery" data-testid="menu-item-skins">
             <Palette className="mr-2 h-4 w-4" />
             <span>Character Skins</span>
           </Link>
