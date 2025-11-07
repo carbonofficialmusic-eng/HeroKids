@@ -220,8 +220,8 @@ export default function RewardsBoard() {
                   </Badge>
                 </div>
 
-                {/* Parent Controls */}
-                {isRealParent && redemption.status !== "completed" && (
+                {/* Parent Controls - Only when acting as parent, not when switched to child */}
+                {isParent && redemption.status !== "completed" && (
                   <div className="flex gap-2 pt-2 border-t">
                     {redemption.status === "pending" && (
                       <Button
