@@ -595,19 +595,19 @@ export default function Dashboard() {
               {/* Action Buttons */}
               <div className="flex items-center justify-center flex-wrap gap-2">
                 <Link href="/approvals">
-                  <Button variant="outline" data-testid="button-approvals">
+                  <Button variant="ghost" data-testid="button-approvals">
                     <ClipboardCheck className="h-4 w-4 mr-2" />
                     Approvals
                   </Button>
                 </Link>
                 <Link href="/analytics">
-                  <Button variant="outline" data-testid="button-analytics">
+                  <Button variant="ghost" data-testid="button-analytics">
                     <BarChart3 className="h-4 w-4 mr-2" />
                     Analytics
                   </Button>
                 </Link>
                 <Link href="/chat">
-                  <Button variant="outline" data-testid="button-chat" className="relative">
+                  <Button variant="ghost" data-testid="button-chat" className="relative">
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Family Chat
                     {unreadChatData && unreadChatData.count > 0 && (
@@ -618,23 +618,13 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 <Link href="/rewards-board">
-                  <Button variant="outline" data-testid="button-rewards-board">
+                  <Button variant="ghost" data-testid="button-rewards-board">
                     <Gift className="h-4 w-4 mr-2" />
                     Rewards Board
                   </Button>
                 </Link>
                 {/* Keep Add buttons together on same line */}
                 <div className="flex gap-2">
-                  <Button
-                    onClick={() => {
-                      setSelectedReward(null);
-                      setRewardDialogOpen(true);
-                    }}
-                    data-testid="button-add-reward"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Reward
-                  </Button>
                   <Button
                     onClick={() => {
                       setSelectedTask(null);
@@ -644,6 +634,16 @@ export default function Dashboard() {
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Task
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSelectedReward(null);
+                      setRewardDialogOpen(true);
+                    }}
+                    data-testid="button-add-reward"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Reward
                   </Button>
                 </div>
               </div>
