@@ -374,7 +374,7 @@ export const skins = pgTable("skins", {
   name: varchar("name").notNull(),
   description: text("description"),
   imageUrl: varchar("image_url").notNull(),
-  unlockThreshold: integer("unlock_threshold").notNull(), // Number of rewards redeemed required to unlock
+  pointsRequired: integer("points_required").notNull(), // Total points earned required to unlock
   createdAt: timestamp("created_at").defaultNow(),
 });
 
