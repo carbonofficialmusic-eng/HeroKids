@@ -77,8 +77,9 @@ export default function SkinsGallery() {
   }
 
   const skins = data?.skins || [];
-  const totalEarned = data?.totalEarned || 0;
+  const totalEarned = Number(data?.totalEarned) || 0;
   const isDefaultActive = memberData?.activeSkinId === null || memberData?.activeSkinId === undefined;
+  const hasReached500 = totalEarned >= 500;
   
   // Organize skins by tier
   // Tier 1: 0-500 points (Starter Heroes)
@@ -237,7 +238,9 @@ export default function SkinsGallery() {
                 Elite Heroes
               </h2>
               <p className="text-sm text-muted-foreground">
-                Unlock from 560 to 1000 lifetime points earned
+                {hasReached500
+                  ? "Unlock from 560 to 1000 lifetime points earned"
+                  : "Mystery skins revealed at 500 points • Unlock from 560 to 1000"}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -261,30 +264,46 @@ export default function SkinsGallery() {
 
                   <CardHeader className="pb-4">
                     <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
-                      {SKIN_IMAGES[skin.id] ? (
-                        <img
-                          src={SKIN_IMAGES[skin.id]}
-                          alt={skin.name}
-                          className={`w-full h-full object-cover ${
-                            !skin.isUnlocked ? "filter grayscale opacity-40" : ""
-                          }`}
-                          data-testid={`img-skin-${skin.id}`}
-                        />
+                      {hasReached500 ? (
+                        // Show preview image once user reaches 500 points
+                        <>
+                          {SKIN_IMAGES[skin.id] ? (
+                            <img
+                              src={SKIN_IMAGES[skin.id]}
+                              alt={skin.name}
+                              className={`w-full h-full object-cover ${
+                                !skin.isUnlocked ? "filter grayscale opacity-40" : ""
+                              }`}
+                              data-testid={`img-skin-${skin.id}`}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
+                              No Image
+                            </div>
+                          )}
+                          {!skin.isUnlocked && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
+                                <Lock className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                            </div>
+                          )}
+                        </>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
-                          No Image
-                        </div>
-                      )}
-                      {!skin.isUnlocked && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
-                            <Lock className="h-8 w-8 text-muted-foreground" />
-                          </div>
+                        // Hide image preview until 500 points - show only lock
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground">
+                          <Lock className="h-16 w-16 mb-2" />
+                          <p className="text-xs font-medium">Mystery Skin</p>
+                          <p className="text-xs opacity-70">Unlock at 500 points</p>
                         </div>
                       )}
                     </div>
-                    <CardTitle className="font-accent text-xl">{skin.name}</CardTitle>
-                    <CardDescription>{skin.description}</CardDescription>
+                    <CardTitle className="font-accent text-xl">
+                      {hasReached500 ? skin.name : "???"}
+                    </CardTitle>
+                    <CardDescription>
+                      {hasReached500 ? skin.description : "A mysterious hero awaits..."}
+                    </CardDescription>
                   </CardHeader>
 
                   <CardContent>
