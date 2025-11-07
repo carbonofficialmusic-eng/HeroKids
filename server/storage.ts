@@ -863,8 +863,9 @@ export class DatabaseStorage implements IStorage {
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(-30); // Last 30 days
 
-    // Top performers (sorted by monthly points)
+    // Top performers (sorted by monthly points, excluding members who opted out)
     const topPerformers = members
+      .filter(member => !member.excludeFromLeaderboard) // Exclude members who don't want to compete
       .map(member => ({
         id: member.id,
         name: member.displayName,

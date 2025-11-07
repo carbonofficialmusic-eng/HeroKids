@@ -10,7 +10,10 @@ interface LeaderboardProps {
 }
 
 export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
-  const sortedMembers = [...members].sort((a, b) => {
+  // Filter out members who opted out of leaderboard competition
+  const eligibleMembers = members.filter(m => !m.excludeFromLeaderboard);
+  
+  const sortedMembers = [...eligibleMembers].sort((a, b) => {
     const aPoints = period === "week" ? a.weeklyPoints : period === "month" ? a.monthlyPoints : a.totalPoints;
     const bPoints = period === "week" ? b.weeklyPoints : period === "month" ? b.monthlyPoints : b.totalPoints;
     return bPoints - aPoints;
@@ -143,10 +146,15 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
         </div>
       )}
 
-      {members.length === 0 && (
+      {eligibleMembers.length === 0 && (
         <div className="text-center py-12">
           <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-lg text-muted-foreground">No family members yet</p>
+          <p className="text-lg text-muted-foreground">
+            {members.length === 0 
+              ? "No family members yet"
+              : "All members have been excluded from the leaderboard"
+            }
+          </p>
         </div>
       )}
     </Card>
