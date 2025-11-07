@@ -51,7 +51,7 @@ export function ProfileMenu({
         >
           <img 
             src={logoUrl} 
-            alt="HomeHero Logo" 
+            alt="HeroKids Logo" 
             className="h-10 w-10 rounded-lg object-contain flex-shrink-0"
             data-testid="img-menu-trigger-logo"
           />

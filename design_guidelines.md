@@ -1,4 +1,4 @@
-# HomeHero Design Guidelines
+# HeroKids Design Guidelines
 
 ## Design Approach
 

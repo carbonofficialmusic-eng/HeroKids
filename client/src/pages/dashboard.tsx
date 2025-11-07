@@ -37,6 +37,7 @@ import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { celebrateTaskCompletion } from "@/lib/confetti";
+import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -132,7 +133,7 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       toast({
-        title: "Welcome to HomeHero!",
+        title: "Welcome to HeroKids!",
         description: "Your profile has been created.",
       });
     },
@@ -546,14 +547,16 @@ export default function Dashboard() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Stats Section */}
+              {/* Logo and Stats Section */}
               <div className="text-center">
-                <div className="mb-2">
-                  <PointCounter points={member.totalEarned} size="hero" showAnimation />
+                <div className="mb-4 flex justify-center">
+                  <img 
+                    src={logoUrl} 
+                    alt="HeroKids Logo" 
+                    className="h-32 w-auto object-contain"
+                    data-testid="img-dashboard-logo"
+                  />
                 </div>
-                <p className="text-sm font-semibold text-muted-foreground mb-1">
-                  Total Earned
-                </p>
                 <p className="text-sm text-muted-foreground mb-4">
                   Available Points: {member.totalPoints}
                 </p>
@@ -842,12 +845,14 @@ export default function Dashboard() {
           /* Child View */
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center">
-              <div className="mb-2">
-                <PointCounter points={member.totalEarned} size="hero" showAnimation />
+              <div className="mb-4 flex justify-center">
+                <img 
+                  src={logoUrl} 
+                  alt="HeroKids Logo" 
+                  className="h-40 w-auto object-contain"
+                  data-testid="img-dashboard-logo-child"
+                />
               </div>
-              <p className="text-sm font-semibold text-muted-foreground mb-1">
-                Total Earned
-              </p>
               <p className="text-sm text-muted-foreground mb-4">
                 Available Points: {member.totalPoints}
               </p>

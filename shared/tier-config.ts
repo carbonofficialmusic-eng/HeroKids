@@ -1,6 +1,6 @@
 /**
  * Subscription Tier Configuration
- * Defines limits and features for each HomeHero subscription tier
+ * Defines limits and features for each HeroKids subscription tier
  */
 
 export type SubscriptionTier = "free" | "family" | "family_plus" | "family_hero";

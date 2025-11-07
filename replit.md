@@ -1,8 +1,8 @@
-# HomeHero - Gamified Family Task Management
+# HeroKids - Gamified Family Task Management
 
 ## Overview
 
-HomeHero is a full-stack web application that gamifies household chores for families. It allows children to earn points, compete on leaderboards, and unlock rewards by completing tasks, fostering responsibility and making chores fun. The application features real-time updates, photo verification for task completion, and a playful, age-appropriate design, aiming to enhance family cooperation and introduce children to personal responsibility.
+HeroKids is a full-stack web application that gamifies household chores for families. It allows children to earn points, compete on leaderboards, and unlock rewards by completing tasks, fostering responsibility and making chores fun. The application features real-time updates, photo verification for task completion, and a playful, age-appropriate design, aiming to enhance family cooperation and introduce children to personal responsibility.
 
 ## User Preferences
 

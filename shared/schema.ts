@@ -32,7 +32,7 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)]
 );
 
-// User storage table - Required for Replit Auth, extended for HomeHero
+// User storage table - Required for Replit Auth, extended for HeroKids
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email"),

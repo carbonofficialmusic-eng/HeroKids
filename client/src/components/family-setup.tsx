@@ -128,7 +128,7 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
             <Users className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-black font-accent mb-2" data-testid="text-setup-title">
-            Welcome to HomeHero!
+            Welcome to HeroKids!
           </h1>
           <p className="text-muted-foreground" data-testid="text-setup-subtitle">
             Let's set up your family profile to get started
