@@ -10,6 +10,8 @@ import { Send, Lock, MessageCircle, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Link } from "wouter";
+import { EmoticonPicker } from "@/components/emoticon-picker";
+import { MessageRenderer } from "@/components/message-renderer";
 
 interface ChatMessage {
   id: string;
@@ -84,6 +86,10 @@ export default function Chat() {
     e.preventDefault();
     if (!messageText.trim() || sendMessageMutation.isPending) return;
     sendMessageMutation.mutate(messageText.trim());
+  };
+
+  const handleSelectEmoticon = (emoticon: string) => {
+    setMessageText((prev) => prev + emoticon + " ");
   };
 
   if (isLoading) {
@@ -224,9 +230,9 @@ export default function Chat() {
                           {format(new Date(msg.createdAt), "h:mm a")}
                         </span>
                       </div>
-                      <p className="text-sm break-words" data-testid={`text-message-content-${index}`}>
-                        {msg.message}
-                      </p>
+                      <div className="text-sm break-words" data-testid={`text-message-content-${index}`}>
+                        <MessageRenderer message={msg.message} />
+                      </div>
                     </div>
                   </div>
                 ))
@@ -241,6 +247,7 @@ export default function Chat() {
             className="border-t p-4 flex gap-2"
             data-testid="form-send-message"
           >
+            <EmoticonPicker onSelectEmoticon={handleSelectEmoticon} />
             <Input
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
