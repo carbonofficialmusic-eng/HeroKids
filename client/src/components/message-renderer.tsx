@@ -21,6 +21,7 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { SKIN_IMAGES } from "@/lib/skins";
 
 interface Skin {
   id: string;
@@ -92,12 +93,13 @@ export function MessageRenderer({ message }: MessageRendererProps) {
         // Skin emoticon
         const skinId = code.substring(5); // Remove "skin:" prefix
         const skin = skins.find((s) => s.id === skinId);
+        const skinImage = SKIN_IMAGES[skinId];
         
-        if (skin) {
+        if (skin && skinImage) {
           parts.push(
             <img
               key={`emoticon-${match.index}`}
-              src={skin.imageUrl}
+              src={skinImage}
               alt={skin.name}
               className="inline-block h-6 w-6 rounded object-cover mx-0.5 align-middle"
               title={skin.name}

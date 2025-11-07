@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SKIN_IMAGES } from "@/lib/skins";
 import {
   Smile,
   Heart,
@@ -152,7 +153,7 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
                       data-testid={`emoticon-skin-${skin.id}`}
                     >
                       <img
-                        src={skin.imageUrl}
+                        src={SKIN_IMAGES[skin.id]}
                         alt={skin.name}
                         className="h-10 w-10 rounded-lg object-cover"
                       />
