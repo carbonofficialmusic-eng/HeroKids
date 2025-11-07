@@ -31,6 +31,11 @@ import constructionBg from "@assets/generated_images/Construction_site_backgroun
 import trainStationBg from "@assets/generated_images/Train_station_background_scene_3c539965.png";
 import underwaterBg from "@assets/generated_images/Underwater_ocean_background_scene_378220c2.png";
 import nightSkyBg from "@assets/generated_images/Night_sky_knight_background_b50bd51d.png";
+import volcanicBg from "@assets/generated_images/Fire_Phoenix_volcanic_background_f3ebef18.png";
+import crystalCaveBg from "@assets/generated_images/Crystal_Mage_cave_background_64b9c911.png";
+import neonCityBg from "@assets/generated_images/Neon_Rebel_city_background_29209636.png";
+import nebulaBg from "@assets/generated_images/Cosmic_Drifter_nebula_background_cea3dec7.png";
+import stormBg from "@assets/generated_images/Thunder_Champion_storm_background_4272fb58.png";
 
 // Skin image mappings for new HeroKids themed skins
 export const SKIN_IMAGES: Record<string, string> = {
@@ -71,11 +76,11 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "tech-ninja": cityStreetBg,
   "ocean-guardian": underwaterBg,
   "sky-knight": nightSkyBg,
-  "fire-phoenix": castleBg,
-  "crystal-mage": gardenBg,
-  "neon-rebel": cityStreetBg,
-  "cosmic-drifter": spaceBg,
-  "thunder-champion": skylineBg,
+  "fire-phoenix": volcanicBg,
+  "crystal-mage": crystalCaveBg,
+  "neon-rebel": neonCityBg,
+  "cosmic-drifter": nebulaBg,
+  "thunder-champion": stormBg,
 };
 
 // Helper to get avatar URL - returns skin image if active, otherwise custom avatar
