@@ -825,10 +825,8 @@ export class DatabaseStorage implements IStorage {
       })
       .from(taskCompletions)
       .innerJoin(familyMembers, eq(taskCompletions.memberId, familyMembers.id))
-      .where(and(
-        eq(familyMembers.familyName, familyName),
-        desc(taskCompletions.completedAt)
-      ))
+      .where(eq(familyMembers.familyName, familyName))
+      .orderBy(desc(taskCompletions.completedAt))
       .limit(100);
 
     // Get all tasks for completion rate calculation
