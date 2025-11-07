@@ -15,7 +15,7 @@ import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon } from "lucide
 import { useTheme } from "@/components/theme-provider";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
-import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_02_08_1762538979445.png";
+import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 interface ProfileMenuProps {
   member: FamilyMember;

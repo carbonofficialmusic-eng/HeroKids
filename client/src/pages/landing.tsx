@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Star, Trophy, Users, CheckCircle, Zap } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_02_08_1762538979445.png";
+import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 export default function Landing() {
   return (
