@@ -518,9 +518,6 @@ export default function Settings() {
                   No family members yet.
                 </div>
               )}
-              <p className="text-sm text-muted-foreground">
-                Tip: Parents working for money may want to opt out of the leaderboard so they don't compete with children earning household points.
-              </p>
             </CardContent>
           </Card>
 
