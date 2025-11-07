@@ -360,7 +360,7 @@ export function TaskDialog({
                   <FormControl>
                     <Slider
                       min={10}
-                      max={100}
+                      max={500}
                       step={5}
                       value={[field.value || 10]}
                       onValueChange={(vals) => field.onChange(vals[0])}
