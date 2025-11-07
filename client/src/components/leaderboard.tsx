@@ -147,9 +147,9 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
       )}
 
       {eligibleMembers.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-12" data-testid="leaderboard-empty-state">
           <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-muted-foreground" data-testid="leaderboard-empty-message">
             {members.length === 0 
               ? "No family members yet"
               : "All members have been excluded from the leaderboard"
