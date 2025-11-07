@@ -64,6 +64,29 @@ const EMOTICON_MAP: Record<string, React.ComponentType<{ className?: string }>> 
   ":party:": PartyPopper,
 };
 
+const EMOTICON_COLORS: Record<string, string> = {
+  ":smile:": "text-yellow-500",
+  ":heart:": "text-red-500",
+  ":thumbsup:": "text-green-500",
+  ":thumbsdown:": "text-red-500",
+  ":star:": "text-yellow-500",
+  ":flame:": "text-orange-500",
+  ":zap:": "text-yellow-400",
+  ":trophy:": "text-yellow-600",
+  ":target:": "text-red-500",
+  ":check:": "text-green-500",
+  ":cross:": "text-red-500",
+  ":alert:": "text-orange-500",
+  ":question:": "text-blue-500",
+  ":sparkles:": "text-purple-500",
+  ":sun:": "text-yellow-500",
+  ":moon:": "text-blue-400",
+  ":cloud:": "text-gray-400",
+  ":rocket:": "text-blue-500",
+  ":gift:": "text-pink-500",
+  ":party:": "text-purple-500",
+};
+
 export function MessageRenderer({ message }: MessageRendererProps) {
   // Fetch all skins to render skin emoticons
   const { data: skinsData } = useQuery<SkinsResponse>({
@@ -112,12 +135,13 @@ export function MessageRenderer({ message }: MessageRendererProps) {
       } else {
         // Standard icon emoticon
         const IconComponent = EMOTICON_MAP[fullMatch];
+        const colorClass = EMOTICON_COLORS[fullMatch] || "text-foreground";
         
         if (IconComponent) {
           parts.push(
             <IconComponent
               key={`emoticon-${match.index}`}
-              className="inline-block h-5 w-5 mx-0.5 align-middle"
+              className={`inline-block h-5 w-5 mx-0.5 align-middle ${colorClass}`}
             />
           );
         } else {
