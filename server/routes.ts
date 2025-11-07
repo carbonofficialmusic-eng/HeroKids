@@ -1428,38 +1428,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         taskId: null,
       });
       
-      // Increment rewards redeemed counter and check for skin unlocks
-      const newRewardsCount = await storage.incrementRewardsRedeemed(member.id);
-      const allSkins = await storage.getSkins();
-      
-      // Get family tier to check skin limits
-      const family = await storage.getFamily(member.familyName);
-      const tier = family?.subscriptionTier as SubscriptionTier || "free";
-      const maxSkins = getMaxSkins(tier);
-      let currentUnlockedCount = member.unlockedSkins.length;
-      
-      // Find skins that should be unlocked but aren't yet (respecting tier limits)
-      const eligibleSkins = allSkins.filter(skin => 
-        skin.unlockThreshold <= newRewardsCount && 
-        !member.unlockedSkins.includes(skin.id)
-      );
-      
-      // Unlock new skins (up to tier limit)
-      const actuallyUnlockedSkins = [];
-      for (const skin of eligibleSkins) {
-        // Check if we've reached the tier limit
-        if (currentUnlockedCount < maxSkins) {
-          await storage.unlockSkin(member.id, skin.id);
-          actuallyUnlockedSkins.push(skin);
-          currentUnlockedCount++;
-        }
-      }
-      const newlyUnlockedSkins = actuallyUnlockedSkins;
-      
-      // Auto-select first skin if none selected
-      if (newlyUnlockedSkins.length > 0 && !member.activeSkinId) {
-        await storage.updateFamilyMemberActiveSkin(member.id, newlyUnlockedSkins[0].id);
-      }
+      // Increment rewards redeemed counter (kept for analytics)
+      await storage.incrementRewardsRedeemed(member.id);
       
       // Broadcast redemption to family
       broadcastToFamily(member.familyName, {
@@ -1468,22 +1438,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         member: { ...member, totalPoints: newTotalPoints },
       });
       
-      // Broadcast skin unlocks if any
-      if (newlyUnlockedSkins.length > 0) {
-        broadcastToFamily(member.familyName, {
-          type: "skins_unlocked",
-          memberId: member.id,
-          skins: newlyUnlockedSkins.map(s => ({ id: s.id, name: s.name })),
-        });
-      }
-      
       res.json({ 
         redemption: {
           ...redemption,
           rewardTitle: reward.title,
         },
         newTotalPoints,
-        unlockedSkins: newlyUnlockedSkins,
         message: `Successfully redeemed ${reward.title}!` 
       });
     } catch (error: any) {
@@ -1548,61 +1508,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update the redemption status
       await storage.updateRewardRedemptionStatus(id, status);
 
-      // If approved, increment rewards redeemed and check for skin unlocks
+      // If approved, increment rewards redeemed counter (kept for analytics)
       if (status === "approved" && redemption.status !== "approved") {
-        // Fetch full member data to access unlockedSkins and activeSkinId
-        let fullMember = await storage.getFamilyMemberById(redemption.memberId);
-        if (!fullMember) {
-          return res.status(404).json({ message: "Member not found" });
-        }
-        
-        const newRewardsCount = await storage.incrementRewardsRedeemed(fullMember.id);
-        const allSkins = await storage.getSkins();
-        
-        // Get family tier to check skin limits
-        const family = await storage.getFamily(fullMember.familyName);
-        const tier = family?.subscriptionTier as SubscriptionTier || "free";
-        const maxSkins = getMaxSkins(tier);
-        let currentUnlockedCount = fullMember.unlockedSkins.length;
-        
-        // Find skins that should be unlocked but aren't yet (respecting tier limits)
-        const eligibleSkins = allSkins.filter(skin => 
-          skin.unlockThreshold <= newRewardsCount && 
-          fullMember && !fullMember.unlockedSkins.includes(skin.id)
-        );
-        
-        // Unlock new skins (up to tier limit)
-        const actuallyUnlockedSkins = [];
-        for (const skin of eligibleSkins) {
-          // Check if we've reached the tier limit
-          if (currentUnlockedCount < maxSkins) {
-            await storage.unlockSkin(fullMember.id, skin.id);
-            actuallyUnlockedSkins.push(skin);
-            currentUnlockedCount++;
-          }
-        }
-        const newlyUnlockedSkins = actuallyUnlockedSkins;
-        
-        // Refresh member data after unlocking to get updated unlockedSkins and activeSkinId
-        if (newlyUnlockedSkins.length > 0) {
-          const refreshedMember = await storage.getFamilyMemberById(redemption.memberId);
-          if (refreshedMember) {
-            fullMember = refreshedMember;
-          }
-        }
-        
-        // Auto-select first skin if none selected (only after refresh so we have current state)
-        if (newlyUnlockedSkins.length > 0 && !fullMember.activeSkinId) {
-          await storage.updateFamilyMemberActiveSkin(fullMember.id, newlyUnlockedSkins[0].id);
-        }
-        
-        // Broadcast skin unlocks if any
-        if (newlyUnlockedSkins.length > 0) {
-          broadcastToFamily(member.familyName, {
-            type: "skins_unlocked",
-            memberId: fullMember.id,
-            skins: newlyUnlockedSkins.map(s => ({ id: s.id, name: s.name })),
-          });
+        const fullMember = await storage.getFamilyMemberById(redemption.memberId);
+        if (fullMember) {
+          await storage.incrementRewardsRedeemed(fullMember.id);
         }
       }
 
@@ -1829,17 +1739,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const allSkins = await storage.getSkins();
       
-      // Enrich skins with unlock status for this member
+      // Enrich skins with unlock status for this member based on points earned
       const skinsWithStatus = allSkins.map(skin => ({
         ...skin,
-        isUnlocked: member.unlockedSkins.includes(skin.id),
+        isUnlocked: member.totalEarned >= skin.pointsRequired,
         isActive: member.activeSkinId === skin.id,
-        canUnlock: member.rewardsRedeemed >= skin.unlockThreshold,
+        canUnlock: member.totalEarned >= skin.pointsRequired,
       }));
       
       res.json({
         skins: skinsWithStatus,
-        rewardsRedeemed: member.rewardsRedeemed,
+        totalEarned: member.totalEarned,
       });
     } catch (error: any) {
       console.error("Error fetching skins:", error);
@@ -1861,9 +1771,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Allow null to reset to default avatar, otherwise verify skin is unlocked
-      if (skinId !== null && !member.unlockedSkins.includes(skinId)) {
-        return res.status(403).json({ message: "Skin not unlocked" });
+      // Allow null to reset to default avatar, otherwise verify skin is unlocked based on points earned
+      if (skinId !== null) {
+        const allSkins = await storage.getSkins();
+        const skin = allSkins.find(s => s.id === skinId);
+        
+        if (!skin) {
+          return res.status(404).json({ message: "Skin not found" });
+        }
+        
+        // Check if user has earned enough points to unlock this skin
+        if (member.totalEarned < skin.pointsRequired) {
+          return res.status(403).json({ message: "Skin not unlocked - need more points" });
+        }
       }
       
       await storage.updateFamilyMemberActiveSkin(member.id, skinId);
