@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil } from "lucide-react";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +36,7 @@ export default function Settings() {
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false);
+  const [joinCodeCopied, setJoinCodeCopied] = useState(false);
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -228,6 +229,18 @@ export default function Settings() {
     updateSettingsMutation.mutate({ showLeaderboard: checked });
   };
 
+  const handleCopyJoinCode = () => {
+    if (familyData?.joinCode) {
+      navigator.clipboard.writeText(familyData.joinCode);
+      setJoinCodeCopied(true);
+      setTimeout(() => setJoinCodeCopied(false), 2000);
+      toast({
+        title: "Join code copied!",
+        description: "Share this code with new family members to let them join.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <div className="container max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
@@ -343,6 +356,46 @@ export default function Settings() {
                 <UserPlus className="h-4 w-4 mr-2" />
                 Add Member
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Family Join Code */}
+          <Card className="border-primary/50">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Key className="h-5 w-5 text-primary" />
+                <CardTitle>Family Join Code</CardTitle>
+              </div>
+              <CardDescription>
+                Share this code with children and other parents to invite them to your family. Anyone with this code can join.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between p-4 rounded-lg border bg-card/50">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Your Family Join Code</p>
+                  <p className="text-3xl font-black tracking-widest text-primary font-mono" data-testid="text-family-join-code">
+                    {familyData?.joinCode}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleCopyJoinCode}
+                  data-testid="button-copy-join-code"
+                  className="flex-shrink-0"
+                  aria-label="Copy join code"
+                >
+                  {joinCodeCopied ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground mt-3">
+                New members can join at the login page by clicking "Join Existing Family" and entering this code.
+              </p>
             </CardContent>
           </Card>
 
