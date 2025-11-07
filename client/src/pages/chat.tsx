@@ -145,10 +145,12 @@ export default function Chat() {
                   <li>• Plus all Family tier benefits</li>
                 </ul>
               </div>
-              <Button className="w-full" data-testid="button-upgrade">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Upgrade to Family+
-              </Button>
+              <Link href="/pricing">
+                <Button className="w-full" data-testid="button-upgrade">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Upgrade to Family+
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
