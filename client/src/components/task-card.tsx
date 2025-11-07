@@ -1,8 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Camera, CheckCircle, Zap } from "lucide-react";
+import { Calendar, Camera, CheckCircle, Zap, Star } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
 import { format } from "date-fns";
 import { getAvatarUrl } from "@/lib/skins";
@@ -44,7 +43,7 @@ export function TaskCard({
         onClick={() => onClick?.(task)}
       >
         <div className="flex items-start gap-3">
-          {/* Icon with points overlay */}
+          {/* Icon with points in star */}
           <div className="relative flex-shrink-0">
             <motion.div
               className="text-4xl"
@@ -56,12 +55,15 @@ export function TaskCard({
             >
               {task.iconEmoji}
             </motion.div>
-            <Badge
-              className="absolute -bottom-1 -right-1 h-6 min-w-6 px-1.5 gradient-achievement text-white border-0 text-xs font-bold"
-              data-testid={`badge-points-${task.id}`}
-            >
-              {task.points}
-            </Badge>
+            <div className="absolute -bottom-1 -right-1 flex items-center justify-center">
+              <Star className="h-7 w-7 fill-yellow-400 text-yellow-400" />
+              <span 
+                className="absolute text-xs font-bold text-black"
+                data-testid={`badge-points-${task.id}`}
+              >
+                {task.points}
+              </span>
+            </div>
           </div>
 
           {/* Content */}
