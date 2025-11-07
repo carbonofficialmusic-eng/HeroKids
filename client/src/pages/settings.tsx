@@ -163,6 +163,24 @@ export default function Settings() {
     },
   });
 
+  // Toggle leaderboard exclusion mutation
+  const toggleLeaderboardExclusionMutation = useMutation({
+    mutationFn: async ({ memberId, excludeFromLeaderboard }: { memberId: string; excludeFromLeaderboard: boolean }) => {
+      return await apiRequest("PUT", `/api/family-members/${memberId}`, { excludeFromLeaderboard });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update leaderboard settings. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Factory reset mutation
   const factoryResetMutation = useMutation({
     mutationFn: async () => {
@@ -430,6 +448,79 @@ export default function Settings() {
                   data-testid="switch-show-leaderboard"
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Leaderboard Competition */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-primary" />
+                <CardTitle>Leaderboard Competition</CardTitle>
+              </div>
+              <CardDescription>
+                Choose which family members participate in leaderboard rankings. Excluded members can still earn points and complete tasks, but won't appear in the competitive leaderboard.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {membersLoading ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  Loading members...
+                </div>
+              ) : familyMembers && familyMembers.length > 0 ? (
+                <div className="space-y-3">
+                  {familyMembers.map((familyMember) => (
+                    <div
+                      key={familyMember.id}
+                      className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                      data-testid={`leaderboard-exclusion-${familyMember.id}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={getAvatarUrl(familyMember.activeSkinId, familyMember.avatarUrl)} alt={familyMember.displayName} />
+                          <AvatarFallback style={{ backgroundColor: familyMember.color }}>
+                            {familyMember.displayName.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium" data-testid={`leaderboard-member-name-${familyMember.id}`}>
+                            {familyMember.displayName}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {familyMember.excludeFromLeaderboard 
+                              ? "Not competing in leaderboard" 
+                              : "Competing in leaderboard"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor={`exclude-${familyMember.id}`} className="text-sm text-muted-foreground">
+                          Include in leaderboard
+                        </Label>
+                        <Switch
+                          id={`exclude-${familyMember.id}`}
+                          checked={!familyMember.excludeFromLeaderboard}
+                          onCheckedChange={(checked) => {
+                            toggleLeaderboardExclusionMutation.mutate({
+                              memberId: familyMember.id,
+                              excludeFromLeaderboard: !checked,
+                            });
+                          }}
+                          disabled={toggleLeaderboardExclusionMutation.isPending}
+                          data-testid={`switch-leaderboard-inclusion-${familyMember.id}`}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-muted-foreground">
+                  No family members yet.
+                </div>
+              )}
+              <p className="text-sm text-muted-foreground">
+                Tip: Parents working for money may want to opt out of the leaderboard so they don't compete with children earning household points.
+              </p>
             </CardContent>
           </Card>
 
