@@ -776,6 +776,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/tasks/:taskId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { taskId } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete tasks
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete tasks" });
+      }
+      
+      // Get the task to verify it exists and belongs to the same family
+      const task = await storage.getTask(taskId);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      if (task.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Cannot delete tasks from another family" });
+      }
+      
+      // Delete the task
+      await storage.deleteTask(taskId);
+      
+      // Broadcast task deletion to family
+      broadcastToFamily(member.familyName, {
+        type: "task_deleted",
+        taskId,
+      });
+      
+      res.json({ success: true, message: "Task deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting task:", error);
+      res.status(500).json({ message: "Failed to delete task" });
+    }
+  });
+
   // Photo upload endpoint for task proof
   app.post("/api/tasks/:taskId/upload-proof", isAuthenticated, upload.single('photo'), async (req: any, res) => {
     try {
