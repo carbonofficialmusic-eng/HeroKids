@@ -119,6 +119,16 @@ export default function SkinsGallery() {
           }`}
           data-testid="card-skin-default"
         >
+          <Link href="/dashboard">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 left-4 z-10"
+              data-testid="button-back-default"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
           {isDefaultActive && (
             <Badge
               className="absolute top-4 right-4 z-10"
@@ -177,6 +187,16 @@ export default function SkinsGallery() {
               }`}
               data-testid={`card-skin-${skin.id}`}
             >
+              <Link href="/dashboard">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 left-4 z-10"
+                  data-testid={`button-back-${skin.id}`}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </Link>
               {skin.isActive && (
                 <Badge
                   className="absolute top-4 right-4 z-10"
@@ -252,6 +272,16 @@ export default function SkinsGallery() {
                   }`}
                   data-testid={`card-skin-${skin.id}`}
                 >
+                  <Link href="/dashboard">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-4 left-4 z-10"
+                      data-testid={`button-back-${skin.id}`}
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                  </Link>
                   {skin.isActive && (
                     <Badge
                       className="absolute top-4 right-4 z-10"
