@@ -599,26 +599,29 @@ export default function Dashboard() {
                     Rewards Board
                   </Button>
                 </Link>
-                <Button
-                  onClick={() => {
-                    setSelectedReward(null);
-                    setRewardDialogOpen(true);
-                  }}
-                  data-testid="button-add-reward"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Reward
-                </Button>
-                <Button
-                  onClick={() => {
-                    setSelectedTask(null);
-                    setTaskDialogOpen(true);
-                  }}
-                  data-testid="button-add-task"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Task
-                </Button>
+                {/* Keep Add buttons together on same line */}
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      setSelectedReward(null);
+                      setRewardDialogOpen(true);
+                    }}
+                    data-testid="button-add-reward"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Reward
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSelectedTask(null);
+                      setTaskDialogOpen(true);
+                    }}
+                    data-testid="button-add-task"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Task
+                  </Button>
+                </div>
               </div>
 
               {activeTasks.length === 0 ? (
