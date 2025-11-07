@@ -367,6 +367,27 @@ export default function Dashboard() {
     },
   });
 
+  // Delete task
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      return await apiRequest("DELETE", `/api/tasks/${taskId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      toast({
+        title: "Task deleted",
+        description: "The task has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to delete",
+        description: error.message || "Could not delete task",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Create reward request
   const createRewardRequestMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -645,17 +666,46 @@ export default function Dashboard() {
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
                   {activeTasks.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      showAssignee
-                      onClick={handleTaskClick}
-                      onComplete={() => {
-                        setTaskToComplete(task);
-                        setCompletionDialogOpen(true);
-                      }}
-                      isCompleting={completeTaskMutation.isPending}
-                    />
+                    <div key={task.id} className="relative group">
+                      <TaskCard
+                        task={task}
+                        showAssignee
+                        onClick={handleTaskClick}
+                        onComplete={() => {
+                          setTaskToComplete(task);
+                          setCompletionDialogOpen(true);
+                        }}
+                        isCompleting={completeTaskMutation.isPending}
+                      />
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTaskToEdit(task);
+                            setTaskDialogOpen(true);
+                          }}
+                          data-testid={`button-edit-task-${task.id}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteTaskMutation.mutate(task.id);
+                          }}
+                          disabled={deleteTaskMutation.isPending}
+                          data-testid={`button-delete-task-${task.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
