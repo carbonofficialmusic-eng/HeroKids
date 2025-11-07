@@ -105,7 +105,7 @@ function Router() {
             <Route path="/chat" component={Chat} />
             <Route path="/approvals" component={Approvals} />
             <Route path="/rewards-board" component={RewardsBoard} />
-            <Route path="/skins" component={SkinsGallery} />
+            <Route path="/skins-gallery" component={SkinsGallery} />
             <Route path="/settings" component={Settings} />
           </>
         )}

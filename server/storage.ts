@@ -614,7 +614,7 @@ export class DatabaseStorage implements IStorage {
 
   // Skin operations
   async getSkins(): Promise<Skin[]> {
-    return await db.select().from(skins).orderBy(skins.unlockThreshold);
+    return await db.select().from(skins).orderBy(skins.pointsRequired);
   }
 
   async updateFamilyMemberActiveSkin(memberId: string, skinId: string | null): Promise<void> {
@@ -650,8 +650,8 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Verify member meets the unlock threshold
-    if (member.rewardsRedeemed < skin.unlockThreshold) {
-      throw new Error(`Cannot unlock ${skin.name} - requires ${skin.unlockThreshold} rewards, member has ${member.rewardsRedeemed}`);
+    if (member.totalEarned < skin.pointsRequired) {
+      throw new Error(`Cannot unlock ${skin.name} - requires ${skin.pointsRequired} points, member has ${member.totalEarned}`);
     }
     
     // Unlock the skin
