@@ -30,6 +30,7 @@ import castleBg from "@assets/generated_images/Halloween_castle_background_scene
 import constructionBg from "@assets/generated_images/Construction_site_background_scene_990a32c9.png";
 import trainStationBg from "@assets/generated_images/Train_station_background_scene_3c539965.png";
 import underwaterBg from "@assets/generated_images/Underwater_ocean_background_scene_378220c2.png";
+import nightSkyBg from "@assets/generated_images/Night_sky_knight_background_b50bd51d.png";
 
 // Skin image mappings for new HeroKids themed skins
 export const SKIN_IMAGES: Record<string, string> = {
@@ -69,7 +70,7 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   // Tier 2 - Elite Heroes
   "tech-ninja": cityStreetBg,
   "ocean-guardian": underwaterBg,
-  "sky-knight": spaceBg,
+  "sky-knight": nightSkyBg,
   "fire-phoenix": castleBg,
   "crystal-mage": gardenBg,
   "neon-rebel": cityStreetBg,
