@@ -55,10 +55,10 @@ export function TaskCard({
             >
               {task.iconEmoji}
             </motion.div>
-            <div className="absolute -bottom-1 -right-1 flex items-center justify-center">
-              <Star className="h-7 w-7 fill-yellow-400 text-yellow-400" />
+            <div className="absolute -bottom-1 -right-1 w-7 h-7 flex items-center justify-center">
+              <Star className="absolute w-full h-full fill-yellow-400 text-yellow-400" />
               <span 
-                className="absolute text-xs font-bold text-black"
+                className="relative z-10 text-xs font-bold text-black leading-none"
                 data-testid={`badge-points-${task.id}`}
               >
                 {task.points}
