@@ -934,23 +934,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let nextAvailableDate: Date;
         
         if (task.recurrenceDays) {
-          // Custom days interval
-          nextAvailableDate = new Date(now.getTime() + task.recurrenceDays * 24 * 60 * 60 * 1000);
+          // Custom days interval - set to midnight of the target day
+          nextAvailableDate = new Date(now);
+          nextAvailableDate.setDate(nextAvailableDate.getDate() + task.recurrenceDays);
+          nextAvailableDate.setHours(0, 0, 0, 0);
         } else {
           // Standard recurrence (daily/weekly/monthly)
           switch (task.recurrence) {
             case "daily":
-              nextAvailableDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+              // Set to midnight of the next calendar day
+              nextAvailableDate = new Date(now);
+              nextAvailableDate.setDate(nextAvailableDate.getDate() + 1);
+              nextAvailableDate.setHours(0, 0, 0, 0);
               break;
             case "weekly":
-              nextAvailableDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+              // Set to midnight 7 days from now
+              nextAvailableDate = new Date(now);
+              nextAvailableDate.setDate(nextAvailableDate.getDate() + 7);
+              nextAvailableDate.setHours(0, 0, 0, 0);
               break;
             case "monthly":
+              // Set to midnight of same date next month
               nextAvailableDate = new Date(now);
               nextAvailableDate.setMonth(nextAvailableDate.getMonth() + 1);
+              nextAvailableDate.setHours(0, 0, 0, 0);
               break;
             default:
-              nextAvailableDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+              // Default to midnight tomorrow
+              nextAvailableDate = new Date(now);
+              nextAvailableDate.setDate(nextAvailableDate.getDate() + 1);
+              nextAvailableDate.setHours(0, 0, 0, 0);
           }
         }
         
