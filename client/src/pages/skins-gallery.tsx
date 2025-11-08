@@ -184,68 +184,49 @@ export default function SkinsGallery() {
             {tier1Skins.map((skin) => (
             <Card
               key={skin.id}
-              className={`relative overflow-hidden transition-all hover-elevate ${
+              className={`relative overflow-hidden transition-all hover-elevate cursor-pointer ${
                 skin.isActive ? "ring-2 ring-primary" : ""
               }`}
               data-testid={`card-skin-${skin.id}`}
+              onClick={() => !skin.isActive && selectSkinMutation.mutate(skin.id)}
             >
-              <Link href="/dashboard">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-4 left-4 z-10"
-                  data-testid={`button-back-${skin.id}`}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </Link>
-
-              <CardHeader className="pb-4">
-                {skin.isActive && (
-                  <div className="flex justify-center mb-2">
-                    <Badge data-testid={`badge-active-${skin.id}`}>
-                      <Check className="h-3 w-3 mr-1" />
-                      Active
-                    </Badge>
+              {skin.isActive && (
+                <div className="absolute top-2 right-2 z-10">
+                  <Badge data-testid={`badge-active-${skin.id}`}>
+                    <Check className="h-3 w-3 mr-1" />
+                    Active
+                  </Badge>
+                </div>
+              )}
+              
+              <div className="relative w-full aspect-square overflow-hidden bg-muted">
+                {SKIN_IMAGES[skin.id] ? (
+                  <img
+                    src={SKIN_IMAGES[skin.id]}
+                    alt={skin.name}
+                    className={`w-full h-full object-cover ${
+                      !skin.isUnlocked ? "filter grayscale opacity-40" : ""
+                    }`}
+                    data-testid={`img-skin-${skin.id}`}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
+                    No Image
                   </div>
                 )}
-                <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
-                  {SKIN_IMAGES[skin.id] ? (
-                    <img
-                      src={SKIN_IMAGES[skin.id]}
-                      alt={skin.name}
-                      className={`w-full h-full object-cover ${
-                        !skin.isUnlocked ? "filter grayscale opacity-40" : ""
-                      }`}
-                      data-testid={`img-skin-${skin.id}`}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
-                      No Image
+                {!skin.isUnlocked && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
+                      <Lock className="h-8 w-8 text-muted-foreground" />
                     </div>
-                  )}
-                  {!skin.isUnlocked && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
-                        <Lock className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <CardTitle className="font-accent text-xl">{skin.name}</CardTitle>
-                <CardDescription>{skin.description}</CardDescription>
-              </CardHeader>
-
-              <CardContent>
-                <Button
-                  onClick={() => selectSkinMutation.mutate(skin.id)}
-                  disabled={skin.isActive || selectSkinMutation.isPending}
-                  className="w-full"
-                  data-testid={`button-select-${skin.id}`}
-                >
-                  {skin.isActive ? "Equipped" : "Equip Skin"}
-                </Button>
-              </CardContent>
+                  </div>
+                )}
+              </div>
+              
+              <div className="p-3 text-center">
+                <h3 className="font-accent text-lg font-bold mb-1">{skin.name}</h3>
+                <p className="text-xs text-muted-foreground">{skin.pointsRequired} points</p>
+              </div>
             </Card>
             ))}
           </div>
@@ -268,108 +249,63 @@ export default function SkinsGallery() {
               {tier2Skins.map((skin) => (
                 <Card
                   key={skin.id}
-                  className={`relative overflow-hidden transition-all hover-elevate ${
+                  className={`relative overflow-hidden transition-all hover-elevate cursor-pointer ${
                     skin.isActive ? "ring-2 ring-primary" : ""
                   }`}
                   data-testid={`card-skin-${skin.id}`}
+                  onClick={() => skin.isUnlocked && !skin.isActive && selectSkinMutation.mutate(skin.id)}
                 >
-                  <Link href="/dashboard">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-4 left-4 z-10"
-                      data-testid={`button-back-${skin.id}`}
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                  </Link>
-
-                  <CardHeader className="pb-4">
-                    {skin.isActive && (
-                      <div className="flex justify-center mb-2">
-                        <Badge data-testid={`badge-active-${skin.id}`}>
-                          <Check className="h-3 w-3 mr-1" />
-                          Active
-                        </Badge>
-                      </div>
-                    )}
-                    <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
-                      {hasReached500 ? (
-                        // Show preview image once user reaches 500 points
-                        <>
-                          {SKIN_IMAGES[skin.id] ? (
-                            <img
-                              src={SKIN_IMAGES[skin.id]}
-                              alt={skin.name}
-                              className={`w-full h-full object-cover ${
-                                !skin.isUnlocked ? "filter grayscale opacity-40" : ""
-                              }`}
-                              data-testid={`img-skin-${skin.id}`}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
-                              No Image
-                            </div>
-                          )}
-                          {!skin.isUnlocked && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
-                                <Lock className="h-8 w-8 text-muted-foreground" />
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        // Hide image preview until 500 points - show only lock
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground">
-                          <Lock className="h-16 w-16 mb-2" />
-                          <p className="text-xs font-medium">Mystery Skin</p>
-                          <p className="text-xs opacity-70">Unlock at 500 points</p>
-                        </div>
-                      )}
+                  {skin.isActive && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <Badge data-testid={`badge-active-${skin.id}`}>
+                        <Check className="h-3 w-3 mr-1" />
+                        Active
+                      </Badge>
                     </div>
-                    <CardTitle className="font-accent text-xl">
-                      {hasReached500 ? skin.name : "???"}
-                    </CardTitle>
-                    <CardDescription>
-                      {hasReached500 ? skin.description : "A mysterious hero awaits..."}
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent>
-                    {skin.isUnlocked ? (
-                      <Button
-                        onClick={() => selectSkinMutation.mutate(skin.id)}
-                        disabled={skin.isActive || selectSkinMutation.isPending}
-                        className="w-full"
-                        data-testid={`button-select-${skin.id}`}
-                      >
-                        {skin.isActive ? "Equipped" : "Equip Skin"}
-                      </Button>
-                    ) : (
-                      <div className="text-center">
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Unlock at {skin.pointsRequired} points
-                        </p>
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
-                            <div
-                              className="bg-primary h-full transition-all"
-                              style={{
-                                width: `${Math.min(
-                                  100,
-                                  (totalEarned / skin.pointsRequired) * 100
-                                )}%`,
-                              }}
-                            />
+                  )}
+                  
+                  <div className="relative w-full aspect-square overflow-hidden bg-muted">
+                    {hasReached500 ? (
+                      <>
+                        {SKIN_IMAGES[skin.id] ? (
+                          <img
+                            src={SKIN_IMAGES[skin.id]}
+                            alt={skin.name}
+                            className={`w-full h-full object-cover ${
+                              !skin.isUnlocked ? "filter grayscale opacity-40" : ""
+                            }`}
+                            data-testid={`img-skin-${skin.id}`}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
+                            No Image
                           </div>
-                          <span className="text-xs font-semibold">
-                            {totalEarned}/{skin.pointsRequired}
-                          </span>
-                        </div>
+                        )}
+                        {!skin.isUnlocked && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
+                              <Lock className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground">
+                        <Lock className="h-16 w-16 mb-2" />
+                        <p className="text-xs font-medium">Mystery Skin</p>
+                        <p className="text-xs opacity-70">Unlock at 500 points</p>
                       </div>
                     )}
-                  </CardContent>
+                  </div>
+                  
+                  <div className="p-3 text-center">
+                    <h3 className="font-accent text-lg font-bold mb-1">
+                      {hasReached500 ? skin.name : "???"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {hasReached500 ? `${skin.pointsRequired} points` : "Mystery Hero"}
+                    </p>
+                  </div>
                 </Card>
               ))}
             </div>
@@ -393,106 +329,63 @@ export default function SkinsGallery() {
               {tier3Skins.map((skin) => (
                 <Card
                   key={skin.id}
-                  className={`relative overflow-hidden transition-all hover-elevate ${
+                  className={`relative overflow-hidden transition-all hover-elevate cursor-pointer ${
                     skin.isActive ? "ring-2 ring-primary" : ""
                   }`}
                   data-testid={`card-skin-${skin.id}`}
+                  onClick={() => skin.isUnlocked && !skin.isActive && selectSkinMutation.mutate(skin.id)}
                 >
-                  <Link href="/dashboard">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-4 left-4 z-10"
-                      data-testid={`button-back-${skin.id}`}
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                  </Link>
-
-                  <CardHeader className="pb-4">
-                    {skin.isActive && (
-                      <div className="flex justify-center mb-2">
-                        <Badge data-testid={`badge-active-${skin.id}`}>
-                          <Check className="h-3 w-3 mr-1" />
-                          Active
-                        </Badge>
-                      </div>
-                    )}
-                    <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
-                      {hasReached1000 ? (
-                        <>
-                          {SKIN_IMAGES[skin.id] ? (
-                            <img
-                              src={SKIN_IMAGES[skin.id]}
-                              alt={skin.name}
-                              className={`w-full h-full object-cover ${
-                                !skin.isUnlocked ? "filter grayscale opacity-40" : ""
-                              }`}
-                              data-testid={`img-skin-${skin.id}`}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
-                              No Image
-                            </div>
-                          )}
-                          {!skin.isUnlocked && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
-                                <Lock className="h-8 w-8 text-muted-foreground" />
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground">
-                          <Lock className="h-16 w-16 mb-2" />
-                          <p className="text-xs font-medium">Mystery Dinosaur</p>
-                          <p className="text-xs opacity-70">Unlock at 1000 points</p>
-                        </div>
-                      )}
+                  {skin.isActive && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <Badge data-testid={`badge-active-${skin.id}`}>
+                        <Check className="h-3 w-3 mr-1" />
+                        Active
+                      </Badge>
                     </div>
-                    <CardTitle className="font-accent text-xl">
-                      {hasReached1000 ? skin.name : "???"}
-                    </CardTitle>
-                    <CardDescription>
-                      {hasReached1000 ? skin.description : "A prehistoric legend awaits..."}
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent>
-                    {skin.isUnlocked ? (
-                      <Button
-                        onClick={() => selectSkinMutation.mutate(skin.id)}
-                        disabled={skin.isActive || selectSkinMutation.isPending}
-                        className="w-full"
-                        data-testid={`button-select-${skin.id}`}
-                      >
-                        {skin.isActive ? "Equipped" : "Equip Skin"}
-                      </Button>
-                    ) : (
-                      <div className="text-center">
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Unlock at {skin.pointsRequired} points
-                        </p>
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
-                            <div
-                              className="bg-primary h-full transition-all"
-                              style={{
-                                width: `${Math.min(
-                                  100,
-                                  (totalEarned / skin.pointsRequired) * 100
-                                )}%`,
-                              }}
-                            />
+                  )}
+                  
+                  <div className="relative w-full aspect-square overflow-hidden bg-muted">
+                    {hasReached1000 ? (
+                      <>
+                        {SKIN_IMAGES[skin.id] ? (
+                          <img
+                            src={SKIN_IMAGES[skin.id]}
+                            alt={skin.name}
+                            className={`w-full h-full object-cover ${
+                              !skin.isUnlocked ? "filter grayscale opacity-40" : ""
+                            }`}
+                            data-testid={`img-skin-${skin.id}`}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
+                            No Image
                           </div>
-                          <span className="text-xs font-semibold">
-                            {totalEarned}/{skin.pointsRequired}
-                          </span>
-                        </div>
+                        )}
+                        {!skin.isUnlocked && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
+                              <Lock className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground">
+                        <Lock className="h-16 w-16 mb-2" />
+                        <p className="text-xs font-medium">Mystery Dinosaur</p>
+                        <p className="text-xs opacity-70">Unlock at 1000 points</p>
                       </div>
                     )}
-                  </CardContent>
+                  </div>
+                  
+                  <div className="p-3 text-center">
+                    <h3 className="font-accent text-lg font-bold mb-1">
+                      {hasReached1000 ? skin.name : "???"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {hasReached1000 ? `${skin.pointsRequired} points` : "Prehistoric Legend"}
+                    </p>
+                  </div>
                 </Card>
               ))}
             </div>
