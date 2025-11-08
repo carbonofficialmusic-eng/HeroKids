@@ -931,28 +931,29 @@ export default function Dashboard() {
               </TabsList>
 
               {/* Quick Action Buttons */}
-              <div className="flex items-center justify-center flex-wrap gap-2 mt-6">
+              <div className="flex items-center justify-center flex-wrap gap-3 mt-6">
                 <Button
                   variant="outline"
                   onClick={() => setRequestRewardDialogOpen(true)}
                   data-testid="button-request-reward"
+                  className="min-h-11 whitespace-normal leading-tight"
                 >
-                  <Lightbulb className="h-4 w-4 mr-2" />
-                  {t("dashboard.requestReward")}
+                  <Lightbulb className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="text-center">{t("dashboard.requestReward")}</span>
                 </Button>
                 <Link href="/rewards-board">
-                  <Button variant="outline" data-testid="button-rewards-board-child">
-                    <Gift className="h-4 w-4 mr-2" />
-                    {t("dashboard.myRewards")}
+                  <Button variant="outline" data-testid="button-rewards-board-child" className="min-h-11 whitespace-normal leading-tight">
+                    <Gift className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-center">{t("dashboard.myRewards")}</span>
                   </Button>
                 </Link>
                 {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") && (
                   <Link href="/chat">
-                    <Button variant="outline" data-testid="button-chat-child" className="relative">
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      {t("nav.chat")}
+                    <Button variant="outline" data-testid="button-chat-child" className="relative min-h-11 whitespace-normal leading-tight">
+                      <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="text-center">{t("nav.chat")}</span>
                       {unreadChatData && unreadChatData.count > 0 && (
-                        <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1" data-testid="badge-unread-count-child">
+                        <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex-shrink-0" data-testid="badge-unread-count-child">
                           {unreadChatData.count}
                         </Badge>
                       )}
