@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { FamilySetup } from "@/components/family-setup";
@@ -40,6 +41,7 @@ import { celebrateTaskCompletion } from "@/lib/confetti";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
@@ -133,8 +135,8 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       toast({
-        title: "Welcome to HeroKids!",
-        description: "Your profile has been created.",
+        title: t("auth.welcome"),
+        description: t("toast.profileCreated"),
       });
     },
   });
@@ -147,14 +149,14 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       toast({
-        title: "Welcome to the family!",
-        description: "You've successfully joined your family.",
+        title: t("toast.welcomeFamily"),
+        description: t("toast.joinedFamily"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to join family",
-        description: error.message || "Invalid join code or the code has already been used.",
+        title: t("toast.failedJoinFamily"),
+        description: error.message || t("toast.invalidJoinCode"),
         variant: "destructive",
       });
     },
@@ -171,14 +173,14 @@ export default function Dashboard() {
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
       toast({
-        title: "Profile updated!",
-        description: "Your profile has been updated successfully.",
+        title: t("toast.profileUpdated"),
+        description: t("toast.profileUpdatedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to update profile",
-        description: error.message || "Unable to update profile.",
+        title: t("toast.failedUpdateProfile"),
+        description: error.message || t("toast.unableUpdateProfile"),
         variant: "destructive",
       });
     },
@@ -197,14 +199,14 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       setSwitchMemberDialogOpen(false);
       toast({
-        title: "Switched member!",
-        description: "You are now acting as a different family member.",
+        title: t("toast.switchedMember"),
+        description: t("toast.switchedMemberDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to switch member",
-        description: error.message || "Unable to switch member.",
+        title: t("toast.failedSwitchMember"),
+        description: error.message || t("toast.unableSwitchMember"),
         variant: "destructive",
       });
     },
@@ -231,8 +233,8 @@ export default function Dashboard() {
       setTaskDialogOpen(false);
       setSelectedTask(null);
       toast({
-        title: "Task created!",
-        description: "The task has been added to the list.",
+        title: t("tasks.taskCreated"),
+        description: t("toast.taskAdded"),
       });
     },
   });
@@ -251,8 +253,8 @@ export default function Dashboard() {
       setTaskDialogOpen(false);
       setSelectedTask(null);
       toast({
-        title: "Task updated!",
-        description: "The task has been updated successfully.",
+        title: t("tasks.taskUpdated"),
+        description: t("toast.taskUpdatedDesc"),
       });
     },
   });
@@ -276,14 +278,14 @@ export default function Dashboard() {
         celebrateTaskCompletion();
         setCelebration({
           points: data.completion?.pointsEarned || 0,
-          message: data.message || "Great job!",
+          message: data.message || t("toast.greatJob"),
         });
       }
       
       // Show success message
       toast({
-        title: data.autoApproved ? "🎉 Task Completed!" : "Task Submitted!",
-        description: data.message || "Awaiting parent approval for points",
+        title: data.autoApproved ? t("toast.taskCompletedCelebration") : t("toast.taskSubmitted"),
+        description: data.message || t("toast.awaitingApproval"),
       });
     },
   });
@@ -298,8 +300,8 @@ export default function Dashboard() {
       setRewardDialogOpen(false);
       setSelectedReward(null);
       toast({
-        title: "Reward created!",
-        description: "The reward is now available to earn.",
+        title: t("toast.rewardCreated"),
+        description: t("toast.rewardAvailable"),
       });
     },
   });
@@ -314,8 +316,8 @@ export default function Dashboard() {
       setRewardDialogOpen(false);
       setSelectedReward(null);
       toast({
-        title: "Reward updated!",
-        description: "The reward has been successfully updated.",
+        title: t("toast.rewardUpdated"),
+        description: t("toast.rewardUpdatedDesc"),
       });
     },
   });
@@ -331,20 +333,20 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       toast({
-        title: "Reward redeemed!",
+        title: t("toast.rewardRedeemed"),
         description: data.message,
       });
       const pointsSpent = data.redemption?.pointsSpent || 0;
       const rewardTitle = data.redemption?.rewardTitle || 'Reward';
       setCelebration({
         points: -pointsSpent,
-        message: `${rewardTitle} - ${pointsSpent} points`,
+        message: `${rewardTitle} - ${pointsSpent} ${t("dashboard.pointsLabel")}`,
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to redeem",
-        description: error.message || "Not enough points",
+        title: t("toast.failedRedeem"),
+        description: error.message || t("rewards.notEnoughPoints"),
         variant: "destructive",
       });
     },
@@ -358,14 +360,14 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       toast({
-        title: "Reward deleted",
-        description: "The reward has been deleted successfully.",
+        title: t("toast.rewardDeleted"),
+        description: t("toast.rewardDeletedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to delete",
-        description: error.message || "Could not delete reward",
+        title: t("toast.failedDelete"),
+        description: error.message || t("toast.couldNotDeleteReward"),
         variant: "destructive",
       });
     },
@@ -379,14 +381,14 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       toast({
-        title: "Task deleted",
-        description: "The task has been deleted successfully.",
+        title: t("tasks.taskDeleted"),
+        description: t("toast.taskDeletedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to delete",
-        description: error.message || "Could not delete task",
+        title: t("toast.failedDelete"),
+        description: error.message || t("toast.couldNotDeleteTask"),
         variant: "destructive",
       });
     },
@@ -401,14 +403,14 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
       toast({
-        title: "Request sent!",
-        description: "Your reward request has been sent to your parents for review.",
+        title: t("toast.requestSent"),
+        description: t("toast.requestSentDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to send request",
-        description: error.message || "Unable to send reward request.",
+        title: t("toast.failedSendRequest"),
+        description: error.message || t("toast.unableSendRequest"),
         variant: "destructive",
       });
     },
@@ -423,14 +425,14 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       toast({
-        title: "Request approved!",
-        description: "The reward has been added and is now available to earn.",
+        title: t("toast.requestApproved"),
+        description: t("toast.requestApprovedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to approve",
-        description: error.message || "Unable to approve request.",
+        title: t("toast.failedApprove"),
+        description: error.message || t("toast.unableApprove"),
         variant: "destructive",
       });
     },
@@ -444,14 +446,14 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       toast({
-        title: "Request declined",
-        description: "The reward request has been declined.",
+        title: t("toast.requestDeclined"),
+        description: t("toast.requestDeclinedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to decline",
-        description: error.message || "Unable to decline request.",
+        title: t("toast.failedDecline"),
+        description: error.message || t("toast.unableDecline"),
         variant: "destructive",
       });
     },
@@ -467,14 +469,14 @@ export default function Dashboard() {
       setRequestRewardDialogOpen(false);
       setRequestToEdit(null);
       toast({
-        title: "Request updated!",
-        description: "The reward request has been updated successfully.",
+        title: t("toast.requestUpdated"),
+        description: t("toast.requestUpdatedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to update",
-        description: error.message || "Unable to update request.",
+        title: t("toast.failedUpdate"),
+        description: error.message || t("toast.unableUpdate"),
         variant: "destructive",
       });
     },
@@ -485,7 +487,7 @@ export default function Dashboard() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -537,12 +539,12 @@ export default function Dashboard() {
                 >
                   <Crown className="h-3 w-3 mr-1" />
                   {familyData.subscriptionTier === "free"
-                    ? "Free"
+                    ? t("subscription.free")
                     : familyData.subscriptionTier === "family"
-                    ? "Family"
+                    ? t("subscription.family")
                     : familyData.subscriptionTier === "family_plus"
-                    ? "Family+"
-                    : "HeroPro"}
+                    ? t("subscription.familyPlus")
+                    : t("subscription.familyHero")}
                 </Badge>
               </Link>
             )}
@@ -583,16 +585,16 @@ export default function Dashboard() {
                   />
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Available Points: {member.totalPoints}
+                  {t("dashboard.availablePoints")}: {member.totalPoints}
                 </p>
                 <h1 className="text-3xl font-black font-accent mb-2" data-testid="text-page-title">
-                  Hi, {member.displayName}!
+                  {t("dashboard.hi", { name: member.displayName })}
                 </h1>
                 <p className="text-muted-foreground mb-2">
-                  Manage your family's tasks and rewards
+                  {t("dashboard.manageFamily")}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Weekly Points: {member.weeklyPoints}
+                  {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
                 </p>
               </div>
 
@@ -601,19 +603,19 @@ export default function Dashboard() {
                 <Link href="/approvals">
                   <Button variant="card" data-testid="button-approvals">
                     <ClipboardCheck className="h-4 w-4 mr-2" />
-                    Approvals
+                    {t("dashboard.approvals")}
                   </Button>
                 </Link>
                 <Link href="/analytics">
                   <Button variant="card" data-testid="button-analytics">
                     <BarChart3 className="h-4 w-4 mr-2" />
-                    Analytics
+                    {t("dashboard.analytics")}
                   </Button>
                 </Link>
                 <Link href="/chat">
                   <Button variant="card" data-testid="button-chat" className="relative">
                     <MessageCircle className="h-4 w-4 mr-2" />
-                    Family Chat
+                    {t("nav.chat")}
                     {unreadChatData && unreadChatData.count > 0 && (
                       <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1" data-testid="badge-unread-count">
                         {unreadChatData.count}
@@ -624,7 +626,7 @@ export default function Dashboard() {
                 <Link href="/rewards-board">
                   <Button variant="card" data-testid="button-rewards-board">
                     <Gift className="h-4 w-4 mr-2" />
-                    Rewards Board
+                    {t("dashboard.rewardsBoard")}
                   </Button>
                 </Link>
                 {/* Keep Add buttons together on same line */}
@@ -637,7 +639,7 @@ export default function Dashboard() {
                     data-testid="button-add-task"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Task
+                    {t("dashboard.addTask")}
                   </Button>
                   <Button
                     onClick={() => {
@@ -647,7 +649,7 @@ export default function Dashboard() {
                     data-testid="button-add-reward"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Reward
+                    {t("dashboard.addReward")}
                   </Button>
                 </div>
               </div>
@@ -655,16 +657,16 @@ export default function Dashboard() {
               {activeTasks.length === 0 ? (
                 <Card className="p-12 text-center">
                   <Star className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-bold font-accent mb-2">No tasks yet</h3>
+                  <h3 className="text-xl font-bold font-accent mb-2">{t("dashboard.noTasksYet")}</h3>
                   <p className="text-muted-foreground mb-6">
-                    Create your first task to get started!
+                    {t("dashboard.createFirstTask")}
                   </p>
                   <Button onClick={() => {
                     setSelectedTask(null);
                     setTaskDialogOpen(true);
                   }} data-testid="button-create-first-task">
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Task
+                    {t("dashboard.createTask")}
                   </Button>
                 </Card>
               ) : (
@@ -717,7 +719,7 @@ export default function Dashboard() {
               {/* Pending Reward Requests Section */}
               {isRealParent && rewardRequests.filter(r => r.status === "pending").length > 0 && (
                 <div>
-                  <h2 className="text-2xl font-bold font-accent mb-4">Pending Reward Requests</h2>
+                  <h2 className="text-2xl font-bold font-accent mb-4">{t("dashboard.pendingRewardRequests")}</h2>
                   <div className="grid md:grid-cols-2 gap-4">
                     {rewardRequests
                       .filter(r => r.status === "pending")
@@ -740,7 +742,7 @@ export default function Dashboard() {
                                   </Badge>
                                 </div>
                                 <p className="text-xs text-muted-foreground mb-1">
-                                  Requested by {requester?.displayName || 'Unknown'}
+                                  {t("dashboard.requestedBy", { name: requester?.displayName || 'Unknown' })}
                                 </p>
                                 {request.description && (
                                   <p className="text-sm text-muted-foreground">
@@ -760,7 +762,7 @@ export default function Dashboard() {
                                 data-testid={`button-edit-request-${request.id}`}
                               >
                                 <Pencil className="h-4 w-4 mr-1" />
-                                Edit
+                                {t("common.edit")}
                               </Button>
                               <Button
                                 onClick={() => approveRewardRequestMutation.mutate(request.id)}
@@ -769,7 +771,7 @@ export default function Dashboard() {
                                 data-testid={`button-approve-request-${request.id}`}
                               >
                                 <Check className="h-4 w-4 mr-1" />
-                                Approve
+                                {t("rewards.approve")}
                               </Button>
                               <Button
                                 onClick={() => declineRewardRequestMutation.mutate(request.id)}
@@ -779,7 +781,7 @@ export default function Dashboard() {
                                 data-testid={`button-decline-request-${request.id}`}
                               >
                                 <X className="h-4 w-4 mr-1" />
-                                Decline
+                                {t("dashboard.decline")}
                               </Button>
                             </div>
                           </Card>
@@ -792,7 +794,7 @@ export default function Dashboard() {
               {/* Rewards Section */}
               {activeRewards.length > 0 && (
                 <div>
-                  <h2 className="text-2xl font-bold font-accent mb-4">Active Rewards</h2>
+                  <h2 className="text-2xl font-bold font-accent mb-4">{t("dashboard.activeRewards")}</h2>
                   <div className="grid md:grid-cols-2 gap-4">
                     {activeRewards.map((reward) => (
                       <Card key={reward.id} className="p-6 relative overflow-visible" data-testid={`card-reward-${reward.id}`}>
@@ -844,11 +846,11 @@ export default function Dashboard() {
                                 }
                                 data-testid={`badge-reward-points-${reward.id}`}
                               >
-                                {reward.pointThreshold} points
+                                {reward.pointThreshold} {t("dashboard.pointsLabel")}
                               </Badge>
                               {member.totalPoints >= reward.pointThreshold && (
                                 <span className="text-xs font-semibold text-green-600">
-                                  You can claim this!
+                                  {t("dashboard.youCanClaim")}
                                 </span>
                               )}
                             </div>
@@ -863,11 +865,11 @@ export default function Dashboard() {
                               data-testid={`button-redeem-${reward.id}`}
                             >
                               {redeemRewardMutation.isPending ? (
-                                "Redeeming..."
+                                t("dashboard.redeeming")
                               ) : member.totalPoints >= reward.pointThreshold ? (
-                                "Redeem Now!"
+                                t("dashboard.redeemNow")
                               ) : (
-                                `Need ${reward.pointThreshold - member.totalPoints} more points`
+                                t("dashboard.needMorePoints", { count: reward.pointThreshold - member.totalPoints })
                               )}
                             </Button>
                           </div>
@@ -886,8 +888,8 @@ export default function Dashboard() {
                 <div className="mb-4">
                   <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="week" data-testid="tab-leaderboard-week">Weekly</TabsTrigger>
-                      <TabsTrigger value="month" data-testid="tab-leaderboard-month">Monthly</TabsTrigger>
+                      <TabsTrigger value="week" data-testid="tab-leaderboard-week">{t("dashboard.weekly")}</TabsTrigger>
+                      <TabsTrigger value="month" data-testid="tab-leaderboard-month">{t("dashboard.monthly")}</TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>
@@ -908,24 +910,24 @@ export default function Dashboard() {
                 />
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Available Points: {member.totalPoints}
+                {t("dashboard.availablePoints")}: {member.totalPoints}
               </p>
               <h1 className="text-3xl font-black font-accent mb-2" data-testid="text-child-welcome">
-                Hi, {member.displayName}!
+                {t("dashboard.hi", { name: member.displayName })}
               </h1>
               <p className="text-muted-foreground mb-2">
-                Complete tasks to earn points and climb the leaderboard
+                {t("dashboard.completeTasksEarn")}
               </p>
               <p className="text-sm text-muted-foreground">
-                Weekly Points: {member.weeklyPoints}
+                {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
               </p>
             </div>
 
             <Tabs value={childActiveTab} onValueChange={setChildActiveTab} className="w-full">
               <TabsList className={`grid w-full ${familyData?.showLeaderboard !== false ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                <TabsTrigger value="active" data-testid="tab-active-tasks">Active Tasks</TabsTrigger>
+                <TabsTrigger value="active" data-testid="tab-active-tasks">{t("dashboard.activeTasks")}</TabsTrigger>
                 {familyData?.showLeaderboard !== false && (
-                  <TabsTrigger value="leaderboard" data-testid="tab-leaderboard">Leaderboard</TabsTrigger>
+                  <TabsTrigger value="leaderboard" data-testid="tab-leaderboard">{t("nav.leaderboard")}</TabsTrigger>
                 )}
               </TabsList>
 
@@ -937,19 +939,19 @@ export default function Dashboard() {
                   data-testid="button-request-reward"
                 >
                   <Lightbulb className="h-4 w-4 mr-2" />
-                  Request Reward
+                  {t("dashboard.requestReward")}
                 </Button>
                 <Link href="/rewards-board">
                   <Button variant="outline" data-testid="button-rewards-board-child">
                     <Gift className="h-4 w-4 mr-2" />
-                    My Rewards
+                    {t("dashboard.myRewards")}
                   </Button>
                 </Link>
                 {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") && (
                   <Link href="/chat">
                     <Button variant="outline" data-testid="button-chat-child" className="relative">
                       <MessageCircle className="h-4 w-4 mr-2" />
-                      Family Chat
+                      {t("nav.chat")}
                       {unreadChatData && unreadChatData.count > 0 && (
                         <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1" data-testid="badge-unread-count-child">
                           {unreadChatData.count}
@@ -964,9 +966,9 @@ export default function Dashboard() {
                 {activeTasks.length === 0 ? (
                   <Card className="p-12 text-center">
                     <Star className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-xl font-bold font-accent mb-2">No tasks available</h3>
+                    <h3 className="text-xl font-bold font-accent mb-2">{t("dashboard.noTasksAvailable")}</h3>
                     <p className="text-muted-foreground">
-                      Ask your parents to add some tasks for you!
+                      {t("dashboard.askParents")}
                     </p>
                   </Card>
                 ) : (
@@ -992,8 +994,8 @@ export default function Dashboard() {
                   {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
                     <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
                       <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="week" data-testid="tab-leaderboard-period-week">Weekly</TabsTrigger>
-                        <TabsTrigger value="month" data-testid="tab-leaderboard-period-month">Monthly</TabsTrigger>
+                        <TabsTrigger value="week" data-testid="tab-leaderboard-period-week">{t("dashboard.weekly")}</TabsTrigger>
+                        <TabsTrigger value="month" data-testid="tab-leaderboard-period-month">{t("dashboard.monthly")}</TabsTrigger>
                       </TabsList>
                     </Tabs>
                   )}
@@ -1004,13 +1006,13 @@ export default function Dashboard() {
 
             {/* Available Rewards */}
             <div>
-              <h2 className="text-2xl font-bold font-accent mb-4">Rewards You Can Earn</h2>
+              <h2 className="text-2xl font-bold font-accent mb-4">{t("dashboard.rewardsYouCanEarn")}</h2>
               {activeRewards.length === 0 ? (
                 <Card className="p-12 text-center">
                   <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-bold font-accent mb-2">No rewards available</h3>
+                  <h3 className="text-xl font-bold font-accent mb-2">{t("dashboard.noRewardsAvailable")}</h3>
                   <p className="text-muted-foreground mb-4">
-                    Request a reward and your parents will review it!
+                    {t("dashboard.requestRewardReview")}
                   </p>
                   <Button
                     variant="outline"
@@ -1018,7 +1020,7 @@ export default function Dashboard() {
                     data-testid="button-request-reward-empty"
                   >
                     <Lightbulb className="h-4 w-4 mr-2" />
-                    Request Your First Reward
+                    {t("dashboard.requestFirstReward")}
                   </Button>
                 </Card>
               ) : (
@@ -1044,11 +1046,11 @@ export default function Dashboard() {
                                   : "secondary"
                               }
                             >
-                              {reward.pointThreshold} points
+                              {reward.pointThreshold} {t("dashboard.pointsLabel")}
                             </Badge>
                             {member.totalPoints >= reward.pointThreshold && (
                               <span className="text-xs font-semibold text-green-600">
-                                You can claim this!
+                                {t("dashboard.youCanClaim")}
                               </span>
                             )}
                           </div>
@@ -1063,11 +1065,11 @@ export default function Dashboard() {
                             data-testid={`button-redeem-${reward.id}`}
                           >
                             {redeemRewardMutation.isPending ? (
-                              "Redeeming..."
+                              t("dashboard.redeeming")
                             ) : member.totalPoints >= reward.pointThreshold ? (
-                              "Redeem Now!"
+                              t("dashboard.redeemNow")
                             ) : (
-                              `Need ${reward.pointThreshold - member.totalPoints} more points`
+                              t("dashboard.needMorePoints", { count: reward.pointThreshold - member.totalPoints })
                             )}
                           </Button>
                         </div>
