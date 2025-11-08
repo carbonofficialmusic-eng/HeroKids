@@ -131,6 +131,14 @@ export default function SkinsGallery() {
           </Link>
 
           <CardHeader className="pb-4">
+            {isDefaultActive && (
+              <div className="flex justify-center mb-2">
+                <Badge data-testid="badge-active-default">
+                  <Check className="h-3 w-3 mr-1" />
+                  Active
+                </Badge>
+              </div>
+            )}
             <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted flex items-center justify-center max-w-xs mx-auto">
               {memberData?.avatarUrl ? (
                 <Avatar className="h-32 w-32">
@@ -141,15 +149,6 @@ export default function SkinsGallery() {
                 </Avatar>
               ) : (
                 <User className="h-32 w-32 text-muted-foreground" />
-              )}
-              {isDefaultActive && (
-                <Badge
-                  className="absolute bottom-2 right-2 pointer-events-none"
-                  data-testid="badge-active-default"
-                >
-                  <Check className="h-3 w-3 mr-1" />
-                  Active
-                </Badge>
               )}
             </div>
             <CardTitle className="font-accent text-xl">Default Avatar</CardTitle>
@@ -199,6 +198,14 @@ export default function SkinsGallery() {
               </Link>
 
               <CardHeader className="pb-4">
+                {skin.isActive && (
+                  <div className="flex justify-center mb-2">
+                    <Badge data-testid={`badge-active-${skin.id}`}>
+                      <Check className="h-3 w-3 mr-1" />
+                      Active
+                    </Badge>
+                  </div>
+                )}
                 <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
                   {SKIN_IMAGES[skin.id] ? (
                     <img
@@ -220,15 +227,6 @@ export default function SkinsGallery() {
                         <Lock className="h-8 w-8 text-muted-foreground" />
                       </div>
                     </div>
-                  )}
-                  {skin.isActive && (
-                    <Badge
-                      className="absolute bottom-2 right-2 pointer-events-none"
-                      data-testid={`badge-active-${skin.id}`}
-                    >
-                      <Check className="h-3 w-3 mr-1" />
-                      Active
-                    </Badge>
                   )}
                 </div>
                 <CardTitle className="font-accent text-xl">{skin.name}</CardTitle>
@@ -284,6 +282,14 @@ export default function SkinsGallery() {
                   </Link>
 
                   <CardHeader className="pb-4">
+                    {skin.isActive && (
+                      <div className="flex justify-center mb-2">
+                        <Badge data-testid={`badge-active-${skin.id}`}>
+                          <Check className="h-3 w-3 mr-1" />
+                          Active
+                        </Badge>
+                      </div>
+                    )}
                     <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
                       {hasReached500 ? (
                         // Show preview image once user reaches 500 points
@@ -308,15 +314,6 @@ export default function SkinsGallery() {
                                 <Lock className="h-8 w-8 text-muted-foreground" />
                               </div>
                             </div>
-                          )}
-                          {skin.isActive && (
-                            <Badge
-                              className="absolute bottom-2 right-2 pointer-events-none"
-                              data-testid={`badge-active-${skin.id}`}
-                            >
-                              <Check className="h-3 w-3 mr-1" />
-                              Active
-                            </Badge>
                           )}
                         </>
                       ) : (
