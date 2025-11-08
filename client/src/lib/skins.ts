@@ -9,9 +9,9 @@ import bookWizardImg from "@assets/generated_images/Modern_Book_Wizard_avatar_a7
 import kitchenHeroImg from "@assets/generated_images/Modern_Kitchen_Hero_avatar_4062600a.png";
 import artMasterImg from "@assets/generated_images/Modern_Art_Master_avatar_9e59088f.png";
 
-// Tier 2 - Elite Heroes (Epic heroic designs)
-import techNinjaImg from "@assets/generated_images/Elite_Tech_Ninja_avatar_d51179ff.png";
-import oceanGuardianImg from "@assets/generated_images/Elite_Ocean_Guardian_avatar_0d83ac8b.png";
+// Tier 2 - Elite Heroes (Friendly heroic designs with white backgrounds)
+import techNinjaImg from "@assets/generated_images/Friendly_Tech_Ninja_white_bg_ab574699.png";
+import oceanGuardianImg from "@assets/generated_images/Friendly_Ocean_Guardian_white_bg_d61b9379.png";
 import skyKnightImg from "@assets/generated_images/Sky_Knight_avatar_11e5e952.png";
 import firePhoenixImg from "@assets/generated_images/Fire_Phoenix_avatar_0eb558b2.png";
 import crystalMageImg from "@assets/generated_images/Crystal_Mage_avatar_3822ee79.png";
