@@ -23,7 +23,7 @@ Preferred communication style: Simple, everyday language.
 - **Authentication**: Replit Auth (OIDC-based) via `openid-client` and Passport.js, with Express-session and PostgreSQL store for persistent, secure sessions.
 - **File Uploads**: Multer middleware for photo uploads (task proofs, avatars).
 - **Subscription Tiers**: 4-tier model (Free, Family, Family+, Family Hero) with progressive feature unlocks enforced by backend middleware. Features include variable member limits, leaderboard types, character skin unlocks, photo proof, recurring tasks, and future analytics/chat.
-- **Gamification Features**: Monthly leaderboards with optional member exclusion (allows parents to opt out of competition with children), unlockable character skins based on reward redemptions, custom recurring tasks with availability management, and a factory reset option for parents.
+- **Gamification Features**: Monthly leaderboards with optional member exclusion (allows parents to opt out of competition with children), unlockable character skins across 3 tiers (Starter Heroes, Elite Heroes, Dinosaur Bonus Pack) based on lifetime points earned, custom recurring tasks with availability management, and a factory reset option for parents.
 - **Points System**: Tracks `totalEarned` (lifetime), `totalPoints` (spendable balance), `weeklyPoints`, and `monthlyPoints`.
 - **Task Approval System**: Configurable per-task approval requirement. Tasks can be set to auto-approve (no parent verification needed) or require approval (default). Auto-approved tasks award points immediately upon completion. Recurring tasks show as greyed out with a checkmark after completion and automatically reopen on schedule at midnight (not 24 hours later), preventing duplicate point earning while providing visual feedback. Daily tasks become available again at 12:00 AM, weekly at midnight 7 days later, and monthly at midnight on the same date next month.
 - **Family Chat**: Real-time family messaging (Family+ tier and above) with unread message counters, auto-mark-as-read functionality, and WebSocket synchronization.
@@ -49,3 +49,28 @@ Preferred communication style: Simple, everyday language.
 -   **UI Libraries**: Radix UI, shadcn/ui, Tailwind CSS, lucide-react.
 -   **Build & Development**: Vite, esbuild, tsx.
 -   **Validation**: Zod (with Drizzle-Zod integration).
+
+## Character Skin System
+
+### Skin Tiers
+**Tier 1 - Starter Heroes (0-500 points)**
+- Modern, child-friendly 3D cartoon style with vibrant colors
+- Contemporary everyday environments as backgrounds
+- 8 skins: Junior Champion (0), Brave Explorer (60), Star Cadet (120), Nature Scout (180), Speed Runner (240), Book Wizard (300), Kitchen Hero (360), Art Master (500)
+
+**Tier 2 - Elite Heroes (560-1000 points)**
+- Heroic, epic style with white/transparent avatar backgrounds
+- Dramatic fantasy/sci-fi themed backgrounds
+- Friendly but powerful, not aggressive
+- 8 skins: Tech Ninja (560), Ocean Guardian (620), Sky Knight (680), Fire Phoenix (740), Crystal Mage (800), Neon Rebel (860), Cosmic Drifter (920), Thunder Champion (1000)
+
+**Tier 3 - Dinosaur Bonus Pack (1060-1500 points)**
+- Realistic, scientifically accurate dinosaur designs for teenagers
+- Epic prehistoric landscapes (Jurassic/Cretaceous periods)
+- Detailed, educational, and impressive
+- 8 skins: T-Rex (1060), Triceratops (1120), Stegosaurus (1180), Velociraptor (1240), Brachiosaurus (1300), Spinosaurus (1360), Ankylosaurus (1420), Allosaurus (1500)
+
+### Hidden Bonus Points
+Certain special skins award bonus points when unlocked:
+- **Tier 1**: Brave Explorer (+10), Book Wizard (+10)
+- **Tier 2**: Tech Ninja (+10), Fire Phoenix (+10), Thunder Champion (+20)

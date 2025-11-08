@@ -19,6 +19,16 @@ import neonRebelImg from "@assets/generated_images/Neon_Rebel_avatar_fe8fea5f.pn
 import cosmicDrifterImg from "@assets/generated_images/Cosmic_Drifter_avatar_1d7d3759.png";
 import thunderChampionImg from "@assets/generated_images/Thunder_Champion_avatar_cf3f783f.png";
 
+// Tier 3 - Dinosaur Bonus Pack (Realistic scientific designs for teenagers)
+import tRexImg from "@assets/generated_images/T-Rex_realistic_portrait_82feaa74.png";
+import triceratopsImg from "@assets/generated_images/Triceratops_realistic_portrait_028d6c17.png";
+import stegosaurusImg from "@assets/generated_images/Stegosaurus_realistic_portrait_539445d4.png";
+import velociraptorImg from "@assets/generated_images/Velociraptor_realistic_feathered_portrait_d3f3b6ad.png";
+import brachiosaurusImg from "@assets/generated_images/Brachiosaurus_realistic_portrait_d0eb144d.png";
+import spinosaurusImg from "@assets/generated_images/Spinosaurus_realistic_portrait_2e2df3d4.png";
+import ankylosaurusImg from "@assets/generated_images/Ankylosaurus_realistic_portrait_34a4b4bf.png";
+import allosaurusImg from "@assets/generated_images/Allosaurus_realistic_portrait_c0d02199.png";
+
 // Import themed background images
 // Modern fresh backgrounds for Tier 1
 import modernCitySkylineBg from "@assets/generated_images/Modern_city_skyline_background_a5f841c6.png";
@@ -41,6 +51,16 @@ import neonCityBg from "@assets/generated_images/Neon_Rebel_city_background_2920
 import nebulaBg from "@assets/generated_images/Cosmic_Drifter_nebula_background_cea3dec7.png";
 import stormBg from "@assets/generated_images/Thunder_Champion_storm_background_4272fb58.png";
 
+// Tier 3 backgrounds (Prehistoric epic landscapes)
+import cretaceousVolcanicBg from "@assets/generated_images/Cretaceous_volcanic_landscape_80691058.png";
+import cretaceousPlainsBg from "@assets/generated_images/Cretaceous_plains_background_f84649c6.png";
+import jurassicForestBg from "@assets/generated_images/Jurassic_forest_background_dca2add4.png";
+import cretaceousScrublandBg from "@assets/generated_images/Cretaceous_scrubland_background_779cd327.png";
+import jurassicSwampBg from "@assets/generated_images/Jurassic_swamp_background_e9a9dd22.png";
+import cretaceousRiverDeltaBg from "@assets/generated_images/Cretaceous_river_delta_background_23c38a31.png";
+import cretaceousCoastalBg from "@assets/generated_images/Cretaceous_coastal_plains_background_cb7d4a93.png";
+import jurassicCanyonBg from "@assets/generated_images/Jurassic_canyon_background_c736e0a5.png";
+
 // Skin image mappings for new HeroKids themed skins
 export const SKIN_IMAGES: Record<string, string> = {
   // Tier 1 - Starter Heroes
@@ -62,6 +82,16 @@ export const SKIN_IMAGES: Record<string, string> = {
   "neon-rebel": neonRebelImg,
   "cosmic-drifter": cosmicDrifterImg,
   "thunder-champion": thunderChampionImg,
+  
+  // Tier 3 - Dinosaur Bonus Pack
+  "t-rex": tRexImg,
+  "triceratops": triceratopsImg,
+  "stegosaurus": stegosaurusImg,
+  "velociraptor": velociraptorImg,
+  "brachiosaurus": brachiosaurusImg,
+  "spinosaurus": spinosaurusImg,
+  "ankylosaurus": ankylosaurusImg,
+  "allosaurus": allosaurusImg,
 };
 
 // Themed background mappings for new HeroKids themed skins
@@ -85,6 +115,16 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "neon-rebel": neonCityBg,
   "cosmic-drifter": nebulaBg,
   "thunder-champion": stormBg,
+  
+  // Tier 3 - Dinosaur Bonus Pack (Prehistoric landscapes)
+  "t-rex": cretaceousVolcanicBg,
+  "triceratops": cretaceousPlainsBg,
+  "stegosaurus": jurassicForestBg,
+  "velociraptor": cretaceousScrublandBg,
+  "brachiosaurus": jurassicSwampBg,
+  "spinosaurus": cretaceousRiverDeltaBg,
+  "ankylosaurus": cretaceousCoastalBg,
+  "allosaurus": jurassicCanyonBg,
 };
 
 // Helper to get avatar URL - returns skin image if active, otherwise custom avatar
