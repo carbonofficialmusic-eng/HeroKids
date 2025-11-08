@@ -92,9 +92,10 @@ export default function SkinsGallery() {
       } else {
         const selectedSkin = data?.skins.find(s => s.id === skinId);
         if (selectedSkin) {
+          const skinName = t(`skinNames.${selectedSkin.id}`);
           setCelebration({
             points: 0,
-            message: `${selectedSkin.name} Equipped!`,
+            message: `${skinName} Equipped!`,
           });
         }
       }
