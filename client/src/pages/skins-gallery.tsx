@@ -46,6 +46,10 @@ export default function SkinsGallery() {
   const discoverSkinMutation = useMutation({
     mutationFn: async (skinId: string) => {
       const res = await apiRequest("POST", "/api/skins/discover", { skinId });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to discover skin");
+      }
       return await res.json();
     },
     onSuccess: (result) => {
@@ -69,7 +73,12 @@ export default function SkinsGallery() {
 
   const selectSkinMutation = useMutation({
     mutationFn: async (skinId: string | null) => {
-      return await apiRequest("POST", "/api/skins/select", { skinId });
+      const res = await apiRequest("POST", "/api/skins/select", { skinId });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to select skin");
+      }
+      return await res.json();
     },
     onSuccess: (_, skinId) => {
       if (skinId === null) {
