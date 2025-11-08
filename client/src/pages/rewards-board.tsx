@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Link } from "wouter";
 import { getAvatarUrl } from "@/lib/skins";
+import { useTranslation } from "react-i18next";
 
 type FamilyMember = {
   id: string;
@@ -48,6 +49,7 @@ type RedemptionWithDetails = {
 
 export default function RewardsBoard() {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Fetch current member (acting member)
   const { data: member } = useQuery<FamilyMember>({
@@ -80,14 +82,14 @@ export default function RewardsBoard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       toast({
-        title: "Status Updated",
-        description: "Reward status has been updated successfully.",
+        title: t("rewardsBoard.toastStatusUpdated"),
+        description: t("rewardsBoard.toastStatusUpdatedDesc"),
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update reward status.",
+        title: t("rewardsBoard.toastError"),
+        description: t("rewardsBoard.toastErrorDesc"),
         variant: "destructive",
       });
     },
@@ -104,21 +106,21 @@ export default function RewardsBoard() {
         return (
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
-            Pending
+            {t("rewardsBoard.statusPending")}
           </Badge>
         );
       case "approved":
         return (
           <Badge className="gap-1 bg-blue-500 hover:bg-blue-600">
             <Sparkles className="h-3 w-3" />
-            Approved
+            {t("rewardsBoard.statusApproved")}
           </Badge>
         );
       case "completed":
         return (
           <Badge className="gap-1 bg-green-500 hover:bg-green-600">
             <CheckCircle2 className="h-3 w-3" />
-            Completed
+            {t("rewardsBoard.statusCompleted")}
           </Badge>
         );
       default:
@@ -132,8 +134,8 @@ export default function RewardsBoard() {
         <div className="flex items-center gap-3">
           <Gift className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="text-3xl font-accent font-bold">Rewards Board</h1>
-            <p className="text-muted-foreground">Loading...</p>
+            <h1 className="text-3xl font-accent font-bold">{t("rewardsBoard.title")}</h1>
+            <p className="text-muted-foreground">{t("rewardsBoard.loading")}</p>
           </div>
         </div>
       </div>
@@ -147,17 +149,17 @@ export default function RewardsBoard() {
         <Link href="/">
           <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back-dashboard">
             <Home className="h-4 w-4" />
-            Back to Dashboard
+            {t("rewardsBoard.backToDashboard")}
           </Button>
         </Link>
         <div className="flex items-center gap-3">
           <Gift className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="text-3xl font-accent font-bold">Rewards Board</h1>
+            <h1 className="text-3xl font-accent font-bold">{t("rewardsBoard.title")}</h1>
             <p className="text-muted-foreground">
               {isParent 
-                ? "Manage reward redemptions for your family" 
-                : "Track your redeemed rewards"}
+                ? t("rewardsBoard.manageRedemptions")
+                : t("rewardsBoard.trackRewards")}
             </p>
           </div>
         </div>
@@ -168,11 +170,11 @@ export default function RewardsBoard() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Gift className="h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No Rewards Yet</h3>
+            <h3 className="text-xl font-semibold mb-2">{t("rewardsBoard.noRewardsYet")}</h3>
             <p className="text-muted-foreground text-center">
               {isParent 
-                ? "No rewards have been redeemed by your family yet." 
-                : "You haven't redeemed any rewards yet. Keep earning points!"}
+                ? t("rewardsBoard.noRewardsFamilyDesc")
+                : t("rewardsBoard.noRewardsYouDesc")}
             </p>
           </CardContent>
         </Card>
@@ -197,8 +199,10 @@ export default function RewardsBoard() {
                         {redemption.reward.title}
                       </CardTitle>
                       <CardDescription>
-                        Redeemed by {redemption.member.displayName} on{" "}
-                        {format(new Date(redemption.redeemedAt), "MMM d, yyyy")}
+                        {t("rewardsBoard.redeemedBy", { 
+                          name: redemption.member.displayName, 
+                          date: format(new Date(redemption.redeemedAt), "MMM d, yyyy") 
+                        })}
                       </CardDescription>
                     </div>
                   </div>
@@ -216,7 +220,7 @@ export default function RewardsBoard() {
                 <div className="flex items-center gap-4 text-sm">
                   <Badge variant="outline" className="gap-1.5">
                     <Sparkles className="h-3 w-3" />
-                    {redemption.pointsSpent} points
+                    {t("rewardsBoard.pointsSpent", { count: redemption.pointsSpent })}
                   </Badge>
                 </div>
 
@@ -234,7 +238,7 @@ export default function RewardsBoard() {
                         disabled={updateStatusMutation.isPending}
                         data-testid={`button-approve-${redemption.id}`}
                       >
-                        Approve
+                        {t("rewardsBoard.approve")}
                       </Button>
                     )}
                     {redemption.status === "approved" && (
@@ -248,7 +252,7 @@ export default function RewardsBoard() {
                         disabled={updateStatusMutation.isPending}
                         data-testid={`button-complete-${redemption.id}`}
                       >
-                        Mark as Fulfilled
+                        {t("rewardsBoard.markFulfilled")}
                       </Button>
                     )}
                     <Button
@@ -261,7 +265,7 @@ export default function RewardsBoard() {
                       disabled={updateStatusMutation.isPending}
                       data-testid={`button-reset-${redemption.id}`}
                     >
-                      Reset to Pending
+                      {t("rewardsBoard.resetPending")}
                     </Button>
                   </div>
                 )}

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Camera, Upload, X } from "lucide-react";
 import type { Task } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 interface TaskCompletionDialogProps {
   open: boolean;
@@ -27,6 +28,7 @@ export function TaskCompletionDialog({
   onComplete,
   isSubmitting = false,
 }: TaskCompletionDialogProps) {
+  const { t } = useTranslation();
   const [uploadedPhoto, setUploadedPhoto] = useState<File | null>(null);
   const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -116,9 +118,9 @@ export function TaskCompletionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent data-testid="dialog-complete-task">
         <DialogHeader>
-          <DialogTitle>Complete Task</DialogTitle>
+          <DialogTitle>{t('tasks.completeTask')}</DialogTitle>
           <DialogDescription>
-            Confirm task completion to earn your points!
+            {t('tasks.confirmCompletion')}
           </DialogDescription>
         </DialogHeader>
 
@@ -130,12 +132,12 @@ export function TaskCompletionDialog({
               <h3 className="font-semibold text-lg">{task.title}</h3>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className="gradient-achievement text-white border-0">
-                  +{task.points} points
+                  +{task.points} {t('dashboard.pointsLabel')}
                 </Badge>
                 {task.requiresProof && (
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Camera className="h-3 w-3" />
-                    <span>Photo required</span>
+                    <span>{t('tasks.photoRequired')}</span>
                   </div>
                 )}
               </div>
@@ -145,7 +147,7 @@ export function TaskCompletionDialog({
           {/* Photo Upload Section */}
           {task.requiresProof && (
             <div className="space-y-3">
-              <div className="text-sm font-medium">Upload Photo Proof</div>
+              <div className="text-sm font-medium">{t('tasks.uploadPhotoProof')}</div>
               
               {!previewUrl ? (
                 <div className="border-2 border-dashed rounded-lg p-8 text-center">
@@ -159,7 +161,7 @@ export function TaskCompletionDialog({
                   />
                   <Camera className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground mb-3">
-                    Take a photo showing you completed this task
+                    {t('tasks.takePhoto')}
                   </p>
                   <Button
                     type="button"
@@ -168,14 +170,14 @@ export function TaskCompletionDialog({
                     data-testid="button-choose-photo"
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Choose Photo
+                    {t('tasks.choosePhoto')}
                   </Button>
                 </div>
               ) : (
                 <div className="relative">
                   <img
                     src={previewUrl}
-                    alt="Proof preview"
+                    alt={t('tasks.choosePhoto')}
                     className="w-full h-48 object-cover rounded-lg"
                     data-testid="img-photo-preview"
                   />
@@ -202,14 +204,14 @@ export function TaskCompletionDialog({
             disabled={isSubmitting || isUploading}
             data-testid="button-cancel-complete"
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={!canSubmit || isSubmitting || isUploading}
             data-testid="button-submit-complete"
           >
-            {isSubmitting || isUploading ? "Submitting..." : "Complete & Earn Points!"}
+            {isSubmitting || isUploading ? t('tasks.submitting') : t('tasks.completeAndEarn')}
           </Button>
         </DialogFooter>
       </DialogContent>

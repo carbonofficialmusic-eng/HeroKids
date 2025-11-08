@@ -12,8 +12,10 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
+import { useTranslation } from "react-i18next";
 
 export default function Approvals() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedCompletion, setSelectedCompletion] = useState<any>(null);
@@ -32,14 +34,14 @@ export default function Approvals() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
-        title: "Task Approved!",
-        description: `Awarded ${data.pointsAwarded} points to ${data.updatedMember?.displayName}`,
+        title: t("approvals.toastApproved"),
+        description: t("approvals.toastAwardedPoints", { points: data.pointsAwarded, name: data.updatedMember?.displayName }),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Approval Failed",
-        description: error.message || "Failed to approve task completion",
+        title: t("approvals.toastApprovalFailed"),
+        description: error.message || t("approvals.toastApprovalFailedDesc"),
         variant: "destructive",
       });
     },
@@ -56,14 +58,14 @@ export default function Approvals() {
       setSelectedCompletion(null);
       setRejectionReason("");
       toast({
-        title: "Task Rejected",
-        description: "The child will be notified of the rejection",
+        title: t("approvals.toastRejected"),
+        description: t("approvals.toastRejectedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Rejection Failed",
-        description: error.message || "Failed to reject task completion",
+        title: t("approvals.toastRejectionFailed"),
+        description: error.message || t("approvals.toastRejectionFailedDesc"),
         variant: "destructive",
       });
     },
@@ -82,7 +84,7 @@ export default function Approvals() {
     if (selectedCompletion) {
       rejectMutation.mutate({
         completionId: selectedCompletion.id,
-        reason: rejectionReason || "Did not meet expectations",
+        reason: rejectionReason || t("approvals.defaultRejectionReason"),
       });
     }
   };
@@ -94,14 +96,14 @@ export default function Approvals() {
           <Link href="/dashboard">
             <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              {t("approvals.backToDashboard")}
             </Button>
           </Link>
           <div className="flex items-center gap-2 mb-6">
             <Clock className="w-6 h-6 text-primary" />
-            <h1 className="text-3xl font-bold">Task Approvals</h1>
+            <h1 className="text-3xl font-bold">{t("approvals.title")}</h1>
           </div>
-          <p className="text-muted-foreground">Loading pending task completions...</p>
+          <p className="text-muted-foreground">{t("approvals.loadingPending")}</p>
         </div>
       </div>
     );
@@ -115,12 +117,12 @@ export default function Approvals() {
         <Link href="/dashboard">
           <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t("approvals.backToDashboard")}
           </Button>
         </Link>
         <div className="flex items-center gap-2 mb-6">
           <Clock className="w-6 h-6 text-primary" />
-          <h1 className="text-3xl font-bold">Task Approvals</h1>
+          <h1 className="text-3xl font-bold">{t("approvals.title")}</h1>
           {completions.length > 0 && (
             <Badge className="ml-2" data-testid="badge-pending-count">
               {completions.length}
@@ -132,8 +134,8 @@ export default function Approvals() {
           <Card>
             <CardContent className="p-8 text-center">
               <CheckCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-lg font-medium mb-2">All caught up!</p>
-              <p className="text-muted-foreground">No pending task completions to review</p>
+              <p className="text-lg font-medium mb-2">{t("approvals.allCaughtUp")}</p>
+              <p className="text-muted-foreground">{t("approvals.noPendingCompletions")}</p>
             </CardContent>
           </Card>
         ) : (
@@ -152,24 +154,24 @@ export default function Approvals() {
                           {completion.taskTitle}
                         </CardTitle>
                         <CardDescription>
-                          Completed by {completion.memberName} • {formatDistanceToNow(new Date(completion.completedAt))} ago
+                          {t("approvals.completedBy", { name: completion.memberName })} • {formatDistanceToNow(new Date(completion.completedAt))} {t("approvals.ago")}
                         </CardDescription>
                       </div>
                     </div>
                     <Badge variant="secondary" className="flex items-center gap-1">
                       <Star className="w-3 h-3" />
-                      {completion.pointsEarned} points
+                      {t("approvals.points", { count: completion.pointsEarned })}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {completion.proofPhotoUrl && (
                     <div>
-                      <Label className="text-sm font-medium mb-2 block">Photo Proof</Label>
+                      <Label className="text-sm font-medium mb-2 block">{t("approvals.photoProof")}</Label>
                       <div className="relative rounded-md overflow-hidden border">
                         <img
                           src={completion.proofPhotoUrl}
-                          alt="Task completion proof"
+                          alt={t("approvals.photoProofAlt")}
                           className="w-full max-w-md object-cover"
                           data-testid={`img-proof-${completion.id}`}
                         />
@@ -185,7 +187,7 @@ export default function Approvals() {
                       data-testid={`button-approve-${completion.id}`}
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
-                      Approve
+                      {t("approvals.approve")}
                     </Button>
                     <Button
                       variant="outline"
@@ -195,7 +197,7 @@ export default function Approvals() {
                       data-testid={`button-reject-${completion.id}`}
                     >
                       <XCircle className="w-4 h-4 mr-2" />
-                      Reject
+                      {t("approvals.reject")}
                     </Button>
                   </div>
                 </CardContent>
@@ -208,17 +210,17 @@ export default function Approvals() {
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogContent data-testid="dialog-reject">
           <DialogHeader>
-            <DialogTitle>Reject Task Completion</DialogTitle>
+            <DialogTitle>{t("approvals.rejectDialogTitle")}</DialogTitle>
             <DialogDescription>
-              Let {selectedCompletion?.memberName} know why their task wasn't approved. They can try again!
+              {t("approvals.rejectDialogDesc", { name: selectedCompletion?.memberName })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="reason">Reason (optional)</Label>
+              <Label htmlFor="reason">{t("approvals.reasonLabel")}</Label>
               <Textarea
                 id="reason"
-                placeholder="e.g., The dishes weren't completely clean, please try again"
+                placeholder={t("approvals.reasonPlaceholder")}
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 rows={4}
@@ -228,14 +230,14 @@ export default function Approvals() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectDialogOpen(false)} data-testid="button-cancel-reject">
-              Cancel
+              {t("approvals.cancel")}
             </Button>
             <Button
               onClick={handleRejectSubmit}
               disabled={rejectMutation.isPending}
               data-testid="button-confirm-reject"
             >
-              {rejectMutation.isPending ? "Rejecting..." : "Reject Task"}
+              {rejectMutation.isPending ? t("approvals.rejecting") : t("approvals.rejectTask")}
             </Button>
           </DialogFooter>
         </DialogContent>

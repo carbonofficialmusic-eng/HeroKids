@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,7 @@ export function RewardRequestDialog({
   familyName,
   request = null,
 }: RewardRequestDialogProps) {
+  const { t } = useTranslation();
   const isEditing = !!request;
   
   const form = useForm<RewardRequestFormData>({
@@ -94,13 +96,13 @@ export function RewardRequestDialog({
               <Lightbulb className="h-6 w-6 text-primary" />
             )}
             <DialogTitle className="text-2xl font-accent">
-              {isEditing ? "Edit Reward Request" : "Request a Reward"}
+              {isEditing ? t('rewards.editRewardRequest') : t('rewards.requestReward')}
             </DialogTitle>
           </div>
           <DialogDescription>
             {isEditing 
-              ? "Adjust the reward details before approving."
-              : "Tell your parents what reward you'd like to earn! They'll review your request."
+              ? t('rewards.adjustRewardDetails')
+              : t('rewards.tellParentsReward')
             }
           </DialogDescription>
         </DialogHeader>
@@ -112,10 +114,10 @@ export function RewardRequestDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>What reward do you want?</FormLabel>
+                  <FormLabel>{t('rewards.whatRewardWant')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Ice cream trip, New toy"
+                      placeholder={t('rewards.requestTitlePlaceholder')}
                       {...field}
                       data-testid="input-request-title"
                     />
@@ -130,10 +132,10 @@ export function RewardRequestDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tell us more (optional)</FormLabel>
+                  <FormLabel>{t('rewards.tellUsMore')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Add more details about what you'd like..."
+                      placeholder={t('rewards.requestDescriptionPlaceholder')}
                       {...field}
                       value={field.value || ""}
                       data-testid="input-request-description"
@@ -149,7 +151,7 @@ export function RewardRequestDialog({
               name="pointThreshold"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>How many points should it cost?</FormLabel>
+                  <FormLabel>{t('rewards.howManyPointsCost')}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -172,14 +174,14 @@ export function RewardRequestDialog({
                 onClick={() => onOpenChange(false)}
                 data-testid="button-cancel-request"
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
                 data-testid={isEditing ? "button-save-request" : "button-submit-request"}
               >
-                {isSubmitting ? (isEditing ? "Saving..." : "Sending...") : (isEditing ? "Save Changes" : "Send Request")}
+                {isSubmitting ? (isEditing ? t('rewards.savingRequest') : t('rewards.sendingRequest')) : (isEditing ? t('rewards.saveChanges') : t('rewards.sendRequest'))}
               </Button>
             </div>
           </form>

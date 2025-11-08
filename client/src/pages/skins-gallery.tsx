@@ -67,8 +67,8 @@ export default function SkinsGallery() {
     },
     onError: (error: any) => {
       toast({
-        title: "Discovery Failed",
-        description: error.message || "Failed to discover skin",
+        title: t('skins.discoveryFailed'),
+        description: error.message || t('skins.failedToDiscover'),
         variant: "destructive",
       });
     },
@@ -87,7 +87,7 @@ export default function SkinsGallery() {
       if (skinId === null) {
         setCelebration({
           points: 0,
-          message: "Default Avatar Equipped!",
+          message: t('skins.defaultAvatarEquipped'),
         });
       } else {
         const selectedSkin = data?.skins.find(s => s.id === skinId);
@@ -95,7 +95,7 @@ export default function SkinsGallery() {
           const skinName = t(`skinNames.${selectedSkin.id}`);
           setCelebration({
             points: 0,
-            message: `${skinName} Equipped!`,
+            message: t('skins.skinEquipped', { skinName }),
           });
         }
       }
@@ -106,8 +106,8 @@ export default function SkinsGallery() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to select skin",
+        title: t('common.error'),
+        description: error.message || t('skins.failedToSelect'),
         variant: "destructive",
       });
     },
@@ -194,7 +194,7 @@ export default function SkinsGallery() {
                   className="h-6 text-xs px-2"
                   data-testid={`button-equip-${skin.id}`}
                 >
-                  {isActive ? "Equipped" : "Equip"}
+                  {isActive ? t('skins.equipped') : t('skins.equip')}
                 </Button>
               </div>
             </>
@@ -211,7 +211,7 @@ export default function SkinsGallery() {
                   data-testid={`button-discover-${skin.id}`}
                 >
                   <Sparkles className="h-3 w-3 mr-1" />
-                  Discover
+                  {t('skins.discover')}
                 </Button>
               </div>
             </>
@@ -227,22 +227,22 @@ export default function SkinsGallery() {
         <Link href="/dashboard">
           <Button variant="ghost" className="mb-4" data-testid="button-back-to-dashboard">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            {t('common.backToDashboard')}
           </Button>
         </Link>
         
         <div className="mb-6">
           <h1 className="text-4xl font-bold font-accent mb-2 gradient-text">
-            Character Skins
+            {t('skins.title')}
           </h1>
           <p className="text-muted-foreground mb-4">
-            Every 60 points earns you 1 skin card! Choose which skins to discover from unlocked packages.
+            {t('skins.description')}
           </p>
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-primary" />
               <span className="font-semibold">
-                Lifetime Points: {totalEarned}
+                {t('skins.lifetimePoints', { points: totalEarned })}
               </span>
             </div>
           </div>
@@ -254,10 +254,10 @@ export default function SkinsGallery() {
             <Sparkles className="h-5 w-5 text-primary" />
             <AlertDescription className="flex items-center justify-between">
               <span className="font-semibold text-lg">
-                You have {availableCards} skin card{availableCards !== 1 ? 's' : ''} to open!
+                {t('skins.availableCards', { count: availableCards })}
               </span>
               <span className="text-sm text-muted-foreground">
-                Click "Discover" on any undiscovered skin
+                {t('skins.clickDiscover')}
               </span>
             </AlertDescription>
           </Alert>
@@ -267,10 +267,10 @@ export default function SkinsGallery() {
         <div className="mb-8">
           <div className="mb-4">
             <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
-              Your Custom Avatar
+              {t('skins.yourCustomAvatar')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Use your personal profile picture
+              {t('skins.usePersonalPicture')}
             </p>
           </div>
           <div className="grid grid-cols-4 gap-2">
@@ -292,7 +292,7 @@ export default function SkinsGallery() {
               <div className="relative w-full aspect-square overflow-hidden bg-muted flex items-center justify-center">
                 {memberData?.avatarUrl ? (
                   <Avatar className="h-full w-full">
-                    <AvatarImage src={memberData.avatarUrl} alt="Your avatar" className="object-cover" />
+                    <AvatarImage src={memberData.avatarUrl} alt={t('skins.yourAvatar')} className="object-cover" />
                     <AvatarFallback>
                       <User className="h-8 w-8" />
                     </AvatarFallback>
@@ -303,8 +303,8 @@ export default function SkinsGallery() {
               </div>
               
               <div className="p-1 text-center">
-                <h3 className="font-accent text-xs font-bold truncate">Default</h3>
-                <p className="text-[10px] text-muted-foreground">Custom</p>
+                <h3 className="font-accent text-xs font-bold truncate">{t('skins.default')}</h3>
+                <p className="text-[10px] text-muted-foreground">{t('skins.custom')}</p>
               </div>
             </Card>
           </div>
@@ -314,10 +314,10 @@ export default function SkinsGallery() {
         <div className="mb-8">
           <div className="mb-4">
             <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
-              Starter Heroes
+              {t('skins.starterHeroes')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Unlocked • Use skin cards to discover characters
+              {t('skins.unlockedUseCards')}
             </p>
           </div>
           <div className="grid grid-cols-4 gap-2">
@@ -330,12 +330,12 @@ export default function SkinsGallery() {
           <div className="mb-8">
             <div className="mb-4">
               <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
-                Elite Heroes
+                {t('skins.eliteHeroes')}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {unlockedTier >= 2
-                  ? "Unlocked • Use skin cards to discover characters"
-                  : "🔒 Unlock at 500 lifetime points"}
+                  ? t('skins.unlockedUseCards')
+                  : t('skins.unlockAt500')}
               </p>
             </div>
             <div className="grid grid-cols-4 gap-2">
@@ -349,12 +349,12 @@ export default function SkinsGallery() {
           <div className="mb-8">
             <div className="mb-4">
               <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
-                Dinosaur Bonus Pack
+                {t('skins.dinosaurBonusPack')}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {unlockedTier >= 3
-                  ? "Unlocked • Use skin cards to discover characters"
-                  : "🔒 Unlock at 1000 lifetime points"}
+                  ? t('skins.unlockedUseCards')
+                  : t('skins.unlockAt1000')}
               </p>
             </div>
             <div className="grid grid-cols-4 gap-2">

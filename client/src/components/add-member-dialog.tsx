@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { AvatarSelector } from "./avatar-selector";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
+import { useTranslation } from "react-i18next";
 
 const addMemberSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
@@ -52,6 +53,7 @@ export function AddMemberDialog({
   isSubmitting = false,
   familyName 
 }: AddMemberDialogProps) {
+  const { t } = useTranslation();
   const [selectedAvatar, setSelectedAvatar] = useState(avatarAssets[0].url);
   const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
   const [uploadedAvatarFile, setUploadedAvatarFile] = useState<File | null>(null);
@@ -111,9 +113,9 @@ export function AddMemberDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto" data-testid="dialog-add-member">
         <DialogHeader>
-          <DialogTitle>Add Family Member</DialogTitle>
+          <DialogTitle>{t("addMember.title")}</DialogTitle>
           <DialogDescription>
-            Add a new member to your family. They'll be able to complete tasks and earn rewards!
+            {t("addMember.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -124,10 +126,10 @@ export function AddMemberDialog({
               name="displayName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Member Name</FormLabel>
+                  <FormLabel>{t("addMember.memberName")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Alex, Emma, Sam"
+                      placeholder={t("addMember.memberNamePlaceholder")}
                       {...field}
                       data-testid="input-member-name"
                     />
@@ -142,16 +144,16 @@ export function AddMemberDialog({
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role</FormLabel>
+                  <FormLabel>{t("addMember.role")}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger data-testid="select-member-role">
-                        <SelectValue placeholder="Select a role" />
+                        <SelectValue placeholder={t("addMember.selectRole")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="child" data-testid="option-role-child">Child</SelectItem>
-                      <SelectItem value="parent" data-testid="option-role-parent">Parent</SelectItem>
+                      <SelectItem value="child" data-testid="option-role-child">{t("addMember.roleChild")}</SelectItem>
+                      <SelectItem value="parent" data-testid="option-role-parent">{t("addMember.roleParent")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -177,14 +179,14 @@ export function AddMemberDialog({
                 disabled={isSubmitting}
                 data-testid="button-cancel-member"
               >
-                Cancel
+                {t("addMember.cancel")}
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
                 data-testid="button-submit-member"
               >
-                {isSubmitting ? "Adding..." : "Add Member"}
+                {isSubmitting ? t("addMember.adding") : t("addMember.addMember")}
               </Button>
             </DialogFooter>
           </form>

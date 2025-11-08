@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Link } from "wouter";
+import { useTranslation } from "react-i18next";
 
 interface AnalyticsData {
   completionRate: number;
@@ -35,6 +36,7 @@ interface AnalyticsData {
 export default function Analytics() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const { data: analytics, isLoading, error } = useQuery<AnalyticsData>({
     queryKey: ["/api/analytics"],
@@ -47,7 +49,7 @@ export default function Analytics() {
         <Link href="/">
           <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t("analytics.backToDashboard")}
           </Button>
         </Link>
         <div className="flex items-center justify-center min-h-[60vh]" data-testid="loading-analytics">
@@ -67,7 +69,7 @@ export default function Analytics() {
           <Link href="/">
             <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              {t("analytics.backToDashboard")}
             </Button>
           </Link>
           <Card className="border-2" data-testid="card-upgrade-prompt">
@@ -75,37 +77,35 @@ export default function Analytics() {
               <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                 <Lock className="w-8 h-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl">Analytics Dashboard</CardTitle>
+              <CardTitle className="text-2xl">{t("analytics.upgradeTitle")}</CardTitle>
               <CardDescription>
-                Track your family's progress with detailed analytics
+                {t("analytics.upgradeDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-muted-foreground">
-                Analytics is available for Family tier and above. Upgrade to unlock:
+                {t("analytics.upgradeMessage")}
               </p>
               <ul className="text-left inline-block space-y-2">
                 <li className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-primary" />
-                  <span>Points trends over time</span>
+                  <span>{t("analytics.featurePointsTrends")}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-primary" />
-                  <span>Top performers leaderboard</span>
+                  <span>{t("analytics.featureTopPerformers")}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-primary" />
-                  <span>Task completion rates</span>
+                  <span>{t("analytics.featureCompletionRates")}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-primary" />
-                  <span>Family performance insights</span>
+                  <span>{t("analytics.featureFamilyInsights")}</span>
                 </li>
               </ul>
               <div className="pt-4">
-                <p className="text-sm text-muted-foreground mb-2">
-                  Upgrade to <strong>Family tier ($3/month)</strong> or higher
-                </p>
+                <p className="text-sm text-muted-foreground mb-2" dangerouslySetInnerHTML={{ __html: t("analytics.upgradeCallout") }} />
               </div>
             </CardContent>
           </Card>
@@ -119,12 +119,12 @@ export default function Analytics() {
         <Link href="/">
           <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t("analytics.backToDashboard")}
           </Button>
         </Link>
         <Card className="border-destructive">
           <CardHeader>
-            <CardTitle>Error Loading Analytics</CardTitle>
+            <CardTitle>{t("analytics.errorLoading")}</CardTitle>
             <CardDescription>{errorMessage}</CardDescription>
           </CardHeader>
         </Card>
@@ -142,14 +142,14 @@ export default function Analytics() {
         <Link href="/">
           <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t("analytics.backToDashboard")}
           </Button>
         </Link>
         <h1 className="text-3xl font-bold mb-2" data-testid="heading-analytics">
-          Analytics Dashboard
+          {t("analytics.title")}
         </h1>
         <p className="text-muted-foreground">
-          Track your family's performance and progress
+          {t("analytics.trackProgress")}
         </p>
       </div>
 
@@ -157,7 +157,7 @@ export default function Analytics() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card data-testid="card-total-points">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Points Earned</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("analytics.totalPointsEarned")}</CardTitle>
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -169,7 +169,7 @@ export default function Analytics() {
 
         <Card data-testid="card-completion-rate">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("analytics.completionRate")}</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -177,14 +177,14 @@ export default function Analytics() {
               {analytics.completionRate}%
             </div>
             <p className="text-xs text-muted-foreground">
-              {analytics.stats.totalTasksCompleted} of {analytics.stats.totalTasksAssigned} tasks
+              {t("analytics.ofTasks", { completed: analytics.stats.totalTasksCompleted, total: analytics.stats.totalTasksAssigned })}
             </p>
           </CardContent>
         </Card>
 
         <Card data-testid="card-tasks-completed">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tasks Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("analytics.tasksCompleted")}</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -196,7 +196,7 @@ export default function Analytics() {
 
         <Card data-testid="card-family-members">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Family Members</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("analytics.familyMembers")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -210,8 +210,8 @@ export default function Analytics() {
       {/* Points Trend Chart */}
       <Card data-testid="card-points-trend">
         <CardHeader>
-          <CardTitle>Points Earned Over Time</CardTitle>
-          <CardDescription>Daily points earned by your family (last 30 days)</CardDescription>
+          <CardTitle>{t("analytics.pointsOverTime")}</CardTitle>
+          <CardDescription>{t("analytics.pointsOverTimeDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           {analytics.pointsTrend.length > 0 ? (
@@ -239,7 +239,7 @@ export default function Analytics() {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              <p>No activity data yet. Complete tasks to see trends!</p>
+              <p>{t("analytics.noActivityData")}</p>
             </div>
           )}
         </CardContent>
@@ -249,8 +249,8 @@ export default function Analytics() {
         {/* Top Performers */}
         <Card data-testid="card-top-performers">
           <CardHeader>
-            <CardTitle>Top Performers This Month</CardTitle>
-            <CardDescription>Family members ranked by monthly points</CardDescription>
+            <CardTitle>{t("analytics.topPerformersMonth")}</CardTitle>
+            <CardDescription>{t("analytics.topPerformersDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -274,20 +274,20 @@ export default function Analytics() {
                       {member.name}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {member.monthlyPoints} points this month
+                      {t("analytics.pointsThisMonth", { count: member.monthlyPoints })}
                     </p>
                   </div>
                   {index === 0 && (
                     <Badge variant="default" data-testid="badge-top-performer">
                       <Trophy className="w-3 h-3 mr-1" />
-                      #1
+                      {t("analytics.topPerformerBadge")}
                     </Badge>
                   )}
                 </div>
               ))}
               {analytics.topPerformers.length === 0 && (
                 <p className="text-center text-muted-foreground py-8">
-                  No activity yet this month
+                  {t("analytics.noActivityMonth")}
                 </p>
               )}
             </div>
@@ -297,8 +297,8 @@ export default function Analytics() {
         {/* Recent Activity */}
         <Card data-testid="card-recent-activity">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest task completions</CardDescription>
+            <CardTitle>{t("analytics.recentActivity")}</CardTitle>
+            <CardDescription>{t("analytics.recentActivityDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -320,13 +320,13 @@ export default function Analytics() {
                     </div>
                   </div>
                   <Badge variant="secondary" data-testid={`badge-activity-points-${index}`}>
-                    +{activity.pointsEarned} pts
+                    {t("analytics.pointsBadge", { count: activity.pointsEarned })}
                   </Badge>
                 </div>
               ))}
               {analytics.recentActivity.length === 0 && (
                 <p className="text-center text-muted-foreground py-8">
-                  No recent activity
+                  {t("analytics.noRecentActivity")}
                 </p>
               )}
             </div>

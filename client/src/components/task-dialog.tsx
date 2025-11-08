@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTaskSchema, type Task } from "@shared/schema";
 import { z } from "zod";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -55,75 +56,6 @@ interface TaskDialogProps {
 
 const taskIcons = ["⭐", "🧹", "🍽️", "🗑️", "🧺", "🛁", "🌱", "📚", "🐕", "🚗"];
 
-// Predefined task templates for common chores
-const taskTemplates = [
-  {
-    id: "clean-room",
-    title: "Clean Your Room",
-    description: "Pick up toys, make bed, organize desk",
-    points: 30,
-    iconEmoji: "🧹",
-    requiresProof: true,
-  },
-  {
-    id: "dishes",
-    title: "Do the Dishes",
-    description: "Wash and dry all dishes, clean the sink",
-    points: 25,
-    iconEmoji: "🍽️",
-    requiresProof: false,
-  },
-  {
-    id: "homework",
-    title: "Complete Homework",
-    description: "Finish all assigned homework for today",
-    points: 40,
-    iconEmoji: "📚",
-    requiresProof: false,
-  },
-  {
-    id: "trash",
-    title: "Take Out Trash",
-    description: "Take trash bins to the curb",
-    points: 15,
-    iconEmoji: "🗑️",
-    requiresProof: false,
-  },
-  {
-    id: "laundry",
-    title: "Fold Laundry",
-    description: "Fold clean clothes and put them away",
-    points: 35,
-    iconEmoji: "🧺",
-    requiresProof: false,
-  },
-  {
-    id: "school-work",
-    title: "Write a Good Mark in School",
-    description: "Get a good grade on schoolwork or test",
-    points: 20,
-    iconEmoji: "✏️",
-    requiresProof: false,
-  },
-  {
-    id: "vacuum",
-    title: "Vacuum Living Room",
-    description: "Vacuum the living room and hallway",
-    points: 30,
-    iconEmoji: "🧹",
-    requiresProof: true,
-  },
-  {
-    id: "dentist",
-    title: "Go to the Dentist",
-    description: "Annual dental checkup and cleaning",
-    points: 200,
-    iconEmoji: "🦷",
-    requiresProof: false,
-    recurrence: "yearly" as const,
-  },
-];
-
 export function TaskDialog({
   open,
   onOpenChange,
@@ -133,6 +65,77 @@ export function TaskDialog({
   createdBy,
   editingTask,
 }: TaskDialogProps) {
+  const { t } = useTranslation();
+  
+  // Predefined task templates for common chores
+  const taskTemplates = [
+    {
+      id: "clean-room",
+      title: t('taskTemplates.cleanRoom.title'),
+      description: t('taskTemplates.cleanRoom.description'),
+      points: 30,
+      iconEmoji: "🧹",
+      requiresProof: true,
+    },
+    {
+      id: "dishes",
+      title: t('taskTemplates.dishes.title'),
+      description: t('taskTemplates.dishes.description'),
+      points: 25,
+      iconEmoji: "🍽️",
+      requiresProof: false,
+    },
+    {
+      id: "homework",
+      title: t('taskTemplates.homework.title'),
+      description: t('taskTemplates.homework.description'),
+      points: 40,
+      iconEmoji: "📚",
+      requiresProof: false,
+    },
+    {
+      id: "trash",
+      title: t('taskTemplates.trash.title'),
+      description: t('taskTemplates.trash.description'),
+      points: 15,
+      iconEmoji: "🗑️",
+      requiresProof: false,
+    },
+    {
+      id: "laundry",
+      title: t('taskTemplates.laundry.title'),
+      description: t('taskTemplates.laundry.description'),
+      points: 35,
+      iconEmoji: "🧺",
+      requiresProof: false,
+    },
+    {
+      id: "school-work",
+      title: t('taskTemplates.schoolWork.title'),
+      description: t('taskTemplates.schoolWork.description'),
+      points: 20,
+      iconEmoji: "✏️",
+      requiresProof: false,
+    },
+    {
+      id: "vacuum",
+      title: t('taskTemplates.vacuum.title'),
+      description: t('taskTemplates.vacuum.description'),
+      points: 30,
+      iconEmoji: "🧹",
+      requiresProof: true,
+    },
+    {
+      id: "dentist",
+      title: t('taskTemplates.dentist.title'),
+      description: t('taskTemplates.dentist.description'),
+      points: 200,
+      iconEmoji: "🦷",
+      requiresProof: false,
+      recurrence: "yearly" as const,
+    },
+  ];
+  
   // Track which recurrence mode is selected
   const [recurrenceMode, setRecurrenceMode] = useState<"standard" | "custom">("standard");
   
@@ -245,10 +248,10 @@ export function TaskDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-task">
         <DialogHeader>
           <DialogTitle className="text-2xl font-accent">
-            {editingTask ? "Edit Task" : "Create New Task"}
+            {editingTask ? t('tasks.editTask') : t('tasks.createTask')}
           </DialogTitle>
           <DialogDescription>
-            {editingTask ? "Update the details for this task." : "Set up a new task for your family to complete."}
+            {editingTask ? t('tasks.updateDetails') : t('tasks.setupNewTask')}
           </DialogDescription>
         </DialogHeader>
 
@@ -257,8 +260,8 @@ export function TaskDialog({
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold">Quick Templates</h3>
-            <Badge variant="secondary">Popular</Badge>
+            <h3 className="font-semibold">{t('tasks.quickTemplates')}</h3>
+            <Badge variant="secondary">{t('tasks.popular')}</Badge>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {taskTemplates.map((template) => (
@@ -273,7 +276,7 @@ export function TaskDialog({
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm truncate">{template.title}</div>
                     <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      <span>{template.points} pts</span>
+                      <span>{template.points} {t('tasks.pts')}</span>
                     </div>
                   </div>
                 </div>
@@ -289,7 +292,7 @@ export function TaskDialog({
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">Or customize</span>
+            <span className="bg-background px-2 text-muted-foreground">{t('tasks.orCustomize')}</span>
           </div>
         </div>
         )}
@@ -301,7 +304,7 @@ export function TaskDialog({
               name="iconEmoji"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Task Icon</FormLabel>
+                  <FormLabel>{t('tasks.taskIcon')}</FormLabel>
                   <div className="grid grid-cols-5 gap-2">
                     {taskIcons.map((icon) => (
                       <Button
@@ -326,10 +329,10 @@ export function TaskDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Task Title</FormLabel>
+                  <FormLabel>{t('tasks.taskTitle')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Clean your room"
+                      placeholder={t('tasks.taskTitlePlaceholder')}
                       {...field}
                       data-testid="input-task-title"
                     />
@@ -344,10 +347,10 @@ export function TaskDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>{t('tasks.descriptionOptional')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Add more details about the task..."
+                      placeholder={t('tasks.descriptionPlaceholder')}
                       {...field}
                       value={field.value || ""}
                       maxLength={100}
@@ -355,7 +358,7 @@ export function TaskDialog({
                     />
                   </FormControl>
                   <FormDescription className="text-xs text-right">
-                    {(field.value || "").length}/100 characters
+                    {t('tasks.charactersCount', { count: (field.value || "").length })}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -367,7 +370,7 @@ export function TaskDialog({
               name="points"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Points: {field.value}</FormLabel>
+                  <FormLabel>{t('tasks.pointsValue', { value: field.value })}</FormLabel>
                   <FormControl>
                     <Slider
                       min={10}
@@ -379,7 +382,7 @@ export function TaskDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    How many points is this task worth?
+                    {t('tasks.pointsQuestion')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -391,7 +394,7 @@ export function TaskDialog({
               name="dueDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Due Date (Optional)</FormLabel>
+                  <FormLabel>{t('tasks.dueDateOptional')}</FormLabel>
                   <FormControl>
                     <Input
                       type="date"
@@ -406,7 +409,7 @@ export function TaskDialog({
 
             <div className="space-y-4">
               <div>
-                <FormLabel>Recurrence Type</FormLabel>
+                <FormLabel>{t('tasks.recurrenceType')}</FormLabel>
                 <RadioGroup
                   value={recurrenceMode}
                   onValueChange={handleRecurrenceModeChange}
@@ -419,7 +422,7 @@ export function TaskDialog({
                       htmlFor="standard"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                     >
-                      Standard Recurrence
+                      {t('tasks.standardRecurrence')}
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -428,14 +431,14 @@ export function TaskDialog({
                       htmlFor="custom"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                     >
-                      Custom Days
+                      {t('tasks.customDaysRecurrence')}
                     </label>
                   </div>
                 </RadioGroup>
                 <p className="text-sm text-muted-foreground mt-2">
                   {recurrenceMode === "standard" 
-                    ? "Choose from preset intervals (one-time, daily, weekly, monthly, yearly)"
-                    : "Set a custom number of days for the task to repeat"}
+                    ? t('tasks.standardRecurrenceDesc')
+                    : t('tasks.customDaysDesc')}
                 </p>
               </div>
 
@@ -445,7 +448,7 @@ export function TaskDialog({
                   name="recurrence"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Repeat Schedule</FormLabel>
+                      <FormLabel>{t('tasks.repeatSchedule')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-task-recurrence">
@@ -453,11 +456,11 @@ export function TaskDialog({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="none">One-time</SelectItem>
-                          <SelectItem value="daily">Daily</SelectItem>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                          <SelectItem value="yearly">Yearly</SelectItem>
+                          <SelectItem value="none">{t('tasks.oneTime')}</SelectItem>
+                          <SelectItem value="daily">{t('tasks.daily')}</SelectItem>
+                          <SelectItem value="weekly">{t('tasks.weekly')}</SelectItem>
+                          <SelectItem value="monthly">{t('tasks.monthly')}</SelectItem>
+                          <SelectItem value="yearly">{t('tasks.yearly')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -472,13 +475,13 @@ export function TaskDialog({
                   name="recurrenceDays"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Repeat Every (Days)</FormLabel>
+                      <FormLabel>{t('tasks.repeatEveryDays')}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           min="1"
                           max="365"
-                          placeholder="e.g., 3 for every 3 days"
+                          placeholder={t('tasks.repeatEveryPlaceholder')}
                           {...field}
                           value={field.value ?? ""}
                           onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
@@ -486,7 +489,7 @@ export function TaskDialog({
                         />
                       </FormControl>
                       <FormDescription>
-                        Task will reappear after this many days following completion (1-365)
+                        {t('tasks.repeatEveryDesc')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -501,9 +504,9 @@ export function TaskDialog({
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Photo Proof</FormLabel>
+                    <FormLabel className="text-base">{t('tasks.photoProof')}</FormLabel>
                     <FormDescription>
-                      Require a photo to verify task completion
+                      {t('tasks.photoProofDesc')}
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -523,9 +526,9 @@ export function TaskDialog({
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Parent Approval</FormLabel>
+                    <FormLabel className="text-base">{t('tasks.parentApproval')}</FormLabel>
                     <FormDescription>
-                      Turn off for simple daily tasks (brush teeth, make bed) so points are awarded immediately. Recurring tasks will show as "done" and reopen on schedule.
+                      {t('tasks.parentApprovalDesc')}
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -547,7 +550,7 @@ export function TaskDialog({
                 onClick={() => onOpenChange(false)}
                 data-testid="button-cancel-task"
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -555,7 +558,7 @@ export function TaskDialog({
                 disabled={isSubmitting}
                 data-testid="button-submit-task"
               >
-                {isSubmitting ? (editingTask ? "Updating..." : "Creating...") : editingTask ? "Update Task" : "Create Task"}
+                {isSubmitting ? (editingTask ? t('tasks.updating') : t('tasks.creating')) : editingTask ? t('tasks.updateTaskButton') : t('tasks.createTaskButton')}
               </Button>
             </div>
           </form>

@@ -9,8 +9,9 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { FamilyMember } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
-const TIERS = [
+const TIERS = (t: (key: string) => string | string[]) => [
   {
     id: "free",
     name: "Free",
@@ -18,15 +19,8 @@ const TIERS = [
     memberLimit: 2,
     price: "€0",
     period: "forever",
-    description: "Perfect for getting started",
-    features: [
-      "Up to 2 family members",
-      "Unlimited tasks",
-      "Monthly leaderboard",
-      "Custom rewards",
-      "Dark mode",
-      "3 unlockable character skins",
-    ],
+    description: t("pricing.tierFreeDesc"),
+    features: t("pricing.tierFreeFeatures") as string[],
     popular: false,
   },
   {
@@ -36,16 +30,8 @@ const TIERS = [
     memberLimit: 4,
     price: "€2",
     period: "per month",
-    description: "Great for small families",
-    features: [
-      "Up to 4 family members",
-      "Everything in Free",
-      "Photo proof for tasks",
-      "Recurring tasks",
-      "Weekly & monthly leaderboards",
-      "Advanced analytics",
-      "10 unlockable character skins",
-    ],
+    description: t("pricing.tierFamilyDesc"),
+    features: t("pricing.tierFamilyFeatures") as string[],
     popular: true,
   },
   {
@@ -55,15 +41,8 @@ const TIERS = [
     memberLimit: 6,
     price: "€5",
     period: "per month",
-    description: "For larger families",
-    features: [
-      "Up to 6 family members",
-      "Everything in Family",
-      "Family chat",
-      "Task comments",
-      "Push notifications",
-      "All character skins unlocked",
-    ],
+    description: t("pricing.tierFamilyPlusDesc"),
+    features: t("pricing.tierFamilyPlusFeatures") as string[],
     popular: false,
   },
   {
@@ -73,15 +52,8 @@ const TIERS = [
     memberLimit: 999,
     price: "€12",
     period: "per month",
-    description: "Ultimate family management",
-    features: [
-      "Unlimited family members",
-      "Everything in Family+",
-      "Priority support",
-      "Early access to new features",
-      "Custom integrations (coming soon)",
-      "All future features included",
-    ],
+    description: t("pricing.tierFamilyHeroDesc"),
+    features: t("pricing.tierFamilyHeroFeatures") as string[],
     popular: false,
   },
 ];
@@ -89,6 +61,7 @@ const TIERS = [
 export default function Pricing() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [processingTier, setProcessingTier] = useState<string | null>(null);
 
   // Fetch current family member to get subscription tier
@@ -118,8 +91,8 @@ export default function Pricing() {
       if (!data.url) {
         setProcessingTier(null);
         toast({
-          title: "Checkout Error",
-          description: "No checkout URL received from server",
+          title: t("pricing.toastCheckoutError"),
+          description: t("pricing.toastNoCheckoutUrl"),
           variant: "destructive",
         });
         return;
@@ -132,8 +105,8 @@ export default function Pricing() {
     onError: (error: any) => {
       setProcessingTier(null);
       toast({
-        title: "Checkout Error",
-        description: error.message || "Failed to start checkout process",
+        title: t("pricing.toastCheckoutError"),
+        description: error.message || t("pricing.toastCheckoutFailed"),
         variant: "destructive",
       });
     },
@@ -142,8 +115,8 @@ export default function Pricing() {
   const handleUpgrade = (tierId: string) => {
     if (!member || member.role !== "parent") {
       toast({
-        title: "Permission Denied",
-        description: "Only parents can manage subscriptions",
+        title: t("pricing.toastPermissionDenied"),
+        description: t("pricing.toastOnlyParents"),
         variant: "destructive",
       });
       return;
@@ -154,6 +127,7 @@ export default function Pricing() {
   };
 
   const isParent = member?.role === "parent";
+  const tiers = TIERS(t);
 
   return (
     <div className="min-h-screen">
@@ -162,7 +136,7 @@ export default function Pricing() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/">
             <Button variant="ghost" data-testid="button-back-home">
-              ← Back to Dashboard
+              {t("pricing.backToDashboard")}
             </Button>
           </Link>
         </div>
@@ -172,20 +146,20 @@ export default function Pricing() {
       <div className="container mx-auto px-4 py-12">
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h1 className="text-4xl md:text-5xl font-black font-accent mb-4" data-testid="heading-pricing">
-            Choose Your Plan
+            {t("pricing.title")}
           </h1>
           <p className="text-lg text-muted-foreground">
-            Select the perfect plan for your family's needs. All plans include core task management features.
+            {t("pricing.subtitle")}
           </p>
           {!isParent && (
             <p className="text-sm text-amber-600 dark:text-amber-500 mt-4">
-              Note: Only parents can change subscription plans.
+              {t("pricing.onlyParents")}
             </p>
           )}
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {TIERS.map((tier) => {
+          {tiers.map((tier) => {
             const Icon = tier.icon;
             const isCurrentTier = familyData?.subscriptionTier === tier.id;
             const isProcessing = processingTier === tier.id;
@@ -203,7 +177,7 @@ export default function Pricing() {
                     className="absolute -top-3 left-1/2 -translate-x-1/2"
                     data-testid="badge-most-popular"
                   >
-                    Most Popular
+                    {t("pricing.mostPopular")}
                   </Badge>
                 )}
 
@@ -226,8 +200,8 @@ export default function Pricing() {
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
                     {tier.memberLimit === 999
-                      ? "Unlimited members"
-                      : `Up to ${tier.memberLimit} members`}
+                      ? t("pricing.unlimitedMembers")
+                      : t("pricing.upToMembers", { count: tier.memberLimit })}
                   </p>
                 </div>
 
@@ -250,14 +224,14 @@ export default function Pricing() {
                   {isProcessing ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Processing...
+                      {t("pricing.processing")}
                     </>
                   ) : tier.id === "free" ? (
-                    "Current Plan"
+                    t("pricing.currentPlan")
                   ) : isCurrentTier ? (
-                    "Current Plan"
+                    t("pricing.currentPlan")
                   ) : (
-                    `Choose ${tier.name}`
+                    t("pricing.choosePlan", { name: tier.name })
                   )}
                 </Button>
               </Card>
@@ -267,13 +241,12 @@ export default function Pricing() {
 
         {/* FAQ or Additional Info */}
         <div className="mt-16 text-center max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold font-accent mb-4">Questions?</h2>
+          <h2 className="text-2xl font-bold font-accent mb-4">{t("pricing.questionsTitle")}</h2>
           <p className="text-muted-foreground mb-6">
-            All plans include unlimited tasks, points tracking, and real-time updates. 
-            Upgrade or downgrade anytime. Cancel whenever you want, no questions asked.
+            {t("pricing.questionsDesc")}
           </p>
           <p className="text-sm text-muted-foreground">
-            Payments are securely processed by Stripe. Your subscription will renew automatically each month.
+            {t("pricing.paymentInfo")}
           </p>
         </div>
       </div>

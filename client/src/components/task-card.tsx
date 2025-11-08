@@ -6,6 +6,7 @@ import type { Task, FamilyMember } from "@shared/schema";
 import { format } from "date-fns";
 import { getAvatarUrl } from "@/lib/skins";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface TaskCardProps {
   task: Task;
@@ -24,6 +25,7 @@ export function TaskCard({
   showAssignee = true,
   onClick,
 }: TaskCardProps) {
+  const { t } = useTranslation();
   // Check if task is currently unavailable (future nextAvailableDate)
   const isUnavailable = !!(task.nextAvailableDate && new Date(task.nextAvailableDate) > new Date());
   
@@ -107,14 +109,14 @@ export function TaskCard({
               {task.requiresProof && (
                 <div className="flex items-center gap-1" data-testid={`icon-requires-proof-${task.id}`}>
                   <Camera className="h-3 w-3" />
-                  <span>Photo required</span>
+                  <span>{t('tasks.photoRequired')}</span>
                 </div>
               )}
               
               {!task.requiresApproval && (
                 <div className="flex items-center gap-1 text-primary" data-testid={`icon-auto-approved-${task.id}`}>
                   <Zap className="h-3 w-3" />
-                  <span>Auto-approved</span>
+                  <span>{t('tasks.autoApproved')}</span>
                 </div>
               )}
 

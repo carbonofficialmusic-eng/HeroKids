@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface SuccessCelebrationProps {
   points: number;
@@ -11,6 +12,7 @@ export function SuccessCelebration({
   message,
   onComplete,
 }: SuccessCelebrationProps) {
+  const { t } = useTranslation();
   const [confettiPieces] = useState(() =>
     Array.from({ length: 50 }, (_, i) => ({
       id: i,
@@ -52,7 +54,7 @@ export function SuccessCelebration({
             className="text-8xl font-black font-accent gradient-text-celebration mb-4"
             data-testid="text-points-earned"
           >
-            {points > 0 ? '+' : ''}{points} pts
+            {points > 0 ? '+' : ''}{points} {t("celebration.pts")}
           </div>
           <div className="text-3xl font-bold text-white" data-testid="text-celebration-message">
             {message}

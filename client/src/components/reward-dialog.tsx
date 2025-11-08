@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRewardSchema, type Reward } from "@shared/schema";
 import { z } from "zod";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +44,7 @@ export function RewardDialog({
   familyName,
   reward = null,
 }: RewardDialogProps) {
+  const { t } = useTranslation();
   const isEditing = !!reward;
 
   const form = useForm<RewardFormData>({
@@ -88,9 +90,9 @@ export function RewardDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"}>
         <DialogHeader>
-          <DialogTitle className="text-2xl font-accent">{isEditing ? "Edit Reward" : "Create Reward"}</DialogTitle>
+          <DialogTitle className="text-2xl font-accent">{isEditing ? t('rewards.editReward') : t('rewards.createReward')}</DialogTitle>
           <DialogDescription>
-            {isEditing ? "Update the details for this reward." : "Set up a new reward that family members can redeem with their points."}
+            {isEditing ? t('rewards.updateDetails') : t('rewards.setupNewReward')}
           </DialogDescription>
         </DialogHeader>
 
@@ -101,10 +103,10 @@ export function RewardDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Reward Title</FormLabel>
+                  <FormLabel>{t('rewards.rewardTitle')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Ice cream trip, Movie night"
+                      placeholder={t('rewards.rewardTitlePlaceholder')}
                       {...field}
                       data-testid="input-reward-title"
                     />
@@ -119,10 +121,10 @@ export function RewardDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>{t('rewards.descriptionOptional')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Add details about the reward..."
+                      placeholder={t('rewards.descriptionPlaceholder')}
                       {...field}
                       value={field.value || ""}
                       data-testid="input-reward-description"
@@ -138,7 +140,7 @@ export function RewardDialog({
               name="pointThreshold"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Points Required</FormLabel>
+                  <FormLabel>{t('rewards.pointsRequired')}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -150,7 +152,7 @@ export function RewardDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    How many points needed to earn this reward
+                    {t('rewards.pointsRequiredDesc')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -163,9 +165,9 @@ export function RewardDialog({
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Active</FormLabel>
+                    <FormLabel className="text-base">{t('rewards.active')}</FormLabel>
                     <FormDescription>
-                      Make this reward available to earn
+                      {t('rewards.activeDesc')}
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -187,7 +189,7 @@ export function RewardDialog({
                 onClick={() => onOpenChange(false)}
                 data-testid="button-cancel-reward"
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -195,7 +197,7 @@ export function RewardDialog({
                 disabled={isSubmitting}
                 data-testid="button-submit-reward"
               >
-                {isSubmitting ? (isEditing ? "Saving..." : "Creating...") : (isEditing ? "Save Changes" : "Create Reward")}
+                {isSubmitting ? (isEditing ? t('rewards.saving') : t('rewards.creating')) : (isEditing ? t('rewards.saveChanges') : t('rewards.createRewardButton'))}
               </Button>
             </div>
           </form>
