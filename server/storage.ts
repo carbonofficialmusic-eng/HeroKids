@@ -748,6 +748,7 @@ export class DatabaseStorage implements IStorage {
             monthlyPoints: 0,
             rewardsRedeemed: 0,
             unlockedSkins: [],
+            discoveredSkinIds: [],
             activeSkinId: null,
             updatedAt: new Date(),
           })
