@@ -9,9 +9,9 @@ import bookWizardImg from "@assets/generated_images/Modern_Book_Wizard_avatar_a7
 import kitchenHeroImg from "@assets/generated_images/Modern_Kitchen_Hero_avatar_4062600a.png";
 import artMasterImg from "@assets/generated_images/Modern_Art_Master_avatar_9e59088f.png";
 
-// Tier 2 - Elite Heroes
-import techNinjaImg from "@assets/generated_images/Female_police_officer_avatar_ad47a20a.png";
-import oceanGuardianImg from "@assets/generated_images/Dolphin_hero_avatar_19162df6.png";
+// Tier 2 - Elite Heroes (Epic heroic designs)
+import techNinjaImg from "@assets/generated_images/Elite_Tech_Ninja_avatar_d51179ff.png";
+import oceanGuardianImg from "@assets/generated_images/Elite_Ocean_Guardian_avatar_0d83ac8b.png";
 import skyKnightImg from "@assets/generated_images/Sky_Knight_avatar_11e5e952.png";
 import firePhoenixImg from "@assets/generated_images/Fire_Phoenix_avatar_0eb558b2.png";
 import crystalMageImg from "@assets/generated_images/Crystal_Mage_avatar_3822ee79.png";
@@ -30,9 +30,9 @@ import modernMagicalLibraryBg from "@assets/generated_images/Modern_magical_libr
 import modernProfessionalKitchenBg from "@assets/generated_images/Modern_professional_kitchen_background_30a471ed.png";
 import modernArtStudioBg from "@assets/generated_images/Modern_art_studio_background_56a4110e.png";
 
-// Tier 2 backgrounds
-import cityStreetBg from "@assets/generated_images/City_street_background_9c722182.png";
-import underwaterBg from "@assets/generated_images/Underwater_ocean_background_scene_378220c2.png";
+// Tier 2 backgrounds (Epic dramatic scenes)
+import eliteTechCityBg from "@assets/generated_images/Elite_tech_city_background_21f1690c.png";
+import eliteOceanDepthsBg from "@assets/generated_images/Elite_ocean_depths_background_112ffacd.png";
 import skylineBg from "@assets/generated_images/City_skyline_background_cf75a668.png";
 import nightSkyBg from "@assets/generated_images/Night_sky_knight_background_b50bd51d.png";
 import volcanicBg from "@assets/generated_images/Fire_Phoenix_volcanic_background_f3ebef18.png";
@@ -76,9 +76,9 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "kitchen-hero": modernProfessionalKitchenBg,
   "art-master": modernArtStudioBg,
   
-  // Tier 2 - Elite Heroes
-  "tech-ninja": cityStreetBg,
-  "ocean-guardian": underwaterBg,
+  // Tier 2 - Elite Heroes (Epic dramatic backgrounds)
+  "tech-ninja": eliteTechCityBg,
+  "ocean-guardian": eliteOceanDepthsBg,
   "sky-knight": nightSkyBg,
   "fire-phoenix": volcanicBg,
   "crystal-mage": crystalCaveBg,
