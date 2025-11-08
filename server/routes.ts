@@ -1738,18 +1738,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const allSkins = await storage.getSkins();
+      const discoveredSkinIds = member.discoveredSkinIds || [];
       
-      // Enrich skins with unlock status for this member based on points earned
-      const skinsWithStatus = allSkins.map(skin => ({
-        ...skin,
-        isUnlocked: member.totalEarned >= skin.pointsRequired,
-        isActive: member.activeSkinId === skin.id,
-        canUnlock: member.totalEarned >= skin.pointsRequired,
-      }));
+      // Calculate available discovery cards: one card per 60 points, minus already discovered skins
+      const availableCards = Math.floor(member.totalEarned / 60) - discoveredSkinIds.length;
+      
+      // Determine which package tiers are unlocked based on total earned points
+      // Starter (0-500), Elite (500-1000), Dinosaur (1000+)
+      const unlockedTier = member.totalEarned >= 1000 ? 3 : member.totalEarned >= 500 ? 2 : 1;
+      
+      // Enrich skins with discovery status for this member
+      const skinsWithStatus = allSkins.map(skin => {
+        const isDiscovered = discoveredSkinIds.includes(skin.id);
+        const isActive = member.activeSkinId === skin.id;
+        
+        // Determine skin tier (1=Starter, 2=Elite, 3=Dinosaur)
+        const skinTier = skin.pointsRequired >= 1060 ? 3 : skin.pointsRequired >= 560 ? 2 : 1;
+        
+        // Can discover if: package is unlocked AND not already discovered AND has available cards
+        const canDiscover = skinTier <= unlockedTier && !isDiscovered && availableCards > 0;
+        
+        return {
+          ...skin,
+          isDiscovered,
+          isActive,
+          canDiscover,
+          tier: skinTier,
+        };
+      });
       
       res.json({
         skins: skinsWithStatus,
         totalEarned: member.totalEarned,
+        availableCards,
+        unlockedTier,
       });
     } catch (error: any) {
       console.error("Error fetching skins:", error);
