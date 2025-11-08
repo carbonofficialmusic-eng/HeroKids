@@ -1,13 +1,13 @@
 // Import skin images using @assets alias
-// Tier 1 - Starter Heroes (reusing existing images)
-import juniorChampionImg from "@assets/generated_images/Female_superhero_character_avatar_c7f67934.png";
-import braveExplorerImg from "@assets/generated_images/Construction_worker_hero_avatar_d1064dc6.png";
-import starCadetImg from "@assets/generated_images/Cute_space_explorer_avatar_a0b60f1e.png";
-import natureScoutImg from "@assets/generated_images/Cute_plant_character_avatar_36aa366b.png";
-import speedRunnerImg from "@assets/generated_images/Female_train_conductor_hero_avatar_dad8a300.png";
-import bookWizardImg from "@assets/generated_images/Cute_dinosaur_character_avatar_4f48bda8.png";
-import kitchenHeroImg from "@assets/generated_images/Cute_chef_character_avatar_4cecd321.png";
-import artMasterImg from "@assets/generated_images/Cute_Halloween_monster_avatar_ea8b9c0b.png";
+// Tier 1 - Starter Heroes (Modern fresh designs)
+import juniorChampionImg from "@assets/generated_images/Modern_Junior_Champion_avatar_2bc47f6b.png";
+import braveExplorerImg from "@assets/generated_images/Modern_Brave_Explorer_avatar_5d8a0f47.png";
+import starCadetImg from "@assets/generated_images/Modern_Star_Cadet_avatar_03106676.png";
+import natureScoutImg from "@assets/generated_images/Modern_Nature_Scout_avatar_9a7998e2.png";
+import speedRunnerImg from "@assets/generated_images/Modern_Speed_Runner_avatar_6438bf70.png";
+import bookWizardImg from "@assets/generated_images/Modern_Book_Wizard_avatar_a7765dd5.png";
+import kitchenHeroImg from "@assets/generated_images/Modern_Kitchen_Hero_avatar_4062600a.png";
+import artMasterImg from "@assets/generated_images/Modern_Art_Master_avatar_9e59088f.png";
 
 // Tier 2 - Elite Heroes
 import techNinjaImg from "@assets/generated_images/Female_police_officer_avatar_ad47a20a.png";
@@ -20,16 +20,20 @@ import cosmicDrifterImg from "@assets/generated_images/Cosmic_Drifter_avatar_1d7
 import thunderChampionImg from "@assets/generated_images/Thunder_Champion_avatar_cf3f783f.png";
 
 // Import themed background images
-import jungleBg from "@assets/generated_images/Jungle_plants_background_3f3fc573.png";
+// Modern fresh backgrounds for Tier 1
+import modernCitySkylineBg from "@assets/generated_images/Modern_city_skyline_background_a5f841c6.png";
+import modernJungleParkBg from "@assets/generated_images/Modern_jungle_park_background_ec08fd63.png";
+import modernSpaceStationBg from "@assets/generated_images/Modern_space_station_background_1605b9f8.png";
+import modernEcoGardenBg from "@assets/generated_images/Modern_eco_garden_background_86a539ca.png";
+import modernRacingTrackBg from "@assets/generated_images/Modern_racing_track_background_850e8bdc.png";
+import modernMagicalLibraryBg from "@assets/generated_images/Modern_magical_library_background_514c4635.png";
+import modernProfessionalKitchenBg from "@assets/generated_images/Modern_professional_kitchen_background_30a471ed.png";
+import modernArtStudioBg from "@assets/generated_images/Modern_art_studio_background_56a4110e.png";
+
+// Tier 2 backgrounds
 import cityStreetBg from "@assets/generated_images/City_street_background_9c722182.png";
-import gardenBg from "@assets/generated_images/Garden_nature_background_b373f3a6.png";
-import spaceBg from "@assets/generated_images/Space_galaxy_background_8100facc.png";
-import skylineBg from "@assets/generated_images/City_skyline_background_cf75a668.png";
-import kitchenBg from "@assets/generated_images/Kitchen_restaurant_background_877f922e.png";
-import castleBg from "@assets/generated_images/Halloween_castle_background_scene_6acbb0d7.png";
-import constructionBg from "@assets/generated_images/Construction_site_background_scene_990a32c9.png";
-import trainStationBg from "@assets/generated_images/Train_station_background_scene_3c539965.png";
 import underwaterBg from "@assets/generated_images/Underwater_ocean_background_scene_378220c2.png";
+import skylineBg from "@assets/generated_images/City_skyline_background_cf75a668.png";
 import nightSkyBg from "@assets/generated_images/Night_sky_knight_background_b50bd51d.png";
 import volcanicBg from "@assets/generated_images/Fire_Phoenix_volcanic_background_f3ebef18.png";
 import crystalCaveBg from "@assets/generated_images/Crystal_Mage_cave_background_64b9c911.png";
@@ -62,15 +66,15 @@ export const SKIN_IMAGES: Record<string, string> = {
 
 // Themed background mappings for new HeroKids themed skins
 export const SKIN_BACKGROUNDS: Record<string, string> = {
-  // Tier 1 - Starter Heroes
-  "junior-champion": skylineBg,
-  "brave-explorer": constructionBg,
-  "star-cadet": spaceBg,
-  "nature-scout": gardenBg,
-  "speed-runner": trainStationBg,
-  "book-wizard": jungleBg,
-  "kitchen-hero": kitchenBg,
-  "art-master": castleBg,
+  // Tier 1 - Starter Heroes (Modern fresh backgrounds)
+  "junior-champion": modernCitySkylineBg,
+  "brave-explorer": modernJungleParkBg,
+  "star-cadet": modernSpaceStationBg,
+  "nature-scout": modernEcoGardenBg,
+  "speed-runner": modernRacingTrackBg,
+  "book-wizard": modernMagicalLibraryBg,
+  "kitchen-hero": modernProfessionalKitchenBg,
+  "art-master": modernArtStudioBg,
   
   // Tier 2 - Elite Heroes
   "tech-ninja": cityStreetBg,
