@@ -599,59 +599,58 @@ export default function Dashboard() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-center flex-wrap gap-2">
+              <div className="flex items-center justify-center flex-wrap gap-3">
                 <Link href="/approvals">
-                  <Button variant="card" data-testid="button-approvals">
-                    <ClipboardCheck className="h-4 w-4 mr-2" />
-                    {t("dashboard.approvals")}
+                  <Button variant="card" data-testid="button-approvals" className="min-h-11 whitespace-normal leading-tight">
+                    <ClipboardCheck className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-center">{t("dashboard.approvals")}</span>
                   </Button>
                 </Link>
                 <Link href="/analytics">
-                  <Button variant="card" data-testid="button-analytics">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    {t("dashboard.analytics")}
+                  <Button variant="card" data-testid="button-analytics" className="min-h-11 whitespace-normal leading-tight">
+                    <BarChart3 className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-center">{t("dashboard.analytics")}</span>
                   </Button>
                 </Link>
                 <Link href="/chat">
-                  <Button variant="card" data-testid="button-chat" className="relative">
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    {t("nav.chat")}
+                  <Button variant="card" data-testid="button-chat" className="relative min-h-11 whitespace-normal leading-tight">
+                    <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-center">{t("nav.chat")}</span>
                     {unreadChatData && unreadChatData.count > 0 && (
-                      <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1" data-testid="badge-unread-count">
+                      <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex-shrink-0" data-testid="badge-unread-count">
                         {unreadChatData.count}
                       </Badge>
                     )}
                   </Button>
                 </Link>
                 <Link href="/rewards-board">
-                  <Button variant="card" data-testid="button-rewards-board">
-                    <Gift className="h-4 w-4 mr-2" />
-                    {t("dashboard.rewardsBoard")}
+                  <Button variant="card" data-testid="button-rewards-board" className="min-h-11 whitespace-normal leading-tight">
+                    <Gift className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-center">{t("dashboard.rewardsBoard")}</span>
                   </Button>
                 </Link>
-                {/* Keep Add buttons together on same line */}
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => {
-                      setSelectedTask(null);
-                      setTaskDialogOpen(true);
-                    }}
-                    data-testid="button-add-task"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("dashboard.addTask")}
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setSelectedReward(null);
-                      setRewardDialogOpen(true);
-                    }}
-                    data-testid="button-add-reward"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("dashboard.addReward")}
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => {
+                    setSelectedTask(null);
+                    setTaskDialogOpen(true);
+                  }}
+                  data-testid="button-add-task"
+                  className="min-h-11 whitespace-normal leading-tight"
+                >
+                  <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="text-center">{t("dashboard.addTask")}</span>
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSelectedReward(null);
+                    setRewardDialogOpen(true);
+                  }}
+                  data-testid="button-add-reward"
+                  className="min-h-11 whitespace-normal leading-tight"
+                >
+                  <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="text-center">{t("dashboard.addReward")}</span>
+                </Button>
               </div>
 
               {activeTasks.length === 0 ? (
