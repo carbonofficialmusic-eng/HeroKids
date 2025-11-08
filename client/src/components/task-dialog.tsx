@@ -98,11 +98,11 @@ const taskTemplates = [
     requiresProof: false,
   },
   {
-    id: "pet-care",
-    title: "Feed the Pet",
-    description: "Give food and fresh water to pet",
+    id: "school-work",
+    title: "Write a Good Mark in School",
+    description: "Get a good grade on schoolwork or test",
     points: 20,
-    iconEmoji: "🐕",
+    iconEmoji: "✏️",
     requiresProof: false,
   },
   {
