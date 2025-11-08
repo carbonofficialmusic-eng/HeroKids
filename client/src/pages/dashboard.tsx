@@ -191,6 +191,10 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       setSwitchMemberDialogOpen(false);
       toast({
         title: "Switched member!",
