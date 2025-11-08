@@ -56,6 +56,7 @@ export const families = pgTable("families", {
   billingSubscriptionId: varchar("billing_subscription_id"), // Stripe subscription ID
   tierExpiresAt: timestamp("tier_expires_at"), // When subscription expires (for grace periods)
   showLeaderboard: boolean("show_leaderboard").notNull().default(true), // Parents can hide leaderboard from children
+  language: varchar("language", { length: 2 }).notNull().default("en"), // Family language (de, en, fr, es, ja, zh)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
