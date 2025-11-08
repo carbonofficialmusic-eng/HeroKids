@@ -12,6 +12,7 @@ import { SuccessCelebration } from "@/components/success-celebration";
 import { Link } from "wouter";
 import { SKIN_IMAGES } from "@/lib/skins";
 import type { FamilyMember } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 interface Skin {
   id: string;
@@ -28,6 +29,7 @@ interface Skin {
 
 export default function SkinsGallery() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [celebration, setCelebration] = useState<{ points: number; message: string } | null>(null);
 
   const { data: memberData, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -54,9 +56,10 @@ export default function SkinsGallery() {
     },
     onSuccess: (result) => {
       const skin = data?.skins.find(s => s.id === result.skinId);
+      const skinName = skin?.id ? t(`skinNames.${skin.id}`) : "Skin";
       setCelebration({
         points: result.bonusPoints || 0,
-        message: `${skin?.name || "Skin"} Discovered!${result.bonusPoints ? ` +${result.bonusPoints} bonus points!` : ""}`,
+        message: `${skinName} Discovered!${result.bonusPoints ? ` +${result.bonusPoints} bonus points!` : ""}`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
@@ -180,7 +183,7 @@ export default function SkinsGallery() {
         <div className="p-1">
           {isDiscovered ? (
             <>
-              <h3 className="font-accent text-xs font-bold truncate text-center">{skin.name}</h3>
+              <h3 className="font-accent text-xs font-bold truncate text-center">{t(`skinNames.${skin.id}`)}</h3>
               <div className="mt-1 flex justify-center">
                 <Button
                   size="sm"
