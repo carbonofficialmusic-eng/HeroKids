@@ -113,36 +113,34 @@ export default function SkinsGallery() {
         </div>
 
         {/* Default Avatar Card */}
-        <div className="relative mb-8">
-          <div className="absolute -top-12 left-0 z-10">
-            <Link href="/dashboard">
-              <Button
-                variant="ghost"
-                data-testid="button-back-default"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
+        <Card
+          className={`relative overflow-hidden transition-all hover-elevate mb-8 ${
+            isDefaultActive ? "ring-2 ring-primary" : ""
+          }`}
+          data-testid="card-skin-default"
+        >
+          <Link href="/dashboard">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 left-4 z-10"
+              data-testid="button-back-default"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
           {isDefaultActive && (
-            <div className="absolute -top-12 right-0 z-10">
-              <Badge
-                data-testid="badge-active-default"
-              >
-                <Check className="h-3 w-3 mr-1" />
-                Active
-              </Badge>
-            </div>
+            <Badge
+              className="absolute top-4 right-4 z-10"
+              data-testid="badge-active-default"
+            >
+              <Check className="h-3 w-3 mr-1" />
+              Active
+            </Badge>
           )}
-          <Card
-            className={`relative overflow-hidden transition-all hover-elevate ${
-              isDefaultActive ? "ring-2 ring-primary" : ""
-            }`}
-            data-testid="card-skin-default"
-          >
-            <CardHeader className="pb-4">
-              <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted flex items-center justify-center max-w-xs mx-auto">
+
+          <CardHeader className="pb-4">
+            <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted flex items-center justify-center max-w-xs mx-auto">
               {memberData?.avatarUrl ? (
                 <Avatar className="h-32 w-32">
                   <AvatarImage src={memberData.avatarUrl} alt="Your avatar" />
@@ -169,7 +167,6 @@ export default function SkinsGallery() {
             </Button>
           </CardContent>
         </Card>
-        </div>
 
         {/* Tier 1 - Starter Skins */}
         <div className="mb-8">
@@ -183,36 +180,35 @@ export default function SkinsGallery() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tier1Skins.map((skin) => (
-            <div key={skin.id} className="relative">
-              <div className="absolute -top-12 left-0 z-10">
-                <Link href="/dashboard">
-                  <Button
-                    variant="ghost"
-                    data-testid={`button-back-${skin.id}`}
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Dashboard
-                  </Button>
-                </Link>
-              </div>
+            <Card
+              key={skin.id}
+              className={`relative overflow-hidden transition-all hover-elevate ${
+                skin.isActive ? "ring-2 ring-primary" : ""
+              }`}
+              data-testid={`card-skin-${skin.id}`}
+            >
+              <Link href="/dashboard">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 left-4 z-10"
+                  data-testid={`button-back-${skin.id}`}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </Link>
               {skin.isActive && (
-                <div className="absolute -top-12 right-0 z-10">
-                  <Badge
-                    data-testid={`badge-active-${skin.id}`}
-                  >
-                    <Check className="h-3 w-3 mr-1" />
-                    Active
-                  </Badge>
-                </div>
+                <Badge
+                  className="absolute top-4 right-4 z-10"
+                  data-testid={`badge-active-${skin.id}`}
+                >
+                  <Check className="h-3 w-3 mr-1" />
+                  Active
+                </Badge>
               )}
-              <Card
-                className={`relative overflow-hidden transition-all hover-elevate ${
-                  skin.isActive ? "ring-2 ring-primary" : ""
-                }`}
-                data-testid={`card-skin-${skin.id}`}
-              >
-                <CardHeader className="pb-4">
-                  <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
+
+              <CardHeader className="pb-4">
+                <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
                   {SKIN_IMAGES[skin.id] ? (
                     <img
                       src={SKIN_IMAGES[skin.id]}
@@ -250,7 +246,6 @@ export default function SkinsGallery() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
             ))}
           </div>
         </div>
@@ -270,36 +265,35 @@ export default function SkinsGallery() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {tier2Skins.map((skin) => (
-                <div key={skin.id} className="relative">
-                  <div className="absolute -top-12 left-0 z-10">
-                    <Link href="/dashboard">
-                      <Button
-                        variant="ghost"
-                        data-testid={`button-back-${skin.id}`}
-                      >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to Dashboard
-                      </Button>
-                    </Link>
-                  </div>
+                <Card
+                  key={skin.id}
+                  className={`relative overflow-hidden transition-all hover-elevate ${
+                    skin.isActive ? "ring-2 ring-primary" : ""
+                  }`}
+                  data-testid={`card-skin-${skin.id}`}
+                >
+                  <Link href="/dashboard">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-4 left-4 z-10"
+                      data-testid={`button-back-${skin.id}`}
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                  </Link>
                   {skin.isActive && (
-                    <div className="absolute -top-12 right-0 z-10">
-                      <Badge
-                        data-testid={`badge-active-${skin.id}`}
-                      >
-                        <Check className="h-3 w-3 mr-1" />
-                        Active
-                      </Badge>
-                    </div>
+                    <Badge
+                      className="absolute top-4 right-4 z-10"
+                      data-testid={`badge-active-${skin.id}`}
+                    >
+                      <Check className="h-3 w-3 mr-1" />
+                      Active
+                    </Badge>
                   )}
-                  <Card
-                    className={`relative overflow-hidden transition-all hover-elevate ${
-                      skin.isActive ? "ring-2 ring-primary" : ""
-                    }`}
-                    data-testid={`card-skin-${skin.id}`}
-                  >
-                    <CardHeader className="pb-4">
-                      <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
+
+                  <CardHeader className="pb-4">
+                    <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
                       {hasReached500 ? (
                         // Show preview image once user reaches 500 points
                         <>
@@ -377,7 +371,6 @@ export default function SkinsGallery() {
                     )}
                   </CardContent>
                 </Card>
-              </div>
               ))}
             </div>
           </div>
