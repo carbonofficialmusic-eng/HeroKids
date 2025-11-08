@@ -129,18 +129,18 @@ export default function SkinsGallery() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          {isDefaultActive && (
-            <Badge
-              className="absolute top-4 right-4 z-10"
-              data-testid="badge-active-default"
-            >
-              <Check className="h-3 w-3 mr-1" />
-              Active
-            </Badge>
-          )}
 
           <CardHeader className="pb-4">
             <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted flex items-center justify-center max-w-xs mx-auto">
+              {isDefaultActive && (
+                <Badge
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+                  data-testid="badge-active-default"
+                >
+                  <Check className="h-3 w-3 mr-1" />
+                  Active
+                </Badge>
+              )}
               {memberData?.avatarUrl ? (
                 <Avatar className="h-32 w-32">
                   <AvatarImage src={memberData.avatarUrl} alt="Your avatar" />
@@ -197,18 +197,18 @@ export default function SkinsGallery() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              {skin.isActive && (
-                <Badge
-                  className="absolute top-4 right-4 z-10"
-                  data-testid={`badge-active-${skin.id}`}
-                >
-                  <Check className="h-3 w-3 mr-1" />
-                  Active
-                </Badge>
-              )}
 
               <CardHeader className="pb-4">
                 <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
+                  {skin.isActive && (
+                    <Badge
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+                      data-testid={`badge-active-${skin.id}`}
+                    >
+                      <Check className="h-3 w-3 mr-1" />
+                      Active
+                    </Badge>
+                  )}
                   {SKIN_IMAGES[skin.id] ? (
                     <img
                       src={SKIN_IMAGES[skin.id]}
@@ -282,18 +282,18 @@ export default function SkinsGallery() {
                       <ArrowLeft className="h-4 w-4" />
                     </Button>
                   </Link>
-                  {skin.isActive && (
-                    <Badge
-                      className="absolute top-4 right-4 z-10"
-                      data-testid={`badge-active-${skin.id}`}
-                    >
-                      <Check className="h-3 w-3 mr-1" />
-                      Active
-                    </Badge>
-                  )}
 
                   <CardHeader className="pb-4">
                     <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
+                      {skin.isActive && (
+                        <Badge
+                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+                          data-testid={`badge-active-${skin.id}`}
+                        >
+                          <Check className="h-3 w-3 mr-1" />
+                          Active
+                        </Badge>
+                      )}
                       {hasReached500 ? (
                         // Show preview image once user reaches 500 points
                         <>
