@@ -25,16 +25,21 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const { i18n } = useTranslation();
   const [language, setLanguage] = useState<string>("en");
 
-  const { data: family, isLoading } = useQuery<Family>({
+  const { data: family, isLoading, isError } = useQuery<Family>({
     queryKey: ["/api/families/settings"],
+    retry: 2,
+    retryDelay: 1000,
   });
 
   useEffect(() => {
     if (family?.language && family.language !== language) {
       setLanguage(family.language);
       i18n.changeLanguage(family.language);
+    } else if (isError) {
+      setLanguage("en");
+      i18n.changeLanguage("en");
     }
-  }, [family?.language, i18n, language]);
+  }, [family?.language, isError, i18n, language]);
 
   useEffect(() => {
     const ws = (window as any).__wsConnection;

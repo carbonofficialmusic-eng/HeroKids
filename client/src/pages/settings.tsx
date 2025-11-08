@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check } from "lucide-react";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -64,7 +65,7 @@ export default function Settings() {
 
   // Update family settings mutation
   const updateSettingsMutation = useMutation({
-    mutationFn: async (settings: { showLeaderboard: boolean }) => {
+    mutationFn: async (settings: { showLeaderboard?: boolean; language?: "de" | "en" | "fr" | "es" | "ja" | "zh" }) => {
       return await apiRequest("PATCH", "/api/families/settings", settings);
     },
     onSuccess: () => {
@@ -259,6 +260,19 @@ export default function Settings() {
     }
   };
 
+  const handleLanguageChange = (language: string) => {
+    updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" });
+  };
+
+  const languageOptions = [
+    { value: "de", label: "Deutsch" },
+    { value: "en", label: "English" },
+    { value: "fr", label: "Français" },
+    { value: "es", label: "Español" },
+    { value: "ja", label: "日本語" },
+    { value: "zh", label: "中文" },
+  ];
+
   return (
     <div className="min-h-screen">
       <div className="container max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
@@ -414,6 +428,47 @@ export default function Settings() {
               <p className="text-sm text-muted-foreground mt-3">
                 New members can join at the login page by clicking "Join Existing Family" and entering this code.
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Language Settings */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Languages className="h-5 w-5 text-primary" />
+                <CardTitle>Language Preferences</CardTitle>
+              </div>
+              <CardDescription>
+                Choose your family's preferred language. This will affect all family members' interface language.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="language-select" className="text-base">
+                    Interface Language
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Select the language for the application interface
+                  </p>
+                </div>
+                <Select
+                  value={familyData?.language || "en"}
+                  onValueChange={handleLanguageChange}
+                  disabled={updateSettingsMutation.isPending}
+                >
+                  <SelectTrigger className="w-[180px]" data-testid="select-language">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languageOptions.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value} data-testid={`select-language-${lang.value}`}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardContent>
           </Card>
 
