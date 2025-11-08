@@ -1779,6 +1779,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/skins/discover", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { skinId } = req.body;
+      
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const allSkins = await storage.getSkins();
+      const skin = allSkins.find(s => s.id === skinId);
+      
+      if (!skin) {
+        return res.status(404).json({ message: "Skin not found" });
+      }
+      
+      const discoveredSkinIds = member.discoveredSkinIds || [];
+      
+      // Check if already discovered
+      if (discoveredSkinIds.includes(skinId)) {
+        return res.status(400).json({ message: "Skin already discovered" });
+      }
+      
+      // Calculate available cards
+      const availableCards = Math.floor(member.totalEarned / 60) - discoveredSkinIds.length;
+      
+      if (availableCards <= 0) {
+        return res.status(403).json({ message: "No discovery cards available" });
+      }
+      
+      // Check if skin's package tier is unlocked
+      const unlockedTier = member.totalEarned >= 1000 ? 3 : member.totalEarned >= 500 ? 2 : 1;
+      const skinTier = skin.pointsRequired >= 1060 ? 3 : skin.pointsRequired >= 560 ? 2 : 1;
+      
+      if (skinTier > unlockedTier) {
+        return res.status(403).json({ message: "Skin package not unlocked yet" });
+      }
+      
+      // Add skin to discovered list
+      const updatedDiscoveredSkins = [...discoveredSkinIds, skinId];
+      await storage.updateFamilyMember(member.id, {
+        discoveredSkinIds: updatedDiscoveredSkins,
+      });
+      
+      // Award bonus points if this skin has them
+      const bonusPoints = skin.bonusPoints || 0;
+      if (bonusPoints > 0) {
+        await storage.updateFamilyMemberPoints(
+          member.id,
+          member.totalEarned + bonusPoints,
+          member.totalPoints + bonusPoints,
+          member.weeklyPoints + bonusPoints,
+          member.monthlyPoints + bonusPoints
+        );
+      }
+      
+      // Broadcast skin discovery to family
+      broadcastToFamily(member.familyName, {
+        type: "skin_discovered",
+        memberId: member.id,
+        skinId,
+        bonusPoints,
+      });
+      
+      res.json({ 
+        message: "Skin discovered!", 
+        skinId,
+        bonusPoints,
+        availableCards: availableCards - 1,
+      });
+    } catch (error: any) {
+      console.error("Error discovering skin:", error);
+      res.status(500).json({ message: "Failed to discover skin" });
+    }
+  });
+
   app.post("/api/skins/select", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -1793,18 +1874,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Allow null to reset to default avatar, otherwise verify skin is unlocked based on points earned
+      // Allow null to reset to default avatar, otherwise verify skin is discovered
       if (skinId !== null) {
-        const allSkins = await storage.getSkins();
-        const skin = allSkins.find(s => s.id === skinId);
+        const discoveredSkinIds = member.discoveredSkinIds || [];
         
-        if (!skin) {
-          return res.status(404).json({ message: "Skin not found" });
-        }
-        
-        // Check if user has earned enough points to unlock this skin
-        if (member.totalEarned < skin.pointsRequired) {
-          return res.status(403).json({ message: "Skin not unlocked - need more points" });
+        if (!discoveredSkinIds.includes(skinId)) {
+          return res.status(403).json({ message: "Skin not discovered yet - discover it first!" });
         }
       }
       
