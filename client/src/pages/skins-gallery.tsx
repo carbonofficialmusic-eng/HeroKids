@@ -180,7 +180,7 @@ export default function SkinsGallery() {
               Unlock from 0 to 500 lifetime points earned
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-4 gap-2">
             {tier1Skins.map((skin) => (
             <Card
               key={skin.id}
@@ -191,10 +191,9 @@ export default function SkinsGallery() {
               onClick={() => !skin.isActive && selectSkinMutation.mutate(skin.id)}
             >
               {skin.isActive && (
-                <div className="absolute top-2 right-2 z-10">
-                  <Badge data-testid={`badge-active-${skin.id}`}>
-                    <Check className="h-3 w-3 mr-1" />
-                    Active
+                <div className="absolute top-1 right-1 z-10">
+                  <Badge className="text-xs px-1 py-0" data-testid={`badge-active-${skin.id}`}>
+                    <Check className="h-2 w-2" />
                   </Badge>
                 </div>
               )}
@@ -216,16 +215,16 @@ export default function SkinsGallery() {
                 )}
                 {!skin.isUnlocked && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
-                      <Lock className="h-8 w-8 text-muted-foreground" />
+                    <div className="bg-background/80 backdrop-blur-sm rounded-full p-2">
+                      <Lock className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </div>
                 )}
               </div>
               
-              <div className="p-3 text-center">
-                <h3 className="font-accent text-lg font-bold mb-1">{skin.name}</h3>
-                <p className="text-xs text-muted-foreground">{skin.pointsRequired} points</p>
+              <div className="p-1 text-center">
+                <h3 className="font-accent text-xs font-bold truncate">{skin.name}</h3>
+                <p className="text-[10px] text-muted-foreground">{skin.pointsRequired}pts</p>
               </div>
             </Card>
             ))}
@@ -245,7 +244,7 @@ export default function SkinsGallery() {
                   : "Mystery skins revealed at 500 points • Unlock from 560 to 1000"}
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-4 gap-2">
               {tier2Skins.map((skin) => (
                 <Card
                   key={skin.id}
@@ -256,10 +255,9 @@ export default function SkinsGallery() {
                   onClick={() => skin.isUnlocked && !skin.isActive && selectSkinMutation.mutate(skin.id)}
                 >
                   {skin.isActive && (
-                    <div className="absolute top-2 right-2 z-10">
-                      <Badge data-testid={`badge-active-${skin.id}`}>
-                        <Check className="h-3 w-3 mr-1" />
-                        Active
+                    <div className="absolute top-1 right-1 z-10">
+                      <Badge className="text-xs px-1 py-0" data-testid={`badge-active-${skin.id}`}>
+                        <Check className="h-2 w-2" />
                       </Badge>
                     </div>
                   )}
@@ -283,27 +281,26 @@ export default function SkinsGallery() {
                         )}
                         {!skin.isUnlocked && (
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
-                              <Lock className="h-8 w-8 text-muted-foreground" />
+                            <div className="bg-background/80 backdrop-blur-sm rounded-full p-2">
+                              <Lock className="h-4 w-4 text-muted-foreground" />
                             </div>
                           </div>
                         )}
                       </>
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground">
-                        <Lock className="h-16 w-16 mb-2" />
-                        <p className="text-xs font-medium">Mystery Skin</p>
-                        <p className="text-xs opacity-70">Unlock at 500 points</p>
+                        <Lock className="h-6 w-6 mb-1" />
+                        <p className="text-[10px] font-medium">Mystery</p>
                       </div>
                     )}
                   </div>
                   
-                  <div className="p-3 text-center">
-                    <h3 className="font-accent text-lg font-bold mb-1">
+                  <div className="p-1 text-center">
+                    <h3 className="font-accent text-xs font-bold truncate">
                       {hasReached500 ? skin.name : "???"}
                     </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {hasReached500 ? `${skin.pointsRequired} points` : "Mystery Hero"}
+                    <p className="text-[10px] text-muted-foreground">
+                      {hasReached500 ? `${skin.pointsRequired}pts` : "Mystery"}
                     </p>
                   </div>
                 </Card>
@@ -325,7 +322,7 @@ export default function SkinsGallery() {
                   : "Mystery skins revealed at 1000 points • Unlock from 1060 to 1500"}
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-4 gap-2">
               {tier3Skins.map((skin) => (
                 <Card
                   key={skin.id}
@@ -336,10 +333,9 @@ export default function SkinsGallery() {
                   onClick={() => skin.isUnlocked && !skin.isActive && selectSkinMutation.mutate(skin.id)}
                 >
                   {skin.isActive && (
-                    <div className="absolute top-2 right-2 z-10">
-                      <Badge data-testid={`badge-active-${skin.id}`}>
-                        <Check className="h-3 w-3 mr-1" />
-                        Active
+                    <div className="absolute top-1 right-1 z-10">
+                      <Badge className="text-xs px-1 py-0" data-testid={`badge-active-${skin.id}`}>
+                        <Check className="h-2 w-2" />
                       </Badge>
                     </div>
                   )}
@@ -363,27 +359,26 @@ export default function SkinsGallery() {
                         )}
                         {!skin.isUnlocked && (
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
-                              <Lock className="h-8 w-8 text-muted-foreground" />
+                            <div className="bg-background/80 backdrop-blur-sm rounded-full p-2">
+                              <Lock className="h-4 w-4 text-muted-foreground" />
                             </div>
                           </div>
                         )}
                       </>
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground">
-                        <Lock className="h-16 w-16 mb-2" />
-                        <p className="text-xs font-medium">Mystery Dinosaur</p>
-                        <p className="text-xs opacity-70">Unlock at 1000 points</p>
+                        <Lock className="h-6 w-6 mb-1" />
+                        <p className="text-[10px] font-medium">Mystery</p>
                       </div>
                     )}
                   </div>
                   
-                  <div className="p-3 text-center">
-                    <h3 className="font-accent text-lg font-bold mb-1">
+                  <div className="p-1 text-center">
+                    <h3 className="font-accent text-xs font-bold truncate">
                       {hasReached1000 ? skin.name : "???"}
                     </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {hasReached1000 ? `${skin.pointsRequired} points` : "Prehistoric Legend"}
+                    <p className="text-[10px] text-muted-foreground">
+                      {hasReached1000 ? `${skin.pointsRequired}pts` : "Mystery"}
                     </p>
                   </div>
                 </Card>
