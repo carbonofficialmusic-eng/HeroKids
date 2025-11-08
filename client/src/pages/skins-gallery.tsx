@@ -84,8 +84,11 @@ export default function SkinsGallery() {
   // Organize skins by tier
   // Tier 1: 0-500 points (Starter Heroes)
   // Tier 2: 560-1000 points (Elite Heroes)
+  // Tier 3: 1060-1500 points (Dinosaur Bonus Pack)
   const tier1Skins = skins.filter(s => s.pointsRequired <= 500);
-  const tier2Skins = skins.filter(s => s.pointsRequired >= 560);
+  const tier2Skins = skins.filter(s => s.pointsRequired >= 560 && s.pointsRequired <= 1000);
+  const tier3Skins = skins.filter(s => s.pointsRequired >= 1060);
+  const hasReached1000 = totalEarned >= 1000;
 
   return (
     <>
@@ -177,7 +180,7 @@ export default function SkinsGallery() {
               Unlock from 0 to 500 lifetime points earned
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {tier1Skins.map((skin) => (
             <Card
               key={skin.id}
@@ -261,7 +264,7 @@ export default function SkinsGallery() {
                   : "Mystery skins revealed at 500 points • Unlock from 560 to 1000"}
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {tier2Skins.map((skin) => (
                 <Card
                   key={skin.id}
@@ -330,6 +333,129 @@ export default function SkinsGallery() {
                     </CardTitle>
                     <CardDescription>
                       {hasReached500 ? skin.description : "A mysterious hero awaits..."}
+                    </CardDescription>
+                  </CardHeader>
+
+                  <CardContent>
+                    {skin.isUnlocked ? (
+                      <Button
+                        onClick={() => selectSkinMutation.mutate(skin.id)}
+                        disabled={skin.isActive || selectSkinMutation.isPending}
+                        className="w-full"
+                        data-testid={`button-select-${skin.id}`}
+                      >
+                        {skin.isActive ? "Equipped" : "Equip Skin"}
+                      </Button>
+                    ) : (
+                      <div className="text-center">
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Unlock at {skin.pointsRequired} points
+                        </p>
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                            <div
+                              className="bg-primary h-full transition-all"
+                              style={{
+                                width: `${Math.min(
+                                  100,
+                                  (totalEarned / skin.pointsRequired) * 100
+                                )}%`,
+                              }}
+                            />
+                          </div>
+                          <span className="text-xs font-semibold">
+                            {totalEarned}/{skin.pointsRequired}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tier 3 - Dinosaur Bonus Pack */}
+        {tier3Skins.length > 0 && (
+          <div className="mb-8">
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
+                Dinosaur Bonus Pack
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {hasReached1000
+                  ? "Unlock from 1060 to 1500 lifetime points earned"
+                  : "Mystery skins revealed at 1000 points • Unlock from 1060 to 1500"}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {tier3Skins.map((skin) => (
+                <Card
+                  key={skin.id}
+                  className={`relative overflow-hidden transition-all hover-elevate ${
+                    skin.isActive ? "ring-2 ring-primary" : ""
+                  }`}
+                  data-testid={`card-skin-${skin.id}`}
+                >
+                  <Link href="/dashboard">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-4 left-4 z-10"
+                      data-testid={`button-back-${skin.id}`}
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                  </Link>
+
+                  <CardHeader className="pb-4">
+                    {skin.isActive && (
+                      <div className="flex justify-center mb-2">
+                        <Badge data-testid={`badge-active-${skin.id}`}>
+                          <Check className="h-3 w-3 mr-1" />
+                          Active
+                        </Badge>
+                      </div>
+                    )}
+                    <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
+                      {hasReached1000 ? (
+                        <>
+                          {SKIN_IMAGES[skin.id] ? (
+                            <img
+                              src={SKIN_IMAGES[skin.id]}
+                              alt={skin.name}
+                              className={`w-full h-full object-cover ${
+                                !skin.isUnlocked ? "filter grayscale opacity-40" : ""
+                              }`}
+                              data-testid={`img-skin-${skin.id}`}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
+                              No Image
+                            </div>
+                          )}
+                          {!skin.isUnlocked && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="bg-background/80 backdrop-blur-sm rounded-full p-4">
+                                <Lock className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground">
+                          <Lock className="h-16 w-16 mb-2" />
+                          <p className="text-xs font-medium">Mystery Dinosaur</p>
+                          <p className="text-xs opacity-70">Unlock at 1000 points</p>
+                        </div>
+                      )}
+                    </div>
+                    <CardTitle className="font-accent text-xl">
+                      {hasReached1000 ? skin.name : "???"}
+                    </CardTitle>
+                    <CardDescription>
+                      {hasReached1000 ? skin.description : "A prehistoric legend awaits..."}
                     </CardDescription>
                   </CardHeader>
 
