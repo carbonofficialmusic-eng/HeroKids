@@ -129,15 +129,6 @@ export default function SkinsGallery() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          {isDefaultActive && (
-            <Badge
-              className="absolute top-4 right-4 z-10"
-              data-testid="badge-active-default"
-            >
-              <Check className="h-3 w-3 mr-1" />
-              Active
-            </Badge>
-          )}
 
           <CardHeader className="pb-4">
             <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted flex items-center justify-center max-w-xs mx-auto">
@@ -150,6 +141,15 @@ export default function SkinsGallery() {
                 </Avatar>
               ) : (
                 <User className="h-32 w-32 text-muted-foreground" />
+              )}
+              {isDefaultActive && (
+                <Badge
+                  className="absolute bottom-2 right-2 pointer-events-none"
+                  data-testid="badge-active-default"
+                >
+                  <Check className="h-3 w-3 mr-1" />
+                  Active
+                </Badge>
               )}
             </div>
             <CardTitle className="font-accent text-xl">Default Avatar</CardTitle>
@@ -197,15 +197,6 @@ export default function SkinsGallery() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              {skin.isActive && (
-                <Badge
-                  className="absolute top-4 right-4 z-10"
-                  data-testid={`badge-active-${skin.id}`}
-                >
-                  <Check className="h-3 w-3 mr-1" />
-                  Active
-                </Badge>
-              )}
 
               <CardHeader className="pb-4">
                 <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
@@ -229,6 +220,15 @@ export default function SkinsGallery() {
                         <Lock className="h-8 w-8 text-muted-foreground" />
                       </div>
                     </div>
+                  )}
+                  {skin.isActive && (
+                    <Badge
+                      className="absolute bottom-2 right-2 pointer-events-none"
+                      data-testid={`badge-active-${skin.id}`}
+                    >
+                      <Check className="h-3 w-3 mr-1" />
+                      Active
+                    </Badge>
                   )}
                 </div>
                 <CardTitle className="font-accent text-xl">{skin.name}</CardTitle>
@@ -282,15 +282,6 @@ export default function SkinsGallery() {
                       <ArrowLeft className="h-4 w-4" />
                     </Button>
                   </Link>
-                  {skin.isActive && (
-                    <Badge
-                      className="absolute top-4 right-4 z-10"
-                      data-testid={`badge-active-${skin.id}`}
-                    >
-                      <Check className="h-3 w-3 mr-1" />
-                      Active
-                    </Badge>
-                  )}
 
                   <CardHeader className="pb-4">
                     <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
@@ -317,6 +308,15 @@ export default function SkinsGallery() {
                                 <Lock className="h-8 w-8 text-muted-foreground" />
                               </div>
                             </div>
+                          )}
+                          {skin.isActive && (
+                            <Badge
+                              className="absolute bottom-2 right-2 pointer-events-none"
+                              data-testid={`badge-active-${skin.id}`}
+                            >
+                              <Check className="h-3 w-3 mr-1" />
+                              Active
+                            </Badge>
                           )}
                         </>
                       ) : (
