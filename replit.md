@@ -28,6 +28,7 @@ Preferred communication style: Simple, everyday language.
 - **Task Approval System**: Configurable per-task approval requirement. Tasks can be set to auto-approve (no parent verification needed) or require approval (default). Auto-approved tasks award points immediately upon completion. Recurring tasks show as greyed out with a checkmark after completion and automatically reopen on schedule at midnight (not 24 hours later), preventing duplicate point earning while providing visual feedback. Daily tasks become available again at 12:00 AM, weekly at midnight 7 days later, and monthly at midnight on the same date next month.
 - **Family Chat**: Real-time family messaging (Family+ tier and above) with unread message counters, auto-mark-as-read functionality, and WebSocket synchronization.
 - **Join System**: Family-level join codes (6-character unique codes) for inviting new members to families.
+- **Multilingual Support**: Full internationalization (i18n) with 6 supported languages (German, English, French, Spanish, Japanese, Chinese). Family-level language setting stored in database, parent-only permission to change language, real-time sync via WebSocket. Character skin names translated for Japanese and Chinese (English retained for other languages). Translation infrastructure uses react-i18next with comprehensive translation files for all UI sections.
 
 ### System Design Choices
 - **Data Storage**: PostgreSQL (Neon serverless driver) with Drizzle ORM for type-safe schema and queries.
