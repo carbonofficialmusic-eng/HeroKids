@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Trophy, Medal, Award } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 
@@ -10,6 +11,7 @@ interface LeaderboardProps {
 }
 
 export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
+  const { t } = useTranslation();
   // Filter out members who opted out of leaderboard competition
   const eligibleMembers = members.filter(m => !m.excludeFromLeaderboard);
   
@@ -34,9 +36,9 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
   };
 
   const getTitle = () => {
-    if (period === "week") return "This Week's Leaderboard";
-    if (period === "month") return "This Month's Leaderboard";
-    return "All-Time Leaderboard";
+    if (period === "week") return t('leaderboard.thisWeeksLeaderboard');
+    if (period === "month") return t('leaderboard.thisMonthsLeaderboard');
+    return t('leaderboard.allTimeLeaderboard');
   };
 
   return (
@@ -45,9 +47,9 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
         {getTitle()}
       </h2>
       <p className="text-sm text-muted-foreground mb-6" data-testid="text-leaderboard-subtitle">
-        {period === "month" && "Points earned this month - resets on the 1st"}
-        {period === "week" && "Points earned this week"}
-        {period === "all" && "Total points earned all time"}
+        {period === "month" && t('leaderboard.pointsEarnedMonth')}
+        {period === "week" && t('leaderboard.pointsEarnedWeek')}
+        {period === "all" && t('leaderboard.pointsEarnedAllTime')}
       </p>
 
       {/* Podium display for top 3 */}
@@ -151,8 +153,8 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
           <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
           <p className="text-lg text-muted-foreground" data-testid="leaderboard-empty-message">
             {members.length === 0 
-              ? "No family members yet"
-              : "All members have been excluded from the leaderboard"
+              ? t('leaderboard.noMembersYet')
+              : t('leaderboard.allExcluded')
             }
           </p>
         </div>

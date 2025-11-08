@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ import type { FamilyMember, Family } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 
 export default function Settings() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -72,14 +74,14 @@ export default function Settings() {
       queryClient.invalidateQueries({ queryKey: ["/api/families/settings"] });
       queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
       toast({
-        title: "Settings updated",
-        description: "Your family settings have been saved.",
+        title: t('settings.settingsUpdated'),
+        description: t('settings.settingsSavedDesc'),
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update settings. Please try again.",
+        title: t('errors.somethingWrong'),
+        description: t('settings.errorUpdateSettings'),
         variant: "destructive",
       });
     },
@@ -101,15 +103,15 @@ export default function Settings() {
         setNewMemberJoinCode(data.joinCode);
       } else {
         toast({
-          title: "Success!",
-          description: "Family member added successfully.",
+          title: t('common.confirm'),
+          description: t('settings.memberAddedSuccess'),
         });
       }
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to add family member. Please try again.",
+        title: t('errors.somethingWrong'),
+        description: t('settings.errorAddMember'),
         variant: "destructive",
       });
     },
@@ -127,14 +129,14 @@ export default function Settings() {
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
       toast({
-        title: "Member updated",
-        description: "Family member has been updated successfully.",
+        title: t('settings.memberUpdated'),
+        description: t('settings.memberUpdatedDesc'),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update family member. Please try again.",
+        title: t('errors.somethingWrong'),
+        description: error.message || t('settings.errorUpdateMember'),
         variant: "destructive",
       });
     },
@@ -151,14 +153,14 @@ export default function Settings() {
       queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
       setMemberToDelete(null);
       toast({
-        title: "Member removed",
-        description: "Family member has been removed successfully.",
+        title: t('settings.memberRemoved'),
+        description: t('settings.memberRemovedDesc'),
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to remove family member. Please try again.",
+        title: t('errors.somethingWrong'),
+        description: t('settings.errorRemoveMember'),
         variant: "destructive",
       });
     },
@@ -175,8 +177,8 @@ export default function Settings() {
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update leaderboard settings. Please try again.",
+        title: t('errors.somethingWrong'),
+        description: t('settings.errorUpdateLeaderboard'),
         variant: "destructive",
       });
     },
@@ -192,16 +194,16 @@ export default function Settings() {
       queryClient.invalidateQueries();
       setShowFactoryResetDialog(false);
       toast({
-        title: "Family Reset Complete",
-        description: "All tasks, rewards, and points have been reset. Your family can start fresh!",
+        title: t('settings.familyResetComplete'),
+        description: t('settings.familyResetDesc'),
       });
       // Redirect to dashboard
       setLocation("/dashboard");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to reset family. Please try again.",
+        title: t('errors.somethingWrong'),
+        description: t('settings.errorResetFamily'),
         variant: "destructive",
       });
     },
@@ -213,9 +215,9 @@ export default function Settings() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
+            <CardTitle>{t('settings.accessDenied')}</CardTitle>
             <CardDescription>
-              Only parents can access family settings.
+              {t('settings.onlyParentsAccess')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -225,7 +227,7 @@ export default function Settings() {
               data-testid="button-back-to-dashboard"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
+              {t('settings.backToDashboard')}
             </Button>
           </CardContent>
         </Card>
@@ -238,7 +240,7 @@ export default function Settings() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading settings...</p>
+          <p className="text-muted-foreground">{t('settings.loadingSettings')}</p>
         </div>
       </div>
     );
@@ -254,8 +256,8 @@ export default function Settings() {
       setJoinCodeCopied(true);
       setTimeout(() => setJoinCodeCopied(false), 2000);
       toast({
-        title: "Join code copied!",
-        description: "Share this code with new family members to let them join.",
+        title: t('settings.joinCodeCopied'),
+        description: t('settings.shareJoinCode'),
       });
     }
   };
@@ -287,8 +289,8 @@ export default function Settings() {
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Family Settings</h1>
-            <p className="text-muted-foreground">Manage your family's HeroKids experience</p>
+            <h1 className="text-3xl font-bold">{t('settings.familySettings')}</h1>
+            <p className="text-muted-foreground">{t('settings.manageExperience')}</p>
           </div>
         </div>
 
@@ -299,17 +301,17 @@ export default function Settings() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <UserPlus className="h-5 w-5 text-primary" />
-                <CardTitle>Family Members</CardTitle>
+                <CardTitle>{t('settings.familySettings')}</CardTitle>
               </div>
               <CardDescription>
-                Manage your family members. Add new members or remove existing ones.
+                {t('settings.manageMembersDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Members List */}
               {membersLoading ? (
                 <div className="text-center py-4 text-muted-foreground">
-                  Loading members...
+                  {t('settings.loadingMembers')}
                 </div>
               ) : familyMembers && familyMembers.length > 0 ? (
                 <div className="space-y-2">
@@ -334,13 +336,13 @@ export default function Settings() {
                                 {familyMember.displayName}
                               </span>
                               {isCurrentUser && (
-                                <Badge variant="secondary" className="text-xs">You</Badge>
+                                <Badge variant="secondary" className="text-xs">{t('settings.you')}</Badge>
                               )}
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <span className="capitalize">{familyMember.role}</span>
                               <span>•</span>
-                              <span>{familyMember.totalPoints} points</span>
+                              <span>{familyMember.totalPoints} {t('dashboard.pointsLabel')}</span>
                             </div>
                           </div>
                         </div>
@@ -375,7 +377,7 @@ export default function Settings() {
                 </div>
               ) : (
                 <div className="text-center py-4 text-muted-foreground">
-                  No family members yet. Add your first member below.
+                  {t('settings.noMembersYet')}
                 </div>
               )}
 
@@ -386,7 +388,7 @@ export default function Settings() {
                 className="w-full"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
-                Add Member
+                {t('settings.addMember')}
               </Button>
             </CardContent>
           </Card>
@@ -396,16 +398,16 @@ export default function Settings() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Key className="h-5 w-5 text-primary" />
-                <CardTitle>Family Join Code</CardTitle>
+                <CardTitle>{t('settings.familyJoinCodeTitle')}</CardTitle>
               </div>
               <CardDescription>
-                Share this code with children and other parents to invite them to your family. Anyone with this code can join.
+                {t('settings.joinCodeDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between p-4 rounded-lg border bg-card/50">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Your Family Join Code</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t('settings.yourFamilyJoinCode')}</p>
                   <p className="text-3xl font-black tracking-widest text-primary font-mono" data-testid="text-family-join-code">
                     {familyData?.joinCode}
                   </p>
@@ -426,7 +428,7 @@ export default function Settings() {
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground mt-3">
-                New members can join at the login page by clicking "Join Existing Family" and entering this code.
+                {t('settings.joinCodeInstructions')}
               </p>
             </CardContent>
           </Card>
@@ -436,20 +438,20 @@ export default function Settings() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Languages className="h-5 w-5 text-primary" />
-                <CardTitle>Language Preferences</CardTitle>
+                <CardTitle>{t('settings.languagePreferences')}</CardTitle>
               </div>
               <CardDescription>
-                Choose your family's preferred language. This will affect all family members' interface language.
+                {t('settings.languageDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5 flex-1">
                   <Label htmlFor="language-select" className="text-base">
-                    Interface Language
+                    {t('settings.interfaceLanguage')}
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Select the language for the application interface
+                    {t('settings.selectInterfaceLanguage')}
                   </p>
                 </div>
                 <Select
@@ -458,7 +460,7 @@ export default function Settings() {
                   disabled={updateSettingsMutation.isPending}
                 >
                   <SelectTrigger className="w-[180px]" data-testid="select-language">
-                    <SelectValue placeholder="Select language" />
+                    <SelectValue placeholder={t('settings.selectLanguage')} />
                   </SelectTrigger>
                   <SelectContent>
                     {languageOptions.map((lang) => (
@@ -477,21 +479,21 @@ export default function Settings() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-primary" />
-                <CardTitle>Leaderboard Visibility</CardTitle>
+                <CardTitle>{t('settings.leaderboardVisibility')}</CardTitle>
               </div>
               <CardDescription>
-                Control whether the leaderboard is visible to children. Parents can always see the leaderboard.
+                {t('settings.leaderboardVisibilityDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="show-leaderboard" className="text-base">
-                    Show leaderboard to children
+                    {t('settings.showToChildren')}
                   </Label>
                   {!familyData?.showLeaderboard && (
                     <p className="text-sm text-muted-foreground">
-                      The leaderboard is hidden from children. Focus on motivation instead of competition.
+                      {t('settings.leaderboardHidden')}
                     </p>
                   )}
                 </div>
@@ -511,16 +513,16 @@ export default function Settings() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-primary" />
-                <CardTitle>Leaderboard Competition</CardTitle>
+                <CardTitle>{t('settings.leaderboardCompetition')}</CardTitle>
               </div>
               <CardDescription>
-                Choose which family members participate in leaderboard rankings. Excluded members can still earn points and complete tasks, but won't appear in the competitive leaderboard.
+                {t('settings.leaderboardCompetitionDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {membersLoading ? (
                 <div className="text-center py-4 text-muted-foreground">
-                  Loading members...
+                  {t('settings.loadingMembers')}
                 </div>
               ) : familyMembers && familyMembers.length > 0 ? (
                 <div className="space-y-3">
@@ -543,14 +545,14 @@ export default function Settings() {
                           </div>
                           <div className="text-sm text-muted-foreground">
                             {familyMember.excludeFromLeaderboard 
-                              ? "Not competing in leaderboard" 
-                              : "Competing in leaderboard"}
+                              ? t('settings.notCompeting')
+                              : t('settings.competing')}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Label htmlFor={`exclude-${familyMember.id}`} className="text-sm text-muted-foreground">
-                          Include in leaderboard
+                          {t('settings.includeInLeaderboard')}
                         </Label>
                         <Switch
                           id={`exclude-${familyMember.id}`}
@@ -570,7 +572,7 @@ export default function Settings() {
                 </div>
               ) : (
                 <div className="text-center py-4 text-muted-foreground">
-                  No family members yet.
+                  {t('settings.noMembersYet')}
                 </div>
               )}
             </CardContent>
@@ -581,25 +583,15 @@ export default function Settings() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-5 w-5 text-destructive" />
-                <CardTitle className="text-destructive">Factory Reset</CardTitle>
+                <CardTitle className="text-destructive">{t('settings.dangerZone')}</CardTitle>
               </div>
               <CardDescription>
-                Reset your family's game progress back to the beginning. This will delete all tasks, rewards, points, and history,
-                then create fresh default tasks. Your family members will remain, but all their progress will be reset to zero.
+                {t('settings.resetAllData')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="bg-destructive/10 p-4 rounded-lg mb-4">
-                <p className="text-sm font-medium mb-2">⚠️ Warning: This action cannot be undone</p>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                  <li>All tasks will be permanently deleted</li>
-                  <li>All rewards will be permanently deleted</li>
-                  <li>All points will be reset to zero</li>
-                  <li>All unlocked skins will be locked again</li>
-                  <li>All history will be permanently deleted</li>
-                  <li>Three default tasks will be created (Clean room, Dishes, Vacuum)</li>
-                  <li>Family members and avatars will be preserved</li>
-                </ul>
+                <p className="text-sm font-medium mb-2">{t('settings.factoryResetWarning')}</p>
               </div>
               <Button
                 variant="destructive"
@@ -609,7 +601,7 @@ export default function Settings() {
                 className="w-full"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
-                Reset to Factory Settings
+                {t('settings.factoryReset')}
               </Button>
             </CardContent>
           </Card>
@@ -643,26 +635,25 @@ export default function Settings() {
       <AlertDialog open={!!newMemberJoinCode} onOpenChange={() => setNewMemberJoinCode(null)}>
         <AlertDialogContent data-testid="dialog-join-code">
           <AlertDialogHeader>
-            <AlertDialogTitle>Member Added Successfully!</AlertDialogTitle>
+            <AlertDialogTitle>{t('settings.memberAddedTitle')}</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
               <p>
-                A new family member profile has been created. Share this join code with them
-                so they can access their account on their own device:
+                {t('settings.memberAddedInstructions')}
               </p>
               <div className="bg-primary/10 p-4 rounded-lg text-center">
-                <p className="text-xs text-muted-foreground mb-1">Join Code</p>
+                <p className="text-xs text-muted-foreground mb-1">{t('settings.joinCodeLabel')}</p>
                 <p className="text-3xl font-bold tracking-wider text-primary" data-testid="text-join-code">
                   {newMemberJoinCode}
                 </p>
               </div>
               <p className="text-sm text-muted-foreground">
-                This code can only be used once. After they join, you'll both be part of the same family.
+                {t('settings.joinCodeOnce')}
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setNewMemberJoinCode(null)} data-testid="button-close-join-code">
-              Got it!
+              {t('common.gotIt')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -672,10 +663,9 @@ export default function Settings() {
       <AlertDialog open={!!memberToDelete} onOpenChange={() => setMemberToDelete(null)}>
         <AlertDialogContent data-testid="dialog-delete-member">
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Family Member?</AlertDialogTitle>
+            <AlertDialogTitle>{t('settings.removeMemberTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove <strong>{memberToDelete?.displayName}</strong> from your family?
-              This will delete all their tasks, points history, and progress. This action cannot be undone.
+              {t('settings.removeMemberConfirm', { name: memberToDelete?.displayName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -683,7 +673,7 @@ export default function Settings() {
               onClick={() => setMemberToDelete(null)}
               data-testid="button-cancel-delete"
             >
-              Cancel
+              {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => memberToDelete && deleteMemberMutation.mutate(memberToDelete.id)}
@@ -691,7 +681,7 @@ export default function Settings() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               data-testid="button-confirm-delete"
             >
-              {deleteMemberMutation.isPending ? "Removing..." : "Remove Member"}
+              {deleteMemberMutation.isPending ? t('settings.removing') : t('settings.removeMemberButton')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -701,38 +691,38 @@ export default function Settings() {
       <AlertDialog open={showFactoryResetDialog} onOpenChange={setShowFactoryResetDialog}>
         <AlertDialogContent data-testid="dialog-factory-reset">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-destructive">⚠️ Reset to Factory Settings?</AlertDialogTitle>
+            <AlertDialogTitle className="text-destructive">{t('settings.resetConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription className="space-y-3">
               <p className="font-semibold text-foreground">
-                This will permanently delete ALL game data and reset your family back to the beginning.
+                {t('settings.resetConfirmMessage')}
               </p>
               <p>
-                <strong>What will be deleted:</strong>
+                <strong>{t('settings.whatDeleted')}</strong>
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>All tasks</li>
-                <li>All rewards and reward requests</li>
-                <li>All points (everyone back to 0)</li>
-                <li>All unlocked skins (everyone back to default)</li>
-                <li>All completion history</li>
+                <li>{t('settings.allTasks')}</li>
+                <li>{t('settings.allRewardsRequests')}</li>
+                <li>{t('settings.allPoints')}</li>
+                <li>{t('settings.allSkins')}</li>
+                <li>{t('settings.allHistory')}</li>
               </ul>
               <p>
-                <strong>What will be created:</strong>
+                <strong>{t('settings.whatCreated')}</strong>
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Clean your room (20 pts, daily)</li>
-                <li>Do the dishes (15 pts, daily)</li>
-                <li>Vacuum the house (30 pts, every 3 days)</li>
+                <li>{t('settings.defaultTask1')}</li>
+                <li>{t('settings.defaultTask2')}</li>
+                <li>{t('settings.defaultTask3')}</li>
               </ul>
               <p>
-                <strong>What will be kept:</strong>
+                <strong>{t('settings.whatKept')}</strong>
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Your family name ({member?.familyName})</li>
-                <li>All family members and their avatars</li>
+                <li>{t('settings.familyNameKept', { name: member?.familyName })}</li>
+                <li>{t('settings.membersKept')}</li>
               </ul>
               <p className="font-semibold text-destructive">
-                This action cannot be undone. Are you absolutely sure?
+                {t('settings.resetAbsoluteSure')}
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -742,7 +732,7 @@ export default function Settings() {
               data-testid="button-cancel-reset"
               disabled={factoryResetMutation.isPending}
             >
-              Cancel
+              {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => factoryResetMutation.mutate()}
@@ -750,7 +740,7 @@ export default function Settings() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               data-testid="button-confirm-reset"
             >
-              {factoryResetMutation.isPending ? "Resetting..." : "Yes, Reset Everything"}
+              {factoryResetMutation.isPending ? t('settings.resetting') : t('settings.yesResetEverything')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

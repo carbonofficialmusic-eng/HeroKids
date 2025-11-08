@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -47,6 +48,7 @@ interface FamilySetupProps {
 }
 
 export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: FamilySetupProps) {
+  const { t } = useTranslation();
   const [selectedAvatar, setSelectedAvatar] = useState(avatarAssets[0].url);
   const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
   const [uploadedAvatarFile, setUploadedAvatarFile] = useState<File | null>(null);
@@ -128,10 +130,10 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
             <Users className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-black font-accent mb-2" data-testid="text-setup-title">
-            Welcome to HeroKids!
+            {t('familySetup.welcomeToHeroKids')}
           </h1>
           <p className="text-muted-foreground" data-testid="text-setup-subtitle">
-            Let's set up your family profile to get started
+            {t('familySetup.setupProfile')}
           </p>
         </div>
 
@@ -139,11 +141,11 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="create" data-testid="tab-create-family">
               <Users className="h-4 w-4 mr-2" />
-              Create Family
+              {t('familySetup.createFamily')}
             </TabsTrigger>
             <TabsTrigger value="join" data-testid="tab-join-family">
               <UserPlus className="h-4 w-4 mr-2" />
-              Join Family
+              {t('familySetup.joinFamily')}
             </TabsTrigger>
           </TabsList>
 
@@ -155,10 +157,10 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                   name="familyName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Family Name</FormLabel>
+                      <FormLabel>{t('familySetup.familyName')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g., The Smiths"
+                          placeholder={t('familySetup.familyNamePlaceholder')}
                           {...field}
                           data-testid="input-family-name"
                         />
@@ -173,10 +175,10 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                   name="displayName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Your Name</FormLabel>
+                      <FormLabel>{t('familySetup.yourName')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g., Mom, Dad, Alex"
+                          placeholder={t('familySetup.yourNamePlaceholder')}
                           {...field}
                           data-testid="input-display-name"
                         />
@@ -191,16 +193,16 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Your Role</FormLabel>
+                      <FormLabel>{t('familySetup.yourRole')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-role">
-                            <SelectValue placeholder="Select your role" />
+                            <SelectValue placeholder={t('familySetup.selectYourRole')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="parent" data-testid="option-role-parent">Parent</SelectItem>
-                          <SelectItem value="child" data-testid="option-role-child">Child</SelectItem>
+                          <SelectItem value="parent" data-testid="option-role-parent">{t('settings.parent')}</SelectItem>
+                          <SelectItem value="child" data-testid="option-role-child">{t('settings.child')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -225,7 +227,7 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                   disabled={isSubmitting}
                   data-testid="button-complete-setup"
                 >
-                  {isSubmitting ? "Creating Family..." : "Create Family"}
+                  {isSubmitting ? t('familySetup.creatingFamily') : t('familySetup.createFamilyButton')}
                 </Button>
               </form>
             </Form>
@@ -239,10 +241,10 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                   name="joinCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Join Code</FormLabel>
+                      <FormLabel>{t('familySetup.joinCode')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter 6-character code"
+                          placeholder={t('familySetup.joinCodePlaceholder')}
                           maxLength={6}
                           {...field}
                           onChange={(e) => field.onChange(e.target.value.toUpperCase())}
@@ -252,7 +254,7 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                       </FormControl>
                       <FormMessage />
                       <p className="text-sm text-muted-foreground mt-2">
-                        Ask a parent in your family for the join code
+                        {t('familySetup.askParentForCode')}
                       </p>
                     </FormItem>
                   )}
@@ -263,10 +265,10 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                   name="displayName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Your Name</FormLabel>
+                      <FormLabel>{t('familySetup.yourName')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g., Liv, Alex, Sam"
+                          placeholder={t('familySetup.yourNamePlaceholder')}
                           {...field}
                           data-testid="input-join-display-name"
                         />
@@ -293,7 +295,7 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                   disabled={isSubmitting}
                   data-testid="button-join-family"
                 >
-                  {isSubmitting ? "Joining..." : "Join Family"}
+                  {isSubmitting ? t('familySetup.joining') : t('familySetup.joinFamilyButton')}
                 </Button>
               </form>
             </Form>

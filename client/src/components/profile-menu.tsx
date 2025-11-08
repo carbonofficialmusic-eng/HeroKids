@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +34,7 @@ export function ProfileMenu({
   onEditProfile,
   onSwitchMember,
 }: ProfileMenuProps) {
+  const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
 
@@ -63,27 +65,27 @@ export function ProfileMenu({
         {!isParent && (
           <DropdownMenuItem onClick={onEditProfile} data-testid="menu-item-edit-profile">
             <Settings className="mr-2 h-4 w-4" />
-            <span>Edit Profile</span>
+            <span>{t("settings.editProfile")}</span>
           </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild>
           <Link href="/skins-gallery" data-testid="menu-item-skins">
             <Palette className="mr-2 h-4 w-4" />
-            <span>Character Skins</span>
+            <span>{t("nav.skins")}</span>
           </Link>
         </DropdownMenuItem>
         {isParent && (
           <DropdownMenuItem asChild>
             <Link href="/settings" data-testid="menu-item-settings">
               <Settings className="mr-2 h-4 w-4" />
-              <span>Family Settings</span>
+              <span>{t("settings.familySettings")}</span>
             </Link>
           </DropdownMenuItem>
         )}
         {isRealParent && familyMemberCount > 1 && (
           <DropdownMenuItem onClick={onSwitchMember} data-testid="menu-item-switch-member">
             <User2 className="mr-2 h-4 w-4" />
-            <span>Switch Member</span>
+            <span>{t("settings.switchMember")}</span>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -93,7 +95,7 @@ export function ProfileMenu({
           ) : (
             <Moon className="mr-2 h-4 w-4" />
           )}
-          <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+          <span>{theme === "dark" ? t("settings.lightMode") : t("settings.darkMode")}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -101,7 +103,7 @@ export function ProfileMenu({
           data-testid="menu-item-logout"
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Logout</span>
+          <span>{t("auth.logout")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

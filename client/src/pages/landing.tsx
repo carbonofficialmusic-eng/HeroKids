@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Star, Trophy, Users, CheckCircle, Zap } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useTranslation } from "react-i18next";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 export default function Landing() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -27,7 +29,7 @@ export default function Landing() {
               onClick={() => (window.location.href = "/api/login")}
               data-testid="button-login"
             >
-              Get Started
+              {t('landing.getStarted')}
             </Button>
           </div>
         </div>
@@ -37,11 +39,10 @@ export default function Landing() {
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-6xl text-center">
           <h1 className="text-5xl md:text-7xl font-black font-accent mb-6 gradient-text-celebration" data-testid="text-hero-title">
-            Turn Chores into Adventures!
+            {t('landing.heroTitle')}
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto" data-testid="text-hero-subtitle">
-            HeroKids makes household tasks fun for the whole family. Kids earn
-            points, climb leaderboards, and win awesome rewards!
+            {t('landing.heroSubtitle')}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Button
@@ -51,7 +52,7 @@ export default function Landing() {
               data-testid="button-hero-cta"
             >
               <Star className="h-5 w-5 mr-2" />
-              Start Your Adventure
+              {t('landing.startYourAdventure')}
             </Button>
           </div>
         </div>
@@ -61,17 +62,16 @@ export default function Landing() {
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-4xl font-bold font-accent text-center mb-12" data-testid="text-features-title">
-            How HeroKids Works
+            {t('landing.howItWorks')}
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="p-8 text-center hover-elevate transition-all" data-testid="card-feature-tasks">
               <div className="h-16 w-16 rounded-full gradient-achievement mx-auto mb-4 flex items-center justify-center">
                 <CheckCircle className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold font-accent mb-3">Create Tasks</h3>
+              <h3 className="text-2xl font-bold font-accent mb-3">{t('landing.createTasks')}</h3>
               <p className="text-muted-foreground">
-                Parents assign household chores with point values and optional
-                photo proof for completion.
+                {t('landing.createTasksDesc')}
               </p>
             </Card>
 
@@ -79,10 +79,9 @@ export default function Landing() {
               <div className="h-16 w-16 rounded-full gradient-celebration mx-auto mb-4 flex items-center justify-center">
                 <Star className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold font-accent mb-3">Earn Points</h3>
+              <h3 className="text-2xl font-bold font-accent mb-3">{t('landing.earnPoints')}</h3>
               <p className="text-muted-foreground">
-                Kids complete tasks and watch their points grow. Each completed
-                chore brings them closer to rewards!
+                {t('landing.earnPointsDesc')}
               </p>
             </Card>
 
@@ -90,10 +89,9 @@ export default function Landing() {
               <div className="h-16 w-16 rounded-full gradient-winner mx-auto mb-4 flex items-center justify-center">
                 <Trophy className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold font-accent mb-3">Win Rewards</h3>
+              <h3 className="text-2xl font-bold font-accent mb-3">{t('landing.winRewards')}</h3>
               <p className="text-muted-foreground">
-                Climb the family leaderboard and earn prizes! Weekly and
-                monthly winners get special rewards.
+                {t('landing.winRewardsDesc')}
               </p>
             </Card>
           </div>
@@ -104,14 +102,14 @@ export default function Landing() {
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-4xl font-bold font-accent text-center mb-12" data-testid="text-benefits-title">
-            Why Families Love HeroKids
+            {t('landing.whyFamiliesLove')}
           </h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {[
-              { icon: Users, text: "Get everyone involved in household chores" },
-              { icon: Zap, text: "Motivate kids with points and achievements" },
-              { icon: Trophy, text: "Friendly competition brings families together" },
-              { icon: CheckCircle, text: "Track progress with photo proof" },
+              { icon: Users, text: t('landing.getEveryoneInvolved') },
+              { icon: Zap, text: t('landing.motivateWithPoints') },
+              { icon: Trophy, text: t('landing.friendlyCompetition') },
+              { icon: CheckCircle, text: t('landing.trackWithProof') },
             ].map((benefit, i) => (
               <div key={i} className="flex items-center gap-4 p-4" data-testid={`item-benefit-${i}`}>
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -128,10 +126,10 @@ export default function Landing() {
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-4xl md:text-5xl font-black font-accent mb-6" data-testid="text-cta-title">
-            Ready to Make Chores Fun?
+            {t('landing.readyToMakeFun')}
           </h2>
           <p className="text-xl text-muted-foreground mb-8" data-testid="text-cta-subtitle">
-            Join thousands of families making household tasks an adventure!
+            {t('landing.joinThousands')}
           </p>
           <Button
             size="lg"
@@ -139,7 +137,7 @@ export default function Landing() {
             onClick={() => (window.location.href = "/api/login")}
             data-testid="button-cta-signup"
           >
-            Get Started Free
+            {t('landing.getStartedFree')}
           </Button>
         </div>
       </section>
@@ -147,7 +145,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t py-8 px-4">
         <div className="container mx-auto max-w-6xl text-center text-sm text-muted-foreground">
-          <p>© 2025 HeroKids. Making families stronger, one chore at a time.</p>
+          <p>{t('landing.copyrightNotice')}</p>
         </div>
       </footer>
     </div>

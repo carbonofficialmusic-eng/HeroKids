@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -57,6 +58,7 @@ export function EditMemberDialog({
   member,
   currentUserRole
 }: EditMemberDialogProps) {
+  const { t } = useTranslation();
   const [selectedAvatar, setSelectedAvatar] = useState(member?.avatarUrl || avatarAssets[0].url);
   const [selectedColor, setSelectedColor] = useState(member?.color || colorOptions[0].value);
   const [uploadedAvatarFile, setUploadedAvatarFile] = useState<File | null>(null);
@@ -133,9 +135,9 @@ export function EditMemberDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto" data-testid="dialog-edit-member">
         <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogTitle>{t('memberDialogs.editProfile')}</DialogTitle>
           <DialogDescription>
-            Update your profile picture, color, or display name.
+            {t('memberDialogs.editProfileDesc')}
           </DialogDescription>
         </DialogHeader>
 
@@ -146,10 +148,10 @@ export function EditMemberDialog({
               name="displayName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Display Name</FormLabel>
+                  <FormLabel>{t('memberDialogs.displayName')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Alex, Emma, Sam"
+                      placeholder={t('memberDialogs.displayNamePlaceholder')}
                       {...field}
                       data-testid="input-edit-member-name"
                     />
@@ -164,16 +166,16 @@ export function EditMemberDialog({
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role</FormLabel>
+                  <FormLabel>{t('memberDialogs.role')}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger data-testid="select-edit-role">
-                        <SelectValue placeholder="Select role" />
+                        <SelectValue placeholder={t('memberDialogs.selectRole')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="parent" data-testid="option-role-parent">Parent</SelectItem>
-                      <SelectItem value="child" data-testid="option-role-child">Child</SelectItem>
+                      <SelectItem value="parent" data-testid="option-role-parent">{t('settings.parent')}</SelectItem>
+                      <SelectItem value="child" data-testid="option-role-child">{t('settings.child')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -183,14 +185,14 @@ export function EditMemberDialog({
 
             {member.activeSkinId && (
               <div className="space-y-2" data-testid="active-skin-preview">
-                <FormLabel>Current Display Avatar</FormLabel>
+                <FormLabel>{t('memberDialogs.currentDisplayAvatar')}</FormLabel>
                 <div className="flex items-center gap-3 p-3 rounded-md bg-muted">
                   <Avatar className="h-16 w-16">
                     <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} alt={member.displayName} />
                     <AvatarFallback>{member.displayName[0]?.toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <p className="text-sm text-muted-foreground">
-                    You have an active character skin equipped. This overrides your avatar selection.
+                    {t('memberDialogs.activeSkinOverride')}
                   </p>
                 </div>
               </div>
@@ -214,14 +216,14 @@ export function EditMemberDialog({
                 disabled={isSubmitting}
                 data-testid="button-cancel-edit"
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
                 data-testid="button-submit-edit"
               >
-                {isSubmitting ? "Saving..." : "Save Changes"}
+                {isSubmitting ? t('rewards.saving') : t('rewards.saveChanges')}
               </Button>
             </DialogFooter>
           </form>

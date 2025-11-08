@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,6 +31,7 @@ export function SwitchMemberDialog({
   onSwitch,
   isSubmitting = false
 }: SwitchMemberDialogProps) {
+  const { t } = useTranslation();
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(currentMember?.id || null);
 
   const handleSwitch = () => {
@@ -44,9 +46,9 @@ export function SwitchMemberDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]" data-testid="dialog-switch-member">
         <DialogHeader>
-          <DialogTitle>Switch Member</DialogTitle>
+          <DialogTitle>{t('memberDialogs.switchMember')}</DialogTitle>
           <DialogDescription>
-            Act as a different family member to test their view
+            {t('memberDialogs.switchMemberDesc')}
           </DialogDescription>
         </DialogHeader>
         
@@ -86,14 +88,14 @@ export function SwitchMemberDialog({
             disabled={isSubmitting}
             data-testid="button-switch-back"
           >
-            Switch Back to Me
+            {t('memberDialogs.switchBackToMe')}
           </Button>
           <Button
             onClick={handleSwitch}
             disabled={isSubmitting}
             data-testid="button-confirm-switch"
           >
-            {isSubmitting ? "Switching..." : "Switch"}
+            {isSubmitting ? t('memberDialogs.switching') : t('memberDialogs.switch')}
           </Button>
         </DialogFooter>
       </DialogContent>

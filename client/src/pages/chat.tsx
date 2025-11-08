@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,7 @@ interface ChatMessage {
 }
 
 export default function Chat() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [messageText, setMessageText] = useState("");
@@ -49,8 +51,8 @@ export default function Chat() {
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to send message",
-        description: error.message || "Please try again",
+        title: t('chat.failedToSend'),
+        description: error.message || t('errors.tryAgain'),
         variant: "destructive",
       });
     },
@@ -98,12 +100,12 @@ export default function Chat() {
         <Link href="/dashboard">
           <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t('settings.backToDashboard')}
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold mb-6">Family Chat</h1>
+        <h1 className="text-3xl font-bold mb-6">{t('chat.title')}</h1>
         <div className="flex items-center justify-center min-h-[60vh]" data-testid="loading-chat">
-          <div className="animate-pulse">Loading chat...</div>
+          <div className="animate-pulse">{t('chat.loadingChat')}</div>
         </div>
       </div>
     );
@@ -120,35 +122,35 @@ export default function Chat() {
           <Link href="/dashboard">
             <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              {t('settings.backToDashboard')}
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold mb-6">Family Chat</h1>
+          <h1 className="text-3xl font-bold mb-6">{t('chat.title')}</h1>
           <Card className="max-w-2xl mx-auto">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
                 <Lock className="w-8 h-8 text-muted-foreground" />
-                <CardTitle>Family Chat</CardTitle>
+                <CardTitle>{t('chat.title')}</CardTitle>
               </div>
-              <CardDescription>Connect with your whole family in real-time</CardDescription>
+              <CardDescription>{t('chat.connectRealtime')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-muted/50 p-4 rounded-lg">
-                <h3 className="font-semibold mb-2">Upgrade to unlock Family Chat</h3>
+                <h3 className="font-semibold mb-2">{t('chat.upgradeToUnlock')}</h3>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Upgrade to <strong>Family+ tier ($9/month)</strong> or higher
+                  {t('chat.upgradeToFamilyPlus')}
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1 mt-3">
-                  <li>• Real-time family messaging</li>
-                  <li>• Share updates and celebrate wins</li>
-                  <li>• Stay connected with your kids</li>
-                  <li>• Plus all Family tier benefits</li>
+                  <li>• {t('chat.realTimeMessaging')}</li>
+                  <li>• {t('chat.shareUpdates')}</li>
+                  <li>• {t('chat.stayConnected')}</li>
+                  <li>• {t('chat.plusAllBenefits')}</li>
                 </ul>
               </div>
               <Link href="/pricing">
                 <Button className="w-full" data-testid="button-upgrade">
                   <MessageCircle className="w-4 h-4 mr-2" />
-                  Upgrade to Family+
+                  {t('chat.upgradeToFamilyPlusButton')}
                 </Button>
               </Link>
             </CardContent>
@@ -159,7 +161,7 @@ export default function Chat() {
 
     // Other errors
     toast({
-      title: "Error loading chat",
+      title: t('chat.errorLoadingChat'),
       description: errorMessage,
       variant: "destructive",
     });
@@ -171,15 +173,15 @@ export default function Chat() {
       <Link href="/dashboard">
         <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
+          {t('settings.backToDashboard')}
         </Button>
       </Link>
       <div className="mb-4">
         <h1 className="text-3xl font-bold mb-2" data-testid="heading-chat">
-          Family Chat
+          {t('chat.title')}
         </h1>
         <p className="text-muted-foreground">
-          Chat with your family in real-time
+          {t('chat.chatWithFamily')}
         </p>
       </div>
 
@@ -188,10 +190,10 @@ export default function Chat() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
-              Messages
+              {t('chat.messages')}
             </CardTitle>
             <span className="text-sm text-muted-foreground">
-              {messages.length} message{messages.length !== 1 ? "s" : ""}
+              {t(messages.length === 1 ? 'chat.messageCount' : 'chat.messageCount_other', { count: messages.length })}
             </span>
           </div>
         </CardHeader>
@@ -202,7 +204,7 @@ export default function Chat() {
               {messages.length === 0 ? (
                 <div className="text-center text-muted-foreground py-12">
                   <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No messages yet. Start the conversation!</p>
+                  <p>{t('chat.noMessagesStart')}</p>
                 </div>
               ) : (
                 messages.map((msg, index) => (
@@ -247,7 +249,7 @@ export default function Chat() {
             <Input
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              placeholder="Type a message..."
+              placeholder={t('chat.typeMessage')}
               maxLength={1000}
               disabled={sendMessageMutation.isPending}
               className="flex-1"
