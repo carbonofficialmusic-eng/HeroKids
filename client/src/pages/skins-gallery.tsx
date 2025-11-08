@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, Lock, Check, Trophy, ArrowLeft, User } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Lock, Check, Trophy, ArrowLeft, User, Star, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { Link } from "wouter";
@@ -18,9 +19,11 @@ interface Skin {
   description: string;
   imageUrl: string;
   pointsRequired: number;
-  isUnlocked: boolean;
+  bonusPoints: number;
+  tier: number;
+  isDiscovered: boolean;
   isActive: boolean;
-  canUnlock: boolean;
+  canDiscover: boolean;
 }
 
 export default function SkinsGallery() {
@@ -31,8 +34,37 @@ export default function SkinsGallery() {
     queryKey: ["/api/family-members/current"],
   });
 
-  const { data, isLoading } = useQuery<{ skins: Skin[]; totalEarned: number }>({
+  const { data, isLoading } = useQuery<{ 
+    skins: Skin[]; 
+    totalEarned: number;
+    availableCards: number;
+    unlockedTier: number;
+  }>({
     queryKey: ["/api/skins"],
+  });
+
+  const discoverSkinMutation = useMutation({
+    mutationFn: async (skinId: string) => {
+      const res = await apiRequest("POST", "/api/skins/discover", { skinId });
+      return await res.json();
+    },
+    onSuccess: (result) => {
+      const skin = data?.skins.find(s => s.id === result.skinId);
+      setCelebration({
+        points: result.bonusPoints || 0,
+        message: `${skin?.name || "Skin"} Discovered!${result.bonusPoints ? ` +${result.bonusPoints} bonus points!` : ""}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Discovery Failed",
+        description: error.message || "Failed to discover skin",
+        variant: "destructive",
+      });
+    },
   });
 
   const selectSkinMutation = useMutation({
@@ -59,10 +91,10 @@ export default function SkinsGallery() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to select skin",
+        description: error.message || "Failed to select skin",
         variant: "destructive",
       });
     },
@@ -78,17 +110,103 @@ export default function SkinsGallery() {
 
   const skins = data?.skins || [];
   const totalEarned = Number(data?.totalEarned) || 0;
+  const availableCards = data?.availableCards || 0;
+  const unlockedTier = data?.unlockedTier || 1;
   const isDefaultActive = memberData?.activeSkinId === null || memberData?.activeSkinId === undefined;
-  const hasReached500 = totalEarned >= 500;
   
   // Organize skins by tier
-  // Tier 1: 0-500 points (Starter Heroes)
-  // Tier 2: 560-1000 points (Elite Heroes)
-  // Tier 3: 1060-1500 points (Dinosaur Bonus Pack)
-  const tier1Skins = skins.filter(s => s.pointsRequired <= 500);
-  const tier2Skins = skins.filter(s => s.pointsRequired >= 560 && s.pointsRequired <= 1000);
-  const tier3Skins = skins.filter(s => s.pointsRequired >= 1060);
-  const hasReached1000 = totalEarned >= 1000;
+  const tier1Skins = skins.filter(s => s.tier === 1);
+  const tier2Skins = skins.filter(s => s.tier === 2);
+  const tier3Skins = skins.filter(s => s.tier === 3);
+
+  const renderSkinCard = (skin: Skin) => {
+    const isDiscovered = skin.isDiscovered;
+    const canDiscover = skin.canDiscover;
+    const isActive = skin.isActive;
+    const hasBonusPoints = skin.bonusPoints > 0;
+
+    return (
+      <Card
+        key={skin.id}
+        className={`relative overflow-hidden transition-all hover-elevate ${
+          isActive ? "ring-2 ring-primary" : ""
+        } ${!isDiscovered ? "opacity-75" : ""}`}
+        data-testid={`card-skin-${skin.id}`}
+      >
+        {isActive && (
+          <div className="absolute top-1 right-1 z-10">
+            <Badge className="text-xs px-1 py-0" data-testid={`badge-active-${skin.id}`}>
+              <Check className="h-2 w-2" />
+            </Badge>
+          </div>
+        )}
+        
+        {hasBonusPoints && isDiscovered && (
+          <div className="absolute top-1 left-1 z-10">
+            <Badge variant="secondary" className="text-xs px-1 py-0">
+              <Star className="h-2 w-2 mr-0.5" />
+              +{skin.bonusPoints}
+            </Badge>
+          </div>
+        )}
+        
+        <div className="relative w-full aspect-square overflow-hidden bg-muted flex items-center justify-center">
+          {isDiscovered ? (
+            SKIN_IMAGES[skin.id] ? (
+              <img
+                src={SKIN_IMAGES[skin.id]}
+                alt={skin.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="h-8 w-8 text-muted-foreground" />
+            )
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-card">
+              <Lock className="h-8 w-8 text-muted-foreground/50" />
+            </div>
+          )}
+        </div>
+        
+        <div className="p-1">
+          {isDiscovered ? (
+            <>
+              <h3 className="font-accent text-xs font-bold truncate text-center">{skin.name}</h3>
+              <div className="mt-1 flex justify-center">
+                <Button
+                  size="sm"
+                  variant={isActive ? "secondary" : "default"}
+                  onClick={() => !isActive && selectSkinMutation.mutate(skin.id)}
+                  disabled={isActive || selectSkinMutation.isPending}
+                  className="h-6 text-xs px-2"
+                  data-testid={`button-equip-${skin.id}`}
+                >
+                  {isActive ? "Equipped" : "Equip"}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className="font-accent text-xs font-bold truncate text-center text-muted-foreground">???</h3>
+              <div className="mt-1 flex justify-center">
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={() => discoverSkinMutation.mutate(skin.id)}
+                  disabled={!canDiscover || discoverSkinMutation.isPending}
+                  className="h-6 text-xs px-2"
+                  data-testid={`button-discover-${skin.id}`}
+                >
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Discover
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </Card>
+    );
+  };
 
   return (
     <>
@@ -100,20 +218,37 @@ export default function SkinsGallery() {
           </Button>
         </Link>
         
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-4xl font-bold font-accent mb-2 gradient-text">
             Character Skins
           </h1>
           <p className="text-muted-foreground mb-4">
-            Unlock new skins by earning points! Complete tasks to unlock exclusive character skins.
+            Every 60 points earns you 1 skin card! Choose which skins to discover from unlocked packages.
           </p>
-          <div className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-primary" />
-            <span className="font-semibold">
-              Lifetime Points Earned: {totalEarned}
-            </span>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-primary" />
+              <span className="font-semibold">
+                Lifetime Points: {totalEarned}
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* Available Cards Banner */}
+        {availableCards > 0 && (
+          <Alert className="mb-6 bg-primary/10 border-primary" data-testid="alert-available-cards">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <AlertDescription className="flex items-center justify-between">
+              <span className="font-semibold text-lg">
+                You have {availableCards} skin card{availableCards !== 1 ? 's' : ''} to open!
+              </span>
+              <span className="text-sm text-muted-foreground">
+                Click "Discover" on any undiscovered skin
+              </span>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Default Avatar Card */}
         <div className="mb-8">
@@ -162,68 +297,22 @@ export default function SkinsGallery() {
           </div>
         </div>
 
-        {/* Tier 1 - Starter Skins */}
+        {/* Tier 1 - Starter Heroes */}
         <div className="mb-8">
           <div className="mb-4">
             <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
               Starter Heroes
             </h2>
             <p className="text-sm text-muted-foreground">
-              Unlock from 0 to 500 lifetime points earned
+              Unlocked • Use skin cards to discover characters
             </p>
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {tier1Skins.map((skin) => (
-            <Card
-              key={skin.id}
-              className={`relative overflow-hidden transition-all hover-elevate cursor-pointer ${
-                skin.isActive ? "ring-2 ring-primary" : ""
-              }`}
-              data-testid={`card-skin-${skin.id}`}
-              onClick={() => !skin.isActive && selectSkinMutation.mutate(skin.id)}
-            >
-              {skin.isActive && (
-                <div className="absolute top-1 right-1 z-10">
-                  <Badge className="text-xs px-1 py-0" data-testid={`badge-active-${skin.id}`}>
-                    <Check className="h-2 w-2" />
-                  </Badge>
-                </div>
-              )}
-              
-              <div className="relative w-full aspect-square overflow-hidden bg-muted">
-                {SKIN_IMAGES[skin.id] ? (
-                  <img
-                    src={SKIN_IMAGES[skin.id]}
-                    alt={skin.name}
-                    className={`w-full h-full object-cover ${
-                      !skin.isUnlocked ? "filter grayscale opacity-40" : ""
-                    }`}
-                    data-testid={`img-skin-${skin.id}`}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
-                    No Image
-                  </div>
-                )}
-                {!skin.isUnlocked && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-background/80 backdrop-blur-sm rounded-full p-2">
-                      <Lock className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-1 text-center">
-                <h3 className="font-accent text-xs font-bold truncate">{skin.name}</h3>
-                <p className="text-[10px] text-muted-foreground">{skin.pointsRequired}pts</p>
-              </div>
-            </Card>
-            ))}
+            {tier1Skins.map(renderSkinCard)}
           </div>
         </div>
 
-        {/* Tier 2 - Elite Skins */}
+        {/* Tier 2 - Elite Heroes */}
         {tier2Skins.length > 0 && (
           <div className="mb-8">
             <div className="mb-4">
@@ -231,72 +320,13 @@ export default function SkinsGallery() {
                 Elite Heroes
               </h2>
               <p className="text-sm text-muted-foreground">
-                {hasReached500
-                  ? "Unlock from 560 to 1000 lifetime points earned"
-                  : "Mystery skins revealed at 500 points • Unlock from 560 to 1000"}
+                {unlockedTier >= 2
+                  ? "Unlocked • Use skin cards to discover characters"
+                  : "🔒 Unlock at 500 lifetime points"}
               </p>
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {tier2Skins.map((skin) => (
-                <Card
-                  key={skin.id}
-                  className={`relative overflow-hidden transition-all hover-elevate cursor-pointer ${
-                    skin.isActive ? "ring-2 ring-primary" : ""
-                  }`}
-                  data-testid={`card-skin-${skin.id}`}
-                  onClick={() => skin.isUnlocked && !skin.isActive && selectSkinMutation.mutate(skin.id)}
-                >
-                  {skin.isActive && (
-                    <div className="absolute top-1 right-1 z-10">
-                      <Badge className="text-xs px-1 py-0" data-testid={`badge-active-${skin.id}`}>
-                        <Check className="h-2 w-2" />
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  <div className="relative w-full aspect-square overflow-hidden bg-muted">
-                    {hasReached500 ? (
-                      <>
-                        {SKIN_IMAGES[skin.id] ? (
-                          <img
-                            src={SKIN_IMAGES[skin.id]}
-                            alt={skin.name}
-                            className={`w-full h-full object-cover ${
-                              !skin.isUnlocked ? "filter grayscale opacity-40" : ""
-                            }`}
-                            data-testid={`img-skin-${skin.id}`}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
-                            No Image
-                          </div>
-                        )}
-                        {!skin.isUnlocked && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="bg-background/80 backdrop-blur-sm rounded-full p-2">
-                              <Lock className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground">
-                        <Lock className="h-6 w-6 mb-1" />
-                        <p className="text-[10px] font-medium">Mystery</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-1 text-center">
-                    <h3 className="font-accent text-xs font-bold truncate">
-                      {hasReached500 ? skin.name : "???"}
-                    </h3>
-                    <p className="text-[10px] text-muted-foreground">
-                      {hasReached500 ? `${skin.pointsRequired}pts` : "Mystery"}
-                    </p>
-                  </div>
-                </Card>
-              ))}
+              {tier2Skins.map(renderSkinCard)}
             </div>
           </div>
         )}
@@ -309,72 +339,13 @@ export default function SkinsGallery() {
                 Dinosaur Bonus Pack
               </h2>
               <p className="text-sm text-muted-foreground">
-                {hasReached1000
-                  ? "Unlock from 1060 to 1500 lifetime points earned"
-                  : "Mystery skins revealed at 1000 points • Unlock from 1060 to 1500"}
+                {unlockedTier >= 3
+                  ? "Unlocked • Use skin cards to discover characters"
+                  : "🔒 Unlock at 1000 lifetime points"}
               </p>
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {tier3Skins.map((skin) => (
-                <Card
-                  key={skin.id}
-                  className={`relative overflow-hidden transition-all hover-elevate cursor-pointer ${
-                    skin.isActive ? "ring-2 ring-primary" : ""
-                  }`}
-                  data-testid={`card-skin-${skin.id}`}
-                  onClick={() => skin.isUnlocked && !skin.isActive && selectSkinMutation.mutate(skin.id)}
-                >
-                  {skin.isActive && (
-                    <div className="absolute top-1 right-1 z-10">
-                      <Badge className="text-xs px-1 py-0" data-testid={`badge-active-${skin.id}`}>
-                        <Check className="h-2 w-2" />
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  <div className="relative w-full aspect-square overflow-hidden bg-muted">
-                    {hasReached1000 ? (
-                      <>
-                        {SKIN_IMAGES[skin.id] ? (
-                          <img
-                            src={SKIN_IMAGES[skin.id]}
-                            alt={skin.name}
-                            className={`w-full h-full object-cover ${
-                              !skin.isUnlocked ? "filter grayscale opacity-40" : ""
-                            }`}
-                            data-testid={`img-skin-${skin.id}`}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
-                            No Image
-                          </div>
-                        )}
-                        {!skin.isUnlocked && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="bg-background/80 backdrop-blur-sm rounded-full p-2">
-                              <Lock className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground">
-                        <Lock className="h-6 w-6 mb-1" />
-                        <p className="text-[10px] font-medium">Mystery</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-1 text-center">
-                    <h3 className="font-accent text-xs font-bold truncate">
-                      {hasReached1000 ? skin.name : "???"}
-                    </h3>
-                    <p className="text-[10px] text-muted-foreground">
-                      {hasReached1000 ? `${skin.pointsRequired}pts` : "Mystery"}
-                    </p>
-                  </div>
-                </Card>
-              ))}
+              {tier3Skins.map(renderSkinCard)}
             </div>
           </div>
         )}

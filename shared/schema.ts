@@ -376,6 +376,7 @@ export const skins = pgTable("skins", {
   description: text("description"),
   imageUrl: varchar("image_url").notNull(),
   pointsRequired: integer("points_required").notNull(), // Total points earned required to unlock
+  bonusPoints: integer("bonus_points").notNull().default(0), // Bonus points awarded when discovering this skin
   createdAt: timestamp("created_at").defaultNow(),
 });
 
