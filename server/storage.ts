@@ -48,7 +48,7 @@ export interface IStorage {
   createFamily(family: InsertFamily): Promise<Family>;
   updateFamily(familyName: string, updates: Partial<InsertFamily>): Promise<Family>;
   updateFamilyTier(familyName: string, tier: "free" | "family" | "family_plus" | "family_hero"): Promise<void>;
-  updateFamilySettings(familyName: string, settings: { showLeaderboard: boolean }): Promise<void>;
+  updateFamilySettings(familyName: string, settings: Partial<Pick<Family, "showLeaderboard" | "language">>): Promise<void>;
 
   // Family member operations
   getFamilyMember(id: string): Promise<FamilyMember | undefined>;
@@ -184,11 +184,11 @@ export class DatabaseStorage implements IStorage {
 
   async updateFamilySettings(
     familyName: string,
-    settings: { showLeaderboard: boolean }
+    settings: Partial<Pick<Family, "showLeaderboard" | "language">>
   ): Promise<void> {
     await db
       .update(families)
-      .set({ showLeaderboard: settings.showLeaderboard, updatedAt: new Date() })
+      .set({ ...settings, updatedAt: new Date() })
       .where(eq(families.familyName, familyName));
   }
 

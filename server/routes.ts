@@ -160,6 +160,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Zod schema for family settings update
+  const updateFamilySettingsSchema = z.object({
+    showLeaderboard: z.boolean().optional(),
+    language: z.enum(["de", "en", "fr", "es", "ja", "zh"]).optional(),
+  }).refine(data => data.showLeaderboard !== undefined || data.language !== undefined, {
+    message: "At least one setting must be provided"
+  });
+
   // Update family settings (parents only)
   app.patch("/api/families/settings", isAuthenticated, async (req: any, res) => {
     try {
@@ -175,18 +183,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only parents can update family settings" });
       }
       
-      const { showLeaderboard } = req.body;
-      
-      if (typeof showLeaderboard !== "boolean") {
-        return res.status(400).json({ message: "showLeaderboard must be a boolean" });
+      // Validate request body
+      const validation = updateFamilySettingsSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid settings", 
+          errors: validation.error.errors 
+        });
       }
       
-      await storage.updateFamilySettings(member.familyName, { showLeaderboard });
+      const settings = validation.data;
+      
+      await storage.updateFamilySettings(member.familyName, settings);
       
       // Broadcast settings change to all family members
       broadcastToFamily(member.familyName, {
         type: "settings_updated",
-        settings: { showLeaderboard },
+        settings,
       });
       
       res.json({ message: "Settings updated successfully" });

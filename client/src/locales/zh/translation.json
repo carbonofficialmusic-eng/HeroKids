@@ -146,7 +146,7 @@
     "title": "角色皮肤",
     "availableCards": "你有{{count}}张皮肤卡可以打开！",
     "availableCards_other": "你有{{count}}张皮肤卡可以打开！",
-    "clickDiscover": "点击任何未发现皮肤上的"发现"",
+    "clickDiscover": "点击任何未发现皮肤上的「发现」",
     "lifetimePoints": "终身积分",
     "earnCards": "每获得60积分可获得1张皮肤卡！从已解锁的包中选择要发现的皮肤。",
     "yourCustomAvatar": "您的自定义头像",
