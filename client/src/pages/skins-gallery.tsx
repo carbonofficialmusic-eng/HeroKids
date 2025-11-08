@@ -116,59 +116,51 @@ export default function SkinsGallery() {
         </div>
 
         {/* Default Avatar Card */}
-        <Card
-          className={`relative overflow-hidden transition-all hover-elevate mb-8 ${
-            isDefaultActive ? "ring-2 ring-primary" : ""
-          }`}
-          data-testid="card-skin-default"
-        >
-          <Link href="/dashboard">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-4 left-4 z-10"
-              data-testid="button-back-default"
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
+              Your Custom Avatar
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Use your personal profile picture
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            <Card
+              className={`relative overflow-hidden transition-all hover-elevate cursor-pointer ${
+                isDefaultActive ? "ring-2 ring-primary" : ""
+              }`}
+              data-testid="card-skin-default"
+              onClick={() => !isDefaultActive && selectSkinMutation.mutate(null)}
             >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-
-          <CardHeader className="pb-4">
-            {isDefaultActive && (
-              <div className="flex justify-center mb-2">
-                <Badge data-testid="badge-active-default">
-                  <Check className="h-3 w-3 mr-1" />
-                  Active
-                </Badge>
-              </div>
-            )}
-            <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-muted flex items-center justify-center max-w-xs mx-auto">
-              {memberData?.avatarUrl ? (
-                <Avatar className="h-32 w-32">
-                  <AvatarImage src={memberData.avatarUrl} alt="Your avatar" />
-                  <AvatarFallback>
-                    <User className="h-16 w-16" />
-                  </AvatarFallback>
-                </Avatar>
-              ) : (
-                <User className="h-32 w-32 text-muted-foreground" />
+              {isDefaultActive && (
+                <div className="absolute top-1 right-1 z-10">
+                  <Badge className="text-xs px-1 py-0" data-testid="badge-active-default">
+                    <Check className="h-2 w-2" />
+                  </Badge>
+                </div>
               )}
-            </div>
-            <CardTitle className="font-accent text-xl">Default Avatar</CardTitle>
-            <CardDescription>Your personal custom avatar</CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <Button
-              onClick={() => selectSkinMutation.mutate(null)}
-              disabled={isDefaultActive || selectSkinMutation.isPending}
-              className="w-full"
-              data-testid="button-select-default"
-            >
-              {isDefaultActive ? "Equipped" : "Use Default"}
-            </Button>
-          </CardContent>
-        </Card>
+              
+              <div className="relative w-full aspect-square overflow-hidden bg-muted flex items-center justify-center">
+                {memberData?.avatarUrl ? (
+                  <Avatar className="h-full w-full">
+                    <AvatarImage src={memberData.avatarUrl} alt="Your avatar" className="object-cover" />
+                    <AvatarFallback>
+                      <User className="h-8 w-8" />
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <User className="h-8 w-8 text-muted-foreground" />
+                )}
+              </div>
+              
+              <div className="p-1 text-center">
+                <h3 className="font-accent text-xs font-bold truncate">Default</h3>
+                <p className="text-[10px] text-muted-foreground">Custom</p>
+              </div>
+            </Card>
+          </div>
+        </div>
 
         {/* Tier 1 - Starter Skins */}
         <div className="mb-8">
