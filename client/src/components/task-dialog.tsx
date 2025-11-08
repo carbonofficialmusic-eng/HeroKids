@@ -117,7 +117,7 @@ const taskTemplates = [
     id: "dentist",
     title: "Go to the Dentist",
     description: "Annual dental checkup and cleaning",
-    points: 50,
+    points: 200,
     iconEmoji: "🦷",
     requiresProof: false,
     recurrence: "yearly" as const,
