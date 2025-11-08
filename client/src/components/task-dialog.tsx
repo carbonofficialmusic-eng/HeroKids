@@ -114,12 +114,13 @@ const taskTemplates = [
     requiresProof: true,
   },
   {
-    id: "garden",
-    title: "Water Plants",
-    description: "Water all indoor and outdoor plants",
-    points: 20,
-    iconEmoji: "🌱",
+    id: "dentist",
+    title: "Go to the Dentist",
+    description: "Annual dental checkup and cleaning",
+    points: 50,
+    iconEmoji: "🦷",
     requiresProof: false,
+    recurrence: "yearly" as const,
   },
 ];
 
@@ -231,6 +232,12 @@ export function TaskDialog({
     form.setValue("points", template.points);
     form.setValue("iconEmoji", template.iconEmoji);
     form.setValue("requiresProof", template.requiresProof);
+    
+    // Apply recurrence if template has it
+    if ('recurrence' in template && template.recurrence) {
+      form.setValue("recurrence", template.recurrence);
+      setRecurrenceMode("standard");
+    }
   };
 
   return (
