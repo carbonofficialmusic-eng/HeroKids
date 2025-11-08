@@ -88,5 +88,6 @@ Preferred communication style: Simple, everyday language.
 Certain special skins award bonus points when discovered:
 - **Tier 1**: Brave Explorer (+10), Book Wizard (+10)
 - **Tier 2**: Tech Ninja (+10), Fire Phoenix (+10), Thunder Champion (+20)
+- **Tier 3**: Velociraptor (+10), Brachiosaurus (+10)
 
 **Note**: The `pointsRequired` values in the database are for reference/ordering only. Actual discovery is controlled by available cards, not point thresholds.
