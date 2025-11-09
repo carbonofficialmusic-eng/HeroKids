@@ -385,6 +385,24 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.7);
   }
 
+  /* Glow effect for maximum text readability */
+  .text-glow {
+    text-shadow: 
+      0 0 20px rgba(0, 0, 0, 0.9),
+      0 0 40px rgba(0, 0, 0, 0.8),
+      0 0 60px rgba(0, 0, 0, 0.7),
+      0 2px 4px rgba(0, 0, 0, 1);
+  }
+
+  .text-glow-white {
+    color: white;
+    text-shadow: 
+      0 0 20px rgba(0, 0, 0, 0.9),
+      0 0 40px rgba(0, 0, 0, 0.8),
+      0 0 60px rgba(0, 0, 0, 0.7),
+      0 2px 4px rgba(0, 0, 0, 1);
+  }
+
   /* Semi-transparent background for text on images */
   .text-backdrop {
     background: rgba(0, 0, 0, 0.4);

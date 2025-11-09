@@ -584,17 +584,17 @@ export default function Dashboard() {
                     data-testid="img-dashboard-logo"
                   />
                 </div>
-                <div className="inline-block px-4 py-3 rounded-lg text-backdrop mb-4">
-                  <p className="text-sm font-semibold text-white mb-3 text-shadow-strong">
+                <div className="space-y-3 mb-4">
+                  <p className="text-sm font-bold text-glow-white">
                     {t("dashboard.availablePoints")}: {member.totalPoints}
                   </p>
-                  <h1 className="text-3xl font-black font-accent mb-2 text-white text-shadow-strong" data-testid="text-page-title">
+                  <h1 className="text-4xl font-black font-accent text-glow-white" data-testid="text-page-title">
                     {t("dashboard.hi", { name: member.displayName })}
                   </h1>
-                  <p className="font-medium text-white mb-2 text-shadow-strong">
+                  <p className="text-lg font-semibold text-glow-white">
                     {t("dashboard.manageFamily")}
                   </p>
-                  <p className="text-sm font-semibold text-white text-shadow-strong">
+                  <p className="text-sm font-bold text-glow-white">
                     {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
                   </p>
                 </div>
@@ -910,17 +910,17 @@ export default function Dashboard() {
                   data-testid="img-dashboard-logo-child"
                 />
               </div>
-              <div className="inline-block px-4 py-3 rounded-lg text-backdrop mb-4">
-                <p className="text-sm font-semibold text-white mb-3 text-shadow-strong">
+              <div className="space-y-3 mb-4">
+                <p className="text-sm font-bold text-glow-white">
                   {t("dashboard.availablePoints")}: {member.totalPoints}
                 </p>
-                <h1 className="text-3xl font-black font-accent mb-2 text-white text-shadow-strong" data-testid="text-child-welcome">
+                <h1 className="text-4xl font-black font-accent text-glow-white" data-testid="text-child-welcome">
                   {t("dashboard.hi", { name: member.displayName })}
                 </h1>
-                <p className="font-medium text-white mb-2 text-shadow-strong">
+                <p className="text-lg font-semibold text-glow-white">
                   {t("dashboard.completeTasksEarn")}
                 </p>
-                <p className="text-sm font-semibold text-white text-shadow-strong">
+                <p className="text-sm font-bold text-glow-white">
                   {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
                 </p>
               </div>
