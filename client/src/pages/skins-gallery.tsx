@@ -232,16 +232,16 @@ export default function SkinsGallery() {
         </Link>
         
         <div className="mb-6">
-          <h1 className="text-4xl font-bold font-accent mb-2 gradient-text">
+          <h1 className="text-4xl font-black font-accent mb-3 text-glow-white">
             {t('skins.title')}
           </h1>
-          <p className="text-muted-foreground mb-4">
+          <p className="text-lg font-semibold mb-4 text-glow-white">
             {t('skins.description')}
           </p>
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-primary" />
-              <span className="font-semibold">
+              <span className="font-bold text-glow-white">
                 {t('skins.lifetimePoints', { points: totalEarned })}
               </span>
             </div>
@@ -266,10 +266,10 @@ export default function SkinsGallery() {
         {/* Default Avatar Card */}
         <div className="mb-8">
           <div className="mb-4">
-            <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
               {t('skins.yourCustomAvatar')}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm font-semibold text-glow-white">
               {t('skins.usePersonalPicture')}
             </p>
           </div>
@@ -313,10 +313,10 @@ export default function SkinsGallery() {
         {/* Tier 1 - Starter Heroes */}
         <div className="mb-8">
           <div className="mb-4">
-            <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
               {t('skins.starterHeroes')}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm font-semibold text-glow-white">
               {t('skins.unlockedUseCards')}
             </p>
           </div>
@@ -329,10 +329,10 @@ export default function SkinsGallery() {
         {tier2Skins.length > 0 && (
           <div className="mb-8">
             <div className="mb-4">
-              <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
+              <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
                 {t('skins.eliteHeroes')}
               </h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm font-semibold text-glow-white">
                 {unlockedTier >= 2
                   ? t('skins.unlockedUseCards')
                   : t('skins.unlockAt500')}
@@ -348,10 +348,10 @@ export default function SkinsGallery() {
         {tier3Skins.length > 0 && (
           <div className="mb-8">
             <div className="mb-4">
-              <h2 className="text-2xl font-bold font-accent gradient-text mb-1">
+              <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
                 {t('skins.dinosaurBonusPack')}
               </h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm font-semibold text-glow-white">
                 {unlockedTier >= 3
                   ? t('skins.unlockedUseCards')
                   : t('skins.unlockAt1000')}
