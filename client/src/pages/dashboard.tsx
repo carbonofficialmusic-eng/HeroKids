@@ -119,6 +119,13 @@ export default function Dashboard() {
     refetchInterval: 10000, // Refetch every 10 seconds
   });
 
+  // Fetch pending approvals count (for parents)
+  const { data: pendingApprovalsData } = useQuery<{ count: number }>({
+    queryKey: ["/api/tasks/pending-count"],
+    enabled: !!member && member?.role === "parent",
+    refetchInterval: 10000, // Refetch every 10 seconds
+  });
+
   // Reset child tab to "active" when leaderboard becomes unavailable
   useEffect(() => {
     const showLeaderboardToChild = familyData?.showLeaderboard !== false;
@@ -603,9 +610,14 @@ export default function Dashboard() {
               {/* Action Buttons */}
               <div className="flex items-center justify-center flex-wrap gap-3">
                 <Link href="/approvals">
-                  <Button variant="card" data-testid="button-approvals" className="min-h-11 whitespace-normal leading-tight">
+                  <Button variant="card" data-testid="button-approvals" className="relative min-h-11 whitespace-normal leading-tight">
                     <ClipboardCheck className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="text-center">{t("dashboard.approvals")}</span>
+                    {pendingApprovalsData && pendingApprovalsData.count > 0 && (
+                      <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex-shrink-0" data-testid="badge-pending-approvals">
+                        {pendingApprovalsData.count}
+                      </Badge>
+                    )}
                   </Button>
                 </Link>
                 <Link href="/analytics">

@@ -2057,6 +2057,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get pending approvals count (for parents)
+  app.get("/api/tasks/pending-count", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can see pending count
+      if (member.role !== "parent") {
+        return res.json({ count: 0 });
+      }
+      
+      const pendingCompletions = await storage.getPendingCompletionsByFamily(member.familyName);
+      res.json({ count: pendingCompletions.length });
+    } catch (error: any) {
+      console.error("Error fetching pending approvals count:", error);
+      res.status(500).json({ message: "Failed to fetch pending count" });
+    }
+  });
+
   // Get unread message count
   app.get("/api/chat/unread-count", isAuthenticated, async (req: any, res) => {
     try {
