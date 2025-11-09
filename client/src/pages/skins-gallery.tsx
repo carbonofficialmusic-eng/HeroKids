@@ -227,7 +227,7 @@ export default function SkinsGallery() {
         <Link href="/dashboard">
           <Button 
             variant="outline" 
-            className="mb-4 bg-background/35 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+            className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
             data-testid="button-back-to-dashboard"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
