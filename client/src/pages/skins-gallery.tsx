@@ -225,7 +225,11 @@ export default function SkinsGallery() {
     <>
       <div className="container mx-auto p-6 max-w-6xl">
         <Link href="/dashboard">
-          <Button variant="ghost" className="mb-4" data-testid="button-back-to-dashboard">
+          <Button 
+            variant="outline" 
+            className="mb-4 bg-background/60 backdrop-blur-sm border-border/40 hover:bg-background/80" 
+            data-testid="button-back-to-dashboard"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t('common.backToDashboard')}
           </Button>
