@@ -79,7 +79,7 @@ Preferred communication style: Simple, everyday language.
 - Friendly but powerful, not aggressive
 - 8 skins: Tech Ninja (560), Ocean Guardian (620), Sky Knight (680), Fire Phoenix (740), Crystal Mage (800), Neon Rebel (860), Cosmic Drifter (920), Thunder Champion (1000)
 
-**Tier 3 - Dinosaur Bonus Pack** (Package unlocks at 1000 total points)
+**Tier 3 - Dinosaur Heroes** (Package unlocks at 1000 total points)
 - Realistic, scientifically accurate dinosaur designs for teenagers
 - Epic prehistoric landscapes (Jurassic/Cretaceous periods)
 - Detailed, educational, and impressive

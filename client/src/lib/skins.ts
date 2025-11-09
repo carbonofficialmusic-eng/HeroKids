@@ -19,7 +19,7 @@ import neonRebelImg from "@assets/generated_images/Neon_Rebel_avatar_fe8fea5f.pn
 import cosmicDrifterImg from "@assets/generated_images/Cosmic_Drifter_avatar_1d7d3759.png";
 import thunderChampionImg from "@assets/generated_images/Thunder_Champion_avatar_cf3f783f.png";
 
-// Tier 3 - Dinosaur Bonus Pack (Realistic scientific designs for teenagers)
+// Tier 3 - Dinosaur Heroes (Realistic scientific designs for teenagers)
 import tRexImg from "@assets/generated_images/T-Rex_realistic_portrait_82feaa74.png";
 import triceratopsImg from "@assets/generated_images/Triceratops_realistic_portrait_028d6c17.png";
 import stegosaurusImg from "@assets/generated_images/Stegosaurus_realistic_portrait_539445d4.png";
@@ -83,7 +83,7 @@ export const SKIN_IMAGES: Record<string, string> = {
   "cosmic-drifter": cosmicDrifterImg,
   "thunder-champion": thunderChampionImg,
   
-  // Tier 3 - Dinosaur Bonus Pack
+  // Tier 3 - Dinosaur Heroes
   "t-rex": tRexImg,
   "triceratops": triceratopsImg,
   "stegosaurus": stegosaurusImg,
@@ -116,7 +116,7 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "cosmic-drifter": nebulaBg,
   "thunder-champion": stormBg,
   
-  // Tier 3 - Dinosaur Bonus Pack (Prehistoric landscapes)
+  // Tier 3 - Dinosaur Heroes (Prehistoric landscapes)
   "t-rex": cretaceousVolcanicBg,
   "triceratops": cretaceousPlainsBg,
   "stegosaurus": jurassicForestBg,

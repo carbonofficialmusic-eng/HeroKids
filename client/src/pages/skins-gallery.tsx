@@ -344,7 +344,7 @@ export default function SkinsGallery() {
           </div>
         )}
 
-        {/* Tier 3 - Dinosaur Bonus Pack */}
+        {/* Tier 3 - Dinosaur Heroes */}
         {tier3Skins.length > 0 && (
           <div className="mb-8">
             <div className="mb-4">
