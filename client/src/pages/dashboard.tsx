@@ -611,7 +611,8 @@ export default function Dashboard() {
               </div>
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
+                {/* Row 1: Approvals, Family Chat */}
                 <Link href="/approvals" className="w-full">
                   <Button variant="card" data-testid="button-approvals" className="relative w-full h-14 whitespace-normal leading-tight">
                     <ClipboardCheck className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -621,12 +622,6 @@ export default function Dashboard() {
                         {pendingApprovalsData.count}
                       </Badge>
                     )}
-                  </Button>
-                </Link>
-                <Link href="/analytics" className="w-full">
-                  <Button variant="card" data-testid="button-analytics" className="w-full h-14 whitespace-normal leading-tight">
-                    <BarChart3 className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="text-center">{t("dashboard.analytics")}</span>
                   </Button>
                 </Link>
                 <Link href="/chat" className="w-full">
@@ -640,12 +635,20 @@ export default function Dashboard() {
                     )}
                   </Button>
                 </Link>
+                {/* Row 2: Rewards Board, Analytics */}
                 <Link href="/rewards-board" className="w-full">
                   <Button variant="card" data-testid="button-rewards-board" className="w-full h-14 whitespace-normal leading-tight">
                     <Gift className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="text-center">{t("dashboard.rewardsBoard")}</span>
                   </Button>
                 </Link>
+                <Link href="/analytics" className="w-full">
+                  <Button variant="card" data-testid="button-analytics" className="w-full h-14 whitespace-normal leading-tight">
+                    <BarChart3 className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-center">{t("dashboard.analytics")}</span>
+                  </Button>
+                </Link>
+                {/* Row 3: Add Task, Add Reward */}
                 <Button
                   onClick={() => {
                     setSelectedTask(null);
