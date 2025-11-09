@@ -584,18 +584,20 @@ export default function Dashboard() {
                     data-testid="img-dashboard-logo"
                   />
                 </div>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {t("dashboard.availablePoints")}: {member.totalPoints}
-                </p>
-                <h1 className="text-3xl font-black font-accent mb-2" data-testid="text-page-title">
-                  {t("dashboard.hi", { name: member.displayName })}
-                </h1>
-                <p className="text-muted-foreground mb-2">
-                  {t("dashboard.manageFamily")}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
-                </p>
+                <div className="inline-block px-4 py-3 rounded-lg text-backdrop mb-4">
+                  <p className="text-sm font-semibold text-white mb-3 text-shadow-strong">
+                    {t("dashboard.availablePoints")}: {member.totalPoints}
+                  </p>
+                  <h1 className="text-3xl font-black font-accent mb-2 text-white text-shadow-strong" data-testid="text-page-title">
+                    {t("dashboard.hi", { name: member.displayName })}
+                  </h1>
+                  <p className="font-medium text-white mb-2 text-shadow-strong">
+                    {t("dashboard.manageFamily")}
+                  </p>
+                  <p className="text-sm font-semibold text-white text-shadow-strong">
+                    {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
+                  </p>
+                </div>
               </div>
 
               {/* Action Buttons */}
@@ -908,18 +910,20 @@ export default function Dashboard() {
                   data-testid="img-dashboard-logo-child"
                 />
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                {t("dashboard.availablePoints")}: {member.totalPoints}
-              </p>
-              <h1 className="text-3xl font-black font-accent mb-2" data-testid="text-child-welcome">
-                {t("dashboard.hi", { name: member.displayName })}
-              </h1>
-              <p className="text-muted-foreground mb-2">
-                {t("dashboard.completeTasksEarn")}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
-              </p>
+              <div className="inline-block px-4 py-3 rounded-lg text-backdrop mb-4">
+                <p className="text-sm font-semibold text-white mb-3 text-shadow-strong">
+                  {t("dashboard.availablePoints")}: {member.totalPoints}
+                </p>
+                <h1 className="text-3xl font-black font-accent mb-2 text-white text-shadow-strong" data-testid="text-child-welcome">
+                  {t("dashboard.hi", { name: member.displayName })}
+                </h1>
+                <p className="font-medium text-white mb-2 text-shadow-strong">
+                  {t("dashboard.completeTasksEarn")}
+                </p>
+                <p className="text-sm font-semibold text-white text-shadow-strong">
+                  {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
+                </p>
+              </div>
             </div>
 
             <Tabs value={childActiveTab} onValueChange={setChildActiveTab} className="w-full">
