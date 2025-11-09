@@ -47,7 +47,12 @@ export default function Analytics() {
     return (
       <div className="container mx-auto p-6">
         <Link href="/">
-          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+            data-testid="button-back-dashboard"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t("analytics.backToDashboard")}
           </Button>
@@ -67,7 +72,12 @@ export default function Analytics() {
       return (
         <div className="container mx-auto p-6 max-w-4xl">
           <Link href="/">
-            <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+              data-testid="button-back-dashboard"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t("analytics.backToDashboard")}
             </Button>
@@ -117,7 +127,12 @@ export default function Analytics() {
     return (
       <div className="container mx-auto p-6">
         <Link href="/">
-          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+            data-testid="button-back-dashboard"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t("analytics.backToDashboard")}
           </Button>
@@ -140,7 +155,12 @@ export default function Analytics() {
     <div className="container mx-auto p-6 space-y-6" data-testid="page-analytics">
       <div>
         <Link href="/">
-          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-dashboard">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+            data-testid="button-back-dashboard"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t("analytics.backToDashboard")}
           </Button>

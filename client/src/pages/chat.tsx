@@ -98,7 +98,12 @@ export default function Chat() {
     return (
       <div className="container mx-auto p-6">
         <Link href="/dashboard">
-          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+            data-testid="button-back-to-dashboard"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t('settings.backToDashboard')}
           </Button>
@@ -120,7 +125,12 @@ export default function Chat() {
       return (
         <div className="container mx-auto p-6" data-testid="chat-upgrade-prompt">
           <Link href="/dashboard">
-            <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+              data-testid="button-back-to-dashboard"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t('settings.backToDashboard')}
             </Button>
@@ -171,7 +181,12 @@ export default function Chat() {
   return (
     <div className="container mx-auto p-4 h-screen flex flex-col" data-testid="page-chat">
       <Link href="/dashboard">
-        <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+          data-testid="button-back-to-dashboard"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           {t('settings.backToDashboard')}
         </Button>

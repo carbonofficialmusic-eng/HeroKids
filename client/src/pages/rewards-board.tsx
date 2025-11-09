@@ -147,7 +147,12 @@ export default function RewardsBoard() {
       {/* Header */}
       <div className="space-y-4">
         <Link href="/">
-          <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back-dashboard">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+            data-testid="button-back-dashboard"
+          >
             <Home className="h-4 w-4" />
             {t("rewardsBoard.backToDashboard")}
           </Button>

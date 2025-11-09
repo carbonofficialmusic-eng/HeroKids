@@ -135,7 +135,11 @@ export default function Pricing() {
       <header className="border-b sticky top-0 backdrop-blur-md z-40 bg-background/80">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/">
-            <Button variant="ghost" data-testid="button-back-home">
+            <Button 
+              variant="outline" 
+              className="bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+              data-testid="button-back-home"
+            >
               {t("pricing.backToDashboard")}
             </Button>
           </Link>

@@ -224,6 +224,7 @@ export default function Settings() {
             <Button 
               onClick={() => setLocation("/")} 
               variant="outline"
+              className="bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
               data-testid="button-back-to-dashboard"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />

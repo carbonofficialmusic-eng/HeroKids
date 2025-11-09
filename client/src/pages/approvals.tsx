@@ -94,7 +94,12 @@ export default function Approvals() {
       <div className="min-h-screen p-6">
         <div className="max-w-5xl mx-auto">
           <Link href="/dashboard">
-            <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+              data-testid="button-back-to-dashboard"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t("approvals.backToDashboard")}
             </Button>
@@ -115,7 +120,12 @@ export default function Approvals() {
     <div className="min-h-screen p-6">
       <div className="max-w-5xl mx-auto">
         <Link href="/dashboard">
-          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back-to-dashboard">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+            data-testid="button-back-to-dashboard"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t("approvals.backToDashboard")}
           </Button>
