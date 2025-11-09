@@ -18,19 +18,19 @@
 
   --background: 210 5% 98%;
 
-  --foreground: 215 20% 15%;
+  --foreground: 215 25% 10%;
 
   --border: 210 10% 88%;
 
   --card: 210 8% 93%;
 
-  --card-foreground: 215 20% 15%;
+  --card-foreground: 215 25% 10%;
 
   --card-border: 210 10% 86%;
 
   --sidebar: 210 5% 94%;
 
-  --sidebar-foreground: 215 20% 15%;
+  --sidebar-foreground: 215 25% 10%;
 
   --sidebar-border: 210 8% 86%;
 
@@ -40,13 +40,13 @@
 
   --sidebar-accent: 210 8% 88%;
 
-  --sidebar-accent-foreground: 215 18% 20%;
+  --sidebar-accent-foreground: 215 22% 15%;
 
   --sidebar-ring: 196 52% 35%;
 
   --popover: 210 6% 92%;
 
-  --popover-foreground: 215 20% 15%;
+  --popover-foreground: 215 25% 10%;
 
   --popover-border: 210 8% 84%;
 
@@ -60,7 +60,7 @@
 
   --muted: 210 12% 90%;
 
-  --muted-foreground: 215 15% 35%;
+  --muted-foreground: 215 18% 30%;
 
   --accent: 15 86% 66%;
 
@@ -368,5 +368,49 @@
 
   .theme-background-layer {
     transition: opacity 0.8s ease-in-out;
+  }
+
+  /* Improved text readability */
+  body {
+    font-weight: 500;
+  }
+
+  /* Better text contrast on images and backgrounds */
+  .text-on-image {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Stronger text shadows for better readability */
+  .text-shadow-strong {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Semi-transparent background for text on images */
+  .text-backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  /* Increase minimum font sizes for better readability */
+  .min-readable {
+    font-size: max(0.875rem, 14px);
+    font-weight: 600;
+  }
+
+  /* Make small text more readable */
+  .text-xs {
+    font-size: max(0.75rem, 12px);
+    font-weight: 600;
+  }
+
+  .text-sm {
+    font-size: max(0.875rem, 14px);
+    font-weight: 500;
+  }
+
+  /* Better contrast for muted text */
+  .text-muted-foreground {
+    font-weight: 500;
   }
 }

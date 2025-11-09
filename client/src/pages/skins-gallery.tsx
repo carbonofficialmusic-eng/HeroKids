@@ -148,16 +148,16 @@ export default function SkinsGallery() {
       >
         {isActive && (
           <div className="absolute top-1 right-1 z-10">
-            <Badge className="text-xs px-1 py-0" data-testid={`badge-active-${skin.id}`}>
-              <Check className="h-2 w-2" />
+            <Badge className="text-xs px-2 py-0.5 font-semibold" data-testid={`badge-active-${skin.id}`}>
+              <Check className="h-3 w-3" />
             </Badge>
           </div>
         )}
         
         {hasBonusPoints && isDiscovered && (
           <div className="absolute top-1 left-1 z-10">
-            <Badge variant="secondary" className="text-xs px-1 py-0">
-              <Star className="h-2 w-2 mr-0.5" />
+            <Badge variant="secondary" className="text-xs px-2 py-0.5 font-semibold">
+              <Star className="h-3 w-3 mr-0.5" />
               +{skin.bonusPoints}
             </Badge>
           </div>
@@ -181,17 +181,17 @@ export default function SkinsGallery() {
           )}
         </div>
         
-        <div className="p-1">
+        <div className="p-2">
           {isDiscovered ? (
             <>
-              <h3 className="font-accent text-xs font-bold truncate text-center">{t(`skinNames.${skin.id}`)}</h3>
-              <div className="mt-1 flex justify-center">
+              <h3 className="font-accent text-sm font-bold truncate text-center">{t(`skinNames.${skin.id}`)}</h3>
+              <div className="mt-2 flex justify-center">
                 <Button
                   size="sm"
                   variant={isActive ? "secondary" : "default"}
                   onClick={() => !isActive && selectSkinMutation.mutate(skin.id)}
                   disabled={isActive || selectSkinMutation.isPending}
-                  className="h-6 text-xs px-2"
+                  className="h-7 text-xs px-3 font-semibold"
                   data-testid={`button-equip-${skin.id}`}
                 >
                   {isActive ? t('skins.equipped') : t('skins.equip')}
@@ -200,14 +200,14 @@ export default function SkinsGallery() {
             </>
           ) : (
             <>
-              <h3 className="font-accent text-xs font-bold truncate text-center text-muted-foreground">???</h3>
-              <div className="mt-1 flex justify-center">
+              <h3 className="font-accent text-sm font-bold truncate text-center text-muted-foreground">???</h3>
+              <div className="mt-2 flex justify-center">
                 <Button
                   size="sm"
                   variant="default"
                   onClick={() => discoverSkinMutation.mutate(skin.id)}
                   disabled={!canDiscover || discoverSkinMutation.isPending}
-                  className="h-6 text-xs px-2"
+                  className="h-7 text-xs px-3 font-semibold"
                   data-testid={`button-discover-${skin.id}`}
                 >
                   <Sparkles className="h-3 w-3 mr-1" />
@@ -283,8 +283,8 @@ export default function SkinsGallery() {
             >
               {isDefaultActive && (
                 <div className="absolute top-1 right-1 z-10">
-                  <Badge className="text-xs px-1 py-0" data-testid="badge-active-default">
-                    <Check className="h-2 w-2" />
+                  <Badge className="text-xs px-2 py-0.5 font-semibold" data-testid="badge-active-default">
+                    <Check className="h-3 w-3" />
                   </Badge>
                 </div>
               )}
@@ -302,9 +302,9 @@ export default function SkinsGallery() {
                 )}
               </div>
               
-              <div className="p-1 text-center">
-                <h3 className="font-accent text-xs font-bold truncate">{t('skins.default')}</h3>
-                <p className="text-[10px] text-muted-foreground">{t('skins.custom')}</p>
+              <div className="p-2 text-center">
+                <h3 className="font-accent text-sm font-bold truncate">{t('skins.default')}</h3>
+                <p className="text-xs text-muted-foreground font-medium">{t('skins.custom')}</p>
               </div>
             </Card>
           </div>
