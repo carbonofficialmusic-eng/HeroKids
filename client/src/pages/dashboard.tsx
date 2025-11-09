@@ -958,7 +958,7 @@ export default function Dashboard() {
               </TabsList>
 
               {/* Quick Action Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-6">
+              <div className="grid grid-cols-2 gap-3 mt-6">
                 <Button
                   variant="card"
                   onClick={() => setRequestRewardDialogOpen(true)}
@@ -975,7 +975,7 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") && (
-                  <Link href="/chat" className="w-full">
+                  <Link href="/chat" className="w-full col-span-2">
                     <Button variant="card" data-testid="button-chat-child" className="relative w-full h-14 whitespace-normal leading-tight">
                       <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
                       <span className="text-center">{t("nav.chat")}</span>
