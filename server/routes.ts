@@ -1773,8 +1773,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const isDiscovered = discoveredSkinIds.includes(skin.id);
         const isActive = member.activeSkinId === skin.id;
         
-        // Determine skin tier (1=Starter, 2=Elite, 3=Dinosaur)
-        const skinTier = skin.pointsRequired >= 1060 ? 3 : skin.pointsRequired >= 560 ? 2 : 1;
+        // Determine skin tier based on pointsRequired ranges
+        // Tier 1 (Starter): 0-559 points
+        // Tier 2 (Elite): 560-1059 points  
+        // Tier 3 (Dinosaur): 1060+ points
+        let skinTier = 1;
+        if (skin.pointsRequired >= 1060) {
+          skinTier = 3;
+        } else if (skin.pointsRequired >= 560) {
+          skinTier = 2;
+        }
         
         // Can discover if: package is unlocked AND not already discovered AND has available cards
         const canDiscover = skinTier <= unlockedTier && !isDiscovered && availableCards > 0;
@@ -1837,7 +1845,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if skin's package tier is unlocked
       const unlockedTier = member.totalEarned >= 1000 ? 3 : member.totalEarned >= 500 ? 2 : 1;
-      const skinTier = skin.pointsRequired >= 1060 ? 3 : skin.pointsRequired >= 560 ? 2 : 1;
+      
+      // Determine skin tier based on pointsRequired ranges
+      // Tier 1 (Starter): 0-559 points
+      // Tier 2 (Elite): 560-1059 points  
+      // Tier 3 (Dinosaur): 1060+ points
+      let skinTier = 1;
+      if (skin.pointsRequired >= 1060) {
+        skinTier = 3;
+      } else if (skin.pointsRequired >= 560) {
+        skinTier = 2;
+      }
       
       if (skinTier > unlockedTier) {
         return res.status(403).json({ message: "Skin package not unlocked yet" });
