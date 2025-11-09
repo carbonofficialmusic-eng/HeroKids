@@ -611,9 +611,9 @@ export default function Dashboard() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-center flex-wrap gap-3">
-                <Link href="/approvals">
-                  <Button variant="card" data-testid="button-approvals" className="relative min-h-11 whitespace-normal leading-tight">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <Link href="/approvals" className="w-full">
+                  <Button variant="card" data-testid="button-approvals" className="relative w-full h-14 whitespace-normal leading-tight">
                     <ClipboardCheck className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="text-center">{t("dashboard.approvals")}</span>
                     {pendingApprovalsData && pendingApprovalsData.count > 0 && (
@@ -623,14 +623,14 @@ export default function Dashboard() {
                     )}
                   </Button>
                 </Link>
-                <Link href="/analytics">
-                  <Button variant="card" data-testid="button-analytics" className="min-h-11 whitespace-normal leading-tight">
+                <Link href="/analytics" className="w-full">
+                  <Button variant="card" data-testid="button-analytics" className="w-full h-14 whitespace-normal leading-tight">
                     <BarChart3 className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="text-center">{t("dashboard.analytics")}</span>
                   </Button>
                 </Link>
-                <Link href="/chat">
-                  <Button variant="card" data-testid="button-chat" className="relative min-h-11 whitespace-normal leading-tight">
+                <Link href="/chat" className="w-full">
+                  <Button variant="card" data-testid="button-chat" className="relative w-full h-14 whitespace-normal leading-tight">
                     <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="text-center">{t("nav.chat")}</span>
                     {unreadChatData && unreadChatData.count > 0 && (
@@ -640,8 +640,8 @@ export default function Dashboard() {
                     )}
                   </Button>
                 </Link>
-                <Link href="/rewards-board">
-                  <Button variant="card" data-testid="button-rewards-board" className="min-h-11 whitespace-normal leading-tight">
+                <Link href="/rewards-board" className="w-full">
+                  <Button variant="card" data-testid="button-rewards-board" className="w-full h-14 whitespace-normal leading-tight">
                     <Gift className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="text-center">{t("dashboard.rewardsBoard")}</span>
                   </Button>
@@ -652,7 +652,7 @@ export default function Dashboard() {
                     setTaskDialogOpen(true);
                   }}
                   data-testid="button-add-task"
-                  className="min-h-11 whitespace-normal leading-tight"
+                  className="w-full h-14 whitespace-normal leading-tight"
                 >
                   <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="text-center">{t("dashboard.addTask")}</span>
@@ -663,7 +663,7 @@ export default function Dashboard() {
                     setRewardDialogOpen(true);
                   }}
                   data-testid="button-add-reward"
-                  className="min-h-11 whitespace-normal leading-tight"
+                  className="w-full h-14 whitespace-normal leading-tight"
                 >
                   <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="text-center">{t("dashboard.addReward")}</span>
@@ -955,25 +955,25 @@ export default function Dashboard() {
               </TabsList>
 
               {/* Quick Action Buttons */}
-              <div className="flex items-center justify-center flex-wrap gap-3 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-6">
                 <Button
                   variant="card"
                   onClick={() => setRequestRewardDialogOpen(true)}
                   data-testid="button-request-reward"
-                  className="min-h-11 whitespace-normal leading-tight"
+                  className="w-full h-14 whitespace-normal leading-tight"
                 >
                   <Lightbulb className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="text-center">{t("dashboard.requestReward")}</span>
                 </Button>
-                <Link href="/rewards-board">
-                  <Button variant="card" data-testid="button-rewards-board-child" className="min-h-11 whitespace-normal leading-tight">
+                <Link href="/rewards-board" className="w-full">
+                  <Button variant="card" data-testid="button-rewards-board-child" className="w-full h-14 whitespace-normal leading-tight">
                     <Gift className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="text-center">{t("dashboard.myRewards")}</span>
                   </Button>
                 </Link>
                 {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") && (
-                  <Link href="/chat">
-                    <Button variant="card" data-testid="button-chat-child" className="relative min-h-11 whitespace-normal leading-tight">
+                  <Link href="/chat" className="w-full">
+                    <Button variant="card" data-testid="button-chat-child" className="relative w-full h-14 whitespace-normal leading-tight">
                       <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
                       <span className="text-center">{t("nav.chat")}</span>
                       {unreadChatData && unreadChatData.count > 0 && (
