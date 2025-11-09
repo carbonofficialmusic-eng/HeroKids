@@ -217,6 +217,14 @@ export default function Settings() {
     },
   });
 
+  // Load prize values from familyData (must be before conditional returns to avoid hook order issues)
+  useEffect(() => {
+    if (familyData) {
+      setWeeklyPrize(familyData.weeklyPrize || "");
+      setMonthlyPrize(familyData.monthlyPrize || "");
+    }
+  }, [familyData]);
+
   // Only parents can access settings
   if (!memberLoading && !familyLoading && realMember?.role !== "parent") {
     return (
@@ -281,14 +289,6 @@ export default function Settings() {
       monthlyPrize: monthlyPrize.trim() || null,
     });
   };
-
-  // Load prize values from familyData
-  useEffect(() => {
-    if (familyData) {
-      setWeeklyPrize(familyData.weeklyPrize || "");
-      setMonthlyPrize(familyData.monthlyPrize || "");
-    }
-  }, [familyData]);
 
   const languageOptions = [
     { value: "de", label: "Deutsch" },
