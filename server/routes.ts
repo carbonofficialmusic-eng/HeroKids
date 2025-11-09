@@ -164,7 +164,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const updateFamilySettingsSchema = z.object({
     showLeaderboard: z.boolean().optional(),
     language: z.enum(["de", "en", "fr", "es", "ja", "zh"]).optional(),
-  }).refine(data => data.showLeaderboard !== undefined || data.language !== undefined, {
+    weeklyPrize: z.string().nullable().optional(),
+    monthlyPrize: z.string().nullable().optional(),
+    yearlyPrize: z.string().nullable().optional(),
+  }).refine(data => 
+    data.showLeaderboard !== undefined || 
+    data.language !== undefined ||
+    data.weeklyPrize !== undefined ||
+    data.monthlyPrize !== undefined ||
+    data.yearlyPrize !== undefined, {
     message: "At least one setting must be provided"
   });
 

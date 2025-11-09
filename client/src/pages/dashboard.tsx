@@ -107,6 +107,9 @@ export default function Dashboard() {
     subscriptionTier: string;
     memberCount: number;
     showLeaderboard?: boolean;
+    weeklyPrize?: string | null;
+    monthlyPrize?: string | null;
+    yearlyPrize?: string | null;
   }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
@@ -907,7 +910,12 @@ export default function Dashboard() {
                   </Tabs>
                 </div>
               )}
-              <Leaderboard members={familyMembers} period={leaderboardPeriod} />
+              <Leaderboard 
+                members={familyMembers} 
+                period={leaderboardPeriod}
+                weeklyPrize={familyData?.weeklyPrize}
+                monthlyPrize={familyData?.monthlyPrize}
+              />
             </div>
           </div>
         ) : (
@@ -1015,7 +1023,12 @@ export default function Dashboard() {
                       </TabsList>
                     </Tabs>
                   )}
-                  <Leaderboard members={familyMembers} period={leaderboardPeriod} />
+                  <Leaderboard 
+                members={familyMembers} 
+                period={leaderboardPeriod}
+                weeklyPrize={familyData?.weeklyPrize}
+                monthlyPrize={familyData?.monthlyPrize}
+              />
                 </TabsContent>
               )}
             </Tabs>

@@ -8,9 +8,11 @@ import { getAvatarUrl } from "@/lib/skins";
 interface LeaderboardProps {
   members: FamilyMember[];
   period?: "week" | "month" | "all";
+  weeklyPrize?: string | null;
+  monthlyPrize?: string | null;
 }
 
-export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
+export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPrize }: LeaderboardProps) {
   const { t } = useTranslation();
   // Filter out members who opted out of leaderboard competition
   const eligibleMembers = members.filter(m => !m.excludeFromLeaderboard);
@@ -157,6 +159,25 @@ export function Leaderboard({ members, period = "week" }: LeaderboardProps) {
               : t('leaderboard.allExcluded')
             }
           </p>
+        </div>
+      )}
+
+      {/* Prize Display */}
+      {period === "week" && weeklyPrize && (
+        <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+          <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+            <Trophy className="h-4 w-4" />
+            <span>{t('leaderboard.weeklyPrize')}: {weeklyPrize}</span>
+          </div>
+        </div>
+      )}
+
+      {period === "month" && monthlyPrize && (
+        <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+          <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+            <Trophy className="h-4 w-4" />
+            <span>{t('leaderboard.monthlyPrize')}: {monthlyPrize}</span>
+          </div>
         </div>
       )}
     </Card>

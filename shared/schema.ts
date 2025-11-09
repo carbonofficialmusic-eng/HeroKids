@@ -57,6 +57,9 @@ export const families = pgTable("families", {
   tierExpiresAt: timestamp("tier_expires_at"), // When subscription expires (for grace periods)
   showLeaderboard: boolean("show_leaderboard").notNull().default(true), // Parents can hide leaderboard from children
   language: varchar("language", { length: 2 }).notNull().default("en"), // Family language (de, en, fr, es, ja, zh)
+  weeklyPrize: text("weekly_prize"), // Prize for weekly leaderboard winner
+  monthlyPrize: text("monthly_prize"), // Prize for monthly leaderboard winner
+  yearlyPrize: text("yearly_prize"), // Prize for yearly leaderboard winner
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

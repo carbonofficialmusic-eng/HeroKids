@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
@@ -40,6 +41,9 @@ export default function Settings() {
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false);
   const [joinCodeCopied, setJoinCodeCopied] = useState(false);
+  const [weeklyPrize, setWeeklyPrize] = useState("");
+  const [monthlyPrize, setMonthlyPrize] = useState("");
+  const [yearlyPrize, setYearlyPrize] = useState("");
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -67,7 +71,13 @@ export default function Settings() {
 
   // Update family settings mutation
   const updateSettingsMutation = useMutation({
-    mutationFn: async (settings: { showLeaderboard?: boolean; language?: "de" | "en" | "fr" | "es" | "ja" | "zh" }) => {
+    mutationFn: async (settings: { 
+      showLeaderboard?: boolean; 
+      language?: "de" | "en" | "fr" | "es" | "ja" | "zh";
+      weeklyPrize?: string | null;
+      monthlyPrize?: string | null;
+      yearlyPrize?: string | null;
+    }) => {
       return await apiRequest("PATCH", "/api/families/settings", settings);
     },
     onSuccess: () => {
@@ -266,6 +276,23 @@ export default function Settings() {
   const handleLanguageChange = (language: string) => {
     updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" });
   };
+
+  const handleSavePrizes = () => {
+    updateSettingsMutation.mutate({
+      weeklyPrize: weeklyPrize.trim() || null,
+      monthlyPrize: monthlyPrize.trim() || null,
+      yearlyPrize: yearlyPrize.trim() || null,
+    });
+  };
+
+  // Load prize values from familyData
+  useEffect(() => {
+    if (familyData) {
+      setWeeklyPrize(familyData.weeklyPrize || "");
+      setMonthlyPrize(familyData.monthlyPrize || "");
+      setYearlyPrize(familyData.yearlyPrize || "");
+    }
+  }, [familyData]);
 
   const languageOptions = [
     { value: "de", label: "Deutsch" },
@@ -576,6 +603,58 @@ export default function Settings() {
                   {t('settings.noMembersYet')}
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Leaderboard Prizes */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-primary" />
+                <CardTitle>{t('settings.leaderboardPrizes')}</CardTitle>
+              </div>
+              <CardDescription>
+                {t('settings.leaderboardPrizesDesc')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="weekly-prize">{t('settings.weeklyPrize')}</Label>
+                <Input
+                  id="weekly-prize"
+                  placeholder={t('settings.weeklyPrizePlaceholder')}
+                  value={weeklyPrize}
+                  onChange={(e) => setWeeklyPrize(e.target.value)}
+                  data-testid="input-weekly-prize"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="monthly-prize">{t('settings.monthlyPrize')}</Label>
+                <Input
+                  id="monthly-prize"
+                  placeholder={t('settings.monthlyPrizePlaceholder')}
+                  value={monthlyPrize}
+                  onChange={(e) => setMonthlyPrize(e.target.value)}
+                  data-testid="input-monthly-prize"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="yearly-prize">{t('settings.yearlyPrize')}</Label>
+                <Input
+                  id="yearly-prize"
+                  placeholder={t('settings.yearlyPrizePlaceholder')}
+                  value={yearlyPrize}
+                  onChange={(e) => setYearlyPrize(e.target.value)}
+                  data-testid="input-yearly-prize"
+                />
+              </div>
+              <Button 
+                onClick={handleSavePrizes}
+                disabled={updateSettingsMutation.isPending}
+                data-testid="button-save-prizes"
+              >
+                {t('settings.savePrizes')}
+              </Button>
             </CardContent>
           </Card>
 
