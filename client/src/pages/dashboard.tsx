@@ -592,16 +592,16 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="space-y-3 mb-4">
-                  <p className="text-sm font-bold text-glow-white">
+                  <p className={`text-sm font-bold ${member?.activeSkinId ? 'text-glow-white' : ''}`}>
                     {t("dashboard.availablePoints")}: {member.totalPoints}
                   </p>
-                  <h1 className="text-4xl font-black font-accent text-glow-white" data-testid="text-page-title">
+                  <h1 className={`text-4xl font-black font-accent ${member?.activeSkinId ? 'text-glow-white' : ''}`} data-testid="text-page-title">
                     {t("dashboard.hi", { name: member.displayName })}
                   </h1>
-                  <p className="text-lg font-semibold text-glow-white">
+                  <p className={`text-lg font-semibold ${member?.activeSkinId ? 'text-glow-white' : ''}`}>
                     {t("dashboard.manageFamily")}
                   </p>
-                  <p className="text-sm font-bold text-glow-white">
+                  <p className={`text-sm font-bold ${member?.activeSkinId ? 'text-glow-white' : ''}`}>
                     {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
                   </p>
                 </div>
@@ -923,16 +923,16 @@ export default function Dashboard() {
                 />
               </div>
               <div className="space-y-3 mb-4">
-                <p className="text-sm font-bold text-glow-white">
+                <p className={`text-sm font-bold ${member?.activeSkinId ? 'text-glow-white' : ''}`}>
                   {t("dashboard.availablePoints")}: {member.totalPoints}
                 </p>
-                <h1 className="text-4xl font-black font-accent text-glow-white" data-testid="text-child-welcome">
+                <h1 className={`text-4xl font-black font-accent ${member?.activeSkinId ? 'text-glow-white' : ''}`} data-testid="text-child-welcome">
                   {t("dashboard.hi", { name: member.displayName })}
                 </h1>
-                <p className="text-lg font-semibold text-glow-white">
+                <p className={`text-lg font-semibold ${member?.activeSkinId ? 'text-glow-white' : ''}`}>
                   {t("dashboard.completeTasksEarn")}
                 </p>
-                <p className="text-sm font-bold text-glow-white">
+                <p className={`text-sm font-bold ${member?.activeSkinId ? 'text-glow-white' : ''}`}>
                   {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
                 </p>
               </div>
