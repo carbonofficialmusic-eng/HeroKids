@@ -101,6 +101,10 @@ function Router() {
           <>
             <Route path="/" component={Dashboard} />
             <Route path="/dashboard" component={Dashboard} />
+            <Route path="/tasks" component={Dashboard} />
+            <Route path="/rewards" component={Dashboard} />
+            <Route path="/leaderboard" component={Dashboard} />
+            <Route path="/skins" component={SkinsGallery} />
             <Route path="/pricing" component={Pricing} />
             <Route path="/analytics" component={Analytics} />
             <Route path="/chat" component={Chat} />
