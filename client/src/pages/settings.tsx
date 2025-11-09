@@ -43,7 +43,6 @@ export default function Settings() {
   const [joinCodeCopied, setJoinCodeCopied] = useState(false);
   const [weeklyPrize, setWeeklyPrize] = useState("");
   const [monthlyPrize, setMonthlyPrize] = useState("");
-  const [yearlyPrize, setYearlyPrize] = useState("");
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -76,7 +75,6 @@ export default function Settings() {
       language?: "de" | "en" | "fr" | "es" | "ja" | "zh";
       weeklyPrize?: string | null;
       monthlyPrize?: string | null;
-      yearlyPrize?: string | null;
     }) => {
       return await apiRequest("PATCH", "/api/families/settings", settings);
     },
@@ -281,7 +279,6 @@ export default function Settings() {
     updateSettingsMutation.mutate({
       weeklyPrize: weeklyPrize.trim() || null,
       monthlyPrize: monthlyPrize.trim() || null,
-      yearlyPrize: yearlyPrize.trim() || null,
     });
   };
 
@@ -290,7 +287,6 @@ export default function Settings() {
     if (familyData) {
       setWeeklyPrize(familyData.weeklyPrize || "");
       setMonthlyPrize(familyData.monthlyPrize || "");
-      setYearlyPrize(familyData.yearlyPrize || "");
     }
   }, [familyData]);
 
@@ -636,16 +632,6 @@ export default function Settings() {
                   value={monthlyPrize}
                   onChange={(e) => setMonthlyPrize(e.target.value)}
                   data-testid="input-monthly-prize"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="yearly-prize">{t('settings.yearlyPrize')}</Label>
-                <Input
-                  id="yearly-prize"
-                  placeholder={t('settings.yearlyPrizePlaceholder')}
-                  value={yearlyPrize}
-                  onChange={(e) => setYearlyPrize(e.target.value)}
-                  data-testid="input-yearly-prize"
                 />
               </div>
               <Button 
