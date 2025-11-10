@@ -901,7 +901,7 @@ export default function Dashboard() {
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div className="space-y-6 lg:-mt-[180px]">
               {/* Leaderboard with tier-gated period selector */}
               {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
                 <div className="mb-4">
