@@ -330,42 +330,50 @@ export default function SkinsGallery() {
         </div>
 
         {/* Tier 2 - Elite Heroes */}
-        {tier2Skins.length > 0 && (
-          <div className="mb-8">
-            <div className="mb-4">
-              <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
-                {t('skins.eliteHeroes')}
-              </h2>
-              <p className="text-sm font-semibold text-glow-white">
-                {unlockedTier >= 2
-                  ? t('skins.unlockedUseCards')
-                  : t('skins.unlockAt500')}
-              </p>
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {tier2Skins.map(renderSkinCard)}
-            </div>
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              {t('skins.eliteHeroes')}
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 2
+                ? t('skins.unlockedUseCards')
+                : t('skins.unlockAt500')}
+            </p>
           </div>
-        )}
+          <div className="grid grid-cols-4 gap-2">
+            {tier2Skins.length > 0 ? (
+              tier2Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
 
         {/* Tier 3 - Dinosaur Heroes */}
-        {tier3Skins.length > 0 && (
-          <div className="mb-8">
-            <div className="mb-4">
-              <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
-                {t('skins.dinosaurBonusPack')}
-              </h2>
-              <p className="text-sm font-semibold text-glow-white">
-                {unlockedTier >= 3
-                  ? t('skins.unlockedUseCards')
-                  : t('skins.unlockAt1000')}
-              </p>
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {tier3Skins.map(renderSkinCard)}
-            </div>
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              {t('skins.dinosaurBonusPack')}
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 3
+                ? t('skins.unlockedUseCards')
+                : t('skins.unlockAt1000')}
+            </p>
           </div>
-        )}
+          <div className="grid grid-cols-4 gap-2">
+            {tier3Skins.length > 0 ? (
+              tier3Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       {celebration && (
