@@ -1774,13 +1774,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const isActive = member.activeSkinId === skin.id;
         
         // Determine skin tier based on pointsRequired ranges
-        // Tier 1 (Starter): 0-559 points
-        // Tier 2 (Elite): 560-1059 points  
+        // Tier 1 (Starter): 0-500 points (Art Master is the last at 500)
+        // Tier 2 (Elite): 560-1000 points (Thunder Champion is the last at 1000)
         // Tier 3 (Dinosaur): 1060+ points
         let skinTier = 1;
         if (skin.pointsRequired >= 1060) {
           skinTier = 3;
-        } else if (skin.pointsRequired >= 560) {
+        } else if (skin.pointsRequired > 500) {
           skinTier = 2;
         }
         
