@@ -41,9 +41,10 @@ interface Skin {
   id: string;
   name: string;
   imageUrl: string;
-  isUnlocked: boolean;
+  isDiscovered: boolean;
   isActive: boolean;
-  canUnlock: boolean;
+  canDiscover: boolean;
+  tier: number;
 }
 
 interface SkinsResponse {
@@ -78,12 +79,12 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
 
-  // Fetch all skins and filter for unlocked ones
+  // Fetch all skins and filter for discovered ones
   const { data: skinsData } = useQuery<SkinsResponse>({
     queryKey: ["/api/skins"],
   });
 
-  const unlockedSkins = skinsData?.skins.filter(skin => skin.isUnlocked) || [];
+  const discoveredSkins = skinsData?.skins.filter(skin => skin.isDiscovered) || [];
 
   const handleSelectEmoticon = (emoticon: string) => {
     onSelectEmoticon(emoticon);
@@ -110,7 +111,7 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
               {t("emoticonPicker.icons")}
             </TabsTrigger>
             <TabsTrigger value="skins" data-testid="tab-skin-emoticons">
-              {t("emoticonPicker.skins", { count: unlockedSkins.length })}
+              {t("emoticonPicker.skins", { count: discoveredSkins.length })}
             </TabsTrigger>
           </TabsList>
           
@@ -136,7 +137,7 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
           
           <TabsContent value="skins" className="m-0">
             <ScrollArea className="h-64 p-2">
-              {unlockedSkins.length === 0 ? (
+              {discoveredSkins.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">
                   <p className="mb-2">{t("emoticonPicker.noUnlockedSkins")}</p>
                   <p className="text-xs">
@@ -145,7 +146,7 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
                 </div>
               ) : (
                 <div className="grid grid-cols-4 gap-2">
-                  {unlockedSkins.map((skin) => (
+                  {discoveredSkins.map((skin) => (
                     <Button
                       key={skin.id}
                       variant="ghost"
