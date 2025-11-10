@@ -11,7 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { FamilyMember } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 
-const TIERS = (t: (key: string) => string | string[]) => [
+const TIERS = (t: (key: string, options?: any) => any) => [
   {
     id: "free",
     name: "Free",
@@ -20,7 +20,7 @@ const TIERS = (t: (key: string) => string | string[]) => [
     price: "€0",
     period: "forever",
     description: t("pricing.tierFreeDesc"),
-    features: t("pricing.tierFreeFeatures") as string[],
+    features: t("pricing.tierFreeFeatures", { returnObjects: true }) as string[],
     popular: false,
   },
   {
@@ -31,7 +31,7 @@ const TIERS = (t: (key: string) => string | string[]) => [
     price: "€2",
     period: "per month",
     description: t("pricing.tierFamilyDesc"),
-    features: t("pricing.tierFamilyFeatures") as string[],
+    features: t("pricing.tierFamilyFeatures", { returnObjects: true }) as string[],
     popular: true,
   },
   {
@@ -42,7 +42,7 @@ const TIERS = (t: (key: string) => string | string[]) => [
     price: "€5",
     period: "per month",
     description: t("pricing.tierFamilyPlusDesc"),
-    features: t("pricing.tierFamilyPlusFeatures") as string[],
+    features: t("pricing.tierFamilyPlusFeatures", { returnObjects: true }) as string[],
     popular: false,
   },
   {
@@ -53,7 +53,7 @@ const TIERS = (t: (key: string) => string | string[]) => [
     price: "€12",
     period: "per month",
     description: t("pricing.tierFamilyHeroDesc"),
-    features: t("pricing.tierFamilyHeroFeatures") as string[],
+    features: t("pricing.tierFamilyHeroFeatures", { returnObjects: true }) as string[],
     popular: false,
   },
 ];
