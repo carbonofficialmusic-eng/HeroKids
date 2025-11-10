@@ -1796,6 +1796,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       });
       
+      // Debug log to check tier distribution
+      const tierCounts = skinsWithStatus.reduce((acc, skin) => {
+        acc[skin.tier] = (acc[skin.tier] || 0) + 1;
+        return acc;
+      }, {} as Record<number, number>);
+      console.log(`🎨 Skins API: totalEarned=${member.totalEarned}, unlockedTier=${unlockedTier}, tierCounts:`, tierCounts);
+      
       res.json({
         skins: skinsWithStatus,
         totalEarned: member.totalEarned,
