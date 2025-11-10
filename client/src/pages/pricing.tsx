@@ -11,6 +11,53 @@ import { apiRequest } from "@/lib/queryClient";
 import type { FamilyMember } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 
+const TIERS = (t: (key: string, options?: any) => any) => [
+  {
+    id: "free",
+    name: "Free",
+    icon: Users,
+    memberLimit: 2,
+    price: "€0",
+    period: "forever",
+    description: t("pricing.tierFreeDesc"),
+    features: t("pricing.tierFreeFeatures", { returnObjects: true }) as string[],
+    popular: false,
+  },
+  {
+    id: "family",
+    name: "Family",
+    icon: Trophy,
+    memberLimit: 4,
+    price: "€2",
+    period: "per month",
+    description: t("pricing.tierFamilyDesc"),
+    features: t("pricing.tierFamilyFeatures", { returnObjects: true }) as string[],
+    popular: true,
+  },
+  {
+    id: "family_plus",
+    name: "Family+",
+    icon: Zap,
+    memberLimit: 6,
+    price: "€5",
+    period: "per month",
+    description: t("pricing.tierFamilyPlusDesc"),
+    features: t("pricing.tierFamilyPlusFeatures", { returnObjects: true }) as string[],
+    popular: false,
+  },
+  {
+    id: "family_hero",
+    name: "Family Hero",
+    icon: Crown,
+    memberLimit: 999,
+    price: "€12",
+    period: "per month",
+    description: t("pricing.tierFamilyHeroDesc"),
+    features: t("pricing.tierFamilyHeroFeatures", { returnObjects: true }) as string[],
+    popular: false,
+  },
+];
+
 export default function Pricing() {
   const { user } = useAuth();
   const { toast } = useToast();
