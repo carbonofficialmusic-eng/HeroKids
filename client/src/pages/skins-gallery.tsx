@@ -127,10 +127,25 @@ export default function SkinsGallery() {
   const unlockedTier = data?.unlockedTier || 1;
   const isDefaultActive = memberData?.activeSkinId === null || memberData?.activeSkinId === undefined;
   
+  // Debug: Log the raw API response
+  console.log('🎨 Frontend: Received skins from API:', {
+    totalSkins: skins.length,
+    totalEarned,
+    unlockedTier,
+    firstSkin: skins[0],
+    skinTiers: skins.map(s => ({ id: s.id, tier: s.tier }))
+  });
+  
   // Organize skins by tier
   const tier1Skins = skins.filter(s => s.tier === 1);
   const tier2Skins = skins.filter(s => s.tier === 2);
   const tier3Skins = skins.filter(s => s.tier === 3);
+  
+  console.log('🎨 Frontend: Tier distribution:', {
+    tier1: tier1Skins.length,
+    tier2: tier2Skins.length,
+    tier3: tier3Skins.length
+  });
 
   const renderSkinCard = (skin: Skin) => {
     const isDiscovered = skin.isDiscovered;
