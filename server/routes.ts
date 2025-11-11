@@ -99,6 +99,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
+  // Stripe Webhook - MUST be before express.json() for signature verification
+  app.post('/api/stripe/webhook', 
+    express.raw({ type: 'application/json' }),
+    async (req, res) => {
+      const sig = req.headers['stripe-signature'];
+      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+      if (!endpointSecret) {
+        console.error('⚠️ STRIPE_WEBHOOK_SECRET not configured');
+        return res.status(500).json({ error: 'Webhook secret not configured' });
+      }
+
+      let event;
+
+      try {
+        // Verify signature using raw body
+        event = stripe.webhooks.constructEvent(req.body, sig!, endpointSecret);
+      } catch (err: any) {
+        console.log(`⚠️ Webhook signature verification failed: ${err.message}`);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+
+      // Handle the event
+      console.log(`✅ Received Stripe webhook: ${event.type}`);
+
+      try {
+        switch (event.type) {
+          case 'checkout.session.completed': {
+            const session = event.data.object as any;
+            console.log('💳 Checkout session completed:', {
+              sessionId: session.id,
+              customerId: session.customer,
+              metadata: session.metadata,
+            });
+
+            // Get family name and tier from metadata
+            const { familyName, tier } = session.metadata;
+
+            if (!familyName || !tier) {
+              console.error('❌ Missing metadata in checkout session:', session.metadata);
+              break;
+            }
+
+            // Update family subscription
+            await storage.updateFamily(familyName, {
+              subscriptionTier: tier as SubscriptionTier,
+              billingCustomerId: session.customer as string,
+              billingSubscriptionId: session.subscription as string,
+            });
+
+            console.log(`✅ Subscription activated: ${familyName} → ${tier}`);
+
+            // Broadcast subscription update to all family members via WebSocket
+            broadcastToFamily(familyName, {
+              type: 'subscription-updated',
+              tier,
+            });
+
+            break;
+          }
+
+          case 'customer.subscription.deleted': {
+            const subscription = event.data.object as any;
+            console.log('🗑️ Subscription canceled:', subscription.id);
+
+            // Find family by subscription ID
+            const families = await storage.getFamilies();
+            const family = families.find((f: Family) => f.billingSubscriptionId === subscription.id);
+
+            if (family) {
+              await storage.updateFamily(family.familyName, {
+                subscriptionTier: 'free',
+                billingSubscriptionId: null,
+              });
+
+              console.log(`✅ Subscription downgraded to free: ${family.familyName}`);
+
+              // Broadcast downgrade
+              broadcastToFamily(family.familyName, {
+                type: 'subscription-updated',
+                tier: 'free',
+              });
+            }
+
+            break;
+          }
+
+          default:
+            console.log(`ℹ️ Unhandled event type: ${event.type}`);
+        }
+      } catch (error) {
+        console.error('❌ Error processing webhook:', error);
+        // Still return 200 to acknowledge receipt
+      }
+
+      // Return 200 to acknowledge receipt
+      res.json({ received: true });
+    }
+  );
+
   // Auth middleware
   await setupAuth(app);
 

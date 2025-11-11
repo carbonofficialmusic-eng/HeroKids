@@ -74,7 +74,11 @@
     "noRewardsAvailable": "Keine Belohnungen verfügbar",
     "requestRewardReview": "Fordere eine Belohnung an und deine Eltern werden sie überprüfen!",
     "requestFirstReward": "Fordere deine erste Belohnung an",
-    "pointsLabel": "Punkte"
+    "pointsLabel": "Punkte",
+    "subscription_processing": "Zahlung wird verarbeitet...",
+    "subscription_processing_desc": "Deine Zahlung wird gerade verarbeitet. Dies dauert nur wenige Sekunden. Die Seite wird automatisch aktualisiert.",
+    "subscription_activated": "Abonnement aktiviert!",
+    "subscription_activated_desc": "Dein Abonnement wurde erfolgreich aktiviert. Viel Spaß mit den neuen Features!"
   },
   "tasks": {
     "title": "Aufgaben",

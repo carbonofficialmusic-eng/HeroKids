@@ -61,6 +61,32 @@ export default function Dashboard() {
   } | null>(null);
   const [childActiveTab, setChildActiveTab] = useState<string>("active");
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("month");
+  const [subscriptionProcessing, setSubscriptionProcessing] = useState(false);
+
+  // Check for subscription=success in URL and show processing dialog
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('subscription') === 'success') {
+      setSubscriptionProcessing(true);
+      
+      // Remove query parameter from URL
+      window.history.replaceState({}, '', window.location.pathname);
+      
+      // Auto-reload after 5 seconds to fetch updated subscription
+      const timer = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+        setSubscriptionProcessing(false);
+        
+        toast({
+          title: "✅ " + t('dashboard.subscription_activated'),
+          description: t('dashboard.subscription_activated_desc'),
+        });
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [toast, t]);
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -1205,6 +1231,21 @@ export default function Dashboard() {
           request={requestToEdit}
         />
       )}
+
+      {/* Subscription Processing Dialog */}
+      <AlertDialog open={subscriptionProcessing} onOpenChange={() => {}}>
+        <AlertDialogContent data-testid="dialog-subscription-processing">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+              {t('dashboard.subscription_processing')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('dashboard.subscription_processing_desc')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Celebration */}
       {celebration && (

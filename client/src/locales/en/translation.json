@@ -74,7 +74,11 @@
     "noRewardsAvailable": "No rewards available",
     "requestRewardReview": "Request a reward and your parents will review it!",
     "requestFirstReward": "Request Your First Reward",
-    "pointsLabel": "points"
+    "pointsLabel": "points",
+    "subscription_processing": "Payment Processing...",
+    "subscription_processing_desc": "Your payment is being processed. This will only take a few seconds. The page will reload automatically.",
+    "subscription_activated": "Subscription Activated!",
+    "subscription_activated_desc": "Your subscription has been successfully activated. Enjoy your new features!"
   },
   "tasks": {
     "title": "Tasks",
