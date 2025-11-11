@@ -92,3 +92,33 @@ Certain special skins award bonus points when discovered:
 - **Tier 3**: Velociraptor (+10), Brachiosaurus (+10)
 
 **Note**: The `pointsRequired` values in the database are for reference/ordering only. Actual discovery is controlled by available cards, not point thresholds.
+
+## Known Issues & Browser Compatibility
+
+### Safari iOS Aggressive Caching
+**Issue**: Safari on iOS aggressively caches API responses, which can prevent users from seeing updates after the app is republished.
+
+**Symptoms**:
+- Character skins page shows "No skins available" even when skins should be displayed
+- Old data appears even after republishing with fixes
+- Development environment shows changes immediately, but published app does not
+
+**Solutions for Users**:
+1. **Clear Safari Cache**: Settings → Safari → Clear History and Website Data
+2. **Use Private Browsing**: Open the app in a Safari Private Tab
+3. **Use Chrome/Firefox**: Switch to a different browser on iOS
+4. **Wait**: Safari's cache typically expires after 5-10 minutes
+
+**Technical Details**: The published app (herokids.replit.app) serves correct data, but Safari may cache GET requests to endpoints like `/api/skins` for extended periods, even with `Cache-Control` headers.
+
+### Desktop Stripe Checkout Compatibility
+**Issue**: Ad-blockers and tracking prevention may block Stripe checkout page rendering on desktop browsers.
+
+**Symptoms**:
+- Checkout page fails to load or shows blank screen
+- Browser console shows blocked requests
+
+**Solutions**:
+- Disable ad-blockers/tracking prevention for herokids.replit.app
+- Use mobile devices (iOS/Android) where checkout works reliably
+- Add herokids.replit.app to browser's allowlist
