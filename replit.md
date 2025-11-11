@@ -32,6 +32,9 @@ Preferred communication style: Simple, everyday language.
 
 ### System Design Choices
 - **Data Storage**: PostgreSQL (Neon serverless driver) with Drizzle ORM for type-safe schema and queries.
+  - **Important**: Production and Development databases are SEPARATE - changes to one do not affect the other
+  - **Auto-Seed**: Character skins (24 total) are automatically seeded on first app startup if the skins table is empty (see `server/index.ts`)
+  - **Database UI**: SQL Console and "Add record" features available in Production Database → My Data tab for manual data management
 - **Authorization**: Role-based (parent vs. child) with API-level enforcement and role change security safeguards.
 - **Role Change Security**: Multi-layered protection to prevent family lockout:
   - Parents cannot demote themselves to child role (self-demotion prevention)
@@ -95,19 +98,35 @@ Certain special skins award bonus points when discovered:
 
 ## Known Issues & Browser Compatibility
 
+### Production Database Empty After Publish (RESOLVED)
+**Issue**: Character skins (and other seeded data) were missing from the published app even though they existed in development.
+
+**Root Cause**: Production and Development databases are SEPARATE entities in Replit - they don't share data.
+
+**Solution Implemented**: Auto-seed mechanism in `server/index.ts`:
+- Checks if skins table is empty on app startup
+- Automatically inserts all 24 character skins if table is empty
+- Runs idempotently (safe to run multiple times, won't create duplicates)
+- Works for both Development and Production environments
+
+**Manual Alternative**: Use SQL Console in Production Database → My Data tab to run `production-skins-insert.sql`
+
+**Status**: ✅ RESOLVED - Auto-seed now ensures skins are available in both environments
+
 ### Safari iOS Aggressive Caching
 **Issue**: Safari on iOS aggressively caches API responses, which can prevent users from seeing updates after the app is republished.
 
 **Symptoms**:
-- Character skins page shows "No skins available" even when skins should be displayed
 - Old data appears even after republishing with fixes
 - Development environment shows changes immediately, but published app does not
+- Hard refresh may be required to see latest data
 
 **Solutions for Users**:
-1. **Clear Safari Cache**: Settings → Safari → Clear History and Website Data
-2. **Use Private Browsing**: Open the app in a Safari Private Tab
-3. **Use Chrome/Firefox**: Switch to a different browser on iOS
-4. **Wait**: Safari's cache typically expires after 5-10 minutes
+1. **Hard Refresh**: Desktop (Ctrl+Shift+R), Mobile (pull-to-refresh)
+2. **Clear Safari Cache**: Settings → Safari → Clear History and Website Data
+3. **Use Private Browsing**: Open the app in a Safari Private Tab
+4. **Use Chrome/Firefox**: Switch to a different browser on iOS
+5. **Wait**: Safari's cache typically expires after 5-10 minutes
 
 **Technical Details**: The published app (herokids.replit.app) serves correct data, but Safari may cache GET requests to endpoints like `/api/skins` for extended periods, even with `Cache-Control` headers.
 
