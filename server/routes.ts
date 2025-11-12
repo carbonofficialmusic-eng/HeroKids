@@ -2360,7 +2360,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log("🔔 Webhook received:", { 
       hasSignature: !!sig, 
       hasSecret: !!webhookSecret,
-      hasRawBody: !!req.rawBody 
+      hasRawBody: !!req.rawBody,
+      rawBodyType: req.rawBody ? typeof req.rawBody : 'undefined',
+      rawBodyLength: req.rawBody ? Buffer.byteLength(req.rawBody) : 0,
+      secretPrefix: webhookSecret ? webhookSecret.substring(0, 8) : 'none'
     });
     
     if (!webhookSecret) {
@@ -2376,11 +2379,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let event: Stripe.Event;
     
     try {
-      // Use the rawBody that was saved by the express.json verify callback
-      event = stripe.webhooks.constructEvent(req.rawBody, sig, webhookSecret);
+      // Ensure rawBody is treated as Buffer
+      const payload = Buffer.isBuffer(req.rawBody) 
+        ? req.rawBody 
+        : Buffer.from(req.rawBody);
+      
+      event = stripe.webhooks.constructEvent(payload, sig, webhookSecret);
       console.log("✅ Webhook event verified:", event.type);
     } catch (err: any) {
-      console.error("Webhook signature verification failed:", err.message);
+      console.error("❌ Webhook signature verification failed:", err.message);
+      console.error("Debug info:", {
+        signatureHeader: sig,
+        webhookSecretMatches: webhookSecret === process.env.STRIPE_WEBHOOK_SECRET,
+        payloadSize: req.rawBody ? Buffer.byteLength(req.rawBody) : 0
+      });
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
       
