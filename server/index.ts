@@ -67,30 +67,62 @@ app.post("/api/stripe-webhook",
       switch (event.type) {
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
+          
+          console.log("🎯 Checkout Session Completed:", {
+            sessionId: session.id,
+            customer: session.customer,
+            subscription: session.subscription,
+            paymentStatus: session.payment_status,
+            metadata: session.metadata,
+            hasMetadata: !!session.metadata,
+            hasFamilyName: !!session.metadata?.familyName,
+            hasTier: !!session.metadata?.tier,
+          });
+          
           const familyName = session.metadata?.familyName;
           const tier = session.metadata?.tier as "free" | "family" | "family_plus" | "family_hero";
           
-          if (familyName && tier) {
-            const { eq } = await import("drizzle-orm");
-            const { families } = await import("../shared/schema");
-            
-            await db.update(families)
-              .set({
-                subscriptionTier: tier,
-                subscriptionStatus: "active",
-                billingSubscriptionId: session.subscription as string,
-              })
-              .where(eq(families.familyName, familyName));
-            
-            console.log(`✅ Subscription activated for ${familyName}: ${tier}`);
+          if (!familyName || !tier) {
+            console.error("❌ CRITICAL: Missing metadata in checkout session!", {
+              familyName,
+              tier,
+              sessionId: session.id,
+              fullMetadata: session.metadata,
+              customer: session.customer,
+              subscription: session.subscription,
+            });
+            // Exit switch, response will be sent at the end
+            break;
           }
+          
+          console.log(`📝 Updating database for family: ${familyName}, tier: ${tier}`);
+          
+          const { eq } = await import("drizzle-orm");
+          const { families } = await import("../shared/schema");
+          
+          await db.update(families)
+            .set({
+              subscriptionTier: tier,
+              subscriptionStatus: "active",
+              billingSubscriptionId: session.subscription as string,
+            })
+            .where(eq(families.familyName, familyName));
+          
+          console.log(`✅ Subscription activated for ${familyName}: ${tier}`);
           break;
         }
+        
+        default:
+          console.log(`ℹ️ Unhandled webhook event type: ${event.type}`);
       }
       
       res.json({ received: true });
     } catch (error: any) {
-      console.error("Error processing webhook:", error);
+      console.error("❌ Error processing webhook:", {
+        error: error.message,
+        stack: error.stack,
+        eventType: event?.type,
+      });
       res.status(500).send("Internal server error");
     }
   }
