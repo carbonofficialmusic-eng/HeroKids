@@ -4,19 +4,83 @@ import { setupVite, serveStatic, log } from "./vite";
 import { startPointsResetScheduler } from "./scheduler";
 import { db } from "./db";
 import { skins } from "../shared/schema";
+import Stripe from "stripe";
 
 const app = express();
 
-declare module 'http' {
-  interface IncomingMessage {
-    rawBody: Buffer
+// CRITICAL: Stripe webhook MUST use express.raw() BEFORE express.json()
+app.post("/api/stripe-webhook", 
+  express.raw({ type: 'application/json' }),
+  async (req: Request, res: Response) => {
+    const sig = req.headers["stripe-signature"];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    
+    console.log("🔔 Webhook received:", { 
+      hasSignature: !!sig, 
+      hasSecret: !!webhookSecret,
+      hasRawBody: !!req.body,
+      rawBodyType: req.body ? typeof req.body : 'undefined',
+      rawBodyLength: req.body ? Buffer.byteLength(req.body) : 0,
+      secretPrefix: webhookSecret ? webhookSecret.substring(0, 8) : 'none'
+    });
+    
+    if (!webhookSecret) {
+      console.warn("STRIPE_WEBHOOK_SECRET not configured");
+      return res.status(400).send("Webhook secret not configured");
+    }
+    
+    if (!req.body) {
+      console.error("No request body for webhook");
+      return res.status(400).send("No request body");
+    }
+    
+    let event: Stripe.Event;
+    
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig as string, webhookSecret);
+      console.log("✅ Webhook event verified:", event.type);
+    } catch (err: any) {
+      console.error("❌ Webhook signature verification failed:", err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+    
+    // Handle the event
+    try {
+      switch (event.type) {
+        case "checkout.session.completed": {
+          const session = event.data.object as Stripe.Checkout.Session;
+          const familyName = session.metadata?.familyName;
+          const tier = session.metadata?.tier;
+          
+          if (familyName && tier) {
+            const { eq } = await import("drizzle-orm");
+            const { families } = await import("../shared/schema");
+            
+            await db.update(families)
+              .set({
+                subscriptionTier: tier,
+                subscriptionStatus: "active",
+                billingSubscriptionId: session.subscription as string,
+              })
+              .where(eq(families.familyName, familyName));
+            
+            console.log(`✅ Subscription activated for ${familyName}: ${tier}`);
+          }
+          break;
+        }
+      }
+      
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error("Error processing webhook:", error);
+      res.status(500).send("Internal server error");
+    }
   }
-}
-app.use(express.json({
-  verify: (req, _res, buf) => {
-    req.rawBody = Buffer.from(buf);
-  }
-}));
+);
+
+// Now load normal JSON middleware for other routes
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
