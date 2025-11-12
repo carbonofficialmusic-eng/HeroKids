@@ -2312,9 +2312,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create checkout session
       // Construct base URL with proper scheme
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
-        : 'http://localhost:5000';
+      // In Production: REPLIT_DOMAINS (e.g., "herokids.replit.app,custom-domain.com")
+      // In Development: REPLIT_DEV_DOMAIN (e.g., "xyz.replit.dev")
+      const baseUrl = process.env.REPLIT_DOMAINS 
+        ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` // Production: first domain
+        : process.env.REPLIT_DEV_DOMAIN 
+          ? `https://${process.env.REPLIT_DEV_DOMAIN}` // Development
+          : 'http://localhost:5000'; // Local fallback
       
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
