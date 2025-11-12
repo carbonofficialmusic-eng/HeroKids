@@ -9,12 +9,12 @@ const app = express();
 
 declare module 'http' {
   interface IncomingMessage {
-    rawBody: unknown
+    rawBody: Buffer
   }
 }
 app.use(express.json({
   verify: (req, _res, buf) => {
-    req.rawBody = buf;
+    req.rawBody = Buffer.from(buf);
   }
 }));
 app.use(express.urlencoded({ extended: false }));
