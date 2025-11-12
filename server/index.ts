@@ -22,7 +22,9 @@ app.post("/api/stripe-webhook",
       hasRawBody: !!req.body,
       rawBodyType: req.body ? typeof req.body : 'undefined',
       rawBodyLength: req.body ? Buffer.byteLength(req.body) : 0,
-      secretPrefix: webhookSecret ? webhookSecret.substring(0, 8) : 'none'
+      secretPrefix: webhookSecret ? webhookSecret.substring(0, 8) : 'none',
+      isBuffer: req.body ? Buffer.isBuffer(req.body) : false,
+      signaturePreview: sig ? String(sig).substring(0, 50) + '...' : 'none'
     });
     
     if (!webhookSecret) {
@@ -38,10 +40,25 @@ app.post("/api/stripe-webhook",
     let event: Stripe.Event;
     
     try {
-      event = stripe.webhooks.constructEvent(req.body, sig as string, webhookSecret);
+      // Ensure we're passing a Buffer
+      const payload = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
+      console.log("🔍 Attempting verification with:", {
+        payloadType: typeof payload,
+        payloadIsBuffer: Buffer.isBuffer(payload),
+        payloadLength: payload.length,
+        signaturePresent: !!sig
+      });
+      
+      event = stripe.webhooks.constructEvent(payload, sig as string, webhookSecret);
       console.log("✅ Webhook event verified:", event.type);
     } catch (err: any) {
       console.error("❌ Webhook signature verification failed:", err.message);
+      console.error("Debug details:", {
+        errorType: err.constructor.name,
+        errorMessage: err.message,
+        webhookSecretLength: webhookSecret.length,
+        bodyPreview: req.body ? req.body.toString().substring(0, 100) : 'none'
+      });
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
     
@@ -51,7 +68,7 @@ app.post("/api/stripe-webhook",
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
           const familyName = session.metadata?.familyName;
-          const tier = session.metadata?.tier;
+          const tier = session.metadata?.tier as "free" | "family" | "family_plus" | "family_hero";
           
           if (familyName && tier) {
             const { eq } = await import("drizzle-orm");
