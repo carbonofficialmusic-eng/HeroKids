@@ -151,16 +151,15 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
                       key={skin.id}
                       variant="ghost"
                       onClick={() => handleSelectEmoticon(`:skin:${skin.id}:`)}
-                      className="h-16 w-16 p-1 flex flex-col items-center gap-1"
+                      className="h-16 w-16 p-1 flex items-center justify-center"
                       title={skin.name}
                       data-testid={`emoticon-skin-${skin.id}`}
                     >
                       <img
                         src={SKIN_IMAGES[skin.id]}
                         alt={skin.name}
-                        className="h-10 w-10 rounded-lg object-cover"
+                        className="h-12 w-12 rounded-lg object-cover"
                       />
-                      <span className="text-xs truncate w-full">{skin.name}</span>
                     </Button>
                   ))}
                 </div>
