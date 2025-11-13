@@ -353,7 +353,7 @@ export default function SkinsGallery() {
             <p className="text-sm font-semibold text-glow-white">
               {unlockedTier >= 2
                 ? t('skins.unlockedUseCards')
-                : t('skins.unlockAt600')}
+                : t('skins.unlockAt700')}
             </p>
           </div>
           <div className="grid grid-cols-4 gap-2">
@@ -376,7 +376,7 @@ export default function SkinsGallery() {
             <p className="text-sm font-semibold text-glow-white">
               {unlockedTier >= 3
                 ? t('skins.unlockedUseCards')
-                : t('skins.unlockAt1500')}
+                : t('skins.unlockAt1400')}
             </p>
           </div>
           <div className="grid grid-cols-4 gap-2">
