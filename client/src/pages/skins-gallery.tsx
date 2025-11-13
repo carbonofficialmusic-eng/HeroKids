@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, ApiError } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,10 +48,6 @@ export default function SkinsGallery() {
   const discoverSkinMutation = useMutation({
     mutationFn: async (skinId: string) => {
       const res = await apiRequest("POST", "/api/skins/discover", { skinId });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to discover skin");
-      }
       return await res.json();
     },
     onSuccess: (result) => {
@@ -66,9 +62,13 @@ export default function SkinsGallery() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
     },
     onError: (error: any) => {
+      const description = error instanceof ApiError && error.data?.message
+        ? error.data.message
+        : t('skins.failedToDiscover');
+      
       toast({
         title: t('skins.discoveryFailed'),
-        description: error.message || t('skins.failedToDiscover'),
+        description,
         variant: "destructive",
       });
     },
@@ -77,10 +77,6 @@ export default function SkinsGallery() {
   const selectSkinMutation = useMutation({
     mutationFn: async (skinId: string | null) => {
       const res = await apiRequest("POST", "/api/skins/select", { skinId });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to select skin");
-      }
       return await res.json();
     },
     onSuccess: (_, skinId) => {
@@ -105,9 +101,13 @@ export default function SkinsGallery() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
     },
     onError: (error: any) => {
+      const description = error instanceof ApiError && error.data?.message
+        ? error.data.message
+        : t('skins.failedToSelect');
+      
       toast({
         title: t('common.error'),
-        description: error.message || t('skins.failedToSelect'),
+        description,
         variant: "destructive",
       });
     },
