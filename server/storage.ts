@@ -184,7 +184,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateFamilySettings(
     familyName: string,
-    settings: Partial<Pick<Family, "showLeaderboard" | "language" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>
+    settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>
   ): Promise<void> {
     await db
       .update(families)
@@ -297,6 +297,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(familyMembers.id, id))
       .returning();
     return updated as FamilyMember;
+  }
+
+  async updateFamilyMemberPin(id: string, pinCode: string | null): Promise<void> {
+    await db
+      .update(familyMembers)
+      .set({ pinCode, updatedAt: new Date() })
+      .where(eq(familyMembers.id, id));
   }
 
   async deleteFamilyMember(id: string): Promise<void> {

@@ -173,12 +173,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Zod schema for family settings update
   const updateFamilySettingsSchema = z.object({
     showLeaderboard: z.boolean().optional(),
+    singleDeviceMode: z.boolean().optional(),
     language: z.enum(["de", "en", "fr", "es", "ja", "zh", "ko"]).optional(),
     weeklyPrize: z.string().nullable().optional(),
     monthlyPrize: z.string().nullable().optional(),
     yearlyPrize: z.string().nullable().optional(),
   }).refine(data => 
     data.showLeaderboard !== undefined || 
+    data.singleDeviceMode !== undefined ||
     data.language !== undefined ||
     data.weeklyPrize !== undefined ||
     data.monthlyPrize !== undefined ||
@@ -321,7 +323,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only parents can switch members" });
       }
       
-      const { memberId } = req.body;
+      const { memberId, pinCode } = req.body;
       
       // If no memberId provided, switch back to self
       if (!memberId) {
@@ -340,6 +342,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot switch to member from different family" });
       }
       
+      // Get family settings to check if single device mode is enabled
+      const family = await storage.getFamily(realMember.familyName);
+      
+      // If single device mode is enabled and switching to a parent, verify PIN
+      if (family?.singleDeviceMode && targetMember.role === "parent") {
+        if (!targetMember.pinCode) {
+          return res.status(400).json({ 
+            message: "Target member has no PIN set. Please set a PIN first.",
+            requiresPin: true 
+          });
+        }
+        
+        if (!pinCode) {
+          return res.status(401).json({ 
+            message: "PIN required for this member",
+            requiresPin: true 
+          });
+        }
+        
+        if (pinCode !== targetMember.pinCode) {
+          return res.status(401).json({ 
+            message: "Incorrect PIN",
+            requiresPin: true 
+          });
+        }
+      }
+      
       // Set the session to act as this member
       req.session.actingAsMemberId = memberId;
       
@@ -347,6 +376,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error switching member:", error);
       res.status(500).json({ message: "Failed to switch member" });
+    }
+  });
+
+  // Set or update PIN code for a family member (parents only)
+  app.patch("/api/family-members/:id/pin", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const realMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!realMember) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can set PIN codes
+      if (realMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can manage PIN codes" });
+      }
+      
+      const { id: targetMemberId } = req.params;
+      const { pinCode } = req.body;
+      
+      // Validate PIN code
+      if (pinCode !== null && pinCode !== undefined && pinCode !== "") {
+        if (!/^\d{4}$/.test(pinCode)) {
+          return res.status(400).json({ message: "PIN must be exactly 4 digits" });
+        }
+      }
+      
+      // Verify the target member exists and is in the same family
+      const targetMember = await storage.getFamilyMember(targetMemberId);
+      
+      if (!targetMember) {
+        return res.status(404).json({ message: "Target member not found" });
+      }
+      
+      if (targetMember.familyName !== realMember.familyName) {
+        return res.status(403).json({ message: "Cannot manage PIN for member from different family" });
+      }
+      
+      // Update PIN code (allow null/empty string to clear PIN)
+      await storage.updateFamilyMemberPin(targetMemberId, pinCode || null);
+      
+      res.json({ message: "PIN updated successfully" });
+    } catch (error) {
+      console.error("Error updating PIN:", error);
+      res.status(500).json({ message: "Failed to update PIN" });
     }
   });
 
