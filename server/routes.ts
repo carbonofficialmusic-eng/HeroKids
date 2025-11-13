@@ -1085,41 +1085,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         uploadedPhotos.delete(proofPhotoUrl);
       }
       
-      // Determine initial status based on requiresApproval setting
-      const initialStatus = task.requiresApproval ? "pending" : "approved";
-      
-      // Create completion record
+      // Create completion record (handles approval, points, and completionCount in transaction)
       const completion = await storage.createTaskCompletion({
         taskId: task.id,
         memberId: member.id,
         pointsEarned: task.points,
         proofPhotoUrl: proofPhotoUrl || null,
-        status: initialStatus,
       });
-      
-      // If task doesn't require approval, auto-approve and award points immediately
-      if (!task.requiresApproval) {
-        const newTotalEarned = member.totalEarned + task.points;
-        const newTotalPoints = member.totalPoints + task.points;
-        const newWeeklyPoints = member.weeklyPoints + task.points;
-        const newMonthlyPoints = member.monthlyPoints + task.points;
-        
-        await storage.updateFamilyMemberPoints(
-          member.id,
-          newTotalEarned,
-          newTotalPoints,
-          newWeeklyPoints,
-          newMonthlyPoints
-        );
-        
-        // Add to points history
-        await storage.addPointsHistory({
-          memberId: member.id,
-          points: task.points,
-          reason: `Completed: ${task.title}`,
-          taskId: task.id,
-        });
-      }
       
       // Handle recurring tasks
       if (task.recurrenceDays || task.recurrence !== "none") {
@@ -1169,8 +1141,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Update the task's nextAvailableDate - task stays visible but unavailable
         await storage.updateTaskNextAvailableDate(taskId, nextAvailableDate);
-      } else {
-        // Non-recurring tasks are marked as completed
+      } else if (task.maxCompletions === null) {
+        // Only non-recurring, non-multi-completion tasks are marked as completed immediately
+        // Multi-completion tasks manage their own status in _approveCompletionInternal
         await storage.updateTaskStatus(taskId, "completed");
       }
       

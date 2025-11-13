@@ -559,7 +559,7 @@ export function TaskDialog({
                     <Switch
                       checked={field.value !== undefined && field.value !== null}
                       onCheckedChange={(checked) => {
-                        field.onChange(checked ? 3 : undefined);
+                        field.onChange(checked ? 2 : undefined);
                       }}
                       data-testid="toggle-multi-completion"
                     />
@@ -570,8 +570,8 @@ export function TaskDialog({
                           type="number"
                           min={1}
                           max={20}
-                          value={field.value || 3}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 3)}
+                          value={field.value || 2}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 2)}
                           className="w-20"
                           data-testid="input-max-completions"
                         />
