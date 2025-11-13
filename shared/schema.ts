@@ -56,6 +56,7 @@ export const families = pgTable("families", {
   billingSubscriptionId: varchar("billing_subscription_id"), // Stripe subscription ID
   tierExpiresAt: timestamp("tier_expires_at"), // When subscription expires (for grace periods)
   showLeaderboard: boolean("show_leaderboard").notNull().default(true), // Parents can hide leaderboard from children
+  singleDeviceMode: boolean("single_device_mode").notNull().default(false), // Enable PIN protection for member switching
   language: varchar("language", { length: 2 }).notNull().default("en"), // Family language (de, en, fr, es, ja, zh, ko)
   weeklyPrize: text("weekly_prize"), // Prize for weekly leaderboard winner
   monthlyPrize: text("monthly_prize"), // Prize for monthly leaderboard winner
@@ -85,6 +86,7 @@ export const familyMembers = pgTable("family_members", {
   role: roleEnum("role").notNull().default("child"),
   avatarUrl: varchar("avatar_url"),
   color: varchar("color").notNull().default("#8B5CF6"), // User's theme color
+  pinCode: varchar("pin_code", { length: 4 }), // 4-digit PIN for single-device mode (optional)
   totalEarned: integer("total_earned").notNull().default(0), // Lifetime achievement points (never decreases)
   totalPoints: integer("total_points").notNull().default(0), // Available balance for redeeming rewards
   weeklyPoints: integer("weekly_points").notNull().default(0),
