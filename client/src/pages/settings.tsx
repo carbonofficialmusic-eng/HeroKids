@@ -72,7 +72,7 @@ export default function Settings() {
   const updateSettingsMutation = useMutation({
     mutationFn: async (settings: { 
       showLeaderboard?: boolean; 
-      language?: "de" | "en" | "fr" | "es" | "ja" | "zh";
+      language?: "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko";
       weeklyPrize?: string | null;
       monthlyPrize?: string | null;
     }) => {
@@ -288,7 +288,7 @@ export default function Settings() {
   };
 
   const handleLanguageChange = (language: string) => {
-    updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" });
+    updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" });
   };
 
   const handleSavePrizes = () => {
@@ -305,6 +305,7 @@ export default function Settings() {
     { value: "es", label: "Español" },
     { value: "ja", label: "日本語" },
     { value: "zh", label: "中文" },
+    { value: "ko", label: "한국어" },
   ];
 
   return (
