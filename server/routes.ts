@@ -157,6 +157,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family not found" });
       }
       
+      // Filter sensitive data for children
+      if (member.role === "child") {
+        const { joinCode, weeklyPrize, monthlyPrize, ...safeData } = family;
+        return res.json(safeData);
+      }
+      
       res.json(family);
     } catch (error) {
       console.error("Error fetching family settings:", error);

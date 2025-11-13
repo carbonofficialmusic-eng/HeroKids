@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { getBackgroundUrl } from "@/lib/skins";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
@@ -111,7 +112,11 @@ function Router() {
             <Route path="/approvals" component={Approvals} />
             <Route path="/rewards-board" component={RewardsBoard} />
             <Route path="/skins-gallery" component={SkinsGallery} />
-            <Route path="/settings" component={Settings} />
+            <Route path="/settings">
+              <ProtectedRoute requiredRole="parent" redirectTo="/dashboard">
+                <Settings />
+              </ProtectedRoute>
+            </Route>
           </>
         )}
         <Route component={NotFound} />
