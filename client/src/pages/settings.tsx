@@ -12,7 +12,7 @@ import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages } from "lucide-react";
 import { useLocation } from "wouter";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -116,10 +116,14 @@ export default function Settings() {
         });
       }
     },
-    onError: () => {
+    onError: (error: any) => {
+      const description = error instanceof ApiError && error.data?.message
+        ? error.data.message
+        : t('settings.errorAddMember');
+      
       toast({
         title: t('errors.somethingWrong'),
-        description: t('settings.errorAddMember'),
+        description,
         variant: "destructive",
       });
     },
@@ -142,9 +146,13 @@ export default function Settings() {
       });
     },
     onError: (error: any) => {
+      const description = error instanceof ApiError && error.data?.message
+        ? error.data.message
+        : t('settings.errorUpdateMember');
+      
       toast({
         title: t('errors.somethingWrong'),
-        description: error.message || t('settings.errorUpdateMember'),
+        description,
         variant: "destructive",
       });
     },
