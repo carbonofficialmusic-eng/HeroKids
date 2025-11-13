@@ -71,7 +71,8 @@ export default function Settings() {
   // Update family settings mutation
   const updateSettingsMutation = useMutation({
     mutationFn: async (settings: { 
-      showLeaderboard?: boolean; 
+      showLeaderboard?: boolean;
+      singleDeviceMode?: boolean;
       language?: "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko";
       weeklyPrize?: string | null;
       monthlyPrize?: string | null;
@@ -273,6 +274,10 @@ export default function Settings() {
 
   const handleToggleLeaderboard = (checked: boolean) => {
     updateSettingsMutation.mutate({ showLeaderboard: checked });
+  };
+
+  const handleToggleSingleDeviceMode = (checked: boolean) => {
+    updateSettingsMutation.mutate({ singleDeviceMode: checked });
   };
 
   const handleCopyJoinCode = () => {
@@ -536,6 +541,40 @@ export default function Settings() {
                   onCheckedChange={handleToggleLeaderboard}
                   disabled={updateSettingsMutation.isPending}
                   data-testid="switch-show-leaderboard"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Single Device Mode */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Key className="h-5 w-5 text-primary" />
+                <CardTitle>App-Nutzung auf einem Gerät</CardTitle>
+              </div>
+              <CardDescription>
+                Schützen Sie Elternprofile mit PIN-Codes bei gemeinsamer Gerätenutzung
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="single-device-mode" className="text-base">
+                    Einzelgerät-Modus
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {familyData?.singleDeviceMode 
+                      ? "Kinder benötigen PIN-Code um zu Elternprofilen zu wechseln"
+                      : "Kinder können frei zwischen allen Profilen wechseln"}
+                  </p>
+                </div>
+                <Switch
+                  id="single-device-mode"
+                  checked={familyData?.singleDeviceMode ?? false}
+                  onCheckedChange={handleToggleSingleDeviceMode}
+                  disabled={updateSettingsMutation.isPending}
+                  data-testid="switch-single-device-mode"
                 />
               </div>
             </CardContent>
