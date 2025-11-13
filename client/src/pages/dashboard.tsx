@@ -149,6 +149,7 @@ export default function Dashboard() {
     subscriptionTier: string;
     memberCount: number;
     showLeaderboard?: boolean;
+    singleDeviceMode?: boolean;
     weeklyPrize?: string | null;
     monthlyPrize?: string | null;
     yearlyPrize?: string | null;
@@ -240,8 +241,8 @@ export default function Dashboard() {
 
   // Switch member (parents only)
   const switchMemberMutation = useMutation({
-    mutationFn: async (memberId: string | null) => {
-      return await apiRequest("POST", "/api/family-members/switch", { memberId });
+    mutationFn: async (params: { memberId: string | null; pinCode?: string }) => {
+      return await apiRequest("POST", "/api/family-members/switch", params);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
@@ -1213,7 +1214,8 @@ export default function Dashboard() {
           onOpenChange={setSwitchMemberDialogOpen}
           members={familyMembers}
           currentMember={member}
-          onSwitch={(memberId) => switchMemberMutation.mutate(memberId)}
+          familyData={familyData}
+          onSwitch={(params) => switchMemberMutation.mutate(params)}
           isSubmitting={switchMemberMutation.isPending}
         />
       )}

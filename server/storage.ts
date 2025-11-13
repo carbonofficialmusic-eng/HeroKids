@@ -48,7 +48,7 @@ export interface IStorage {
   createFamily(family: InsertFamily): Promise<Family>;
   updateFamily(familyName: string, updates: Partial<InsertFamily>): Promise<Family>;
   updateFamilyTier(familyName: string, tier: "free" | "family" | "family_plus" | "family_hero"): Promise<void>;
-  updateFamilySettings(familyName: string, settings: Partial<Pick<Family, "showLeaderboard" | "language" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>): Promise<void>;
+  updateFamilySettings(familyName: string, settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>): Promise<void>;
 
   // Family member operations
   getFamilyMember(id: string): Promise<FamilyMember | undefined>;
@@ -70,6 +70,9 @@ export interface IStorage {
   ): Promise<void>;
   resetAllWeeklyPoints(): Promise<void>;
   resetAllMonthlyPoints(): Promise<void>;
+  setPinCode(memberId: string, pinCode: string): Promise<void>;
+  clearPinCode(memberId: string): Promise<void>;
+  validatePin(memberId: string, pinCode: string): Promise<boolean>;
 
   // Task operations
   getTask(id: string): Promise<Task | undefined>;
@@ -291,20 +294,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateFamilyMember(id: string, updates: Partial<InsertFamilyMember>): Promise<FamilyMember> {
+    // Prevent direct pinCode updates - must use setPinCode or clearPinCode
+    const { pinCode, ...safeUpdates } = updates;
+    if (pinCode !== undefined) {
+      throw new Error("Direct pinCode updates not allowed. Use setPinCode or clearPinCode methods.");
+    }
+    
     const [updated] = await db
       .update(familyMembers)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...safeUpdates, updatedAt: new Date() })
       .where(eq(familyMembers.id, id))
       .returning();
     return updated as FamilyMember;
   }
 
-  async updateFamilyMemberPin(id: string, pinCode: string | null): Promise<void> {
-    await db
-      .update(familyMembers)
-      .set({ pinCode, updatedAt: new Date() })
-      .where(eq(familyMembers.id, id));
-  }
 
   async deleteFamilyMember(id: string): Promise<void> {
     await db.delete(familyMembers).where(eq(familyMembers.id, id));
@@ -333,6 +336,31 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(familyMembers)
       .set({ monthlyPoints: 0, updatedAt: new Date() });
+  }
+
+  async setPinCode(memberId: string, pinCode: string): Promise<void> {
+    const bcrypt = await import("bcrypt");
+    const hashedPin = await bcrypt.hash(pinCode, 10);
+    await db
+      .update(familyMembers)
+      .set({ pinCode: hashedPin, updatedAt: new Date() })
+      .where(eq(familyMembers.id, memberId));
+  }
+
+  async clearPinCode(memberId: string): Promise<void> {
+    await db
+      .update(familyMembers)
+      .set({ pinCode: null, updatedAt: new Date() })
+      .where(eq(familyMembers.id, memberId));
+  }
+
+  async validatePin(memberId: string, pinCode: string): Promise<boolean> {
+    const member = await this.getFamilyMember(memberId);
+    if (!member || !member.pinCode) {
+      return false;
+    }
+    const bcrypt = await import("bcrypt");
+    return await bcrypt.compare(pinCode, member.pinCode);
   }
 
   // Task operations

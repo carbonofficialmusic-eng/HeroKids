@@ -361,7 +361,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        if (pinCode !== targetMember.pinCode) {
+        const isValidPin = await storage.validatePin(memberId, pinCode);
+        if (!isValidPin) {
           return res.status(401).json({ 
             message: "Incorrect PIN",
             requiresPin: true 
@@ -416,7 +417,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Update PIN code (allow null/empty string to clear PIN)
-      await storage.updateFamilyMemberPin(targetMemberId, pinCode || null);
+      if (pinCode && pinCode.trim() !== "") {
+        await storage.setPinCode(targetMemberId, pinCode);
+      } else {
+        // Clear PIN by setting to null
+        await storage.clearPinCode(targetMemberId);
+      }
       
       res.json({ message: "PIN updated successfully" });
     } catch (error) {

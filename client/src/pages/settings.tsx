@@ -43,6 +43,9 @@ export default function Settings() {
   const [joinCodeCopied, setJoinCodeCopied] = useState(false);
   const [weeklyPrize, setWeeklyPrize] = useState("");
   const [monthlyPrize, setMonthlyPrize] = useState("");
+  const [memberForPinSetting, setMemberForPinSetting] = useState<FamilyMember | null>(null);
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [newPin, setNewPin] = useState("");
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -221,6 +224,30 @@ export default function Settings() {
       toast({
         title: t('errors.somethingWrong'),
         description: t('settings.errorResetFamily'),
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Set/update PIN code mutation
+  const setPinMutation = useMutation({
+    mutationFn: async ({ memberId, pinCode }: { memberId: string; pinCode: string }) => {
+      return await apiRequest("PATCH", `/api/family-members/${memberId}/pin`, { pinCode });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      setPinDialogOpen(false);
+      setMemberForPinSetting(null);
+      setNewPin("");
+      toast({
+        title: "PIN aktualisiert",
+        description: "Der PIN-Code wurde erfolgreich gesetzt",
+      });
+    },
+    onError: () => {
+      toast({
+        title: t('errors.somethingWrong'),
+        description: "Fehler beim Setzen des PIN-Codes",
         variant: "destructive",
       });
     },
@@ -580,6 +607,71 @@ export default function Settings() {
             </CardContent>
           </Card>
 
+          {/* PIN Code Management - only shown when single device mode is enabled */}
+          {familyData?.singleDeviceMode && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Key className="h-5 w-5 text-primary" />
+                  <CardTitle>Eltern PIN-Codes</CardTitle>
+                </div>
+                <CardDescription>
+                  Verwalten Sie die PIN-Codes für Eltern-Profile
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {membersLoading ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    Lade Mitglieder...
+                  </div>
+                ) : familyMembers && familyMembers.length > 0 ? (
+                  <div className="space-y-3">
+                    {familyMembers
+                      .filter((m) => m.role === "parent")
+                      .map((parent) => (
+                        <div
+                          key={parent.id}
+                          className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                          data-testid={`pin-management-${parent.id}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={getAvatarUrl(parent.activeSkinId, parent.avatarUrl)} alt={parent.displayName} />
+                              <AvatarFallback style={{ backgroundColor: parent.color }}>
+                                {parent.displayName.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">{parent.displayName}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {parent.pinCode ? "PIN gesetzt" : "Kein PIN"}
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setMemberForPinSetting(parent);
+                              setPinDialogOpen(true);
+                            }}
+                            data-testid={`button-set-pin-${parent.id}`}
+                          >
+                            <Key className="h-4 w-4 mr-2" />
+                            {parent.pinCode ? "PIN ändern" : "PIN setzen"}
+                          </Button>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground">
+                    Keine Eltern gefunden
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Leaderboard Competition */}
           <Card>
             <CardHeader>
@@ -796,6 +888,81 @@ export default function Settings() {
               data-testid="button-confirm-delete"
             >
               {deleteMemberMutation.isPending ? t('settings.removing') : t('settings.removeMemberButton')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* PIN Code Dialog */}
+      <AlertDialog open={pinDialogOpen} onOpenChange={setPinDialogOpen}>
+        <AlertDialogContent data-testid="dialog-set-pin">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              PIN-Code {memberForPinSetting?.pinCode ? "ändern" : "setzen"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Setzen Sie einen 4-stelligen PIN-Code für {memberForPinSetting?.displayName}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="pin-input">PIN-Code (4 Ziffern)</Label>
+              <Input
+                id="pin-input"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={4}
+                value={newPin}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, '');
+                  setNewPin(value);
+                }}
+                placeholder="0000"
+                className="text-center text-2xl tracking-widest font-mono"
+                data-testid="input-pin-code"
+              />
+              <p className="text-sm text-muted-foreground">
+                Dieser PIN wird benötigt, um zu diesem Profil zu wechseln
+              </p>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            {memberForPinSetting?.pinCode && (
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (memberForPinSetting) {
+                    setPinMutation.mutate({ memberId: memberForPinSetting.id, pinCode: "" });
+                  }
+                }}
+                disabled={setPinMutation.isPending}
+                data-testid="button-clear-pin"
+              >
+                PIN löschen
+              </Button>
+            )}
+            <AlertDialogCancel
+              onClick={() => {
+                setPinDialogOpen(false);
+                setNewPin("");
+                setMemberForPinSetting(null);
+              }}
+              disabled={setPinMutation.isPending}
+              data-testid="button-cancel-pin"
+            >
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (memberForPinSetting && newPin.length === 4) {
+                  setPinMutation.mutate({ memberId: memberForPinSetting.id, pinCode: newPin });
+                }
+              }}
+              disabled={setPinMutation.isPending || newPin.length !== 4}
+              data-testid="button-save-pin"
+            >
+              {setPinMutation.isPending ? "Speichern..." : "Speichern"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

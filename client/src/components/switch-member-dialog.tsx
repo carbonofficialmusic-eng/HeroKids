@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Check, User } from "lucide-react";
-import type { FamilyMember } from "@shared/schema";
+import { Check, User, Lock } from "lucide-react";
+import type { FamilyMember, Family } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 
 interface SwitchMemberDialogProps {
@@ -19,7 +21,8 @@ interface SwitchMemberDialogProps {
   onOpenChange: (open: boolean) => void;
   members: FamilyMember[];
   currentMember: FamilyMember | null;
-  onSwitch: (memberId: string | null) => void;
+  familyData: { singleDeviceMode?: boolean } | null | undefined;
+  onSwitch: (params: { memberId: string | null; pinCode?: string }) => void;
   isSubmitting?: boolean;
 }
 
@@ -28,18 +31,25 @@ export function SwitchMemberDialog({
   onOpenChange, 
   members,
   currentMember,
+  familyData,
   onSwitch,
   isSubmitting = false
 }: SwitchMemberDialogProps) {
   const { t } = useTranslation();
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(currentMember?.id || null);
+  const [pinCode, setPinCode] = useState("");
+
+  const selectedMember = members.find(m => m.id === selectedMemberId);
+  const requiresPin = familyData?.singleDeviceMode && selectedMember?.role === "parent";
 
   const handleSwitch = () => {
-    onSwitch(selectedMemberId);
+    onSwitch({ memberId: selectedMemberId, pinCode: requiresPin ? pinCode : undefined });
+    setPinCode("");
   };
 
   const handleSwitchBack = () => {
-    onSwitch(null as any);
+    onSwitch({ memberId: null });
+    setPinCode("");
   };
 
   return (
@@ -52,33 +62,71 @@ export function SwitchMemberDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-2 py-4">
-          {members.map((member) => (
-            <button
-              key={member.id}
-              onClick={() => setSelectedMemberId(member.id)}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg hover-elevate active-elevate-2 transition-colors ${
-                selectedMemberId === member.id ? 'bg-accent' : 'bg-card'
-              }`}
-              data-testid={`button-select-member-${member.id}`}
-            >
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} alt={member.displayName} />
-                <AvatarFallback style={{ backgroundColor: member.color }}>
-                  <User className="h-5 w-5" />
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className="flex-1 text-left">
-                <div className="font-medium">{member.displayName}</div>
-                <div className="text-sm text-muted-foreground capitalize">{member.role}</div>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            {members.map((member) => (
+              <button
+                key={member.id}
+                onClick={() => {
+                  setSelectedMemberId(member.id);
+                  setPinCode("");
+                }}
+                className={`w-full flex items-center gap-3 p-3 rounded-lg hover-elevate active-elevate-2 transition-colors ${
+                  selectedMemberId === member.id ? 'bg-accent' : 'bg-card'
+                }`}
+                data-testid={`button-select-member-${member.id}`}
+              >
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} alt={member.displayName} />
+                  <AvatarFallback style={{ backgroundColor: member.color }}>
+                    <User className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                
+                <div className="flex-1 text-left">
+                  <div className="font-medium flex items-center gap-2">
+                    {member.displayName}
+                    {familyData?.singleDeviceMode && member.role === "parent" && (
+                      <Lock className="h-3 w-3 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground capitalize">{member.role}</div>
+                </div>
+                
+                {selectedMemberId === member.id && (
+                  <Check className="h-5 w-5 text-primary" data-testid={`icon-selected-${member.id}`} />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* PIN Code Input - shown only when switching to a parent in single device mode */}
+          {requiresPin && (
+            <div className="space-y-2 p-4 rounded-lg border bg-accent/20">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Lock className="h-4 w-4" />
+                <span>PIN-Code erforderlich</span>
               </div>
-              
-              {selectedMemberId === member.id && (
-                <Check className="h-5 w-5 text-primary" data-testid={`icon-selected-${member.id}`} />
-              )}
-            </button>
-          ))}
+              <Label htmlFor="pin-input-switch" className="text-sm text-muted-foreground">
+                Geben Sie den PIN-Code für {selectedMember?.displayName} ein
+              </Label>
+              <Input
+                id="pin-input-switch"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={4}
+                value={pinCode}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, '');
+                  setPinCode(value);
+                }}
+                placeholder="0000"
+                className="text-center text-2xl tracking-widest font-mono"
+                data-testid="input-switch-pin"
+              />
+            </div>
+          )}
         </div>
         
         <DialogFooter className="flex-row gap-2 sm:gap-2">
@@ -92,7 +140,7 @@ export function SwitchMemberDialog({
           </Button>
           <Button
             onClick={handleSwitch}
-            disabled={isSubmitting}
+            disabled={isSubmitting || (requiresPin && pinCode.length !== 4)}
             data-testid="button-confirm-switch"
           >
             {isSubmitting ? t('memberDialogs.switching') : t('memberDialogs.switch')}
