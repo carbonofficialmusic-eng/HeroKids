@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, Camera, CheckCircle, Zap, Star } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
@@ -9,7 +10,10 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 interface TaskCardProps {
-  task: Task;
+  task: Task & {
+    remainingSlots?: number | null;
+    memberHasCompleted?: boolean;
+  };
   assignedTo?: FamilyMember;
   onComplete?: (taskId: string) => void;
   isCompleting?: boolean;
@@ -86,6 +90,16 @@ export function TaskCard({
                 >
                   <CheckCircle className="h-5 w-5 text-green-500 shrink-0" data-testid={`icon-done-${task.id}`} />
                 </motion.div>
+              )}
+              {/* Multi-Completion Counter Badge */}
+              {task.maxCompletions !== null && task.maxCompletions !== undefined && (
+                <Badge 
+                  variant="secondary" 
+                  className="shrink-0 text-xs"
+                  data-testid={`badge-multi-completion-${task.id}`}
+                >
+                  {task.completionCount || 0}/{task.maxCompletions}
+                </Badge>
               )}
             </div>
             

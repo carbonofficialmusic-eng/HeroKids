@@ -789,8 +789,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      const tasks = await storage.getTasksByFamily(member.familyName);
-      res.json(tasks);
+      const allTasks = await storage.getTasksByFamily(member.familyName);
+      
+      // For children: filter and enhance tasks based on Multi-Completion mode
+      if (member.role === "child") {
+        const tasksWithMeta = await Promise.all(
+          allTasks.map(async (task) => {
+            // Multi-Completion mode (maxCompletions != null)
+            if (task.maxCompletions !== null) {
+              // Check if child has already completed this task
+              const hasCompleted = await storage.hasActiveMemberCompletion(task.id, member.id);
+              
+              return {
+                ...task,
+                remainingSlots: task.maxCompletions - task.completionCount,
+                memberHasCompleted: hasCompleted,
+              };
+            }
+            
+            // Assignment-based mode (maxCompletions == null)
+            // Check if task is assigned to this member
+            const assignments = await storage.getTaskAssignmentsByTask(task.id);
+            const isAssigned = assignments.includes(member.id);
+            
+            return isAssigned ? { ...task, remainingSlots: null, memberHasCompleted: false } : null;
+          })
+        );
+        
+        // Filter out null (unassigned tasks in assignment mode), already-completed tasks, and exhausted multi-completion tasks
+        const filteredTasks = tasksWithMeta.filter(
+          (task) => task !== null && !task.memberHasCompleted && (task.remainingSlots === null || task.remainingSlots > 0)
+        );
+        
+        res.json(filteredTasks);
+      } else {
+        // Parents see all tasks with metadata
+        const tasksWithMeta = allTasks.map((task) => ({
+          ...task,
+          remainingSlots: task.maxCompletions !== null ? task.maxCompletions - task.completionCount : null,
+        }));
+        
+        res.json(tasksWithMeta);
+      }
     } catch (error) {
       console.error("Error fetching tasks:", error);
       res.status(500).json({ message: "Failed to fetch tasks" });

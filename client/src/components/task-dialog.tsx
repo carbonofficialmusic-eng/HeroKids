@@ -40,6 +40,7 @@ import { Sparkles } from "lucide-react";
 const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
   recurrenceDays: z.number().int().min(1).max(365).optional(),
+  maxCompletions: z.number().int().min(1).max(20).optional(),
 });
 
 type TaskFormData = z.infer<typeof taskFormSchema>;
@@ -154,6 +155,7 @@ export function TaskDialog({
       requiresProof: false,
       requiresApproval: true,
       iconEmoji: "⭐",
+      maxCompletions: undefined,
     },
   });
 
@@ -185,6 +187,7 @@ export function TaskDialog({
           requiresProof: editingTask.requiresProof,
           requiresApproval: editingTask.requiresApproval ?? true,
           iconEmoji: editingTask.iconEmoji || "⭐",
+          maxCompletions: editingTask.maxCompletions || undefined,
         });
       } else {
         setRecurrenceMode("standard");
@@ -201,6 +204,7 @@ export function TaskDialog({
           requiresProof: false,
           requiresApproval: true,
           iconEmoji: "⭐",
+          maxCompletions: undefined,
         });
       }
     }
@@ -538,6 +542,43 @@ export function TaskDialog({
                       data-testid="switch-requires-approval"
                     />
                   </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="maxCompletions"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Multiple Children Can Complete</FormLabel>
+                  <FormDescription>
+                    Allow multiple children to complete this task (e.g., 3 children can each do dishes)
+                  </FormDescription>
+                  <div className="flex items-center gap-4">
+                    <Switch
+                      checked={field.value !== undefined && field.value !== null}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked ? 3 : undefined);
+                      }}
+                      data-testid="toggle-multi-completion"
+                    />
+                    {field.value !== undefined && field.value !== null && (
+                      <div className="flex items-center gap-2">
+                        <FormLabel className="text-sm">Times:</FormLabel>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={20}
+                          value={field.value || 3}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 3)}
+                          className="w-20"
+                          data-testid="input-max-completions"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <FormMessage />
                 </FormItem>
               )}
             />

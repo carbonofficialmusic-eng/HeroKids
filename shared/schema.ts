@@ -141,6 +141,8 @@ export const tasks = pgTable("tasks", {
   status: taskStatusEnum("status").notNull().default("active"),
   requiresProof: boolean("requires_proof").notNull().default(false),
   requiresApproval: boolean("requires_approval").notNull().default(true),
+  maxCompletions: integer("max_completions"), // Multi-completion mode: null = assignment-based, number = slot-based (e.g., 3 children can complete)
+  completionCount: integer("completion_count").notNull().default(0), // Performance cache: approved completions count
   iconEmoji: varchar("icon_emoji").default("⭐"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

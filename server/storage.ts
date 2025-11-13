@@ -34,7 +34,7 @@ import {
   type InsertChatMessage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gt, sql } from "drizzle-orm";
+import { eq, and, desc, gt, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -90,6 +90,7 @@ export interface IStorage {
 
   // Task completion operations
   createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion>;
+  hasActiveMemberCompletion(taskId: string, memberId: string, txClient?: any): Promise<boolean>;
   getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]>;
   getPendingCompletionsByFamily(familyName: string): Promise<any[]>;
   approveTaskCompletion(completionId: string, approvedBy: string): Promise<void>;
@@ -387,6 +388,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTask(id: string, taskUpdate: Partial<InsertTask>): Promise<Task> {
+    // Validation: prevent lowering maxCompletions below current completionCount
+    if (taskUpdate.maxCompletions !== undefined && taskUpdate.maxCompletions !== null) {
+      const [existing] = await db.select().from(tasks).where(eq(tasks.id, id));
+      if (existing && taskUpdate.maxCompletions < existing.completionCount) {
+        throw new Error('Cannot set maxCompletions below current completion count');
+      }
+    }
+    
     const [updated] = await db
       .update(tasks)
       .set({ ...taskUpdate, updatedAt: new Date() })
@@ -441,12 +450,59 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Task completion operations
+  async hasActiveMemberCompletion(taskId: string, memberId: string, txClient?: any): Promise<boolean> {
+    const client = txClient || db;
+    
+    const [result] = await client
+      .select({ count: sql<number>`count(*)` })
+      .from(taskCompletions)
+      .where(
+        and(
+          eq(taskCompletions.taskId, taskId),
+          eq(taskCompletions.memberId, memberId),
+          inArray(taskCompletions.status, ["pending", "approved"])
+        )
+      );
+    return Number(result?.count || 0) > 0;
+  }
+
   async createTaskCompletion(completionData: InsertTaskCompletion): Promise<TaskCompletion> {
-    const [completion] = await db
-      .insert(taskCompletions)
-      .values(completionData)
-      .returning();
-    return completion;
+    return await db.transaction(async (tx) => {
+      // 1. Lock task: SELECT * FROM tasks WHERE id = taskId FOR UPDATE
+      const task = await tx.select().from(tasks).where(eq(tasks.id, completionData.taskId)).for('update');
+      if (!task[0]) throw new Error('Task not found');
+      
+      // 2. If maxCompletions mode: validate
+      if (task[0].maxCompletions !== null) {
+        // Check if member already completed
+        const hasCompleted = await this.hasActiveMemberCompletion(
+          completionData.taskId, 
+          completionData.memberId,
+          tx
+        );
+        if (hasCompleted) throw new Error('Member already completed this task');
+        
+        // Check if slots exhausted
+        if (task[0].completionCount >= task[0].maxCompletions) {
+          throw new Error('All completion slots filled');
+        }
+      }
+      
+      // 3. Insert completion
+      const [completion] = await tx.insert(taskCompletions)
+        .values({
+          ...completionData,
+          status: task[0].requiresApproval ? 'pending' : 'approved'
+        })
+        .returning();
+      
+      // 4. If auto-approved: run approval logic immediately
+      if (!task[0].requiresApproval) {
+        await this._approveCompletionInternal(tx, completion.id, completion.memberId);
+      }
+      
+      return completion;
+    });
   }
 
   async getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]> {
@@ -494,15 +550,67 @@ export class DatabaseStorage implements IStorage {
     return completions;
   }
 
-  async approveTaskCompletion(completionId: string, approvedBy: string): Promise<void> {
-    await db
-      .update(taskCompletions)
+  private async _approveCompletionInternal(tx: any, completionId: string, approvedBy: string): Promise<void> {
+    // 1. Lock completion
+    const [completion] = await tx.select().from(taskCompletions)
+      .where(eq(taskCompletions.id, completionId))
+      .for('update');
+    
+    if (!completion) throw new Error('Completion not found');
+    if (completion.status === 'approved') return; // Already approved
+    
+    // 2. Lock task
+    const [task] = await tx.select().from(tasks)
+      .where(eq(tasks.id, completion.taskId))
+      .for('update');
+    
+    // 3. Update completion
+    await tx.update(taskCompletions)
       .set({
-        status: "approved",
+        status: 'approved',
         approvedBy,
-        approvedAt: new Date(),
+        approvedAt: new Date()
       })
       .where(eq(taskCompletions.id, completionId));
+    
+    // 4. If maxCompletions mode: increment counter and check threshold
+    if (task.maxCompletions !== null) {
+      await tx.update(tasks)
+        .set({
+          completionCount: sql<number>`${tasks.completionCount} + 1`,
+          status: sql`CASE WHEN ${tasks.completionCount} + 1 >= ${task.maxCompletions} THEN 'completed' ELSE ${tasks.status} END`,
+          updatedAt: new Date()
+        })
+        .where(eq(tasks.id, task.id));
+    }
+    
+    // 5. Award points to member (existing logic from old approveTaskCompletion)
+    const [member] = await tx.select().from(familyMembers)
+      .where(eq(familyMembers.id, completion.memberId))
+      .for('update');
+    
+    await tx.update(familyMembers)
+      .set({
+        totalEarned: member.totalEarned + completion.pointsEarned,
+        totalPoints: member.totalPoints + completion.pointsEarned,
+        weeklyPoints: member.weeklyPoints + completion.pointsEarned,
+        monthlyPoints: member.monthlyPoints + completion.pointsEarned
+      })
+      .where(eq(familyMembers.id, completion.memberId));
+    
+    // Add points history
+    await tx.insert(pointsHistory).values({
+      memberId: completion.memberId,
+      points: completion.pointsEarned,
+      reason: 'task_completion',
+      taskId: completion.taskId
+    });
+  }
+
+  async approveTaskCompletion(completionId: string, approvedBy: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      await this._approveCompletionInternal(tx, completionId, approvedBy);
+    });
   }
 
   async rejectTaskCompletion(completionId: string, approvedBy: string, rejectionReason: string): Promise<void> {
