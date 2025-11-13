@@ -2210,6 +2210,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Verify checkout session and update subscription (workaround for webhook issues)
+  app.post("/api/verify-checkout-session", isAuthenticated, async (req: any, res) => {
+    try {
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+      
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Fetch the checkout session from Stripe
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      console.log("🔍 Verifying checkout session:", {
+        sessionId: session.id,
+        paymentStatus: session.payment_status,
+        metadata: session.metadata,
+      });
+      
+      // Only process if payment was successful
+      if (session.payment_status !== "paid") {
+        return res.status(400).json({ message: "Payment not completed" });
+      }
+      
+      const familyName = session.metadata?.familyName;
+      const tier = session.metadata?.tier as "free" | "family" | "family_plus" | "family_hero";
+      
+      if (!familyName || !tier) {
+        return res.status(400).json({ message: "Invalid session metadata" });
+      }
+      
+      // Verify that this session belongs to the user's family
+      if (familyName !== member.familyName) {
+        return res.status(403).json({ message: "Session does not belong to your family" });
+      }
+      
+      // Update the family subscription
+      await storage.updateFamily(familyName, {
+        subscriptionTier: tier,
+        subscriptionStatus: "active",
+        billingSubscriptionId: session.subscription as string,
+      });
+      
+      console.log(`✅ Subscription verified and activated for ${familyName}: ${tier}`);
+      
+      // Broadcast subscription update to all family members
+      broadcastToFamily(familyName, {
+        type: 'subscription-updated',
+        tier,
+      });
+      
+      res.json({ 
+        message: "Subscription activated successfully",
+        tier 
+      });
+    } catch (error: any) {
+      console.error("Error verifying checkout session:", error);
+      res.status(500).json({ message: "Failed to verify checkout session" });
+    }
+  });
+
   // ===== Stripe Integration =====
   
   // Create Stripe Checkout Session
@@ -2283,7 +2350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         host,
         protocol,
         baseUrl,
-        successUrl: `${baseUrl}/dashboard?subscription=success`,
+        successUrl: `${baseUrl}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${baseUrl}/pricing?canceled=true`,
       });
       
@@ -2297,7 +2364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             quantity: 1,
           },
         ],
-        success_url: `${baseUrl}/dashboard?subscription=success`,
+        success_url: `${baseUrl}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/pricing?canceled=true`,
         metadata: {
           familyName: family.familyName,

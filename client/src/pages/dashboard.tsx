@@ -63,28 +63,44 @@ export default function Dashboard() {
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("month");
   const [subscriptionProcessing, setSubscriptionProcessing] = useState(false);
 
-  // Check for subscription=success in URL and show processing dialog
+  // Check for subscription=success in URL and verify checkout session
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('subscription') === 'success') {
+    const sessionId = params.get('session_id');
+    
+    if (params.get('subscription') === 'success' && sessionId) {
       setSubscriptionProcessing(true);
       
-      // Remove query parameter from URL
+      // Remove query parameters from URL
       window.history.replaceState({}, '', window.location.pathname);
       
-      // Auto-reload after 5 seconds to fetch updated subscription
-      const timer = setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
-        setSubscriptionProcessing(false);
-        
-        toast({
-          title: "✅ " + t('dashboard.subscription_activated'),
-          description: t('dashboard.subscription_activated_desc'),
+      // Verify the checkout session with backend
+      apiRequest("POST", "/api/verify-checkout-session", { sessionId })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("✅ Checkout session verified:", data);
+          
+          // Invalidate queries to fetch updated subscription
+          queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+          
+          setSubscriptionProcessing(false);
+          
+          toast({
+            title: "✅ " + t('dashboard.subscription_activated'),
+            description: t('dashboard.subscription_activated_desc'),
+          });
+        })
+        .catch((error) => {
+          console.error("❌ Error verifying checkout session:", error);
+          setSubscriptionProcessing(false);
+          
+          toast({
+            title: "❌ Error",
+            description: "Failed to activate subscription. Please contact support.",
+            variant: "destructive",
+          });
         });
-      }, 5000);
-      
-      return () => clearTimeout(timer);
     }
   }, [toast, t]);
 
