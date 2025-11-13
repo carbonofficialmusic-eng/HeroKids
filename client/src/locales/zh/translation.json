@@ -255,12 +255,12 @@
   },
   "skins": {
     "title": "角色皮肤",
-    "description": "每60积分可获得1张皮肤卡！从解锁的套装中选择要发现的皮肤。",
+    "description": "完成任务获得皮肤卡！从解锁的套装中选择要发现的皮肤。",
     "availableCards": "你有{{count}}张皮肤卡可以打开！",
     "availableCards_other": "你有{{count}}张皮肤卡可以打开！",
     "clickDiscover": "点击任何未发现皮肤上的【发现】按钮",
     "lifetimePoints": "累计积分",
-    "earnCards": "每60积分可获得1张皮肤卡！从解锁的套装中选择要发现的皮肤。",
+    "earnCards": "完成任务获得皮肤卡！从解锁的套装中选择要发现的皮肤。",
     "yourCustomAvatar": "你的自定义头像",
     "useProfilePicture": "使用你的个人头像照片",
     "usePersonalPicture": "使用你的个人头像照片",
@@ -290,8 +290,8 @@
     "failedToDiscover": "无法发现皮肤",
     "failedToSelect": "无法选择皮肤",
     "yourAvatar": "你的头像",
-    "unlockAt500": "🔒 累计500积分解锁",
-    "unlockAt1000": "🔒 累计1000积分解锁"
+    "unlockAt600": "🔒 累计600积分解锁",
+    "unlockAt1500": "🔒 累计1500积分解锁"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

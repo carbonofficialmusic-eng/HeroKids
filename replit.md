@@ -57,10 +57,15 @@ Preferred communication style: Simple, everyday language.
 ## Character Skin System
 
 ### Tekken-Style Discovery Mechanics
-**Card System**: Members earn 1 skin discovery card per 60 points earned (totalEarned). Cards can be spent to discover any skin from unlocked packages.
+**Card System**: Members earn discovery cards at tier-based rates. Cards can be spent to discover any skin from unlocked packages.
+
+**Card Earning Rates (Tier-Based)**:
+- **Tier 1 (0-600 points)**: 80 points = 1 card
+- **Tier 2 (600-1500 points)**: 100 points = 1 card
+- **Tier 3 (1500+ points)**: 120 points = 1 card
 
 **Discovery Flow**:
-1. Earn points through completed tasks (60 points = 1 card)
+1. Earn points through completed tasks
 2. Navigate to skins gallery
 3. Click "Discover" on any undiscovered skin from unlocked packages
 4. Skin is instantly revealed and becomes equippable
@@ -68,31 +73,34 @@ Preferred communication style: Simple, everyday language.
 
 **Database**: `discovered_skin_ids` (array) tracks which skins each member has chosen to discover. The default "Junior Champion" (0 points) is always available without discovery.
 
-**Available Cards Calculation**: `availableCards = floor(totalEarned / 60) - discoveredSkinIds.length`
+**Available Cards Calculation**: Piecewise calculation across tiers. First 600 points earn cards at 80 points/card, next 900 points (600-1500) at 100 points/card, and points beyond 1500 at 120 points/card. Total cards minus already discovered skins.
 
 ### Skin Tiers & Package Unlocks
 **Tier 1 - Starter Heroes** (Unlocked from start)
 - Modern, child-friendly 3D cartoon style with vibrant colors
 - Contemporary everyday environments as backgrounds
-- 8 skins: Junior Champion (0 - always available), Brave Explorer (60), Star Cadet (120), Nature Scout (180), Speed Runner (240), Book Wizard (300), Kitchen Hero (360), Art Master (500)
+- **Card Cost**: 80 points per card
+- 8 skins: Junior Champion (0 - always available), Brave Explorer, Star Cadet, Nature Scout, Speed Runner, Book Wizard, Kitchen Hero, Art Master
 
-**Tier 2 - Elite Heroes** (Package unlocks at 500 total points)
+**Tier 2 - Elite Heroes** (Package unlocks at 600 total points)
 - Heroic, epic style with white/transparent avatar backgrounds
 - Dramatic fantasy/sci-fi themed backgrounds
 - Friendly but powerful, not aggressive
-- 8 skins: Tech Ninja (560), Ocean Guardian (620), Sky Knight (680), Fire Phoenix (740), Crystal Mage (800), Neon Rebel (860), Cosmic Drifter (920), Thunder Champion (1000)
+- **Card Cost**: 100 points per card
+- 8 skins: Tech Ninja, Ocean Guardian, Sky Knight, Fire Phoenix, Crystal Mage, Neon Rebel, Cosmic Drifter, Thunder Champion
 
-**Tier 3 - Dinosaur Heroes** (Package unlocks at 1000 total points)
+**Tier 3 - Dinosaur Heroes** (Package unlocks at 1500 total points)
 - Realistic, scientifically accurate dinosaur designs for teenagers
 - Epic prehistoric landscapes (Jurassic/Cretaceous periods)
 - Detailed, educational, and impressive
-- 8 skins: T-Rex (1060), Triceratops (1120), Stegosaurus (1180), Velociraptor (1240), Brachiosaurus (1300), Spinosaurus (1360), Ankylosaurus (1420), Allosaurus (1500)
+- **Card Cost**: 120 points per card
+- 8 skins: T-Rex, Triceratops, Stegosaurus, Velociraptor, Brachiosaurus, Spinosaurus, Ankylosaurus, Allosaurus
 
 ### Hidden Bonus Points
 Certain special skins award bonus points when discovered:
 - **Tier 1**: Brave Explorer (+10), Book Wizard (+10)
 - **Tier 2**: Tech Ninja (+10), Fire Phoenix (+10), Thunder Champion (+20)
-- **Tier 3**: Velociraptor (+10), Brachiosaurus (+10)
+- **Tier 3**: Velociraptor (+30), Brachiosaurus (+10), Allosaurus (+40)
 
 **Note**: The `pointsRequired` values in the database are for reference/ordering only. Actual discovery is controlled by available cards, not point thresholds.
 

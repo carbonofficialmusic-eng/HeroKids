@@ -259,12 +259,12 @@
   },
   "skins": {
     "title": "Charakter-Skins",
-    "description": "Alle 60 Punkte verdienst du 1 Skin-Karte! Wähle, welche Skins du aus freigeschalteten Paketen entdecken möchtest.",
+    "description": "Verdiene Skin-Karten durch das Abschließen von Aufgaben! Wähle, welche Skins du aus freigeschalteten Paketen entdecken möchtest.",
     "availableCards": "Du hast {{count}} Skin-Karte zum Öffnen!",
     "availableCards_other": "Du hast {{count}} Skin-Karten zum Öffnen!",
     "clickDiscover": "Klicke auf \"Entdecken\" bei einem noch unentdeckten Skin",
     "lifetimePoints": "Gesamtpunkte",
-    "earnCards": "Alle 60 Punkte verdienst du 1 Skin-Karte! Wähle, welche Skins du aus freigeschalteten Paketen entdecken möchtest.",
+    "earnCards": "Verdiene Skin-Karten durch das Abschließen von Aufgaben! Wähle, welche Skins du aus freigeschalteten Paketen entdecken möchtest.",
     "yourCustomAvatar": "Dein eigener Avatar",
     "useProfilePicture": "Verwende dein persönliches Profilbild",
     "usePersonalPicture": "Verwende dein persönliches Profilbild",
@@ -294,8 +294,8 @@
     "failedToDiscover": "Skin konnte nicht entdeckt werden",
     "failedToSelect": "Skin konnte nicht ausgewählt werden",
     "yourAvatar": "Dein Avatar",
-    "unlockAt500": "🔒 Freischalten mit 500 Gesamtpunkten",
-    "unlockAt1000": "🔒 Freischalten mit 1000 Gesamtpunkten",
+    "unlockAt600": "🔒 Freischalten mit 600 Gesamtpunkten",
+    "unlockAt1500": "🔒 Freischalten mit 1500 Gesamtpunkten",
     "noSkinsInTier": "Keine Skins in diesem Paket verfügbar"
   },
   "skinNames": {

@@ -165,7 +165,7 @@ const SKIN_DATA = [
     description: "Swift and clever predator with razor-sharp claws!",
     imageUrl: "🦎",
     pointsRequired: 1240,
-    bonusPoints: 10,
+    bonusPoints: 30,
   },
   {
     id: "brachiosaurus",
@@ -197,7 +197,7 @@ const SKIN_DATA = [
     description: "Apex predator of the Jurassic period!",
     imageUrl: "🦖",
     pointsRequired: 1500,
-    bonusPoints: 0,
+    bonusPoints: 40,
   },
 ];
 

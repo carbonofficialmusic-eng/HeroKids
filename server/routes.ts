@@ -12,6 +12,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, type Family } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
+import { calculateAvailableCards, getUnlockedTier, getSkinTier } from "@shared/skin-config";
 import "./types";
 
 // Initialize Stripe
@@ -1764,28 +1765,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allSkins = await storage.getSkins();
       const discoveredSkinIds = member.discoveredSkinIds || [];
       
-      // Calculate available discovery cards: one card per 60 points, minus already discovered skins
-      const availableCards = Math.floor(member.totalEarned / 60) - discoveredSkinIds.length;
+      // Calculate available discovery cards using tier-based system
+      const availableCards = calculateAvailableCards(member.totalEarned, discoveredSkinIds.length);
       
       // Determine which package tiers are unlocked based on total earned points
-      // Starter (0-500), Elite (500-1000), Dinosaur (1000+)
-      const unlockedTier = member.totalEarned >= 1000 ? 3 : member.totalEarned >= 500 ? 2 : 1;
+      const unlockedTier = getUnlockedTier(member.totalEarned);
       
       // Enrich skins with discovery status for this member
       const skinsWithStatus = allSkins.map(skin => {
         const isDiscovered = discoveredSkinIds.includes(skin.id);
         const isActive = member.activeSkinId === skin.id;
         
-        // Determine skin tier based on pointsRequired ranges
-        // Tier 1 (Starter): 0-500 points (Art Master is the last at 500)
-        // Tier 2 (Elite): 560-1000 points (Thunder Champion is the last at 1000)
-        // Tier 3 (Dinosaur): 1060+ points
-        let skinTier = 1;
-        if (skin.pointsRequired >= 1060) {
-          skinTier = 3;
-        } else if (skin.pointsRequired > 500) {
-          skinTier = 2;
-        }
+        // Determine skin tier using centralized function
+        const skinTier = getSkinTier(skin.id);
         
         // Can discover if: package is unlocked AND not already discovered AND has available cards
         const canDiscover = skinTier <= unlockedTier && !isDiscovered && availableCards > 0;
@@ -1846,26 +1838,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Skin already discovered" });
       }
       
-      // Calculate available cards
-      const availableCards = Math.floor(member.totalEarned / 60) - discoveredSkinIds.length;
+      // Calculate available cards using tier-based system
+      const availableCards = calculateAvailableCards(member.totalEarned, discoveredSkinIds.length);
       
       if (availableCards <= 0) {
         return res.status(403).json({ message: "No discovery cards available" });
       }
       
       // Check if skin's package tier is unlocked
-      const unlockedTier = member.totalEarned >= 1000 ? 3 : member.totalEarned >= 500 ? 2 : 1;
+      const unlockedTier = getUnlockedTier(member.totalEarned);
       
-      // Determine skin tier based on pointsRequired ranges
-      // Tier 1 (Starter): 0-559 points
-      // Tier 2 (Elite): 560-1059 points  
-      // Tier 3 (Dinosaur): 1060+ points
-      let skinTier = 1;
-      if (skin.pointsRequired >= 1060) {
-        skinTier = 3;
-      } else if (skin.pointsRequired >= 560) {
-        skinTier = 2;
-      }
+      // Determine skin tier using centralized function
+      const skinTier = getSkinTier(skinId);
       
       if (skinTier > unlockedTier) {
         return res.status(403).json({ message: "Skin package not unlocked yet" });

@@ -255,12 +255,12 @@
   },
   "skins": {
     "title": "キャラクタースキン",
-    "description": "60ポイントごとに1枚のスキンカードを獲得！アンロックされたパッケージから発見するスキンを選ぼう。",
+    "description": "タスクをクリアしてスキンカードを獲得しよう！アンロックされたパッケージから発見するスキンを選ぼう。",
     "availableCards": "開けるスキンカードが{{count}}枚あります！",
     "availableCards_other": "開けるスキンカードが{{count}}枚あります！",
     "clickDiscover": "未発見のスキンで「発見」をクリック",
     "lifetimePoints": "通算ポイント",
-    "earnCards": "60ポイントごとに1枚のスキンカードを獲得！アンロックされたパッケージから発見するスキンを選ぼう。",
+    "earnCards": "タスクをクリアしてスキンカードを獲得しよう！アンロックされたパッケージから発見するスキンを選ぼう。",
     "yourCustomAvatar": "カスタムアバター",
     "useProfilePicture": "個人プロフィール写真を使用",
     "usePersonalPicture": "個人プロフィール写真を使用",
@@ -290,8 +290,8 @@
     "failedToDiscover": "スキンを発見できませんでした",
     "failedToSelect": "スキンを選択できませんでした",
     "yourAvatar": "あなたのアバター",
-    "unlockAt500": "🔒 通算500ポイントでアンロック",
-    "unlockAt1000": "🔒 通算1000ポイントでアンロック"
+    "unlockAt600": "🔒 通算600ポイントでアンロック",
+    "unlockAt1500": "🔒 通算1500ポイントでアンロック"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

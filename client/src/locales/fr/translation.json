@@ -255,12 +255,12 @@
   },
   "skins": {
     "title": "Apparences de Personnage",
-    "description": "Tous les 60 points, tu gagnes 1 carte d'apparence ! Choisis quelles apparences découvrir parmi les paquets débloqués.",
+    "description": "Gagne des cartes d'apparence en accomplissant des tâches ! Choisis quelles apparences découvrir parmi les paquets débloqués.",
     "availableCards": "Tu as {{count}} carte d'apparence à ouvrir !",
     "availableCards_other": "Tu as {{count}} cartes d'apparence à ouvrir !",
     "clickDiscover": "Clique sur \"Découvrir\" sur n'importe quelle apparence non découverte",
     "lifetimePoints": "Points Totaux",
-    "earnCards": "Tous les 60 points, tu gagnes 1 carte d'apparence ! Choisis quelles apparences découvrir parmi les paquets débloqués.",
+    "earnCards": "Gagne des cartes d'apparence en accomplissant des tâches ! Choisis quelles apparences découvrir parmi les paquets débloqués.",
     "yourCustomAvatar": "Ton Avatar Personnalisé",
     "useProfilePicture": "Utilise ta photo de profil personnelle",
     "usePersonalPicture": "Utilise ta photo de profil personnelle",
@@ -290,8 +290,8 @@
     "failedToDiscover": "Impossible de découvrir l'apparence",
     "failedToSelect": "Impossible de sélectionner l'apparence",
     "yourAvatar": "Ton Avatar",
-    "unlockAt500": "🔒 Déverrouiller avec 500 points totaux",
-    "unlockAt1000": "🔒 Déverrouiller avec 1000 points totaux"
+    "unlockAt600": "🔒 Déverrouiller avec 600 points totaux",
+    "unlockAt1500": "🔒 Déverrouiller avec 1500 points totaux"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

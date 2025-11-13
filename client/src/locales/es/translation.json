@@ -255,12 +255,12 @@
   },
   "skins": {
     "title": "Aspectos de Personaje",
-    "description": "¡Cada 60 puntos ganas 1 carta de aspecto! Elige qué aspectos descubrir de los paquetes desbloqueados.",
+    "description": "¡Gana cartas de aspecto completando tareas! Elige qué aspectos descubrir de los paquetes desbloqueados.",
     "availableCards": "¡Tienes {{count}} carta de aspecto para abrir!",
     "availableCards_other": "¡Tienes {{count}} cartas de aspecto para abrir!",
     "clickDiscover": "Haz clic en \"Descubrir\" en cualquier aspecto sin descubrir",
     "lifetimePoints": "Puntos Totales",
-    "earnCards": "¡Cada 60 puntos ganas 1 carta de aspecto! Elige qué aspectos descubrir de los paquetes desbloqueados.",
+    "earnCards": "¡Gana cartas de aspecto completando tareas! Elige qué aspectos descubrir de los paquetes desbloqueados.",
     "yourCustomAvatar": "Tu Avatar Personalizado",
     "useProfilePicture": "Usa tu foto de perfil personal",
     "usePersonalPicture": "Usa tu foto de perfil personal",
@@ -290,8 +290,8 @@
     "failedToDiscover": "No se pudo descubrir el aspecto",
     "failedToSelect": "No se pudo seleccionar el aspecto",
     "yourAvatar": "Tu Avatar",
-    "unlockAt500": "🔒 Desbloquear con 500 puntos totales",
-    "unlockAt1000": "🔒 Desbloquear con 1000 puntos totales"
+    "unlockAt600": "🔒 Desbloquear con 600 puntos totales",
+    "unlockAt1500": "🔒 Desbloquear con 1500 puntos totales"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",
