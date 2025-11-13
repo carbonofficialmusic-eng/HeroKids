@@ -25,15 +25,15 @@ export const SKIN_TIERS: SkinTierConfig[] = [
   {
     tier: 2,
     name: "Elite Heroes",
-    unlockThreshold: 600,
-    pointsPerCard: 100,
+    unlockThreshold: 700,
+    pointsPerCard: 80,
     skinCount: 8,
   },
   {
     tier: 3,
     name: "Dinosaur Heroes",
-    unlockThreshold: 1500,
-    pointsPerCard: 120,
+    unlockThreshold: 1400,
+    pointsPerCard: 80,
     skinCount: 8,
   },
 ];
@@ -60,32 +60,14 @@ export function getUnlockedTier(totalEarned: number): number {
 
 /**
  * Calculate total available discovery cards across all unlocked tiers
- * This is a piecewise calculation:
- * - First 600 points earn cards at 80 points/card (Tier 1)
- * - Points 600-1500 earn cards at 100 points/card (Tier 2)
- * - Points 1500+ earn cards at 120 points/card (Tier 3)
+ * Simplified: All tiers cost 80 points per card
+ * - Tier 1 unlocks at 0 points (8 skins = max 640 points to discover all)
+ * - Tier 2 unlocks at 700 points (8 skins = max 640 points to discover all)
+ * - Tier 3 unlocks at 1400 points (8 skins = max 640 points to discover all)
  */
 export function calculateAvailableCards(totalEarned: number, discoveredCount: number): number {
-  let totalCards = 0;
-
-  // Process each tier sequentially
-  for (const tierConfig of SKIN_TIERS) {
-    // Check if we have enough points to reach this tier
-    if (totalEarned < tierConfig.unlockThreshold) {
-      break;
-    }
-
-    // Calculate points spent in this tier
-    const nextTierIndex = SKIN_TIERS.findIndex(t => t.tier === tierConfig.tier + 1);
-    const nextTierThreshold = nextTierIndex >= 0 ? SKIN_TIERS[nextTierIndex].unlockThreshold : Infinity;
-    
-    const pointsInThisTier = Math.min(totalEarned, nextTierThreshold) - tierConfig.unlockThreshold;
-    const cardsFromThisTier = Math.floor(pointsInThisTier / tierConfig.pointsPerCard);
-    
-    totalCards += cardsFromThisTier;
-  }
-
-  // Subtract already discovered skins
+  // Simple calculation: total points divided by 80, minus already discovered
+  const totalCards = Math.floor(totalEarned / 80);
   const availableCards = totalCards - discoveredCount;
   
   // Never return negative cards
