@@ -80,7 +80,7 @@ const SKIN_DATA = [
   {
     id: "ocean-guardian",
     name: "Ocean Guardian",
-    description: "Protector of the seas with water powers!",
+    description: "Ocean warrior princess commanding the power of the seas!",
     imageUrl: "🌊",
     pointsRequired: 620,
     bonusPoints: 0,
