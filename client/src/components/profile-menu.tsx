@@ -44,9 +44,7 @@ export function ProfileMenu({
 
   const resetSubscriptionMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("/api/admin/reset-subscription", {
-        method: "POST",
-      });
+      return await apiRequest("POST", "/api/admin/reset-subscription");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
