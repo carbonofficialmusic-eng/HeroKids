@@ -14,7 +14,7 @@ INSERT INTO skins (id, name, description, image_url, points_required, bonus_poin
 
 -- Tier 2 - Elite Heroes (501-1000 points)
 ('tech-ninja', 'Tech Ninja', 'Cyber warrior with advanced gadgets and tech skills!', '🥷', 560, 10),
-('ocean-guardian', 'Ocean Guardian', 'Ocean warrior princess commanding the power of the seas!', '🌊', 620, 0),
+('ocean-guardian', 'Ocean Guardian', 'Ocean warrior princess commanding the power of the seas!', '🧜‍♀️', 620, 0),
 ('sky-knight', 'Sky Knight', 'Aerial warrior soaring through the clouds!', '☁️', 680, 0),
 ('fire-phoenix', 'Fire Phoenix', 'Legendary bird rising from flames with fire powers!', '🔥', 740, 10),
 ('crystal-mage', 'Crystal Mage', 'Mystical hero channeling crystal energy!', '💎', 800, 0),

@@ -174,7 +174,7 @@ async function autoSeedSkinsIfNeeded() {
       
       // Tier 2 - Elite Heroes (501-1000 points)
       { id: "tech-ninja", name: "Tech Ninja", description: "Cyber warrior with advanced gadgets and tech skills!", imageUrl: "🥷", pointsRequired: 560, bonusPoints: 10 },
-      { id: "ocean-guardian", name: "Ocean Guardian", description: "Ocean warrior princess commanding the power of the seas!", imageUrl: "🌊", pointsRequired: 620, bonusPoints: 0 },
+      { id: "ocean-guardian", name: "Ocean Guardian", description: "Ocean warrior princess commanding the power of the seas!", imageUrl: "🧜‍♀️", pointsRequired: 620, bonusPoints: 0 },
       { id: "sky-knight", name: "Sky Knight", description: "Aerial warrior soaring through the clouds!", imageUrl: "☁️", pointsRequired: 680, bonusPoints: 0 },
       { id: "fire-phoenix", name: "Fire Phoenix", description: "Legendary bird rising from flames with fire powers!", imageUrl: "🔥", pointsRequired: 740, bonusPoints: 10 },
       { id: "crystal-mage", name: "Crystal Mage", description: "Mystical hero channeling crystal energy!", imageUrl: "💎", pointsRequired: 800, bonusPoints: 0 },
