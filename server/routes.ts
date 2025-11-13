@@ -2163,6 +2163,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== Admin Tools =====
+  
+  // Reset family subscription to Free (parent only, for testing)
+  app.post("/api/admin/reset-subscription", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can reset subscriptions
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can reset subscriptions" });
+      }
+      
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Reset to free tier
+      await storage.updateFamily(member.familyName, {
+        subscriptionTier: "free",
+        billingSubscriptionId: null,
+        billingCustomerId: null,
+      });
+      
+      console.log(`🔄 Admin: Subscription reset to Free for family: ${member.familyName}`);
+      
+      // Broadcast subscription update to all family members via WebSocket
+      broadcastToFamily(member.familyName, {
+        type: 'subscription-updated',
+        tier: 'free',
+      });
+      
+      res.json({ 
+        message: "Subscription reset to Free successfully",
+        tier: "free"
+      });
+    } catch (error: any) {
+      console.error("Error resetting subscription:", error);
+      res.status(500).json({ message: "Failed to reset subscription" });
+    }
+  });
+
   // ===== Stripe Integration =====
   
   // Create Stripe Checkout Session
