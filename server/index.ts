@@ -8,22 +8,25 @@ import Stripe from "stripe";
 
 const app = express();
 
-// CRITICAL: Stripe webhook MUST use express.raw() BEFORE express.json()
-app.post("/api/stripe-webhook", 
-  express.raw({ type: 'application/json' }),
+// CRITICAL: Stripe webhook with custom raw body parser
+app.post("/api/stripe-webhook",
+  express.json({
+    verify: (req: any, _res, buf) => {
+      req.rawBody = buf.toString('utf8');
+    }
+  }),
   async (req: Request, res: Response) => {
     const sig = req.headers["stripe-signature"];
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const rawBody = (req as any).rawBody;
     
     console.log("🔔 Webhook received:", { 
       hasSignature: !!sig, 
       hasSecret: !!webhookSecret,
-      hasRawBody: !!req.body,
-      rawBodyType: req.body ? typeof req.body : 'undefined',
-      rawBodyLength: req.body ? Buffer.byteLength(req.body) : 0,
+      hasRawBody: !!rawBody,
+      rawBodyLength: rawBody ? rawBody.length : 0,
       secretPrefix: webhookSecret ? webhookSecret.substring(0, 8) : 'none',
-      isBuffer: req.body ? Buffer.isBuffer(req.body) : false,
       signaturePreview: sig ? String(sig).substring(0, 50) + '...' : 'none'
     });
     
@@ -32,32 +35,23 @@ app.post("/api/stripe-webhook",
       return res.status(400).send("Webhook secret not configured");
     }
     
-    if (!req.body) {
-      console.error("No request body for webhook");
-      return res.status(400).send("No request body");
+    if (!rawBody) {
+      console.error("No raw body for webhook");
+      return res.status(400).send("No raw body");
     }
     
     let event: Stripe.Event;
     
     try {
-      // Ensure we're passing a Buffer
-      const payload = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
-      console.log("🔍 Attempting verification with:", {
-        payloadType: typeof payload,
-        payloadIsBuffer: Buffer.isBuffer(payload),
-        payloadLength: payload.length,
-        signaturePresent: !!sig
-      });
-      
-      event = stripe.webhooks.constructEvent(payload, sig as string, webhookSecret);
+      console.log("🔍 Verifying webhook signature...");
+      event = stripe.webhooks.constructEvent(rawBody, sig as string, webhookSecret);
       console.log("✅ Webhook event verified:", event.type);
     } catch (err: any) {
       console.error("❌ Webhook signature verification failed:", err.message);
       console.error("Debug details:", {
         errorType: err.constructor.name,
-        errorMessage: err.message,
         webhookSecretLength: webhookSecret.length,
-        bodyPreview: req.body ? req.body.toString().substring(0, 100) : 'none'
+        rawBodyPreview: rawBody ? rawBody.substring(0, 100) : 'none'
       });
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
@@ -74,24 +68,17 @@ app.post("/api/stripe-webhook",
             subscription: session.subscription,
             paymentStatus: session.payment_status,
             metadata: session.metadata,
-            hasMetadata: !!session.metadata,
-            hasFamilyName: !!session.metadata?.familyName,
-            hasTier: !!session.metadata?.tier,
           });
           
           const familyName = session.metadata?.familyName;
           const tier = session.metadata?.tier as "free" | "family" | "family_plus" | "family_hero";
           
           if (!familyName || !tier) {
-            console.error("❌ CRITICAL: Missing metadata in checkout session!", {
+            console.error("❌ Missing metadata in checkout session!", {
               familyName,
               tier,
               sessionId: session.id,
-              fullMetadata: session.metadata,
-              customer: session.customer,
-              subscription: session.subscription,
             });
-            // Exit switch, response will be sent at the end
             break;
           }
           
