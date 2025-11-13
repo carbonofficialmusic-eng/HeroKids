@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeroKids Umbauplan: Altersgerechte Architektur (6-16 Jahre)</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .slide {
+            background: white;
+            padding: 40px;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            page-break-after: always;
+        }
+        
+        .slide:last-child {
+            page-break-after: auto;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            border-bottom: 4px solid #764ba2;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #764ba2;
+            font-size: 1.8em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        h3 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-top: 20px;
+        }
+        
+        .tier-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .tier-adventurer { border-left-color: #48bb78; }
+        .tier-explorer { border-left-color: #4299e1; }
+        .tier-champion { border-left-color: #ed8936; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background-color: #f5f7fa;
+        }
+        
+        .feature-yes { color: #48bb78; font-weight: bold; }
+        .feature-no { color: #f56565; font-weight: bold; }
+        .feature-lock { color: #a0aec0; }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            margin: 15px 0;
+        }
+        
+        .roadmap {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .phase {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .phase h4 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        
+        .highlight-box {
+            background: #fef5e7;
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .highlight-box strong {
+            color: #d68910;
+        }
+        
+        ul {
+            line-height: 1.8;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .emoji {
+            font-size: 1.3em;
+        }
+        
+        .dashboard-preview {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 0.75em;
+            line-height: 1.4;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .summary-item {
+            background: #48bb78;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .summary-item h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .summary-item p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+<!-- SLIDE 1 -->
+<div class="slide">
+    <h1><span class="emoji">🎯</span> HeroKids Umbauplan: Altersgerechte Architektur (6-16 Jahre)</h1>
+    
+    <h2>Vision & Ziele</h2>
+    
+    <div class="highlight-box">
+        <strong>Vision:</strong> HeroKids soll mit den Kindern mitwachsen - von spielerischen Aufgaben für 6-Jährige bis zu Verantwortungs- und Finanz-Tracking für 16-Jährige.
+    </div>
+    
+    <h3>Hauptziele</h3>
+    <ul>
+        <li><strong>Altersgerechte Oberflächen:</strong> Verschiedene Komplexitätsstufen je nach Alter/Reife</li>
+        <li><strong>Ausbaufähigkeit:</strong> Neue Features ohne komplette Neuprogrammierung</li>
+        <li><strong>Elternkontrolle:</strong> Eltern entscheiden, welches Level für ihr Kind passend ist</li>
+        <li><strong>Langfristige Motivation:</strong> Kinder bleiben über Jahre engagiert</li>
+    </ul>
+    
+    <h3>Kernprinzip</h3>
+    <div style="text-align: center; font-size: 1.5em; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; margin: 20px 0;">
+        "Ein System, drei Erlebnisse"<br>
+        <span style="font-size: 0.7em;">Gleiche Datenbank, unterschiedliche Benutzeroberflächen je nach Reifegrad</span>
+    </div>
+</div>
+
+<!-- SLIDE 2 -->
+<div class="slide">
+    <h1><span class="emoji">👥</span> Die drei Maturity Levels (Tier-Personas)</h1>
+    
+    <div class="tier-card tier-adventurer">
+        <h2><span class="emoji">🌟</span> Level 1: Adventurer (6-9 Jahre)</h2>
+        <p><strong>Charakteristik:</strong> <em>Visuell, spielerisch, sofortige Belohnungen</em></p>
+        
+        <h3>UI-Stil:</h3>
+        <ul>
+            <li><span class="emoji">🎨</span> Große, bunte Buttons und Karten</li>
+            <li><span class="emoji">⭐</span> Sofortige Belohnungs-Animationen</li>
+            <li><span class="emoji">🏆</span> Einfache Streak-Anzeigen (Tage hintereinander)</li>
+            <li><span class="emoji">🎮</span> Fokus auf einzelne Aufgaben, keine Komplexität</li>
+        </ul>
+        
+        <h3>Features:</h3>
+        <p>Aufgaben abschließen • Punkte sammeln • Charakter-Skins freischalten • Einfache Leaderboard-Ansicht</p>
+        
+        <p style="font-style: italic; color: #2d3748; margin-top: 15px;">
+            <strong>Beispiel-Persona:</strong> "Emma (7) liebt es, ihre Dinosaurier-Skins freizuschalten und die Sterne zu sehen wenn sie ihr Zimmer aufräumt"
+        </p>
+    </div>
+    
+    <div class="tier-card tier-explorer">
+        <h2><span class="emoji">🔍</span> Level 2: Explorer (10-12 Jahre)</h2>
+        <p><strong>Charakteristik:</strong> <em>Ziele setzen, zusammenarbeiten, erste Challenges</em></p>
+        
+        <h3>UI-Stil:</h3>
+        <ul>
+            <li><span class="emoji">📊</span> Fortschrittsbalken für längerfristige Ziele</li>
+            <li><span class="emoji">🎖️</span> Badge-System für Erfolge</li>
+            <li><span class="emoji">👥</span> Kollaborative Familien-Quests</li>
+            <li><span class="emoji">📈</span> Einfache Statistiken (z.B. "Diese Woche: 5/7 Aufgaben")</li>
+        </ul>
+        
+        <h3>Features:</h3>
+        <p>Alle Adventurer-Features + Ziel-Leiter • Erfolgs-Badges • Familien-Challenges • Aufgaben-Kategorien</p>
+        
+        <p style="font-style: italic; color: #2d3748; margin-top: 15px;">
+            <strong>Beispiel-Persona:</strong> "Leon (11) spart für eine Spielkonsole und liebt es, seinen wöchentlichen Fortschritt zu tracken"
+        </p>
+    </div>
+    
+    <div class="tier-card tier-champion">
+        <h2><span class="emoji">🏆</span> Level 3: Champion (13-16 Jahre)</h2>
+        <p><strong>Charakteristik:</strong> <em>Wettbewerb, Verantwortung, Finanz-Skills</em></p>
+        
+        <h3>UI-Stil:</h3>
+        <ul>
+            <li><span class="emoji">💰</span> Taschengeld-Tracking & Spar-Ledger</li>
+            <li><span class="emoji">🎯</span> XP-Seasons mit Battle Pass</li>
+            <li><span class="emoji">📊</span> Erweiterte Analytics (Gewohnheiten, Produktivität)</li>
+            <li><span class="emoji">🌐</span> Optional: Peer-Challenges mit Freunden</li>
+        </ul>
+        
+        <h3>Features:</h3>
+        <p>Alle Explorer-Features + Allowance-Verwaltung • Spar-Ziele • Skill Trees • Community Service Tracker • Competitive Seasons</p>
+        
+        <p style="font-style: italic; color: #2d3748; margin-top: 15px;">
+            <strong>Beispiel-Persona:</strong> "Sofia (15) nutzt HeroKids um ihr Taschengeld zu tracken und ihre Volunteer-Stunden für College-Bewerbungen zu dokumentieren"
+        </p>
+    </div>
+</div>
+
+<!-- SLIDE 3 -->
+<div class="slide">
+    <h1><span class="emoji">🗺️</span> Feature-Mapping nach Alters-Tiers</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Adventurer (6-9)</th>
+                <th>Explorer (10-12)</th>
+                <th>Champion (13-16)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Aufgaben abschließen</strong></td>
+                <td class="feature-yes">✅ Große Buttons</td>
+                <td class="feature-yes">✅ + Kategorien</td>
+                <td class="feature-yes">✅ + Prioritäten</td>
+            </tr>
+            <tr>
+                <td><strong>Punkte-System</strong></td>
+                <td class="feature-yes">✅ Einfach</td>
+                <td class="feature-yes">✅ + Multiplier</td>
+                <td class="feature-yes">✅ + XP-Seasons</td>
+            </tr>
+            <tr>
+                <td><strong>Character Skins</strong></td>
+                <td class="feature-yes">✅ 3 Tiers</td>
+                <td class="feature-yes">✅ 3 Tiers</td>
+                <td class="feature-yes">✅ 3 Tiers + Custom</td>
+            </tr>
+            <tr>
+                <td><strong>Leaderboard</strong></td>
+                <td class="feature-lock">🔒 Parent-Toggle</td>
+                <td class="feature-yes">✅ Familien-Ranking</td>
+                <td class="feature-yes">✅ + Peer Challenges</td>
+            </tr>
+            <tr>
+                <td><strong>Belohnungen</strong></td>
+                <td class="feature-yes">✅ Anfragen</td>
+                <td class="feature-yes">✅ Anfragen</td>
+                <td class="feature-yes">✅ + Taschengeld</td>
+            </tr>
+            <tr>
+                <td><strong>Ziel-Tracking</strong></td>
+                <td class="feature-no">❌</td>
+                <td class="feature-yes">✅ Einfach</td>
+                <td class="feature-yes">✅ Erweitert</td>
+            </tr>
+            <tr>
+                <td><strong>Badges/Achievements</strong></td>
+                <td class="feature-no">❌</td>
+                <td class="feature-yes">✅ Basic</td>
+                <td class="feature-yes">✅ + Skill Trees</td>
+            </tr>
+            <tr>
+                <td><strong>Statistiken</strong></td>
+                <td class="feature-no">❌</td>
+                <td class="feature-yes">✅ Einfach</td>
+                <td class="feature-yes">✅ Analytics</td>
+            </tr>
+            <tr>
+                <td><strong>Taschengeld-Ledger</strong></td>
+                <td class="feature-no">❌</td>
+                <td class="feature-no">❌</td>
+                <td class="feature-yes">✅</td>
+            </tr>
+            <tr>
+                <td><strong>Community Service</strong></td>
+                <td class="feature-no">❌</td>
+                <td class="feature-no">❌</td>
+                <td class="feature-yes">✅</td>
+            </tr>
+            <tr>
+                <td><strong>Financial Literacy</strong></td>
+                <td class="feature-no">❌</td>
+                <td class="feature-no">❌</td>
+                <td class="feature-yes">✅</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="highlight-box">
+        <strong>Wichtig:</strong> Eltern haben immer vollzugriff auf alle Verwaltungsfunktionen (Aufgaben erstellen, Genehmigungen, Settings) - unabhängig vom Level ihrer Kinder.
+    </div>
+</div>
+
+<!-- SLIDE 4 -->
+<div class="slide">
+    <h1><span class="emoji">🏗️</span> Technische Architektur</h1>
+    
+    <h2>A) Database Schema Erweiterungen</h2>
+    <div class="code-block">// Erweiterte family_members Tabelle
+export const familyMembers = pgTable("family_members", {
+  // ... bestehende Felder ...
+  
+  // NEU: Alters- und Reifegrad-Tracking
+  birthdate: date("birthdate"),
+  maturityLevel: varchar("maturity_level", { length: 20 })
+    .notNull()
+    .default("adventurer"),
+  
+  // NEU: Feature-Flags für granulare Kontrolle
+  featureFlags: jsonb("feature_flags").default({}),
+});
+
+// NEU: Fortschritts-Meilensteine Tabelle
+export const progressMilestones = pgTable("progress_milestones", {
+  id: varchar("id").primaryKey(),
+  memberId: integer("member_id"),
+  featureKey: varchar("feature_key", { length: 50 }),
+  unlockedAt: timestamp("unlocked_at"),
+});</div>
+    
+    <h2>B) Component-Architektur (Frontend)</h2>
+    <div class="code-block">client/src/
+├── features/
+│   └── experience/
+│       ├── hooks/
+│       │   ├── useMemberExperience.ts    // Zentrale Daten
+│       │   ├── useFeatureFlags.ts         // Feature-Gates
+│       │   └── useDashboardData.ts        // Shared queries
+│       ├── components/
+│       │   ├── shared/
+│       │   │   ├── TaskGrid.tsx           // Wiederverwendbar
+│       │   │   ├── PointsSummary.tsx
+│       │   │   └── LeaderboardPanel.tsx
+│       │   ├── adventurer/
+│       │   │   ├── AdventurerDashboard.tsx
+│       │   │   └── SimpleTaskCard.tsx
+│       │   ├── explorer/
+│       │   │   ├── ExplorerDashboard.tsx
+│       │   │   ├── GoalLadder.tsx
+│       │   │   └── BadgeRail.tsx
+│       │   └── champion/
+│       │       ├── ChampionDashboard.tsx
+│       │       ├── AllowanceTracker.tsx
+│       │       └── SkillTree.tsx
+│       └── FeatureGate.tsx                // HOC für Toggling
+├── pages/
+│   ├── ParentDashboard.tsx               // Eltern-UI
+│   └── ChildDashboard.tsx                // Router zu Tiers</div>
+    
+    <h2>C) Feature-Gate-System</h2>
+    <div class="code-block">// Beispiel-Verwendung:
+&lt;FeatureGate feature="allowance_tracking" fallback={null}&gt;
+  &lt;AllowanceTracker memberId={member.id} /&gt;
+&lt;/FeatureGate&gt;
+
+// FeatureGate prüft automatisch:
+// 1. Ist das Feature im Tier enthalten?
+// 2. Hat das Mitglied den Meilenstein freigeschaltet?
+// 3. Ist das Feature manuell deaktiviert?</div>
+</div>
+
+<!-- SLIDE 5 -->
+<div class="slide">
+    <h1><span class="emoji">🗓️</span> Entwicklungs-Roadmap</h1>
+    
+    <div class="roadmap">
+        <div class="phase">
+            <h4>Phase 0: Foundation</h4>
+            <p><strong>Woche 1-2</strong></p>
+            <ul style="font-size: 0.9em;">
+                <li>✅ Schema-Migration</li>
+                <li>✅ Parent Settings UI</li>
+                <li>✅ Feature-Flag-Service</li>
+                <li>✅ useMemberExperience Hook</li>
+            </ul>
+        </div>
+        
+        <div class="phase">
+            <h4>Phase 1: Split Dashboards</h4>
+            <p><strong>Woche 3-4</strong></p>
+            <ul style="font-size: 0.9em;">
+                <li>✅ Parent vs Child Dashboards</li>
+                <li>✅ AdventurerDashboard</li>
+                <li>✅ Shared Components</li>
+                <li>✅ FeatureGate HOC</li>
+            </ul>
+        </div>
+        
+        <div class="phase">
+            <h4>Phase 2: Explorer Features</h4>
+            <p><strong>Woche 5-7</strong></p>
+            <ul style="font-size: 0.9em;">
+                <li>🔄 ExplorerDashboard</li>
+                <li>🔄 Goal Ladder System</li>
+                <li>🔄 Badge/Achievement-System</li>
+                <li>🔄 Familien-Challenges</li>
+            </ul>
+        </div>
+        
+        <div class="phase">
+            <h4>Phase 3: Champion Features</h4>
+            <p><strong>Woche 8-12</strong></p>
+            <ul style="font-size: 0.9em;">
+                <li>🔄 ChampionDashboard</li>
+                <li>🔄 Allowance-Tracking</li>
+                <li>🔄 Skill Trees</li>
+                <li>🔄 Season Pass & XP</li>
+            </ul>
+        </div>
+    </div>
+    
+    <h2>Phase 4: Advanced Features (Woche 13+)</h2>
+    <ul>
+        <li>Community Service Tracker</li>
+        <li>Advanced Analytics</li>
+        <li>Peer Challenges (opt-in)</li>
+        <li>Export-Funktion (Lebenslauf, Portfolio)</li>
+    </ul>
+    
+    <div class="highlight-box">
+        <strong>Laufend:</strong> End-to-End Tests für jedes Tier • A/B-Testing • User Feedback • Performance-Optimierung
+    </div>
+</div>
+
+<!-- SLIDE 6 -->
+<div class="slide">
+    <h1><span class="emoji">🔄</span> Migrations-Strategie</h1>
+    
+    <h2>Schritt 1: Opt-in Einführung</h2>
+    <p><strong>Problem:</strong> Benutzer nicht mit sofortigen Änderungen überraschen</p>
+    <p><strong>Lösung:</strong></p>
+    <ul>
+        <li>Alle bestehenden Kinder starten als "Adventurer" (aktuelles Design)</li>
+        <li>Eltern bekommen Banner: <em>"Neu: Altersgerechte Oberflächen! Passen Sie das Erlebnis für [Kind] an"</em></li>
+        <li>Upgrade ist optional, jederzeit umkehrbar</li>
+    </ul>
+    
+    <h2>Schritt 2: Altersbasierte Vorschläge</h2>
+    <p><strong>Problem:</strong> Eltern wissen nicht, welches Level passt</p>
+    <p><strong>Lösung:</strong></p>
+    <ul>
+        <li>System schlägt Level vor basierend auf Geburtsdatum</li>
+        <li>6-9 Jahre → Adventurer | 10-12 Jahre → Explorer | 13-16 Jahre → Champion</li>
+        <li>Eltern müssen bestätigen (kein Auto-Upgrade)</li>
+    </ul>
+    
+    <h2>Schritt 3: Feature-Freischaltungen</h2>
+    <p><strong>Problem:</strong> Zu viele neue Features auf einmal überfordern</p>
+    <p><strong>Lösung:</strong></p>
+    <ul>
+        <li>Progressive Disclosure: Features werden nacheinander vorgestellt</li>
+        <li>Tutorial-Tooltips beim ersten Mal</li>
+        <li>Erfolgs-basierte Unlocks (z.B. "50 Aufgaben → Badge-System verfügbar")</li>
+    </ul>
+    
+    <h2>Schritt 4: Downgrade-Möglichkeit</h2>
+    <p><strong>Lösung:</strong> Eltern können Level jederzeit zurückstufen • Kein Datenverlust</p>
+    
+    <div class="highlight-box">
+        <strong>Rollback-Plan:</strong> Feature-Flags können per Admin-Panel sofort deaktiviert werden • Alle Nutzer fallen auf "Legacy UI" zurück • Datenmigration ist non-destructive
+    </div>
+</div>
+
+<!-- SUMMARY SLIDE -->
+<div class="slide">
+    <h1><span class="emoji">📊</span> Zusammenfassung & Nächste Schritte</h1>
+    
+    <h2>Was wird erreicht?</h2>
+    <div class="summary-grid">
+        <div class="summary-item">
+            <h4>Altersgerecht</h4>
+            <p>Oberflächen für 6-16 Jahre</p>
+        </div>
+        <div class="summary-item" style="background: #4299e1;">
+            <h4>Ausbaufähig</h4>
+            <p>Architektur für zukünftige Features</p>
+        </div>
+        <div class="summary-item" style="background: #ed8936;">
+            <h4>Kontrolliert</h4>
+            <p>Eltern entscheiden über Komplexität</p>
+        </div>
+        <div class="summary-item" style="background: #9f7aea;">
+            <h4>Langfristig</h4>
+            <p>Bindung durch wachsende Challenges</p>
+        </div>
+    </div>
+    
+    <h2>Technischer Aufwand</h2>
+    <table style="width: 70%; margin: 20px auto;">
+        <tr>
+            <td><strong>Schema-Migration</strong></td>
+            <td>1-2 Tage</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 1 (Dashboards)</strong></td>
+            <td>2-3 Wochen</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 2 (Explorer)</strong></td>
+            <td>3-4 Wochen</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 3 (Champion)</strong></td>
+            <td>4-5 Wochen</td>
+        </tr>
+        <tr style="background: #667eea; color: white; font-weight: bold;">
+            <td><strong>GESAMT</strong></td>
+            <td>~10-12 Wochen</td>
+        </tr>
+    </table>
+    
+    <h2>Nächste Schritte für Freigabe</h2>
+    <ol style="font-size: 1.1em; line-height: 2;">
+        <li><strong>Review dieser Präsentation</strong> → Feedback einholen</li>
+        <li><strong>Prototyping</strong> → Mock-ups der drei Dashboard-Varianten</li>
+        <li><strong>User Research</strong> → Mit Familien (verschiedene Altersgruppen) testen</li>
+        <li><strong>Go/No-Go Entscheidung</strong> → Basierend auf Feedback & Aufwand</li>
+    </ol>
+    
+    <div class="highlight-box">
+        <strong>Diese Architektur ermöglicht es HeroKids, mit Familien über Jahre zu wachsen und bleibt technisch wartbar und erweiterbar.</strong>
+    </div>
+</div>
+
+</body>
+</html>
