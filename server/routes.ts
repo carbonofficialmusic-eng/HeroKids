@@ -167,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Zod schema for family settings update
   const updateFamilySettingsSchema = z.object({
     showLeaderboard: z.boolean().optional(),
-    language: z.enum(["de", "en", "fr", "es", "ja", "zh"]).optional(),
+    language: z.enum(["de", "en", "fr", "es", "ja", "zh", "ko"]).optional(),
     weeklyPrize: z.string().nullable().optional(),
     monthlyPrize: z.string().nullable().optional(),
     yearlyPrize: z.string().nullable().optional(),
