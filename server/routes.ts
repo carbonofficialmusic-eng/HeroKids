@@ -2311,14 +2311,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create checkout session
-      // Construct base URL with proper scheme
-      // In Production: REPLIT_DOMAINS (e.g., "herokids.replit.app,custom-domain.com")
-      // In Development: REPLIT_DEV_DOMAIN (e.g., "xyz.replit.dev")
-      const baseUrl = process.env.REPLIT_DOMAINS 
-        ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` // Production: first domain
-        : process.env.REPLIT_DEV_DOMAIN 
-          ? `https://${process.env.REPLIT_DEV_DOMAIN}` // Development
-          : 'http://localhost:5000'; // Local fallback
+      // Construct base URL from request (most reliable in all contexts)
+      // Falls back to REPLIT_DOMAINS if needed
+      const host = req.get('host');
+      const protocol = req.protocol || 'https';
+      
+      let baseUrl: string;
+      if (host) {
+        // Use actual request host (works everywhere: dev, production, webhooks)
+        baseUrl = `${protocol}://${host}`;
+      } else if (process.env.REPLIT_DOMAINS) {
+        // Fallback to environment variable
+        baseUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+      } else {
+        // Last resort: localhost (should never happen in production)
+        baseUrl = 'http://localhost:5000';
+        console.warn("⚠️ Using localhost as baseUrl - this may cause redirect issues in production!");
+      }
+      
+      console.log("🌐 Checkout session URLs:", {
+        host,
+        protocol,
+        baseUrl,
+        successUrl: `${baseUrl}/dashboard?subscription=success`,
+        cancelUrl: `${baseUrl}/pricing?canceled=true`,
+      });
       
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
