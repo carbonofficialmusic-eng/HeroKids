@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon, Menu } from "lucide-react";
+import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon, Menu, RotateCcw } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
@@ -35,11 +38,41 @@ export function ProfileMenu({
   onSwitchMember,
 }: ProfileMenuProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
 
+  const resetSubscriptionMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("/api/admin/reset-subscription", {
+        method: "POST",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+      toast({
+        title: "✅ Subscription Reset",
+        description: "Your family subscription has been reset to Free tier.",
+      });
+      setOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ Error",
+        description: error.message || "Failed to reset subscription",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleThemeToggle = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const handleResetSubscription = () => {
+    if (confirm("Are you sure you want to reset your subscription to Free? This cannot be undone.")) {
+      resetSubscriptionMutation.mutate();
+    }
   };
 
   return (
@@ -87,6 +120,19 @@ export function ProfileMenu({
             <User2 className="mr-2 h-4 w-4" />
             <span>{t("settings.switchMember")}</span>
           </DropdownMenuItem>
+        )}
+        {isParent && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              onClick={handleResetSubscription}
+              disabled={resetSubscriptionMutation.isPending}
+              data-testid="menu-item-reset-subscription"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              <span>Reset to Free (Admin)</span>
+            </DropdownMenuItem>
+          </>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleThemeToggle} data-testid="menu-item-theme-toggle">
