@@ -824,15 +824,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(filteredTasks);
       } else {
         // Parents see all tasks with metadata
-        const tasksWithMeta = allTasks.map((task) => {
-          if (task.maxCompletions !== null) {
-            console.log(`🔍 [GET /api/tasks] Task "${task.title}": completionCount=${task.completionCount}, maxCompletions=${task.maxCompletions}`);
-          }
-          return {
-            ...task,
-            remainingSlots: task.maxCompletions !== null ? task.maxCompletions - task.completionCount : null,
-          };
-        });
+        const tasksWithMeta = allTasks.map((task) => ({
+          ...task,
+          remainingSlots: task.maxCompletions !== null ? task.maxCompletions - task.completionCount : null,
+        }));
         
         res.json(tasksWithMeta);
       }

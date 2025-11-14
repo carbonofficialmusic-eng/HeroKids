@@ -551,18 +551,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async _approveCompletionInternal(tx: any, completionId: string, approvedBy: string, skipApprovalUpdate: boolean = false): Promise<void> {
-    console.log(`🔍 [_approveCompletionInternal] START: completionId=${completionId}, skipApprovalUpdate=${skipApprovalUpdate}`);
-    
     // 1. Lock completion
     const [completion] = await tx.select().from(taskCompletions)
       .where(eq(taskCompletions.id, completionId))
       .for('update');
     
     if (!completion) throw new Error('Completion not found');
-    console.log(`🔍 [_approveCompletionInternal] Completion status: ${completion.status}`);
     
     if (!skipApprovalUpdate && completion.status === 'approved') {
-      console.log(`🔍 [_approveCompletionInternal] EARLY RETURN: Already approved`);
       return; // Already approved (but proceed if skipApprovalUpdate=true for auto-approved tasks)
     }
     
@@ -570,8 +566,6 @@ export class DatabaseStorage implements IStorage {
     const [task] = await tx.select().from(tasks)
       .where(eq(tasks.id, completion.taskId))
       .for('update');
-    
-    console.log(`🔍 [_approveCompletionInternal] Task BEFORE update: maxCompletions=${task.maxCompletions}, completionCount=${task.completionCount}`);
     
     // 3. Update completion (only if not already approved)
     if (!skipApprovalUpdate) {
@@ -586,13 +580,10 @@ export class DatabaseStorage implements IStorage {
     
     // 4. If maxCompletions mode: increment counter and check threshold
     if (task.maxCompletions !== null) {
-      console.log(`🔍 [_approveCompletionInternal] INCREMENTING completionCount: ${task.completionCount} + 1 = ${task.completionCount + 1} / ${task.maxCompletions}`);
-      
       // For recurring tasks: keep status as "active" even when maxCompletions reached
       // The nextAvailableDate (set in routes.ts) will make it unavailable until reset
       // For non-recurring tasks: set status to "completed" when maxCompletions reached
       const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
-      console.log(`🔍 [_approveCompletionInternal] isRecurring=${isRecurring}, recurrence=${task.recurrence}, recurrenceDays=${task.recurrenceDays}`);
       
       await tx.update(tasks)
         .set({
@@ -603,12 +594,6 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date()
         })
         .where(eq(tasks.id, task.id));
-      
-      // Verify update
-      const [updatedTask] = await tx.select().from(tasks).where(eq(tasks.id, task.id));
-      console.log(`🔍 [_approveCompletionInternal] Task AFTER update: completionCount=${updatedTask.completionCount}, status=${updatedTask.status}`);
-    } else {
-      console.log(`🔍 [_approveCompletionInternal] SKIPPING multi-completion (maxCompletions=null)`);
     }
     
     // 5. Award points to member (existing logic from old approveTaskCompletion)
