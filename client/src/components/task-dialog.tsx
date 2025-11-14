@@ -4,6 +4,7 @@ import { insertTaskSchema, type Task, type FamilyMember } from "@shared/schema";
 import { z } from "zod";
 import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -69,6 +70,7 @@ export function TaskDialog({
   familyMembers = [],
 }: TaskDialogProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   
   // Calculate number of children in the family
   const childCount = useMemo(() => {
@@ -556,55 +558,76 @@ export function TaskDialog({
             <FormField
               control={form.control}
               name="maxCompletions"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Multiple Children Can Complete</FormLabel>
-                  <FormDescription>
-                    Allow multiple children to complete this task. Adjustable range: 2 to {Math.max(childCount, 2)} (based on your family size).
-                  </FormDescription>
-                  <div className="flex items-center gap-4">
-                    <Switch
-                      checked={field.value !== undefined && field.value !== null}
-                      onCheckedChange={(checked) => {
-                        // When enabling: use number of children in family (minimum 2)
-                        // When editing existing task: preserve current value
-                        if (checked) {
-                          // Only set default if it's a new task (not editing)
-                          if (!editingTask) {
-                            field.onChange(Math.max(childCount, 2));
-                          } else {
-                            // When editing, keep existing value or use childCount
-                            field.onChange(field.value || Math.max(childCount, 2));
+              render={({ field }) => {
+                const isDisabled = childCount < 2;
+                
+                return (
+                  <FormItem className="space-y-3">
+                    <FormLabel className={isDisabled ? "text-muted-foreground" : ""}>
+                      Multiple Children Can Complete
+                    </FormLabel>
+                    <FormDescription>
+                      {isDisabled ? (
+                        "⚠️ Mindestens 2 Kinder benötigt. Diese Funktion erlaubt es mehreren Kindern, dieselbe Aufgabe zu erledigen."
+                      ) : (
+                        `Allow multiple children to complete this task. Adjustable range: 2 to ${childCount} (based on your family size).`
+                      )}
+                    </FormDescription>
+                    <div className="flex items-center gap-4">
+                      <Switch
+                        checked={field.value !== undefined && field.value !== null}
+                        disabled={isDisabled}
+                        onCheckedChange={(checked) => {
+                          // Prevent enabling if less than 2 children
+                          if (checked && childCount < 2) {
+                            toast({
+                              title: "Nicht verfügbar",
+                              description: "Sie benötigen mindestens 2 Kinder in Ihrer Familie, um Multi-Completion Tasks zu erstellen.",
+                              variant: "destructive",
+                            });
+                            return;
                           }
-                        } else {
-                          field.onChange(undefined);
-                        }
-                      }}
-                      data-testid="toggle-multi-completion"
-                    />
-                    {field.value !== undefined && field.value !== null && (
-                      <div className="flex items-center gap-2">
-                        <FormLabel className="text-sm">Times:</FormLabel>
-                        <Input
-                          type="number"
-                          min={2}
-                          max={Math.max(childCount, 2)}
-                          value={field.value || 2}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value);
-                            if (!isNaN(val)) {
-                              field.onChange(Math.max(2, Math.min(val, Math.max(childCount, 2))));
+                          
+                          // When enabling: use number of children in family (minimum 2)
+                          // When editing existing task: preserve current value
+                          if (checked) {
+                            // Only set default if it's a new task (not editing)
+                            if (!editingTask) {
+                              field.onChange(Math.max(childCount, 2));
+                            } else {
+                              // When editing, keep existing value or use childCount
+                              field.onChange(field.value || Math.max(childCount, 2));
                             }
-                          }}
-                          className="w-20"
-                          data-testid="input-max-completions"
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
+                          } else {
+                            field.onChange(undefined);
+                          }
+                        }}
+                        data-testid="toggle-multi-completion"
+                      />
+                      {field.value !== undefined && field.value !== null && !isDisabled && (
+                        <div className="flex items-center gap-2">
+                          <FormLabel className="text-sm">Times:</FormLabel>
+                          <Input
+                            type="number"
+                            min={2}
+                            max={childCount}
+                            value={field.value || 2}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value);
+                              if (!isNaN(val)) {
+                                field.onChange(Math.max(2, Math.min(val, childCount)));
+                              }
+                            }}
+                            className="w-20"
+                            data-testid="input-max-completions"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <div className="flex gap-3">
