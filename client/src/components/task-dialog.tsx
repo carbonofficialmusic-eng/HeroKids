@@ -72,9 +72,9 @@ export function TaskDialog({
   const { t } = useTranslation();
   const { toast } = useToast();
   
-  // Calculate number of children in the family
-  const childCount = useMemo(() => {
-    return familyMembers.filter(m => m.role === 'child').length;
+  // Calculate total number of family members (parents + children)
+  const totalMemberCount = useMemo(() => {
+    return familyMembers.length;
   }, [familyMembers]);
   
   // Predefined task templates for common chores
@@ -559,18 +559,18 @@ export function TaskDialog({
               control={form.control}
               name="maxCompletions"
               render={({ field }) => {
-                const isDisabled = childCount < 2;
+                const isDisabled = totalMemberCount < 2;
                 
                 return (
                   <FormItem className="space-y-3">
                     <FormLabel className={isDisabled ? "text-muted-foreground" : ""}>
-                      Multiple Children Can Complete
+                      Multiple Family Members Can Complete
                     </FormLabel>
                     <FormDescription>
                       {isDisabled ? (
-                        "⚠️ Mindestens 2 Kinder benötigt. Diese Funktion erlaubt es mehreren Kindern, dieselbe Aufgabe zu erledigen."
+                        "⚠️ Mindestens 2 Familienmitglieder benötigt. Diese Funktion erlaubt es mehreren Familienmitgliedern (Eltern & Kinder), dieselbe Aufgabe zu erledigen."
                       ) : (
-                        `Allow multiple children to complete this task. Adjustable range: 2 to ${childCount} (based on your family size).`
+                        `Allow multiple family members to complete this task. Adjustable range: 2 to ${totalMemberCount} (based on your family size).`
                       )}
                     </FormDescription>
                     <div className="flex items-center gap-4">
@@ -578,25 +578,25 @@ export function TaskDialog({
                         checked={field.value !== undefined && field.value !== null}
                         disabled={isDisabled}
                         onCheckedChange={(checked) => {
-                          // Prevent enabling if less than 2 children
-                          if (checked && childCount < 2) {
+                          // Prevent enabling if less than 2 family members
+                          if (checked && totalMemberCount < 2) {
                             toast({
                               title: "Nicht verfügbar",
-                              description: "Sie benötigen mindestens 2 Kinder in Ihrer Familie, um Multi-Completion Tasks zu erstellen.",
+                              description: "Sie benötigen mindestens 2 Familienmitglieder, um Multi-Completion Tasks zu erstellen.",
                               variant: "destructive",
                             });
                             return;
                           }
                           
-                          // When enabling: use number of children in family (minimum 2)
+                          // When enabling: use total number of family members (minimum 2)
                           // When editing existing task: preserve current value
                           if (checked) {
                             // Only set default if it's a new task (not editing)
                             if (!editingTask) {
-                              field.onChange(Math.max(childCount, 2));
+                              field.onChange(Math.max(totalMemberCount, 2));
                             } else {
-                              // When editing, keep existing value or use childCount
-                              field.onChange(field.value || Math.max(childCount, 2));
+                              // When editing, keep existing value or use totalMemberCount
+                              field.onChange(field.value || Math.max(totalMemberCount, 2));
                             }
                           } else {
                             field.onChange(undefined);
@@ -610,12 +610,12 @@ export function TaskDialog({
                           <Input
                             type="number"
                             min={2}
-                            max={childCount}
+                            max={totalMemberCount}
                             value={field.value || 2}
                             onChange={(e) => {
                               const val = parseInt(e.target.value);
                               if (!isNaN(val)) {
-                                field.onChange(Math.max(2, Math.min(val, childCount)));
+                                field.onChange(Math.max(2, Math.min(val, totalMemberCount)));
                               }
                             }}
                             className="w-20"
