@@ -561,7 +561,11 @@ export default function Dashboard() {
   const isParent = member?.role === "parent";
   // Use real member's role to show parent-only UI elements (like switch button)
   const isRealParent = realMember?.role === "parent";
-  const activeTasks = tasks.filter((t) => t.status === "active");
+  // Show active tasks AND completed recurring tasks (they stay visible until nextAvailableDate passes)
+  const activeTasks = tasks.filter((t) => 
+    t.status === "active" || 
+    (t.status === "completed" && t.nextAvailableDate !== null)
+  );
   const activeRewards = rewards.filter((r) => r.isActive);
 
   return (

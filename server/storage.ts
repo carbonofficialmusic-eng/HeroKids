@@ -592,6 +592,7 @@ export class DatabaseStorage implements IStorage {
       // The nextAvailableDate (set in routes.ts) will make it unavailable until reset
       // For non-recurring tasks: set status to "completed" when maxCompletions reached
       const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
+      console.log(`🔍 [_approveCompletionInternal] isRecurring=${isRecurring}, recurrence=${task.recurrence}, recurrenceDays=${task.recurrenceDays}`);
       
       await tx.update(tasks)
         .set({
