@@ -33,12 +33,18 @@ export function TaskCard({
   // Check if task is currently unavailable (future nextAvailableDate)
   const isUnavailable = !!(task.nextAvailableDate && new Date(task.nextAvailableDate) > new Date());
   
+  // Check if this member has already completed this multi-completion task
+  const isCompletedByMember = task.memberHasCompleted || false;
+  
+  // Task should appear grayed out if it's unavailable OR completed by this member
+  const isGrayedOut = isUnavailable || isCompletedByMember;
+  
   return (
     <motion.div
       className="min-h-[140px]"
       initial={false}
       animate={{
-        opacity: isUnavailable ? 0.6 : 1,
+        opacity: isGrayedOut ? 0.6 : 1,
         scale: 1,
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -56,7 +62,7 @@ export function TaskCard({
               className="text-4xl"
               data-testid={`text-task-icon-${task.id}`}
               animate={{
-                filter: isUnavailable ? "grayscale(100%)" : "grayscale(0%)",
+                filter: isGrayedOut ? "grayscale(100%)" : "grayscale(0%)",
               }}
               transition={{ duration: 0.3 }}
             >
@@ -82,7 +88,7 @@ export function TaskCard({
               >
                 {task.title}
               </h3>
-              {isUnavailable && (
+              {isGrayedOut && (
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
@@ -157,15 +163,15 @@ export function TaskCard({
           {onComplete && (
             <Button
               size="icon"
-              variant={isUnavailable ? "outline" : "default"}
+              variant={isGrayedOut ? "outline" : "default"}
               className="flex-shrink-0"
               onClick={(e) => {
                 e.stopPropagation();
-                if (!isUnavailable) {
+                if (!isGrayedOut) {
                   onComplete(task.id);
                 }
               }}
-              disabled={isCompleting || isUnavailable}
+              disabled={isCompleting || isGrayedOut}
               data-testid={`button-complete-task-${task.id}`}
             >
               <CheckCircle className="h-5 w-5" />

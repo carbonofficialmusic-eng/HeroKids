@@ -816,9 +816,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })
         );
         
-        // Filter out null (unassigned tasks in assignment mode), already-completed tasks, and exhausted multi-completion tasks
+        // Filter logic for different task types:
+        // 1. Assignment-based (remainingSlots === null): Show only if NOT completed by member
+        // 2. Multi-completion with slots (remainingSlots > 0): Always show
+        // 3. Multi-completion (maxCompletions > 1) completed by member: Show grayed out
+        // 4. Single-completion or exhausted: Hide
         const filteredTasks = tasksWithMeta.filter(
-          (task) => task !== null && !task.memberHasCompleted && (task.remainingSlots === null || task.remainingSlots > 0)
+          (task) => task !== null && (
+            (task.remainingSlots === null && !task.memberHasCompleted) || // Assignment-based: show only if NOT completed
+            (task.remainingSlots !== null && task.remainingSlots > 0) || // Multi-completion with slots available
+            (task.maxCompletions !== null && task.maxCompletions > 1 && task.memberHasCompleted) // TRUE multi-completion task this member already completed (show grayed out)
+          )
         );
         
         res.json(filteredTasks);
@@ -1061,6 +1069,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (task.status !== "active") {
         return res.status(422).json({ message: "Validation failed: Task is not active" });
+      }
+      
+      // For multi-completion tasks, prevent the same member from completing twice
+      if (task.maxCompletions !== null && task.maxCompletions > 1) {
+        const hasAlreadyCompleted = await storage.hasActiveMemberCompletion(taskId, member.id);
+        if (hasAlreadyCompleted) {
+          return res.status(422).json({ message: "Validation failed: You have already completed this task" });
+        }
       }
       
       // Validate photo proof
