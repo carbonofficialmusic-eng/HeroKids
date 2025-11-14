@@ -848,10 +848,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(filteredTasks);
       } else {
         // Parents see all tasks with metadata
-        const tasksWithMeta = allTasks.map((task) => ({
-          ...task,
-          remainingSlots: task.maxCompletions !== null ? task.maxCompletions - task.completionCount : null,
-        }));
+        const tasksWithMeta = await Promise.all(
+          allTasks.map(async (task) => {
+            // For multi-completion tasks, check if parent has already completed it
+            if (task.maxCompletions !== null) {
+              const hasCompleted = await storage.hasActiveMemberCompletion(task.id, member.id);
+              
+              return {
+                ...task,
+                remainingSlots: task.maxCompletions - task.completionCount,
+                memberHasCompleted: hasCompleted,
+              };
+            }
+            
+            // For non-multi-completion tasks
+            return {
+              ...task,
+              remainingSlots: null,
+              memberHasCompleted: false,
+            };
+          })
+        );
         
         // Disable caching for task data
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
