@@ -783,21 +783,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tasks", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const realMember = await storage.getFamilyMemberByUserId(userId);
       
-      // Use acting member if available, otherwise use authenticated user
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
-      
-      if (!member) {
+      if (!realMember) {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      console.log(`[TASKS API] User: ${member.displayName} (${member.role}) - ActingAs: ${actingMemberId ? 'YES' : 'NO'}`);
+      // Use acting member if available, otherwise use authenticated user
+      let member = realMember;
+      if (req.session.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        
+        // Security: Validate acting member belongs to same family
+        if (!actingMember || actingMember.familyName !== realMember.familyName) {
+          // Clear invalid session
+          delete req.session.actingAsMemberId;
+        } else {
+          member = actingMember;
+        }
+      }
       
       const allTasks = await storage.getTasksByFamily(member.familyName);
-      console.log(`[TASKS API] Found ${allTasks.length} tasks for family ${member.familyName}`);
       
       // For children: filter and enhance tasks based on Multi-Completion mode
       if (member.role === "child") {
@@ -807,8 +813,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (task.maxCompletions !== null) {
               // Check if child has already completed this task
               const hasCompleted = await storage.hasActiveMemberCompletion(task.id, member.id);
-              
-              console.log(`[DEBUG] Task ${task.id} (${task.title}) - Member ${member.displayName}: hasCompleted=${hasCompleted}`);
               
               return {
                 ...task,
@@ -839,8 +843,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           )
         );
         
-        console.log(`[TASKS API] Returning ${filteredTasks.length} filtered tasks for child ${member.displayName}`);
-        
         // Disable caching for task data
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         res.json(filteredTasks);
@@ -850,8 +852,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...task,
           remainingSlots: task.maxCompletions !== null ? task.maxCompletions - task.completionCount : null,
         }));
-        
-        console.log(`[TASKS API] Returning ${tasksWithMeta.length} tasks for parent ${member.displayName}`);
         
         // Disable caching for task data
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
