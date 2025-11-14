@@ -11,7 +11,7 @@ import { getBackgroundUrl } from "@/lib/skins";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
-import Dashboard from "@/pages/dashboard";
+import DashboardGateway from "@/pages/dashboard-gateway";
 import Pricing from "@/pages/pricing";
 import Analytics from "@/pages/analytics";
 import Chat from "@/pages/chat";
@@ -100,11 +100,11 @@ function Router() {
           <Route path="/" component={Landing} />
         ) : (
           <>
-            <Route path="/" component={Dashboard} />
-            <Route path="/dashboard" component={Dashboard} />
-            <Route path="/tasks" component={Dashboard} />
-            <Route path="/rewards" component={Dashboard} />
-            <Route path="/leaderboard" component={Dashboard} />
+            <Route path="/" component={DashboardGateway} />
+            <Route path="/dashboard" component={DashboardGateway} />
+            <Route path="/tasks" component={DashboardGateway} />
+            <Route path="/rewards" component={DashboardGateway} />
+            <Route path="/leaderboard" component={DashboardGateway} />
             <Route path="/skins" component={SkinsGallery} />
             <Route path="/pricing" component={Pricing} />
             <Route path="/analytics" component={Analytics} />
