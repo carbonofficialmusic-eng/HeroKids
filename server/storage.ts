@@ -500,8 +500,8 @@ export class DatabaseStorage implements IStorage {
       
       // 4. If auto-approved: run approval logic immediately
       if (!task[0].requiresApproval) {
-        console.log(`[createTaskCompletion] Task ${task[0].id} is auto-approved, calling _approveCompletionInternal`);
-        await this._approveCompletionInternal(tx, completion.id, completion.memberId);
+        console.log(`[createTaskCompletion] Task ${task[0].id} is auto-approved, calling _approveCompletionInternal with skipApprovalUpdate=true`);
+        await this._approveCompletionInternal(tx, completion.id, completion.memberId, true);
         console.log(`[createTaskCompletion] _approveCompletionInternal completed for ${completion.id}`);
       } else {
         console.log(`[createTaskCompletion] Task ${task[0].id} requires approval, skipping _approveCompletionInternal`);
@@ -556,32 +556,38 @@ export class DatabaseStorage implements IStorage {
     return completions;
   }
 
-  private async _approveCompletionInternal(tx: any, completionId: string, approvedBy: string): Promise<void> {
+  private async _approveCompletionInternal(tx: any, completionId: string, approvedBy: string, skipApprovalUpdate: boolean = false): Promise<void> {
+    console.log(`🔄 [DEBUG] _approveCompletionInternal called for completion ${completionId}, skipApprovalUpdate=${skipApprovalUpdate}`);
+    
     // 1. Lock completion
     const [completion] = await tx.select().from(taskCompletions)
       .where(eq(taskCompletions.id, completionId))
       .for('update');
     
     if (!completion) throw new Error('Completion not found');
-    if (completion.status === 'approved') return; // Already approved
+    if (!skipApprovalUpdate && completion.status === 'approved') return; // Already approved (but proceed if skipApprovalUpdate=true for auto-approved tasks)
     
     // 2. Lock task
     const [task] = await tx.select().from(tasks)
       .where(eq(tasks.id, completion.taskId))
       .for('update');
     
-    // 3. Update completion
-    await tx.update(taskCompletions)
-      .set({
-        status: 'approved',
-        approvedBy,
-        approvedAt: new Date()
-      })
-      .where(eq(taskCompletions.id, completionId));
+    console.log(`🔄 [DEBUG] Task ${task.id}: maxCompletions=${task.maxCompletions}, completionCount=${task.completionCount}`);
+    
+    // 3. Update completion (only if not already approved)
+    if (!skipApprovalUpdate) {
+      await tx.update(taskCompletions)
+        .set({
+          status: 'approved',
+          approvedBy,
+          approvedAt: new Date()
+        })
+        .where(eq(taskCompletions.id, completionId));
+    }
     
     // 4. If maxCompletions mode: increment counter and check threshold
     if (task.maxCompletions !== null) {
-      console.log(`[Multi-Completion] Incrementing completionCount for task ${task.id}: ${task.completionCount} → ${task.completionCount + 1} / ${task.maxCompletions}`);
+      console.log(`✅ [Multi-Completion] Incrementing completionCount for task ${task.id}: ${task.completionCount} → ${task.completionCount + 1} / ${task.maxCompletions}`);
       await tx.update(tasks)
         .set({
           completionCount: sql<number>`completion_count + 1`,
@@ -589,7 +595,9 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date()
         })
         .where(eq(tasks.id, task.id));
-      console.log(`[Multi-Completion] Successfully incremented completionCount for task ${task.id}`);
+      console.log(`✅ [Multi-Completion] Successfully incremented completionCount for task ${task.id}`);
+    } else {
+      console.log(`⚠️ [DEBUG] Task ${task.id} has maxCompletions=null, skipping multi-completion logic`);
     }
     
     // 5. Award points to member (existing logic from old approveTaskCompletion)
