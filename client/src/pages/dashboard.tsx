@@ -319,10 +319,11 @@ export default function Dashboard() {
       return await res.json();
     },
     onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
+      // Aggressive cache invalidation - force refetch
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"], refetchType: 'active' });
       setCompletionDialogOpen(false);
       setTaskToComplete(null);
       
