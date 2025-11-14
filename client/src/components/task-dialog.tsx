@@ -179,6 +179,18 @@ export function TaskDialog({
           setRecurrenceMode("standard");
         }
         
+        // Clamp maxCompletions to current family size to handle edge case where family shrunk
+        let clampedMaxCompletions = editingTask.maxCompletions || undefined;
+        if (clampedMaxCompletions !== undefined) {
+          // If family shrunk below 2 members, disable multi-completion feature
+          if (totalMemberCount < 2) {
+            clampedMaxCompletions = undefined;
+          } else {
+            // Otherwise, clamp to valid range [2, totalMemberCount]
+            clampedMaxCompletions = Math.max(2, Math.min(clampedMaxCompletions, totalMemberCount));
+          }
+        }
+        
         form.reset({
           familyName: editingTask.familyName,
           createdBy: editingTask.createdBy,
@@ -196,7 +208,7 @@ export function TaskDialog({
           requiresProof: editingTask.requiresProof,
           requiresApproval: editingTask.requiresApproval ?? true,
           iconEmoji: editingTask.iconEmoji || "⭐",
-          maxCompletions: editingTask.maxCompletions || undefined,
+          maxCompletions: clampedMaxCompletions,
         });
       } else {
         setRecurrenceMode("standard");
@@ -217,7 +229,7 @@ export function TaskDialog({
         });
       }
     }
-  }, [open, editingTask, familyName, createdBy]);
+  }, [open, editingTask, familyName, createdBy, totalMemberCount]);
 
   const handleSubmit = (data: TaskFormData) => {
     // Create a copy and clear the field that's not being used based on mode
@@ -588,15 +600,21 @@ export function TaskDialog({
                             return;
                           }
                           
-                          // When enabling: use total number of family members (minimum 2)
-                          // When editing existing task: preserve current value
+                          // When enabling: clamp to valid range [2, totalMemberCount]
+                          // When disabling: clear the value
                           if (checked) {
-                            // Only set default if it's a new task (not editing)
-                            if (!editingTask) {
-                              field.onChange(Math.max(totalMemberCount, 2));
+                            // If family shrunk below 2 members while form was open, disable feature
+                            if (totalMemberCount < 2) {
+                              field.onChange(undefined);
+                              toast({
+                                title: "Feature deaktiviert",
+                                description: "Multi-Completion erfordert mindestens 2 Familienmitglieder.",
+                                variant: "destructive",
+                              });
                             } else {
-                              // When editing, keep existing value or use totalMemberCount
-                              field.onChange(field.value || Math.max(totalMemberCount, 2));
+                              const existingValue = field.value || totalMemberCount;
+                              const clampedValue = Math.max(2, Math.min(existingValue, totalMemberCount));
+                              field.onChange(clampedValue);
                             }
                           } else {
                             field.onChange(undefined);
