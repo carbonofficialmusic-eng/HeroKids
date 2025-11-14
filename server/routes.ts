@@ -1100,52 +1100,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Handle recurring tasks
       if (task.recurrenceDays || task.recurrence !== "none") {
-        // Calculate next available date based on recurrence
-        const now = new Date();
-        let nextAvailableDate: Date;
+        // Get updated task to check completion count after the completion was processed
+        const updatedTask = await storage.getTask(taskId);
         
-        if (task.recurrenceDays) {
-          // Custom days interval - set to midnight of the target day
-          nextAvailableDate = new Date(now);
-          nextAvailableDate.setDate(nextAvailableDate.getDate() + task.recurrenceDays);
-          nextAvailableDate.setHours(0, 0, 0, 0);
-        } else {
-          // Standard recurrence (daily/weekly/monthly)
-          switch (task.recurrence) {
-            case "daily":
-              // Set to midnight of the next calendar day
-              nextAvailableDate = new Date(now);
-              nextAvailableDate.setDate(nextAvailableDate.getDate() + 1);
-              nextAvailableDate.setHours(0, 0, 0, 0);
-              break;
-            case "weekly":
-              // Set to midnight 7 days from now
-              nextAvailableDate = new Date(now);
-              nextAvailableDate.setDate(nextAvailableDate.getDate() + 7);
-              nextAvailableDate.setHours(0, 0, 0, 0);
-              break;
-            case "monthly":
-              // Set to midnight of same date next month
-              nextAvailableDate = new Date(now);
-              nextAvailableDate.setMonth(nextAvailableDate.getMonth() + 1);
-              nextAvailableDate.setHours(0, 0, 0, 0);
-              break;
-            case "yearly":
-              // Set to midnight of same date next year
-              nextAvailableDate = new Date(now);
-              nextAvailableDate.setFullYear(nextAvailableDate.getFullYear() + 1);
-              nextAvailableDate.setHours(0, 0, 0, 0);
-              break;
-            default:
-              // Default to midnight tomorrow
-              nextAvailableDate = new Date(now);
-              nextAvailableDate.setDate(nextAvailableDate.getDate() + 1);
-              nextAvailableDate.setHours(0, 0, 0, 0);
+        // For multi-completion tasks, only set nextAvailableDate if max completions reached
+        // Otherwise, keep the task available for other children to complete
+        const shouldSetNextAvailableDate = 
+          !updatedTask?.maxCompletions || 
+          (updatedTask.completionCount >= updatedTask.maxCompletions);
+        
+        if (shouldSetNextAvailableDate) {
+          // Calculate next available date based on recurrence
+          const now = new Date();
+          let nextAvailableDate: Date;
+          
+          if (task.recurrenceDays) {
+            // Custom days interval - set to midnight of the target day
+            nextAvailableDate = new Date(now);
+            nextAvailableDate.setDate(nextAvailableDate.getDate() + task.recurrenceDays);
+            nextAvailableDate.setHours(0, 0, 0, 0);
+          } else {
+            // Standard recurrence (daily/weekly/monthly)
+            switch (task.recurrence) {
+              case "daily":
+                // Set to midnight of the next calendar day
+                nextAvailableDate = new Date(now);
+                nextAvailableDate.setDate(nextAvailableDate.getDate() + 1);
+                nextAvailableDate.setHours(0, 0, 0, 0);
+                break;
+              case "weekly":
+                // Set to midnight 7 days from now
+                nextAvailableDate = new Date(now);
+                nextAvailableDate.setDate(nextAvailableDate.getDate() + 7);
+                nextAvailableDate.setHours(0, 0, 0, 0);
+                break;
+              case "monthly":
+                // Set to midnight of same date next month
+                nextAvailableDate = new Date(now);
+                nextAvailableDate.setMonth(nextAvailableDate.getMonth() + 1);
+                nextAvailableDate.setHours(0, 0, 0, 0);
+                break;
+              case "yearly":
+                // Set to midnight of same date next year
+                nextAvailableDate = new Date(now);
+                nextAvailableDate.setFullYear(nextAvailableDate.getFullYear() + 1);
+                nextAvailableDate.setHours(0, 0, 0, 0);
+                break;
+              default:
+                // Default to midnight tomorrow
+                nextAvailableDate = new Date(now);
+                nextAvailableDate.setDate(nextAvailableDate.getDate() + 1);
+                nextAvailableDate.setHours(0, 0, 0, 0);
+            }
           }
+          
+          // Update the task's nextAvailableDate - task stays visible but unavailable
+          await storage.updateTaskNextAvailableDate(taskId, nextAvailableDate);
         }
-        
-        // Update the task's nextAvailableDate - task stays visible but unavailable
-        await storage.updateTaskNextAvailableDate(taskId, nextAvailableDate);
       } else if (task.maxCompletions === null) {
         // Only non-recurring, non-multi-completion tasks are marked as completed immediately
         // Multi-completion tasks manage their own status in _approveCompletionInternal
