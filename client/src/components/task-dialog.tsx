@@ -40,7 +40,7 @@ import { Sparkles } from "lucide-react";
 const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
   recurrenceDays: z.number().int().min(1).max(365).optional(),
-  maxCompletions: z.number().int().min(1).max(20).optional(),
+  maxCompletions: z.number().int().min(2).max(20).optional(),
 });
 
 type TaskFormData = z.infer<typeof taskFormSchema>;
@@ -560,21 +560,21 @@ export function TaskDialog({
                 <FormItem className="space-y-3">
                   <FormLabel>Multiple Children Can Complete</FormLabel>
                   <FormDescription>
-                    Allow multiple children to complete this task. Default is set to the number of children in your family ({childCount || 0}).
+                    Allow multiple children to complete this task. Adjustable range: 2 to {Math.max(childCount, 2)} (based on your family size).
                   </FormDescription>
                   <div className="flex items-center gap-4">
                     <Switch
                       checked={field.value !== undefined && field.value !== null}
                       onCheckedChange={(checked) => {
-                        // When enabling: use number of children in family (or 1 if no children yet)
+                        // When enabling: use number of children in family (minimum 2)
                         // When editing existing task: preserve current value
                         if (checked) {
                           // Only set default if it's a new task (not editing)
                           if (!editingTask) {
-                            field.onChange(childCount || 1);
+                            field.onChange(Math.max(childCount, 2));
                           } else {
                             // When editing, keep existing value or use childCount
-                            field.onChange(field.value || childCount || 1);
+                            field.onChange(field.value || Math.max(childCount, 2));
                           }
                         } else {
                           field.onChange(undefined);
@@ -587,10 +587,15 @@ export function TaskDialog({
                         <FormLabel className="text-sm">Times:</FormLabel>
                         <Input
                           type="number"
-                          min={1}
-                          max={20}
-                          value={field.value || 1}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                          min={2}
+                          max={Math.max(childCount, 2)}
+                          value={field.value || 2}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            if (!isNaN(val)) {
+                              field.onChange(Math.max(2, Math.min(val, Math.max(childCount, 2))));
+                            }
+                          }}
                           className="w-20"
                           data-testid="input-max-completions"
                         />
