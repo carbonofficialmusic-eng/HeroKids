@@ -783,13 +783,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tasks", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      // Use acting member if available, otherwise use authenticated user
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      console.log(`[TASKS API] User: ${member.displayName} (${member.role})`);
+      console.log(`[TASKS API] User: ${member.displayName} (${member.role}) - ActingAs: ${actingMemberId ? 'YES' : 'NO'}`);
       
       const allTasks = await storage.getTasksByFamily(member.familyName);
       console.log(`[TASKS API] Found ${allTasks.length} tasks for family ${member.familyName}`);
