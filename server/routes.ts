@@ -800,6 +800,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Check if child has already completed this task
               const hasCompleted = await storage.hasActiveMemberCompletion(task.id, member.id);
               
+              console.log(`[DEBUG] Task ${task.id} (${task.title}) - Member ${member.displayName}: hasCompleted=${hasCompleted}`);
+              
               return {
                 ...task,
                 remainingSlots: task.maxCompletions - task.completionCount,
