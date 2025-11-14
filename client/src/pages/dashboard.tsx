@@ -1183,6 +1183,7 @@ export default function Dashboard() {
             familyName={member.familyName}
             createdBy={member.id}
             editingTask={selectedTask}
+            familyMembers={familyMembers}
           />
           <RewardDialog
             open={rewardDialogOpen}

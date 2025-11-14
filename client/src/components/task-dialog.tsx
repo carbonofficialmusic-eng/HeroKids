@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertTaskSchema, type Task } from "@shared/schema";
+import { insertTaskSchema, type Task, type FamilyMember } from "@shared/schema";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -53,6 +53,7 @@ interface TaskDialogProps {
   familyName: string;
   createdBy: string;
   editingTask?: Task | null;
+  familyMembers?: FamilyMember[];
 }
 
 const taskIcons = ["⭐", "🧹", "🍽️", "🗑️", "🧺", "🛁", "🌱", "📚", "🐕", "🚗"];
@@ -65,8 +66,14 @@ export function TaskDialog({
   familyName,
   createdBy,
   editingTask,
+  familyMembers = [],
 }: TaskDialogProps) {
   const { t } = useTranslation();
+  
+  // Calculate number of children in the family
+  const childCount = useMemo(() => {
+    return familyMembers.filter(m => m.role === 'child').length;
+  }, [familyMembers]);
   
   // Predefined task templates for common chores
   const taskTemplates = [
@@ -553,13 +560,25 @@ export function TaskDialog({
                 <FormItem className="space-y-3">
                   <FormLabel>Multiple Children Can Complete</FormLabel>
                   <FormDescription>
-                    Allow multiple children to complete this task (e.g., 3 children can each do dishes)
+                    Allow multiple children to complete this task. Default is set to the number of children in your family ({childCount || 0}).
                   </FormDescription>
                   <div className="flex items-center gap-4">
                     <Switch
                       checked={field.value !== undefined && field.value !== null}
                       onCheckedChange={(checked) => {
-                        field.onChange(checked ? 2 : undefined);
+                        // When enabling: use number of children in family (or 1 if no children yet)
+                        // When editing existing task: preserve current value
+                        if (checked) {
+                          // Only set default if it's a new task (not editing)
+                          if (!editingTask) {
+                            field.onChange(childCount || 1);
+                          } else {
+                            // When editing, keep existing value or use childCount
+                            field.onChange(field.value || childCount || 1);
+                          }
+                        } else {
+                          field.onChange(undefined);
+                        }
                       }}
                       data-testid="toggle-multi-completion"
                     />
@@ -570,8 +589,8 @@ export function TaskDialog({
                           type="number"
                           min={1}
                           max={20}
-                          value={field.value || 2}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 2)}
+                          value={field.value || 1}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                           className="w-20"
                           data-testid="input-max-completions"
                         />
