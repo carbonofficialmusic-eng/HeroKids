@@ -569,6 +569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         avatarUrl: z.string().min(1, "Avatar is required"),
         color: z.string().min(1, "Color is required"),
         role: z.enum(["parent", "child"]).optional().default("child"),
+        ageGroup: z.enum(["6-11", "11-17", "adult"]).optional().default("6-11"),
       });
       
       const parsed = joinFamilySchema.parse(req.body);
@@ -615,6 +616,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         avatarUrl: parsed.avatarUrl,
         color: parsed.color,
         role: parsed.role,
+        ageGroup: parsed.ageGroup,
         userId,
       } as any);
       

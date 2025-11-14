@@ -30,11 +30,13 @@ const createFamilySchema = z.object({
   familyName: z.string().min(1, "Family name is required"),
   displayName: z.string().min(1, "Display name is required"),
   role: z.enum(["parent", "child"]),
+  ageGroup: z.enum(["6-11", "11-17", "adult"]),
 });
 
 const joinFamilySchema = z.object({
   joinCode: z.string().length(6, "Join code must be 6 characters"),
   displayName: z.string().min(1, "Display name is required"),
+  ageGroup: z.enum(["6-11", "11-17", "adult"]),
 });
 
 type CreateFamilyForm = z.infer<typeof createFamilySchema>;
@@ -60,6 +62,7 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
       familyName: "",
       displayName: "",
       role: "parent",
+      ageGroup: "adult",
     },
   });
 
@@ -68,6 +71,7 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
     defaultValues: {
       joinCode: "",
       displayName: "",
+      ageGroup: "6-11",
     },
   });
 
@@ -194,7 +198,14 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t('familySetup.yourRole')}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value);
+                        if (value === "parent") {
+                          createForm.setValue("ageGroup", "adult");
+                        } else {
+                          createForm.setValue("ageGroup", "6-11");
+                        }
+                      }} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-role">
                             <SelectValue placeholder={t('familySetup.selectYourRole')} />
@@ -209,6 +220,30 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                     </FormItem>
                   )}
                 />
+
+                {createForm.watch("role") === "child" && (
+                  <FormField
+                    control={createForm.control}
+                    name="ageGroup"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Age Group</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-age-group">
+                              <SelectValue placeholder="Select age group" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="6-11" data-testid="option-age-6-11">6-11 years (Children)</SelectItem>
+                            <SelectItem value="11-17" data-testid="option-age-11-17">11-17 years (Youth)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <AvatarSelector
                   selectedAvatar={selectedAvatar}
@@ -273,6 +308,29 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
                           data-testid="input-join-display-name"
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={joinForm.control}
+                  name="ageGroup"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Age Group</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-join-age-group">
+                            <SelectValue placeholder="Select age group" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="6-11" data-testid="option-join-age-6-11">6-11 years (Children)</SelectItem>
+                          <SelectItem value="11-17" data-testid="option-join-age-11-17">11-17 years (Youth)</SelectItem>
+                          <SelectItem value="adult" data-testid="option-join-age-adult">Parent/Adult</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
