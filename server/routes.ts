@@ -789,7 +789,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
+      console.log(`[TASKS API] User: ${member.displayName} (${member.role})`);
+      
       const allTasks = await storage.getTasksByFamily(member.familyName);
+      console.log(`[TASKS API] Found ${allTasks.length} tasks for family ${member.familyName}`);
       
       // For children: filter and enhance tasks based on Multi-Completion mode
       if (member.role === "child") {
@@ -831,6 +834,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           )
         );
         
+        console.log(`[TASKS API] Returning ${filteredTasks.length} filtered tasks for child ${member.displayName}`);
+        
+        // Disable caching for task data
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         res.json(filteredTasks);
       } else {
         // Parents see all tasks with metadata
@@ -839,6 +846,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           remainingSlots: task.maxCompletions !== null ? task.maxCompletions - task.completionCount : null,
         }));
         
+        console.log(`[TASKS API] Returning ${tasksWithMeta.length} tasks for parent ${member.displayName}`);
+        
+        // Disable caching for task data
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         res.json(tasksWithMeta);
       }
     } catch (error) {
