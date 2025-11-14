@@ -869,7 +869,7 @@ export default function Settings() {
       <AlertDialog open={!!memberToDelete} onOpenChange={() => setMemberToDelete(null)}>
         <AlertDialogContent data-testid="dialog-delete-member">
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('settings.removeMemberTitle')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('settings.removeMemberTitle', { name: memberToDelete?.displayName })}</AlertDialogTitle>
             <AlertDialogDescription>
               {t('settings.removeMemberConfirm', { name: memberToDelete?.displayName })}
             </AlertDialogDescription>
