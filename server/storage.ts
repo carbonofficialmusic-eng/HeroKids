@@ -587,10 +587,18 @@ export class DatabaseStorage implements IStorage {
     // 4. If maxCompletions mode: increment counter and check threshold
     if (task.maxCompletions !== null) {
       console.log(`🔍 [_approveCompletionInternal] INCREMENTING completionCount: ${task.completionCount} + 1 = ${task.completionCount + 1} / ${task.maxCompletions}`);
+      
+      // For recurring tasks: keep status as "active" even when maxCompletions reached
+      // The nextAvailableDate (set in routes.ts) will make it unavailable until reset
+      // For non-recurring tasks: set status to "completed" when maxCompletions reached
+      const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
+      
       await tx.update(tasks)
         .set({
           completionCount: sql<number>`completion_count + 1`,
-          status: sql`CASE WHEN completion_count + 1 >= ${task.maxCompletions} THEN 'completed'::task_status ELSE status END`,
+          status: isRecurring 
+            ? task.status // Keep current status for recurring tasks
+            : sql`CASE WHEN completion_count + 1 >= ${task.maxCompletions} THEN 'completed'::task_status ELSE status END`,
           updatedAt: new Date()
         })
         .where(eq(tasks.id, task.id));
