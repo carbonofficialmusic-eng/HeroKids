@@ -587,7 +587,7 @@ export function TaskDialog({
                     </FormDescription>
                     <div className="flex items-center gap-4">
                       <Switch
-                        checked={field.value !== undefined && field.value !== null}
+                        checked={typeof field.value === 'number'}
                         disabled={isDisabled}
                         onCheckedChange={(checked) => {
                           // Prevent enabling if less than 2 family members
@@ -600,10 +600,9 @@ export function TaskDialog({
                             return;
                           }
                           
-                          // When enabling: clamp to valid range [2, totalMemberCount]
-                          // When disabling: clear the value
+                          // When enabling: set to totalMemberCount (or 2 minimum)
+                          // When disabling: clear the value to undefined
                           if (checked) {
-                            // If family shrunk below 2 members while form was open, disable feature
                             if (totalMemberCount < 2) {
                               field.onChange(undefined);
                               toast({
@@ -612,9 +611,8 @@ export function TaskDialog({
                                 variant: "destructive",
                               });
                             } else {
-                              const existingValue = field.value || totalMemberCount;
-                              const clampedValue = Math.max(2, Math.min(existingValue, totalMemberCount));
-                              field.onChange(clampedValue);
+                              // Set to totalMemberCount as default
+                              field.onChange(totalMemberCount);
                             }
                           } else {
                             field.onChange(undefined);
@@ -622,14 +620,14 @@ export function TaskDialog({
                         }}
                         data-testid="toggle-multi-completion"
                       />
-                      {field.value !== undefined && field.value !== null && !isDisabled && (
+                      {typeof field.value === 'number' && !isDisabled && (
                         <div className="flex items-center gap-2">
                           <FormLabel className="text-sm">Times:</FormLabel>
                           <Input
                             type="number"
                             min={2}
                             max={totalMemberCount}
-                            value={field.value || 2}
+                            value={field.value}
                             onChange={(e) => {
                               const val = parseInt(e.target.value);
                               if (!isNaN(val)) {
