@@ -172,12 +172,7 @@ function RewardCard({
             <Progress value={percentage} className="h-3" style={{ backgroundColor: "hsl(var(--muted))" }} />
           </div>
 
-          {isReady ? (
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-              <span className="text-sm font-bold text-primary">BEREIT! Du kannst es anfragen!</span>
-            </div>
-          ) : (
+          {!isReady && (
             <p className="text-sm text-muted-foreground">
               Noch <span className="font-bold">{remaining} Punkte</span>!
             </p>
