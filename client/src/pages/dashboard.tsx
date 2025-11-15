@@ -384,20 +384,19 @@ export default function Dashboard() {
   const redeemRewardMutation = useMutation({
     mutationFn: async (rewardId: string) => {
       const res = await apiRequest("POST", `/api/rewards/${rewardId}/redeem`, {});
-      const data = await res.json();
-      return data;
+      return res.json();
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       
-      const pointsSpent = data.redemption?.pointsSpent || 0;
-      const rewardTitle = data.redemption?.rewardTitle || 'Reward';
+      const pointsSpent = data?.redemption?.pointsSpent || 0;
+      const rewardTitle = data?.redemption?.rewardTitle || 'Reward';
       
       toast({
         title: t("toast.rewardRedeemed"),
-        description: data.message || `Successfully redeemed ${rewardTitle}!`,
+        description: data?.message || `Successfully redeemed ${rewardTitle}!`,
       });
       
       setCelebration({
@@ -406,10 +405,10 @@ export default function Dashboard() {
       });
     },
     onError: (error: any) => {
-      console.error("Redeem error:", error);
+      const errorMessage = error?.data?.message || error?.message || t("rewards.notEnoughPoints");
       toast({
         title: t("toast.failedRedeem"),
-        description: error.message || t("rewards.notEnoughPoints"),
+        description: errorMessage,
         variant: "destructive",
       });
     },
