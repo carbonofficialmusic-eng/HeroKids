@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { FamilySetup } from "@/components/family-setup";
 import { PointCounter } from "@/components/point-counter";
 import { TaskCard } from "@/components/task-card";
@@ -118,6 +119,9 @@ export default function Dashboard() {
 
   // WebSocket connection for real-time updates
   useWebSocket(member?.familyName || null);
+
+  // Automatic midnight refresh for recurring tasks
+  useMidnightRefresh();
 
   // Fetch all family members
   const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
