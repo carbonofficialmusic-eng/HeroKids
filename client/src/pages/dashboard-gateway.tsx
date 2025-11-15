@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import Dashboard from "@/pages/dashboard";
 import ChildDashboard from "@/pages/child-dashboard";
 import type { FamilyMember } from "@shared/schema";
@@ -11,6 +12,8 @@ export default function DashboardGateway() {
     queryKey: ["/api/family-members/current"],
     enabled: !!user,
   });
+
+  useWebSocket(member?.familyName || null);
 
   if (isLoading) {
     return (
