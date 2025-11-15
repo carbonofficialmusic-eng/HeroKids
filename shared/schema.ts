@@ -10,6 +10,7 @@ import {
   index,
   jsonb,
   pgEnum,
+  unique,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -360,7 +361,9 @@ export const rewardSharingParticipants = pgTable("reward_sharing_participants", 
   memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
   pointsContributed: integer("points_contributed").notNull(),
   joinedAt: timestamp("joined_at").defaultNow(),
-});
+}, (table) => ({
+  uniqueRedemptionMember: unique("unique_redemption_member").on(table.redemptionId, table.memberId),
+}));
 
 export const rewardSharingParticipantsRelations = relations(rewardSharingParticipants, ({ one }) => ({
   redemption: one(rewardRedemptions, {

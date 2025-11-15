@@ -7,6 +7,7 @@ import {
   taskCompletions,
   rewards,
   rewardRedemptions,
+  rewardSharingParticipants,
   rewardRequests,
   pointsHistory,
   skins,
@@ -25,6 +26,8 @@ import {
   type InsertReward,
   type RewardRedemption,
   type InsertRewardRedemption,
+  type RewardSharingParticipant,
+  type InsertRewardSharingParticipant,
   type RewardRequest,
   type InsertRewardRequest,
   type InsertPointsHistory,
@@ -108,6 +111,14 @@ export interface IStorage {
   getRewardRedemptionsByFamily(familyName: string): Promise<any[]>;
   getRewardRedemptionsByMember(memberId: string): Promise<RewardRedemption[]>;
   updateRewardRedemptionStatus(id: string, status: string): Promise<void>;
+  
+  // Reward sharing operations
+  getRewardRedemption(id: string): Promise<RewardRedemption | undefined>;
+  startRewardSharing(redemptionId: string): Promise<void>;
+  joinRewardSharing(redemptionId: string, memberId: string): Promise<RewardSharingParticipant>;
+  finalizeRewardSharing(redemptionId: string): Promise<void>;
+  getRewardSharingParticipants(redemptionId: string): Promise<Array<RewardSharingParticipant & { member: FamilyMember }>>;
+  getActiveSharedRewards(familyName: string): Promise<Array<RewardRedemption & { participants: Array<RewardSharingParticipant & { member: FamilyMember }> }>>;
 
   // Reward request operations
   createRewardRequest(request: InsertRewardRequest): Promise<RewardRequest>;
@@ -751,6 +762,236 @@ export class DatabaseStorage implements IStorage {
       .update(rewardRedemptions)
       .set({ status })
       .where(eq(rewardRedemptions.id, id));
+  }
+
+  // Reward sharing operations
+  async getRewardRedemption(id: string): Promise<RewardRedemption | undefined> {
+    const [redemption] = await db
+      .select()
+      .from(rewardRedemptions)
+      .where(eq(rewardRedemptions.id, id))
+      .limit(1);
+    return redemption;
+  }
+
+  async startRewardSharing(redemptionId: string): Promise<void> {
+    await db
+      .update(rewardRedemptions)
+      .set({ sharingStatus: "sharing_active" })
+      .where(eq(rewardRedemptions.id, redemptionId));
+  }
+
+  async joinRewardSharing(redemptionId: string, memberId: string): Promise<RewardSharingParticipant> {
+    try {
+      // Check if member already joined
+      const existing = await db
+        .select()
+        .from(rewardSharingParticipants)
+        .where(
+          and(
+            eq(rewardSharingParticipants.redemptionId, redemptionId),
+            eq(rewardSharingParticipants.memberId, memberId)
+          )
+        )
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Already joined - return existing record
+        return existing[0];
+      }
+
+      // Add participant (points will be calculated when finalized)
+      const [participant] = await db
+        .insert(rewardSharingParticipants)
+        .values({
+          redemptionId,
+          memberId,
+          pointsContributed: 0, // Will be calculated on finalize
+        })
+        .returning();
+
+      return participant;
+    } catch (error: any) {
+      // Handle unique constraint violation gracefully
+      if (error.code === '23505') { // PostgreSQL unique violation error code
+        // Fetch and return the existing record
+        const [existing] = await db
+          .select()
+          .from(rewardSharingParticipants)
+          .where(
+            and(
+              eq(rewardSharingParticipants.redemptionId, redemptionId),
+              eq(rewardSharingParticipants.memberId, memberId)
+            )
+          )
+          .limit(1);
+        
+        if (existing) {
+          return existing;
+        }
+      }
+      throw error;
+    }
+  }
+
+  async finalizeRewardSharing(redemptionId: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      // Get redemption
+      const [redemption] = await tx
+        .select()
+        .from(rewardRedemptions)
+        .where(eq(rewardRedemptions.id, redemptionId))
+        .limit(1);
+
+      if (!redemption) {
+        throw new Error("Redemption not found");
+      }
+
+      // Get all participants
+      const participants = await tx
+        .select()
+        .from(rewardSharingParticipants)
+        .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
+
+      // Require at least 1 participant (prevents exploit)
+      if (participants.length === 0) {
+        throw new Error("Cannot finalize sharing without any participants");
+      }
+
+      // Total participants = participants + original buyer
+      const totalParticipants = participants.length + 1;
+      const pointsPerPerson = Math.ceil(redemption.originalPointsSpent / totalParticipants);
+      
+      // Validate all participants have enough points BEFORE making any changes
+      for (const participant of participants) {
+        const [member] = await tx
+          .select()
+          .from(familyMembers)
+          .where(eq(familyMembers.id, participant.memberId))
+          .limit(1);
+
+        if (!member) {
+          throw new Error(`Member ${participant.memberId} not found`);
+        }
+
+        if (member.totalPoints < pointsPerPerson) {
+          throw new Error(`Member ${member.displayName} doesn't have enough points (needs ${pointsPerPerson}, has ${member.totalPoints})`);
+        }
+      }
+
+      // Calculate refund for original buyer
+      const originalBuyerRefund = redemption.originalPointsSpent - pointsPerPerson;
+
+      // Refund points to original buyer
+      if (originalBuyerRefund > 0) {
+        const [originalBuyer] = await tx
+          .select()
+          .from(familyMembers)
+          .where(eq(familyMembers.id, redemption.memberId))
+          .limit(1);
+
+        if (originalBuyer) {
+          await tx
+            .update(familyMembers)
+            .set({
+              totalPoints: originalBuyer.totalPoints + originalBuyerRefund,
+            })
+            .where(eq(familyMembers.id, redemption.memberId));
+
+          // Add to points history
+          await tx.insert(pointsHistory).values({
+            memberId: redemption.memberId,
+            points: originalBuyerRefund,
+            reason: `Refund from sharing reward (${totalParticipants} people)`,
+          });
+        }
+      }
+
+      // Deduct points from each participant
+      for (const participant of participants) {
+        const [member] = await tx
+          .select()
+          .from(familyMembers)
+          .where(eq(familyMembers.id, participant.memberId))
+          .limit(1);
+
+        if (member) {
+          await tx
+            .update(familyMembers)
+            .set({
+              totalPoints: member.totalPoints - pointsPerPerson,
+            })
+            .where(eq(familyMembers.id, participant.memberId));
+
+          // Update participant record
+          await tx
+            .update(rewardSharingParticipants)
+            .set({ pointsContributed: pointsPerPerson })
+            .where(eq(rewardSharingParticipants.id, participant.id));
+
+          // Add to points history
+          await tx.insert(pointsHistory).values({
+            memberId: participant.memberId,
+            points: -pointsPerPerson,
+            reason: `Shared reward (${totalParticipants} people)`,
+          });
+        }
+      }
+
+      // Update redemption status and final points
+      await tx
+        .update(rewardRedemptions)
+        .set({
+          sharingStatus: "sharing_finalized",
+          pointsSpent: pointsPerPerson,
+        })
+        .where(eq(rewardRedemptions.id, redemptionId));
+    });
+  }
+
+  async getRewardSharingParticipants(redemptionId: string): Promise<Array<RewardSharingParticipant & { member: FamilyMember }>> {
+    return await db
+      .select({
+        id: rewardSharingParticipants.id,
+        redemptionId: rewardSharingParticipants.redemptionId,
+        memberId: rewardSharingParticipants.memberId,
+        pointsContributed: rewardSharingParticipants.pointsContributed,
+        joinedAt: rewardSharingParticipants.joinedAt,
+        member: familyMembers,
+      })
+      .from(rewardSharingParticipants)
+      .innerJoin(familyMembers, eq(rewardSharingParticipants.memberId, familyMembers.id))
+      .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
+  }
+
+  async getActiveSharedRewards(familyName: string): Promise<Array<RewardRedemption & { participants: Array<RewardSharingParticipant & { member: FamilyMember }> }>> {
+    // Get all active shared rewards for this family
+    const redemptions = await db
+      .select({
+        redemption: rewardRedemptions,
+        member: familyMembers,
+      })
+      .from(rewardRedemptions)
+      .innerJoin(familyMembers, eq(rewardRedemptions.memberId, familyMembers.id))
+      .where(
+        and(
+          eq(familyMembers.familyName, familyName),
+          eq(rewardRedemptions.sharingStatus, "sharing_active")
+        )
+      );
+
+    // Get participants for each redemption
+    const results = await Promise.all(
+      redemptions.map(async (r) => {
+        const participants = await this.getRewardSharingParticipants(r.redemption.id);
+        return {
+          ...r.redemption,
+          participants,
+        };
+      })
+    );
+
+    return results;
   }
 
   // Reward request operations

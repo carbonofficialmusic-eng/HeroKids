@@ -1604,6 +1604,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rewardId: reward.id,
         memberId: member.id,
         pointsSpent: reward.pointThreshold,
+        originalPointsSpent: reward.pointThreshold,
+        sharingStatus: "not_shared",
         status: "pending",
       });
       
@@ -1908,6 +1910,187 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error updating reward request:", error);
       res.status(500).json({ message: "Failed to update reward request" });
+    }
+  });
+
+  // Reward sharing routes
+  // Start sharing a reward
+  app.post("/api/rewards/redemptions/:redemptionId/share", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { redemptionId } = req.params;
+      
+      // Use acting member if available
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get the redemption
+      const redemption = await storage.getRewardRedemption(redemptionId);
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      
+      // Only the person who redeemed can start sharing
+      if (redemption.memberId !== member.id) {
+        return res.status(403).json({ message: "Only the original redeemer can start sharing" });
+      }
+      
+      // Can't share if already sharing or finalized
+      if (redemption.sharingStatus !== "not_shared") {
+        return res.status(400).json({ message: "Reward is already being shared or has been finalized" });
+      }
+      
+      // Start sharing
+      await storage.startRewardSharing(redemptionId);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_sharing_started",
+        redemptionId,
+        memberId: member.id,
+        memberName: member.displayName,
+      });
+      
+      res.json({ message: "Reward sharing started!", redemptionId });
+    } catch (error: any) {
+      console.error("Error starting reward sharing:", error);
+      res.status(500).json({ message: "Failed to start reward sharing" });
+    }
+  });
+
+  // Join a shared reward
+  app.post("/api/rewards/redemptions/:redemptionId/join", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { redemptionId } = req.params;
+      
+      // Use acting member if available
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get the redemption
+      const redemption = await storage.getRewardRedemption(redemptionId);
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      
+      // Can only join if sharing is active
+      if (redemption.sharingStatus !== "sharing_active") {
+        return res.status(400).json({ message: "Sharing is not active for this reward" });
+      }
+      
+      // Can't join your own redemption
+      if (redemption.memberId === member.id) {
+        return res.status(400).json({ message: "You can't join your own shared reward" });
+      }
+      
+      // Join the sharing
+      const participant = await storage.joinRewardSharing(redemptionId, member.id);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_sharing_joined",
+        redemptionId,
+        memberId: member.id,
+        memberName: member.displayName,
+      });
+      
+      res.json({ 
+        message: "You joined the shared reward!", 
+        participant,
+      });
+    } catch (error: any) {
+      console.error("Error joining shared reward:", error);
+      res.status(500).json({ message: "Failed to join shared reward" });
+    }
+  });
+
+  // Finalize a shared reward (calculate and distribute costs)
+  app.post("/api/rewards/redemptions/:redemptionId/finalize", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { redemptionId } = req.params;
+      
+      // Use acting member if available
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get the redemption
+      const redemption = await storage.getRewardRedemption(redemptionId);
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      
+      // Only the original redeemer can finalize
+      if (redemption.memberId !== member.id) {
+        return res.status(403).json({ message: "Only the original redeemer can finalize sharing" });
+      }
+      
+      // Can only finalize if sharing is active
+      if (redemption.sharingStatus !== "sharing_active") {
+        return res.status(400).json({ message: "Sharing is not active for this reward" });
+      }
+      
+      // Finalize sharing (this handles all point calculations)
+      await storage.finalizeRewardSharing(redemptionId);
+      
+      // Get updated participants list
+      const participants = await storage.getRewardSharingParticipants(redemptionId);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_sharing_finalized",
+        redemptionId,
+        participants,
+      });
+      
+      res.json({ 
+        message: "Sharing finalized! Points have been distributed.",
+        participants,
+      });
+    } catch (error: any) {
+      console.error("Error finalizing shared reward:", error);
+      res.status(500).json({ message: "Failed to finalize shared reward" });
+    }
+  });
+
+  // Get all active shared rewards for family
+  app.get("/api/rewards/shared", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const sharedRewards = await storage.getActiveSharedRewards(member.familyName);
+      
+      res.json(sharedRewards);
+    } catch (error: any) {
+      console.error("Error getting shared rewards:", error);
+      res.status(500).json({ message: "Failed to get shared rewards" });
     }
   });
 
