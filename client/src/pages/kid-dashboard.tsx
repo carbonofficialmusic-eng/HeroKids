@@ -360,11 +360,7 @@ function KidQuestTrack({ tasks, onComingSoon }: { tasks: typeof MOCK_DATA.tasks;
                 <div className="flex justify-center mb-2">
                   <TaskIcon className="h-12 w-12 text-primary" />
                 </div>
-                <h3 className="font-bold text-lg mb-2">{task.title}</h3>
-                <div className="mb-3">
-                  <Progress value={task.progress} className="h-2 mb-1" />
-                  <span className="text-sm text-muted-foreground">{task.progress}%</span>
-                </div>
+                <h3 className="font-bold text-lg mb-3">{task.title}</h3>
                 <Badge variant={task.completed ? "secondary" : "default"} className="text-base">
                   {task.completed ? "Fertig" : "+"} {task.points} Punkte
                 </Badge>
