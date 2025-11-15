@@ -809,7 +809,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (member.role === "child") {
         const tasksWithMeta = await Promise.all(
           allTasks.map(async (task) => {
-            // Multi-Completion mode (maxCompletions != null)
+            // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
             if (task.maxCompletions !== null) {
               // Check if child has already completed this task
               const hasCompleted = await storage.hasActiveMemberCompletion(task.id, member.id);
@@ -821,26 +821,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
               };
             }
             
-            // Assignment-based mode (maxCompletions == null)
-            // Check if task is assigned to this member
-            const assignments = await storage.getTaskAssignmentsByTask(task.id);
-            const isAssigned = assignments.includes(member.id);
+            // Normal mode (maxCompletions == null) - Standard tasks visible to everyone
+            // Check if child has already completed this task
+            const hasCompleted = await storage.hasActiveMemberCompletion(task.id, member.id);
             
-            return isAssigned ? { ...task, remainingSlots: null, memberHasCompleted: false } : null;
+            return {
+              ...task,
+              remainingSlots: null,
+              memberHasCompleted: hasCompleted,
+            };
           })
         );
         
         // Filter logic for different task types:
-        // 1. Assignment-based (remainingSlots === null): Show only if NOT completed by member
+        // 1. Normal tasks (remainingSlots === null): Show only if NOT completed OR if recurring
         // 2. Multi-completion with slots (remainingSlots > 0): Always show
         // 3. Multi-completion (maxCompletions > 1) completed by member: Show grayed out
         // 4. Single-completion or exhausted: Hide
         const filteredTasks = tasksWithMeta.filter(
-          (task) => task !== null && (
-            (task.remainingSlots === null && !task.memberHasCompleted) || // Assignment-based: show only if NOT completed
+          (task) => 
+            (task.remainingSlots === null && !task.memberHasCompleted) || // Normal tasks: show only if NOT completed
             (task.remainingSlots !== null && task.remainingSlots > 0) || // Multi-completion with slots available
-            (task.maxCompletions !== null && task.maxCompletions > 1 && task.memberHasCompleted) // TRUE multi-completion task this member already completed (show grayed out)
-          )
+            (task.maxCompletions !== null && task.maxCompletions > 1 && task.memberHasCompleted) // Multi-completion task this member already completed (show grayed out)
         );
         
         // Disable caching for task data
