@@ -2,7 +2,7 @@
 
 ## Overview
 
-HeroKids is a full-stack web application that gamifies household chores for families. It allows children to earn points, compete on leaderboards, and unlock rewards by completing tasks, fostering responsibility and making chores fun. The application features real-time updates, photo verification for task completion, and a playful, age-appropriate design, aiming to enhance family cooperation and introduce children to personal responsibility.
+HeroKids is a full-stack web application designed to gamify household chores for families. It empowers children to earn points, compete on leaderboards, and unlock rewards by completing tasks, thereby fostering responsibility and making chores engaging. The application features real-time updates, photo verification for task completion, and a playful design, aiming to enhance family cooperation and introduce children to personal responsibility. It offers a structured gamified system with subscription tiers that unlock progressive features, including various gamification elements like leaderboards, character skins, and a flexible task approval system. The project's ambition is to create a fun, interactive platform that promotes positive family dynamics and teaches children valuable life skills.
 
 ## User Preferences
 
@@ -13,39 +13,27 @@ Preferred communication style: Simple, everyday language.
 ### UI/UX Decisions
 - **Design System**: Custom CSS variables for theming (light/dark), playful typography (Nunito, Fredoka), gradient effects, elevation, and rounded corners.
 - **UI Components**: Radix UI primitives wrapped with shadcn/ui ("New York" style).
-- **Themed Backgrounds**: Dynamic backgrounds tied to active character skins with smooth crossfade transitions and frosted glass UI effects.
-- **Animations**: Framer Motion for smooth transitions, canvas-confetti for celebratory effects on auto-approved task completions, spring-based animations for task cards, checkmarks, and points counter with 60fps performance.
+- **Themed Backgrounds**: Dynamic backgrounds linked to active character skins with smooth transitions and frosted glass UI effects.
+- **Animations**: Framer Motion for smooth transitions, canvas-confetti for celebratory effects, and spring-based animations for UI elements, ensuring 60fps performance.
 
 ### Technical Implementations
-- **Frontend**: React with TypeScript (Vite), Wouter for routing, TanStack Query for server state management and caching.
+- **Frontend**: React with TypeScript (Vite), Wouter for routing, TanStack Query for server state management.
 - **Backend**: Express.js with TypeScript (Node.js), RESTful API.
 - **Real-time Updates**: WebSocket server using "family rooms" for live synchronization.
-- **Authentication**: Replit Auth (OIDC-based) via `openid-client` and Passport.js, with Express-session and PostgreSQL store for persistent, secure sessions.
+- **Authentication**: Replit Auth (OIDC-based) via `openid-client` and Passport.js, with Express-session and PostgreSQL store.
 - **File Uploads**: Multer middleware for photo uploads (task proofs, avatars).
-- **Subscription Tiers**: 4-tier model (Free, Family, Family+, Family Hero) with progressive feature unlocks enforced by backend middleware. Features include variable member limits, leaderboard types, character skin unlocks, photo proof, recurring tasks, and future analytics/chat.
-- **Gamification Features**: Monthly leaderboards with optional member exclusion (allows parents to opt out of competition with children), unlockable character skins across 3 tiers (Starter Heroes, Elite Heroes, Dinosaur Bonus Pack) based on lifetime points earned, custom recurring tasks with availability management, and a factory reset option for parents.
-- **Points System**: Tracks `totalEarned` (lifetime), `totalPoints` (spendable balance), `weeklyPoints`, and `monthlyPoints`.
-- **Task Approval System**: Configurable per-task approval requirement. Tasks can be set to auto-approve (no parent verification needed) or require approval (default). Auto-approved tasks award points immediately upon completion. Recurring tasks show as greyed out with a checkmark after completion and automatically reopen on schedule at midnight (not 24 hours later), preventing duplicate point earning while providing visual feedback. Daily tasks become available again at 12:00 AM, weekly at midnight 7 days later, and monthly at midnight on the same date next month.
-  - **Automatic Midnight Refresh**: Client-side timer (`useMidnightRefresh` hook) automatically refreshes task list at midnight local time without requiring manual page reload. Timer calculation respects user's timezone and handles DST transitions. Proper cleanup prevents memory leaks on component unmount. After each midnight refresh, timer recursively schedules the next midnight for continuous automatic updates.
-- **Multi-Completion Tasks**: Tasks can have a `maxCompletions` value allowing multiple family members (both parents and children) to complete the same task. The system displays a counter (e.g., "2/4") showing progress. When creating a new multi-completion task, `maxCompletions` is automatically set to the total number of family members with an adjustable range from 2 to the total family size (e.g., 2-4 for a family with 2 parents + 2 children, or 2-7 for 2 parents + 5 children). The feature is disabled with an error message if the family has fewer than 2 total members. For recurring multi-completion tasks, the task remains visible when fully completed (grayed out until reset at midnight). For non-recurring multi-completion tasks, the task disappears after reaching maxCompletions. The backend uses SQL atomic increments with FOR UPDATE locks to prevent race conditions. `nextAvailableDate` is only set when maxCompletions is reached for recurring tasks, keeping the task available for other members until fully completed.
-  - **Automatic Reset at Midnight**: Recurring multi-completion tasks automatically reset their `completionCount` to 0 when `nextAvailableDate` passes (lazy reset on task fetch). This ensures all slots become available again for the next recurrence cycle. For example, a daily task with 4 slots that had only 3 completions on Day 1 will have all 4 slots available on Day 2, not just 1 remaining slot. The reset happens in `getTasksByFamily()` and is logged for debugging. Task completion history is preserved in the database.
-  - **Per-Member Task Visibility**: Multi-completion tasks implement intelligent per-member visibility. When any family member (parent or child) completes a multi-completion task, it appears grayed out (60% opacity, grayscale icon, green checkmark) for that specific member while remaining active and colorful for members who haven't completed it yet. The `/api/tasks` endpoint respects `req.session.actingAsMemberId` and validates that the acting member belongs to the same family as the authenticated user (security feature). Backend uses `hasActiveMemberCompletion()` to check completion status and adds `memberHasCompleted` flag to task objects. Frontend applies visual feedback automatically. Cache-Control headers prevent stale data issues.
-- **Family Chat**: Real-time family messaging (Family+ tier and above) with unread message counters, auto-mark-as-read functionality, and WebSocket synchronization.
-- **Join System**: Family-level join codes (6-character unique codes) for inviting new members to families.
-- **Multilingual Support**: Full internationalization (i18n) with 7 supported languages (German, English, French, Spanish, Japanese, Chinese, Korean) - **ALL LANGUAGES NOW FULLY TRANSLATED**. ~275 critical UI strings professionally translated across all non-English languages covering navigation, dashboard, tasks, rewards, leaderboard, settings, and common UI elements. Family-level language setting stored in database, parent-only permission to change language, real-time sync via WebSocket. Translation infrastructure uses react-i18next with comprehensive translation files (client/src/locales/{lang}/translation.json).
-- **Kid Dashboard Preview (Visual Prototype)**: A child-focused dashboard designed for ages 6-11 with enhanced gamification and motivation. Accessible via "Kinder-Vorschau" link in profile dropdown menu at `/kid-dashboard`. Features include: parent-created rewards as primary focus with progress bars showing proximity to goals, simplified navigation (4 main buttons), playful design with Lucide icons (no emojis per design guidelines), larger text and visual elements, and "Coming Soon" dialog for all interactions. **IMPORTANT**: This is a visual-only prototype using mock data - no API calls, no database changes, no effect on production workflow. Built for tester feedback collection before full implementation. All buttons either show "Coming Soon" dialog or link back to main dashboard. Skin system positioned as secondary "Style Bonus" feature to emphasize real-world rewards.
+- **Subscription Tiers**: 4-tier model (Free, Family, Family+, Family Hero) with feature unlocks enforced by backend middleware (e.g., member limits, leaderboard types, character skins, photo proof, recurring tasks, chat).
+- **Gamification Features**: Monthly leaderboards with optional member exclusion, unlockable character skins across 3 tiers (Starter, Elite, Dinosaur) based on lifetime points, custom recurring tasks, and a factory reset option. Points system tracks `totalEarned`, `totalPoints`, `weeklyPoints`, and `monthlyPoints`.
+- **Task Approval System**: Configurable per-task approval. Tasks can be auto-approved or require parent verification. Recurring tasks automatically reopen at midnight. Client-side `useMidnightRefresh` hook ensures task list updates automatically.
+- **Multi-Completion Tasks**: Tasks can have `maxCompletions` for multiple family members. Displays progress (e.g., "2/4"). Backend uses SQL atomic increments. Recurring multi-completion tasks reset completion count at midnight. Intelligent per-member visibility shows tasks as grayed out for completed members while active for others.
+- **Family Chat**: Real-time messaging for higher tiers with unread counters and WebSocket synchronization.
+- **Join System**: Family-level join codes for inviting new members.
+- **Multilingual Support**: Full i18n with 7 supported languages (German, English, French, Spanish, Japanese, Chinese, Korean) using `react-i18next`. Family-level language setting with parent-only permission and real-time sync.
+- **Kid Dashboard Preview**: A visual prototype `/kid-dashboard` for ages 6-11, focusing on parent-created rewards, simplified navigation, and playful design. It uses mock data for tester feedback and has no API/DB interactions.
 
 ### System Design Choices
-- **Data Storage**: PostgreSQL (Neon serverless driver) with Drizzle ORM for type-safe schema and queries.
-  - **Important**: Production and Development databases are SEPARATE - changes to one do not affect the other
-  - **Auto-Seed**: Character skins (24 total) are automatically seeded on first app startup if the skins table is empty (see `server/index.ts`)
-  - **Database UI**: SQL Console and "Add record" features available in Production Database → My Data tab for manual data management
-- **Authorization**: Role-based (parent vs. child) with API-level enforcement and role change security safeguards.
-- **Role Change Security**: Multi-layered protection to prevent family lockout:
-  - Parents cannot demote themselves to child role (self-demotion prevention)
-  - Cannot demote the last parent (ensures at least one parent always exists)
-  - Only real authenticated parents can change roles (not "actingAs" sessions)
-  - Role enum validation ensures only "parent" or "child" values accepted
+- **Data Storage**: PostgreSQL (Neon serverless driver) with Drizzle ORM. Production and Development databases are separate. Character skins are auto-seeded on first app startup.
+- **Authorization**: Role-based (parent vs. child) with API-level enforcement and role change security safeguards (e.g., preventing self-demotion or demotion of the last parent).
 - **Session Management**: Secure, httpOnly cookies with 7-day TTL and CSRF protection.
 - **Development**: Custom Vite integration for React HMR and API routing.
 
@@ -53,105 +41,8 @@ Preferred communication style: Simple, everyday language.
 
 -   **Authentication**: Replit Auth OIDC provider.
 -   **Database**: Neon PostgreSQL serverless database.
--   **Asset Storage**: Local filesystem for uploaded task completion photos and custom profile pictures; pre-made avatar assets.
+-   **Asset Storage**: Local filesystem for uploaded photos; pre-made avatar assets.
 -   **Fonts**: Google Fonts (Nunito, Fredoka).
 -   **UI Libraries**: Radix UI, shadcn/ui, Tailwind CSS, lucide-react.
 -   **Build & Development**: Vite, esbuild, tsx.
 -   **Validation**: Zod (with Drizzle-Zod integration).
-
-## Character Skin System
-
-### Tekken-Style Discovery Mechanics
-**Card System**: Members earn discovery cards at a uniform rate. Cards can be spent to discover any skin from unlocked packages.
-
-**Card Earning Rate (SIMPLIFIED)**:
-- **All Tiers**: **80 points = 1 card** (uniform across all tiers)
-
-**Discovery Flow**:
-1. Earn points through completed tasks
-2. Navigate to skins gallery
-3. Click "Discover" on any undiscovered skin from unlocked packages
-4. Skin is instantly revealed and becomes equippable
-5. If skin has bonus points, they are awarded immediately
-
-**Database**: `discovered_skin_ids` (array) tracks which skins each member has chosen to discover. The default "Junior Champion" (0 points) is always available without discovery.
-
-**Available Cards Calculation**: Simple calculation - total earned points divided by 80, minus already discovered skins. Example: 1600 points = 20 cards available (1600 ÷ 80 = 20).
-
-### Skin Tiers & Package Unlocks
-**Tier 1 - Starter Heroes** (Unlocked from start)
-- Modern, child-friendly 3D cartoon style with vibrant colors
-- Contemporary everyday environments as backgrounds
-- **Card Cost**: 80 points per card
-- 8 skins: Junior Champion (0 - always available), Brave Explorer, Star Cadet, Nature Scout, Speed Runner, Book Wizard, Kitchen Hero, Art Master
-- **To discover all 8 skins**: 8 × 80 = 640 points
-
-**Tier 2 - Elite Heroes** (Package unlocks at **700 total points**)
-- Heroic, epic style with white/transparent avatar backgrounds
-- Dramatic fantasy/sci-fi themed backgrounds
-- Friendly but powerful, not aggressive
-- **Card Cost**: 80 points per card
-- 8 skins: Tech Ninja, Ocean Guardian, Sky Knight, Fire Phoenix, Crystal Mage, Neon Rebel, Cosmic Drifter, Thunder Champion
-- **To discover all 8 skins**: 8 × 80 = 640 points
-
-**Tier 3 - Dinosaur Heroes** (Package unlocks at **1400 total points**)
-- Realistic, scientifically accurate dinosaur designs for teenagers
-- Epic prehistoric landscapes (Jurassic/Cretaceous periods)
-- Detailed, educational, and impressive
-- **Card Cost**: 80 points per card
-- 8 skins: T-Rex, Triceratops, Stegosaurus, Velociraptor, Brachiosaurus, Spinosaurus, Ankylosaurus, Allosaurus
-- **To discover all 8 skins**: 8 × 80 = 640 points
-
-### Hidden Bonus Points
-Certain special skins award bonus points when discovered:
-- **Tier 1**: Brave Explorer (+10), Book Wizard (+10)
-- **Tier 2**: Tech Ninja (+10), Fire Phoenix (+10), Thunder Champion (+20)
-- **Tier 3**: Velociraptor (+30), Brachiosaurus (+10), Allosaurus (+40)
-
-**Note**: The `pointsRequired` values in the database are for reference/ordering only. Actual discovery is controlled by available cards, not point thresholds.
-
-## Known Issues & Browser Compatibility
-
-### Production Database Empty After Publish (RESOLVED)
-**Issue**: Character skins (and other seeded data) were missing from the published app even though they existed in development.
-
-**Root Cause**: Production and Development databases are SEPARATE entities in Replit - they don't share data.
-
-**Solution Implemented**: Auto-seed mechanism in `server/index.ts`:
-- Checks if skins table is empty on app startup
-- Automatically inserts all 24 character skins if table is empty
-- Runs idempotently (safe to run multiple times, won't create duplicates)
-- Works for both Development and Production environments
-
-**Manual Alternative**: Use SQL Console in Production Database → My Data tab to run `production-skins-insert.sql`
-
-**Status**: ✅ RESOLVED - Auto-seed now ensures skins are available in both environments
-
-### Safari iOS Aggressive Caching
-**Issue**: Safari on iOS aggressively caches API responses, which can prevent users from seeing updates after the app is republished.
-
-**Symptoms**:
-- Old data appears even after republishing with fixes
-- Development environment shows changes immediately, but published app does not
-- Hard refresh may be required to see latest data
-
-**Solutions for Users**:
-1. **Hard Refresh**: Desktop (Ctrl+Shift+R), Mobile (pull-to-refresh)
-2. **Clear Safari Cache**: Settings → Safari → Clear History and Website Data
-3. **Use Private Browsing**: Open the app in a Safari Private Tab
-4. **Use Chrome/Firefox**: Switch to a different browser on iOS
-5. **Wait**: Safari's cache typically expires after 5-10 minutes
-
-**Technical Details**: The published app (herokids.replit.app) serves correct data, but Safari may cache GET requests to endpoints like `/api/skins` for extended periods, even with `Cache-Control` headers.
-
-### Desktop Stripe Checkout Compatibility
-**Issue**: Ad-blockers and tracking prevention may block Stripe checkout page rendering on desktop browsers.
-
-**Symptoms**:
-- Checkout page fails to load or shows blank screen
-- Browser console shows blocked requests
-
-**Solutions**:
-- Disable ad-blockers/tracking prevention for herokids.replit.app
-- Use mobile devices (iOS/Android) where checkout works reliably
-- Add herokids.replit.app to browser's allowlist
