@@ -476,8 +476,10 @@ export default function RewardsBoard() {
                   )}
                 </div>
 
-                {/* Sharing Button - Only for own redemptions that are not yet shared */}
-                {redemption.memberId === member?.id && redemption.sharingStatus === "not_shared" && (
+                {/* Sharing Button - Only for own redemptions that are not yet shared and not completed */}
+                {redemption.memberId === member?.id && 
+                 redemption.sharingStatus === "not_shared" && 
+                 redemption.status !== "completed" && (
                   <div className="flex gap-2 pt-2 border-t">
                     <Button
                       size="sm"
@@ -496,45 +498,18 @@ export default function RewardsBoard() {
                 {/* Parent Controls - Only when acting as parent, not when switched to child */}
                 {isParent && redemption.status !== "completed" && (
                   <div className="flex gap-2 pt-2 border-t">
-                    {redemption.status === "pending" && (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => updateStatusMutation.mutate({ 
-                          id: redemption.id, 
-                          status: "approved" 
-                        })}
-                        disabled={updateStatusMutation.isPending}
-                        data-testid={`button-approve-${redemption.id}`}
-                      >
-                        {t("rewardsBoard.approve")}
-                      </Button>
-                    )}
-                    {redemption.status === "approved" && (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => updateStatusMutation.mutate({ 
-                          id: redemption.id, 
-                          status: "completed" 
-                        })}
-                        disabled={updateStatusMutation.isPending}
-                        data-testid={`button-complete-${redemption.id}`}
-                      >
-                        {t("rewardsBoard.markFulfilled")}
-                      </Button>
-                    )}
+                    {/* Rewards are auto-approved, parents only mark as fulfilled */}
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="default"
                       onClick={() => updateStatusMutation.mutate({ 
                         id: redemption.id, 
-                        status: "pending" 
+                        status: "completed" 
                       })}
                       disabled={updateStatusMutation.isPending}
-                      data-testid={`button-reset-${redemption.id}`}
+                      data-testid={`button-complete-${redemption.id}`}
                     >
-                      {t("rewardsBoard.resetPending")}
+                      {t("rewardsBoard.markFulfilled")}
                     </Button>
                   </div>
                 )}

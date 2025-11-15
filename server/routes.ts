@@ -1600,13 +1600,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       // Create redemption record
+      // Note: Status is "approved" because parent-created rewards don't need approval
+      // Reward Requests still go through the approval process separately
       const redemption = await storage.createRewardRedemption({
         rewardId: reward.id,
         memberId: member.id,
         pointsSpent: reward.pointThreshold,
         originalPointsSpent: reward.pointThreshold,
         sharingStatus: "not_shared",
-        status: "pending",
+        status: "approved",
       });
       
       // Add to points history
