@@ -1554,25 +1554,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Redeem a reward
   app.post("/api/rewards/:rewardId/redeem", isAuthenticated, async (req: any, res) => {
+    console.log('🎯 POST /api/rewards/:rewardId/redeem called');
+    console.log('   rewardId:', req.params.rewardId);
+    console.log('   userId:', req.user?.claims?.sub);
+    
     try {
       const userId = req.user.claims.sub;
       const { rewardId } = req.params;
       
+      console.log('   Checking for acting member...');
       // Use acting member if available, otherwise use authenticated user
       const actingMemberId = req.session.actingAsMemberId;
       const member = actingMemberId 
         ? await storage.getFamilyMemberById(actingMemberId)
         : await storage.getFamilyMemberByUserId(userId);
       
+      console.log('   Member found:', member ? `${member.displayName} (${member.id})` : 'null');
+      
       if (!member) {
+        console.log('   ❌ Member not found');
         return res.status(404).json({ message: "Family member not found" });
       }
       
+      console.log('   Fetching rewards for family:', member.familyName);
       // Get the reward
       const rewards = await storage.getRewardsByFamily(member.familyName);
+      console.log('   Found rewards:', rewards.length);
       const reward = rewards.find(r => r.id === rewardId);
       
+      console.log('   Reward found:', reward ? `${reward.title} (${reward.id})` : 'null');
+      
       if (!reward) {
+        console.log('   ❌ Reward not found in family rewards');
         return res.status(404).json({ message: "Reward not found" });
       }
       
