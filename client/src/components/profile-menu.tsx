@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon, Menu, RotateCcw } from "lucide-react";
+import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon, Menu, RotateCcw, Baby } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
@@ -103,6 +103,12 @@ export function ProfileMenu({
           <Link href="/skins-gallery" data-testid="menu-item-skins">
             <Palette className="mr-2 h-4 w-4" />
             <span>{t("nav.skins")}</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/kid-dashboard" data-testid="menu-item-kid-preview">
+            <Baby className="mr-2 h-4 w-4" />
+            <span>Kinder-Vorschau</span>
           </Link>
         </DropdownMenuItem>
         {isParent && (

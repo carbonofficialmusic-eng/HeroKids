@@ -12,6 +12,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
+import KidDashboard from "@/pages/kid-dashboard";
 import Pricing from "@/pages/pricing";
 import Analytics from "@/pages/analytics";
 import Chat from "@/pages/chat";
@@ -102,6 +103,7 @@ function Router() {
           <>
             <Route path="/" component={Dashboard} />
             <Route path="/dashboard" component={Dashboard} />
+            <Route path="/kid-dashboard" component={KidDashboard} />
             <Route path="/tasks" component={Dashboard} />
             <Route path="/rewards" component={Dashboard} />
             <Route path="/leaderboard" component={Dashboard} />
