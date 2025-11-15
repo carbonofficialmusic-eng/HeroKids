@@ -164,7 +164,7 @@ export function TaskDialog({
       requiresProof: false,
       requiresApproval: true,
       iconEmoji: "⭐",
-      maxCompletions: undefined,
+      maxCompletions: totalMemberCount >= 2 ? totalMemberCount : undefined,
     },
   });
 
@@ -225,7 +225,7 @@ export function TaskDialog({
           requiresProof: false,
           requiresApproval: true,
           iconEmoji: "⭐",
-          maxCompletions: undefined,
+          maxCompletions: totalMemberCount >= 2 ? totalMemberCount : undefined,
         });
       }
     }
