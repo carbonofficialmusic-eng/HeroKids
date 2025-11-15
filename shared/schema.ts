@@ -20,6 +20,7 @@ export const taskStatusEnum = pgEnum("task_status", ["active", "completed", "arc
 export const recurrenceEnum = pgEnum("recurrence", ["none", "daily", "weekly", "monthly", "yearly"]);
 export const subscriptionTierEnum = pgEnum("subscription_tier", ["free", "family", "family_plus", "family_hero"]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "trialing", "past_due", "canceled", "incomplete"]);
+export const sharingStatusEnum = pgEnum("sharing_status", ["not_shared", "sharing_active", "sharing_finalized"]);
 
 // Session storage table - Required for Replit Auth
 export const sessions = pgTable(
@@ -326,11 +327,13 @@ export const rewardRedemptions = pgTable("reward_redemptions", {
   rewardId: varchar("reward_id").notNull().references(() => rewards.id, { onDelete: "cascade" }),
   memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
   pointsSpent: integer("points_spent").notNull(),
+  originalPointsSpent: integer("original_points_spent").notNull(), // Original points before sharing
   status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, approved, completed
+  sharingStatus: sharingStatusEnum("sharing_status").notNull().default("not_shared"),
   redeemedAt: timestamp("redeemed_at").defaultNow(),
 });
 
-export const rewardRedemptionsRelations = relations(rewardRedemptions, ({ one }) => ({
+export const rewardRedemptionsRelations = relations(rewardRedemptions, ({ one, many }) => ({
   reward: one(rewards, {
     fields: [rewardRedemptions.rewardId],
     references: [rewards.id],
@@ -339,6 +342,7 @@ export const rewardRedemptionsRelations = relations(rewardRedemptions, ({ one })
     fields: [rewardRedemptions.memberId],
     references: [familyMembers.id],
   }),
+  sharingParticipants: many(rewardSharingParticipants),
 }));
 
 export const insertRewardRedemptionSchema = createInsertSchema(rewardRedemptions).omit({
@@ -348,6 +352,34 @@ export const insertRewardRedemptionSchema = createInsertSchema(rewardRedemptions
 
 export type InsertRewardRedemption = z.infer<typeof insertRewardRedemptionSchema>;
 export type RewardRedemption = typeof rewardRedemptions.$inferSelect;
+
+// Reward sharing participants - Track who is sharing a reward
+export const rewardSharingParticipants = pgTable("reward_sharing_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  redemptionId: varchar("redemption_id").notNull().references(() => rewardRedemptions.id, { onDelete: "cascade" }),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  pointsContributed: integer("points_contributed").notNull(),
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
+export const rewardSharingParticipantsRelations = relations(rewardSharingParticipants, ({ one }) => ({
+  redemption: one(rewardRedemptions, {
+    fields: [rewardSharingParticipants.redemptionId],
+    references: [rewardRedemptions.id],
+  }),
+  member: one(familyMembers, {
+    fields: [rewardSharingParticipants.memberId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertRewardSharingParticipantSchema = createInsertSchema(rewardSharingParticipants).omit({
+  id: true,
+  joinedAt: true,
+});
+
+export type InsertRewardSharingParticipant = z.infer<typeof insertRewardSharingParticipantSchema>;
+export type RewardSharingParticipant = typeof rewardSharingParticipants.$inferSelect;
 
 // Chat Messages - Family chat messages (Family+ and Family Hero tier)
 export const chatMessages = pgTable("chat_messages", {
