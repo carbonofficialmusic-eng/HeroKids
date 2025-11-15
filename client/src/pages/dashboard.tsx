@@ -384,24 +384,29 @@ export default function Dashboard() {
   const redeemRewardMutation = useMutation({
     mutationFn: async (rewardId: string) => {
       const res = await apiRequest("POST", `/api/rewards/${rewardId}/redeem`, {});
-      return await res.json();
+      const data = await res.json();
+      return data;
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
-      toast({
-        title: t("toast.rewardRedeemed"),
-        description: data.message,
-      });
+      
       const pointsSpent = data.redemption?.pointsSpent || 0;
       const rewardTitle = data.redemption?.rewardTitle || 'Reward';
+      
+      toast({
+        title: t("toast.rewardRedeemed"),
+        description: data.message || `Successfully redeemed ${rewardTitle}!`,
+      });
+      
       setCelebration({
         points: -pointsSpent,
         message: `${rewardTitle} - ${pointsSpent} ${t("dashboard.pointsLabel")}`,
       });
     },
     onError: (error: any) => {
+      console.error("Redeem error:", error);
       toast({
         title: t("toast.failedRedeem"),
         description: error.message || t("rewards.notEnoughPoints"),
