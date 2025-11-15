@@ -569,7 +569,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         avatarUrl: z.string().min(1, "Avatar is required"),
         color: z.string().min(1, "Color is required"),
         role: z.enum(["parent", "child"]).optional().default("child"),
-        ageGroup: z.enum(["6-11", "11-17", "adult"]).optional().default("6-11"),
       });
       
       const parsed = joinFamilySchema.parse(req.body);
@@ -616,7 +615,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         avatarUrl: parsed.avatarUrl,
         color: parsed.color,
         role: parsed.role,
-        ageGroup: parsed.ageGroup,
         userId,
       } as any);
       
@@ -690,30 +688,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Validate ageGroup if provided
-      if (req.body.ageGroup && !["6-11", "11-17", "adult"].includes(req.body.ageGroup)) {
-        return res.status(400).json({ message: "Invalid age group. Must be '6-11', '11-17', or 'adult'." });
-      }
-      
-      // Validate role/ageGroup combination to prevent mismatches
-      const finalRole = req.body.role || memberToUpdate.role;
-      const finalAgeGroup = req.body.ageGroup || memberToUpdate.ageGroup;
-      
-      if (finalRole === "parent" && (finalAgeGroup === "6-11" || finalAgeGroup === "11-17")) {
-        return res.status(400).json({ message: "Parents cannot have child age groups. Please set age group to 'adult'." });
-      }
-      
-      if (finalRole === "child" && finalAgeGroup === "adult") {
-        return res.status(400).json({ message: "Children cannot have adult age group. Please set age group to '6-11' or '11-17'." });
-      }
-      
       // Update the member
       const updates = {
         displayName: req.body.displayName,
         avatarUrl: req.body.avatarUrl,
         color: req.body.color,
         role: req.body.role,
-        ageGroup: req.body.ageGroup,
         excludeFromLeaderboard: req.body.excludeFromLeaderboard,
       };
       

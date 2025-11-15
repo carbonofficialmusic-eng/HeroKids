@@ -16,7 +16,6 @@ import { z } from "zod";
 
 // Enums
 export const roleEnum = pgEnum("role", ["parent", "child"]);
-export const ageGroupEnum = pgEnum("age_group", ["6-11", "11-17", "adult"]);
 export const taskStatusEnum = pgEnum("task_status", ["active", "completed", "archived"]);
 export const recurrenceEnum = pgEnum("recurrence", ["none", "daily", "weekly", "monthly", "yearly"]);
 export const subscriptionTierEnum = pgEnum("subscription_tier", ["free", "family", "family_plus", "family_hero"]);
@@ -85,7 +84,6 @@ export const familyMembers = pgTable("family_members", {
   familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
   displayName: varchar("display_name").notNull(),
   role: roleEnum("role").notNull().default("child"),
-  ageGroup: ageGroupEnum("age_group").notNull().default("6-11"),
   avatarUrl: varchar("avatar_url"),
   color: varchar("color").notNull().default("#8B5CF6"), // User's theme color
   pinCode: varchar("pin_code", { length: 60 }), // bcrypt-hashed 4-digit PIN for single-device mode (optional)
