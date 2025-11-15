@@ -379,6 +379,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tasks.familyName, familyName))
       .orderBy(desc(tasks.createdAt));
     
+    // Reset completionCount for recurring multi-completion tasks that have passed their nextAvailableDate
+    const now = new Date();
+    const tasksToReset = allTasks.filter(task => {
+      // Only reset recurring multi-completion tasks
+      const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
+      const isMultiCompletion = task.maxCompletions !== null;
+      const hasPassedAvailableDate = task.nextAvailableDate && task.nextAvailableDate <= now;
+      const needsReset = task.completionCount > 0;
+      
+      return isRecurring && isMultiCompletion && hasPassedAvailableDate && needsReset;
+    });
+    
+    // Reset each task in a transaction
+    if (tasksToReset.length > 0) {
+      console.log(`🔄 Resetting ${tasksToReset.length} recurring multi-completion task(s) after midnight`);
+    }
+    
+    for (const task of tasksToReset) {
+      await db
+        .update(tasks)
+        .set({ 
+          completionCount: 0, 
+          nextAvailableDate: null,
+          updatedAt: new Date() 
+        })
+        .where(eq(tasks.id, task.id));
+      
+      console.log(`  ✅ Reset task "${task.title}" (was ${task.completionCount}/${task.maxCompletions}, now 0/${task.maxCompletions})`);
+      
+      // Update the in-memory task object as well
+      task.completionCount = 0;
+      task.nextAvailableDate = null;
+    }
+    
     return allTasks;
   }
 
