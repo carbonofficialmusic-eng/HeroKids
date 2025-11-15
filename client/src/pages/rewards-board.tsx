@@ -149,6 +149,7 @@ export default function RewardsBoard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
         title: "Erfolgreich beigetreten!",
         description: "Du bist jetzt Teil der geteilten Belohnung.",
@@ -172,6 +173,7 @@ export default function RewardsBoard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
         title: "Teilen abgeschlossen!",
         description: "Die Punkte wurden gleichmäßig aufgeteilt.",
