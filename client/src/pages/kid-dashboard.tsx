@@ -33,6 +33,7 @@ import {
   BookOpen,
   UtensilsCrossed,
   Trash2,
+  ArrowLeft,
 } from "lucide-react";
 
 // Mock data for visual prototype (NO REAL API CALLS)
@@ -386,8 +387,18 @@ export default function KidDashboard() {
 
   return (
     <div className="min-h-screen pb-20">
+      {/* Back to Dashboard Button */}
+      <div className="mx-4 mt-4 mb-2">
+        <Button variant="outline" size="sm" asChild data-testid="button-back-to-dashboard">
+          <Link href="/dashboard">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Zurück zum Dashboard
+          </Link>
+        </Button>
+      </div>
+
       {/* Preview Banner */}
-      <Alert className="mb-4 mx-4 mt-4 border-primary bg-primary/10">
+      <Alert className="mb-4 mx-4 border-primary bg-primary/10">
         <Info className="h-4 w-4" />
         <AlertDescription>
           <strong>Kinder-Vorschau</strong> - Dies ist eine visuelle Vorschau des neuen Kinder-Dashboards. Die
