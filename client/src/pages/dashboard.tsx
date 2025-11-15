@@ -383,24 +383,30 @@ export default function Dashboard() {
   // Redeem reward
   const redeemRewardMutation = useMutation({
     mutationFn: async (rewardId: string) => {
-      try {
-        const res = await apiRequest("POST", `/api/rewards/${rewardId}/redeem`, {});
-        const text = await res.text();
-        
-        if (!text || text.trim() === '') {
-          throw new Error('Empty response from server');
-        }
-        
+      const res = await fetch(`/api/rewards/${rewardId}/redeem`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({}),
+      });
+      
+      const text = await res.text();
+      
+      if (!res.ok) {
+        let errorData: any;
         try {
-          return JSON.parse(text);
-        } catch (parseError) {
-          console.error('JSON parse error:', parseError, 'Text:', text);
-          throw new Error('Invalid JSON response');
+          errorData = text ? JSON.parse(text) : { message: `HTTP ${res.status}` };
+        } catch {
+          errorData = { message: text || `HTTP ${res.status}` };
         }
-      } catch (error) {
-        console.error('Redeem request error:', error);
-        throw error;
+        throw { status: res.status, data: errorData, message: errorData.message };
       }
+      
+      if (!text || text.trim() === '') {
+        throw new Error('Empty response from server');
+      }
+      
+      return JSON.parse(text);
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
@@ -422,7 +428,6 @@ export default function Dashboard() {
       });
     },
     onError: (error: any) => {
-      console.error('Redeem error full:', error);
       const errorMessage = error?.data?.message || error?.message || t("rewards.notEnoughPoints");
       toast({
         title: t("toast.failedRedeem"),
