@@ -725,7 +725,9 @@ export class DatabaseStorage implements IStorage {
         rewardId: rewardRedemptions.rewardId,
         memberId: rewardRedemptions.memberId,
         pointsSpent: rewardRedemptions.pointsSpent,
+        originalPointsSpent: rewardRedemptions.originalPointsSpent,
         status: rewardRedemptions.status,
+        sharingStatus: rewardRedemptions.sharingStatus,
         redeemedAt: rewardRedemptions.redeemedAt,
         reward: {
           id: rewards.id,
