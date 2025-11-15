@@ -690,12 +690,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Validate ageGroup if provided
+      if (req.body.ageGroup && !["6-11", "11-17", "adult"].includes(req.body.ageGroup)) {
+        return res.status(400).json({ message: "Invalid age group. Must be '6-11', '11-17', or 'adult'." });
+      }
+      
       // Update the member
       const updates = {
         displayName: req.body.displayName,
         avatarUrl: req.body.avatarUrl,
         color: req.body.color,
         role: req.body.role,
+        ageGroup: req.body.ageGroup,
         excludeFromLeaderboard: req.body.excludeFromLeaderboard,
       };
       

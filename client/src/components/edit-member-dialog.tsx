@@ -37,6 +37,7 @@ import type { FamilyMember } from "@shared/schema";
 const editMemberSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
   role: z.enum(["parent", "child"]),
+  ageGroup: z.enum(["6-11", "11-17", "adult"]),
 });
 
 type EditMemberForm = z.infer<typeof editMemberSchema>;
@@ -48,6 +49,7 @@ interface EditMemberDialogProps {
   isSubmitting?: boolean;
   member: FamilyMember | null;
   currentUserRole?: "parent" | "child";
+  currentUserAgeGroup?: "6-11" | "11-17" | "adult";
 }
 
 export function EditMemberDialog({ 
@@ -56,7 +58,8 @@ export function EditMemberDialog({
   onSubmit, 
   isSubmitting = false,
   member,
-  currentUserRole
+  currentUserRole,
+  currentUserAgeGroup
 }: EditMemberDialogProps) {
   const { t } = useTranslation();
   const [selectedAvatar, setSelectedAvatar] = useState(member?.avatarUrl || avatarAssets[0].url);
@@ -69,6 +72,7 @@ export function EditMemberDialog({
     defaultValues: {
       displayName: member?.displayName || "",
       role: member?.role || "child",
+      ageGroup: member?.ageGroup || "6-11",
     },
   });
 
@@ -78,6 +82,7 @@ export function EditMemberDialog({
       form.reset({
         displayName: member.displayName,
         role: member.role,
+        ageGroup: member.ageGroup,
       });
       setSelectedAvatar(member.avatarUrl || avatarAssets[0].url);
       setSelectedColor(member.color || colorOptions[0].value);
@@ -176,6 +181,29 @@ export function EditMemberDialog({
                     <SelectContent>
                       <SelectItem value="parent" data-testid="option-role-parent">{t('settings.parent')}</SelectItem>
                       <SelectItem value="child" data-testid="option-role-child">{t('settings.child')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="ageGroup"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Age Group</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-edit-age-group">
+                        <SelectValue placeholder="Select age group" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="6-11" data-testid="option-age-6-11">Children (6-11 years)</SelectItem>
+                      <SelectItem value="11-17" data-testid="option-age-11-17">Youth (11-17 years)</SelectItem>
+                      <SelectItem value="adult" data-testid="option-age-adult">Adult</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
