@@ -140,6 +140,15 @@ export default function Dashboard() {
     queryKey: ["/api/rewards"],
     enabled: !!member,
   });
+  
+  // Log rewards data for debugging
+  useEffect(() => {
+    if (rewards && rewards.length > 0) {
+      console.log('🎁 Rewards data received:', rewards);
+      console.log('🔍 First reward structure:', rewards[0]);
+      console.log('🔑 First reward keys:', Object.keys(rewards[0]));
+    }
+  }, [rewards]);
 
   // Fetch reward requests
   const { data: rewardRequests = [] } = useQuery<RewardRequest[]>({
@@ -383,6 +392,15 @@ export default function Dashboard() {
   // Redeem reward
   const redeemRewardMutation = useMutation({
     mutationFn: async (rewardId: string) => {
+      console.log('🎯 Redeem mutation called with rewardId:', rewardId);
+      
+      if (!rewardId || rewardId === 'undefined') {
+        console.error('❌ Invalid rewardId:', rewardId);
+        throw new Error(`Invalid reward ID: ${rewardId}`);
+      }
+      
+      console.log('📡 Sending POST request to:', `/api/rewards/${rewardId}/redeem`);
+      
       const res = await fetch(`/api/rewards/${rewardId}/redeem`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -390,7 +408,10 @@ export default function Dashboard() {
         body: JSON.stringify({}),
       });
       
+      console.log('📥 Response status:', res.status, res.statusText);
+      
       const text = await res.text();
+      console.log('📄 Response text:', text);
       
       if (!res.ok) {
         let errorData: any;
@@ -399,14 +420,18 @@ export default function Dashboard() {
         } catch {
           errorData = { message: text || `HTTP ${res.status}` };
         }
+        console.error('❌ Server error:', errorData);
         throw { status: res.status, data: errorData, message: errorData.message };
       }
       
       if (!text || text.trim() === '') {
+        console.error('❌ Empty response from server');
         throw new Error('Empty response from server');
       }
       
-      return JSON.parse(text);
+      const data = JSON.parse(text);
+      console.log('✅ Redemption successful:', data);
+      return data;
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
