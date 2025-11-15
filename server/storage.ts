@@ -966,14 +966,35 @@ export class DatabaseStorage implements IStorage {
       .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
   }
 
-  async getActiveSharedRewards(familyName: string): Promise<Array<RewardRedemption & { participants: Array<RewardSharingParticipant & { member: FamilyMember }> }>> {
-    // Get all active shared rewards for this family
+  async getActiveSharedRewards(familyName: string): Promise<Array<any>> {
+    // Get all active shared rewards for this family with full details
     const redemptions = await db
       .select({
-        redemption: rewardRedemptions,
-        member: familyMembers,
+        id: rewardRedemptions.id,
+        rewardId: rewardRedemptions.rewardId,
+        memberId: rewardRedemptions.memberId,
+        pointsSpent: rewardRedemptions.pointsSpent,
+        originalPointsSpent: rewardRedemptions.originalPointsSpent,
+        status: rewardRedemptions.status,
+        sharingStatus: rewardRedemptions.sharingStatus,
+        redeemedAt: rewardRedemptions.redeemedAt,
+        reward: {
+          id: rewards.id,
+          title: rewards.title,
+          description: rewards.description,
+          pointThreshold: rewards.pointThreshold,
+        },
+        member: {
+          id: familyMembers.id,
+          displayName: familyMembers.displayName,
+          avatarUrl: familyMembers.avatarUrl,
+          color: familyMembers.color,
+          unlockedSkins: familyMembers.unlockedSkins,
+          activeSkinId: familyMembers.activeSkinId,
+        },
       })
       .from(rewardRedemptions)
+      .innerJoin(rewards, eq(rewardRedemptions.rewardId, rewards.id))
       .innerJoin(familyMembers, eq(rewardRedemptions.memberId, familyMembers.id))
       .where(
         and(
@@ -985,9 +1006,9 @@ export class DatabaseStorage implements IStorage {
     // Get participants for each redemption
     const results = await Promise.all(
       redemptions.map(async (r) => {
-        const participants = await this.getRewardSharingParticipants(r.redemption.id);
+        const participants = await this.getRewardSharingParticipants(r.id);
         return {
-          ...r.redemption,
+          ...r,
           participants,
         };
       })
