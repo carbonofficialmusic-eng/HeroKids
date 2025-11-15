@@ -26,17 +26,17 @@ export default function DashboardGateway() {
     );
   }
 
+  // If no member data, default to Dashboard which handles onboarding
   if (!member) {
     return <Dashboard />;
   }
 
-  if (member.ageGroup === "6-11") {
+  // Route based on age group
+  // Children (6-11) and Youth (11-17) see child-friendly dashboard
+  if (member.ageGroup === "6-11" || member.ageGroup === "11-17") {
     return <ChildDashboard />;
   }
 
-  if (member.ageGroup === "11-17") {
-    return <ChildDashboard />;
-  }
-
+  // Adults see regular dashboard
   return <Dashboard />;
 }

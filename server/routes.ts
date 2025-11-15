@@ -695,6 +695,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid age group. Must be '6-11', '11-17', or 'adult'." });
       }
       
+      // Validate role/ageGroup combination to prevent mismatches
+      const finalRole = req.body.role || memberToUpdate.role;
+      const finalAgeGroup = req.body.ageGroup || memberToUpdate.ageGroup;
+      
+      if (finalRole === "parent" && (finalAgeGroup === "6-11" || finalAgeGroup === "11-17")) {
+        return res.status(400).json({ message: "Parents cannot have child age groups. Please set age group to 'adult'." });
+      }
+      
+      if (finalRole === "child" && finalAgeGroup === "adult") {
+        return res.status(400).json({ message: "Children cannot have adult age group. Please set age group to '6-11' or '11-17'." });
+      }
+      
       // Update the member
       const updates = {
         displayName: req.body.displayName,
