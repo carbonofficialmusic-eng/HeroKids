@@ -22,6 +22,7 @@ export const recurrenceEnum = pgEnum("recurrence", ["none", "daily", "weekly", "
 export const subscriptionTierEnum = pgEnum("subscription_tier", ["free", "family", "family_plus", "family_hero"]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "trialing", "past_due", "canceled", "incomplete"]);
 export const sharingStatusEnum = pgEnum("sharing_status", ["not_shared", "sharing_active", "sharing_finalized"]);
+export const achievementTypeEnum = pgEnum("achievement_type", ["first_weekly_finisher", "weekly_leaderboard", "perfect_week", "lifetime_milestone", "task_streak"]);
 
 // Session storage table - Required for Replit Auth
 export const sessions = pgTable(
@@ -429,3 +430,107 @@ export const insertSkinSchema = createInsertSchema(skins).omit({
 
 export type InsertSkin = z.infer<typeof insertSkinSchema>;
 export type Skin = typeof skins.$inferSelect;
+
+// Achievement Definitions - Templates for achievements (configured per family)
+export const achievementDefinitions = pgTable("achievement_definitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
+  type: achievementTypeEnum("type").notNull(),
+  slug: varchar("slug").notNull(), // Unique identifier within family (e.g., "first-weekly-finisher")
+  title: varchar("title").notNull(), // Display name (e.g., "Weekly Champion")
+  description: text("description").notNull(), // Description shown to members
+  config: jsonb("config").notNull().default(sql`'{}'::jsonb`), // Type-specific config (e.g., { threshold: 100, rank: "gold" })
+  bonusPoints: integer("bonus_points").notNull(), // Points awarded when achievement is earned
+  isActive: boolean("is_active").notNull().default(true), // Parents can enable/disable
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique().on(table.familyName, table.slug), // Unique slug per family
+]);
+
+export const achievementDefinitionsRelations = relations(achievementDefinitions, ({ one, many }) => ({
+  family: one(families, {
+    fields: [achievementDefinitions.familyName],
+    references: [families.familyName],
+  }),
+  awards: many(achievementAwards),
+}));
+
+export const insertAchievementDefinitionSchema = createInsertSchema(achievementDefinitions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertAchievementDefinition = z.infer<typeof insertAchievementDefinitionSchema>;
+export type AchievementDefinition = typeof achievementDefinitions.$inferSelect;
+
+// Achievement Members - Progress tracking for each member
+export const achievementMembers = pgTable("achievement_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  weeklyCompletionCount: integer("weekly_completion_count").notNull().default(0), // Tasks completed this week
+  weeklyRejectionCount: integer("weekly_rejection_count").notNull().default(0), // Tasks rejected this week
+  consecutiveDaysStreak: integer("consecutive_days_streak").notNull().default(0), // Current streak of days with tasks
+  lastStreakDate: timestamp("last_streak_date"), // Last date when streak was updated
+  lastWeeklyReset: timestamp("last_weekly_reset").defaultNow(), // When weekly counters were last reset
+  firstWeeklyFinisher: boolean("first_weekly_finisher").notNull().default(false), // Has claimed first-weekly-finisher this week
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique().on(table.familyName, table.memberId), // One progress record per member per family
+]);
+
+export const achievementMembersRelations = relations(achievementMembers, ({ one }) => ({
+  family: one(families, {
+    fields: [achievementMembers.familyName],
+    references: [families.familyName],
+  }),
+  member: one(familyMembers, {
+    fields: [achievementMembers.memberId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertAchievementMemberSchema = createInsertSchema(achievementMembers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertAchievementMember = z.infer<typeof insertAchievementMemberSchema>;
+export type AchievementMember = typeof achievementMembers.$inferSelect;
+
+// Achievement Awards - History of earned achievements
+export const achievementAwards = pgTable("achievement_awards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  achievementDefinitionId: varchar("achievement_definition_id").notNull().references(() => achievementDefinitions.id, { onDelete: "cascade" }),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  pointsHistoryId: varchar("points_history_id").references(() => pointsHistory.id, { onDelete: "set null" }), // Link to points history entry
+  bonusPoints: integer("bonus_points").notNull(), // Points awarded (snapshot at award time)
+  awardedAt: timestamp("awarded_at").defaultNow(),
+});
+
+export const achievementAwardsRelations = relations(achievementAwards, ({ one }) => ({
+  achievementDefinition: one(achievementDefinitions, {
+    fields: [achievementAwards.achievementDefinitionId],
+    references: [achievementDefinitions.id],
+  }),
+  member: one(familyMembers, {
+    fields: [achievementAwards.memberId],
+    references: [familyMembers.id],
+  }),
+  pointsHistory: one(pointsHistory, {
+    fields: [achievementAwards.pointsHistoryId],
+    references: [pointsHistory.id],
+  }),
+}));
+
+export const insertAchievementAwardSchema = createInsertSchema(achievementAwards).omit({
+  id: true,
+  awardedAt: true,
+});
+
+export type InsertAchievementAward = z.infer<typeof insertAchievementAwardSchema>;
+export type AchievementAward = typeof achievementAwards.$inferSelect;

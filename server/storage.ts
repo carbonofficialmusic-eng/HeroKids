@@ -12,6 +12,9 @@ import {
   pointsHistory,
   skins,
   chatMessages,
+  achievementDefinitions,
+  achievementMembers,
+  achievementAwards,
   type User,
   type UpsertUser,
   type Family,
@@ -35,6 +38,12 @@ import {
   type Skin,
   type ChatMessage,
   type InsertChatMessage,
+  type AchievementDefinition,
+  type InsertAchievementDefinition,
+  type AchievementMember,
+  type InsertAchievementMember,
+  type AchievementAward,
+  type InsertAchievementAward,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gt, sql, inArray } from "drizzle-orm";
@@ -140,6 +149,18 @@ export interface IStorage {
 
   // Analytics operations
   getAnalytics(familyName: string): Promise<any>;
+
+  // Achievement operations
+  getAchievementDefinitionsByFamily(familyName: string): Promise<AchievementDefinition[]>;
+  createAchievementDefinition(definition: InsertAchievementDefinition): Promise<AchievementDefinition>;
+  updateAchievementDefinition(id: string, definition: Partial<InsertAchievementDefinition>): Promise<AchievementDefinition>;
+  deleteAchievementDefinition(id: string): Promise<void>;
+  getOrCreateAchievementMember(familyName: string, memberId: string): Promise<AchievementMember>;
+  updateAchievementMember(id: string, updates: Partial<Omit<InsertAchievementMember, 'familyName' | 'memberId'>>): Promise<void>;
+  resetWeeklyAchievements(familyName: string): Promise<void>;
+  awardAchievement(achievementDefinitionId: string, memberId: string, bonusPoints: number): Promise<AchievementAward>;
+  getAchievementAwardsByFamily(familyName: string): Promise<Array<AchievementAward & { achievementDefinition: AchievementDefinition; member: FamilyMember }>>;
+  getAchievementAwardsByMember(memberId: string): Promise<Array<AchievementAward & { achievementDefinition: AchievementDefinition }>>;
 
   // Chat operations (Family+ and Family Hero tier)
   getChatMessages(familyName: string, limit?: number): Promise<any[]>;
@@ -1384,6 +1405,179 @@ export class DatabaseStorage implements IStorage {
         totalTasksAssigned,
       },
     };
+  }
+
+  // Achievement operations
+  async getAchievementDefinitionsByFamily(familyName: string): Promise<AchievementDefinition[]> {
+    return await db
+      .select()
+      .from(achievementDefinitions)
+      .where(eq(achievementDefinitions.familyName, familyName))
+      .orderBy(achievementDefinitions.createdAt);
+  }
+
+  async createAchievementDefinition(definition: InsertAchievementDefinition): Promise<AchievementDefinition> {
+    const [created] = await db
+      .insert(achievementDefinitions)
+      .values({
+        ...definition,
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updateAchievementDefinition(id: string, definition: Partial<InsertAchievementDefinition>): Promise<AchievementDefinition> {
+    const [updated] = await db
+      .update(achievementDefinitions)
+      .set({
+        ...definition,
+        updatedAt: new Date(),
+      })
+      .where(eq(achievementDefinitions.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteAchievementDefinition(id: string): Promise<void> {
+    await db
+      .delete(achievementDefinitions)
+      .where(eq(achievementDefinitions.id, id));
+  }
+
+  async getOrCreateAchievementMember(familyName: string, memberId: string): Promise<AchievementMember> {
+    const [existing] = await db
+      .select()
+      .from(achievementMembers)
+      .where(
+        and(
+          eq(achievementMembers.familyName, familyName),
+          eq(achievementMembers.memberId, memberId)
+        )
+      );
+
+    if (existing) {
+      return existing;
+    }
+
+    const [created] = await db
+      .insert(achievementMembers)
+      .values({
+        familyName,
+        memberId,
+      })
+      .returning();
+    return created;
+  }
+
+  async updateAchievementMember(id: string, updates: Partial<Omit<InsertAchievementMember, 'familyName' | 'memberId'>>): Promise<void> {
+    await db
+      .update(achievementMembers)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(achievementMembers.id, id));
+  }
+
+  async resetWeeklyAchievements(familyName: string): Promise<void> {
+    await db
+      .update(achievementMembers)
+      .set({
+        weeklyCompletionCount: 0,
+        weeklyRejectionCount: 0,
+        firstWeeklyFinisher: false,
+        lastWeeklyReset: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(achievementMembers.familyName, familyName));
+  }
+
+  async awardAchievement(achievementDefinitionId: string, memberId: string, bonusPoints: number): Promise<AchievementAward> {
+    return await db.transaction(async (tx) => {
+      const [member] = await tx
+        .select()
+        .from(familyMembers)
+        .where(eq(familyMembers.id, memberId))
+        .for('update');
+
+      if (!member) {
+        throw new Error('Member not found');
+      }
+
+      await tx
+        .update(familyMembers)
+        .set({
+          totalEarned: member.totalEarned + bonusPoints,
+          totalPoints: member.totalPoints + bonusPoints,
+          weeklyPoints: member.weeklyPoints + bonusPoints,
+          monthlyPoints: member.monthlyPoints + bonusPoints,
+          updatedAt: new Date(),
+        })
+        .where(eq(familyMembers.id, memberId));
+
+      const [pointsHistoryEntry] = await tx
+        .insert(pointsHistory)
+        .values({
+          memberId,
+          points: bonusPoints,
+          reason: `Achievement bonus`,
+          taskId: null,
+        })
+        .returning();
+
+      const [award] = await tx
+        .insert(achievementAwards)
+        .values({
+          achievementDefinitionId,
+          memberId,
+          pointsHistoryId: pointsHistoryEntry.id,
+          bonusPoints,
+        })
+        .returning();
+
+      return award;
+    });
+  }
+
+  async getAchievementAwardsByFamily(familyName: string): Promise<Array<AchievementAward & { achievementDefinition: AchievementDefinition; member: FamilyMember }>> {
+    const awards = await db
+      .select({
+        id: achievementAwards.id,
+        achievementDefinitionId: achievementAwards.achievementDefinitionId,
+        memberId: achievementAwards.memberId,
+        pointsHistoryId: achievementAwards.pointsHistoryId,
+        bonusPoints: achievementAwards.bonusPoints,
+        awardedAt: achievementAwards.awardedAt,
+        achievementDefinition: achievementDefinitions,
+        member: familyMembers,
+      })
+      .from(achievementAwards)
+      .innerJoin(achievementDefinitions, eq(achievementAwards.achievementDefinitionId, achievementDefinitions.id))
+      .innerJoin(familyMembers, eq(achievementAwards.memberId, familyMembers.id))
+      .where(eq(achievementDefinitions.familyName, familyName))
+      .orderBy(desc(achievementAwards.awardedAt));
+
+    return awards as any;
+  }
+
+  async getAchievementAwardsByMember(memberId: string): Promise<Array<AchievementAward & { achievementDefinition: AchievementDefinition }>> {
+    const awards = await db
+      .select({
+        id: achievementAwards.id,
+        achievementDefinitionId: achievementAwards.achievementDefinitionId,
+        memberId: achievementAwards.memberId,
+        pointsHistoryId: achievementAwards.pointsHistoryId,
+        bonusPoints: achievementAwards.bonusPoints,
+        awardedAt: achievementAwards.awardedAt,
+        achievementDefinition: achievementDefinitions,
+      })
+      .from(achievementAwards)
+      .innerJoin(achievementDefinitions, eq(achievementAwards.achievementDefinitionId, achievementDefinitions.id))
+      .where(eq(achievementAwards.memberId, memberId))
+      .orderBy(desc(achievementAwards.awardedAt));
+
+    return awards as any;
   }
 
   // Chat operations
