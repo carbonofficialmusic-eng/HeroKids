@@ -720,7 +720,7 @@ export default function Dashboard() {
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3">
-                {/* Row 1: Approvals, Family Chat */}
+                {/* Row 1: Approvals, Rewards Board */}
                 <Link href="/approvals" className="w-full">
                   <Button variant="card" data-testid="button-approvals" className="relative w-full h-14 whitespace-normal leading-tight">
                     <ClipboardCheck className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -732,18 +732,6 @@ export default function Dashboard() {
                     )}
                   </Button>
                 </Link>
-                <Link href="/chat" className="w-full">
-                  <Button variant="card" data-testid="button-chat" className="relative w-full h-14 whitespace-normal leading-tight">
-                    <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="text-center">{t("nav.chat")}</span>
-                    {unreadChatData && unreadChatData.count > 0 && (
-                      <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex-shrink-0" data-testid="badge-unread-count">
-                        {unreadChatData.count}
-                      </Badge>
-                    )}
-                  </Button>
-                </Link>
-                {/* Row 2: Rewards Board, Family Goals */}
                 <Link href="/rewards-board" className="w-full">
                   <Button variant="card" data-testid="button-rewards-board" className="relative w-full h-14 whitespace-normal leading-tight">
                     <Gift className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -755,10 +743,22 @@ export default function Dashboard() {
                     )}
                   </Button>
                 </Link>
+                {/* Row 2: Family Goals, Family Chat */}
                 <Link href="/family-goals" className="w-full">
                   <Button variant="card" data-testid="button-family-goals" className="w-full h-14 whitespace-normal leading-tight">
                     <Target className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="text-center">{t("dashboard.familyGoals")}</span>
+                  </Button>
+                </Link>
+                <Link href="/chat" className="w-full">
+                  <Button variant="card" data-testid="button-chat" className="relative w-full h-14 whitespace-normal leading-tight">
+                    <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-center">{t("nav.chat")}</span>
+                    {unreadChatData && unreadChatData.count > 0 && (
+                      <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex-shrink-0" data-testid="badge-unread-count">
+                        {unreadChatData.count}
+                      </Badge>
+                    )}
                   </Button>
                 </Link>
                 {/* Row 3: Add Task, Add Reward */}
