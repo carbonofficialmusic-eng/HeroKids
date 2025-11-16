@@ -539,7 +539,7 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* Leaderboard Settings */}
+          {/* Leaderboard Settings - All in one card */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -550,8 +550,9 @@ export default function Settings() {
                 {t('settings.leaderboardVisibilityDesc')}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
+            <CardContent className="space-y-6">
+              {/* Visibility Toggle */}
+              <div className="flex items-center justify-between pb-4 border-b">
                 <div className="space-y-0.5">
                   <Label htmlFor="show-leaderboard" className="text-base">
                     {t('settings.showToChildren')}
@@ -569,6 +570,106 @@ export default function Settings() {
                   disabled={updateSettingsMutation.isPending}
                   data-testid="switch-show-leaderboard"
                 />
+              </div>
+
+              {/* Competition Participation */}
+              <div className="space-y-3">
+                <div>
+                  <h3 className="text-base font-semibold mb-1">{t('settings.leaderboardCompetition')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('settings.leaderboardCompetitionDesc')}</p>
+                </div>
+                {membersLoading ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    {t('settings.loadingMembers')}
+                  </div>
+                ) : familyMembers && familyMembers.length > 0 ? (
+                  <div className="space-y-2">
+                    {familyMembers.map((familyMember) => (
+                      <div
+                        key={familyMember.id}
+                        className="flex items-center justify-between p-3 rounded-lg border bg-card/50"
+                        data-testid={`leaderboard-exclusion-${familyMember.id}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={getAvatarUrl(familyMember.activeSkinId, familyMember.avatarUrl)} alt={familyMember.displayName} />
+                            <AvatarFallback style={{ backgroundColor: familyMember.color }}>
+                              {familyMember.displayName.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium text-sm" data-testid={`leaderboard-member-name-${familyMember.id}`}>
+                              {familyMember.displayName}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {familyMember.excludeFromLeaderboard 
+                                ? t('settings.notCompeting')
+                                : t('settings.competing')}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`exclude-${familyMember.id}`} className="text-sm text-muted-foreground">
+                            {t('settings.includeInLeaderboard')}
+                          </Label>
+                          <Switch
+                            id={`exclude-${familyMember.id}`}
+                            checked={!familyMember.excludeFromLeaderboard}
+                            onCheckedChange={(checked) => {
+                              toggleLeaderboardExclusionMutation.mutate({
+                                memberId: familyMember.id,
+                                excludeFromLeaderboard: !checked,
+                              });
+                            }}
+                            disabled={toggleLeaderboardExclusionMutation.isPending}
+                            data-testid={`switch-leaderboard-inclusion-${familyMember.id}`}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground">
+                    {t('settings.noMembersYet')}
+                  </div>
+                )}
+              </div>
+
+              {/* Prizes */}
+              <div className="space-y-3 pt-4 border-t">
+                <div>
+                  <h3 className="text-base font-semibold mb-1">{t('settings.leaderboardPrizes')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('settings.leaderboardPrizesDesc')}</p>
+                </div>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="weekly-prize">{t('settings.weeklyPrize')}</Label>
+                    <Input
+                      id="weekly-prize"
+                      placeholder={t('settings.weeklyPrizePlaceholder')}
+                      value={weeklyPrize}
+                      onChange={(e) => setWeeklyPrize(e.target.value)}
+                      data-testid="input-weekly-prize"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="monthly-prize">{t('settings.monthlyPrize')}</Label>
+                    <Input
+                      id="monthly-prize"
+                      placeholder={t('settings.monthlyPrizePlaceholder')}
+                      value={monthlyPrize}
+                      onChange={(e) => setMonthlyPrize(e.target.value)}
+                      data-testid="input-monthly-prize"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleSavePrizes}
+                    disabled={updateSettingsMutation.isPending}
+                    data-testid="button-save-prizes"
+                  >
+                    {t('settings.savePrizes')}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -671,118 +772,6 @@ export default function Settings() {
               </CardContent>
             </Card>
           )}
-
-          {/* Leaderboard Competition */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-primary" />
-                <CardTitle>{t('settings.leaderboardCompetition')}</CardTitle>
-              </div>
-              <CardDescription>
-                {t('settings.leaderboardCompetitionDesc')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {membersLoading ? (
-                <div className="text-center py-4 text-muted-foreground">
-                  {t('settings.loadingMembers')}
-                </div>
-              ) : familyMembers && familyMembers.length > 0 ? (
-                <div className="space-y-3">
-                  {familyMembers.map((familyMember) => (
-                    <div
-                      key={familyMember.id}
-                      className="flex items-center justify-between p-3 rounded-lg border bg-card"
-                      data-testid={`leaderboard-exclusion-${familyMember.id}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={getAvatarUrl(familyMember.activeSkinId, familyMember.avatarUrl)} alt={familyMember.displayName} />
-                          <AvatarFallback style={{ backgroundColor: familyMember.color }}>
-                            {familyMember.displayName.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium" data-testid={`leaderboard-member-name-${familyMember.id}`}>
-                            {familyMember.displayName}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {familyMember.excludeFromLeaderboard 
-                              ? t('settings.notCompeting')
-                              : t('settings.competing')}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor={`exclude-${familyMember.id}`} className="text-sm text-muted-foreground">
-                          {t('settings.includeInLeaderboard')}
-                        </Label>
-                        <Switch
-                          id={`exclude-${familyMember.id}`}
-                          checked={!familyMember.excludeFromLeaderboard}
-                          onCheckedChange={(checked) => {
-                            toggleLeaderboardExclusionMutation.mutate({
-                              memberId: familyMember.id,
-                              excludeFromLeaderboard: !checked,
-                            });
-                          }}
-                          disabled={toggleLeaderboardExclusionMutation.isPending}
-                          data-testid={`switch-leaderboard-inclusion-${familyMember.id}`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4 text-muted-foreground">
-                  {t('settings.noMembersYet')}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Leaderboard Prizes */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-primary" />
-                <CardTitle>{t('settings.leaderboardPrizes')}</CardTitle>
-              </div>
-              <CardDescription>
-                {t('settings.leaderboardPrizesDesc')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="weekly-prize">{t('settings.weeklyPrize')}</Label>
-                <Input
-                  id="weekly-prize"
-                  placeholder={t('settings.weeklyPrizePlaceholder')}
-                  value={weeklyPrize}
-                  onChange={(e) => setWeeklyPrize(e.target.value)}
-                  data-testid="input-weekly-prize"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="monthly-prize">{t('settings.monthlyPrize')}</Label>
-                <Input
-                  id="monthly-prize"
-                  placeholder={t('settings.monthlyPrizePlaceholder')}
-                  value={monthlyPrize}
-                  onChange={(e) => setMonthlyPrize(e.target.value)}
-                  data-testid="input-monthly-prize"
-                />
-              </div>
-              <Button 
-                onClick={handleSavePrizes}
-                disabled={updateSettingsMutation.isPending}
-                data-testid="button-save-prizes"
-              >
-                {t('settings.savePrizes')}
-              </Button>
-            </CardContent>
-          </Card>
 
           {/* Achievement Configuration */}
           <Card className="border-primary/50">
