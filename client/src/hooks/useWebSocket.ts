@@ -135,6 +135,52 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
               break;
 
+            case "family-goal-created":
+            case "family-goal-updated":
+            case "family-goal-deleted":
+            case "family-goal-contribution":
+              // Invalidate family goals and family members (points changed)
+              queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+              break;
+
+            case "family-goal-completed":
+              // Goal completed - show confetti celebration!
+              queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+              
+              {
+                const duration = 3000;
+                const animationEnd = Date.now() + duration;
+                const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+                const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+                const interval: any = setInterval(() => {
+                  const timeLeft = animationEnd - Date.now();
+
+                  if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                  }
+
+                  const particleCount = 50 * (timeLeft / duration);
+                  
+                  confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+                  });
+                  confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+                  });
+                }, 250);
+                
+                console.log(`🎯 Familie hat ein Ziel erreicht!`);
+              }
+              break;
+
             default:
               console.log("Unknown WebSocket message type:", data.type);
           }

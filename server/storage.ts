@@ -44,6 +44,12 @@ import {
   type InsertAchievementMember,
   type AchievementAward,
   type InsertAchievementAward,
+  familyGoals,
+  goalContributions,
+  type FamilyGoal,
+  type InsertFamilyGoal,
+  type GoalContribution,
+  type InsertGoalContribution,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gt, sql, inArray } from "drizzle-orm";
@@ -167,6 +173,18 @@ export interface IStorage {
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   updateLastReadChatAt(memberId: string): Promise<void>;
   getUnreadMessageCount(memberId: string, familyName: string): Promise<number>;
+
+  // Family Goals operations
+  getFamilyGoalsByFamily(familyName: string): Promise<FamilyGoal[]>;
+  getFamilyGoal(id: string): Promise<FamilyGoal | undefined>;
+  createFamilyGoal(goal: InsertFamilyGoal): Promise<FamilyGoal>;
+  updateFamilyGoal(id: string, goal: Partial<InsertFamilyGoal>): Promise<FamilyGoal>;
+  deleteFamilyGoal(id: string): Promise<void>;
+  contributeToGoal(goalId: string, memberId: string, points: number, period: string): Promise<GoalContribution>;
+  getGoalContributionsByGoalAndPeriod(goalId: string, period: string): Promise<GoalContribution[]>;
+  getGoalContributionsByMemberAndGoal(goalId: string, memberId: string, period: string): Promise<GoalContribution | undefined>;
+  updateGoalCurrentPoints(goalId: string, currentPoints: number): Promise<void>;
+  completeGoal(goalId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1637,6 +1655,94 @@ export class DatabaseStorage implements IStorage {
       );
 
     return Number(result?.count || 0);
+  }
+
+  // Family Goals operations
+  async getFamilyGoalsByFamily(familyName: string): Promise<FamilyGoal[]> {
+    return await db
+      .select()
+      .from(familyGoals)
+      .where(eq(familyGoals.familyName, familyName))
+      .orderBy(desc(familyGoals.createdAt));
+  }
+
+  async getFamilyGoal(id: string): Promise<FamilyGoal | undefined> {
+    const [goal] = await db
+      .select()
+      .from(familyGoals)
+      .where(eq(familyGoals.id, id));
+    return goal;
+  }
+
+  async createFamilyGoal(goalData: InsertFamilyGoal): Promise<FamilyGoal> {
+    const [goal] = await db.insert(familyGoals).values(goalData).returning();
+    return goal;
+  }
+
+  async updateFamilyGoal(id: string, updates: Partial<InsertFamilyGoal>): Promise<FamilyGoal> {
+    const [goal] = await db
+      .update(familyGoals)
+      .set(updates)
+      .where(eq(familyGoals.id, id))
+      .returning();
+    return goal;
+  }
+
+  async deleteFamilyGoal(id: string): Promise<void> {
+    await db.delete(familyGoals).where(eq(familyGoals.id, id));
+  }
+
+  async contributeToGoal(goalId: string, memberId: string, points: number, period: string): Promise<GoalContribution> {
+    const [contribution] = await db
+      .insert(goalContributions)
+      .values({
+        goalId,
+        memberId,
+        points,
+        period,
+      })
+      .returning();
+    return contribution;
+  }
+
+  async getGoalContributionsByGoalAndPeriod(goalId: string, period: string): Promise<GoalContribution[]> {
+    return await db
+      .select()
+      .from(goalContributions)
+      .where(
+        and(
+          eq(goalContributions.goalId, goalId),
+          eq(goalContributions.period, period)
+        )
+      );
+  }
+
+  async getGoalContributionsByMemberAndGoal(goalId: string, memberId: string, period: string): Promise<GoalContribution | undefined> {
+    const [contribution] = await db
+      .select()
+      .from(goalContributions)
+      .where(
+        and(
+          eq(goalContributions.goalId, goalId),
+          eq(goalContributions.memberId, memberId),
+          eq(goalContributions.period, period)
+        )
+      );
+    return contribution;
+  }
+
+  async updateGoalCurrentPoints(goalId: string, currentPoints: number): Promise<void> {
+    await db
+      .update(familyGoals)
+      .set({ currentPoints })
+      .where(eq(familyGoals.id, goalId));
+  }
+
+  async completeGoal(goalId: string): Promise<void> {
+    await db
+      .update(familyGoals)
+      .set({ isActive: false, completedAt: new Date() })
+      .where(eq(familyGoals.id, goalId));
   }
 }
 

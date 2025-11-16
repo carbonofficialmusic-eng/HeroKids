@@ -21,6 +21,7 @@ import RewardsBoard from "@/pages/rewards-board";
 import Settings from "@/pages/settings";
 import SkinsGallery from "@/pages/skins-gallery";
 import Achievements from "@/pages/achievements";
+import FamilyGoals from "@/pages/family-goals";
 
 interface FamilyMember {
   id: number;
@@ -125,6 +126,7 @@ function Router() {
                 <Achievements />
               </ProtectedRoute>
             </Route>
+            <Route path="/family-goals" component={FamilyGoals} />
           </>
         )}
         <Route component={NotFound} />

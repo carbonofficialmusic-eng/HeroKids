@@ -23,6 +23,7 @@ export const subscriptionTierEnum = pgEnum("subscription_tier", ["free", "family
 export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "trialing", "past_due", "canceled", "incomplete"]);
 export const sharingStatusEnum = pgEnum("sharing_status", ["not_shared", "sharing_active", "sharing_finalized"]);
 export const achievementTypeEnum = pgEnum("achievement_type", ["first_weekly_finisher", "weekly_leaderboard", "perfect_week", "lifetime_milestone", "task_streak"]);
+export const contributionPeriodEnum = pgEnum("contribution_period", ["weekly", "monthly"]);
 
 // Session storage table - Required for Replit Auth
 export const sessions = pgTable(
@@ -534,3 +535,66 @@ export const insertAchievementAwardSchema = createInsertSchema(achievementAwards
 
 export type InsertAchievementAward = z.infer<typeof insertAchievementAwardSchema>;
 export type AchievementAward = typeof achievementAwards.$inferSelect;
+
+// Family Goals - Shared family objectives that require equal contributions from all members
+export const familyGoals = pgTable("family_goals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
+  title: varchar("title", { length: 100 }).notNull(), // e.g., "Tierpark-Besuch"
+  description: text("description"), // Optional details about the goal
+  targetPoints: integer("target_points").notNull(), // Total points needed to complete the goal
+  contributionAmount: integer("contribution_amount").notNull(), // Points each member must contribute per period
+  contributionPeriod: contributionPeriodEnum("contribution_period").notNull(), // weekly or monthly
+  currentPoints: integer("current_points").notNull().default(0), // Current total contributed
+  isActive: boolean("is_active").notNull().default(true),
+  iconEmoji: varchar("icon_emoji", { length: 10 }).notNull().default("🎯"), // Visual icon for the goal
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"), // When the goal was achieved
+});
+
+export const familyGoalsRelations = relations(familyGoals, ({ one, many }) => ({
+  family: one(families, {
+    fields: [familyGoals.familyName],
+    references: [families.familyName],
+  }),
+  contributions: many(goalContributions),
+}));
+
+export const insertFamilyGoalSchema = createInsertSchema(familyGoals).omit({
+  id: true,
+  currentPoints: true,
+  createdAt: true,
+  completedAt: true,
+});
+
+export type InsertFamilyGoal = z.infer<typeof insertFamilyGoalSchema>;
+export type FamilyGoal = typeof familyGoals.$inferSelect;
+
+// Goal Contributions - Tracks individual member contributions to family goals
+export const goalContributions = pgTable("goal_contributions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  goalId: varchar("goal_id").notNull().references(() => familyGoals.id, { onDelete: "cascade" }),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  points: integer("points").notNull(), // Amount contributed
+  period: varchar("period", { length: 20 }).notNull(), // e.g., "2025-W47" (weekly) or "2025-11" (monthly)
+  contributedAt: timestamp("contributed_at").defaultNow(),
+});
+
+export const goalContributionsRelations = relations(goalContributions, ({ one }) => ({
+  goal: one(familyGoals, {
+    fields: [goalContributions.goalId],
+    references: [familyGoals.id],
+  }),
+  member: one(familyMembers, {
+    fields: [goalContributions.memberId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertGoalContributionSchema = createInsertSchema(goalContributions).omit({
+  id: true,
+  contributedAt: true,
+});
+
+export type InsertGoalContribution = z.infer<typeof insertGoalContributionSchema>;
+export type GoalContribution = typeof goalContributions.$inferSelect;

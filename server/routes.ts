@@ -11,7 +11,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, type Family } from "@shared/schema";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { calculateAvailableCards, getUnlockedTier, getSkinTier } from "@shared/skin-config";
@@ -2684,6 +2684,282 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching member achievement awards:", error);
       res.status(500).json({ message: "Failed to fetch achievement awards" });
+    }
+  });
+
+  // ===== Family Goals =====
+  
+  // Get all family goals for the current family
+  app.get("/api/family-goals", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Always use authenticated user
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const goals = await storage.getFamilyGoalsByFamily(member.familyName);
+      res.json(goals);
+    } catch (error: any) {
+      console.error("Error fetching family goals:", error);
+      res.status(500).json({ message: "Failed to fetch family goals" });
+    }
+  });
+
+  // Get a specific family goal with contributions
+  app.get("/api/family-goals/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Always use authenticated user
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const goal = await storage.getFamilyGoal(id);
+      
+      if (!goal || goal.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Family goal not found" });
+      }
+      
+      // Calculate current period identifier
+      const now = new Date();
+      const period = goal.contributionPeriod === "weekly"
+        ? `${now.getFullYear()}-W${String(Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 604800000)).padStart(2, '0')}`
+        : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      
+      const contributions = await storage.getGoalContributionsByGoalAndPeriod(id, period);
+      
+      res.json({ goal, contributions, currentPeriod: period });
+    } catch (error: any) {
+      console.error("Error fetching family goal:", error);
+      res.status(500).json({ message: "Failed to fetch family goal" });
+    }
+  });
+
+  // Create a new family goal (parents only)
+  app.post("/api/family-goals", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Always use authenticated user - never trust actingMemberId from client
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can create family goals
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can create family goals" });
+      }
+      
+      // Validate request body with Zod
+      const validatedData = insertFamilyGoalSchema.parse({
+        ...req.body,
+        familyName: member.familyName, // Always use authenticated member's family
+        isActive: true,
+      });
+      
+      const goal = await storage.createFamilyGoal(validatedData);
+      
+      // Broadcast to family via WebSocket
+      broadcastToFamily(member.familyName, {
+        type: 'family-goal-created',
+        goal,
+      });
+      
+      res.status(201).json(goal);
+    } catch (error: any) {
+      console.error("Error creating family goal:", error);
+      if (error.name === "ZodError") {
+        return res.status(400).json({ message: "Invalid request data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create family goal" });
+    }
+  });
+
+  // Update a family goal (parents only)
+  app.put("/api/family-goals/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Always use authenticated user
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can update family goals
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update family goals" });
+      }
+      
+      const goal = await storage.getFamilyGoal(id);
+      
+      if (!goal || goal.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Family goal not found" });
+      }
+      
+      const { title, description, targetPoints, contributionAmount, contributionPeriod, iconEmoji, isActive } = req.body;
+      
+      const updatedGoal = await storage.updateFamilyGoal(id, {
+        title,
+        description,
+        targetPoints,
+        contributionAmount,
+        contributionPeriod,
+        iconEmoji,
+        isActive,
+      });
+      
+      // Broadcast to family via WebSocket
+      broadcastToFamily(member.familyName, {
+        type: 'family-goal-updated',
+        goal: updatedGoal,
+      });
+      
+      res.json(updatedGoal);
+    } catch (error: any) {
+      console.error("Error updating family goal:", error);
+      res.status(500).json({ message: "Failed to update family goal" });
+    }
+  });
+
+  // Delete a family goal (parents only)
+  app.delete("/api/family-goals/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Always use authenticated user
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete family goals
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete family goals" });
+      }
+      
+      const goal = await storage.getFamilyGoal(id);
+      
+      if (!goal || goal.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Family goal not found" });
+      }
+      
+      await storage.deleteFamilyGoal(id);
+      
+      // Broadcast to family via WebSocket
+      broadcastToFamily(member.familyName, {
+        type: 'family-goal-deleted',
+        goalId: id,
+      });
+      
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error deleting family goal:", error);
+      res.status(500).json({ message: "Failed to delete family goal" });
+    }
+  });
+
+  // Contribute points to a family goal
+  app.post("/api/family-goals/:id/contribute", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Always use authenticated user
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const goal = await storage.getFamilyGoal(id);
+      
+      if (!goal || goal.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Family goal not found" });
+      }
+      
+      if (!goal.isActive) {
+        return res.status(400).json({ message: "This goal is no longer active" });
+      }
+      
+      // Calculate current period
+      const now = new Date();
+      const period = goal.contributionPeriod === "weekly"
+        ? `${now.getFullYear()}-W${String(Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 604800000)).padStart(2, '0')}`
+        : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      
+      // Check if member has already contributed this period
+      const existingContribution = await storage.getGoalContributionsByMemberAndGoal(id, member.id, period);
+      
+      if (existingContribution) {
+        return res.status(400).json({ message: "You have already contributed to this goal this period" });
+      }
+      
+      // Check if member has enough points
+      if (member.totalPoints < goal.contributionAmount) {
+        return res.status(400).json({ message: "Insufficient points to contribute" });
+      }
+      
+      // Deduct points from member and create contribution
+      const newTotalPoints = member.totalPoints - goal.contributionAmount;
+      
+      await storage.updateFamilyMemberPoints(
+        member.id,
+        member.totalEarned,
+        newTotalPoints,
+        member.weeklyPoints,
+        member.monthlyPoints
+      );
+      
+      await storage.addPointsHistory({
+        memberId: member.id,
+        points: -goal.contributionAmount,
+        reason: `Contributed to family goal: ${goal.title}`,
+      });
+      
+      const contribution = await storage.contributeToGoal(id, member.id, goal.contributionAmount, period);
+      
+      // Update goal's current points
+      const newCurrentPoints = goal.currentPoints + goal.contributionAmount;
+      await storage.updateGoalCurrentPoints(id, newCurrentPoints);
+      
+      // Check if goal is complete
+      if (newCurrentPoints >= goal.targetPoints) {
+        await storage.completeGoal(id);
+        
+        // Broadcast goal completed event
+        broadcastToFamily(member.familyName, {
+          type: 'family-goal-completed',
+          goalId: id,
+        });
+      }
+      
+      // Broadcast contribution event
+      broadcastToFamily(member.familyName, {
+        type: 'family-goal-contribution',
+        goalId: id,
+        memberId: member.id,
+        contribution,
+      });
+      
+      res.status(201).json(contribution);
+    } catch (error: any) {
+      console.error("Error contributing to family goal:", error);
+      res.status(500).json({ message: "Failed to contribute to family goal" });
     }
   });
 
