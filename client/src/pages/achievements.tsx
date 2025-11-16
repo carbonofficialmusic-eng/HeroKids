@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, Trophy, Star, Award, TrendingUp, Flame } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChevronLeft, Trophy, Star, Award, TrendingUp, Flame, History } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 import type { FamilyMember } from "@shared/schema";
 
 interface AchievementDefinition {
@@ -22,6 +24,19 @@ interface AchievementDefinition {
   bonusPoints: number;
   isActive: boolean;
   config: Record<string, any>;
+}
+
+interface AchievementAward {
+  id: string;
+  achievementDefinitionId: string;
+  memberId: string;
+  bonusPoints: number;
+  awardedAt: Date;
+  achievementDefinition: AchievementDefinition;
+  member: {
+    displayName: string;
+    color: string;
+  };
 }
 
 export default function Achievements() {
@@ -44,6 +59,12 @@ export default function Achievements() {
   // Fetch achievement definitions
   const { data: achievements = [], isLoading } = useQuery<AchievementDefinition[]>({
     queryKey: ["/api/achievements"],
+    enabled: !!member,
+  });
+
+  // Fetch achievement awards
+  const { data: awards = [], isLoading: awardsLoading } = useQuery<AchievementAward[]>({
+    queryKey: ["/api/achievements/awards"],
     enabled: !!member,
   });
 
@@ -131,13 +152,26 @@ export default function Achievements() {
           </div>
         </div>
 
-        {/* Achievements List */}
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          </div>
-        ) : (
-          <div className="space-y-4">
+        {/* Tabs for Configuration and History */}
+        <Tabs defaultValue="configure" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="configure" data-testid="tab-configure">
+              <Trophy className="h-4 w-4 mr-2" />
+              Configure
+            </TabsTrigger>
+            <TabsTrigger value="history" data-testid="tab-history">
+              <History className="h-4 w-4 mr-2" />
+              Award History
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="configure" className="space-y-4 mt-6">
+            {isLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
             {achievements.map((achievement) => (
               <Card key={achievement.id} data-testid={`achievement-card-${achievement.slug}`}>
                 <CardHeader>
@@ -197,16 +231,61 @@ export default function Achievements() {
               </Card>
             ))}
 
-            {achievements.length === 0 && (
+                {achievements.length === 0 && (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No achievements configured yet</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-4 mt-6">
+            {awardsLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              </div>
+            ) : awards.length > 0 ? (
+              <div className="space-y-2">
+                {awards.map((award) => (
+                  <Card key={award.id} data-testid={`award-${award.id}`}>
+                    <CardContent className="py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                            <Trophy className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{award.achievementDefinition.title}</div>
+                            <div className="text-sm text-muted-foreground">
+                              Earned by <span className="font-medium" style={{ color: award.member.color }}>{award.member.displayName}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-primary">+{award.bonusPoints}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {format(new Date(award.awardedAt), "MMM d, yyyy")}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No achievements configured yet</p>
+                  <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No achievements earned yet</p>
                 </CardContent>
               </Card>
             )}
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
 
         {/* Info Card */}
         <Card className="bg-muted/50">
