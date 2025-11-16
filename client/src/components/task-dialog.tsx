@@ -326,6 +326,85 @@ export function TaskDialog({
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <FormField
               control={form.control}
+              name="maxCompletions"
+              render={({ field }) => {
+                const isDisabled = totalMemberCount < 2;
+                
+                return (
+                  <FormItem className="space-y-3">
+                    <FormLabel className={isDisabled ? "text-muted-foreground" : ""}>
+                      Multiple Family Members Can Complete
+                    </FormLabel>
+                    <FormDescription>
+                      {isDisabled ? (
+                        "⚠️ Mindestens 2 Familienmitglieder benötigt. Diese Funktion erlaubt es mehreren Familienmitgliedern (Eltern & Kinder), dieselbe Aufgabe zu erledigen."
+                      ) : (
+                        `Allow multiple family members to complete this task. Adjustable range: 2 to ${totalMemberCount} (based on your family size).`
+                      )}
+                    </FormDescription>
+                    <div className="flex items-center gap-4">
+                      <Switch
+                        checked={typeof field.value === 'number'}
+                        disabled={isDisabled}
+                        onCheckedChange={(checked) => {
+                          // Prevent enabling if less than 2 family members
+                          if (checked && totalMemberCount < 2) {
+                            toast({
+                              title: "Nicht verfügbar",
+                              description: "Sie benötigen mindestens 2 Familienmitglieder, um Multi-Completion Tasks zu erstellen.",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          
+                          // When enabling: set to totalMemberCount (or 2 minimum)
+                          // When disabling: clear the value to undefined
+                          if (checked) {
+                            if (totalMemberCount < 2) {
+                              field.onChange(undefined);
+                              toast({
+                                title: "Feature deaktiviert",
+                                description: "Multi-Completion erfordert mindestens 2 Familienmitglieder.",
+                                variant: "destructive",
+                              });
+                            } else {
+                              // Set to totalMemberCount as default
+                              field.onChange(totalMemberCount);
+                            }
+                          } else {
+                            field.onChange(undefined);
+                          }
+                        }}
+                        data-testid="toggle-multi-completion"
+                      />
+                      {typeof field.value === 'number' && !isDisabled && (
+                        <div className="flex items-center gap-2">
+                          <FormLabel className="text-sm">Times:</FormLabel>
+                          <Input
+                            type="number"
+                            min={2}
+                            max={totalMemberCount}
+                            value={field.value}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value);
+                              if (!isNaN(val)) {
+                                field.onChange(Math.max(2, Math.min(val, totalMemberCount)));
+                              }
+                            }}
+                            className="w-20"
+                            data-testid="input-max-completions"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+
+            <FormField
+              control={form.control}
               name="iconEmoji"
               render={({ field }) => (
                 <FormItem>
@@ -565,85 +644,6 @@ export function TaskDialog({
                   </FormControl>
                 </FormItem>
               )}
-            />
-
-            <FormField
-              control={form.control}
-              name="maxCompletions"
-              render={({ field }) => {
-                const isDisabled = totalMemberCount < 2;
-                
-                return (
-                  <FormItem className="space-y-3">
-                    <FormLabel className={isDisabled ? "text-muted-foreground" : ""}>
-                      Multiple Family Members Can Complete
-                    </FormLabel>
-                    <FormDescription>
-                      {isDisabled ? (
-                        "⚠️ Mindestens 2 Familienmitglieder benötigt. Diese Funktion erlaubt es mehreren Familienmitgliedern (Eltern & Kinder), dieselbe Aufgabe zu erledigen."
-                      ) : (
-                        `Allow multiple family members to complete this task. Adjustable range: 2 to ${totalMemberCount} (based on your family size).`
-                      )}
-                    </FormDescription>
-                    <div className="flex items-center gap-4">
-                      <Switch
-                        checked={typeof field.value === 'number'}
-                        disabled={isDisabled}
-                        onCheckedChange={(checked) => {
-                          // Prevent enabling if less than 2 family members
-                          if (checked && totalMemberCount < 2) {
-                            toast({
-                              title: "Nicht verfügbar",
-                              description: "Sie benötigen mindestens 2 Familienmitglieder, um Multi-Completion Tasks zu erstellen.",
-                              variant: "destructive",
-                            });
-                            return;
-                          }
-                          
-                          // When enabling: set to totalMemberCount (or 2 minimum)
-                          // When disabling: clear the value to undefined
-                          if (checked) {
-                            if (totalMemberCount < 2) {
-                              field.onChange(undefined);
-                              toast({
-                                title: "Feature deaktiviert",
-                                description: "Multi-Completion erfordert mindestens 2 Familienmitglieder.",
-                                variant: "destructive",
-                              });
-                            } else {
-                              // Set to totalMemberCount as default
-                              field.onChange(totalMemberCount);
-                            }
-                          } else {
-                            field.onChange(undefined);
-                          }
-                        }}
-                        data-testid="toggle-multi-completion"
-                      />
-                      {typeof field.value === 'number' && !isDisabled && (
-                        <div className="flex items-center gap-2">
-                          <FormLabel className="text-sm">Times:</FormLabel>
-                          <Input
-                            type="number"
-                            min={2}
-                            max={totalMemberCount}
-                            value={field.value}
-                            onChange={(e) => {
-                              const val = parseInt(e.target.value);
-                              if (!isNaN(val)) {
-                                field.onChange(Math.max(2, Math.min(val, totalMemberCount)));
-                              }
-                            }}
-                            className="w-20"
-                            data-testid="input-max-completions"
-                          />
-                        </div>
-                      )}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
             />
 
             <div className="flex gap-3">
