@@ -8,13 +8,15 @@ import { mkdir } from "fs/promises";
 import { z } from "zod";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family } from "@shared/schema";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { calculateAvailableCards, getUnlockedTier, getSkinTier } from "@shared/skin-config";
+import { eq } from "drizzle-orm";
 import "./types";
 
 // Initialize Stripe
@@ -2925,7 +2927,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family goal not found" });
       }
       
-      // Get all contributions to this goal and refund points to contributors
+      // Get all contributions to this goal for refund calculation
       const contributions = await storage.getGoalContributionsByGoal(id);
       
       // Group contributions by member and sum up their total contributions
@@ -2935,24 +2937,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contributionsByMember.set(contribution.memberId, current + contribution.points);
       }
       
-      // Refund points to each contributor
-      for (const [memberId, totalPoints] of Array.from(contributionsByMember.entries())) {
-        const contributor = await storage.getFamilyMemberById(memberId);
-        if (contributor) {
-          await storage.updateFamilyMemberPoints(
-            memberId,
-            contributor.totalEarned,
-            contributor.totalPoints + totalPoints,
-            contributor.weeklyPoints,
-            contributor.monthlyPoints
-          );
-        }
-      }
+      // Use database transaction to ensure atomicity of refunds and deletion
+      await db.transaction(async (tx) => {
+        // Refund points to each contributor within the transaction
+        const refundPromises = Array.from(contributionsByMember.entries()).map(async ([memberId, refundAmount]) => {
+          // Get fresh member data within transaction
+          const [contributor] = await tx
+            .select()
+            .from(familyMembers)
+            .where(eq(familyMembers.id, memberId));
+          
+          if (contributor) {
+            // Update all point fields to match storage layer behavior
+            await tx
+              .update(familyMembers)
+              .set({
+                totalEarned: contributor.totalEarned,
+                totalPoints: contributor.totalPoints + refundAmount,
+                weeklyPoints: contributor.weeklyPoints,
+                monthlyPoints: contributor.monthlyPoints,
+                updatedAt: new Date(),
+              })
+              .where(eq(familyMembers.id, memberId));
+          }
+        });
+        
+        // Wait for all refunds to complete
+        await Promise.all(refundPromises);
+        
+        // Delete the goal (contributions will be cascade deleted)
+        await tx
+          .delete(familyGoals)
+          .where(eq(familyGoals.id, id));
+      });
       
-      // Delete the goal (contributions will be cascade deleted)
-      await storage.deleteFamilyGoal(id);
-      
-      // Broadcast to family via WebSocket
+      // Broadcast to family via WebSocket after successful transaction
       broadcastToFamily(member.familyName, {
         type: 'family-goal-deleted',
         goalId: id,
