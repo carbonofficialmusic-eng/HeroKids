@@ -65,68 +65,69 @@ export function SwitchMemberDialog({
         <div className="space-y-4 py-4 overflow-y-auto flex-1 min-h-0">
           <div className="space-y-2 pr-1">
             {members.map((member) => (
-              <button
-                key={member.id}
-                onClick={() => {
-                  setSelectedMemberId(member.id);
-                  setPinCode("");
-                }}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg hover-elevate active-elevate-2 transition-colors ${
-                  selectedMemberId === member.id ? 'bg-accent' : 'bg-card'
-                }`}
-                data-testid={`button-select-member-${member.id}`}
-              >
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} alt={member.displayName} />
-                  <AvatarFallback style={{ backgroundColor: member.color }}>
-                    <User className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-1 text-left">
-                  <div className="font-medium flex items-center gap-2">
-                    {member.displayName}
-                    {familyData?.singleDeviceMode && member.role === "parent" && (
-                      <Lock className="h-3 w-3 text-muted-foreground" />
-                    )}
+              <div key={member.id}>
+                <button
+                  onClick={() => {
+                    setSelectedMemberId(member.id);
+                    setPinCode("");
+                  }}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg hover-elevate active-elevate-2 transition-colors ${
+                    selectedMemberId === member.id ? 'bg-accent' : 'bg-card'
+                  }`}
+                  data-testid={`button-select-member-${member.id}`}
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} alt={member.displayName} />
+                    <AvatarFallback style={{ backgroundColor: member.color }}>
+                      <User className="h-5 w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-1 text-left">
+                    <div className="font-medium flex items-center gap-2">
+                      {member.displayName}
+                      {familyData?.singleDeviceMode && member.role === "parent" && (
+                        <Lock className="h-3 w-3 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground capitalize">{member.role}</div>
                   </div>
-                  <div className="text-sm text-muted-foreground capitalize">{member.role}</div>
-                </div>
-                
-                {selectedMemberId === member.id && (
-                  <Check className="h-5 w-5 text-primary" data-testid={`icon-selected-${member.id}`} />
+                  
+                  {selectedMemberId === member.id && (
+                    <Check className="h-5 w-5 text-primary" data-testid={`icon-selected-${member.id}`} />
+                  )}
+                </button>
+
+                {/* PIN Code Input - shown directly below the selected parent */}
+                {selectedMemberId === member.id && familyData?.singleDeviceMode && member.role === "parent" && (
+                  <div className="mt-2 space-y-2 p-4 rounded-lg border bg-accent/20">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Lock className="h-4 w-4" />
+                      <span>PIN-Code erforderlich</span>
+                    </div>
+                    <Label htmlFor="pin-input-switch" className="text-sm text-muted-foreground">
+                      Geben Sie den PIN-Code für {member.displayName} ein
+                    </Label>
+                    <Input
+                      id="pin-input-switch"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={4}
+                      value={pinCode}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, '');
+                        setPinCode(value);
+                      }}
+                      placeholder="0000"
+                      className="text-center text-2xl tracking-widest font-mono"
+                      data-testid="input-switch-pin"
+                    />
+                  </div>
                 )}
-              </button>
+              </div>
             ))}
           </div>
-
-          {/* PIN Code Input - shown only when switching to a parent in single device mode */}
-          {requiresPin && (
-            <div className="space-y-2 p-4 rounded-lg border bg-accent/20">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Lock className="h-4 w-4" />
-                <span>PIN-Code erforderlich</span>
-              </div>
-              <Label htmlFor="pin-input-switch" className="text-sm text-muted-foreground">
-                Geben Sie den PIN-Code für {selectedMember?.displayName} ein
-              </Label>
-              <Input
-                id="pin-input-switch"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={4}
-                value={pinCode}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9]/g, '');
-                  setPinCode(value);
-                }}
-                placeholder="0000"
-                className="text-center text-2xl tracking-widest font-mono"
-                data-testid="input-switch-pin"
-              />
-            </div>
-          )}
         </div>
         
         <DialogFooter className="flex-row gap-2 sm:gap-2 flex-shrink-0">
