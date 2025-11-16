@@ -172,11 +172,11 @@ function RewardCard({
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <Card className={`p-6 transition-all bg-card/80 backdrop-blur-md border-2 rounded-2xl ${
-        isReady ? "ring-4 ring-primary shadow-2xl border-primary animate-pulse" : "border-border"
+        isReady ? "ring-4 ring-primary shadow-2xl border-primary" : "border-border"
       }`}>
         <div className="flex gap-6">
           <div className={`flex-shrink-0 p-4 rounded-2xl ${
-            isReady ? "bg-primary/20 animate-bounce" : "bg-primary/10"
+            isReady ? "bg-primary/20" : "bg-primary/10"
           }`}>
             <RewardIcon className="h-16 w-16 text-primary" />
           </div>
