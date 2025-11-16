@@ -30,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -739,17 +739,17 @@ export default function Dashboard() {
                     )}
                   </Button>
                 </Link>
-                {/* Row 2: Rewards Board, Analytics */}
+                {/* Row 2: Rewards Board, Family Goals */}
                 <Link href="/rewards-board" className="w-full">
                   <Button variant="card" data-testid="button-rewards-board" className="w-full h-14 whitespace-normal leading-tight">
                     <Gift className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="text-center">{t("dashboard.rewardsBoard")}</span>
                   </Button>
                 </Link>
-                <Link href="/analytics" className="w-full">
-                  <Button variant="card" data-testid="button-analytics" className="w-full h-14 whitespace-normal leading-tight">
-                    <BarChart3 className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="text-center">{t("dashboard.analytics")}</span>
+                <Link href="/family-goals" className="w-full">
+                  <Button variant="card" data-testid="button-family-goals" className="w-full h-14 whitespace-normal leading-tight">
+                    <Target className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-center">{t("dashboard.familyGoals")}</span>
                   </Button>
                 </Link>
                 {/* Row 3: Add Task, Add Reward */}
