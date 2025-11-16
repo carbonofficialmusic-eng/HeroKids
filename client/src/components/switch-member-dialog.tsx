@@ -54,7 +54,7 @@ export function SwitchMemberDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]" data-testid="dialog-switch-member">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] flex flex-col" data-testid="dialog-switch-member">
         <DialogHeader>
           <DialogTitle>{t('memberDialogs.switchMember')}</DialogTitle>
           <DialogDescription>
@@ -62,8 +62,8 @@ export function SwitchMemberDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
-          <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+        <div className="space-y-4 py-4 overflow-y-auto flex-1 min-h-0">
+          <div className="space-y-2 pr-1">
             {members.map((member) => (
               <button
                 key={member.id}
@@ -129,7 +129,7 @@ export function SwitchMemberDialog({
           )}
         </div>
         
-        <DialogFooter className="flex-row gap-2 sm:gap-2">
+        <DialogFooter className="flex-row gap-2 sm:gap-2 flex-shrink-0">
           <Button
             variant="outline"
             onClick={handleSwitchBack}
