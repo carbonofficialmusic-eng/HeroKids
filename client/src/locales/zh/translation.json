@@ -382,6 +382,8 @@
     "languageDesc": "选择你家庭的首选语言。这将影响所有家庭成员的界面语言。",
     "interfaceLanguage": "界面语言",
     "selectInterfaceLanguage": "选择应用程序界面的语言",
+    "leaderboardSettings": "排行榜设置",
+    "leaderboardSettingsDesc": "管理排行榜的可见性、参与和奖品",
     "leaderboardVisibility": "排行榜可见性",
     "leaderboardVisibilityDesc": "控制排行榜是否对孩子可见。家长始终可以看到排行榜。",
     "showToChildren": "向孩子显示排行榜",

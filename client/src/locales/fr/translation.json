@@ -382,6 +382,8 @@
     "languageDesc": "Choisissez la langue préférée de votre famille. Cela affectera la langue de l'interface de tous les membres de la famille.",
     "interfaceLanguage": "Langue de l'interface",
     "selectInterfaceLanguage": "Sélectionnez la langue de l'interface de l'application",
+    "leaderboardSettings": "Paramètres du classement",
+    "leaderboardSettingsDesc": "Gérer la visibilité, la participation et les prix du classement",
     "leaderboardVisibility": "Visibilité du classement",
     "leaderboardVisibilityDesc": "Contrôlez si le classement est visible pour les enfants. Les parents peuvent toujours voir le classement.",
     "showToChildren": "Montrer le classement aux enfants",

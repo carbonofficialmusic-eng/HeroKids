@@ -387,6 +387,8 @@
     "languageDesc": "Choose your family's preferred language. This will affect all family members' interface language.",
     "interfaceLanguage": "Interface Language",
     "selectInterfaceLanguage": "Select the language for the application interface",
+    "leaderboardSettings": "Leaderboard Settings",
+    "leaderboardSettingsDesc": "Manage leaderboard visibility, participation, and prizes",
     "leaderboardVisibility": "Leaderboard Visibility",
     "leaderboardVisibilityDesc": "Control whether the leaderboard is visible to children. Parents can always see the leaderboard.",
     "showToChildren": "Show leaderboard to children",

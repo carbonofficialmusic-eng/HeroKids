@@ -382,6 +382,8 @@
     "languageDesc": "Elige el idioma preferido de tu familia. Esto afectará el idioma de la interfaz de todos los miembros de la familia.",
     "interfaceLanguage": "Idioma de la Interfaz",
     "selectInterfaceLanguage": "Selecciona el idioma para la interfaz de la aplicación",
+    "leaderboardSettings": "Configuración de Clasificación",
+    "leaderboardSettingsDesc": "Administrar la visibilidad, participación y premios de la clasificación",
     "leaderboardVisibility": "Visibilidad de la Clasificación",
     "leaderboardVisibilityDesc": "Controla si la clasificación es visible para los niños. Los padres siempre pueden ver la clasificación.",
     "showToChildren": "Mostrar clasificación a los niños",

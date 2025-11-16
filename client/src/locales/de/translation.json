@@ -387,6 +387,8 @@
     "languageDesc": "Wähle die bevorzugte Sprache deiner Familie. Dies wirkt sich auf die Oberflächensprache aller Familienmitglieder aus.",
     "interfaceLanguage": "Oberflächensprache",
     "selectInterfaceLanguage": "Wähle die Sprache für die Anwendungsoberfläche",
+    "leaderboardSettings": "Bestenlisten-Einstellungen",
+    "leaderboardSettingsDesc": "Verwalte die Sichtbarkeit, Teilnahme und Preise der Bestenliste",
     "leaderboardVisibility": "Bestenlisten-Sichtbarkeit",
     "leaderboardVisibilityDesc": "Steuere, ob die Bestenliste für Kinder sichtbar ist. Eltern können die Bestenliste immer sehen.",
     "showToChildren": "Bestenliste Kindern zeigen",

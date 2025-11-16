@@ -382,6 +382,8 @@
     "languageDesc": "家族の優先言語を選択します。これにより、すべての家族メンバーのインターフェース言語が影響を受けます。",
     "interfaceLanguage": "インターフェース言語",
     "selectInterfaceLanguage": "アプリケーションインターフェースの言語を選択",
+    "leaderboardSettings": "ランキング設定",
+    "leaderboardSettingsDesc": "ランキングの表示、参加、および賞品を管理",
     "leaderboardVisibility": "ランキングの表示",
     "leaderboardVisibilityDesc": "子供にランキングを表示するかどうかを制御します。親は常にランキングを見ることができます。",
     "showToChildren": "子供にランキングを表示",

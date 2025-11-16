@@ -544,10 +544,10 @@ export default function Settings() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-primary" />
-                <CardTitle>{t('settings.leaderboardVisibility')}</CardTitle>
+                <CardTitle>{t('settings.leaderboardSettings')}</CardTitle>
               </div>
               <CardDescription>
-                {t('settings.leaderboardVisibilityDesc')}
+                {t('settings.leaderboardSettingsDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
