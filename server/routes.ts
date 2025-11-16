@@ -2513,6 +2513,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get pending reward redemptions count (for parents)
+  app.get("/api/reward-redemptions/pending-count", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can see pending rewards count
+      if (member.role !== "parent") {
+        return res.json({ count: 0 });
+      }
+      
+      const redemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
+      // Count redemptions that are not yet fulfilled (completed)
+      const pendingCount = redemptions.filter(r => r.status !== "completed").length;
+      
+      res.json({ count: pendingCount });
+    } catch (error: any) {
+      console.error("Error fetching pending rewards count:", error);
+      res.status(500).json({ message: "Failed to fetch pending rewards count" });
+    }
+  });
+
   // ===== Achievement System =====
 
   // Get achievement definitions for family

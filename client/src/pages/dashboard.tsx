@@ -185,6 +185,13 @@ export default function Dashboard() {
     refetchInterval: 10000, // Refetch every 10 seconds
   });
 
+  // Fetch pending reward redemptions count (for parents)
+  const { data: pendingRewardsData } = useQuery<{ count: number }>({
+    queryKey: ["/api/reward-redemptions/pending-count"],
+    enabled: !!member && member?.role === "parent",
+    refetchInterval: 10000, // Refetch every 10 seconds
+  });
+
   // Reset child tab to "active" when leaderboard becomes unavailable
   useEffect(() => {
     const showLeaderboardToChild = familyData?.showLeaderboard !== false;
@@ -433,6 +440,7 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       
       const pointsSpent = data?.redemption?.pointsSpent || 0;
@@ -737,9 +745,14 @@ export default function Dashboard() {
                 </Link>
                 {/* Row 2: Rewards Board, Family Goals */}
                 <Link href="/rewards-board" className="w-full">
-                  <Button variant="card" data-testid="button-rewards-board" className="w-full h-14 whitespace-normal leading-tight">
+                  <Button variant="card" data-testid="button-rewards-board" className="relative w-full h-14 whitespace-normal leading-tight">
                     <Gift className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="text-center">{t("dashboard.rewardsBoard")}</span>
+                    {pendingRewardsData && pendingRewardsData.count > 0 && (
+                      <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex-shrink-0" data-testid="badge-pending-rewards">
+                        {pendingRewardsData.count}
+                      </Badge>
+                    )}
                   </Button>
                 </Link>
                 <Link href="/family-goals" className="w-full">
