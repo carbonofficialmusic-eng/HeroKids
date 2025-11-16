@@ -264,10 +264,6 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       setSwitchMemberDialogOpen(false);
-      toast({
-        title: t("toast.switchedMember"),
-        description: t("toast.switchedMemberDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
