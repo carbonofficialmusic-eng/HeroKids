@@ -63,7 +63,7 @@ export function SwitchMemberDialog({
         </DialogHeader>
         
         <div className="space-y-4 py-4">
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
             {members.map((member) => (
               <button
                 key={member.id}
