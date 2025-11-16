@@ -2925,6 +2925,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family goal not found" });
       }
       
+      // Get all contributions to this goal and refund points to contributors
+      const contributions = await storage.getGoalContributionsByGoal(id);
+      
+      // Group contributions by member and sum up their total contributions
+      const contributionsByMember = new Map<string, number>();
+      for (const contribution of contributions) {
+        const current = contributionsByMember.get(contribution.memberId) || 0;
+        contributionsByMember.set(contribution.memberId, current + contribution.points);
+      }
+      
+      // Refund points to each contributor
+      for (const [memberId, totalPoints] of contributionsByMember) {
+        const contributor = await storage.getFamilyMemberById(memberId);
+        if (contributor) {
+          await storage.updateFamilyMemberPoints(
+            memberId,
+            contributor.totalEarned,
+            contributor.totalPoints + totalPoints,
+            contributor.weeklyPoints,
+            contributor.monthlyPoints
+          );
+        }
+      }
+      
+      // Delete the goal (contributions will be cascade deleted)
       await storage.deleteFamilyGoal(id);
       
       // Broadcast to family via WebSocket
@@ -2932,6 +2957,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'family-goal-deleted',
         goalId: id,
       });
+      
+      // Invalidate member queries for point updates
+      if (contributionsByMember.size > 0) {
+        broadcastToFamily(member.familyName, {
+          type: 'member-updated',
+        });
+      }
       
       res.status(204).send();
     } catch (error: any) {

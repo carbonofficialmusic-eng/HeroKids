@@ -183,6 +183,7 @@ export interface IStorage {
   deleteFamilyGoal(id: string): Promise<void>;
   contributeToGoal(goalId: string, memberId: string, points: number, period: string): Promise<GoalContribution>;
   getGoalContributionsByGoalAndPeriod(goalId: string, period: string): Promise<GoalContribution[]>;
+  getGoalContributionsByGoal(goalId: string): Promise<GoalContribution[]>;
   getGoalContributionsByMemberAndGoal(goalId: string, memberId: string, period: string): Promise<GoalContribution | undefined>;
   updateGoalCurrentPoints(goalId: string, currentPoints: number): Promise<void>;
   completeGoal(goalId: string): Promise<void>;
@@ -1825,6 +1826,13 @@ export class DatabaseStorage implements IStorage {
           eq(goalContributions.period, period)
         )
       );
+  }
+
+  async getGoalContributionsByGoal(goalId: string): Promise<GoalContribution[]> {
+    return await db
+      .select()
+      .from(goalContributions)
+      .where(eq(goalContributions.goalId, goalId));
   }
 
   async getGoalContributionsByMemberAndGoal(goalId: string, memberId: string, period: string): Promise<GoalContribution | undefined> {
