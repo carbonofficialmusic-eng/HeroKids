@@ -139,21 +139,19 @@ export default function FamilyGoals() {
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-black font-accent flex items-center gap-3">
-              <Target className="h-10 w-10" />
-              Familienziele
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Arbeitet zusammen an gemeinsamen Zielen und verdient tolle Belohnungen!
-            </p>
-          </div>
+        <div className="mb-8">
           <Link href="/dashboard">
-            <Button variant="outline" data-testid="button-back-dashboard">
+            <Button variant="outline" data-testid="button-back-dashboard" className="mb-4">
               {t("backToDashboard")}
             </Button>
           </Link>
+          <h1 className="text-4xl font-black font-accent flex items-center gap-3">
+            <Target className="h-10 w-10" />
+            Familienziele
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Arbeitet zusammen an gemeinsamen Zielen und verdient tolle Belohnungen!
+          </p>
         </div>
 
         {member?.role === "parent" && (
