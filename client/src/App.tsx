@@ -20,6 +20,7 @@ import Approvals from "@/pages/approvals";
 import RewardsBoard from "@/pages/rewards-board";
 import Settings from "@/pages/settings";
 import SkinsGallery from "@/pages/skins-gallery";
+import Achievements from "@/pages/achievements";
 
 interface FamilyMember {
   id: number;
@@ -117,6 +118,11 @@ function Router() {
             <Route path="/settings">
               <ProtectedRoute requiredRole="parent" redirectTo="/dashboard">
                 <Settings />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/achievements">
+              <ProtectedRoute requiredRole="parent" redirectTo="/dashboard">
+                <Achievements />
               </ProtectedRoute>
             </Route>
           </>

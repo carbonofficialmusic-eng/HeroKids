@@ -784,6 +784,32 @@ export default function Settings() {
             </CardContent>
           </Card>
 
+          {/* Achievement Configuration */}
+          <Card className="border-primary/50">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-primary" />
+                <CardTitle>Achievements & Allowance Bonuses</CardTitle>
+              </div>
+              <CardDescription>
+                Configure automatic bonus points when children reach milestones
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Set up achievements like "First to Finish Weekly Tasks" or "Perfect Week" that automatically award bonus points.
+              </p>
+              <Button 
+                onClick={() => setLocation("/achievements")}
+                data-testid="button-configure-achievements"
+                className="w-full"
+              >
+                <Trophy className="h-4 w-4 mr-2" />
+                Configure Achievements
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Factory Reset Settings */}
           <Card className="border-destructive/50">
             <CardHeader>
