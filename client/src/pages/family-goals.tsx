@@ -10,6 +10,16 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Target, 
   Plus, 
@@ -17,7 +27,8 @@ import {
   Users, 
   Calendar,
   CheckCircle2,
-  Coins
+  Coins,
+  Trash2
 } from "lucide-react";
 import { Link } from "wouter";
 import type { FamilyGoal, GoalContribution, FamilyMember } from "@shared/schema";
@@ -35,6 +46,8 @@ export default function FamilyGoals() {
   const { user } = useAuth();
   const [selectedGoal, setSelectedGoal] = useState<FamilyGoal | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState<FamilyGoal | null>(null);
 
   const { data: member } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
@@ -91,6 +104,30 @@ export default function FamilyGoals() {
       toast({
         title: "Fehler",
         description: error.message || "Beitrag konnte nicht eingezahlt werden",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteGoalMutation = useMutation({
+    mutationFn: async (goalId: string) => {
+      return await apiRequest("DELETE", `/api/family-goals/${goalId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      setDeleteDialogOpen(false);
+      setGoalToDelete(null);
+      toast({
+        title: "Familienziel gelöscht",
+        description: "Das Ziel wurde gelöscht und alle eingezahlten Punkte wurden zurückerstattet.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fehler",
+        description: error.message || "Ziel konnte nicht gelöscht werden",
         variant: "destructive",
       });
     },
@@ -196,9 +233,9 @@ export default function FamilyGoals() {
               <Card key={goal.id} className="overflow-hidden" data-testid={`card-goal-${goal.id}`}>
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-4 flex-1">
                       <div className="text-5xl">{goal.iconEmoji}</div>
-                      <div>
+                      <div className="flex-1">
                         <h3 className="text-2xl font-bold mb-1">{goal.title}</h3>
                         {goal.description && (
                           <p className="text-muted-foreground">{goal.description}</p>
@@ -215,12 +252,27 @@ export default function FamilyGoals() {
                         </div>
                       </div>
                     </div>
-                    {isCompleted && (
-                      <Badge variant="default" className="gap-1">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Erreicht!
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {isCompleted && (
+                        <Badge variant="default" className="gap-1">
+                          <CheckCircle2 className="h-4 w-4" />
+                          Erreicht!
+                        </Badge>
+                      )}
+                      {member?.role === "parent" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setGoalToDelete(goal);
+                            setDeleteDialogOpen(true);
+                          }}
+                          data-testid={`button-delete-goal-${goal.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-4">
@@ -297,6 +349,41 @@ export default function FamilyGoals() {
           familyName={member.familyName}
         />
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent data-testid="dialog-delete-goal">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Familienziel löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {goalToDelete && (
+                <>
+                  Möchtest du das Ziel <strong>"{goalToDelete.title}"</strong> wirklich löschen?
+                  <br /><br />
+                  {goalToDelete.currentPoints > 0 && (
+                    <span className="text-primary font-semibold">
+                      Alle eingezahlten {goalToDelete.currentPoints} Punkte werden automatisch an die Einzahler zurückerstattet.
+                    </span>
+                  )}
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete">Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (goalToDelete) {
+                  deleteGoalMutation.mutate(goalToDelete.id);
+                }
+              }}
+              data-testid="button-confirm-delete"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

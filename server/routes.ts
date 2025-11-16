@@ -2936,7 +2936,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Refund points to each contributor
-      for (const [memberId, totalPoints] of contributionsByMember) {
+      for (const [memberId, totalPoints] of Array.from(contributionsByMember.entries())) {
         const contributor = await storage.getFamilyMemberById(memberId);
         if (contributor) {
           await storage.updateFamilyMemberPoints(
