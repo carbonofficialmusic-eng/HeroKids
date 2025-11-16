@@ -161,6 +161,7 @@ export interface IStorage {
   createAchievementDefinition(definition: InsertAchievementDefinition): Promise<AchievementDefinition>;
   updateAchievementDefinition(id: string, definition: Partial<InsertAchievementDefinition>): Promise<AchievementDefinition>;
   deleteAchievementDefinition(id: string): Promise<void>;
+  seedDefaultAchievements(familyName: string): Promise<AchievementDefinition[]>;
   getOrCreateAchievementMember(familyName: string, memberId: string): Promise<AchievementMember>;
   updateAchievementMember(id: string, updates: Partial<Omit<InsertAchievementMember, 'familyName' | 'memberId'>>): Promise<void>;
   resetWeeklyAchievements(familyName: string): Promise<void>;
@@ -1461,6 +1462,115 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(achievementDefinitions)
       .where(eq(achievementDefinitions.id, id));
+  }
+
+  async seedDefaultAchievements(familyName: string): Promise<AchievementDefinition[]> {
+    const defaultAchievements: InsertAchievementDefinition[] = [
+      {
+        familyName,
+        type: "first_weekly_finisher",
+        slug: "first-weekly-finisher",
+        title: "Weekly Champion",
+        description: "Be the first family member to complete all weekly tasks",
+        bonusPoints: 50,
+        isActive: true,
+        config: {},
+      },
+      {
+        familyName,
+        type: "perfect_week",
+        slug: "perfect-week",
+        title: "Perfect Week",
+        description: "Complete all your weekly tasks without any rejections",
+        bonusPoints: 100,
+        isActive: true,
+        config: {},
+      },
+      {
+        familyName,
+        type: "task_streak",
+        slug: "task-streak-7",
+        title: "7-Day Streak",
+        description: "Complete tasks for 7 days in a row",
+        bonusPoints: 75,
+        isActive: true,
+        config: { days: 7 },
+      },
+      {
+        familyName,
+        type: "task_streak",
+        slug: "task-streak-14",
+        title: "14-Day Streak",
+        description: "Complete tasks for 14 days in a row",
+        bonusPoints: 150,
+        isActive: true,
+        config: { days: 14 },
+      },
+      {
+        familyName,
+        type: "task_streak",
+        slug: "task-streak-30",
+        title: "30-Day Streak",
+        description: "Complete tasks for 30 days in a row",
+        bonusPoints: 300,
+        isActive: true,
+        config: { days: 30 },
+      },
+      {
+        familyName,
+        type: "lifetime_milestone",
+        slug: "lifetime-500",
+        title: "500 Points Milestone",
+        description: "Earn a total of 500 points",
+        bonusPoints: 100,
+        isActive: true,
+        config: { threshold: 500 },
+      },
+      {
+        familyName,
+        type: "lifetime_milestone",
+        slug: "lifetime-1000",
+        title: "1000 Points Milestone",
+        description: "Earn a total of 1000 points",
+        bonusPoints: 200,
+        isActive: true,
+        config: { threshold: 1000 },
+      },
+      {
+        familyName,
+        type: "lifetime_milestone",
+        slug: "lifetime-2000",
+        title: "2000 Points Milestone",
+        description: "Earn a total of 2000 points",
+        bonusPoints: 400,
+        isActive: true,
+        config: { threshold: 2000 },
+      },
+      {
+        familyName,
+        type: "weekly_leaderboard",
+        slug: "weekly-leaderboard-1st",
+        title: "Weekly Leader",
+        description: "Finish in 1st place on the weekly leaderboard",
+        bonusPoints: 75,
+        isActive: true,
+        config: { rank: 1 },
+      },
+    ];
+
+    const created: AchievementDefinition[] = [];
+    for (const achievement of defaultAchievements) {
+      const [result] = await db
+        .insert(achievementDefinitions)
+        .values({
+          ...achievement,
+          updatedAt: new Date(),
+        })
+        .returning();
+      created.push(result);
+    }
+
+    return created;
   }
 
   async getOrCreateAchievementMember(familyName: string, memberId: string): Promise<AchievementMember> {
