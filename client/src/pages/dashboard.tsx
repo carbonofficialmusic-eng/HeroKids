@@ -1087,8 +1087,14 @@ export default function Dashboard() {
                     <span className="text-center">{t("dashboard.myRewards")}</span>
                   </Button>
                 </Link>
+                <Link href="/family-goals" className="w-full">
+                  <Button variant="card" data-testid="button-family-goals-child" className="w-full h-14 whitespace-normal leading-tight">
+                    <Target className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-center">{t("dashboard.familyGoals")}</span>
+                  </Button>
+                </Link>
                 {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") && (
-                  <Link href="/chat" className="w-full col-span-2">
+                  <Link href="/chat" className="w-full">
                     <Button variant="card" data-testid="button-chat-child" className="relative w-full h-14 whitespace-normal leading-tight">
                       <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
                       <span className="text-center">{t("nav.chat")}</span>
