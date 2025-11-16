@@ -107,12 +107,6 @@ export function ProfileMenu({
             <span>{t("settings.editProfile")}</span>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem asChild>
-          <Link href="/kid-dashboard" data-testid="menu-item-kid-preview">
-            <Baby className="mr-2 h-4 w-4" />
-            <span>Kinder-Vorschau</span>
-          </Link>
-        </DropdownMenuItem>
         
         {/* Block 2: Family Navigation */}
         <DropdownMenuSeparator />
@@ -171,6 +165,15 @@ export function ProfileMenu({
             </DropdownMenuItem>
           </>
         )}
+        
+        {/* Preview/Demo Section */}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/kid-dashboard" data-testid="menu-item-kid-preview">
+            <Baby className="mr-2 h-4 w-4" />
+            <span>Kinder-Vorschau</span>
+          </Link>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
