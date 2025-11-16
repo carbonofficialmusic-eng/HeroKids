@@ -1,9 +1,11 @@
 import { storage } from "./storage";
+import { achievementEngine } from "./achievementEngine";
 
 // Track last reset dates to prevent duplicate resets
 // Initialize to epoch (far in the past) so first check always triggers
 let lastWeeklyReset = new Date(0);
 let lastMonthlyReset = new Date(0);
+let lastDailyCheck = new Date(0);
 
 export function startPointsResetScheduler() {
   // Check every hour for point resets
@@ -33,15 +35,51 @@ export function startPointsResetScheduler() {
       await resetMonthlyPoints();
       lastMonthlyReset = now;
     }
+    
+    // Daily check for streak tracking
+    const isSameDay =
+      lastDailyCheck.getDate() === now.getDate() &&
+      lastDailyCheck.getMonth() === now.getMonth() &&
+      lastDailyCheck.getFullYear() === now.getFullYear();
+    
+    if (!isSameDay) {
+      console.log("Running daily achievement check...");
+      await runDailyAchievementCheck();
+      lastDailyCheck = now;
+    }
   }, 60 * 60 * 1000); // Check every hour
 
   console.log("Points reset scheduler started");
+}
+
+async function runDailyAchievementCheck() {
+  try {
+    const families = await storage.getFamilies();
+    for (const family of families) {
+      await achievementEngine.processEvent({
+        type: "daily_check",
+        familyName: family.familyName,
+      });
+    }
+    console.log("✅ Daily achievement check completed");
+  } catch (error) {
+    console.error("Error running daily achievement check:", error);
+  }
 }
 
 async function resetWeeklyPoints() {
   try {
     await storage.resetAllWeeklyPoints();
     console.log("✅ Weekly points have been reset for all family members");
+    
+    // Trigger achievement evaluations for all families
+    const families = await storage.getFamilies();
+    for (const family of families) {
+      await achievementEngine.processEvent({
+        type: "midnight_reset",
+        familyName: family.familyName,
+      });
+    }
   } catch (error) {
     console.error("Error resetting weekly points:", error);
   }

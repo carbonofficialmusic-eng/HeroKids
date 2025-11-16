@@ -9,6 +9,7 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { achievementEngine } from "./achievementEngine";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, type Family } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
@@ -1347,6 +1348,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         approvedBy: member.displayName,
       });
       
+      // Process achievement events
+      await achievementEngine.processEvent({
+        type: "task_approved",
+        familyName: member.familyName,
+        memberId: childMember.id,
+        taskId: completion.taskId,
+        pointsEarned: completion.pointsEarned,
+      });
+      
       res.json({
         success: true,
         message: "Task completion approved!",
@@ -1411,6 +1421,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         memberId: childMember.id,
         rejectedBy: member.displayName,
         reason: reason || "Did not meet expectations",
+      });
+      
+      // Process achievement events
+      await achievementEngine.processEvent({
+        type: "task_rejected",
+        familyName: member.familyName,
+        memberId: childMember.id,
+        taskId: completion.taskId,
       });
       
       res.json({
