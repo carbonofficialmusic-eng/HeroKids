@@ -8,7 +8,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, Trophy, Star, Award, TrendingUp, Flame, History } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, Trophy, Star, Award, TrendingUp, Flame, History, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -68,6 +69,27 @@ export default function Achievements() {
   const { data: awards = [], isLoading: awardsLoading } = useQuery<AchievementAward[]>({
     queryKey: ["/api/achievements/awards"],
     enabled: !!member,
+  });
+
+  // Seed default achievements mutation
+  const seedAchievementsMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/achievements/seed", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
+      toast({
+        title: t("achievements.seeded"),
+        description: t("achievements.seededSuccessfully"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("error"),
+        description: error?.message || t("achievements.failedToSeed"),
+        variant: "destructive",
+      });
+    },
   });
 
   // Update achievement mutation
@@ -175,15 +197,26 @@ export default function Achievements() {
             ) : (
               <div className="space-y-4">
             {achievements.map((achievement) => (
-              <Card key={achievement.id} data-testid={`achievement-card-${achievement.slug}`}>
+              <Card 
+                key={achievement.id} 
+                data-testid={`achievement-card-${achievement.slug}`}
+                className={!achievement.isActive ? "opacity-60" : ""}
+              >
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10 text-primary mt-1">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="p-3 rounded-lg bg-primary/10 text-primary mt-1 flex-shrink-0">
                         {getAchievementIcon(achievement.type)}
                       </div>
-                      <div>
-                        <CardTitle className="text-lg">{achievement.title}</CardTitle>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CardTitle className="text-lg">{achievement.title}</CardTitle>
+                          {!achievement.isActive && (
+                            <Badge variant="secondary" className="text-xs">
+                              {t("achievements.inactive")}
+                            </Badge>
+                          )}
+                        </div>
                         <CardDescription className="mt-1">
                           {achievement.description}
                         </CardDescription>
@@ -207,7 +240,7 @@ export default function Achievements() {
                       <Label htmlFor={`bonus-${achievement.id}`} className="text-sm font-medium">
                         {t("achievements.bonusPoints")}
                       </Label>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2 mt-2">
                         <Input
                           id={`bonus-${achievement.id}`}
                           type="number"
@@ -228,6 +261,12 @@ export default function Achievements() {
                         <span className="text-sm text-muted-foreground">{t("points")}</span>
                       </div>
                     </div>
+                    <div className="text-right">
+                      <div className="text-3xl font-bold text-primary">+{achievement.bonusPoints}</div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                        {t("achievements.reward")}
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -235,9 +274,37 @@ export default function Achievements() {
 
                 {achievements.length === 0 && (
                   <Card>
-                    <CardContent className="py-12 text-center">
-                      <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">{t("achievements.noAchievements")}</p>
+                    <CardContent className="py-12 text-center space-y-6">
+                      <div className="flex justify-center">
+                        <div className="rounded-full bg-primary/10 p-6">
+                          <Sparkles className="h-12 w-12 text-primary" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-semibold">{t("achievements.noAchievements")}</h3>
+                        <p className="text-muted-foreground max-w-md mx-auto">
+                          {t("achievements.startWithDefaults")}
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={() => seedAchievementsMutation.mutate()}
+                        disabled={seedAchievementsMutation.isPending}
+                        size="lg"
+                        data-testid="button-seed-achievements"
+                        className="mx-auto"
+                      >
+                        {seedAchievementsMutation.isPending ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-background mr-2"></div>
+                            {t("achievements.creating")}
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            {t("achievements.createDefaults")}
+                          </>
+                        )}
+                      </Button>
                     </CardContent>
                   </Card>
                 )}
