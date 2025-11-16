@@ -741,6 +741,31 @@
   "celebration": {
     "pts": "pts"
   },
+  "achievements": {
+    "title": "成就",
+    "subtitle": "配置达成里程碑时的自动零花钱奖励",
+    "configure": "配置",
+    "awardHistory": "奖励历史",
+    "bonusPoints": "奖励积分",
+    "noAchievements": "尚未配置成就",
+    "earnedBy": "获得者",
+    "noAwards": "尚未获得成就",
+    "howItWorks": "成就如何运作",
+    "howItWorksDesc": "当孩子达到特定里程碑时，系统会自动检测并授予成就。奖励积分会立即添加并显示庆祝通知。",
+    "firstWeeklyFinisher": "每周首位完成者：首个完成所有每周任务",
+    "weeklyLeaderboard": "每周排行榜：周末前三名",
+    "perfectWeek": "完美一周：全周无被拒绝的任务",
+    "lifetimeMilestones": "终身里程碑：达到总积分阈值",
+    "taskStreaks": "任务连续：连续多天完成任务",
+    "updated": "成就已更新",
+    "savedSuccessfully": "成就设置保存成功",
+    "failedToUpdate": "更新成就失败",
+    "accessDenied": "访问被拒绝",
+    "onlyParents": "只有家长可以配置成就"
+  },
+  "error": "错误",
+  "goBack": "返回",
+  "points": "积分",
   "notFound": {
     "title": "404 Page Not Found",
     "message": "Did you forget to add the page to the router?"

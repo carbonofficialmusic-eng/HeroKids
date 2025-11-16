@@ -746,6 +746,31 @@
   "celebration": {
     "pts": "pts"
   },
+  "achievements": {
+    "title": "Achievements",
+    "subtitle": "Configure automatic allowance bonuses for achieving milestones",
+    "configure": "Configure",
+    "awardHistory": "Award History",
+    "bonusPoints": "Bonus Points",
+    "noAchievements": "No achievements configured yet",
+    "earnedBy": "Earned by",
+    "noAwards": "No achievements earned yet",
+    "howItWorks": "How Achievements Work",
+    "howItWorksDesc": "Achievements are automatically detected and awarded when children reach specific milestones. Bonus points are added immediately with a celebration notification.",
+    "firstWeeklyFinisher": "First Weekly Finisher: First to complete all weekly tasks",
+    "weeklyLeaderboard": "Weekly Leaderboard: Top 3 positions at week end",
+    "perfectWeek": "Perfect Week: No rejected tasks all week",
+    "lifetimeMilestones": "Lifetime Milestones: Reaching total point thresholds",
+    "taskStreaks": "Task Streaks: Consecutive days completing tasks",
+    "updated": "Achievement Updated",
+    "savedSuccessfully": "Achievement settings saved successfully",
+    "failedToUpdate": "Failed to update achievement",
+    "accessDenied": "Access Denied",
+    "onlyParents": "Only parents can configure achievements"
+  },
+  "error": "Error",
+  "goBack": "Go Back",
+  "points": "points",
   "notFound": {
     "title": "404 Page Not Found",
     "message": "Did you forget to add the page to the router?"

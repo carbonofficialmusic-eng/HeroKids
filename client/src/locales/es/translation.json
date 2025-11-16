@@ -741,6 +741,31 @@
   "celebration": {
     "pts": "pts"
   },
+  "achievements": {
+    "title": "Logros",
+    "subtitle": "Configura bonificaciones automáticas de mesada por alcanzar hitos",
+    "configure": "Configurar",
+    "awardHistory": "Historial de premios",
+    "bonusPoints": "Puntos de bonificación",
+    "noAchievements": "Aún no hay logros configurados",
+    "earnedBy": "Obtenido por",
+    "noAwards": "Aún no se han obtenido logros",
+    "howItWorks": "Cómo funcionan los logros",
+    "howItWorksDesc": "Los logros se detectan y otorgan automáticamente cuando los niños alcanzan hitos específicos. Los puntos de bonificación se agregan inmediatamente con una notificación de celebración.",
+    "firstWeeklyFinisher": "Primer finalista semanal: Primero en completar todas las tareas semanales",
+    "weeklyLeaderboard": "Tabla semanal: Top 3 posiciones al final de la semana",
+    "perfectWeek": "Semana perfecta: Sin tareas rechazadas toda la semana",
+    "lifetimeMilestones": "Hitos de por vida: Alcanzar umbrales de puntos totales",
+    "taskStreaks": "Rachas de tareas: Días consecutivos completando tareas",
+    "updated": "Logro actualizado",
+    "savedSuccessfully": "Configuración de logros guardada exitosamente",
+    "failedToUpdate": "Error al actualizar el logro",
+    "accessDenied": "Acceso denegado",
+    "onlyParents": "Solo los padres pueden configurar los logros"
+  },
+  "error": "Error",
+  "goBack": "Volver",
+  "points": "puntos",
   "notFound": {
     "title": "404 Page Not Found",
     "message": "Did you forget to add the page to the router?"

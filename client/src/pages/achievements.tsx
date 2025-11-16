@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ interface AchievementAward {
 }
 
 export default function Achievements() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -76,14 +78,14 @@ export default function Achievements() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
       toast({
-        title: "Achievement Updated",
-        description: "Achievement settings saved successfully",
+        title: t("achievements.updated"),
+        description: t("achievements.savedSuccessfully"),
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update achievement",
+        title: t("error"),
+        description: t("achievements.failedToUpdate"),
         variant: "destructive",
       });
     },
@@ -96,14 +98,14 @@ export default function Achievements() {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
+            <CardTitle>{t("achievements.accessDenied")}</CardTitle>
             <CardDescription>
-              Only parents can configure achievements
+              {t("achievements.onlyParents")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={() => setLocation("/dashboard")} className="w-full" data-testid="button-back">
-              Go Back
+              {t("goBack")}
             </Button>
           </CardContent>
         </Card>
@@ -144,10 +146,10 @@ export default function Achievements() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Trophy className="h-8 w-8 text-primary" />
-              Achievements
+              {t("achievements.title")}
             </h1>
             <p className="text-muted-foreground">
-              Configure automatic allowance bonuses for achieving milestones
+              {t("achievements.subtitle")}
             </p>
           </div>
         </div>
@@ -157,11 +159,11 @@ export default function Achievements() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="configure" data-testid="tab-configure">
               <Trophy className="h-4 w-4 mr-2" />
-              Configure
+              {t("achievements.configure")}
             </TabsTrigger>
             <TabsTrigger value="history" data-testid="tab-history">
               <History className="h-4 w-4 mr-2" />
-              Award History
+              {t("achievements.awardHistory")}
             </TabsTrigger>
           </TabsList>
 
@@ -203,7 +205,7 @@ export default function Achievements() {
                   <div className="flex items-center gap-4">
                     <div className="flex-1">
                       <Label htmlFor={`bonus-${achievement.id}`} className="text-sm font-medium">
-                        Bonus Points
+                        {t("achievements.bonusPoints")}
                       </Label>
                       <div className="flex items-center gap-2 mt-1">
                         <Input
@@ -223,7 +225,7 @@ export default function Achievements() {
                           className="w-32"
                           data-testid={`input-${achievement.slug}-bonus`}
                         />
-                        <span className="text-sm text-muted-foreground">points</span>
+                        <span className="text-sm text-muted-foreground">{t("points")}</span>
                       </div>
                     </div>
                   </div>
@@ -235,7 +237,7 @@ export default function Achievements() {
                   <Card>
                     <CardContent className="py-12 text-center">
                       <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">No achievements configured yet</p>
+                      <p className="text-muted-foreground">{t("achievements.noAchievements")}</p>
                     </CardContent>
                   </Card>
                 )}
@@ -261,7 +263,7 @@ export default function Achievements() {
                           <div>
                             <div className="font-medium">{award.achievementDefinition.title}</div>
                             <div className="text-sm text-muted-foreground">
-                              Earned by <span className="font-medium" style={{ color: award.member.color }}>{award.member.displayName}</span>
+                              {t("achievements.earnedBy")} <span className="font-medium" style={{ color: award.member.color }}>{award.member.displayName}</span>
                             </div>
                           </div>
                         </div>
@@ -280,7 +282,7 @@ export default function Achievements() {
               <Card>
                 <CardContent className="py-12 text-center">
                   <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No achievements earned yet</p>
+                  <p className="text-muted-foreground">{t("achievements.noAwards")}</p>
                 </CardContent>
               </Card>
             )}
@@ -290,19 +292,18 @@ export default function Achievements() {
         {/* Info Card */}
         <Card className="bg-muted/50">
           <CardHeader>
-            <CardTitle className="text-base">How Achievements Work</CardTitle>
+            <CardTitle className="text-base">{t("achievements.howItWorks")}</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2">
             <p>
-              Achievements are automatically detected and awarded when children reach specific milestones.
-              Bonus points are added immediately with a celebration notification.
+              {t("achievements.howItWorksDesc")}
             </p>
             <ul className="list-disc list-inside space-y-1 mt-2">
-              <li>First Weekly Finisher: First to complete all weekly tasks</li>
-              <li>Weekly Leaderboard: Top 3 positions at week end</li>
-              <li>Perfect Week: No rejected tasks all week</li>
-              <li>Lifetime Milestones: Reaching total point thresholds</li>
-              <li>Task Streaks: Consecutive days completing tasks</li>
+              <li>{t("achievements.firstWeeklyFinisher")}</li>
+              <li>{t("achievements.weeklyLeaderboard")}</li>
+              <li>{t("achievements.perfectWeek")}</li>
+              <li>{t("achievements.lifetimeMilestones")}</li>
+              <li>{t("achievements.taskStreaks")}</li>
             </ul>
           </CardContent>
         </Card>

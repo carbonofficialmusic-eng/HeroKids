@@ -741,6 +741,31 @@
   "celebration": {
     "pts": "pts"
   },
+  "achievements": {
+    "title": "達成項目",
+    "subtitle": "マイルストーン達成時の自動お小遣いボーナスを設定",
+    "configure": "設定",
+    "awardHistory": "受賞履歴",
+    "bonusPoints": "ボーナスポイント",
+    "noAchievements": "まだ達成項目が設定されていません",
+    "earnedBy": "獲得者",
+    "noAwards": "まだ達成項目が獲得されていません",
+    "howItWorks": "達成項目の仕組み",
+    "howItWorksDesc": "達成項目は、子供が特定のマイルストーンに到達すると自動的に検出され、授与されます。ボーナスポイントは、お祝い通知とともにすぐに追加されます。",
+    "firstWeeklyFinisher": "週間初回完了者：すべての週間タスクを最初に完了",
+    "weeklyLeaderboard": "週間ランキング：週末のトップ3位",
+    "perfectWeek": "完璧な週：1週間中拒否されたタスクなし",
+    "lifetimeMilestones": "生涯マイルストーン：合計ポイントのしきい値に到達",
+    "taskStreaks": "タスク連続達成：連続日数でタスクを完了",
+    "updated": "達成項目が更新されました",
+    "savedSuccessfully": "達成項目の設定が正常に保存されました",
+    "failedToUpdate": "達成項目の更新に失敗しました",
+    "accessDenied": "アクセスが拒否されました",
+    "onlyParents": "保護者のみが達成項目を設定できます"
+  },
+  "error": "エラー",
+  "goBack": "戻る",
+  "points": "ポイント",
   "notFound": {
     "title": "404 Page Not Found",
     "message": "Did you forget to add the page to the router?"

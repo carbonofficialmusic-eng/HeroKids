@@ -746,6 +746,31 @@
   "celebration": {
     "pts": "pts"
   },
+  "achievements": {
+    "title": "Erfolge",
+    "subtitle": "Konfiguriere automatische Taschengeld-Boni für erreichte Meilensteine",
+    "configure": "Konfigurieren",
+    "awardHistory": "Erfolgs-Verlauf",
+    "bonusPoints": "Bonus-Punkte",
+    "noAchievements": "Noch keine Erfolge konfiguriert",
+    "earnedBy": "Verdient von",
+    "noAwards": "Noch keine Erfolge erzielt",
+    "howItWorks": "So funktionieren Erfolge",
+    "howItWorksDesc": "Erfolge werden automatisch erkannt und vergeben, wenn Kinder bestimmte Meilensteine erreichen. Bonus-Punkte werden sofort mit einer Benachrichtigung hinzugefügt.",
+    "firstWeeklyFinisher": "Erster wöchentlicher Finisher: Als Erster alle wöchentlichen Aufgaben abgeschlossen",
+    "weeklyLeaderboard": "Wöchentliche Bestenliste: Top 3 Positionen am Wochenende",
+    "perfectWeek": "Perfekte Woche: Keine abgelehnten Aufgaben die ganze Woche",
+    "lifetimeMilestones": "Lebenszeitliche Meilensteine: Erreichen von Gesamtpunktschwellen",
+    "taskStreaks": "Aufgaben-Serien: Aufeinanderfolgende Tage mit erledigten Aufgaben",
+    "updated": "Erfolg aktualisiert",
+    "savedSuccessfully": "Erfolgseinstellungen erfolgreich gespeichert",
+    "failedToUpdate": "Erfolg konnte nicht aktualisiert werden",
+    "accessDenied": "Zugriff verweigert",
+    "onlyParents": "Nur Eltern können Erfolge konfigurieren"
+  },
+  "error": "Fehler",
+  "goBack": "Zurück",
+  "points": "Punkte",
   "notFound": {
     "title": "404 Page Not Found",
     "message": "Did you forget to add the page to the router?"

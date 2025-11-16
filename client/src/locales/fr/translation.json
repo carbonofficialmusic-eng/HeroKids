@@ -741,6 +741,31 @@
   "celebration": {
     "pts": "pts"
   },
+  "achievements": {
+    "title": "Réalisations",
+    "subtitle": "Configurez les bonus automatiques d'argent de poche pour atteindre les jalons",
+    "configure": "Configurer",
+    "awardHistory": "Historique des récompenses",
+    "bonusPoints": "Points bonus",
+    "noAchievements": "Aucune réalisation configurée pour le moment",
+    "earnedBy": "Obtenu par",
+    "noAwards": "Aucune réalisation obtenue pour le moment",
+    "howItWorks": "Comment fonctionnent les réalisations",
+    "howItWorksDesc": "Les réalisations sont automatiquement détectées et attribuées lorsque les enfants atteignent des jalons spécifiques. Les points bonus sont ajoutés immédiatement avec une notification de célébration.",
+    "firstWeeklyFinisher": "Premier finisseur hebdomadaire : Premier à terminer toutes les tâches hebdomadaires",
+    "weeklyLeaderboard": "Classement hebdomadaire : Top 3 positions en fin de semaine",
+    "perfectWeek": "Semaine parfaite : Aucune tâche rejetée toute la semaine",
+    "lifetimeMilestones": "Jalons à vie : Atteindre les seuils de points totaux",
+    "taskStreaks": "Séries de tâches : Jours consécutifs à terminer des tâches",
+    "updated": "Réalisation mise à jour",
+    "savedSuccessfully": "Paramètres de réalisation enregistrés avec succès",
+    "failedToUpdate": "Échec de la mise à jour de la réalisation",
+    "accessDenied": "Accès refusé",
+    "onlyParents": "Seuls les parents peuvent configurer les réalisations"
+  },
+  "error": "Erreur",
+  "goBack": "Retour",
+  "points": "points",
   "notFound": {
     "title": "404 Page Not Found",
     "message": "Did you forget to add the page to the router?"
