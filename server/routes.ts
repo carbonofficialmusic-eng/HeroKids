@@ -2995,10 +2995,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/family-goals/:id/contribute", isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
       
-      // Always use authenticated user
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Get current member (either acting as or real authenticated user)
+      let member;
+      if (req.session.actingAsMemberId) {
+        member = await storage.getFamilyMember(req.session.actingAsMemberId);
+      } else {
+        const userId = req.user.claims.sub;
+        member = await storage.getFamilyMemberByUserId(userId);
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
