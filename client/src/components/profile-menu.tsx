@@ -93,6 +93,14 @@ export function ProfileMenu({
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        
+        {/* Block 1: Profile & Actions */}
+        {isRealParent && familyMemberCount > 1 && (
+          <DropdownMenuItem onClick={onSwitchMember} data-testid="menu-item-switch-member">
+            <User2 className="mr-2 h-4 w-4" />
+            <span>{t("settings.switchMember")}</span>
+          </DropdownMenuItem>
+        )}
         {!isParent && (
           <DropdownMenuItem onClick={onEditProfile} data-testid="menu-item-edit-profile">
             <Settings className="mr-2 h-4 w-4" />
@@ -100,15 +108,18 @@ export function ProfileMenu({
           </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild>
-          <Link href="/skins-gallery" data-testid="menu-item-skins">
-            <Palette className="mr-2 h-4 w-4" />
-            <span>{t("nav.skins")}</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
           <Link href="/kid-dashboard" data-testid="menu-item-kid-preview">
             <Baby className="mr-2 h-4 w-4" />
             <span>Kinder-Vorschau</span>
+          </Link>
+        </DropdownMenuItem>
+        
+        {/* Block 2: Family Navigation */}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/skins-gallery" data-testid="menu-item-skins">
+            <Palette className="mr-2 h-4 w-4" />
+            <span>{t("nav.skins")}</span>
           </Link>
         </DropdownMenuItem>
         {isParent && (
@@ -127,12 +138,26 @@ export function ProfileMenu({
             </DropdownMenuItem>
           </>
         )}
-        {isRealParent && familyMemberCount > 1 && (
-          <DropdownMenuItem onClick={onSwitchMember} data-testid="menu-item-switch-member">
-            <User2 className="mr-2 h-4 w-4" />
-            <span>{t("settings.switchMember")}</span>
-          </DropdownMenuItem>
-        )}
+        
+        {/* Block 3: System & Logout */}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleThemeToggle} data-testid="menu-item-theme-toggle">
+          {theme === "dark" ? (
+            <Sun className="mr-2 h-4 w-4" />
+          ) : (
+            <Moon className="mr-2 h-4 w-4" />
+          )}
+          <span>{theme === "dark" ? t("settings.lightMode") : t("settings.darkMode")}</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => (window.location.href = "/api/logout")}
+          data-testid="menu-item-logout"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>{t("auth.logout")}</span>
+        </DropdownMenuItem>
+        
+        {/* Admin Section (separated at bottom) */}
         {isParent && (
           <>
             <DropdownMenuSeparator />
@@ -146,23 +171,6 @@ export function ProfileMenu({
             </DropdownMenuItem>
           </>
         )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleThemeToggle} data-testid="menu-item-theme-toggle">
-          {theme === "dark" ? (
-            <Sun className="mr-2 h-4 w-4" />
-          ) : (
-            <Moon className="mr-2 h-4 w-4" />
-          )}
-          <span>{theme === "dark" ? t("settings.lightMode") : t("settings.darkMode")}</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => (window.location.href = "/api/logout")}
-          data-testid="menu-item-logout"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>{t("auth.logout")}</span>
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
