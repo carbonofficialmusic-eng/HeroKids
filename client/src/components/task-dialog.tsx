@@ -280,48 +280,6 @@ export function TaskDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Quick Templates Section - Only show when creating */}
-        {!editingTask && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold">{t('tasks.quickTemplates')}</h3>
-            <Badge variant="secondary">{t('tasks.popular')}</Badge>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {taskTemplates.map((template) => (
-              <Card
-                key={template.id}
-                className="p-3 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                onClick={() => applyTemplate(template)}
-                data-testid={`template-${template.id}`}
-              >
-                <div className="flex items-start gap-2">
-                  <span className="text-2xl">{template.iconEmoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">{template.title}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      <span>{template.points} {t('tasks.pts')}</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-        )}
-
-        {!editingTask && (
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">{t('tasks.orCustomize')}</span>
-          </div>
-        </div>
-        )}
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <FormField
@@ -402,6 +360,57 @@ export function TaskDialog({
                 );
               }}
             />
+
+            {/* Quick Templates Section - Only show when creating */}
+            {!editingTask && (
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">{t('tasks.orChooseTemplate')}</span>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <h3 className="font-semibold">{t('tasks.quickTemplates')}</h3>
+                  <Badge variant="secondary">{t('tasks.popular')}</Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {taskTemplates.map((template) => (
+                    <Card
+                      key={template.id}
+                      className="p-3 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                      onClick={() => applyTemplate(template)}
+                      data-testid={`template-${template.id}`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="text-2xl">{template.iconEmoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">{template.title}</div>
+                          <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <span>{template.points} {t('tasks.pts')}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">{t('tasks.orCustomize')}</span>
+                </div>
+              </div>
+            </>
+            )}
 
             <FormField
               control={form.control}
