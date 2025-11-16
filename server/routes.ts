@@ -10,6 +10,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { achievementEngine } from "./achievementEngine";
+import { wsClients, broadcastToFamily } from "./websocket";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, type Family } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
@@ -65,9 +66,6 @@ const avatarUpload = multer({
   },
 });
 
-// WebSocket connection management
-const wsClients = new Map<string, Set<WebSocket>>();
-
 // Track uploaded photos to prevent URL spoofing
 const uploadedPhotos = new Map<string, { memberId: string; taskId: string; timestamp: number }>();
 
@@ -80,18 +78,6 @@ setInterval(() => {
     }
   });
 }, 60 * 60 * 1000);
-
-function broadcastToFamily(familyName: string, message: any) {
-  const clients = wsClients.get(familyName);
-  if (clients) {
-    const messageStr = JSON.stringify(message);
-    clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(messageStr);
-      }
-    });
-  }
-}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded files

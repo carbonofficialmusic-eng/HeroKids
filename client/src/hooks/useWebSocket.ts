@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { queryClient } from "@/lib/queryClient";
+import confetti from "canvas-confetti";
 
 export function useWebSocket(familyName: string | null) {
   const wsRef = useRef<WebSocket | null>(null);
@@ -88,6 +89,50 @@ export function useWebSocket(familyName: string | null) {
             case "chat_message":
               // Invalidate chat messages to show new message
               queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+              break;
+
+            case "achievement_earned":
+              // Invalidate queries to refresh data
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/achievements/awards"] });
+              
+              // Trigger confetti celebration
+              {
+                const duration = 3000;
+                const animationEnd = Date.now() + duration;
+                const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+                const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+                const interval: any = setInterval(() => {
+                  const timeLeft = animationEnd - Date.now();
+
+                  if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                  }
+
+                  const particleCount = 50 * (timeLeft / duration);
+                  
+                  confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+                  });
+                  confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+                  });
+                }, 250);
+                
+                console.log(`🎉 ${data.memberName} earned "${data.achievementTitle}" (+${data.bonusPoints} points)!`);
+              }
+              break;
+
+            case "achievement_created":
+            case "achievement_updated":
+            case "achievement_deleted":
+              queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
               break;
 
             default:

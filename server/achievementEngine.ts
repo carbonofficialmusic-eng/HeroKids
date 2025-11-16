@@ -1,4 +1,5 @@
 import { storage } from "./storage";
+import { broadcastToFamily } from "./websocket";
 import type { AchievementDefinition, FamilyMember } from "@shared/schema";
 
 export interface AchievementEvent {
@@ -87,6 +88,15 @@ export class AchievementEngine {
 
         await storage.awardAchievement(definition.id, event.memberId, definition.bonusPoints);
         console.log(`🏆 ${member.displayName} earned "${definition.title}" (+${definition.bonusPoints} points)`);
+        
+        // Broadcast achievement to family with celebration
+        broadcastToFamily(event.familyName, {
+          type: "achievement_earned",
+          memberId: event.memberId,
+          memberName: member.displayName,
+          achievementTitle: definition.title,
+          bonusPoints: definition.bonusPoints,
+        });
       }
     } else {
       await storage.updateAchievementMember(achievementMember.id, {
@@ -114,6 +124,14 @@ export class AchievementEngine {
       if (winner.weeklyPoints > 0) {
         await storage.awardAchievement(definition.id, winner.id, definition.bonusPoints);
         console.log(`🥇 ${winner.displayName} earned "${definition.title}" for ${config.rank} rank (+${definition.bonusPoints} points)`);
+        
+        broadcastToFamily(event.familyName, {
+          type: "achievement_earned",
+          memberId: winner.id,
+          memberName: winner.displayName,
+          achievementTitle: definition.title,
+          bonusPoints: definition.bonusPoints,
+        });
       }
     }
   }
@@ -136,6 +154,14 @@ export class AchievementEngine {
         if (hasTasks && noRejections) {
           await storage.awardAchievement(definition.id, member.id, definition.bonusPoints);
           console.log(`⭐ ${member.displayName} earned "${definition.title}" - Perfect week! (+${definition.bonusPoints} points)`);
+          
+          broadcastToFamily(event.familyName, {
+            type: "achievement_earned",
+            memberId: member.id,
+            memberName: member.displayName,
+            achievementTitle: definition.title,
+            bonusPoints: definition.bonusPoints,
+          });
         }
       }
     }
@@ -160,6 +186,14 @@ export class AchievementEngine {
       if (!alreadyAwarded) {
         await storage.awardAchievement(definition.id, event.memberId, definition.bonusPoints);
         console.log(`🎯 ${member.displayName} earned "${definition.title}" - ${threshold} lifetime points! (+${definition.bonusPoints} points)`);
+        
+        broadcastToFamily(event.familyName, {
+          type: "achievement_earned",
+          memberId: event.memberId,
+          memberName: member.displayName,
+          achievementTitle: definition.title,
+          bonusPoints: definition.bonusPoints,
+        });
       }
     }
   }
@@ -207,6 +241,14 @@ export class AchievementEngine {
           if (newStreak === threshold) {
             await storage.awardAchievement(definition.id, member.id, definition.bonusPoints);
             console.log(`🔥 ${member.displayName} earned "${definition.title}" - ${threshold} day streak! (+${definition.bonusPoints} points)`);
+            
+            broadcastToFamily(event.familyName, {
+              type: "achievement_earned",
+              memberId: member.id,
+              memberName: member.displayName,
+              achievementTitle: definition.title,
+              bonusPoints: definition.bonusPoints,
+            });
           }
         } else {
           if (achievementMember.lastStreakDate) {
