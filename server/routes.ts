@@ -2559,6 +2559,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Seed default achievements for family (parent only)
+  app.post("/api/achievements/seed", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can seed achievements
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can seed achievements" });
+      }
+      
+      // Check if achievements already exist
+      const existing = await storage.getAchievementDefinitionsByFamily(member.familyName);
+      if (existing.length > 0) {
+        return res.status(400).json({ message: "Achievements already exist for this family" });
+      }
+      
+      // Create default achievements
+      const definitions = await storage.seedDefaultAchievements(member.familyName);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "achievements_seeded",
+        count: definitions.length,
+      });
+      
+      res.status(201).json({ 
+        message: "Default achievements created successfully",
+        achievements: definitions,
+        count: definitions.length 
+      });
+    } catch (error: any) {
+      console.error("Error seeding achievements:", error);
+      res.status(500).json({ message: "Failed to seed achievements" });
+    }
+  });
+
   // Create achievement definition (parent only)
   app.post("/api/achievements", isAuthenticated, async (req: any, res) => {
     try {
