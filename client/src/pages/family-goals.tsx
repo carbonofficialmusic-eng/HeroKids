@@ -151,7 +151,7 @@ export default function FamilyGoals() {
           </div>
           <Link href="/dashboard">
             <Button variant="outline" data-testid="button-back-dashboard">
-              Zurück zum Dashboard
+              {t("backToDashboard")}
             </Button>
           </Link>
         </div>
