@@ -150,11 +150,12 @@ function RewardCard({
   currentPoints: number;
   onComingSoon: () => void;
 }) {
+  const [showDetails, setShowDetails] = useState(false);
   const { percentage, remaining, isReady } = getRewardProgress(currentPoints, reward.pointCost);
   const progressColor = getProgressColor(percentage);
   const RewardIcon = reward.Icon;
 
-  const handleClick = () => {
+  const handleRequestClick = () => {
     if (isReady) {
       confetti({
         particleCount: 100,
@@ -166,69 +167,146 @@ function RewardCard({
   };
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-    >
-      <Card className={`p-6 transition-all bg-card/80 backdrop-blur-md border-2 rounded-2xl ${
-        isReady ? "ring-4 ring-primary shadow-2xl border-primary" : "border-border"
-      }`}>
-        <div className="flex gap-6">
-          <div className={`flex-shrink-0 p-4 rounded-2xl ${
-            isReady ? "bg-primary/20" : "bg-primary/10"
-          }`}>
-            <RewardIcon className="h-16 w-16 text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-2xl mb-2" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              {reward.title}
-            </h3>
-            <p className="text-base text-muted-foreground mb-4">{reward.description}</p>
-
-            <div className="mb-3">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-lg font-bold">
-                  {currentPoints}/{reward.pointCost} Punkte
-                </span>
-                <span className="text-xl font-bold" style={{ color: progressColor }}>
-                  {Math.round(percentage)}%
-                </span>
-              </div>
-              <Progress value={percentage} className="h-4 rounded-full" />
+    <>
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      >
+        <Card className={`p-4 transition-all bg-card/80 backdrop-blur-md border-2 rounded-2xl ${
+          isReady ? "ring-4 ring-primary shadow-2xl border-primary" : "border-border"
+        }`}>
+          <div className="flex items-center gap-4">
+            <div className={`flex-shrink-0 p-3 rounded-2xl ${
+              isReady ? "bg-primary/20" : "bg-primary/10"
+            }`}>
+              <RewardIcon className="h-12 w-12 text-primary" />
             </div>
-
-            {!isReady && (
-              <p className="text-base text-muted-foreground flex items-center gap-2">
-                <Zap className="h-5 w-5 text-amber-500" />
-                Noch <span className="font-bold text-lg">{remaining} Punkte</span>!
-              </p>
-            )}
-          </div>
-          <div className="flex-shrink-0">
-            <Button
-              variant={isReady ? "default" : "outline"}
-              size="lg"
-              onClick={handleClick}
-              className="h-14 px-6 text-base font-bold rounded-2xl"
-              data-testid={`button-request-reward-${reward.id}`}
-            >
-              {isReady ? (
-                <>
-                  <Gift className="h-6 w-6 mr-2" />
-                  Anfragen!
-                </>
-              ) : (
-                <>
-                  <Trophy className="h-5 w-5 mr-2" />
-                  Sammeln
-                </>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-bold text-xl" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                  {reward.title}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDetails(true)}
+                  className="h-8 w-8 rounded-full"
+                  data-testid={`button-info-reward-${reward.id}`}
+                >
+                  <Info className="h-5 w-5 text-primary" />
+                </Button>
+              </div>
+              
+              <Progress value={percentage} className="h-5 rounded-full mb-1" />
+              
+              {!isReady && (
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <Zap className="h-4 w-4 text-amber-500" />
+                  Noch <span className="font-bold">{remaining} Punkte</span>!
+                </p>
               )}
-            </Button>
+              {isReady && (
+                <p className="text-sm font-bold text-green-500 flex items-center gap-1">
+                  <Sparkles className="h-4 w-4" />
+                  Bereit zum Anfragen!
+                </p>
+              )}
+            </div>
+            <div className="flex-shrink-0">
+              <Button
+                variant={isReady ? "default" : "outline"}
+                size="default"
+                onClick={handleRequestClick}
+                className="h-11 px-5 text-base font-bold rounded-2xl"
+                data-testid={`button-request-reward-${reward.id}`}
+              >
+                {isReady ? (
+                  <>
+                    <Gift className="h-5 w-5 mr-2" />
+                    Jetzt!
+                  </>
+                ) : (
+                  <>
+                    <Trophy className="h-4 w-4 mr-2" />
+                    Sammeln
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-        </div>
-      </Card>
-    </motion.div>
+        </Card>
+      </motion.div>
+
+      {/* Details Dialog */}
+      <AlertDialog open={showDetails} onOpenChange={setShowDetails}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-3 text-2xl" style={{ fontFamily: "Fredoka, sans-serif" }}>
+              <div className="p-3 bg-primary/10 rounded-2xl">
+                <RewardIcon className="h-10 w-10 text-primary" />
+              </div>
+              {reward.title}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4 pt-4">
+              {reward.description && (
+                <div className="text-base text-foreground">
+                  <p className="font-semibold mb-1">Beschreibung:</p>
+                  <p>{reward.description}</p>
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
+                  <span className="font-semibold">Benötigte Punkte:</span>
+                  <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
+                    {reward.pointCost}
+                  </Badge>
+                </div>
+                
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
+                  <span className="font-semibold">Deine Punkte:</span>
+                  <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
+                    {currentPoints}
+                  </Badge>
+                </div>
+                
+                <div className="p-3 bg-muted/50 rounded-xl">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold">Fortschritt:</span>
+                    <span className="text-lg font-bold" style={{ color: progressColor }}>
+                      {Math.round(percentage)}%
+                    </span>
+                  </div>
+                  <Progress value={percentage} className="h-4 rounded-full" />
+                </div>
+                
+                {!isReady && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800">
+                    <p className="text-base font-bold flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-amber-500" />
+                      Noch {remaining} Punkte bis zur Belohnung!
+                    </p>
+                  </div>
+                )}
+                
+                {isReady && (
+                  <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-xl border border-green-200 dark:border-green-800">
+                    <p className="text-base font-bold flex items-center gap-2 text-green-600 dark:text-green-400">
+                      <Sparkles className="h-5 w-5" />
+                      Du kannst diese Belohnung jetzt anfragen!
+                    </p>
+                  </div>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction data-testid="button-close-details">Schließen</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -339,49 +417,49 @@ function StyleBonusPanel({
   const remaining = Math.max(nextUnlock.pointsNeeded - currentPoints, 0);
 
   return (
-    <Card className="p-6 bg-card/80 backdrop-blur-md border-2 rounded-2xl">
-      <h3 className="font-bold text-2xl mb-4 flex items-center gap-2" style={{ fontFamily: "Fredoka, sans-serif" }}>
+    <Card className="p-4 bg-card/80 backdrop-blur-md border-2 rounded-2xl">
+      <h3 className="font-bold text-xl mb-3 flex items-center gap-2" style={{ fontFamily: "Fredoka, sans-serif" }}>
         <div className="p-2 bg-gradient-to-br from-pink-400 to-purple-500 rounded-xl">
-          <Palette className="h-6 w-6 text-white" />
+          <Palette className="h-5 w-5 text-white" />
         </div>
         Style Bonus
       </h3>
-      <div className="space-y-4">
-        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30 rounded-xl border border-orange-200 dark:border-orange-800">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30 rounded-xl border border-orange-200 dark:border-orange-800">
           <motion.div
             animate={{ rotate: [0, 10, -10, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
-            <Flame className="h-10 w-10 text-orange-500" />
+            <Flame className="h-8 w-8 text-orange-500" />
           </motion.div>
           <div>
-            <p className="font-bold text-base">Aktueller Skin:</p>
-            <p className="text-lg font-bold text-primary">{activeSkin.name}</p>
+            <p className="font-bold text-sm">Aktueller Skin:</p>
+            <p className="text-base font-bold text-primary">{activeSkin.name}</p>
           </div>
         </div>
-        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
-          <span className="font-bold text-base">Discovery-Karten</span>
-          <Badge variant="secondary" className="text-xl px-4 py-2 font-bold rounded-xl">
+        <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
+          <span className="font-bold text-sm">Discovery-Karten</span>
+          <Badge variant="secondary" className="text-base px-3 py-1 font-bold rounded-xl">
             {availableCards}
           </Badge>
         </div>
-        <div className="p-4 bg-muted/50 rounded-xl border-2 border-dashed border-primary/30">
-          <p className="text-base mb-1">
+        <div className="p-3 bg-muted/50 rounded-xl border-2 border-dashed border-primary/30">
+          <p className="text-sm mb-1">
             Nächstes Unlock: <span className="font-bold text-primary">{nextUnlock.name}</span>
           </p>
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            <Zap className="h-4 w-4 text-amber-500" />
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Zap className="h-3 w-3 text-amber-500" />
             bei {nextUnlock.pointsNeeded} Punkten ({remaining} fehlen noch)
           </p>
         </div>
         <Button
           variant="outline"
-          size="lg"
-          className="w-full h-12 text-base font-bold rounded-xl"
+          size="default"
+          className="w-full h-10 text-sm font-bold rounded-xl"
           onClick={onComingSoon}
           data-testid="button-browse-skins"
         >
-          <Palette className="h-5 w-5 mr-2" />
+          <Palette className="h-4 w-4 mr-2" />
           Skins durchstöbern
         </Button>
       </div>
@@ -414,24 +492,24 @@ function KidQuestTrack({ tasks, onComingSoon }: { tasks: typeof MOCK_DATA.tasks;
               whileTap={{ scale: 0.95 }}
             >
               <Card
-                className={`p-6 transition-all cursor-pointer bg-card/80 backdrop-blur-md border-2 rounded-2xl ${
+                className={`p-4 transition-all cursor-pointer bg-card/80 backdrop-blur-md border-2 rounded-2xl ${
                   task.completed ? "opacity-60 border-green-500" : "border-border hover:border-primary"
                 }`}
                 data-testid={`task-card-${task.id}`}
                 onClick={onComingSoon}
               >
-                <div className="text-center space-y-4">
-                  <div className={`flex justify-center p-4 rounded-2xl mx-auto w-fit ${
+                <div className="text-center space-y-3">
+                  <div className={`flex justify-center p-3 rounded-2xl mx-auto w-fit ${
                     task.completed ? "bg-green-500/20" : "bg-primary/10"
                   }`}>
-                    <TaskIcon className={`h-16 w-16 ${task.completed ? "text-green-500" : "text-primary"}`} />
+                    <TaskIcon className={`h-12 w-12 ${task.completed ? "text-green-500" : "text-primary"}`} />
                   </div>
-                  <h3 className="font-bold text-2xl" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                  <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
                     {task.title}
                   </h3>
                   <Badge 
                     variant={task.completed ? "secondary" : "default"} 
-                    className="text-lg px-4 py-2 font-bold rounded-xl"
+                    className="text-base px-3 py-1 font-bold rounded-xl"
                   >
                     {task.completed ? "✓ Fertig" : "+"} {task.points} Punkte
                   </Badge>
