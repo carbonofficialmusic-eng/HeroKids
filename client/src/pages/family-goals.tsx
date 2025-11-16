@@ -230,48 +230,49 @@ export default function FamilyGoals() {
             const isCompleted = goal.currentPoints >= goal.targetPoints;
             
             return (
-              <Card key={goal.id} className="overflow-hidden" data-testid={`card-goal-${goal.id}`}>
+              <Card key={goal.id} className="overflow-hidden relative" data-testid={`card-goal-${goal.id}`}>
                 <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="text-5xl">{goal.iconEmoji}</div>
-                      <div className="flex-1">
-                        <h3 className="text-2xl font-bold mb-1">{goal.title}</h3>
+                  {/* Delete Button - Fixed top right position */}
+                  {member?.role === "parent" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setGoalToDelete(goal);
+                        setDeleteDialogOpen(true);
+                      }}
+                      data-testid={`button-delete-goal-${goal.id}`}
+                      className="absolute top-4 right-4 z-10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  
+                  <div className="mb-4 pr-12">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="text-4xl sm:text-5xl flex-shrink-0">{goal.iconEmoji}</div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold mb-1">{goal.title}</h3>
                         {goal.description && (
-                          <p className="text-muted-foreground">{goal.description}</p>
+                          <p className="text-muted-foreground text-sm">{goal.description}</p>
                         )}
-                        <div className="flex items-center gap-4 mt-3">
-                          <Badge variant="secondary" className="gap-1">
+                        {isCompleted && (
+                          <Badge variant="default" className="gap-1 mt-2">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Erreicht!
+                          </Badge>
+                        )}
+                        <div className="flex flex-wrap items-center gap-2 mt-3">
+                          <Badge variant="secondary" className="gap-1 text-xs">
                             <Calendar className="h-3 w-3" />
                             {goal.contributionPeriod === "weekly" ? "Wöchentlich" : "Monatlich"}
                           </Badge>
-                          <Badge variant="secondary" className="gap-1">
+                          <Badge variant="secondary" className="gap-1 text-xs">
                             <Coins className="h-3 w-3" />
-                            {goal.contributionAmount} Punkte pro Person
+                            {goal.contributionAmount} Punkte
                           </Badge>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {isCompleted && (
-                        <Badge variant="default" className="gap-1">
-                          <CheckCircle2 className="h-4 w-4" />
-                          Erreicht!
-                        </Badge>
-                      )}
-                      {member?.role === "parent" && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setGoalToDelete(goal);
-                            setDeleteDialogOpen(true);
-                          }}
-                          data-testid={`button-delete-goal-${goal.id}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
                     </div>
                   </div>
 
