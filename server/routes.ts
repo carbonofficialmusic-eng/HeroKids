@@ -9,7 +9,7 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, type Family } from "@shared/schema";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, type Family } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { calculateAvailableCards, getUnlockedTier, getSkinTier } from "@shared/skin-config";
@@ -2506,6 +2506,180 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error marking messages as read:", error);
       res.status(500).json({ message: "Failed to mark messages as read" });
+    }
+  });
+
+  // ===== Achievement System =====
+
+  // Get achievement definitions for family
+  app.get("/api/achievements", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const definitions = await storage.getAchievementDefinitionsByFamily(member.familyName);
+      res.json(definitions);
+    } catch (error: any) {
+      console.error("Error fetching achievement definitions:", error);
+      res.status(500).json({ message: "Failed to fetch achievement definitions" });
+    }
+  });
+
+  // Create achievement definition (parent only)
+  app.post("/api/achievements", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can create achievements
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can create achievements" });
+      }
+      
+      const parsed = insertAchievementDefinitionSchema.parse({
+        ...req.body,
+        familyName: member.familyName,
+      });
+      
+      const definition = await storage.createAchievementDefinition(parsed);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "achievement_created",
+        definition,
+      });
+      
+      res.status(201).json(definition);
+    } catch (error: any) {
+      console.error("Error creating achievement definition:", error);
+      res.status(400).json({ message: error.message || "Failed to create achievement definition" });
+    }
+  });
+
+  // Update achievement definition (parent only)
+  app.patch("/api/achievements/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can update achievements
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update achievements" });
+      }
+      
+      // Verify achievement belongs to this family
+      const definitions = await storage.getAchievementDefinitionsByFamily(member.familyName);
+      const existing = definitions.find(d => d.id === id);
+      
+      if (!existing) {
+        return res.status(404).json({ message: "Achievement definition not found" });
+      }
+      
+      const updated = await storage.updateAchievementDefinition(id, req.body);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "achievement_updated",
+        definition: updated,
+      });
+      
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error updating achievement definition:", error);
+      res.status(400).json({ message: error.message || "Failed to update achievement definition" });
+    }
+  });
+
+  // Delete achievement definition (parent only)
+  app.delete("/api/achievements/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete achievements
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete achievements" });
+      }
+      
+      // Verify achievement belongs to this family
+      const definitions = await storage.getAchievementDefinitionsByFamily(member.familyName);
+      const existing = definitions.find(d => d.id === id);
+      
+      if (!existing) {
+        return res.status(404).json({ message: "Achievement definition not found" });
+      }
+      
+      await storage.deleteAchievementDefinition(id);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "achievement_deleted",
+        achievementId: id,
+      });
+      
+      res.json({ message: "Achievement definition deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting achievement definition:", error);
+      res.status(500).json({ message: "Failed to delete achievement definition" });
+    }
+  });
+
+  // Get achievement awards history
+  app.get("/api/achievements/awards", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const awards = await storage.getAchievementAwardsByFamily(member.familyName);
+      res.json(awards);
+    } catch (error: any) {
+      console.error("Error fetching achievement awards:", error);
+      res.status(500).json({ message: "Failed to fetch achievement awards" });
+    }
+  });
+
+  // Get achievement awards for current member
+  app.get("/api/achievements/my-awards", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Use acting member if available
+      const actingMemberId = req.session.actingAsMemberId;
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const awards = await storage.getAchievementAwardsByMember(member.id);
+      res.json(awards);
+    } catch (error: any) {
+      console.error("Error fetching member achievement awards:", error);
+      res.status(500).json({ message: "Failed to fetch achievement awards" });
     }
   });
 
