@@ -1256,7 +1256,11 @@ export class DatabaseStorage implements IStorage {
       await tx.delete(chatMessages)
         .where(eq(chatMessages.familyName, familyName));
 
-      // 9. Reset all family member stats to zero
+      // 9. Delete all family goals (goalContributions will cascade delete automatically)
+      await tx.delete(familyGoals)
+        .where(eq(familyGoals.familyName, familyName));
+
+      // 10. Reset all family member stats to zero
       for (const memberId of memberIds) {
         await tx.update(familyMembers)
           .set({
@@ -1273,7 +1277,7 @@ export class DatabaseStorage implements IStorage {
           .where(eq(familyMembers.id, memberId));
       }
 
-      // 10. Create default tasks for the family (customized baseline)
+      // 11. Create default tasks for the family (customized baseline)
       const defaultTasks = [
         {
           id: crypto.randomUUID(),
