@@ -949,8 +949,8 @@ export default function KidDashboard() {
                 </Link>
               </Button>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {myRedemptions.slice(0, 3).map((redemption, index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {myRedemptions.slice(0, 2).map((redemption, index) => (
                 <motion.div
                   key={redemption.id}
                   initial={{ opacity: 0, scale: 0.9 }}
