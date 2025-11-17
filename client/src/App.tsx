@@ -14,6 +14,7 @@ import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import KidDashboard from "@/pages/kid-dashboard";
 import KidDashboardOld from "@/pages/kid-dashboard-old";
+import AutoRedirect from "@/pages/auto-redirect";
 import Pricing from "@/pages/pricing";
 import Analytics from "@/pages/analytics";
 import Chat from "@/pages/chat";
@@ -105,7 +106,7 @@ function Router() {
           <Route path="/" component={Landing} />
         ) : (
           <>
-            <Route path="/" component={Dashboard} />
+            <Route path="/" component={AutoRedirect} />
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/kid-dashboard" component={KidDashboard} />
             <Route path="/kid-dashboard-old" component={KidDashboardOld} />
