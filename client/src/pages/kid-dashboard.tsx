@@ -38,7 +38,7 @@ import {
   MessageCircle,
   Lightbulb,
 } from "lucide-react";
-import type { User, FamilyMember, Reward, Task, Family } from "@shared/schema";
+import type { User, FamilyMember, Reward, Task, Family, RewardRedemption } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileMenu } from "@/components/profile-menu";
@@ -497,6 +497,15 @@ export default function KidDashboard() {
     enabled: !!member,
   });
 
+  // Fetch reward redemptions (child's redeemed rewards)
+  const { data: redemptions = [] } = useQuery<(RewardRedemption & { rewardTitle?: string })[]>({
+    queryKey: ["/api/reward-redemptions"],
+    enabled: !!member,
+  });
+
+  // Filter to show only this child's redemptions
+  const myRedemptions = member ? redemptions.filter(r => r.memberId === member.id) : [];
+
   // Edit member mutation
   const editMemberMutation = useMutation({
     mutationFn: async ({ memberId, data }: { memberId: string; data: any }) => {
@@ -699,7 +708,7 @@ export default function KidDashboard() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 max-w-6xl space-y-8">
+      <div className="container mx-auto px-4 max-w-6xl space-y-8 pb-28">
         {/* Hero Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -786,6 +795,50 @@ export default function KidDashboard() {
             </div>
           )}
         </div>
+
+        {/* My Redeemed Rewards Section */}
+        {myRedemptions.length > 0 && (
+          <div className="space-y-4 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-green-500/20">
+                <CheckCircle2 className="h-7 w-7 text-green-500" />
+              </div>
+              <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                Meine Belohnungen
+              </h2>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {myRedemptions.map((redemption, index) => (
+                <motion.div
+                  key={redemption.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-2 border-green-500/30 rounded-2xl">
+                    <div className="text-center space-y-2">
+                      <div className="flex justify-center p-3 rounded-2xl mx-auto w-fit bg-green-500/20">
+                        <CheckCircle2 className="h-10 w-10 text-green-500" />
+                      </div>
+                      <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                        {redemption.rewardTitle || "Belohnung"}
+                      </h3>
+                      <Badge 
+                        variant={redemption.status === "approved" ? "default" : "secondary"}
+                        className="text-sm"
+                      >
+                        {redemption.status === "approved" ? "✓ Eingelöst" : "⏳ Warte auf Erfüllung"}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground">
+                        {redemption.pointsSpent} Punkte
+                      </p>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Tasks Section */}
         <div className="space-y-6">
