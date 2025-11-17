@@ -822,7 +822,7 @@ export default function KidDashboard() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 max-w-6xl space-y-8 pb-28">
+      <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-10 pb-28">
         {/* Hero Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
