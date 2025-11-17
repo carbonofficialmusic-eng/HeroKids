@@ -503,8 +503,16 @@ export default function KidDashboard() {
     enabled: !!member,
   });
 
-  // Filter to show only this child's redemptions
-  const myRedemptions = member ? redemptions.filter(r => r.memberId === member.id) : [];
+  // Filter to show only this child's redemptions, sorted by newest first
+  const myRedemptions = member 
+    ? redemptions
+        .filter(r => r.memberId === member.id)
+        .sort((a, b) => {
+          const dateA = a.redeemedAt ? new Date(a.redeemedAt).getTime() : 0;
+          const dateB = b.redeemedAt ? new Date(b.redeemedAt).getTime() : 0;
+          return dateB - dateA;
+        })
+    : [];
 
   // Edit member mutation
   const editMemberMutation = useMutation({
@@ -799,16 +807,23 @@ export default function KidDashboard() {
         {/* My Redeemed Rewards Section */}
         {myRedemptions.length > 0 && (
           <div className="space-y-4 mb-8">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-green-500/20">
-                <CheckCircle2 className="h-7 w-7 text-green-500" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-green-500/20">
+                  <CheckCircle2 className="h-7 w-7 text-green-500" />
+                </div>
+                <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                  Meine Belohnungen
+                </h2>
               </div>
-              <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                Meine Belohnungen
-              </h2>
+              <Button variant="ghost" size="sm" asChild data-testid="button-view-all-rewards">
+                <Link href="/my-rewards">
+                  Alle ansehen →
+                </Link>
+              </Button>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {myRedemptions.map((redemption, index) => (
+              {myRedemptions.slice(0, 3).map((redemption, index) => (
                 <motion.div
                   key={redemption.id}
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -824,10 +839,12 @@ export default function KidDashboard() {
                         {redemption.rewardTitle || "Belohnung"}
                       </h3>
                       <Badge 
-                        variant={redemption.status === "approved" ? "default" : "secondary"}
+                        variant={redemption.status === "completed" ? "default" : "secondary"}
                         className="text-sm"
                       >
-                        {redemption.status === "approved" ? "✓ Eingelöst" : "⏳ Warte auf Erfüllung"}
+                        {redemption.status === "completed" ? "✓ Erfüllt" : 
+                         redemption.status === "approved" ? "⏳ Warte auf Erfüllung" : 
+                         "⏸️ Ausstehend"}
                       </Badge>
                       <p className="text-xs text-muted-foreground">
                         {redemption.pointsSpent} Punkte
