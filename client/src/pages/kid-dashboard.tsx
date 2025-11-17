@@ -37,8 +37,12 @@ import {
   Crown,
   MessageCircle,
   Lightbulb,
+  Target,
+  TrendingUp,
+  Calendar,
+  Coins,
 } from "lucide-react";
-import type { User, FamilyMember, Reward, Task, Family, RewardRedemption } from "@shared/schema";
+import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileMenu } from "@/components/profile-menu";
@@ -71,6 +75,49 @@ function getTaskIcon(title: string) {
   if (lowerTitle.includes("lesen") || lowerTitle.includes("read")) return Film;
   if (lowerTitle.includes("spiel") || lowerTitle.includes("play")) return Gamepad2;
   return Star;
+}
+
+// Helper: Calculate progress percentage for family goals
+function calculateProgress(goal: FamilyGoal): number {
+  if (goal.targetPoints === 0) return 0;
+  return Math.min((goal.currentPoints / goal.targetPoints) * 100, 100);
+}
+
+// Helper: Get current period string (e.g., "2025-W47" for weekly, "2025-11" for monthly)
+function getCurrentPeriod(period: "weekly" | "monthly"): string {
+  const now = new Date();
+  if (period === "weekly") {
+    const weekNumber = getWeekNumber(now);
+    return `${now.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
+  } else {
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }
+}
+
+// Helper: Get ISO week number
+function getWeekNumber(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+}
+
+// Helper: Format period for display
+function formatPeriod(period: string, type: "weekly" | "monthly"): string {
+  if (type === "weekly") {
+    const match = period.match(/(\d{4})-W(\d{2})/);
+    if (match) {
+      return `Woche ${match[2]}, ${match[1]}`;
+    }
+  } else {
+    const match = period.match(/(\d{4})-(\d{2})/);
+    if (match) {
+      const monthNames = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+      return `${monthNames[parseInt(match[2]) - 1]} ${match[1]}`;
+    }
+  }
+  return period;
 }
 
 // Get color based on progress percentage
@@ -462,6 +509,33 @@ export default function KidDashboard() {
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
 
+  // Family Goals mutations
+  const contributeMutation = useMutation({
+    mutationFn: async (goalId: string) => {
+      return await apiRequest("POST", `/api/family-goals/${goalId}/contribute`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      toast({
+        title: "Punkte eingezahlt! 🎯",
+        description: "Dein Beitrag wurde zum Familienziel hinzugefügt.",
+      });
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fehler",
+        description: error.message || "Beitrag konnte nicht eingezahlt werden",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Load user and member data
   const { data: authUser, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -494,6 +568,12 @@ export default function KidDashboard() {
 
   const { data: tasks = [] } = useQuery<TaskWithMeta[]>({
     queryKey: ["/api/tasks"],
+    enabled: !!member,
+  });
+
+  // Fetch family goals
+  const { data: goals = [] } = useQuery<FamilyGoal[]>({
+    queryKey: ["/api/family-goals"],
     enabled: !!member,
   });
 
@@ -854,6 +934,94 @@ export default function KidDashboard() {
                 </motion.div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Family Goals Section */}
+        {goals.filter(g => g.isActive).length > 0 && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl">
+                <Target className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-4xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                Familienziele 🎯
+              </h2>
+            </div>
+
+            {goals.filter(g => g.isActive).map((goal, index) => {
+              const progress = calculateProgress(goal);
+              const currentPeriod = getCurrentPeriod(goal.contributionPeriod);
+              const isCompleted = goal.currentPoints >= goal.targetPoints;
+              
+              return (
+                <motion.div
+                  key={goal.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-2 border-blue-500/30 rounded-3xl">
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-4">
+                        <div className="text-5xl flex-shrink-0">{goal.iconEmoji}</div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-2xl font-bold mb-1" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                            {goal.title}
+                          </h3>
+                          {goal.description && (
+                            <p className="text-muted-foreground text-sm mb-2">{goal.description}</p>
+                          )}
+                          {isCompleted && (
+                            <Badge variant="default" className="gap-1 mb-2">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Erreicht!
+                            </Badge>
+                          )}
+                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                            <Badge variant="secondary" className="gap-1 text-xs">
+                              <Calendar className="h-3 w-3" />
+                              {goal.contributionPeriod === "weekly" ? "Wöchentlich" : "Monatlich"}
+                            </Badge>
+                            <Badge variant="secondary" className="gap-1 text-xs">
+                              <Coins className="h-3 w-3" />
+                              {goal.contributionAmount} Punkte
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Fortschritt</span>
+                          <span className="text-sm font-bold">
+                            {goal.currentPoints} / {goal.targetPoints} Punkte
+                          </span>
+                        </div>
+                        <Progress value={progress} className="h-3" />
+                      </div>
+
+                      <div className="flex items-center justify-between pt-4 border-t">
+                        <div className="text-sm text-muted-foreground">
+                          {formatPeriod(currentPeriod, goal.contributionPeriod)}
+                        </div>
+                        {!isCompleted && member && (
+                          <Button
+                            onClick={() => contributeMutation.mutate(goal.id)}
+                            disabled={contributeMutation.isPending || member.totalPoints < goal.contributionAmount}
+                            data-testid={`button-contribute-${goal.id}`}
+                            className="font-bold"
+                          >
+                            <TrendingUp className="h-4 w-4 mr-2" />
+                            {goal.contributionAmount} Punkte einzahlen
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         )}
 
