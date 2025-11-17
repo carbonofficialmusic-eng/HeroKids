@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,9 @@ import {
   TrendingUp,
   Calendar,
   Coins,
+  Users,
+  Share2,
+  UserPlus,
 } from "lucide-react";
 import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -62,6 +66,30 @@ interface TaskWithMeta extends Task {
   remainingSlots?: number | null;
   memberCompletionStatus?: "pending" | "approved" | "rejected" | null;
 }
+
+// Extended RewardRedemption type with sharing details
+type RedemptionWithDetails = RewardRedemption & {
+  rewardTitle?: string;
+  sharingStatus: "not_shared" | "sharing_active" | "sharing_finalized";
+  originalPointsSpent: number;
+};
+
+// Shared reward type with participants
+type SharedReward = RedemptionWithDetails & {
+  participants: Array<{
+    id: string;
+    memberId: string;
+    pointsContributed: number;
+    joinedAt: string;
+    member: {
+      id: string;
+      displayName: string;
+      avatarUrl: string | null;
+      activeSkinId: string | null;
+      color: string;
+    };
+  }>;
+};
 
 // Helper: Get generic icon for rewards
 function getRewardIcon(title: string) {
@@ -517,6 +545,9 @@ export default function KidDashboard() {
   // Auto-refresh tasks at midnight when daily tasks reset
   useMidnightRefresh();
 
+  // WebSocket connection for real-time updates
+  useWebSocket(member?.familyName || null);
+
   // Family Goals mutations
   const contributeMutation = useMutation({
     mutationFn: async (goalId: string) => {
@@ -566,6 +597,78 @@ export default function KidDashboard() {
     },
   });
 
+  // Reward Sharing Mutations
+  const startSharingMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/share`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      toast({
+        title: "Teilen gestartet! 🤝",
+        description: "Andere können jetzt beitreten.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fehler",
+        description: error.message || "Teilen konnte nicht gestartet werden.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const joinSharingMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/join`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      toast({
+        title: "Erfolgreich beigetreten! 🎉",
+        description: "Du bist jetzt Teil der geteilten Belohnung.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fehler",
+        description: error.message || "Beitreten nicht möglich.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const finalizeSharingMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/finalize`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      toast({
+        title: "Teilen abgeschlossen! ✓",
+        description: "Die Punkte wurden gleichmäßig aufgeteilt.",
+      });
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fehler",
+        description: error.message || "Teilen konnte nicht abgeschlossen werden.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Load user and member data
   const { data: authUser, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -610,6 +713,12 @@ export default function KidDashboard() {
   // Fetch reward redemptions (child's redeemed rewards)
   const { data: redemptions = [] } = useQuery<(RewardRedemption & { rewardTitle?: string })[]>({
     queryKey: ["/api/reward-redemptions"],
+    enabled: !!member,
+  });
+
+  // Fetch active shared rewards from other family members
+  const { data: sharedRewards = [] } = useQuery<SharedReward[]>({
+    queryKey: ["/api/rewards/shared"],
     enabled: !!member,
   });
 
