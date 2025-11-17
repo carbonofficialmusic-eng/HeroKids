@@ -552,29 +552,49 @@ export class DatabaseStorage implements IStorage {
     return Number(result?.count || 0) > 0;
   }
 
+  async getMemberCompletionStatus(taskId: string, memberId: string, txClient?: any): Promise<"pending" | "approved" | "rejected" | null> {
+    const client = txClient || db;
+    
+    const [completion] = await client
+      .select({ status: taskCompletions.status })
+      .from(taskCompletions)
+      .where(
+        and(
+          eq(taskCompletions.taskId, taskId),
+          eq(taskCompletions.memberId, memberId),
+          inArray(taskCompletions.status, ["pending", "approved", "rejected"])
+        )
+      )
+      .orderBy(desc(taskCompletions.completedAt))
+      .limit(1);
+    
+    return completion?.status || null;
+  }
+
   async createTaskCompletion(completionData: InsertTaskCompletion): Promise<TaskCompletion> {
     return await db.transaction(async (tx) => {
       // 1. Lock task: SELECT * FROM tasks WHERE id = taskId FOR UPDATE
       const task = await tx.select().from(tasks).where(eq(tasks.id, completionData.taskId)).for('update');
       if (!task[0]) throw new Error('Task not found');
       
-      // 2. If maxCompletions mode: validate
+      // 2. Check if member already has an active completion (pending or approved)
+      // This prevents duplicate submissions for both normal and multi-completion tasks
+      const hasCompleted = await this.hasActiveMemberCompletion(
+        completionData.taskId, 
+        completionData.memberId,
+        tx
+      );
+      if (hasCompleted) throw new Error('Member already completed this task');
+      
+      // 3. If maxCompletions mode: validate slot availability
       if (task[0].maxCompletions !== null) {
-        // Check if member already completed
-        const hasCompleted = await this.hasActiveMemberCompletion(
-          completionData.taskId, 
-          completionData.memberId,
-          tx
-        );
-        if (hasCompleted) throw new Error('Member already completed this task');
-        
         // Check if slots exhausted
         if (task[0].completionCount >= task[0].maxCompletions) {
           throw new Error('All completion slots filled');
         }
       }
       
-      // 3. Insert completion
+      // 4. Insert completion
       const [completion] = await tx.insert(taskCompletions)
         .values({
           ...completionData,
@@ -582,7 +602,7 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
       
-      // 4. If auto-approved: run approval logic immediately
+      // 5. If auto-approved: run approval logic immediately
       if (!task[0].requiresApproval) {
         await this._approveCompletionInternal(tx, completion.id, completion.memberId, true);
       }

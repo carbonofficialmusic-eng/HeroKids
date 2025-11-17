@@ -798,26 +798,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (member.role === "child") {
         const tasksWithMeta = await Promise.all(
           allTasks.map(async (task) => {
+            // Get completion status for this member
+            const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
+            // Only "approved" counts as truly completed for filtering purposes
+            // "pending" and "rejected" should still be shown to children
+            const hasCompleted = completionStatus === "approved";
+            
             // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
             if (task.maxCompletions !== null) {
-              // Check if child has already completed this task
-              const hasCompleted = await storage.hasActiveMemberCompletion(task.id, member.id);
-              
               return {
                 ...task,
                 remainingSlots: task.maxCompletions - task.completionCount,
                 memberHasCompleted: hasCompleted,
+                memberCompletionStatus: completionStatus,
               };
             }
             
             // Normal mode (maxCompletions == null) - Standard tasks visible to everyone
-            // Check if child has already completed this task
-            const hasCompleted = await storage.hasActiveMemberCompletion(task.id, member.id);
-            
             return {
               ...task,
               remainingSlots: null,
               memberHasCompleted: hasCompleted,
+              memberCompletionStatus: completionStatus,
             };
           })
         );
@@ -841,22 +843,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Parents see all tasks with metadata
         const tasksWithMeta = await Promise.all(
           allTasks.map(async (task) => {
+            // Get completion status for this member
+            const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
+            // Only "approved" counts as truly completed
+            const hasCompleted = completionStatus === "approved";
+            
             // For multi-completion tasks, check if parent has already completed it
             if (task.maxCompletions !== null) {
-              const hasCompleted = await storage.hasActiveMemberCompletion(task.id, member.id);
-              
               return {
                 ...task,
                 remainingSlots: task.maxCompletions - task.completionCount,
                 memberHasCompleted: hasCompleted,
+                memberCompletionStatus: completionStatus,
               };
             }
             
-            // For non-multi-completion tasks
+            // For non-multi-completion tasks - use same logic as multi-completion
             return {
               ...task,
               remainingSlots: null,
-              memberHasCompleted: false,
+              memberHasCompleted: hasCompleted,
+              memberCompletionStatus: completionStatus,
             };
           })
         );

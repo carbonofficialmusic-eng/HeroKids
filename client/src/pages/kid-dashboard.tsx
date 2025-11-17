@@ -42,6 +42,7 @@ import { useToast } from "@/hooks/use-toast";
 interface TaskWithMeta extends Task {
   memberHasCompleted?: boolean;
   remainingSlots?: number | null;
+  memberCompletionStatus?: "pending" | "approved" | "rejected" | null;
 }
 
 // Helper: Get generic icon for rewards
@@ -258,7 +259,27 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
 // Task Card Component
 function TaskCard({ task, member }: { task: TaskWithMeta; member: FamilyMember }) {
   const { toast } = useToast();
-  const isCompleted = task.memberHasCompleted || false;
+  
+  // Determine task state based on memberCompletionStatus
+  const completionStatus = task.memberCompletionStatus;
+  const isPending = completionStatus === "pending";
+  const isApproved = completionStatus === "approved";
+  const isRejected = completionStatus === "rejected";
+  const neverAttempted = completionStatus === null;
+  const hasNoSlots = task.remainingSlots !== null && task.remainingSlots <= 0;
+  const isInactive = task.status !== "active";
+  
+  // Fallback check: if memberHasCompleted is true but status is null, treat as completed
+  // This handles edge cases where status might be missing due to data inconsistency
+  const hasCompletedWithoutStatus = task.memberHasCompleted && neverAttempted;
+  
+  // Task is actionable ONLY if:
+  // 1. Never attempted (completionStatus === null AND !memberHasCompleted) OR rejected (can retry)
+  // 2. Task status is active
+  // 3. Has available slots (or no slot limit)
+  // NOT actionable if: pending, approved, has completion without status, inactive, or no slots
+  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots;
+  
   const TaskIcon = getTaskIcon(task.title);
 
   const completeMutation = useMutation({
@@ -267,7 +288,10 @@ function TaskCard({ task, member }: { task: TaskWithMeta; member: FamilyMember }
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-      if (!response.ok) throw new Error("Failed to complete task");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errorData.message || "Failed to complete task");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -285,41 +309,73 @@ function TaskCard({ task, member }: { task: TaskWithMeta; member: FamilyMember }
           : `Du hast ${task.points} Punkte verdient!`,
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         variant: "destructive",
         title: "Fehler",
-        description: "Aufgabe konnte nicht abgeschlossen werden.",
+        description: error.message || "Aufgabe konnte nicht abgeschlossen werden.",
       });
     },
   });
 
   const handleComplete = () => {
-    if (!isCompleted && !completeMutation.isPending) {
+    if (isActionable && !completeMutation.isPending) {
       completeMutation.mutate();
     }
   };
+  
+  // Display message for different states
+  let statusMessage = "";
+  let statusColor = "";
+  
+  if (isPending) {
+    statusMessage = "Wartet auf Freigabe";
+    statusColor = "text-amber-600 dark:text-amber-400";
+  } else if (isApproved) {
+    statusMessage = "Abgeschlossen & Genehmigt";
+    statusColor = "text-green-600 dark:text-green-400";
+  } else if (isRejected) {
+    statusMessage = "Nochmal versuchen";
+    statusColor = "text-blue-600 dark:text-blue-400";
+  } else if (hasNoSlots) {
+    statusMessage = "Alle Plätze belegt";
+    statusColor = "text-amber-600 dark:text-amber-400";
+  } else if (isInactive) {
+    statusMessage = "Nicht verfügbar";
+    statusColor = "text-muted-foreground";
+  }
 
   return (
     <motion.div
-      whileHover={{ scale: isCompleted ? 1 : 1.05, rotate: isCompleted ? 0 : 2 }}
-      whileTap={{ scale: isCompleted ? 1 : 0.95 }}
+      whileHover={{ scale: isActionable ? 1.05 : 1, rotate: isActionable ? 2 : 0 }}
+      whileTap={{ scale: isActionable ? 0.95 : 1 }}
     >
       <Card
-        className={`p-4 transition-all cursor-pointer bg-card/80 backdrop-blur-md border-2 rounded-2xl ${
-          isCompleted ? "opacity-60 border-green-500" : "border-border hover:border-primary"
+        className={`p-4 transition-all bg-card/80 backdrop-blur-md border-2 rounded-2xl ${
+          isActionable && !isRejected ? "cursor-pointer border-border hover:border-primary" : 
+          isActionable && isRejected ? "cursor-pointer border-blue-500 hover:border-blue-600" :
+          isApproved ? "opacity-70 border-green-500" :
+          isPending ? "opacity-60 border-amber-500" :
+          hasNoSlots ? "opacity-50 border-amber-500" :
+          "opacity-70 border-muted"
         }`}
         data-testid={`task-card-${task.id}`}
-        onClick={handleComplete}
+        onClick={isActionable ? handleComplete : undefined}
       >
         <div className="text-center space-y-3">
           <div className={`flex justify-center p-3 rounded-2xl mx-auto w-fit ${
-            isCompleted ? "bg-green-500/20" : "bg-primary/10"
+            isApproved ? "bg-green-500/20" : 
+            isPending ? "bg-amber-500/20" :
+            isRejected ? "bg-blue-500/20" :
+            hasNoSlots ? "bg-amber-500/20" :
+            "bg-primary/10"
           }`}>
-            {isCompleted ? (
-              <CheckCircle2 className="h-12 w-12 text-green-500" />
-            ) : completeMutation.isPending ? (
+            {completeMutation.isPending ? (
               <Loader2 className="h-12 w-12 text-primary animate-spin" />
+            ) : isApproved ? (
+              <CheckCircle2 className="h-12 w-12 text-green-500" />
+            ) : isPending ? (
+              <CheckCircle2 className="h-12 w-12 text-amber-500" />
             ) : (
               <TaskIcon className="h-12 w-12 text-primary" />
             )}
@@ -327,12 +383,33 @@ function TaskCard({ task, member }: { task: TaskWithMeta; member: FamilyMember }
           <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
             {task.title}
           </h3>
-          <Badge 
-            variant={isCompleted ? "secondary" : "default"} 
-            className="text-base px-3 py-1 font-bold rounded-xl"
-          >
-            {isCompleted ? "✓ Fertig" : "+"}{task.points} Punkte
-          </Badge>
+          
+          {statusMessage ? (
+            <div className="space-y-1">
+              <Badge 
+                variant="secondary"
+                className={`text-sm px-3 py-1 rounded-xl ${statusColor}`}
+              >
+                {statusMessage}
+              </Badge>
+              <p className="text-sm font-bold text-muted-foreground">
+                {task.points} Punkte
+              </p>
+            </div>
+          ) : (
+            <Badge 
+              variant="default" 
+              className="text-base px-3 py-1 font-bold rounded-xl"
+            >
+              +{task.points} Punkte
+            </Badge>
+          )}
+          
+          {hasNoSlots && task.remainingSlots === 0 && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+              Keine Plätze mehr verfügbar
+            </p>
+          )}
         </div>
       </Card>
     </motion.div>
