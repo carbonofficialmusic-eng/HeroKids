@@ -8,9 +8,15 @@ let lastMonthlyReset = new Date(0);
 let lastDailyCheck = new Date(0);
 
 export function startPointsResetScheduler() {
+  // Log initial timezone info
+  const startTime = new Date();
+  console.log(`Points reset scheduler started at ${startTime.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })} (German Time)`);
+  console.log(`Server timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
+  
   // Check every hour for point resets
   setInterval(async () => {
     const now = new Date();
+    const germanTime = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', hour12: false });
     
     // Weekly reset - every Monday at 00:00
     const isMonday = now.getDay() === 1;
@@ -19,7 +25,7 @@ export function startPointsResetScheduler() {
       getWeekNumber(lastWeeklyReset) === getWeekNumber(now);
     
     if (isMonday && !isSameWeek) {
-      console.log("Running weekly points reset...");
+      console.log(`⏰ Running weekly points reset at ${germanTime} (German Time)`);
       await resetWeeklyPoints();
       lastWeeklyReset = now;
     }
@@ -31,25 +37,24 @@ export function startPointsResetScheduler() {
       lastMonthlyReset.getFullYear() === now.getFullYear();
     
     if (isFirstOfMonth && !isSameMonth) {
-      console.log("Running monthly points reset...");
+      console.log(`⏰ Running monthly points reset at ${germanTime} (German Time)`);
       await resetMonthlyPoints();
       lastMonthlyReset = now;
     }
     
-    // Daily check for streak tracking
+    // Daily check for streak tracking and recurring task resets
     const isSameDay =
       lastDailyCheck.getDate() === now.getDate() &&
       lastDailyCheck.getMonth() === now.getMonth() &&
       lastDailyCheck.getFullYear() === now.getFullYear();
     
     if (!isSameDay) {
-      console.log("Running daily achievement check...");
+      console.log(`⏰ Running daily reset at ${germanTime} (German Time)`);
+      console.log(`   Date: ${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`);
       await runDailyAchievementCheck();
       lastDailyCheck = now;
     }
   }, 60 * 60 * 1000); // Check every hour
-
-  console.log("Points reset scheduler started");
 }
 
 async function runDailyAchievementCheck() {

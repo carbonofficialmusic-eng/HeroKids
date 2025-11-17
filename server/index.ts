@@ -1,3 +1,6 @@
+// Set timezone to German time (Europe/Berlin) for daily task resets
+process.env.TZ = 'Europe/Berlin';
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
