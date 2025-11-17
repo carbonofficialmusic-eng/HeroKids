@@ -1117,7 +1117,7 @@ export default function KidDashboard() {
                             <p className="text-xs text-muted-foreground mr-1">Mit:</p>
                             {participants.map(p => (
                               <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
-                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId)} />
+                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl)} />
                                 <AvatarFallback className="text-xs">
                                   {p.member.displayName[0]}
                                 </AvatarFallback>
@@ -1160,6 +1160,109 @@ export default function KidDashboard() {
                   </motion.div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* Active Shared Rewards Section - From other family members */}
+        {sharedRewards.filter(sr => sr.memberId !== member?.id).length > 0 && (
+          <div className="space-y-4 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-blue-500/20">
+                <Users className="h-7 w-7 text-blue-500" />
+              </div>
+              <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                Teilen & Sparen 🤝
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {sharedRewards
+                .filter(sr => sr.memberId !== member?.id)
+                .map((shared, index) => {
+                  const hasJoined = shared.participants.some(p => p.memberId === member?.id);
+                  const initiatorMember = familyMembers.find(m => m.id === shared.memberId);
+
+                  return (
+                    <motion.div
+                      key={shared.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-2 border-blue-500/30 rounded-2xl">
+                        <div className="space-y-3">
+                          <div className="text-center space-y-2">
+                            <div className="flex justify-center p-3 rounded-2xl mx-auto w-fit bg-blue-500/20">
+                              <Gift className="h-10 w-10 text-blue-500" />
+                            </div>
+                            <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                              {shared.reward?.title || "Belohnung"}
+                            </h3>
+                            <div className="flex flex-col items-center gap-1.5">
+                              <div className="flex items-center gap-2">
+                                {initiatorMember && (
+                                  <Avatar className="h-6 w-6 border-2 border-background">
+                                    <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl)} />
+                                    <AvatarFallback className="text-xs">
+                                      {initiatorMember.displayName[0]}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                )}
+                                <p className="text-sm text-muted-foreground">
+                                  {initiatorMember?.displayName} teilt
+                                </p>
+                              </div>
+                              <Badge variant="secondary" className="gap-1.5 text-xs">
+                                <Users className="h-3 w-3" />
+                                {shared.participants.length + 1} {shared.participants.length === 0 ? "Person" : "Personen"}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Original: {shared.originalPointsSpent} Punkte
+                            </p>
+                          </div>
+
+                          {/* Participants */}
+                          {shared.participants.length > 0 && (
+                            <div className="flex items-center justify-center gap-1 flex-wrap">
+                              <p className="text-xs text-muted-foreground mr-1">Dabei:</p>
+                              {shared.participants.map(p => (
+                                <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
+                                  <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl)} />
+                                  <AvatarFallback className="text-xs">
+                                    {p.member.displayName[0]}
+                                  </AvatarFallback>
+                                </Avatar>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Join Button */}
+                          <div className="pt-2 border-t border-blue-500/20">
+                            {!hasJoined ? (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="w-full gap-1.5 text-xs"
+                                onClick={() => joinSharingMutation.mutate(shared.id)}
+                                disabled={joinSharingMutation.isPending}
+                                data-testid={`button-join-${shared.id}`}
+                              >
+                                <UserPlus className="h-3.5 w-3.5" />
+                                Mitmachen
+                              </Button>
+                            ) : (
+                              <Badge variant="secondary" className="w-full gap-1 justify-center">
+                                <CheckCircle2 className="h-3 w-3" />
+                                Du nimmst teil
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
             </div>
           </div>
         )}
