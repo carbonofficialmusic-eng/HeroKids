@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ProfileMenu } from "@/components/profile-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   CheckCircle2,
@@ -76,18 +75,10 @@ export default function MyRewards() {
     enabled: !!member,
   });
 
-  const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
-    queryKey: ["/api/family-members"],
-    enabled: !!member,
-  });
-
   const { data: sharedRewards = [] } = useQuery<SharedReward[]>({
     queryKey: ["/api/rewards/shared"],
     enabled: !!member,
   });
-
-  const isParent = member?.role === "parent";
-  const isRealParent = realMember?.role === "parent";
 
   // Mutations for reward sharing
   const startSharingMutation = useMutation({
@@ -183,25 +174,15 @@ export default function MyRewards() {
   return (
     <div className="min-h-screen">
       <header className="border-b sticky top-0 z-40 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild data-testid="button-back">
-              <Link href="/kid-dashboard">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <h1 className="text-2xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              Meine Belohnungen
-            </h1>
-          </div>
-          <ProfileMenu
-            member={member}
-            isParent={isParent}
-            isRealParent={isRealParent}
-            familyMemberCount={familyMembers.length}
-            onEditProfile={() => {}}
-            onSwitchMember={() => {}}
-          />
+        <div className="container mx-auto px-4 py-3 flex items-center gap-4">
+          <Button variant="ghost" size="icon" asChild data-testid="button-back">
+            <Link href="/kid-dashboard">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+            Meine Belohnungen
+          </h1>
         </div>
       </header>
 
