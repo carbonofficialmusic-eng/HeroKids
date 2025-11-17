@@ -1688,7 +1688,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const redemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
-      res.json(redemptions);
+      
+      // Get all rewards to attach reward titles
+      const rewards = await storage.getRewardsByFamily(member.familyName);
+      const rewardsMap = new Map(rewards.map(r => [r.id, r]));
+      
+      // Attach reward titles to redemptions
+      const redemptionsWithTitles = redemptions.map(redemption => ({
+        ...redemption,
+        rewardTitle: rewardsMap.get(redemption.rewardId)?.title || "Belohnung",
+      }));
+      
+      res.json(redemptionsWithTitles);
     } catch (error) {
       console.error("Error fetching redemptions:", error);
       res.status(500).json({ message: "Failed to fetch redemptions" });
