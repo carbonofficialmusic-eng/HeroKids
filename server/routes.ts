@@ -1586,6 +1586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : await storage.getFamilyMemberByUserId(userId);
       
       console.log('   Member found:', member ? `${member.displayName} (${member.id})` : 'null');
+      console.log('   Member role:', member?.role);
       
       if (!member) {
         console.log('   ❌ Member not found');
@@ -1616,6 +1617,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Immediate redemption (auto-approved, points deducted immediately for everyone)
+      console.log('   Redemption - deducting points and auto-approving');
       // Deduct points ONLY from available balance (totalPoints)
       // Weekly/Monthly points represent "earned this period" and should never decrease
       const newTotalEarned = member.totalEarned; // Lifetime achievement never decreases
@@ -1631,8 +1634,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       // Create redemption record
-      // Note: Status is "approved" because parent-created rewards don't need approval
-      // Reward Requests still go through the approval process separately
       const redemption = await storage.createRewardRedemption({
         rewardId: reward.id,
         memberId: member.id,

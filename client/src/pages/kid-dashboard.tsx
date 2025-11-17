@@ -91,10 +91,9 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
 
   const redeemMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/reward-redemptions", {
+      const response = await fetch(`/api/rewards/${reward.id}/redeem`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rewardId: reward.id }),
       });
       if (!response.ok) throw new Error("Failed to redeem reward");
       return response.json();
