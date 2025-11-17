@@ -2101,7 +2101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Error finalizing shared reward:", error);
-      res.status(500).json({ message: "Failed to finalize shared reward" });
+      res.status(500).json({ message: error.message || "Failed to finalize shared reward" });
     }
   });
 
