@@ -24,7 +24,8 @@
     "leaderboard": "Clasificación",
     "skins": "Apariencias de Personajes",
     "chat": "Chat Familiar",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "kidPreview": "Vista previa infantil"
   },
   "auth": {
     "login": "Iniciar sesión con Replit",

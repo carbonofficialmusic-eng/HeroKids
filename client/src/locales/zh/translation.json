@@ -24,7 +24,8 @@
     "leaderboard": "排行榜",
     "skins": "角色皮肤",
     "chat": "家庭聊天",
-    "settings": "设置"
+    "settings": "设置",
+    "kidPreview": "儿童预览"
   },
   "auth": {
     "login": "使用 Replit 登录",

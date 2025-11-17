@@ -24,7 +24,8 @@
     "leaderboard": "Leaderboard",
     "skins": "Character Skins",
     "chat": "Family Chat",
-    "settings": "Settings"
+    "settings": "Settings",
+    "kidPreview": "Kid Preview"
   },
   "auth": {
     "login": "Log in with Replit",

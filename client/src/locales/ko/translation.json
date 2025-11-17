@@ -24,7 +24,8 @@
     "leaderboard": "리더보드",
     "skins": "캐릭터 스킨",
     "chat": "가족 채팅",
-    "settings": "설정"
+    "settings": "설정",
+    "kidPreview": "어린이 미리보기"
   },
   "auth": {
     "login": "Replit으로 로그인",

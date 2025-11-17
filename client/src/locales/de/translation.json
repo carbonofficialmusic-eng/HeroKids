@@ -24,7 +24,8 @@
     "leaderboard": "Bestenliste",
     "skins": "Charakter-Skins",
     "chat": "Familien-Chat",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "kidPreview": "Kinder-Vorschau"
   },
   "auth": {
     "login": "Mit Replit anmelden",

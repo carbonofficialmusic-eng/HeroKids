@@ -171,7 +171,7 @@ export function ProfileMenu({
         <DropdownMenuItem asChild>
           <Link href="/kid-dashboard" data-testid="menu-item-kid-preview">
             <Baby className="mr-2 h-4 w-4" />
-            <span>Kinder-Vorschau</span>
+            <span>{t("nav.kidPreview")}</span>
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

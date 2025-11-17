@@ -24,7 +24,8 @@
     "leaderboard": "Classement",
     "skins": "Apparences",
     "chat": "Chat familial",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "kidPreview": "Aperçu enfant"
   },
   "auth": {
     "login": "Se connecter avec Replit",
