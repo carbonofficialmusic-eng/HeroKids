@@ -36,6 +36,9 @@ export default function SkinsGallery() {
     queryKey: ["/api/family-members/current"],
   });
 
+  const isChild = memberData?.role === "child";
+  const dashboardUrl = isChild ? "/kid-dashboard" : "/dashboard";
+
   const { data, isLoading } = useQuery<{ 
     skins: Skin[]; 
     totalEarned: number;
@@ -239,7 +242,7 @@ export default function SkinsGallery() {
   return (
     <>
       <div className="container mx-auto p-6 max-w-6xl">
-        <Link href="/dashboard">
+        <Link href={dashboardUrl}>
           <Button 
             variant="outline" 
             className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 

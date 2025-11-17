@@ -33,11 +33,19 @@ export default function Chat() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const { data: member } = useQuery<any>({
+    queryKey: ["/api/family-members/current"],
+    enabled: !!user,
+  });
+
   const { data: messages = [], isLoading, error } = useQuery<ChatMessage[]>({
     queryKey: ["/api/chat"],
     enabled: !!user,
     refetchInterval: 5000, // Refetch every 5 seconds as fallback
   });
+
+  const isChild = member?.role === "child";
+  const dashboardUrl = isChild ? "/kid-dashboard" : "/dashboard";
 
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
@@ -97,7 +105,7 @@ export default function Chat() {
   if (isLoading) {
     return (
       <div className="container mx-auto p-6">
-        <Link href="/dashboard">
+        <Link href={dashboardUrl}>
           <Button 
             variant="outline" 
             size="sm" 
@@ -124,7 +132,7 @@ export default function Chat() {
     if (isTierError) {
       return (
         <div className="container mx-auto p-6" data-testid="chat-upgrade-prompt">
-          <Link href="/dashboard">
+          <Link href={dashboardUrl}>
             <Button 
               variant="outline" 
               size="sm" 
@@ -180,7 +188,7 @@ export default function Chat() {
 
   return (
     <div className="container mx-auto p-4 h-screen flex flex-col" data-testid="page-chat">
-      <Link href="/dashboard">
+      <Link href={dashboardUrl}>
         <Button 
           variant="outline" 
           size="sm" 
