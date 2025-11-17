@@ -1032,7 +1032,7 @@ export default function KidDashboard() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {activeRewards.slice(0, 2).map((reward, index) => (
+              {activeRewards.map((reward, index) => (
                 <motion.div
                   key={reward.id}
                   initial={{ opacity: 0, y: 20 }}
