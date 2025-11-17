@@ -36,6 +36,7 @@ import {
   CheckCircle2,
   Crown,
   MessageCircle,
+  Lightbulb,
 } from "lucide-react";
 import type { User, FamilyMember, Reward, Task, Family } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -44,6 +45,7 @@ import { ProfileMenu } from "@/components/profile-menu";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
+import { RewardRequestDialog } from "@/components/reward-request-dialog";
 import { getAvatarUrl } from "@/lib/skins";
 
 // Extended Task type with metadata from API
@@ -458,6 +460,7 @@ export default function KidDashboard() {
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
 
   // Load user and member data
   const { data: authUser, isLoading: userLoading } = useQuery<User>({
@@ -826,9 +829,21 @@ export default function KidDashboard() {
           <Card className="p-2 sticky bottom-4 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-2xl">
             <div className="flex justify-around gap-2">
               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button 
+                  variant="ghost" 
+                  size="lg" 
+                  onClick={() => setRequestRewardDialogOpen(true)}
+                  data-testid="button-nav-request-reward" 
+                  className="h-16 px-6 rounded-2xl"
+                >
+                  <Lightbulb className="h-7 w-7 mr-2 text-amber-500" />
+                  <span className="font-bold text-base">Wunsch</span>
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                 <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-16 px-6 rounded-2xl">
                   <Link href="/chat">
-                    <MessageCircle className="h-7 w-7 mr-2" />
+                    <MessageCircle className="h-7 w-7 mr-2 text-blue-500" />
                     <span className="font-bold text-base">{t("nav.chat")}</span>
                   </Link>
                 </Button>
@@ -870,6 +885,15 @@ export default function KidDashboard() {
         onComplete={handleTaskComplete}
         isSubmitting={completeTaskMutation.isPending}
       />
+
+      {/* Reward Request Dialog - Children can propose new rewards */}
+      {member && (
+        <RewardRequestDialog
+          open={requestRewardDialogOpen}
+          onOpenChange={setRequestRewardDialogOpen}
+          member={member}
+        />
+      )}
     </div>
   );
 }
