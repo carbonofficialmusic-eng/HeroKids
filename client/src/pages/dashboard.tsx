@@ -273,9 +273,11 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       setSwitchMemberDialogOpen(false);
       
-      // Navigate to kid-dashboard if switched to a child
+      // Navigate based on the new member's role
       if (data?.member?.role === "child") {
         window.location.href = "/kid-dashboard";
+      } else if (data?.member?.role === "parent") {
+        window.location.href = "/dashboard";
       }
     },
     onError: (error: any) => {

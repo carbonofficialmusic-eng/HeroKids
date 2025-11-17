@@ -490,6 +490,36 @@ export default function KidDashboard() {
     },
   });
 
+  // Switch member mutation (for parents to switch between profiles)
+  const switchMemberMutation = useMutation({
+    mutationFn: async (params: { memberId: string | null; pinCode?: string }) => {
+      const response = await apiRequest("POST", "/api/family-members/switch", params);
+      return await response.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
+      setSwitchMemberDialogOpen(false);
+      
+      // Navigate based on the new member's role
+      if (data?.member?.role === "child") {
+        window.location.href = "/kid-dashboard";
+      } else if (data?.member?.role === "parent") {
+        window.location.href = "/dashboard";
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("toast.failedSwitchMember"),
+        description: error.message || t("toast.unableSwitchMember"),
+        variant: "destructive",
+      });
+    },
+  });
+
   // Show loading state
   if (userLoading || memberLoading) {
     return (
@@ -748,10 +778,8 @@ export default function KidDashboard() {
           members={familyMembers}
           currentMember={member}
           familyData={familyData || null}
-          onSwitch={() => {
-            setSwitchMemberDialogOpen(false);
-          }}
-          isSubmitting={false}
+          onSwitch={(params) => switchMemberMutation.mutate(params)}
+          isSubmitting={switchMemberMutation.isPending}
         />
       )}
     </div>
