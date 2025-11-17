@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon, Menu, RotateCcw, Baby, BarChart3 } from "lucide-react";
+import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon, Menu, RotateCcw, BarChart3 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
@@ -166,14 +166,6 @@ export function ProfileMenu({
           </>
         )}
         
-        {/* Preview/Demo Section */}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/kid-dashboard" data-testid="menu-item-kid-preview">
-            <Baby className="mr-2 h-4 w-4" />
-            <span>{t("nav.kidPreview")}</span>
-          </Link>
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
