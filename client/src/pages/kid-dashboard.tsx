@@ -860,17 +860,48 @@ export default function KidDashboard() {
                   )}
                 </div>
               </div>
-              <div className="text-right bg-card/80 backdrop-blur-sm p-6 rounded-2xl border-2 border-primary/30">
-                <p className="text-base text-muted-foreground mb-2 font-medium">Du hast:</p>
-                <motion.div
-                  className="text-6xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  style={{ fontFamily: "Fredoka, sans-serif" }}
-                >
-                  {currentPoints.toLocaleString()}
-                </motion.div>
-                <p className="text-lg font-bold text-primary mt-1">Punkte</p>
+              <div className="bg-card/80 backdrop-blur-sm p-6 rounded-2xl border-2 border-primary/30 min-w-[280px]">
+                <p className="text-base text-muted-foreground mb-4 font-medium text-center">Deine Punkte:</p>
+                <div className="space-y-3">
+                  {/* Total Points */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Star className="h-5 w-5 text-amber-500" />
+                      <span className="font-semibold">Gesamt:</span>
+                    </div>
+                    <motion.span
+                      className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                      style={{ fontFamily: "Fredoka, sans-serif" }}
+                      data-testid="text-total-points"
+                    >
+                      {member.totalPoints.toLocaleString()}
+                    </motion.span>
+                  </div>
+                  
+                  {/* Weekly Points */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-medium text-muted-foreground">Diese Woche:</span>
+                    </div>
+                    <span className="text-lg font-bold text-blue-600 dark:text-blue-400" data-testid="text-weekly-points">
+                      {member.weeklyPoints.toLocaleString()}
+                    </span>
+                  </div>
+                  
+                  {/* Monthly Points */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-purple-500" />
+                      <span className="text-sm font-medium text-muted-foreground">Dieser Monat:</span>
+                    </div>
+                    <span className="text-lg font-bold text-purple-600 dark:text-purple-400" data-testid="text-monthly-points">
+                      {member.monthlyPoints.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </Card>
