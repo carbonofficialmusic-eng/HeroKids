@@ -545,9 +545,6 @@ export default function KidDashboard() {
   // Auto-refresh tasks at midnight when daily tasks reset
   useMidnightRefresh();
 
-  // WebSocket connection for real-time updates
-  useWebSocket(member?.familyName || null);
-
   // Family Goals mutations
   const contributeMutation = useMutation({
     mutationFn: async (goalId: string) => {
@@ -678,6 +675,9 @@ export default function KidDashboard() {
     queryKey: ["/api/family-members/current"],
     enabled: !!authUser,
   });
+
+  // WebSocket connection for real-time updates
+  useWebSocket(member?.familyName || null);
 
   const { data: realMember } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/real"],
@@ -1059,36 +1059,107 @@ export default function KidDashboard() {
               </Button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {myRedemptions.slice(0, 2).map((redemption, index) => (
-                <motion.div
-                  key={redemption.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-2 border-green-500/30 rounded-2xl">
-                    <div className="text-center space-y-2">
-                      <div className="flex justify-center p-3 rounded-2xl mx-auto w-fit bg-green-500/20">
-                        <CheckCircle2 className="h-10 w-10 text-green-500" />
+              {myRedemptions.slice(0, 2).map((redemption, index) => {
+                const typed = redemption as RedemptionWithDetails;
+                const shared = sharedRewards.find(s => s.id === typed.id);
+                const participants = shared?.participants || [];
+                const isSharing = typed.sharingStatus === "sharing_active";
+                const isFinalized = typed.sharingStatus === "sharing_finalized";
+                const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared";
+                const canFinalize = isSharing && participants.length > 0;
+
+                return (
+                  <motion.div
+                    key={redemption.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-2 border-green-500/30 rounded-2xl">
+                      <div className="space-y-3">
+                        <div className="text-center space-y-2">
+                          <div className="flex justify-center p-3 rounded-2xl mx-auto w-fit bg-green-500/20">
+                            <CheckCircle2 className="h-10 w-10 text-green-500" />
+                          </div>
+                          <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                            {redemption.rewardTitle || "Belohnung"}
+                          </h3>
+                          <div className="flex flex-wrap gap-1.5 justify-center">
+                            <Badge 
+                              variant={redemption.status === "completed" ? "default" : "secondary"}
+                              className="text-sm"
+                            >
+                              {redemption.status === "completed" ? "✓ Erfüllt" : 
+                               redemption.status === "approved" ? "⏳ Warte" : 
+                               "⏸️ Ausstehend"}
+                            </Badge>
+                            {isSharing && (
+                              <Badge variant="secondary" className="gap-1.5 text-xs">
+                                <Users className="h-3 w-3" />
+                                Wird geteilt
+                              </Badge>
+                            )}
+                            {isFinalized && (
+                              <Badge variant="secondary" className="gap-1.5 text-xs">
+                                <CheckCircle2 className="h-3 w-3" />
+                                Geteilt
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {typed.pointsSpent} Punkte {isFinalized && `(war ${typed.originalPointsSpent})`}
+                          </p>
+                        </div>
+
+                        {/* Participants */}
+                        {participants.length > 0 && (
+                          <div className="flex items-center justify-center gap-1 flex-wrap">
+                            <p className="text-xs text-muted-foreground mr-1">Mit:</p>
+                            {participants.map(p => (
+                              <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
+                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId)} />
+                                <AvatarFallback className="text-xs">
+                                  {p.member.displayName[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Sharing Actions */}
+                        <div className="flex gap-2 pt-2 border-t border-green-500/20">
+                          {canShare && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 gap-1.5 text-xs"
+                              onClick={() => startSharingMutation.mutate(typed.id)}
+                              disabled={startSharingMutation.isPending}
+                              data-testid={`button-start-share-${typed.id}`}
+                            >
+                              <Share2 className="h-3.5 w-3.5" />
+                              Teilen
+                            </Button>
+                          )}
+                          {canFinalize && (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              className="flex-1 gap-1.5 text-xs"
+                              onClick={() => finalizeSharingMutation.mutate(typed.id)}
+                              disabled={finalizeSharingMutation.isPending}
+                              data-testid={`button-finalize-${typed.id}`}
+                            >
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              Beenden
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                      <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                        {redemption.rewardTitle || "Belohnung"}
-                      </h3>
-                      <Badge 
-                        variant={redemption.status === "completed" ? "default" : "secondary"}
-                        className="text-sm"
-                      >
-                        {redemption.status === "completed" ? "✓ Erfüllt" : 
-                         redemption.status === "approved" ? "⏳ Warte auf Erfüllung" : 
-                         "⏸️ Ausstehend"}
-                      </Badge>
-                      <p className="text-xs text-muted-foreground">
-                        {redemption.pointsSpent} Punkte
-                      </p>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         )}
