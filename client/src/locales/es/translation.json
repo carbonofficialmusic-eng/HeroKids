@@ -25,7 +25,8 @@
     "skins": "Apariencias de Personajes",
     "chat": "Chat Familiar",
     "settings": "Configuración",
-    "kidPreview": "Vista previa infantil"
+    "kidPreview": "Vista previa infantil",
+    "kidPreviewOld": "Vista previa infantil (antigua)"
   },
   "auth": {
     "login": "Iniciar sesión con Replit",

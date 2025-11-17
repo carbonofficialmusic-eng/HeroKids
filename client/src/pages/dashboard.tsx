@@ -262,15 +262,21 @@ export default function Dashboard() {
   // Switch member (parents only)
   const switchMemberMutation = useMutation({
     mutationFn: async (params: { memberId: string | null; pinCode?: string }) => {
-      return await apiRequest("POST", "/api/family-members/switch", params);
+      const response = await apiRequest("POST", "/api/family-members/switch", params);
+      return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       setSwitchMemberDialogOpen(false);
+      
+      // Navigate to kid-dashboard if switched to a child
+      if (data?.member?.role === "child") {
+        window.location.href = "/kid-dashboard";
+      }
     },
     onError: (error: any) => {
       toast({

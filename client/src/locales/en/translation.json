@@ -25,7 +25,8 @@
     "skins": "Character Skins",
     "chat": "Family Chat",
     "settings": "Settings",
-    "kidPreview": "Kid Preview"
+    "kidPreview": "Kid Preview",
+    "kidPreviewOld": "Kid Preview (Old)"
   },
   "auth": {
     "login": "Log in with Replit",

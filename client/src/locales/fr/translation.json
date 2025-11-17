@@ -25,7 +25,8 @@
     "skins": "Apparences",
     "chat": "Chat familial",
     "settings": "Paramètres",
-    "kidPreview": "Aperçu enfant"
+    "kidPreview": "Aperçu enfant",
+    "kidPreviewOld": "Aperçu enfant (ancien)"
   },
   "auth": {
     "login": "Se connecter avec Replit",

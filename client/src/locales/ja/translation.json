@@ -25,7 +25,8 @@
     "skins": "キャラクタースキン",
     "chat": "家族チャット",
     "settings": "設定",
-    "kidPreview": "子供プレビュー"
+    "kidPreview": "子供プレビュー",
+    "kidPreviewOld": "子供プレビュー（旧）"
   },
   "auth": {
     "login": "Replitでログイン",

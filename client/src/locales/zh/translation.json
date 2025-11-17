@@ -25,7 +25,8 @@
     "skins": "角色皮肤",
     "chat": "家庭聊天",
     "settings": "设置",
-    "kidPreview": "儿童预览"
+    "kidPreview": "儿童预览",
+    "kidPreviewOld": "儿童预览（旧）"
   },
   "auth": {
     "login": "使用 Replit 登录",
