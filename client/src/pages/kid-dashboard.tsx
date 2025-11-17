@@ -38,9 +38,11 @@ import {
   MessageCircle,
 } from "lucide-react";
 import type { User, FamilyMember, Reward, Task, Family } from "@shared/schema";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileMenu } from "@/components/profile-menu";
+import { EditMemberDialog } from "@/components/edit-member-dialog";
+import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { getAvatarUrl } from "@/lib/skins";
 
 // Extended Task type with metadata from API
@@ -464,6 +466,30 @@ export default function KidDashboard() {
     enabled: !!member,
   });
 
+  // Edit member mutation
+  const editMemberMutation = useMutation({
+    mutationFn: async ({ memberId, data }: { memberId: string; data: any }) => {
+      return await apiRequest("PATCH", `/api/family-members/${memberId}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      setEditMemberDialogOpen(false);
+      setMemberToEdit(null);
+      toast({
+        title: t("toast.profileUpdated"),
+        description: t("toast.profileUpdatedDesc"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("toast.failedUpdateProfile"),
+        description: error.message || t("toast.unableUpdateProfile"),
+        variant: "destructive",
+      });
+    },
+  });
+
   // Show loading state
   if (userLoading || memberLoading) {
     return (
@@ -702,6 +728,25 @@ export default function KidDashboard() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Edit Profile Dialog - Available to all members */}
+      {member && (
+        <EditMemberDialog
+          open={editMemberDialogOpen}
+          onOpenChange={setEditMemberDialogOpen}
+          onSubmit={(memberId, data) => editMemberMutation.mutate({ memberId, data })}
+          isSubmitting={editMemberMutation.isPending}
+          member={memberToEdit}
+        />
+      )}
+
+      {/* Switch Member Dialog - Real parents only */}
+      {member && isRealParent && (
+        <SwitchMemberDialog
+          open={switchMemberDialogOpen}
+          onOpenChange={setSwitchMemberDialogOpen}
+        />
+      )}
     </div>
   );
 }
