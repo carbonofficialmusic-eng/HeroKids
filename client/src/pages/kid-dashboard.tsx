@@ -3,6 +3,8 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,10 +35,13 @@ import {
   Sparkles,
   Loader2,
   CheckCircle2,
+  Crown,
 } from "lucide-react";
 import type { User, FamilyMember, Reward, Task, Family } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { ProfileMenu } from "@/components/profile-menu";
+import { getAvatarUrl } from "@/lib/skins";
 
 // Extended Task type with metadata from API
 interface TaskWithMeta extends Task {
@@ -417,14 +422,36 @@ function TaskCard({ task, member }: { task: TaskWithMeta; member: FamilyMember }
 }
 
 export default function KidDashboard() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
+  const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
+  const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
+
   // Load user and member data
-  const { data: user, isLoading: userLoading } = useQuery<User>({
+  const { data: authUser, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
   });
 
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
-    enabled: !!user,
+    enabled: !!authUser,
+  });
+
+  const { data: realMember } = useQuery<FamilyMember>({
+    queryKey: ["/api/family-members/real"],
+    enabled: !!authUser,
+  });
+
+  const { data: familyData } = useQuery<Family>({
+    queryKey: ["/api/families/current"],
+    enabled: !!member,
+  });
+
+  const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
+    queryKey: ["/api/family-members"],
+    enabled: !!member,
   });
 
   const { data: rewards = [] } = useQuery<Reward[]>({
@@ -447,7 +474,7 @@ export default function KidDashboard() {
   }
 
   // If not logged in
-  if (!user || !member) {
+  if (!authUser || !member) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Card className="p-8 text-center">
@@ -462,6 +489,8 @@ export default function KidDashboard() {
 
   const currentPoints = member.totalPoints || 0;
   const streak = 0; // TODO: Implement streak tracking
+  const isParent = member?.role === "parent";
+  const isRealParent = realMember?.role === "parent";
 
   // Filter active rewards and sort by proximity
   const activeRewards = rewards
@@ -481,15 +510,56 @@ export default function KidDashboard() {
 
   return (
     <div className="min-h-screen pb-20">
-      {/* Back to Dashboard Button */}
-      <div className="mx-4 mt-4 mb-2">
-        <Button variant="outline" size="default" asChild data-testid="button-back-to-dashboard" className="rounded-xl">
-          <Link href="/dashboard">
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Zurück
-          </Link>
-        </Button>
-      </div>
+      {/* Header - Like Dashboard */}
+      <header className="border-b sticky top-0 backdrop-blur-md z-40 bg-background/80">
+        <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Avatar className="h-10 w-10 flex-shrink-0">
+              <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
+              <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
+                {member.displayName[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <div className="text-sm text-muted-foreground truncate">{member.familyName}</div>
+              <div className="font-semibold truncate" data-testid="text-user-name">
+                {member.displayName}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {familyData && (
+              <Link href="/pricing">
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer hover-elevate"
+                  data-testid="badge-current-tier"
+                >
+                  <Crown className="h-3 w-3 mr-1" />
+                  {familyData.subscriptionTier === "free"
+                    ? t("subscription.free")
+                    : familyData.subscriptionTier === "family"
+                    ? t("subscription.family")
+                    : familyData.subscriptionTier === "family_plus"
+                    ? t("subscription.familyPlus")
+                    : t("subscription.familyHero")}
+                </Badge>
+              </Link>
+            )}
+            <ProfileMenu
+              member={member}
+              isParent={isParent}
+              isRealParent={isRealParent}
+              familyMemberCount={familyMembers.length}
+              onEditProfile={() => {
+                setMemberToEdit(member);
+                setEditMemberDialogOpen(true);
+              }}
+              onSwitchMember={() => setSwitchMemberDialogOpen(true)}
+            />
+          </div>
+        </div>
+      </header>
 
       <div className="container mx-auto px-4 max-w-6xl space-y-8">
         {/* Hero Header */}
@@ -506,8 +576,8 @@ export default function KidDashboard() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Avatar className="h-24 w-24 border-4 border-primary shadow-lg">
-                    <AvatarImage src={member.avatarUrl || ""} />
-                    <AvatarFallback className="text-4xl font-bold bg-gradient-to-br from-amber-400 to-orange-500">
+                    <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
+                    <AvatarFallback style={{ backgroundColor: member.color }} className="text-4xl font-bold text-white">
                       {member.displayName[0]}
                     </AvatarFallback>
                   </Avatar>
