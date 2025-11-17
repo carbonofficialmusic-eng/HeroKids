@@ -4,8 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 interface FamilyMember {
   id: string;
-  isParent: boolean;
-  isRealParent: boolean;
+  role: "parent" | "child";
 }
 
 export default function AutoRedirect() {
@@ -18,7 +17,7 @@ export default function AutoRedirect() {
   useEffect(() => {
     if (!isLoading && member) {
       // Redirect based on role
-      if (member.isParent || member.isRealParent) {
+      if (member.role === "parent") {
         setLocation("/dashboard");
       } else {
         setLocation("/kid-dashboard");
