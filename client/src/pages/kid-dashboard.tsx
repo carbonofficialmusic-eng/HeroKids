@@ -43,6 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProfileMenu } from "@/components/profile-menu";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SwitchMemberDialog } from "@/components/switch-member-dialog";
+import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { getAvatarUrl } from "@/lib/skins";
 
 // Extended Task type with metadata from API
@@ -264,7 +265,15 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
 }
 
 // Task Card Component
-function TaskCard({ task, member }: { task: TaskWithMeta; member: FamilyMember }) {
+function TaskCard({ 
+  task, 
+  member, 
+  onOpenTaskDialog 
+}: { 
+  task: TaskWithMeta; 
+  member: FamilyMember;
+  onOpenTaskDialog: (task: TaskWithMeta) => void;
+}) {
   const { toast } = useToast();
   
   // Determine task state based on memberCompletionStatus
@@ -326,7 +335,13 @@ function TaskCard({ task, member }: { task: TaskWithMeta; member: FamilyMember }
   });
 
   const handleComplete = () => {
-    if (isActionable && !completeMutation.isPending) {
+    if (!isActionable || completeMutation.isPending) return;
+    
+    // If task requires photo proof, open dialog for photo upload
+    if (task.requiresProof) {
+      onOpenTaskDialog(task);
+    } else {
+      // No photo needed, complete directly
       completeMutation.mutate();
     }
   };
@@ -442,6 +457,8 @@ export default function KidDashboard() {
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
 
   // Load user and member data
   const { data: authUser, isLoading: userLoading } = useQuery<User>({
@@ -531,6 +548,57 @@ export default function KidDashboard() {
       });
     },
   });
+
+  // Complete task mutation (for task dialog)
+  const completeTaskMutation = useMutation({
+    mutationFn: async ({ taskId, proofPhotoUrl }: { taskId: string; proofPhotoUrl?: string }) => {
+      const response = await fetch(`/api/tasks/${taskId}/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(proofPhotoUrl ? { proofPhotoUrl } : {}),
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errorData.message || "Failed to complete task");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      setTaskDialogOpen(false);
+      setSelectedTask(null);
+      toast({
+        title: "Aufgabe abgeschlossen! 🎉",
+        description: selectedTask?.requiresApproval 
+          ? "Wartet auf Freigabe von deinen Eltern!"
+          : `Du hast ${selectedTask?.points} Punkte verdient!`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Fehler",
+        description: error.message || "Aufgabe konnte nicht abgeschlossen werden.",
+      });
+    },
+  });
+
+  // Handler for completing a task from dialog
+  const handleTaskComplete = (taskId: string, proofPhotoUrl?: string) => {
+    completeTaskMutation.mutate({ taskId, proofPhotoUrl });
+  };
+
+  // Handler for opening task dialog
+  const handleOpenTaskDialog = (task: TaskWithMeta) => {
+    setSelectedTask(task);
+    setTaskDialogOpen(true);
+  };
 
   // Show loading state
   if (userLoading || memberLoading) {
@@ -743,7 +811,7 @@ export default function KidDashboard() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <TaskCard task={task} member={member} />
+                  <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} />
                 </motion.div>
               ))}
             </div>
@@ -794,6 +862,15 @@ export default function KidDashboard() {
           isSubmitting={switchMemberMutation.isPending}
         />
       )}
+
+      {/* Task Completion Dialog with Photo Upload */}
+      <TaskCompletionDialog
+        open={taskDialogOpen}
+        onOpenChange={setTaskDialogOpen}
+        task={selectedTask}
+        onComplete={handleTaskComplete}
+        isSubmitting={completeTaskMutation.isPending}
+      />
     </div>
   );
 }
