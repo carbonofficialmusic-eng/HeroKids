@@ -900,7 +900,7 @@ export default function KidDashboard() {
               <Trophy className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-4xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              Deine Belohnungen!
+              Belohnungen
             </h2>
             <Sparkles className="h-6 w-6 text-amber-500 animate-pulse" />
           </div>
