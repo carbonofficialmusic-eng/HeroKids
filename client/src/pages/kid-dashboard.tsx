@@ -1273,6 +1273,39 @@ export default function KidDashboard() {
           </div>
         )}
 
+        {/* Tasks Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
+              <Star className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+              Deine Aufgaben
+            </h2>
+          </div>
+
+          {myTasks.length === 0 ? (
+            <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
+              <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-green-500" />
+              <p className="text-lg font-bold text-green-500">Alle Aufgaben erledigt!</p>
+              <p className="text-sm text-muted-foreground mt-2">Super gemacht! 🎉</p>
+            </Card>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {myTasks.map((task, index) => (
+                <motion.div
+                  key={task.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} />
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Family Goals Section */}
         {goals.filter(g => g.isActive).length > 0 && (
           <div className="space-y-6">
@@ -1360,39 +1393,6 @@ export default function KidDashboard() {
             })}
           </div>
         )}
-
-        {/* Tasks Section */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
-              <Star className="h-8 w-8 text-white" />
-            </div>
-            <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              Deine Aufgaben
-            </h2>
-          </div>
-
-          {myTasks.length === 0 ? (
-            <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
-              <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-green-500" />
-              <p className="text-lg font-bold text-green-500">Alle Aufgaben erledigt!</p>
-              <p className="text-sm text-muted-foreground mt-2">Super gemacht! 🎉</p>
-            </Card>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {myTasks.map((task, index) => (
-                <motion.div
-                  key={task.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} />
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
 
         {/* Leaderboard Section */}
         {familyData?.showLeaderboard && (
