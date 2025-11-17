@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -42,7 +43,7 @@ import {
   Calendar,
   Coins,
 } from "lucide-react";
-import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal } from "@shared/schema";
+import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal, SubscriptionTier } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileMenu } from "@/components/profile-menu";
@@ -50,7 +51,9 @@ import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { RewardRequestDialog } from "@/components/reward-request-dialog";
+import { Leaderboard } from "@/components/leaderboard";
 import { getAvatarUrl } from "@/lib/skins";
+import { hasFeature } from "@shared/tier-config";
 
 // Extended Task type with metadata from API
 interface TaskWithMeta extends Task {
@@ -508,6 +511,7 @@ export default function KidDashboard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
+  const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("week");
 
   // Family Goals mutations
   const contributeMutation = useMutation({
@@ -1022,6 +1026,43 @@ export default function KidDashboard() {
                 </motion.div>
               );
             })}
+          </div>
+        )}
+
+        {/* Leaderboard Section */}
+        {familyData?.showLeaderboard && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl">
+                <Trophy className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-4xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                Bestenliste 🏆
+              </h2>
+            </div>
+
+            {/* Weekly/Monthly Toggle */}
+            {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
+              <div className="mb-4">
+                <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
+                  <TabsList className="grid w-full grid-cols-2" data-testid="tabs-leaderboard-period">
+                    <TabsTrigger value="week" data-testid="tab-leaderboard-week">
+                      {t("dashboard.weekly")}
+                    </TabsTrigger>
+                    <TabsTrigger value="month" data-testid="tab-leaderboard-month">
+                      {t("dashboard.monthly")}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+            )}
+
+            <Leaderboard 
+              members={familyMembers} 
+              period={leaderboardPeriod}
+              weeklyPrize={familyData?.weeklyPrize}
+              monthlyPrize={familyData?.monthlyPrize}
+            />
           </div>
         )}
 
