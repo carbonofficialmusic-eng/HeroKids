@@ -887,28 +887,6 @@ export default function KidDashboard() {
                       {member.totalPoints.toLocaleString()}
                     </span>
                   </div>
-                  
-                  {/* Weekly Points */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-blue-500" />
-                      <span className="text-sm font-medium text-muted-foreground">Diese Woche:</span>
-                    </div>
-                    <span className="text-lg font-bold text-blue-600 dark:text-blue-400" data-testid="text-weekly-points">
-                      {member.weeklyPoints.toLocaleString()}
-                    </span>
-                  </div>
-                  
-                  {/* Monthly Points */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-purple-500" />
-                      <span className="text-sm font-medium text-muted-foreground">Dieser Monat:</span>
-                    </div>
-                    <span className="text-lg font-bold text-purple-600 dark:text-purple-400" data-testid="text-monthly-points">
-                      {member.monthlyPoints.toLocaleString()}
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
