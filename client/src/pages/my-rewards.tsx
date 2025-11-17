@@ -128,9 +128,9 @@ export default function MyRewards() {
                   transition={{ delay: index * 0.05 }}
                 >
                   <Card className="p-4 hover-elevate">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className={`p-3 rounded-xl ${
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className={`p-3 rounded-xl flex-shrink-0 ${
                           redemption.status === "completed" 
                             ? "bg-green-500/20" 
                             : "bg-amber-500/20"
@@ -145,22 +145,22 @@ export default function MyRewards() {
                           <h3 className="font-bold text-lg truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
                             {redemption.rewardTitle || "Belohnung"}
                           </h3>
-                          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                            <Coins className="h-3.5 w-3.5" />
-                            <span>{redemption.pointsSpent} Punkte</span>
+                          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground flex-wrap">
+                            <Coins className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span className="whitespace-nowrap">{redemption.pointsSpent} Punkte</span>
                             <span>•</span>
-                            <span>{redemption.redeemedAt ? new Date(redemption.redeemedAt).toLocaleDateString("de-DE") : "-"}</span>
+                            <span className="whitespace-nowrap">{redemption.redeemedAt ? new Date(redemption.redeemedAt).toLocaleDateString("de-DE") : "-"}</span>
                           </div>
                         </div>
                       </div>
                       <Badge 
                         variant={redemption.status === "completed" ? "default" : "secondary"}
-                        className="text-xs whitespace-nowrap"
+                        className="text-xs whitespace-nowrap flex-shrink-0"
                         data-testid={`badge-status-${redemption.id}`}
                       >
                         {redemption.status === "completed" ? "✓ Erfüllt" : 
-                         redemption.status === "approved" ? "⏳ Warte auf Erfüllung" : 
-                         "⏸️ Ausstehend"}
+                         redemption.status === "approved" ? "Warte" : 
+                         "Ausstehend"}
                       </Badge>
                     </div>
                   </Card>
