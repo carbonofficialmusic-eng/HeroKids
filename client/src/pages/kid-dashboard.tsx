@@ -862,22 +862,30 @@ export default function KidDashboard() {
               </div>
               <div className="bg-card/80 backdrop-blur-sm p-6 rounded-2xl border-2 border-primary/30 min-w-[280px]">
                 <p className="text-base text-muted-foreground mb-4 font-medium text-center">Deine Punkte:</p>
-                <div className="space-y-3">
-                  {/* Total Points */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Star className="h-5 w-5 text-amber-500" />
-                      <span className="font-semibold">Gesamt:</span>
-                    </div>
-                    <motion.span
-                      className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
+                <div className="space-y-4">
+                  {/* Total Earned - Prominent Display */}
+                  <div className="text-center pb-4 border-b border-border">
+                    <p className="text-sm text-muted-foreground mb-2">Total verdient</p>
+                    <motion.div
+                      className="text-5xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
                       animate={{ scale: [1, 1.05, 1] }}
                       transition={{ repeat: Infinity, duration: 2 }}
                       style={{ fontFamily: "Fredoka, sans-serif" }}
-                      data-testid="text-total-points"
+                      data-testid="text-total-earned"
                     >
+                      {member.totalEarned.toLocaleString()}
+                    </motion.div>
+                  </div>
+
+                  {/* Available Points */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Coins className="h-5 w-5 text-green-500" />
+                      <span className="font-semibold">Verfügbar:</span>
+                    </div>
+                    <span className="text-2xl font-bold text-green-600 dark:text-green-400" data-testid="text-total-points">
                       {member.totalPoints.toLocaleString()}
-                    </motion.span>
+                    </span>
                   </div>
                   
                   {/* Weekly Points */}
