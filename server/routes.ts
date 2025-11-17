@@ -2029,6 +2029,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "You can't join your own shared reward" });
       }
       
+      // Check if member has enough points to participate
+      // Get current participants to calculate cost per person
+      const currentParticipants = await storage.getRewardSharingParticipants(redemptionId);
+      const totalParticipants = currentParticipants.length + 2; // existing participants + new participant + original buyer
+      const pointsPerPerson = Math.ceil(redemption.originalPointsSpent / totalParticipants);
+      
+      if (member.totalPoints < pointsPerPerson) {
+        return res.status(400).json({ 
+          message: `Du hast nicht genug Punkte zum Mitmachen. Du brauchst ${pointsPerPerson} Punkte, hast aber nur ${member.totalPoints}.`
+        });
+      }
+      
       // Join the sharing
       const participant = await storage.joinRewardSharing(redemptionId, member.id);
       
