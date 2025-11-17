@@ -174,12 +174,6 @@ export function ProfileMenu({
             <span>{t("nav.kidPreview")}</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/kid-dashboard-old" data-testid="menu-item-kid-preview-old">
-            <Baby className="mr-2 h-4 w-4" />
-            <span>{t("nav.kidPreviewOld")}</span>
-          </Link>
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

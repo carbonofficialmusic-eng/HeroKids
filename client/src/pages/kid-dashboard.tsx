@@ -20,7 +20,6 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import {
-  Home,
   Gift,
   Star,
   Trophy,
@@ -36,6 +35,7 @@ import {
   Loader2,
   CheckCircle2,
   Crown,
+  MessageCircle,
 } from "lucide-react";
 import type { User, FamilyMember, Reward, Task, Family } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
@@ -271,7 +271,7 @@ function TaskCard({ task, member }: { task: TaskWithMeta; member: FamilyMember }
   const isApproved = completionStatus === "approved";
   const isRejected = completionStatus === "rejected";
   const neverAttempted = completionStatus === null;
-  const hasNoSlots = task.remainingSlots !== null && task.remainingSlots <= 0;
+  const hasNoSlots = task.remainingSlots !== null && task.remainingSlots !== undefined && task.remainingSlots <= 0;
   const isInactive = task.status !== "active";
   
   // Fallback check: if memberHasCompleted is true but status is null, treat as completed
@@ -691,10 +691,10 @@ export default function KidDashboard() {
           <Card className="p-2 sticky bottom-4 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-2xl">
             <div className="flex justify-around gap-2">
               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                <Button variant="ghost" size="lg" asChild data-testid="button-nav-home" className="h-16 px-6 rounded-2xl">
-                  <Link href="/dashboard">
-                    <Home className="h-7 w-7 mr-2" />
-                    <span className="font-bold text-base">Home</span>
+                <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-16 px-6 rounded-2xl">
+                  <Link href="/chat">
+                    <MessageCircle className="h-7 w-7 mr-2" />
+                    <span className="font-bold text-base">{t("nav.chat")}</span>
                   </Link>
                 </Button>
               </motion.div>
