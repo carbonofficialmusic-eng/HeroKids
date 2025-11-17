@@ -43,7 +43,9 @@ export function SwitchMemberDialog({
   const requiresPin = familyData?.singleDeviceMode && selectedMember?.role === "parent";
 
   const handleSwitch = () => {
-    onSwitch({ memberId: selectedMemberId, pinCode: requiresPin ? pinCode : undefined });
+    // If PIN is required but empty, use default PIN "0000"
+    const finalPinCode = requiresPin ? (pinCode || "0000") : undefined;
+    onSwitch({ memberId: selectedMemberId, pinCode: finalPinCode });
     setPinCode("");
   };
 
@@ -141,7 +143,7 @@ export function SwitchMemberDialog({
           </Button>
           <Button
             onClick={handleSwitch}
-            disabled={isSubmitting || (requiresPin && pinCode.length !== 4)}
+            disabled={isSubmitting || (requiresPin && pinCode.length > 0 && pinCode.length < 4)}
             data-testid="button-confirm-switch"
           >
             {isSubmitting ? t('memberDialogs.switching') : t('memberDialogs.switch')}
