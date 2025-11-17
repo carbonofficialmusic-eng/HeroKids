@@ -43,7 +43,7 @@ import {
   Calendar,
   Coins,
 } from "lucide-react";
-import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal, SubscriptionTier } from "@shared/schema";
+import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileMenu } from "@/components/profile-menu";
@@ -53,7 +53,7 @@ import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { RewardRequestDialog } from "@/components/reward-request-dialog";
 import { Leaderboard } from "@/components/leaderboard";
 import { getAvatarUrl } from "@/lib/skins";
-import { hasFeature } from "@shared/tier-config";
+import { hasFeature, type SubscriptionTier } from "@shared/tier-config";
 
 // Extended Task type with metadata from API
 interface TaskWithMeta extends Task {
@@ -535,6 +535,28 @@ export default function KidDashboard() {
       toast({
         title: "Fehler",
         description: error.message || "Beitrag konnte nicht eingezahlt werden",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create reward request (children can propose new rewards)
+  const createRewardRequestMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/reward-requests", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      setRequestRewardDialogOpen(false);
+      toast({
+        title: "Wunsch gesendet! 💡",
+        description: "Deine Eltern können deinen Wunsch jetzt sehen.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fehler",
+        description: error.message || "Wunsch konnte nicht gesendet werden",
         variant: "destructive",
       });
     },
@@ -1172,7 +1194,9 @@ export default function KidDashboard() {
         <RewardRequestDialog
           open={requestRewardDialogOpen}
           onOpenChange={setRequestRewardDialogOpen}
-          member={member}
+          onSubmit={(data) => createRewardRequestMutation.mutate(data)}
+          isSubmitting={createRewardRequestMutation.isPending}
+          familyName={member.familyName}
         />
       )}
     </div>
