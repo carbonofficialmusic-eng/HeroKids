@@ -134,7 +134,7 @@ export function SwitchMemberDialog({
           <Button
             variant="outline"
             onClick={handleSwitchBack}
-            disabled={isSubmitting}
+            disabled={isSubmitting || familyData?.singleDeviceMode === true}
             data-testid="button-switch-back"
           >
             {t('memberDialogs.switchBackToMe')}
