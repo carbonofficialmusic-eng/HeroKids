@@ -387,9 +387,21 @@ function TaskCard({ task, member }: { task: TaskWithMeta; member: FamilyMember }
               <TaskIcon className="h-12 w-12 text-primary" />
             )}
           </div>
-          <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-            {task.title}
-          </h3>
+          <div className="flex items-center justify-center gap-2">
+            <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
+              {task.title}
+            </h3>
+            {/* Multi-Completion Counter Badge */}
+            {task.maxCompletions !== null && task.maxCompletions !== undefined && (
+              <Badge 
+                variant="secondary" 
+                className="shrink-0 text-xs font-bold"
+                data-testid={`badge-multi-completion-${task.id}`}
+              >
+                {task.completionCount || 0}/{task.maxCompletions}
+              </Badge>
+            )}
+          </div>
           
           {statusMessage ? (
             <div className="space-y-1">
