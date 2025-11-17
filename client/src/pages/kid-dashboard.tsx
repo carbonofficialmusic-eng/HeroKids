@@ -745,6 +745,13 @@ export default function KidDashboard() {
         <SwitchMemberDialog
           open={switchMemberDialogOpen}
           onOpenChange={setSwitchMemberDialogOpen}
+          members={familyMembers}
+          currentMember={member}
+          familyData={familyData || null}
+          onSwitch={() => {
+            setSwitchMemberDialogOpen(false);
+          }}
+          isSubmitting={false}
         />
       )}
     </div>
