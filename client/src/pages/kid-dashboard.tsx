@@ -38,6 +38,10 @@ import {
   ArrowLeft,
   Zap,
   Crown,
+  Target,
+  Users,
+  Send,
+  Medal,
 } from "lucide-react";
 
 // Mock data for visual prototype (NO REAL API CALLS)
@@ -121,6 +125,82 @@ const MOCK_DATA = {
       progress: 0,
       Icon: UtensilsCrossed,
       completed: false,
+    },
+  ],
+  leaderboard: [
+    {
+      id: 1,
+      name: "Max",
+      points: 450,
+      rank: 1,
+      isMe: true,
+      avatar: "M",
+      color: "from-amber-400 to-orange-500",
+    },
+    {
+      id: 2,
+      name: "Sarah",
+      points: 380,
+      rank: 2,
+      isMe: false,
+      avatar: "S",
+      color: "from-pink-400 to-purple-500",
+    },
+    {
+      id: 3,
+      name: "Papa",
+      points: 220,
+      rank: 3,
+      isMe: false,
+      avatar: "P",
+      color: "from-blue-400 to-cyan-500",
+    },
+  ],
+  familyGoals: [
+    {
+      id: 1,
+      title: "Familienurlaub",
+      description: "Gemeinsam 2000 Punkte sammeln für einen Ausflug!",
+      targetPoints: 2000,
+      currentPoints: 1450,
+      pointsPerMember: 100,
+      contributedThisWeek: true,
+      Icon: Target,
+    },
+  ],
+  sharedRewards: [
+    {
+      id: 1,
+      title: "Pizza-Abend",
+      description: "Mit Geschwistern teilen",
+      totalCost: 300,
+      myShare: 100,
+      participants: 3,
+      joined: false,
+      Icon: Gift,
+    },
+  ],
+  chatMessages: [
+    {
+      id: 1,
+      sender: "Mama",
+      message: "Toll gemacht beim Lesen heute! 📚",
+      time: "vor 5 Min",
+      isMe: false,
+    },
+    {
+      id: 2,
+      sender: "Max",
+      message: "Danke Mama! 😊",
+      time: "vor 3 Min",
+      isMe: true,
+    },
+    {
+      id: 3,
+      sender: "Sarah",
+      message: "Wer will heute Fußball spielen?",
+      time: "vor 1 Min",
+      isMe: false,
     },
   ],
 };
@@ -523,6 +603,253 @@ function KidQuestTrack({ tasks, onComingSoon }: { tasks: typeof MOCK_DATA.tasks;
   );
 }
 
+function KidLeaderboard({ leaderboard, onComingSoon }: { leaderboard: typeof MOCK_DATA.leaderboard; onComingSoon: () => void }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-2xl">
+          <Trophy className="h-8 w-8 text-white" />
+        </div>
+        <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+          Bestenliste
+        </h2>
+      </div>
+      <Card className="p-4 bg-card/80 backdrop-blur-md border-2 rounded-2xl">
+        <div className="space-y-3">
+          {leaderboard.map((entry, index) => (
+            <motion.div
+              key={entry.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className={`flex items-center gap-3 p-3 rounded-xl ${
+                entry.isMe 
+                  ? "bg-gradient-to-r from-primary/20 to-purple-500/20 border-2 border-primary" 
+                  : "bg-muted/50"
+              }`}>
+                <div className="flex-shrink-0 w-8 text-center">
+                  {entry.rank === 1 && <Trophy className="h-7 w-7 text-amber-500 fill-amber-500 inline" />}
+                  {entry.rank === 2 && <Medal className="h-7 w-7 text-gray-400 inline" />}
+                  {entry.rank === 3 && <Medal className="h-7 w-7 text-amber-700 inline" />}
+                  {entry.rank > 3 && <span className="text-xl font-bold">{entry.rank}</span>}
+                </div>
+                <Avatar className="h-12 w-12 border-2 border-primary">
+                  <AvatarFallback className={`text-lg font-bold bg-gradient-to-br ${entry.color}`}>
+                    {entry.avatar}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-base truncate">{entry.name}</p>
+                  {entry.isMe && <p className="text-xs text-primary font-bold">Das bist du!</p>}
+                </div>
+                <Badge variant="secondary" className="text-base px-3 py-1 font-bold">
+                  {entry.points}
+                </Badge>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function KidFamilyGoals({ goals, onComingSoon }: { goals: typeof MOCK_DATA.familyGoals; onComingSoon: () => void }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl">
+          <Target className="h-8 w-8 text-white" />
+        </div>
+        <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+          Familienziele
+        </h2>
+      </div>
+      {goals.map((goal, index) => {
+        const GoalIcon = goal.Icon;
+        const percentage = Math.min((goal.currentPoints / goal.targetPoints) * 100, 100);
+        const progressColor = getProgressColor(percentage);
+        
+        return (
+          <motion.div
+            key={goal.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <Card className="p-4 bg-card/80 backdrop-blur-md border-2 rounded-2xl">
+              <div className="flex items-center gap-4 mb-3">
+                <div className="flex-shrink-0 p-3 rounded-2xl bg-green-500/10">
+                  <GoalIcon className="h-12 w-12 text-green-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-xl mb-1" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                    {goal.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{goal.description}</p>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-bold">
+                    {goal.currentPoints} / {goal.targetPoints} Punkte
+                  </span>
+                  <span className="font-bold" style={{ color: progressColor }}>
+                    {Math.round(percentage)}%
+                  </span>
+                </div>
+                <Progress value={percentage} className="h-5 rounded-full" />
+                
+                <div className="flex items-center justify-between pt-2">
+                  {goal.contributedThisWeek ? (
+                    <Badge variant="secondary" className="text-sm">
+                      ✓ Diese Woche beigetragen
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-sm">
+                      {goal.pointsPerMember} Punkte pro Woche
+                    </Badge>
+                  )}
+                  <Button
+                    size="default"
+                    variant={goal.contributedThisWeek ? "outline" : "default"}
+                    disabled={goal.contributedThisWeek}
+                    onClick={onComingSoon}
+                    className="h-9 px-4 text-sm font-bold rounded-xl"
+                  >
+                    {goal.contributedThisWeek ? "Beigetragen" : "Beitragen"}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+function KidSharedRewards({ rewards, onComingSoon }: { rewards: typeof MOCK_DATA.sharedRewards; onComingSoon: () => void }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl">
+          <Users className="h-8 w-8 text-white" />
+        </div>
+        <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+          Geteilte Belohnungen
+        </h2>
+      </div>
+      {rewards.map((reward, index) => {
+        const RewardIcon = reward.Icon;
+        
+        return (
+          <motion.div
+            key={reward.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <Card className="p-4 bg-card/80 backdrop-blur-md border-2 rounded-2xl border-pink-500/30">
+              <div className="flex items-center gap-4">
+                <div className="flex-shrink-0 p-3 rounded-2xl bg-pink-500/10">
+                  <RewardIcon className="h-12 w-12 text-pink-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-xl mb-1" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                    {reward.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-2">{reward.description}</p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <Badge variant="secondary" className="text-sm">
+                      <Users className="h-3 w-3 mr-1" />
+                      {reward.participants} Teilnehmer
+                    </Badge>
+                    <Badge variant="secondary" className="text-sm">
+                      Dein Anteil: {reward.myShare} Punkte
+                    </Badge>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <Button
+                    size="default"
+                    variant={reward.joined ? "outline" : "default"}
+                    onClick={onComingSoon}
+                    className="h-11 px-5 text-base font-bold rounded-2xl"
+                  >
+                    {reward.joined ? "Beigetreten" : "Mitmachen"}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+function KidChat({ messages, onComingSoon }: { messages: typeof MOCK_DATA.chatMessages; onComingSoon: () => void }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl">
+          <MessageCircle className="h-8 w-8 text-white" />
+        </div>
+        <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+          Familien-Chat
+        </h2>
+      </div>
+      <Card className="p-4 bg-card/80 backdrop-blur-md border-2 rounded-2xl">
+        <div className="space-y-3 mb-4 max-h-96 overflow-y-auto">
+          {messages.map((msg, index) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, x: msg.isMe ? 20 : -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className={`flex ${msg.isMe ? "justify-end" : "justify-start"}`}
+            >
+              <div className={`max-w-[80%] ${msg.isMe ? "order-2" : "order-1"}`}>
+                <div className={`p-3 rounded-2xl ${
+                  msg.isMe 
+                    ? "bg-primary text-primary-foreground" 
+                    : "bg-muted"
+                }`}>
+                  {!msg.isMe && (
+                    <p className="text-xs font-bold mb-1">{msg.sender}</p>
+                  )}
+                  <p className="text-sm">{msg.message}</p>
+                  <p className={`text-xs mt-1 ${msg.isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                    {msg.time}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Nachricht schreiben..."
+            className="flex-1 px-4 py-2 rounded-xl bg-muted border-2 border-border focus:border-primary focus:outline-none text-base"
+            onClick={onComingSoon}
+            readOnly
+          />
+          <Button size="icon" onClick={onComingSoon} className="h-10 w-10 rounded-xl">
+            <Send className="h-5 w-5" />
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 export default function KidDashboard() {
   const [showComingSoon, setShowComingSoon] = useState(false);
 
@@ -630,6 +957,18 @@ export default function KidDashboard() {
 
         {/* Quest Track */}
         <KidQuestTrack tasks={MOCK_DATA.tasks} onComingSoon={() => setShowComingSoon(true)} />
+
+        {/* Leaderboard */}
+        <KidLeaderboard leaderboard={MOCK_DATA.leaderboard} onComingSoon={() => setShowComingSoon(true)} />
+
+        {/* Family Goals */}
+        <KidFamilyGoals goals={MOCK_DATA.familyGoals} onComingSoon={() => setShowComingSoon(true)} />
+
+        {/* Shared Rewards */}
+        <KidSharedRewards rewards={MOCK_DATA.sharedRewards} onComingSoon={() => setShowComingSoon(true)} />
+
+        {/* Family Chat */}
+        <KidChat messages={MOCK_DATA.chatMessages} onComingSoon={() => setShowComingSoon(true)} />
 
         {/* Simplified Navigation - Playful Bottom Bar */}
         <motion.div
