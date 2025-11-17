@@ -336,13 +336,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If single device mode is enabled and switching to a parent, verify PIN
       if (family?.singleDeviceMode && targetMember.role === "parent") {
-        if (!targetMember.pinCode) {
-          return res.status(400).json({ 
-            message: "Target member has no PIN set. Please set a PIN first.",
-            requiresPin: true 
-          });
-        }
-        
         if (!pinCode) {
           return res.status(401).json({ 
             message: "PIN required for this member",
@@ -350,7 +343,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        const isValidPin = await storage.validatePin(memberId, pinCode);
+        // If no PIN is set, default PIN is "0000"
+        // If PIN is set, validate it
+        let isValidPin = false;
+        if (!targetMember.pinCode) {
+          // No PIN set - accept default PIN "0000"
+          isValidPin = pinCode === "0000";
+        } else {
+          // PIN is set - validate against stored PIN
+          isValidPin = await storage.validatePin(memberId, pinCode);
+        }
+        
         if (!isValidPin) {
           return res.status(401).json({ 
             message: "Incorrect PIN",
