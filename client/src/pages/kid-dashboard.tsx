@@ -824,12 +824,12 @@ export default function KidDashboard() {
 
       {/* Simplified Navigation - Fixed Bottom Bar */}
       <motion.div
-        className="fixed bottom-0 left-0 right-0 z-50 p-4"
+        className="fixed bottom-0 left-0 right-0 z-50 p-2"
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5, type: "spring" }}
       >
-        <Card className="p-2 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl mx-auto">
+        <Card className="p-1.5 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl mx-auto">
           <div className="flex justify-around gap-2">
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button 
@@ -837,16 +837,16 @@ export default function KidDashboard() {
                 size="lg" 
                 onClick={() => setRequestRewardDialogOpen(true)}
                 data-testid="button-nav-request-reward" 
-                className="h-16 px-6 rounded-2xl"
+                className="h-14 px-5 rounded-2xl"
               >
-                <Lightbulb className="h-7 w-7 mr-2 text-amber-500" />
+                <Lightbulb className="h-6 w-6 mr-2 text-amber-500" />
                 <span className="font-bold text-base">Wunsch</span>
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-16 px-6 rounded-2xl">
+              <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 px-5 rounded-2xl">
                 <Link href="/chat">
-                  <MessageCircle className="h-7 w-7 mr-2 text-blue-500" />
+                  <MessageCircle className="h-6 w-6 mr-2 text-blue-500" />
                   <span className="font-bold text-base">{t("nav.chat")}</span>
                 </Link>
               </Button>
