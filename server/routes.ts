@@ -828,15 +828,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         
         // Filter logic for different task types:
-        // 1. Normal tasks (remainingSlots === null): Show if NOT globally completed, OR if recurring
+        // 1. Normal tasks: Show ALL tasks except archived (children should see all tasks)
         // 2. Multi-completion with slots (remainingSlots > 0): Always show
         // 3. Multi-completion (maxCompletions > 1) completed by member: Show grayed out
-        // 4. One-time globally completed tasks: Hide for everyone
+        // 4. Archived tasks: Hide for everyone
         const filteredTasks = tasksWithMeta.filter(
-          (task) => 
-            (task.remainingSlots === null && (task.status !== "completed" || task.recurrence !== "none")) || // Normal tasks: show if NOT globally completed OR recurring
-            (task.remainingSlots !== null && task.remainingSlots > 0) || // Multi-completion with slots available
-            (task.maxCompletions !== null && task.maxCompletions > 1 && task.memberHasCompleted) // Multi-completion task this member already completed (show grayed out)
+          (task) => task.status !== "archived"
         );
         
         // Disable caching for task data
