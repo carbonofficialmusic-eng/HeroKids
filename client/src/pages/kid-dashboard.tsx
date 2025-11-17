@@ -76,6 +76,12 @@ type RedemptionWithDetails = RewardRedemption & {
 
 // Shared reward type with participants
 type SharedReward = RedemptionWithDetails & {
+  reward: {
+    id: string;
+    title: string;
+    description: string | null;
+    pointThreshold: number;
+  };
   participants: Array<{
     id: string;
     memberId: string;
