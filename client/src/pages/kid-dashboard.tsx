@@ -5,6 +5,7 @@ import confetti from "canvas-confetti";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
+import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -512,6 +513,9 @@ export default function KidDashboard() {
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("week");
+
+  // Auto-refresh tasks at midnight when daily tasks reset
+  useMidnightRefresh();
 
   // Family Goals mutations
   const contributeMutation = useMutation({
