@@ -149,6 +149,9 @@ export function TaskDialog({
   // Track which recurrence mode is selected
   const [recurrenceMode, setRecurrenceMode] = useState<"standard" | "custom">("standard");
   
+  // Local state for maxCompletions input (allows empty string during editing)
+  const [maxCompletionsInput, setMaxCompletionsInput] = useState<string>("");
+  
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
@@ -210,6 +213,8 @@ export function TaskDialog({
           iconEmoji: editingTask.iconEmoji || "⭐",
           maxCompletions: clampedMaxCompletions,
         });
+        // Sync local input state with field value
+        setMaxCompletionsInput(clampedMaxCompletions !== undefined ? String(clampedMaxCompletions) : "");
       } else {
         setRecurrenceMode("standard");
         form.reset({
@@ -227,6 +232,8 @@ export function TaskDialog({
           iconEmoji: "⭐",
           maxCompletions: undefined,
         });
+        // Clear local input state for new task
+        setMaxCompletionsInput("");
       }
     }
   }, [open, editingTask, familyName, createdBy, totalMemberCount]);
@@ -320,6 +327,7 @@ export function TaskDialog({
                           if (checked) {
                             if (totalMemberCount < 2) {
                               field.onChange(undefined);
+                              setMaxCompletionsInput("");
                               toast({
                                 title: "Feature deaktiviert",
                                 description: "Multi-Completion erfordert mindestens 2 Familienmitglieder.",
@@ -328,9 +336,11 @@ export function TaskDialog({
                             } else {
                               // Set to totalMemberCount as default
                               field.onChange(totalMemberCount);
+                              setMaxCompletionsInput(String(totalMemberCount));
                             }
                           } else {
                             field.onChange(undefined);
+                            setMaxCompletionsInput("");
                           }
                         }}
                         data-testid="toggle-multi-completion"
@@ -342,13 +352,43 @@ export function TaskDialog({
                             type="number"
                             min={2}
                             max={totalMemberCount}
-                            value={field.value}
+                            value={maxCompletionsInput}
                             onChange={(e) => {
-                              const val = parseInt(e.target.value);
-                              if (!isNaN(val)) {
-                                field.onChange(Math.max(2, Math.min(val, totalMemberCount)));
+                              const val = e.target.value;
+                              // Update local state (allows empty string)
+                              setMaxCompletionsInput(val);
+                              
+                              // Update field value for form validation
+                              if (val === '') {
+                                // Don't update field.value during typing, only on blur
+                                return;
+                              }
+                              const numVal = parseInt(val);
+                              if (!isNaN(numVal)) {
+                                // Update field value without clamping
+                                field.onChange(numVal);
                               }
                             }}
+                            onBlur={() => {
+                              // Clamp to valid range when user finishes editing
+                              if (maxCompletionsInput === '') {
+                                // If empty, reset to minimum
+                                field.onChange(2);
+                                setMaxCompletionsInput("2");
+                                return;
+                              }
+                              const numVal = parseInt(maxCompletionsInput);
+                              if (!isNaN(numVal)) {
+                                const clamped = Math.max(2, Math.min(numVal, totalMemberCount));
+                                field.onChange(clamped);
+                                setMaxCompletionsInput(String(clamped));
+                              } else {
+                                // Invalid input, reset to minimum
+                                field.onChange(2);
+                                setMaxCompletionsInput("2");
+                              }
+                            }}
+                            onFocus={(e) => e.target.select()} // Auto-select on focus for easy editing
                             className="w-20"
                             data-testid="input-max-completions"
                           />
