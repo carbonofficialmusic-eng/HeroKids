@@ -21,7 +21,7 @@ Preferred communication style: Simple, everyday language.
 - **Backend**: Express.js with TypeScript (Node.js), RESTful API.
 - **Real-time Updates**: WebSocket server using "family rooms" for live synchronization.
 - **Authentication**: Replit Auth (OIDC-based) via `openid-client` and Passport.js, with Express-session and PostgreSQL store.
-- **File Uploads**: Multer middleware for photo uploads (task proofs, avatars).
+- **File Uploads**: Replit Object Storage (Google Cloud Storage backend) with presigned URL-based client-side uploads. Task proofs and avatars use a 3-step flow: (1) request presigned URL from backend, (2) upload file directly to storage, (3) set ACL policy and get final object path. Serves files via `/objects/` endpoint with ACL validation. Replaces multer diskStorage for production compatibility (read-only filesystem).
 - **Subscription Tiers**: 4-tier model (Free, Family, Family+, Family Hero) with feature unlocks enforced by backend middleware (e.g., member limits, leaderboard types, character skins, photo proof, recurring tasks, chat).
 - **Gamification Features**: Monthly leaderboards with optional member exclusion, unlockable character skins across 3 tiers (Starter, Elite, Dinosaur) based on lifetime points, custom recurring tasks, and a factory reset option. Points system tracks `totalEarned`, `totalPoints`, `weeklyPoints`, and `monthlyPoints`.
 - **Task Approval System**: Configurable per-task approval with granular completion states (`pending`, `approved`, `rejected`, `null`). Backend guards prevent duplicate submissions via transaction locks. Tasks can be auto-approved or require parent verification. Recurring tasks automatically reopen at midnight. Client-side `useMidnightRefresh` hook ensures task list updates automatically. API exposes `memberCompletionStatus` for precise UI state rendering.
@@ -43,7 +43,7 @@ Preferred communication style: Simple, everyday language.
 
 -   **Authentication**: Replit Auth OIDC provider.
 -   **Database**: Neon PostgreSQL serverless database.
--   **Asset Storage**: Local filesystem for uploaded photos; pre-made avatar assets.
+-   **Asset Storage**: Replit Object Storage (Google Cloud Storage) for uploaded photos (task proofs, avatars) with presigned URL uploads; legacy `/uploads/` endpoint for backward compatibility; pre-made avatar assets.
 -   **Fonts**: Google Fonts (Nunito, Fredoka).
 -   **UI Libraries**: Radix UI, shadcn/ui, Tailwind CSS, lucide-react.
 -   **Build & Development**: Vite, esbuild, tsx.
