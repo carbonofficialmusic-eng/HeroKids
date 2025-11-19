@@ -10,6 +10,8 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { ObjectPermission } from "./objectAcl";
 import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers } from "@shared/schema";
@@ -94,6 +96,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth middleware
   await setupAuth(app);
+
+  // Object Storage: Serve private objects with ACL check
+  app.get("/objects/:objectPath(*)", isAuthenticated, async (req: any, res) => {
+    const userId = req.user?.claims?.sub;
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      const canAccess = await objectStorageService.canAccessObjectEntity({
+        objectFile,
+        userId,
+        requestedPermission: ObjectPermission.READ,
+      });
+      if (!canAccess) {
+        return res.sendStatus(401);
+      }
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error checking object access:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
 
   // Auth routes
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
@@ -756,20 +782,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Avatar upload endpoint
-  app.post("/api/upload-avatar", isAuthenticated, avatarUpload.single('avatar'), async (req: any, res) => {
+  // Get presigned URL for avatar upload (client-side upload to Object Storage)
+  app.post("/api/upload-avatar-url", isAuthenticated, async (req: any, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({ message: "No avatar file provided" });
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL("avatars");
+      
+      res.json({ uploadURL });
+    } catch (error: any) {
+      console.error("Error getting avatar upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
+  // Set ACL policy for uploaded avatar
+  app.put("/api/avatar", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { avatarUrl } = req.body;
+      
+      if (!avatarUrl) {
+        return res.status(400).json({ message: "avatarUrl is required" });
       }
       
-      // Generate URL for the uploaded file
-      const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        avatarUrl,
+        {
+          owner: userId,
+          visibility: "public", // Avatars are public, accessible by everyone
+        }
+      );
       
-      res.json({ avatarUrl });
+      res.json({ avatarUrl: objectPath });
     } catch (error: any) {
-      console.error("Error uploading avatar:", error);
-      res.status(500).json({ message: "Failed to upload avatar" });
+      console.error("Error setting avatar ACL:", error);
+      res.status(500).json({ message: "Failed to set avatar ACL" });
     }
   });
 
@@ -1014,17 +1062,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Photo upload endpoint for task proof
-  app.post("/api/tasks/:taskId/upload-proof", isAuthenticated, upload.single('photo'), async (req: any, res) => {
+  // Get presigned URL for task proof upload (client-side upload to Object Storage)
+  app.post("/api/tasks/upload-proof-url", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { taskId } = req.params;
-      
-      if (!req.file) {
-        return res.status(422).json({ message: "No photo file provided" });
-      }
-      
       const member = await storage.getFamilyMemberByUserId(userId);
+      
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
       }
@@ -1044,6 +1087,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL("task-proofs");
+      
+      res.json({ uploadURL });
+    } catch (error: any) {
+      console.error("Error getting task proof upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
+  // Set ACL policy for uploaded task proof photo
+  app.put("/api/tasks/:taskId/proof-photo", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { taskId } = req.params;
+      const { photoUrl } = req.body;
+      
+      if (!photoUrl) {
+        return res.status(400).json({ message: "photoUrl is required" });
+      }
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
       const task = await storage.getTask(taskId);
       if (!task) {
         return res.status(404).json({ message: "Task not found" });
@@ -1053,20 +1122,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Task not in your family" });
       }
       
-      // Generate URL for the uploaded file
-      const photoUrl = `/uploads/task-proofs/${req.file.filename}`;
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        photoUrl,
+        {
+          owner: userId,
+          visibility: "private", // Task proofs are private, only accessible by family members
+        }
+      );
       
-      // Track this upload to prevent URL spoofing
-      uploadedPhotos.set(photoUrl, {
-        memberId: member.id,
-        taskId: taskId,
-        timestamp: Date.now(),
-      });
-      
-      res.json({ photoUrl });
+      res.json({ photoUrl: objectPath });
     } catch (error: any) {
-      console.error("Error uploading proof photo:", error);
-      res.status(500).json({ message: "Failed to upload photo" });
+      console.error("Error setting task proof ACL:", error);
+      res.status(500).json({ message: "Failed to set photo ACL" });
     }
   });
 
