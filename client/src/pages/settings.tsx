@@ -77,6 +77,7 @@ export default function Settings() {
       showLeaderboard?: boolean;
       singleDeviceMode?: boolean;
       language?: "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko";
+      timezone?: string;
       weeklyPrize?: string | null;
       monthlyPrize?: string | null;
     }) => {
@@ -323,6 +324,10 @@ export default function Settings() {
     updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" });
   };
 
+  const handleTimezoneChange = (timezone: string) => {
+    updateSettingsMutation.mutate({ timezone });
+  };
+
   const handleSavePrizes = () => {
     updateSettingsMutation.mutate({
       weeklyPrize: weeklyPrize.trim() || null,
@@ -339,6 +344,34 @@ export default function Settings() {
     { value: "zh", label: "中文" },
     { value: "ko", label: "한국어" },
   ];
+
+  // Common timezones grouped by region
+  const timezoneOptions = [
+    { value: "Europe/Berlin", label: "🇩🇪 Berlin (MEZ/MESZ)" },
+    { value: "Europe/London", label: "🇬🇧 London (GMT/BST)" },
+    { value: "Europe/Paris", label: "🇫🇷 Paris (MEZ/MESZ)" },
+    { value: "Europe/Madrid", label: "🇪🇸 Madrid (MEZ/MESZ)" },
+    { value: "Europe/Rome", label: "🇮🇹 Rom (MEZ/MESZ)" },
+    { value: "Europe/Vienna", label: "🇦🇹 Wien (MEZ/MESZ)" },
+    { value: "Europe/Zurich", label: "🇨🇭 Zürich (MEZ/MESZ)" },
+    { value: "America/New_York", label: "🇺🇸 New York (EST/EDT)" },
+    { value: "America/Chicago", label: "🇺🇸 Chicago (CST/CDT)" },
+    { value: "America/Denver", label: "🇺🇸 Denver (MST/MDT)" },
+    { value: "America/Los_Angeles", label: "🇺🇸 Los Angeles (PST/PDT)" },
+    { value: "America/Toronto", label: "🇨🇦 Toronto (EST/EDT)" },
+    { value: "America/Mexico_City", label: "🇲🇽 Mexico City (CST/CDT)" },
+    { value: "America/Sao_Paulo", label: "🇧🇷 São Paulo (BRT)" },
+    { value: "Asia/Tokyo", label: "🇯🇵 Tokyo (JST)" },
+    { value: "Asia/Shanghai", label: "🇨🇳 Shanghai (CST)" },
+    { value: "Asia/Seoul", label: "🇰🇷 Seoul (KST)" },
+    { value: "Asia/Dubai", label: "🇦🇪 Dubai (GST)" },
+    { value: "Asia/Singapore", label: "🇸🇬 Singapore (SGT)" },
+    { value: "Australia/Sydney", label: "🇦🇺 Sydney (AEDT/AEST)" },
+    { value: "Pacific/Auckland", label: "🇳🇿 Auckland (NZDT/NZST)" },
+  ];
+
+  // Auto-detect browser timezone
+  const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   return (
     <div className="min-h-screen">
@@ -536,6 +569,54 @@ export default function Settings() {
                   </SelectContent>
                 </Select>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Timezone Settings */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🕐</span>
+                <CardTitle>Zeitzone</CardTitle>
+              </div>
+              <CardDescription>
+                Legen Sie Ihre lokale Zeitzone fest. Täglich, wöchentliche und monatliche Resets erfolgen um Mitternacht in Ihrer Zeitzone.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="timezone-select" className="text-base">
+                    Ihre Zeitzone
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Aktuell erkannt: <span className="font-mono text-xs">{browserTimezone}</span>
+                  </p>
+                </div>
+                <Select
+                  value={familyData?.timezone || "Europe/Berlin"}
+                  onValueChange={handleTimezoneChange}
+                  disabled={updateSettingsMutation.isPending}
+                >
+                  <SelectTrigger className="w-[240px]" data-testid="select-timezone">
+                    <SelectValue placeholder="Zeitzone wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timezoneOptions.map((tz) => (
+                      <SelectItem key={tz.value} value={tz.value} data-testid={`select-timezone-${tz.value}`}>
+                        {tz.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {familyData?.timezone !== browserTimezone && (
+                <div className="p-3 rounded-lg bg-muted/50 border border-muted">
+                  <p className="text-sm text-muted-foreground">
+                    💡 <strong>Hinweis:</strong> Ihre eingestellte Zeitzone ({familyData?.timezone}) unterscheidet sich von Ihrer Browser-Zeitzone ({browserTimezone}).
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

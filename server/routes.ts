@@ -164,6 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     showLeaderboard: z.boolean().optional(),
     singleDeviceMode: z.boolean().optional(),
     language: z.enum(["de", "en", "fr", "es", "ja", "zh", "ko"]).optional(),
+    timezone: z.string().optional(),
     weeklyPrize: z.string().nullable().optional(),
     monthlyPrize: z.string().nullable().optional(),
     yearlyPrize: z.string().nullable().optional(),
@@ -171,6 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     data.showLeaderboard !== undefined || 
     data.singleDeviceMode !== undefined ||
     data.language !== undefined ||
+    data.timezone !== undefined ||
     data.weeklyPrize !== undefined ||
     data.monthlyPrize !== undefined ||
     data.yearlyPrize !== undefined, {
