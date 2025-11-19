@@ -226,6 +226,38 @@ export function EditMemberDialog({
               </div>
             )}
 
+            {member.activeSkinId && (member as any).avatarHistory && (member as any).avatarHistory.length > 0 && (
+              <div className="space-y-2" data-testid="recent-avatars-section">
+                <FormLabel>{t('memberDialogs.recentAvatars')}</FormLabel>
+                <div className="flex gap-2">
+                  {((member as any).avatarHistory as string[]).map((avatarUrl: string, index: number) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => {
+                        setUploadedAvatarUrl(avatarUrl);
+                        setUploadedAvatarFile(new File([], 'recent-avatar'));
+                      }}
+                      className="relative group"
+                      data-testid={`button-recent-avatar-${index}`}
+                    >
+                      <Avatar className={`h-14 w-14 border-2 transition-all ${
+                        uploadedAvatarUrl === avatarUrl 
+                          ? 'border-primary ring-2 ring-primary ring-offset-2' 
+                          : 'border-border hover-elevate'
+                      }`}>
+                        <AvatarImage src={avatarUrl} alt={`Recent avatar ${index + 1}`} />
+                        <AvatarFallback>{member.displayName[0]?.toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t('memberDialogs.recentAvatarsHint')}
+                </p>
+              </div>
+            )}
+
             <AvatarSelector
               selectedAvatar={selectedAvatar}
               selectedColor={selectedColor}

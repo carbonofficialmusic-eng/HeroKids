@@ -519,6 +519,8 @@
     "selectRole": "Select role",
     "currentDisplayAvatar": "Current Display Avatar",
     "activeSkinOverride": "You have an active character skin equipped. This overrides your avatar selection.",
+    "recentAvatars": "Recent Avatars",
+    "recentAvatarsHint": "Click a recent avatar to use it again",
     "switchMember": "Switch Member",
     "switchMemberDesc": "Act as a different family member to test their view",
     "switchBackToMe": "Switch Back to Me",

@@ -356,16 +356,16 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Manage avatar history if a new avatar is being uploaded
-    let finalUpdates = { ...safeUpdates, updatedAt: new Date() };
+    let finalUpdates: any = { ...safeUpdates, updatedAt: new Date() };
     if (safeUpdates.avatarUrl) {
       // Get current member to access avatar history
       const currentMember = await this.getFamilyMemberById(id);
       if (currentMember) {
-        const currentHistory = (currentMember.avatarHistory as string[] | null) || [];
+        const currentHistory = ((currentMember as any).avatarHistory as string[] | null) || [];
         
         // Add new avatar to front of history, keep only last 3
         const newHistory = [safeUpdates.avatarUrl, ...currentHistory.filter(url => url !== safeUpdates.avatarUrl)].slice(0, 3);
-        finalUpdates = { ...finalUpdates, avatarHistory: newHistory as any };
+        finalUpdates.avatarHistory = newHistory;
       }
     }
     
