@@ -2363,7 +2363,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      await storage.updateFamilyMemberActiveSkin(member.id, skinId);
+      // When selecting a skin, always show the skin's default avatar
+      // When clearing (skinId = null), preserve the useCustomAvatar flag
+      await storage.updateFamilyMemberActiveSkin(member.id, {
+        skinId,
+        useCustomAvatar: skinId !== null ? false : undefined
+      });
       
       // Broadcast skin change to family
       broadcastToFamily(member.familyName, {

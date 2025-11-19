@@ -148,7 +148,7 @@ export interface IStorage {
 
   // Skin operations
   getSkins(): Promise<any[]>;
-  updateFamilyMemberActiveSkin(memberId: string, skinId: string | null): Promise<void>;
+  updateFamilyMemberActiveSkin(memberId: string, options: { skinId: string | null; useCustomAvatar?: boolean }): Promise<void>;
   unlockSkin(memberId: string, skinId: string): Promise<void>;
   incrementRewardsRedeemed(memberId: string): Promise<number>;
 
@@ -331,7 +331,7 @@ export class DatabaseStorage implements IStorage {
   async createFamilyMember(memberData: InsertFamilyMember): Promise<FamilyMember> {
     const [member] = await db
       .insert(familyMembers)
-      .values(memberData)
+      .values(memberData as any)
       .returning();
     
     // New members start with no skins unlocked
@@ -1169,10 +1169,22 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(skins).orderBy(skins.pointsRequired);
   }
 
-  async updateFamilyMemberActiveSkin(memberId: string, skinId: string | null): Promise<void> {
+  async updateFamilyMemberActiveSkin(
+    memberId: string, 
+    options: { skinId: string | null; useCustomAvatar?: boolean }
+  ): Promise<void> {
+    const updateData: any = { 
+      activeSkinId: options.skinId,
+      updatedAt: new Date()
+    };
+    
+    if (options.useCustomAvatar !== undefined) {
+      updateData.useCustomAvatar = options.useCustomAvatar;
+    }
+    
     await db
       .update(familyMembers)
-      .set({ activeSkinId: skinId })
+      .set(updateData)
       .where(eq(familyMembers.id, memberId));
   }
 
