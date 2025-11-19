@@ -44,7 +44,7 @@ type EditMemberForm = z.infer<typeof editMemberSchema>;
 interface EditMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (memberId: string, data: EditMemberForm & { avatarUrl: string; color: string }) => void;
+  onSubmit: (memberId: string, data: EditMemberForm & { avatarUrl: string; color: string; useCustomAvatar?: boolean }) => void;
   isSubmitting?: boolean;
   member: FamilyMember | null;
   currentUserRole?: "parent" | "child";
