@@ -284,7 +284,7 @@ export default function RewardsBoard() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3 flex-1">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={getAvatarUrl(shared.member.activeSkinId, shared.member.avatarUrl)} />
+                          <AvatarImage src={getAvatarUrl(shared.member.activeSkinId, shared.member.avatarUrl, (shared.member as any).useCustomAvatar)} />
                           <AvatarFallback 
                             className="text-white font-bold"
                             style={{ backgroundColor: shared.member.color }}
@@ -332,7 +332,7 @@ export default function RewardsBoard() {
                         <div className="flex flex-wrap gap-2">
                           <Badge variant="secondary" className="gap-2">
                             <Avatar className="h-5 w-5">
-                              <AvatarImage src={getAvatarUrl(shared.member.activeSkinId, shared.member.avatarUrl)} />
+                              <AvatarImage src={getAvatarUrl(shared.member.activeSkinId, shared.member.avatarUrl, (shared.member as any).useCustomAvatar)} />
                               <AvatarFallback 
                                 className="text-xs text-white font-bold"
                                 style={{ backgroundColor: shared.member.color }}
@@ -345,7 +345,7 @@ export default function RewardsBoard() {
                           {shared.participants.map(p => (
                             <Badge key={p.id} variant="secondary" className="gap-2">
                               <Avatar className="h-5 w-5">
-                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl)} />
+                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar)} />
                                 <AvatarFallback 
                                   className="text-xs text-white font-bold"
                                   style={{ backgroundColor: p.member.color }}
@@ -429,7 +429,7 @@ export default function RewardsBoard() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3 flex-1">
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={getAvatarUrl(redemption.member.activeSkinId, redemption.member.avatarUrl)} />
+                      <AvatarImage src={getAvatarUrl(redemption.member.activeSkinId, redemption.member.avatarUrl, (redemption.member as any).useCustomAvatar)} />
                       <AvatarFallback 
                         className="text-white font-bold"
                         style={{ backgroundColor: redemption.member.color }}

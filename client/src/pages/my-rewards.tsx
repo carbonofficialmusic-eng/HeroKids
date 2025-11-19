@@ -291,7 +291,7 @@ export default function MyRewards() {
                             <p className="text-xs text-muted-foreground">Mit:</p>
                             {participants.map(p => (
                               <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
-                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl)} />
+                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar)} />
                                 <AvatarFallback className="text-xs">
                                   {p.member.displayName[0]}
                                 </AvatarFallback>

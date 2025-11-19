@@ -825,6 +825,7 @@ export class DatabaseStorage implements IStorage {
           color: familyMembers.color,
           unlockedSkins: familyMembers.unlockedSkins,
           activeSkinId: familyMembers.activeSkinId,
+          useCustomAvatar: familyMembers.useCustomAvatar,
         },
       })
       .from(rewardRedemptions)
@@ -1074,6 +1075,7 @@ export class DatabaseStorage implements IStorage {
           color: familyMembers.color,
           unlockedSkins: familyMembers.unlockedSkins,
           activeSkinId: familyMembers.activeSkinId,
+          useCustomAvatar: familyMembers.useCustomAvatar,
         },
       })
       .from(rewardRedemptions)

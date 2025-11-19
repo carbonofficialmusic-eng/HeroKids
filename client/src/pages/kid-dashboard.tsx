@@ -895,7 +895,7 @@ export default function KidDashboard() {
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <Avatar className="h-10 w-10 flex-shrink-0">
-              <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
+              <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar)} />
               <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
                 {member.displayName[0]}
               </AvatarFallback>
@@ -956,7 +956,7 @@ export default function KidDashboard() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Avatar className="h-24 w-24 border-4 border-primary shadow-lg">
-                    <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
+                    <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar)} />
                     <AvatarFallback style={{ backgroundColor: member.color }} className="text-4xl font-bold text-white">
                       {member.displayName[0]}
                     </AvatarFallback>
@@ -1123,7 +1123,7 @@ export default function KidDashboard() {
                             <p className="text-xs text-muted-foreground mr-1">Mit:</p>
                             {participants.map(p => (
                               <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
-                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl)} />
+                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar)} />
                                 <AvatarFallback className="text-xs">
                                   {p.member.displayName[0]}
                                 </AvatarFallback>
@@ -1208,7 +1208,7 @@ export default function KidDashboard() {
                               <div className="flex items-center gap-2">
                                 {initiatorMember && (
                                   <Avatar className="h-6 w-6 border-2 border-background">
-                                    <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl)} />
+                                    <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar)} />
                                     <AvatarFallback className="text-xs">
                                       {initiatorMember.displayName[0]}
                                     </AvatarFallback>
@@ -1234,7 +1234,7 @@ export default function KidDashboard() {
                               <p className="text-xs text-muted-foreground mr-1">Dabei:</p>
                               {shared.participants.map(p => (
                                 <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
-                                  <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl)} />
+                                  <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar)} />
                                   <AvatarFallback className="text-xs">
                                     {p.member.displayName[0]}
                                   </AvatarFallback>
