@@ -95,13 +95,24 @@ export function EditMemberDialog({
     setUploadedAvatarUrl(null);
   };
 
+  const handleAvatarSelect = (avatarUrl: string) => {
+    setSelectedAvatar(avatarUrl);
+    // Clear custom avatar state when selecting a skin/default avatar
+    setUploadedAvatarFile(null);
+    setUploadedAvatarUrl(null);
+  };
+
   const handleSubmit = async (data: EditMemberForm) => {
     if (!member) return;
 
     let finalAvatarUrl = selectedAvatar;
 
-    // If user uploaded a custom avatar, upload it first using 3-step Object Storage flow
-    if (uploadedAvatarFile) {
+    // If user selected an avatar from history, use that URL directly
+    if (uploadedAvatarUrl) {
+      finalAvatarUrl = uploadedAvatarUrl;
+    }
+    // If user uploaded a new custom avatar file, upload it first using 3-step Object Storage flow
+    else if (uploadedAvatarFile && uploadedAvatarFile.size > 0) {
       try {
         // Step 1: Get presigned upload URL
         const urlResponse = await fetch('/api/upload-avatar-url', {
@@ -142,18 +153,33 @@ export function EditMemberDialog({
 
         const { avatarUrl } = await aclResponse.json();
         finalAvatarUrl = avatarUrl;
-        setUploadedAvatarUrl(avatarUrl);
       } catch (error) {
         console.error('Error uploading avatar:', error);
         // Continue with default avatar on error
       }
     }
 
+    // Determine useCustomAvatar flag:
+    // - If new avatar uploaded or history selected → true
+    // - If no change to avatar → keep existing flag
+    // - If reverted to skin/default avatar → false
+    let useCustomAvatarFlag: boolean;
+    if (uploadedAvatarUrl || (uploadedAvatarFile && uploadedAvatarFile.size > 0)) {
+      // New upload or history selection
+      useCustomAvatarFlag = true;
+    } else if (finalAvatarUrl !== member.avatarUrl) {
+      // Avatar changed to something else (likely skin asset)
+      useCustomAvatarFlag = false;
+    } else {
+      // No avatar change, preserve existing flag
+      useCustomAvatarFlag = member.useCustomAvatar;
+    }
+
     onSubmit(member.id, {
       ...data,
       avatarUrl: finalAvatarUrl,
       color: selectedColor,
-      useCustomAvatar: uploadedAvatarFile ? true : undefined, // Enable custom avatar if uploaded
+      useCustomAvatar: useCustomAvatarFlag,
     });
   };
 
@@ -236,7 +262,8 @@ export function EditMemberDialog({
                       type="button"
                       onClick={() => {
                         setUploadedAvatarUrl(avatarUrl);
-                        setUploadedAvatarFile(new File([], 'recent-avatar'));
+                        setUploadedAvatarFile(null);
+                        setSelectedAvatar(avatarUrl);
                       }}
                       className="relative group"
                       data-testid={`button-recent-avatar-${index}`}
@@ -261,7 +288,7 @@ export function EditMemberDialog({
             <AvatarSelector
               selectedAvatar={selectedAvatar}
               selectedColor={selectedColor}
-              onAvatarSelect={setSelectedAvatar}
+              onAvatarSelect={handleAvatarSelect}
               onColorSelect={setSelectedColor}
               onCustomUpload={handleCustomUpload}
               onClearCustomUpload={handleClearCustomUpload}
