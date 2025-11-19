@@ -99,11 +99,27 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  // Show nothing while loading to prevent 404 flash
+  if (isLoading) {
+    return (
+      <BackgroundWrapper>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
+          </div>
+        </div>
+      </BackgroundWrapper>
+    );
+  }
+
   return (
     <BackgroundWrapper>
       <Switch>
-        {isLoading || !isAuthenticated ? (
-          <Route path="/" component={Landing} />
+        {!isAuthenticated ? (
+          <>
+            <Route path="/" component={Landing} />
+            <Route component={NotFound} />
+          </>
         ) : (
           <>
             <Route path="/" component={AutoRedirect} />
@@ -132,9 +148,9 @@ function Router() {
               </ProtectedRoute>
             </Route>
             <Route path="/family-goals" component={FamilyGoals} />
+            <Route component={NotFound} />
           </>
         )}
-        <Route component={NotFound} />
       </Switch>
     </BackgroundWrapper>
   );
