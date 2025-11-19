@@ -118,7 +118,7 @@ function Router() {
         {!isAuthenticated ? (
           <>
             <Route path="/" component={Landing} />
-            <Route component={NotFound} />
+            <Route path="/:rest*" component={NotFound} />
           </>
         ) : (
           <>
@@ -148,7 +148,7 @@ function Router() {
               </ProtectedRoute>
             </Route>
             <Route path="/family-goals" component={FamilyGoals} />
-            <Route component={NotFound} />
+            <Route path="/:rest*" component={NotFound} />
           </>
         )}
       </Switch>
