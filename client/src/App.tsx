@@ -112,45 +112,47 @@ function Router() {
     );
   }
 
+  if (!isAuthenticated) {
+    return (
+      <BackgroundWrapper>
+        <Switch>
+          <Route path="/" component={Landing} />
+          <Route component={NotFound} />
+        </Switch>
+      </BackgroundWrapper>
+    );
+  }
+
   return (
     <BackgroundWrapper>
       <Switch>
-        {!isAuthenticated ? (
-          <>
-            <Route path="/" component={Landing} />
-            <Route path="/:rest*" component={NotFound} />
-          </>
-        ) : (
-          <>
-            <Route path="/" component={AutoRedirect} />
-            <Route path="/dashboard" component={Dashboard} />
-            <Route path="/kid-dashboard" component={KidDashboard} />
-            <Route path="/kid-dashboard-old" component={KidDashboardOld} />
-            <Route path="/my-rewards" component={MyRewards} />
-            <Route path="/tasks" component={Dashboard} />
-            <Route path="/rewards" component={Dashboard} />
-            <Route path="/leaderboard" component={Dashboard} />
-            <Route path="/skins" component={SkinsGallery} />
-            <Route path="/pricing" component={Pricing} />
-            <Route path="/analytics" component={Analytics} />
-            <Route path="/chat" component={Chat} />
-            <Route path="/approvals" component={Approvals} />
-            <Route path="/rewards-board" component={RewardsBoard} />
-            <Route path="/skins-gallery" component={SkinsGallery} />
-            <Route path="/settings">
-              <ProtectedRoute requiredRole="parent" redirectTo="/dashboard">
-                <Settings />
-              </ProtectedRoute>
-            </Route>
-            <Route path="/achievements">
-              <ProtectedRoute requiredRole="parent" redirectTo="/dashboard">
-                <Achievements />
-              </ProtectedRoute>
-            </Route>
-            <Route path="/family-goals" component={FamilyGoals} />
-            <Route path="/:rest*" component={NotFound} />
-          </>
-        )}
+        <Route path="/" component={AutoRedirect} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/kid-dashboard" component={KidDashboard} />
+        <Route path="/kid-dashboard-old" component={KidDashboardOld} />
+        <Route path="/my-rewards" component={MyRewards} />
+        <Route path="/tasks" component={Dashboard} />
+        <Route path="/rewards" component={Dashboard} />
+        <Route path="/leaderboard" component={Dashboard} />
+        <Route path="/skins" component={SkinsGallery} />
+        <Route path="/pricing" component={Pricing} />
+        <Route path="/analytics" component={Analytics} />
+        <Route path="/chat" component={Chat} />
+        <Route path="/approvals" component={Approvals} />
+        <Route path="/rewards-board" component={RewardsBoard} />
+        <Route path="/skins-gallery" component={SkinsGallery} />
+        <Route path="/settings">
+          <ProtectedRoute requiredRole="parent" redirectTo="/dashboard">
+            <Settings />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/achievements">
+          <ProtectedRoute requiredRole="parent" redirectTo="/dashboard">
+            <Achievements />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/family-goals" component={FamilyGoals} />
+        <Route component={NotFound} />
       </Switch>
     </BackgroundWrapper>
   );
