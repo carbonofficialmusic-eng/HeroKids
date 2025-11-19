@@ -84,19 +84,49 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
     let finalAvatarUrl = selectedAvatar;
     if (uploadedAvatarFile) {
       try {
-        const formData = new FormData();
-        formData.append('avatar', uploadedAvatarFile);
-
-        const response = await fetch('/api/upload-avatar', {
+        // Step 1: Get presigned upload URL
+        const urlResponse = await fetch('/api/upload-avatar-url', {
           method: 'POST',
-          body: formData,
         });
 
-        if (response.ok) {
-          const { avatarUrl } = await response.json();
-          finalAvatarUrl = avatarUrl;
-          setUploadedAvatarUrl(avatarUrl);
+        if (!urlResponse.ok) {
+          console.error('Failed to get avatar upload URL');
+          return finalAvatarUrl;
         }
+
+        const { uploadURL } = await urlResponse.json();
+
+        // Step 2: Upload file directly to Object Storage using presigned URL
+        const uploadResponse = await fetch(uploadURL, {
+          method: 'PUT',
+          body: uploadedAvatarFile,
+          headers: {
+            'Content-Type': uploadedAvatarFile.type,
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          console.error('Failed to upload avatar to storage');
+          return finalAvatarUrl;
+        }
+
+        // Step 3: Set ACL policy and get final object path
+        const aclResponse = await fetch('/api/avatar', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ avatarUrl: uploadURL }),
+        });
+
+        if (!aclResponse.ok) {
+          console.error('Failed to finalize avatar upload');
+          return finalAvatarUrl;
+        }
+
+        const { avatarUrl } = await aclResponse.json();
+        finalAvatarUrl = avatarUrl;
+        setUploadedAvatarUrl(avatarUrl);
       } catch (error) {
         console.error('Error uploading avatar:', error);
       }

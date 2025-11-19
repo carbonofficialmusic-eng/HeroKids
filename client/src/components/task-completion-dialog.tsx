@@ -76,26 +76,57 @@ export function TaskCompletionDialog({
     if (task.requiresProof && uploadedPhoto && !uploadedPhotoUrl) {
       setIsUploading(true);
       try {
-        const formData = new FormData();
-        formData.append('photo', uploadedPhoto);
-
-        const response = await fetch(`/api/tasks/${task.id}/upload-proof`, {
+        // Step 1: Get presigned upload URL
+        const urlResponse = await fetch('/api/tasks/upload-proof-url', {
           method: 'POST',
-          body: formData,
         });
 
-        if (response.ok) {
-          const { photoUrl } = await response.json();
-          setUploadedPhotoUrl(photoUrl);
-          // Now complete the task with the photo URL
-          onComplete(task.id, photoUrl);
-          setIsUploading(false);
-        } else {
-          const error = await response.json();
-          alert(error.message || 'Failed to upload photo');
+        if (!urlResponse.ok) {
+          const error = await urlResponse.json();
+          alert(error.message || 'Failed to get upload URL');
           setIsUploading(false);
           return;
         }
+
+        const { uploadURL } = await urlResponse.json();
+
+        // Step 2: Upload file directly to Object Storage using presigned URL
+        const uploadResponse = await fetch(uploadURL, {
+          method: 'PUT',
+          body: uploadedPhoto,
+          headers: {
+            'Content-Type': uploadedPhoto.type,
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          alert('Failed to upload photo to storage');
+          setIsUploading(false);
+          return;
+        }
+
+        // Step 3: Set ACL policy and get final object path
+        const aclResponse = await fetch(`/api/tasks/${task.id}/proof-photo`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ photoUrl: uploadURL }),
+        });
+
+        if (!aclResponse.ok) {
+          const error = await aclResponse.json();
+          alert(error.message || 'Failed to finalize upload');
+          setIsUploading(false);
+          return;
+        }
+
+        const { photoUrl } = await aclResponse.json();
+        setUploadedPhotoUrl(photoUrl);
+        
+        // Now complete the task with the photo URL
+        onComplete(task.id, photoUrl);
+        setIsUploading(false);
       } catch (error) {
         console.error('Error uploading photo:', error);
         alert('Failed to upload photo. Please try again.');

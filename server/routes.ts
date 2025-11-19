@@ -2,9 +2,7 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import multer from "multer";
 import { join } from "path";
-import { mkdir } from "fs/promises";
 import { z } from "zod";
 import Stripe from "stripe";
 import { storage } from "./storage";
@@ -26,51 +24,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-10-29.clover",
 });
 
-// Configure multer for photo uploads
-const uploadDir = join(process.cwd(), "uploads", "task-proofs");
-const avatarUploadDir = join(process.cwd(), "uploads", "avatars");
-
-// Ensure upload directories exist
-mkdir(uploadDir, { recursive: true }).catch(console.error);
-mkdir(avatarUploadDir, { recursive: true }).catch(console.error);
-
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: uploadDir,
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, uniqueSuffix + '-' + file.originalname);
-    },
-  }),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'));
-    }
-  },
-});
-
-const avatarUpload = multer({
-  storage: multer.diskStorage({
-    destination: avatarUploadDir,
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, 'avatar-' + uniqueSuffix + '-' + file.originalname);
-    },
-  }),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'));
-    }
-  },
-});
-
-// Track uploaded photos to prevent URL spoofing
+// Track uploaded photos to prevent URL spoofing (now using Object Storage instead of multer)
 const uploadedPhotos = new Map<string, { memberId: string; taskId: string; timestamp: number }>();
 
 // Clean up old uploads every hour
@@ -1108,7 +1062,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "photoUrl is required" });
       }
       
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Use same member resolution logic as POST /complete to ensure consistency
+      let member;
+      if (req.session.actingAsMemberId) {
+        member = await storage.getFamilyMember(req.session.actingAsMemberId);
+        if (!member) {
+          // If acting as member not found, clear the session and fall through
+          delete req.session.actingAsMemberId;
+        }
+      }
+      
+      // If not acting as someone or actingAs member not found, use real user
+      if (!member) {
+        member = await storage.getFamilyMemberByUserId(userId);
+      }
+      
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
       }
@@ -1130,6 +1098,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           visibility: "private", // Task proofs are private, only accessible by family members
         }
       );
+      
+      // Track this upload to prevent URL spoofing (same as old multer flow)
+      uploadedPhotos.set(objectPath, {
+        memberId: member.id,
+        taskId: taskId,
+        timestamp: Date.now(),
+      });
       
       res.json({ photoUrl: objectPath });
     } catch (error: any) {
