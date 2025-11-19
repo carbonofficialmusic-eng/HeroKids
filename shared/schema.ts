@@ -100,6 +100,7 @@ export const familyMembers = pgTable("family_members", {
   unlockedSkins: text("unlocked_skins").array().notNull().default(sql`ARRAY[]::text[]`), // Array of unlocked skin IDs (deprecated, use discoveredSkinIds)
   discoveredSkinIds: text("discovered_skin_ids").array().notNull().default(sql`ARRAY[]::text[]`), // Skins the member has chosen/discovered (Tekken-style system)
   activeSkinId: varchar("active_skin_id"), // Currently selected skin
+  useCustomAvatar: boolean("use_custom_avatar").notNull().default(false), // Use custom avatar instead of skin avatar (background stays from skin)
   lastReadChatAt: timestamp("last_read_chat_at"), // When member last viewed chat messages
   excludeFromLeaderboard: boolean("exclude_from_leaderboard").notNull().default(false), // Exclude member from leaderboard competition
   createdAt: timestamp("created_at").defaultNow(),

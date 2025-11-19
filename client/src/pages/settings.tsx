@@ -425,7 +425,7 @@ export default function Settings() {
                       >
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={getAvatarUrl(familyMember.activeSkinId, familyMember.avatarUrl)} alt={familyMember.displayName} />
+                            <AvatarImage src={getAvatarUrl(familyMember.activeSkinId, familyMember.avatarUrl, familyMember.useCustomAvatar)} alt={familyMember.displayName} />
                             <AvatarFallback style={{ backgroundColor: familyMember.color }}>
                               {familyMember.displayName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
@@ -675,7 +675,7 @@ export default function Settings() {
                       >
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={getAvatarUrl(familyMember.activeSkinId, familyMember.avatarUrl)} alt={familyMember.displayName} />
+                            <AvatarImage src={getAvatarUrl(familyMember.activeSkinId, familyMember.avatarUrl, familyMember.useCustomAvatar)} alt={familyMember.displayName} />
                             <AvatarFallback style={{ backgroundColor: familyMember.color }}>
                               {familyMember.displayName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
@@ -820,7 +820,7 @@ export default function Settings() {
                         >
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={getAvatarUrl(parent.activeSkinId, parent.avatarUrl)} alt={parent.displayName} />
+                              <AvatarImage src={getAvatarUrl(parent.activeSkinId, parent.avatarUrl, parent.useCustomAvatar)} alt={parent.displayName} />
                               <AvatarFallback style={{ backgroundColor: parent.color }}>
                                 {parent.displayName.slice(0, 2).toUpperCase()}
                               </AvatarFallback>

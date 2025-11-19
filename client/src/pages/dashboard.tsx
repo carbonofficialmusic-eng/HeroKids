@@ -643,7 +643,7 @@ export default function Dashboard() {
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <Avatar className="h-10 w-10 flex-shrink-0">
-              <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl)} />
+              <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar)} />
               <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
                 {member.displayName[0]}
               </AvatarFallback>
@@ -870,7 +870,7 @@ export default function Dashboard() {
                           <Card key={request.id} className="p-6" data-testid={`card-request-${request.id}`}>
                             <div className="flex items-start gap-3 mb-4">
                               <Avatar className="h-10 w-10">
-                                <AvatarImage src={getAvatarUrl(requester?.activeSkinId, requester?.avatarUrl)} />
+                                <AvatarImage src={getAvatarUrl(requester?.activeSkinId, requester?.avatarUrl, requester?.useCustomAvatar)} />
                                 <AvatarFallback style={{ backgroundColor: requester?.color }} className="text-white">
                                   {requester?.displayName[0] || '?'}
                                 </AvatarFallback>

@@ -127,11 +127,23 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "allosaurus": jurassicCanyonBg,
 };
 
-// Helper to get avatar URL - returns skin image if active, otherwise custom avatar
-export function getAvatarUrl(activeSkinId: string | null | undefined, customAvatarUrl: string | null | undefined): string | undefined {
+// Helper to get avatar URL - respects useCustomAvatar flag to allow custom avatar + skin background
+export function getAvatarUrl(
+  activeSkinId: string | null | undefined, 
+  customAvatarUrl: string | null | undefined,
+  useCustomAvatar: boolean = false
+): string | undefined {
+  // If custom avatar flag is set and there's a custom avatar, use it
+  if (useCustomAvatar && customAvatarUrl) {
+    return customAvatarUrl;
+  }
+  
+  // Otherwise, use skin avatar if available
   if (activeSkinId && SKIN_IMAGES[activeSkinId]) {
     return SKIN_IMAGES[activeSkinId];
   }
+  
+  // Final fallback to custom avatar
   return customAvatarUrl || undefined;
 }
 
