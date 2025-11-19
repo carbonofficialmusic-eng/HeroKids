@@ -79,22 +79,49 @@ export function AddMemberDialog({
   const handleSubmit = async (data: AddMemberForm) => {
     let finalAvatarUrl = selectedAvatar;
 
-    // If user uploaded a custom avatar, upload it first
+    // If user uploaded a custom avatar, upload it first using 3-step Object Storage flow
     if (uploadedAvatarFile) {
       try {
-        const formData = new FormData();
-        formData.append('avatar', uploadedAvatarFile);
-
-        const response = await fetch('/api/upload-avatar', {
+        // Step 1: Get presigned upload URL
+        const urlResponse = await fetch('/api/upload-avatar-url', {
           method: 'POST',
-          body: formData,
         });
 
-        if (response.ok) {
-          const { avatarUrl } = await response.json();
-          finalAvatarUrl = avatarUrl;
-          setUploadedAvatarUrl(avatarUrl);
+        if (!urlResponse.ok) {
+          throw new Error('Failed to get upload URL');
         }
+
+        const { uploadURL } = await urlResponse.json();
+
+        // Step 2: Upload file directly to Object Storage using presigned URL
+        const uploadResponse = await fetch(uploadURL, {
+          method: 'PUT',
+          body: uploadedAvatarFile,
+          headers: {
+            'Content-Type': uploadedAvatarFile.type,
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload avatar to storage');
+        }
+
+        // Step 3: Set ACL policy and get final object path
+        const aclResponse = await fetch('/api/avatar', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ avatarUrl: uploadURL }),
+        });
+
+        if (!aclResponse.ok) {
+          throw new Error('Failed to finalize avatar upload');
+        }
+
+        const { avatarUrl } = await aclResponse.json();
+        finalAvatarUrl = avatarUrl;
+        setUploadedAvatarUrl(avatarUrl);
       } catch (error) {
         console.error('Error uploading avatar:', error);
         // Continue with default avatar on error
