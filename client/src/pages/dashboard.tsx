@@ -675,9 +675,10 @@ export default function Dashboard() {
               </Link>
             )}
             <PointCounter
-              points={member.weeklyPoints}
+              points={member.totalEarned}
               size="compact"
               showAnimation
+              data-testid="point-counter-total-earned"
             />
             <ProfileMenu
               member={member}
