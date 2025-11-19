@@ -1,101 +1,135 @@
 import { storage } from "./storage";
 import { achievementEngine } from "./achievementEngine";
 
-// Track last reset dates to prevent duplicate resets
-// Initialize to epoch (far in the past) so first check always triggers
-let lastWeeklyReset = new Date(0);
-let lastMonthlyReset = new Date(0);
-let lastDailyCheck = new Date(0);
+// Track last reset dates PER FAMILY to prevent duplicate resets
+// Map: familyName -> { weekly, monthly, daily }
+const lastResetByFamily: Map<string, {
+  weekly: Date;
+  monthly: Date;
+  daily: Date;
+}> = new Map();
 
 export function startPointsResetScheduler() {
-  // Log initial timezone info
   const startTime = new Date();
-  console.log(`Points reset scheduler started at ${startTime.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })} (German Time)`);
+  console.log(`Points reset scheduler started at ${startTime.toISOString()}`);
   console.log(`Server timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
+  console.log(`Scheduler will check each family's timezone for midnight resets`);
   
   // Check every hour for point resets
   setInterval(async () => {
-    const now = new Date();
-    const germanTime = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', hour12: false });
-    
-    // Weekly reset - every Monday at 00:00
-    const isMonday = now.getDay() === 1;
-    const isSameWeek = 
-      lastWeeklyReset.getFullYear() === now.getFullYear() &&
-      getWeekNumber(lastWeeklyReset) === getWeekNumber(now);
-    
-    if (isMonday && !isSameWeek) {
-      console.log(`⏰ Running weekly points reset at ${germanTime} (German Time)`);
-      await resetWeeklyPoints();
-      lastWeeklyReset = now;
-    }
-    
-    // Monthly reset - 1st of each month at 00:00
-    const isFirstOfMonth = now.getDate() === 1;
-    const isSameMonth =
-      lastMonthlyReset.getMonth() === now.getMonth() &&
-      lastMonthlyReset.getFullYear() === now.getFullYear();
-    
-    if (isFirstOfMonth && !isSameMonth) {
-      console.log(`⏰ Running monthly points reset at ${germanTime} (German Time)`);
-      await resetMonthlyPoints();
-      lastMonthlyReset = now;
-    }
-    
-    // Daily check for streak tracking and recurring task resets
-    const isSameDay =
-      lastDailyCheck.getDate() === now.getDate() &&
-      lastDailyCheck.getMonth() === now.getMonth() &&
-      lastDailyCheck.getFullYear() === now.getFullYear();
-    
-    if (!isSameDay) {
-      console.log(`⏰ Running daily reset at ${germanTime} (German Time)`);
-      console.log(`   Date: ${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`);
-      await runDailyAchievementCheck();
-      lastDailyCheck = now;
-    }
+    await checkAndResetPoints();
   }, 60 * 60 * 1000); // Check every hour
 }
 
-async function runDailyAchievementCheck() {
+async function checkAndResetPoints() {
   try {
     const families = await storage.getFamilies();
-    for (const family of families) {
-      await achievementEngine.processEvent({
-        type: "daily_check",
-        familyName: family.familyName,
-      });
-    }
-    console.log("✅ Daily achievement check completed");
-  } catch (error) {
-    console.error("Error running daily achievement check:", error);
-  }
-}
-
-async function resetWeeklyPoints() {
-  try {
-    await storage.resetAllWeeklyPoints();
-    console.log("✅ Weekly points have been reset for all family members");
     
-    // Trigger achievement evaluations for all families
-    const families = await storage.getFamilies();
     for (const family of families) {
-      await achievementEngine.processEvent({
-        type: "midnight_reset",
-        familyName: family.familyName,
+      const familyTimezone = family.timezone || "Europe/Berlin"; // Default to Berlin if not set
+      
+      // Initialize tracking for this family if not exists
+      if (!lastResetByFamily.has(family.familyName)) {
+        lastResetByFamily.set(family.familyName, {
+          weekly: new Date(0),
+          monthly: new Date(0),
+          daily: new Date(0),
+        });
+      }
+      
+      const familyResets = lastResetByFamily.get(family.familyName)!;
+      
+      // Get current time in family's timezone
+      const now = new Date();
+      const familyTimeString = now.toLocaleString('en-US', { 
+        timeZone: familyTimezone,
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        weekday: 'long'
       });
+      
+      // Parse the family's local date/time
+      const familyDate = new Date(now.toLocaleString('en-US', { timeZone: familyTimezone }));
+      
+      // Check for weekly reset (Monday in family's timezone)
+      const isMonday = familyDate.getDay() === 1;
+      const weekNumber = getWeekNumber(familyDate);
+      const lastWeeklyWeekNumber = getWeekNumber(familyResets.weekly);
+      const isSameWeek = 
+        familyResets.weekly.getFullYear() === familyDate.getFullYear() &&
+        lastWeeklyWeekNumber === weekNumber;
+      
+      if (isMonday && !isSameWeek) {
+        console.log(`⏰ Running weekly reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone})`);
+        await resetWeeklyPointsForFamily(family.familyName);
+        familyResets.weekly = familyDate; // Store family's local date, not server time
+      }
+      
+      // Check for monthly reset (1st of month in family's timezone)
+      const isFirstOfMonth = familyDate.getDate() === 1;
+      const isSameMonth =
+        familyResets.monthly.getMonth() === familyDate.getMonth() &&
+        familyResets.monthly.getFullYear() === familyDate.getFullYear();
+      
+      if (isFirstOfMonth && !isSameMonth) {
+        console.log(`⏰ Running monthly reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone})`);
+        await resetMonthlyPointsForFamily(family.familyName);
+        familyResets.monthly = familyDate; // Store family's local date, not server time
+      }
+      
+      // Check for daily reset (new day in family's timezone)
+      const isSameDay =
+        familyResets.daily.getDate() === familyDate.getDate() &&
+        familyResets.daily.getMonth() === familyDate.getMonth() &&
+        familyResets.daily.getFullYear() === familyDate.getFullYear();
+      
+      if (!isSameDay) {
+        console.log(`⏰ Running daily reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone})`);
+        await runDailyAchievementCheckForFamily(family.familyName);
+        familyResets.daily = familyDate; // Store family's local date, not server time
+      }
     }
   } catch (error) {
-    console.error("Error resetting weekly points:", error);
+    console.error("Error checking and resetting points:", error);
   }
 }
 
-async function resetMonthlyPoints() {
+async function runDailyAchievementCheckForFamily(familyName: string) {
   try {
-    await storage.resetAllMonthlyPoints();
-    console.log("✅ Monthly points have been reset for all family members");
+    await achievementEngine.processEvent({
+      type: "daily_check",
+      familyName,
+    });
+    console.log(`✅ Daily achievement check completed for family "${familyName}"`);
   } catch (error) {
-    console.error("Error resetting monthly points:", error);
+    console.error(`Error running daily achievement check for family "${familyName}":`, error);
+  }
+}
+
+async function resetWeeklyPointsForFamily(familyName: string) {
+  try {
+    await storage.resetWeeklyPointsForFamily(familyName);
+    console.log(`✅ Weekly points reset for family "${familyName}"`);
+    
+    await achievementEngine.processEvent({
+      type: "midnight_reset",
+      familyName,
+    });
+  } catch (error) {
+    console.error(`Error resetting weekly points for family "${familyName}":`, error);
+  }
+}
+
+async function resetMonthlyPointsForFamily(familyName: string) {
+  try {
+    await storage.resetMonthlyPointsForFamily(familyName);
+    console.log(`✅ Monthly points reset for family "${familyName}"`);
+  } catch (error) {
+    console.error(`Error resetting monthly points for family "${familyName}":`, error);
   }
 }
 

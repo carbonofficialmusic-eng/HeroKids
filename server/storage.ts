@@ -66,7 +66,7 @@ export interface IStorage {
   createFamily(family: InsertFamily): Promise<Family>;
   updateFamily(familyName: string, updates: Partial<InsertFamily>): Promise<Family>;
   updateFamilyTier(familyName: string, tier: "free" | "family" | "family_plus" | "family_hero"): Promise<void>;
-  updateFamilySettings(familyName: string, settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>): Promise<void>;
+  updateFamilySettings(familyName: string, settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "timezone" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>): Promise<void>;
 
   // Family member operations
   getFamilyMember(id: string): Promise<FamilyMember | undefined>;
@@ -88,6 +88,8 @@ export interface IStorage {
   ): Promise<void>;
   resetAllWeeklyPoints(): Promise<void>;
   resetAllMonthlyPoints(): Promise<void>;
+  resetWeeklyPointsForFamily(familyName: string): Promise<void>;
+  resetMonthlyPointsForFamily(familyName: string): Promise<void>;
   setPinCode(memberId: string, pinCode: string): Promise<void>;
   clearPinCode(memberId: string): Promise<void>;
   validatePin(memberId: string, pinCode: string): Promise<boolean>;
@@ -240,7 +242,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateFamilySettings(
     familyName: string,
-    settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>
+    settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "timezone" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>
   ): Promise<void> {
     await db
       .update(families)
@@ -389,6 +391,20 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(familyMembers)
       .set({ monthlyPoints: 0, updatedAt: new Date() });
+  }
+
+  async resetWeeklyPointsForFamily(familyName: string): Promise<void> {
+    await db
+      .update(familyMembers)
+      .set({ weeklyPoints: 0, updatedAt: new Date() })
+      .where(eq(familyMembers.familyName, familyName));
+  }
+
+  async resetMonthlyPointsForFamily(familyName: string): Promise<void> {
+    await db
+      .update(familyMembers)
+      .set({ monthlyPoints: 0, updatedAt: new Date() })
+      .where(eq(familyMembers.familyName, familyName));
   }
 
   async setPinCode(memberId: string, pinCode: string): Promise<void> {
