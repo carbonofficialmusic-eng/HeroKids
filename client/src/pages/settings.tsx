@@ -142,6 +142,8 @@ export default function Settings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/real"] });
       queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
