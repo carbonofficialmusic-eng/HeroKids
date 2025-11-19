@@ -30,6 +30,7 @@ Preferred communication style: Simple, everyday language.
 - **Family Chat**: Real-time messaging for higher tiers with unread counters and WebSocket synchronization.
 - **Join System**: Family-level join codes for inviting new members.
 - **Multilingual Support**: Full i18n with 7 supported languages (German, English, French, Spanish, Japanese, Chinese, Korean) using `react-i18next`. Family-level language setting with parent-only permission and real-time sync.
+- **Timezone Support**: Family-specific timezone configuration for accurate task resets. Features auto-detection from browser timezone, 21+ common timezone options with flag icons, and a scheduler that performs daily/weekly/monthly resets at each family's local midnight. Backend tracks reset timestamps per family to prevent duplicate resets across different timezones. Settings UI shows timezone mismatch warnings when selected timezone differs from browser timezone.
 - **Kid Dashboard**: A fully functional child-friendly interface at `/kid-dashboard` for ages 6-11 with complete API integration. Features real rewards with redemption flow (confetti effects), active tasks with granular completion states (pending/approved/rejected), and playful Fredoka typography. Task actionability logic prevents duplicate completions using backend transaction guards. Accessible via ProfileMenu navigation with full i18n support (7 languages).
 
 ### System Design Choices
