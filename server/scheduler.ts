@@ -13,12 +13,12 @@ export function startPointsResetScheduler() {
   const startTime = new Date();
   console.log(`Points reset scheduler started at ${startTime.toISOString()}`);
   console.log(`Server timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
-  console.log(`Scheduler will check each family's timezone for midnight resets`);
+  console.log(`Scheduler will check each family's timezone for midnight resets (every 5 minutes)`);
   
-  // Check every hour for point resets
+  // Check every 5 minutes for point resets (more accurate timing near midnight)
   setInterval(async () => {
     await checkAndResetPoints();
-  }, 60 * 60 * 1000); // Check every hour
+  }, 5 * 60 * 1000); // Check every 5 minutes
 }
 
 async function checkAndResetPoints() {
@@ -88,10 +88,21 @@ async function checkAndResetPoints() {
         familyResets.daily.getFullYear() === familyDate.getFullYear();
       
       if (!isSameDay) {
-        console.log(`⏰ Running daily reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone})`);
-        await resetDailyTasksForFamily(family.familyName);
-        await runDailyAchievementCheckForFamily(family.familyName);
-        familyResets.daily = familyDate; // Store family's local date, not server time
+        const currentHour = familyDate.getHours();
+        const isNearMidnight = currentHour === 0; // Between 00:00 and 00:59
+        const isSafeForLateReset = currentHour >= 2; // After 02:00 (safe time after early morning completions)
+        
+        // Run reset if:
+        // 1. Ideally: Between 00:00-01:00 (near midnight)
+        // 2. Fallback: After 02:00 if reset wasn't executed yet (e.g., due to server downtime)
+        if (isNearMidnight || isSafeForLateReset) {
+          console.log(`⏰ Running daily reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone})`);
+          await resetDailyTasksForFamily(family.familyName);
+          await runDailyAchievementCheckForFamily(family.familyName);
+          familyResets.daily = familyDate; // Store family's local date, not server time
+        } else {
+          console.log(`⏭️  Waiting for safe reset time for family "${family.familyName}" (current hour: ${currentHour}, will reset at 02:00 or later)`);
+        }
       }
     }
   } catch (error) {
