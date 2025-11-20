@@ -292,9 +292,7 @@ export function TaskDialog({
   // Manual task reset mutation
   const resetTaskMutation = useMutation({
     mutationFn: async (taskId: string) => {
-      return await apiRequest(`/api/tasks/${taskId}/reset`, {
-        method: "POST",
-      });
+      return await apiRequest("POST", `/api/tasks/${taskId}/reset`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
