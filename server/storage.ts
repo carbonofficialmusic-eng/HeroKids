@@ -54,6 +54,19 @@ import {
 import { db } from "./db";
 import { eq, and, desc, gt, sql, inArray } from "drizzle-orm";
 
+/**
+ * Helper function to check if a date is today in a specific timezone
+ */
+function isToday(date: Date, timezone: string): boolean {
+  const now = new Date();
+  
+  // Format both dates in the target timezone
+  const todayString = now.toLocaleDateString('en-US', { timeZone: timezone });
+  const dateString = date.toLocaleDateString('en-US', { timeZone: timezone });
+  
+  return todayString === dateString;
+}
+
 export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
@@ -575,6 +588,44 @@ export class DatabaseStorage implements IStorage {
   async hasActiveMemberCompletion(taskId: string, memberId: string, txClient?: any): Promise<boolean> {
     const client = txClient || db;
     
+    // Get task info to check if it's a daily recurring task
+    const [task] = await client
+      .select({
+        recurrence: tasks.recurrence,
+        familyName: tasks.familyName
+      })
+      .from(tasks)
+      .where(eq(tasks.id, taskId));
+    
+    if (!task) return false;
+    
+    // For daily recurring tasks, only check completions from TODAY (in family timezone)
+    if (task.recurrence === 'daily') {
+      // Get family timezone
+      const [family] = await client
+        .select({ timezone: families.timezone })
+        .from(families)
+        .where(eq(families.familyName, task.familyName));
+      
+      const familyTimezone = family?.timezone || 'Europe/Berlin';
+      
+      // Get all active completions for this member and task
+      const completions = await client
+        .select({ completedAt: taskCompletions.completedAt })
+        .from(taskCompletions)
+        .where(
+          and(
+            eq(taskCompletions.taskId, taskId),
+            eq(taskCompletions.memberId, memberId),
+            inArray(taskCompletions.status, ["pending", "approved"])
+          )
+        );
+      
+      // Check if any completion is from today in the family's timezone
+      return completions.some((c: { completedAt: Date }) => isToday(c.completedAt, familyTimezone));
+    }
+    
+    // For non-daily tasks, use the original logic (any active completion)
     const [result] = await client
       .select({ count: sql<number>`count(*)` })
       .from(taskCompletions)
@@ -591,6 +642,49 @@ export class DatabaseStorage implements IStorage {
   async getMemberCompletionStatus(taskId: string, memberId: string, txClient?: any): Promise<"pending" | "approved" | "rejected" | null> {
     const client = txClient || db;
     
+    // Get task info to check if it's a daily recurring task
+    const [task] = await client
+      .select({
+        recurrence: tasks.recurrence,
+        familyName: tasks.familyName
+      })
+      .from(tasks)
+      .where(eq(tasks.id, taskId));
+    
+    if (!task) return null;
+    
+    // For daily recurring tasks, only check completions from TODAY (in family timezone)
+    if (task.recurrence === 'daily') {
+      // Get family timezone
+      const [family] = await client
+        .select({ timezone: families.timezone })
+        .from(families)
+        .where(eq(families.familyName, task.familyName));
+      
+      const familyTimezone = family?.timezone || 'Europe/Berlin';
+      
+      // Get all completions for this member and task
+      const completions = await client
+        .select({ 
+          status: taskCompletions.status,
+          completedAt: taskCompletions.completedAt
+        })
+        .from(taskCompletions)
+        .where(
+          and(
+            eq(taskCompletions.taskId, taskId),
+            eq(taskCompletions.memberId, memberId),
+            inArray(taskCompletions.status, ["pending", "approved", "rejected"])
+          )
+        )
+        .orderBy(desc(taskCompletions.completedAt));
+      
+      // Find the most recent completion from today
+      const todayCompletion = completions.find((c: { status: string; completedAt: Date }) => isToday(c.completedAt, familyTimezone));
+      return todayCompletion?.status || null;
+    }
+    
+    // For non-daily tasks, use the original logic (latest completion)
     const [completion] = await client
       .select({ status: taskCompletions.status })
       .from(taskCompletions)
