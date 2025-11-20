@@ -29,6 +29,66 @@ import spinosaurusImg from "@assets/generated_images/Spinosaurus_realistic_portr
 import ankylosaurusImg from "@assets/generated_images/Ankylosaurus_realistic_portrait_34a4b4bf.png";
 import allosaurusImg from "@assets/generated_images/Allosaurus_realistic_portrait_c0d02199.png";
 
+// Tier 4 - Magical Princess World (Girls collection)
+import princessTiaraImg from "@assets/generated_images/princess_with_tiara_magical.png";
+import purplePrincessImg from "@assets/generated_images/purple_princess_glitter_gown.png";
+import icePrincessImg from "@assets/generated_images/ice_princess_blue_snowflake.png";
+import rainbowPrincessImg from "@assets/generated_images/rainbow_princess_colorful_stars.png";
+import naturePrincessImg from "@assets/generated_images/nature_princess_green_flowers.png";
+import sunPrincessImg from "@assets/generated_images/sun_princess_golden_bright.png";
+import oceanPrincessImg from "@assets/generated_images/ocean_princess_coral_seashells.png";
+import fairyPrincessImg from "@assets/generated_images/fairy_princess_lavender_butterflies.png";
+
+// Tier 5 - Space Explorers (Boys collection)
+import astronautKidImg from "@assets/generated_images/astronaut_kid_white_spacesuit.png";
+import spaceCadetBlueImg from "@assets/generated_images/blue_space_cadet_uniform.png";
+import greenAlienImg from "@assets/generated_images/green_alien_orange_spacesuit.png";
+import rocketPilotImg from "@assets/generated_images/rocket_pilot_red_yellow.png";
+import moonWalkerImg from "@assets/generated_images/moon_walker_gray_lunar.png";
+import galaxyScoutImg from "@assets/generated_images/galaxy_scout_purple_cosmic.png";
+import robotAstronautImg from "@assets/generated_images/robot_astronaut_metallic_friendly.png";
+import starCaptainImg from "@assets/generated_images/star_captain_gold_uniform.png";
+
+// Tier 6 - Cute Animals (Girls collection)
+import catGirlImg from "@assets/generated_images/cat_girl_pink_hoodie.png";
+import bunnyGirlImg from "@assets/generated_images/bunny_girl_lavender_dress.png";
+import foxGirlImg from "@assets/generated_images/fox_girl_orange_outfit.png";
+import puppyGirlImg from "@assets/generated_images/puppy_girl_brown_hoodie.png";
+import pandaGirlImg from "@assets/generated_images/panda_girl_black_white.png";
+import deerGirlImg from "@assets/generated_images/deer_girl_brown_antlers.png";
+import raccoonGirlImg from "@assets/generated_images/raccoon_girl_gray_hoodie.png";
+import squirrelGirlImg from "@assets/generated_images/squirrel_girl_orange_acorn.png";
+
+// Tier 7 - Dino Adventure (Boys collection)
+import tRexKidImg from "@assets/generated_images/t-rex_kid_explorer_vest.png";
+import triceratopsKidImg from "@assets/generated_images/triceratops_kid_safety_helmet.png";
+import stegosaurusKidImg from "@assets/generated_images/stegosaurus_kid_colorful_plates.png";
+import velociraptorKidImg from "@assets/generated_images/velociraptor_kid_racing_goggles.png";
+import brachiosaurusKidImg from "@assets/generated_images/brachiosaurus_kid_long_neck.png";
+import pteranodonKidImg from "@assets/generated_images/pteranodon_kid_aviator_goggles.png";
+import ankylosaurusKidImg from "@assets/generated_images/ankylosaurus_kid_armored_shell.png";
+import spinosaurusKidImg from "@assets/generated_images/spinosaurus_kid_swimming_gear.png";
+
+// Tier 8 - Ballerina Dreams (Girls collection)
+import ballerinaPinkImg from "@assets/generated_images/ballerina_pink_tutu_classic.png";
+import swanBallerinaImg from "@assets/generated_images/swan_ballerina_white_feathers.png";
+import purpleBallerinaImg from "@assets/generated_images/purple_ballerina_flower_crown.png";
+import blueBallerinaImg from "@assets/generated_images/blue_ballerina_ocean_waves.png";
+import goldenBallerinaImg from "@assets/generated_images/golden_ballerina_star_sequins.png";
+import peachBallerinaImg from "@assets/generated_images/peach_ballerina_rose_details.png";
+import mintBallerinaImg from "@assets/generated_images/mint_ballerina_leaf_patterns.png";
+import rainbowBallerinaImg from "@assets/generated_images/rainbow_ballerina_colorful_layers.png";
+
+// Tier 9 - Superhero Squad (Boys collection)
+import classicSuperheroImg from "@assets/generated_images/classic_superhero_red_blue.png";
+import lightningSpeedsterImg from "@assets/generated_images/lightning_speedster_yellow_suit.png";
+import techHeroImg from "@assets/generated_images/tech_hero_purple_armor.png";
+import natureGuardianImg from "@assets/generated_images/nature_guardian_green_eco.png";
+import iceHeroImg from "@assets/generated_images/ice_hero_blue_frost.png";
+import fireHeroImg from "@assets/generated_images/fire_hero_orange_flames.png";
+import shadowNinjaImg from "@assets/generated_images/shadow_ninja_black_purple.png";
+import shieldHeroImg from "@assets/generated_images/shield_hero_gold_energy.png";
+
 // Import themed background images
 // Modern fresh backgrounds for Tier 1
 import modernCitySkylineBg from "@assets/generated_images/Modern_city_skyline_background_a5f841c6.png";
@@ -61,6 +121,66 @@ import cretaceousRiverDeltaBg from "@assets/generated_images/Cretaceous_river_de
 import cretaceousCoastalBg from "@assets/generated_images/Cretaceous_coastal_plains_background_cb7d4a93.png";
 import jurassicCanyonBg from "@assets/generated_images/Jurassic_canyon_background_c736e0a5.png";
 
+// Tier 4 backgrounds - Magical Princess World
+import pinkCastleBg from "@assets/generated_images/pink_castle_magical_rainbow.png";
+import purpleCrystalPalaceBg from "@assets/generated_images/purple_crystal_palace_night.png";
+import iceCastleBg from "@assets/generated_images/ice_castle_winter_wonderland.png";
+import rainbowCastleBg from "@assets/generated_images/rainbow_castle_colorful_clouds.png";
+import enchantedForestBg from "@assets/generated_images/enchanted_green_forest_magical.png";
+import goldenPalaceBg from "@assets/generated_images/golden_palace_sunny_bright.png";
+import underwaterPalaceBg from "@assets/generated_images/underwater_coral_palace_ocean.png";
+import fairyGardenBg from "@assets/generated_images/fairy_garden_lavender_magical.png";
+
+// Tier 5 backgrounds - Space Explorers
+import spaceStationBg from "@assets/generated_images/space_station_command_center.png";
+import alienPlanetBg from "@assets/generated_images/alien_planet_colorful_landscape.png";
+import rocketLaunchBg from "@assets/generated_images/rocket_launch_pad_countdown.png";
+import moonBaseBg from "@assets/generated_images/moon_base_lunar_station.png";
+import galaxyNebulaBg from "@assets/generated_images/purple_pink_nebula_cosmic.png";
+import spaceAcademyBg from "@assets/generated_images/space_academy_blue_training.png";
+import asteroidFieldBg from "@assets/generated_images/asteroid_field_mining_station.png";
+import starshipBridgeBg from "@assets/generated_images/starship_bridge_gold_command.png";
+
+// Tier 6 backgrounds - Cute Animals
+import sunnyMeadowBg from "@assets/generated_images/sunny_meadow_wildflowers_butterflies.png";
+import enchantedForestPurpleBg from "@assets/generated_images/enchanted_forest_magical_purple.png";
+import autumnWoodlandBg from "@assets/generated_images/autumn_woodland_orange_leaves.png";
+import flowerGardenBg from "@assets/generated_images/flower_garden_colorful_blooms.png";
+import bambooForestBg from "@assets/generated_images/bamboo_forest_peaceful_panda.png";
+import woodlandClearingBg from "@assets/generated_images/woodland_clearing_deer_sunbeams.png";
+import hollowTreeHouseBg from "@assets/generated_images/hollow_tree_house_cozy.png";
+import oakTreeParkBg from "@assets/generated_images/oak_tree_park_squirrel.png";
+
+// Tier 7 backgrounds - Dino Adventure
+import prehistoricJungleBg from "@assets/generated_images/prehistoric_jungle_volcano_waterfall.png";
+import excavationSiteBg from "@assets/generated_images/excavation_site_fossil_dig.png";
+import cretaceousPlainsPteranBg from "@assets/generated_images/cretaceous_plains_pteranodons_flying.png";
+import jurassicCoastlineBg from "@assets/generated_images/jurassic_coastline_ocean_plesiosaurs.png";
+import dinosaurMuseumBg from "@assets/generated_images/dinosaur_museum_skeleton_displays.png";
+import volcanicLandscapeBg from "@assets/generated_images/volcanic_landscape_lava_flows.png";
+import prehistoricCanyonBg from "@assets/generated_images/prehistoric_canyon_rock_layers.png";
+import dinoParkEntranceBg from "@assets/generated_images/dino_park_entrance_gates.png";
+
+// Tier 8 backgrounds - Ballerina Dreams
+import balletStageBg from "@assets/generated_images/ballet_stage_red_curtains.png";
+import swanLakeBg from "@assets/generated_images/swan_lake_sunset_castle.png";
+import balletStudioBg from "@assets/generated_images/ballet_studio_mirrors_barre.png";
+import underwaterBalletBg from "@assets/generated_images/underwater_ballet_coral_ocean.png";
+import sunflowerFieldBg from "@assets/generated_images/sunflower_field_golden_bright.png";
+import roseGardenBg from "@assets/generated_images/rose_garden_romantic_trellis.png";
+import springMeadowBg from "@assets/generated_images/spring_meadow_green_fresh.png";
+import rainbowSkyBg from "@assets/generated_images/rainbow_sky_magical_clouds.png";
+
+// Tier 9 backgrounds - Superhero Squad
+import citySkylineBg from "@assets/generated_images/city_skyline_hero_signal.png";
+import lightningStormBg from "@assets/generated_images/lightning_storm_electric_sky.png";
+import techLabBg from "@assets/generated_images/tech_lab_purple_holograms.png";
+import forestClearingMagicBg from "@assets/generated_images/forest_clearing_nature_magic.png";
+import arcticIceBg from "@assets/generated_images/arctic_ice_northern_lights.png";
+import volcanicCraterBg from "@assets/generated_images/volcanic_crater_lava_glowing.png";
+import shadowDojoBg from "@assets/generated_images/shadow_dojo_ninja_training.png";
+import heroFortressBg from "@assets/generated_images/hero_fortress_gold_shields.png";
+
 // Skin image mappings for new HeroKids themed skins
 export const SKIN_IMAGES: Record<string, string> = {
   // Tier 1 - Starter Heroes
@@ -92,6 +212,66 @@ export const SKIN_IMAGES: Record<string, string> = {
   "spinosaurus": spinosaurusImg,
   "ankylosaurus": ankylosaurusImg,
   "allosaurus": allosaurusImg,
+  
+  // Tier 4 - Magical Princess World
+  "princess-tiara": princessTiaraImg,
+  "purple-princess": purplePrincessImg,
+  "ice-princess": icePrincessImg,
+  "rainbow-princess": rainbowPrincessImg,
+  "nature-princess": naturePrincessImg,
+  "sun-princess": sunPrincessImg,
+  "ocean-princess": oceanPrincessImg,
+  "fairy-princess": fairyPrincessImg,
+  
+  // Tier 5 - Space Explorers
+  "astronaut-kid": astronautKidImg,
+  "space-cadet-blue": spaceCadetBlueImg,
+  "green-alien": greenAlienImg,
+  "rocket-pilot": rocketPilotImg,
+  "moon-walker": moonWalkerImg,
+  "galaxy-scout": galaxyScoutImg,
+  "robot-astronaut": robotAstronautImg,
+  "star-captain": starCaptainImg,
+  
+  // Tier 6 - Cute Animals
+  "cat-girl": catGirlImg,
+  "bunny-girl": bunnyGirlImg,
+  "fox-girl": foxGirlImg,
+  "puppy-girl": puppyGirlImg,
+  "panda-girl": pandaGirlImg,
+  "deer-girl": deerGirlImg,
+  "raccoon-girl": raccoonGirlImg,
+  "squirrel-girl": squirrelGirlImg,
+  
+  // Tier 7 - Dino Adventure
+  "t-rex-kid": tRexKidImg,
+  "triceratops-kid": triceratopsKidImg,
+  "stegosaurus-kid": stegosaurusKidImg,
+  "velociraptor-kid": velociraptorKidImg,
+  "brachiosaurus-kid": brachiosaurusKidImg,
+  "pteranodon-kid": pteranodonKidImg,
+  "ankylosaurus-kid": ankylosaurusKidImg,
+  "spinosaurus-kid": spinosaurusKidImg,
+  
+  // Tier 8 - Ballerina Dreams
+  "ballerina-pink": ballerinaPinkImg,
+  "swan-ballerina": swanBallerinaImg,
+  "purple-ballerina": purpleBallerinaImg,
+  "blue-ballerina": blueBallerinaImg,
+  "golden-ballerina": goldenBallerinaImg,
+  "peach-ballerina": peachBallerinaImg,
+  "mint-ballerina": mintBallerinaImg,
+  "rainbow-ballerina": rainbowBallerinaImg,
+  
+  // Tier 9 - Superhero Squad
+  "classic-superhero": classicSuperheroImg,
+  "lightning-speedster": lightningSpeedsterImg,
+  "tech-hero": techHeroImg,
+  "nature-guardian": natureGuardianImg,
+  "ice-hero": iceHeroImg,
+  "fire-hero": fireHeroImg,
+  "shadow-ninja": shadowNinjaImg,
+  "shield-hero": shieldHeroImg,
 };
 
 // Themed background mappings for new HeroKids themed skins
@@ -125,6 +305,66 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "spinosaurus": cretaceousRiverDeltaBg,
   "ankylosaurus": cretaceousCoastalBg,
   "allosaurus": jurassicCanyonBg,
+  
+  // Tier 4 - Magical Princess World
+  "princess-tiara": pinkCastleBg,
+  "purple-princess": purpleCrystalPalaceBg,
+  "ice-princess": iceCastleBg,
+  "rainbow-princess": rainbowCastleBg,
+  "nature-princess": enchantedForestBg,
+  "sun-princess": goldenPalaceBg,
+  "ocean-princess": underwaterPalaceBg,
+  "fairy-princess": fairyGardenBg,
+  
+  // Tier 5 - Space Explorers
+  "astronaut-kid": spaceStationBg,
+  "space-cadet-blue": alienPlanetBg,
+  "green-alien": rocketLaunchBg,
+  "rocket-pilot": moonBaseBg,
+  "moon-walker": galaxyNebulaBg,
+  "galaxy-scout": spaceAcademyBg,
+  "robot-astronaut": asteroidFieldBg,
+  "star-captain": starshipBridgeBg,
+  
+  // Tier 6 - Cute Animals
+  "cat-girl": sunnyMeadowBg,
+  "bunny-girl": enchantedForestPurpleBg,
+  "fox-girl": autumnWoodlandBg,
+  "puppy-girl": flowerGardenBg,
+  "panda-girl": bambooForestBg,
+  "deer-girl": woodlandClearingBg,
+  "raccoon-girl": hollowTreeHouseBg,
+  "squirrel-girl": oakTreeParkBg,
+  
+  // Tier 7 - Dino Adventure
+  "t-rex-kid": prehistoricJungleBg,
+  "triceratops-kid": excavationSiteBg,
+  "stegosaurus-kid": cretaceousPlainsPteranBg,
+  "velociraptor-kid": jurassicCoastlineBg,
+  "brachiosaurus-kid": dinosaurMuseumBg,
+  "pteranodon-kid": volcanicLandscapeBg,
+  "ankylosaurus-kid": prehistoricCanyonBg,
+  "spinosaurus-kid": dinoParkEntranceBg,
+  
+  // Tier 8 - Ballerina Dreams
+  "ballerina-pink": balletStageBg,
+  "swan-ballerina": swanLakeBg,
+  "purple-ballerina": balletStudioBg,
+  "blue-ballerina": underwaterBalletBg,
+  "golden-ballerina": sunflowerFieldBg,
+  "peach-ballerina": roseGardenBg,
+  "mint-ballerina": springMeadowBg,
+  "rainbow-ballerina": rainbowSkyBg,
+  
+  // Tier 9 - Superhero Squad
+  "classic-superhero": citySkylineBg,
+  "lightning-speedster": lightningStormBg,
+  "tech-hero": techLabBg,
+  "nature-guardian": forestClearingMagicBg,
+  "ice-hero": arcticIceBg,
+  "fire-hero": volcanicCraterBg,
+  "shadow-ninja": shadowDojoBg,
+  "shield-hero": heroFortressBg,
 };
 
 // Helper to get avatar URL - respects useCustomAvatar flag to allow custom avatar + skin background
