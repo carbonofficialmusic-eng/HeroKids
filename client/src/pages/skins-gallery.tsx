@@ -474,11 +474,11 @@ export default function SkinsGallery() {
           </div>
         </div>
 
-        {/* Tier 7 - Dino Adventure */}
+        {/* Tier 7 - Vampire Adventure */}
         <div className="mb-8">
           <div className="mb-4">
             <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
-              Dino Adventure
+              Vampire Adventure
             </h2>
             <p className="text-sm font-semibold text-glow-white">
               {unlockedTier >= 7
