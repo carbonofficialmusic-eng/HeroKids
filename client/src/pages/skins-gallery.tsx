@@ -143,11 +143,23 @@ export default function SkinsGallery() {
   const tier1Skins = skins.filter(s => s.tier === 1);
   const tier2Skins = skins.filter(s => s.tier === 2);
   const tier3Skins = skins.filter(s => s.tier === 3);
+  const tier4Skins = skins.filter(s => s.tier === 4);
+  const tier5Skins = skins.filter(s => s.tier === 5);
+  const tier6Skins = skins.filter(s => s.tier === 6);
+  const tier7Skins = skins.filter(s => s.tier === 7);
+  const tier8Skins = skins.filter(s => s.tier === 8);
+  const tier9Skins = skins.filter(s => s.tier === 9);
   
   console.log('🎨 Frontend: Tier distribution:', {
     tier1: tier1Skins.length,
     tier2: tier2Skins.length,
-    tier3: tier3Skins.length
+    tier3: tier3Skins.length,
+    tier4: tier4Skins.length,
+    tier5: tier5Skins.length,
+    tier6: tier6Skins.length,
+    tier7: tier7Skins.length,
+    tier8: tier8Skins.length,
+    tier9: tier9Skins.length,
   });
 
   const renderSkinCard = (skin: Skin) => {
@@ -385,6 +397,144 @@ export default function SkinsGallery() {
           <div className="grid grid-cols-4 gap-2">
             {tier3Skins.length > 0 ? (
               tier3Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 4 - Magical Princess World */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              Magical Princess World
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 4
+                ? t('skins.unlockedUseCards')
+                : "Unlock at 2,100 points"}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier4Skins.length > 0 ? (
+              tier4Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 5 - Space Explorers */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              Space Explorers
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 5
+                ? t('skins.unlockedUseCards')
+                : "Unlock at 2,800 points"}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier5Skins.length > 0 ? (
+              tier5Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 6 - Cute Animals */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              Cute Animals
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 6
+                ? t('skins.unlockedUseCards')
+                : "Unlock at 3,500 points"}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier6Skins.length > 0 ? (
+              tier6Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 7 - Dino Adventure */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              Dino Adventure
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 7
+                ? t('skins.unlockedUseCards')
+                : "Unlock at 4,200 points"}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier7Skins.length > 0 ? (
+              tier7Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 8 - Ballerina Dreams */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              Ballerina Dreams
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 8
+                ? t('skins.unlockedUseCards')
+                : "Unlock at 4,900 points"}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier8Skins.length > 0 ? (
+              tier8Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 9 - Superhero Squad */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              Superhero Squad
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 9
+                ? t('skins.unlockedUseCards')
+                : "Unlock at 5,600 points"}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier9Skins.length > 0 ? (
+              tier9Skins.map(renderSkinCard)
             ) : (
               <p className="col-span-4 text-center text-muted-foreground py-8">
                 {t('skins.noSkinsInTier')}
