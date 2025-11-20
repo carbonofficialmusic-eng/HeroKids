@@ -103,6 +103,7 @@ export interface IStorage {
   resetAllMonthlyPoints(): Promise<void>;
   resetWeeklyPointsForFamily(familyName: string): Promise<void>;
   resetMonthlyPointsForFamily(familyName: string): Promise<void>;
+  resetDailyTasksForFamily(familyName: string): Promise<void>;
   setPinCode(memberId: string, pinCode: string): Promise<void>;
   clearPinCode(memberId: string): Promise<void>;
   validatePin(memberId: string, pinCode: string): Promise<boolean>;
@@ -432,6 +433,24 @@ export class DatabaseStorage implements IStorage {
       .update(familyMembers)
       .set({ monthlyPoints: 0, updatedAt: new Date() })
       .where(eq(familyMembers.familyName, familyName));
+  }
+
+  async resetDailyTasksForFamily(familyName: string): Promise<void> {
+    // Reset completion_count and nextAvailableDate for all daily recurring tasks
+    // This ensures multi-completion tasks (e.g., 2/3) are fully reset at midnight
+    await db
+      .update(tasks)
+      .set({ 
+        completionCount: 0,
+        nextAvailableDate: null,
+        updatedAt: new Date() 
+      })
+      .where(
+        and(
+          eq(tasks.familyName, familyName),
+          eq(tasks.recurrence, "daily")
+        )
+      );
   }
 
   async setPinCode(memberId: string, pinCode: string): Promise<void> {

@@ -89,12 +89,22 @@ async function checkAndResetPoints() {
       
       if (!isSameDay) {
         console.log(`⏰ Running daily reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone})`);
+        await resetDailyTasksForFamily(family.familyName);
         await runDailyAchievementCheckForFamily(family.familyName);
         familyResets.daily = familyDate; // Store family's local date, not server time
       }
     }
   } catch (error) {
     console.error("Error checking and resetting points:", error);
+  }
+}
+
+async function resetDailyTasksForFamily(familyName: string) {
+  try {
+    await storage.resetDailyTasksForFamily(familyName);
+    console.log(`✅ Daily tasks reset for family "${familyName}"`);
+  } catch (error) {
+    console.error(`Error resetting daily tasks for family "${familyName}":`, error);
   }
 }
 
