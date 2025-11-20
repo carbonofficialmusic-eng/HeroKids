@@ -494,7 +494,8 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(tasks.createdAt));
     
     // Reset completionCount for recurring multi-completion tasks that have passed their nextAvailableDate
-    // OR for daily recurring tasks (reset every midnight)
+    // NOTE: Daily tasks are reset by the scheduler at midnight (see scheduler.ts)
+    // Only reset non-daily tasks here (weekly, monthly, custom recurrence)
     const now = new Date();
     const tasksToReset = allTasks.filter(task => {
       // Only reset recurring multi-completion tasks
@@ -502,18 +503,16 @@ export class DatabaseStorage implements IStorage {
       const isMultiCompletion = task.maxCompletions !== null;
       const needsReset = task.completionCount > 0;
       
-      // Reset if either:
-      // 1. Task has nextAvailableDate and it has passed (fully completed yesterday)
-      // 2. Task is daily recurring and we're past midnight (partially completed yesterday)
+      // Reset ONLY if task has nextAvailableDate and it has passed (fully completed)
+      // Do NOT reset daily tasks here - they are handled by the scheduler at midnight
       const hasPassedAvailableDate = task.nextAvailableDate && task.nextAvailableDate <= now;
-      const isDailyRecurring = task.recurrence === 'daily';
       
-      return isRecurring && isMultiCompletion && needsReset && (hasPassedAvailableDate || isDailyRecurring);
+      return isRecurring && isMultiCompletion && needsReset && hasPassedAvailableDate;
     });
     
-    // Reset each task in a transaction
+    // Reset each task
     if (tasksToReset.length > 0) {
-      console.log(`🔄 Resetting ${tasksToReset.length} recurring multi-completion task(s) after midnight`);
+      console.log(`🔄 Resetting ${tasksToReset.length} recurring multi-completion task(s) (nextAvailableDate passed)`);
     }
     
     for (const task of tasksToReset) {
