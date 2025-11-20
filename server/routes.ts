@@ -814,11 +814,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
             if (task.maxCompletions !== null) {
+              // Get active completions to show participants
+              const completions = await storage.getActiveCompletionsByTask(task.id);
               return {
                 ...task,
                 remainingSlots: task.maxCompletions - task.completionCount,
                 memberHasCompleted: hasCompleted,
                 memberCompletionStatus: completionStatus,
+                completions, // Include participant list for multi-tasks
               };
             }
             
@@ -828,6 +831,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               remainingSlots: null,
               memberHasCompleted: hasCompleted,
               memberCompletionStatus: completionStatus,
+              completions: [], // No participants for non-multi tasks
             };
           })
         );
@@ -857,11 +861,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // For multi-completion tasks, check if parent has already completed it
             if (task.maxCompletions !== null) {
+              // Get active completions to show participants
+              const completions = await storage.getActiveCompletionsByTask(task.id);
               return {
                 ...task,
                 remainingSlots: task.maxCompletions - task.completionCount,
                 memberHasCompleted: hasCompleted,
                 memberCompletionStatus: completionStatus,
+                completions, // Include participant list for multi-tasks
               };
             }
             
@@ -871,6 +878,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               remainingSlots: null,
               memberHasCompleted: hasCompleted,
               memberCompletionStatus: completionStatus,
+              completions: [], // No participants for non-multi tasks
             };
           })
         );

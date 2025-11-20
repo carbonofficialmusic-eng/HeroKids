@@ -804,6 +804,83 @@ export class DatabaseStorage implements IStorage {
     return completions;
   }
 
+  async getActiveCompletionsByTask(taskId: string): Promise<any[]> {
+    // Get task info to check if it's a daily recurring task
+    const [task] = await db
+      .select({
+        recurrence: tasks.recurrence,
+        familyName: tasks.familyName
+      })
+      .from(tasks)
+      .where(eq(tasks.id, taskId));
+    
+    if (!task) return [];
+    
+    // For daily recurring tasks, only get completions from TODAY (in family timezone)
+    if (task.recurrence === 'daily') {
+      // Get family timezone
+      const [family] = await db
+        .select({ timezone: families.timezone })
+        .from(families)
+        .where(eq(families.familyName, task.familyName));
+      
+      const familyTimezone = family?.timezone || 'Europe/Berlin';
+      
+      // Get all active completions for this task
+      const allCompletions = await db
+        .select({
+          id: taskCompletions.id,
+          memberId: taskCompletions.memberId,
+          memberDisplayName: familyMembers.displayName,
+          memberAvatarUrl: familyMembers.avatarUrl,
+          memberActiveSkinId: familyMembers.activeSkinId,
+          memberUseCustomAvatar: familyMembers.useCustomAvatar,
+          memberColor: familyMembers.color,
+          status: taskCompletions.status,
+          completedAt: taskCompletions.completedAt,
+        })
+        .from(taskCompletions)
+        .innerJoin(familyMembers, eq(taskCompletions.memberId, familyMembers.id))
+        .where(
+          and(
+            eq(taskCompletions.taskId, taskId),
+            inArray(taskCompletions.status, ["pending", "approved"])
+          )
+        )
+        .orderBy(taskCompletions.completedAt);
+      
+      // Filter to only today's completions
+      return allCompletions.filter((c) => 
+        c.completedAt && isToday(c.completedAt, familyTimezone)
+      );
+    }
+    
+    // For non-daily tasks, get all active completions
+    const completions = await db
+      .select({
+        id: taskCompletions.id,
+        memberId: taskCompletions.memberId,
+        memberDisplayName: familyMembers.displayName,
+        memberAvatarUrl: familyMembers.avatarUrl,
+        memberActiveSkinId: familyMembers.activeSkinId,
+        memberUseCustomAvatar: familyMembers.useCustomAvatar,
+        memberColor: familyMembers.color,
+        status: taskCompletions.status,
+        completedAt: taskCompletions.completedAt,
+      })
+      .from(taskCompletions)
+      .innerJoin(familyMembers, eq(taskCompletions.memberId, familyMembers.id))
+      .where(
+        and(
+          eq(taskCompletions.taskId, taskId),
+          inArray(taskCompletions.status, ["pending", "approved"])
+        )
+      )
+      .orderBy(taskCompletions.completedAt);
+    
+    return completions;
+  }
+
   private async _approveCompletionInternal(tx: any, completionId: string, approvedBy: string, skipApprovalUpdate: boolean = false): Promise<void> {
     // 1. Lock completion
     const [completion] = await tx.select().from(taskCompletions)
