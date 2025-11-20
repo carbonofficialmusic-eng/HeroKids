@@ -195,65 +195,65 @@ async function autoSeedSkinsIfNeeded() {
       { id: "ankylosaurus", name: "Ankylosaurus", description: "Armored tank with a devastating club tail!", imageUrl: "🦴", pointsRequired: 1420, bonusPoints: 0 },
       { id: "allosaurus", name: "Allosaurus", description: "Apex predator of the Jurassic period!", imageUrl: "🦖", pointsRequired: 1500, bonusPoints: 0 },
       
-      // Tier 4 - Magical Princess World (Girls collection, 1560-2300 points)
-      { id: "princess-tiara", name: "Princess with Tiara", description: "Classic princess with magical tiara and sparkling gown!", imageUrl: "👑", pointsRequired: 1560, bonusPoints: 10 },
-      { id: "purple-princess", name: "Purple Princess", description: "Royal princess in glittering purple ballgown with mystical powers!", imageUrl: "💜", pointsRequired: 1620, bonusPoints: 0 },
+      // Tier 4 - Magical Princess World (Girls collection, 1560-2000 points)
+      { id: "princess-tiara", name: "Princess with Tiara", description: "Classic princess with magical tiara and sparkling gown!", imageUrl: "👑", pointsRequired: 1560, bonusPoints: 0 },
+      { id: "purple-princess", name: "Purple Princess", description: "Royal princess in glittering purple ballgown with mystical powers!", imageUrl: "💜", pointsRequired: 1620, bonusPoints: 10 },
       { id: "ice-princess", name: "Ice Princess", description: "Frozen beauty with snowflake powers and icy elegance!", imageUrl: "❄️", pointsRequired: 1680, bonusPoints: 0 },
-      { id: "rainbow-princess", name: "Rainbow Princess", description: "Magical princess surrounded by colorful stars and rainbows!", imageUrl: "🌈", pointsRequired: 1740, bonusPoints: 10 },
-      { id: "nature-princess", name: "Nature Princess", description: "Green guardian princess who speaks to flowers and animals!", imageUrl: "🌸", pointsRequired: 1800, bonusPoints: 0 },
-      { id: "sun-princess", name: "Sun Princess", description: "Golden princess radiating warmth and sunshine energy!", imageUrl: "☀️", pointsRequired: 1860, bonusPoints: 10 },
+      { id: "rainbow-princess", name: "Rainbow Princess", description: "Magical princess surrounded by colorful stars and rainbows!", imageUrl: "🌈", pointsRequired: 1740, bonusPoints: 0 },
+      { id: "nature-princess", name: "Nature Princess", description: "Green guardian princess who speaks to flowers and animals!", imageUrl: "🌸", pointsRequired: 1800, bonusPoints: 15 },
+      { id: "sun-princess", name: "Sun Princess", description: "Golden princess radiating warmth and sunshine energy!", imageUrl: "☀️", pointsRequired: 1860, bonusPoints: 0 },
       { id: "ocean-princess", name: "Ocean Princess", description: "Coral princess ruling the underwater kingdoms!", imageUrl: "🐚", pointsRequired: 1920, bonusPoints: 0 },
-      { id: "fairy-princess", name: "Fairy Princess", description: "Mystical fairy princess with butterfly wings and magic dust!", imageUrl: "🧚", pointsRequired: 2000, bonusPoints: 20 },
+      { id: "fairy-princess", name: "Fairy Princess", description: "Mystical fairy princess with butterfly wings and magic dust!", imageUrl: "🧚", pointsRequired: 2000, bonusPoints: 25 },
       
-      // Tier 5 - Space Explorers (Boys collection, 2060-2800 points)
+      // Tier 5 - Space Explorers (Boys collection, 2060-2500 points)
       { id: "astronaut-kid", name: "Astronaut Kid", description: "Young space explorer in white spacesuit ready for adventure!", imageUrl: "🚀", pointsRequired: 2060, bonusPoints: 0 },
       { id: "space-cadet-blue", name: "Space Cadet", description: "Blue-suited cadet training for space missions!", imageUrl: "👨‍🚀", pointsRequired: 2120, bonusPoints: 10 },
       { id: "green-alien", name: "Friendly Alien", description: "Green alien explorer from a distant galaxy!", imageUrl: "👽", pointsRequired: 2180, bonusPoints: 0 },
-      { id: "rocket-pilot", name: "Rocket Pilot", description: "Red and yellow suited pilot commanding starships!", imageUrl: "🛸", pointsRequired: 2240, bonusPoints: 10 },
-      { id: "moon-walker", name: "Moon Walker", description: "Lunar explorer walking on the moon's surface!", imageUrl: "🌙", pointsRequired: 2300, bonusPoints: 0 },
+      { id: "rocket-pilot", name: "Rocket Pilot", description: "Red and yellow suited pilot commanding starships!", imageUrl: "🛸", pointsRequired: 2240, bonusPoints: 0 },
+      { id: "moon-walker", name: "Moon Walker", description: "Lunar explorer walking on the moon's surface!", imageUrl: "🌙", pointsRequired: 2300, bonusPoints: 20 },
       { id: "galaxy-scout", name: "Galaxy Scout", description: "Purple-suited scout exploring cosmic mysteries!", imageUrl: "🌌", pointsRequired: 2360, bonusPoints: 0 },
-      { id: "robot-astronaut", name: "Robot Astronaut", description: "Friendly robot exploring space with metal determination!", imageUrl: "🤖", pointsRequired: 2420, bonusPoints: 10 },
-      { id: "star-captain", name: "Star Captain", description: "Gold-suited captain commanding the space fleet!", imageUrl: "⭐", pointsRequired: 2500, bonusPoints: 20 },
+      { id: "robot-astronaut", name: "Robot Astronaut", description: "Friendly robot exploring space with metal determination!", imageUrl: "🤖", pointsRequired: 2420, bonusPoints: 0 },
+      { id: "star-captain", name: "Star Captain", description: "Gold-suited captain commanding the space fleet!", imageUrl: "⭐", pointsRequired: 2500, bonusPoints: 30 },
       
-      // Tier 6 - Cute Animals (Girls collection, 2560-3300 points)
+      // Tier 6 - Cute Animals (Girls collection, 2560-3000 points)
       { id: "cat-girl", name: "Cat Girl", description: "Adorable kitty character in pink hoodie with cat ears!", imageUrl: "🐱", pointsRequired: 2560, bonusPoints: 0 },
       { id: "bunny-girl", name: "Bunny Girl", description: "Sweet bunny character in lavender dress with floppy ears!", imageUrl: "🐰", pointsRequired: 2620, bonusPoints: 10 },
       { id: "fox-girl", name: "Fox Girl", description: "Clever fox character in orange outfit with fluffy tail!", imageUrl: "🦊", pointsRequired: 2680, bonusPoints: 0 },
-      { id: "puppy-girl", name: "Puppy Girl", description: "Playful puppy character in brown hoodie, always wagging!", imageUrl: "🐶", pointsRequired: 2740, bonusPoints: 10 },
-      { id: "panda-girl", name: "Panda Girl", description: "Cuddly panda character in black and white with bamboo!", imageUrl: "🐼", pointsRequired: 2800, bonusPoints: 0 },
-      { id: "deer-girl", name: "Deer Girl", description: "Gentle deer character with adorable antlers and spots!", imageUrl: "🦌", pointsRequired: 2860, bonusPoints: 10 },
+      { id: "puppy-girl", name: "Puppy Girl", description: "Playful puppy character in brown hoodie, always wagging!", imageUrl: "🐶", pointsRequired: 2740, bonusPoints: 0 },
+      { id: "panda-girl", name: "Panda Girl", description: "Cuddly panda character in black and white with bamboo!", imageUrl: "🐼", pointsRequired: 2800, bonusPoints: 15 },
+      { id: "deer-girl", name: "Deer Girl", description: "Gentle deer character with adorable antlers and spots!", imageUrl: "🦌", pointsRequired: 2860, bonusPoints: 0 },
       { id: "raccoon-girl", name: "Raccoon Girl", description: "Mischievous raccoon character in gray hoodie with mask!", imageUrl: "🦝", pointsRequired: 2920, bonusPoints: 0 },
-      { id: "squirrel-girl", name: "Squirrel Girl", description: "Energetic squirrel character collecting acorns and treasures!", imageUrl: "🐿️", pointsRequired: 3000, bonusPoints: 20 },
+      { id: "squirrel-girl", name: "Squirrel Girl", description: "Energetic squirrel character collecting acorns and treasures!", imageUrl: "🐿️", pointsRequired: 3000, bonusPoints: 25 },
       
-      // Tier 7 - Dino Adventure (Boys collection, 3060-3800 points)
+      // Tier 7 - Dino Adventure (Boys collection, 3060-3500 points)
       { id: "t-rex-kid", name: "T-Rex Explorer", description: "Young dino adventurer dressed as a mighty T-Rex!", imageUrl: "🦖", pointsRequired: 3060, bonusPoints: 0 },
       { id: "triceratops-kid", name: "Triceratops Scout", description: "Brave explorer with triceratops safety helmet!", imageUrl: "🦕", pointsRequired: 3120, bonusPoints: 10 },
       { id: "stegosaurus-kid", name: "Stegosaurus Hero", description: "Dino fan with colorful stegosaurus plates costume!", imageUrl: "🦴", pointsRequired: 3180, bonusPoints: 0 },
-      { id: "velociraptor-kid", name: "Velociraptor Racer", description: "Speedy adventurer with velociraptor racing goggles!", imageUrl: "🦎", pointsRequired: 3240, bonusPoints: 10 },
-      { id: "brachiosaurus-kid", name: "Brachiosaurus Climber", description: "Tall explorer reaching new heights like a brachiosaur!", imageUrl: "🦕", pointsRequired: 3300, bonusPoints: 0 },
-      { id: "pteranodon-kid", name: "Pteranodon Pilot", description: "Flying adventurer with pteranodon aviator gear!", imageUrl: "🦅", pointsRequired: 3360, bonusPoints: 10 },
+      { id: "velociraptor-kid", name: "Velociraptor Racer", description: "Speedy adventurer with velociraptor racing goggles!", imageUrl: "🦎", pointsRequired: 3240, bonusPoints: 0 },
+      { id: "brachiosaurus-kid", name: "Brachiosaurus Climber", description: "Tall explorer reaching new heights like a brachiosaur!", imageUrl: "🦕", pointsRequired: 3300, bonusPoints: 20 },
+      { id: "pteranodon-kid", name: "Pteranodon Pilot", description: "Flying adventurer with pteranodon aviator gear!", imageUrl: "🦅", pointsRequired: 3360, bonusPoints: 0 },
       { id: "ankylosaurus-kid", name: "Ankylosaurus Defender", description: "Protected explorer in armored ankylosaurus shell!", imageUrl: "🦴", pointsRequired: 3420, bonusPoints: 0 },
-      { id: "spinosaurus-kid", name: "Spinosaurus Swimmer", description: "Water adventurer with spinosaurus swimming gear!", imageUrl: "🦖", pointsRequired: 3500, bonusPoints: 20 },
+      { id: "spinosaurus-kid", name: "Spinosaurus Swimmer", description: "Water adventurer with spinosaurus swimming gear!", imageUrl: "🦖", pointsRequired: 3500, bonusPoints: 30 },
       
-      // Tier 8 - Ballerina Dreams (Girls collection, 3560-4300 points)
+      // Tier 8 - Ballerina Dreams (Girls collection, 3560-4000 points)
       { id: "ballerina-pink", name: "Pink Ballerina", description: "Classic ballerina in pink tutu with sparkling grace!", imageUrl: "🩰", pointsRequired: 3560, bonusPoints: 0 },
       { id: "swan-ballerina", name: "Swan Ballerina", description: "Elegant swan lake ballerina in white feather tutu!", imageUrl: "🦢", pointsRequired: 3620, bonusPoints: 10 },
       { id: "purple-ballerina", name: "Purple Ballerina", description: "Royal ballerina in lavender tutu with flower crown!", imageUrl: "💜", pointsRequired: 3680, bonusPoints: 0 },
-      { id: "blue-ballerina", name: "Ocean Ballerina", description: "Aqua ballerina dancing with ocean wave patterns!", imageUrl: "💙", pointsRequired: 3740, bonusPoints: 10 },
-      { id: "golden-ballerina", name: "Golden Ballerina", description: "Radiant ballerina in golden tutu with star sequins!", imageUrl: "⭐", pointsRequired: 3800, bonusPoints: 0 },
-      { id: "peach-ballerina", name: "Rose Ballerina", description: "Romantic ballerina in peach tutu with rose details!", imageUrl: "🌹", pointsRequired: 3860, bonusPoints: 10 },
+      { id: "blue-ballerina", name: "Ocean Ballerina", description: "Aqua ballerina dancing with ocean wave patterns!", imageUrl: "💙", pointsRequired: 3740, bonusPoints: 0 },
+      { id: "golden-ballerina", name: "Golden Ballerina", description: "Radiant ballerina in golden tutu with star sequins!", imageUrl: "⭐", pointsRequired: 3800, bonusPoints: 15 },
+      { id: "peach-ballerina", name: "Rose Ballerina", description: "Romantic ballerina in peach tutu with rose details!", imageUrl: "🌹", pointsRequired: 3860, bonusPoints: 0 },
       { id: "mint-ballerina", name: "Garden Ballerina", description: "Nature ballerina in mint green tutu with leaf patterns!", imageUrl: "🌿", pointsRequired: 3920, bonusPoints: 0 },
-      { id: "rainbow-ballerina", name: "Rainbow Ballerina", description: "Magical ballerina in rainbow tutu spreading joy!", imageUrl: "🌈", pointsRequired: 4000, bonusPoints: 20 },
+      { id: "rainbow-ballerina", name: "Rainbow Ballerina", description: "Magical ballerina in rainbow tutu spreading joy!", imageUrl: "🌈", pointsRequired: 4000, bonusPoints: 25 },
       
-      // Tier 9 - Superhero Squad (Boys collection, 4060-4800 points)
+      // Tier 9 - Superhero Squad (Boys collection, 4060-4500 points)
       { id: "classic-superhero", name: "Classic Hero", description: "Iconic superhero in red and blue suit with star emblem!", imageUrl: "🦸", pointsRequired: 4060, bonusPoints: 0 },
       { id: "lightning-speedster", name: "Lightning Speedster", description: "Super-fast hero in yellow suit with electric powers!", imageUrl: "⚡", pointsRequired: 4120, bonusPoints: 10 },
       { id: "tech-hero", name: "Tech Hero", description: "High-tech hero in purple armor with advanced gadgets!", imageUrl: "🤖", pointsRequired: 4180, bonusPoints: 0 },
-      { id: "nature-guardian", name: "Nature Guardian", description: "Eco-hero in green suit protecting the environment!", imageUrl: "🌿", pointsRequired: 4240, bonusPoints: 10 },
-      { id: "ice-hero", name: "Ice Hero", description: "Cool hero in blue frost suit with ice powers!", imageUrl: "❄️", pointsRequired: 4300, bonusPoints: 0 },
-      { id: "fire-hero", name: "Fire Hero", description: "Blazing hero in orange flame suit with heat powers!", imageUrl: "🔥", pointsRequired: 4360, bonusPoints: 10 },
+      { id: "nature-guardian", name: "Nature Guardian", description: "Eco-hero in green suit protecting the environment!", imageUrl: "🌿", pointsRequired: 4240, bonusPoints: 0 },
+      { id: "ice-hero", name: "Ice Hero", description: "Cool hero in blue frost suit with ice powers!", imageUrl: "❄️", pointsRequired: 4300, bonusPoints: 20 },
+      { id: "fire-hero", name: "Fire Hero", description: "Blazing hero in orange flame suit with heat powers!", imageUrl: "🔥", pointsRequired: 4360, bonusPoints: 0 },
       { id: "shadow-ninja", name: "Shadow Ninja", description: "Stealthy ninja hero in black and purple suit!", imageUrl: "🥷", pointsRequired: 4420, bonusPoints: 0 },
-      { id: "shield-hero", name: "Shield Hero", description: "Defensive hero in gold armor with energy shields!", imageUrl: "🛡️", pointsRequired: 4500, bonusPoints: 20 },
+      { id: "shield-hero", name: "Shield Hero", description: "Defensive hero in gold armor with energy shields!", imageUrl: "🛡️", pointsRequired: 4500, bonusPoints: 30 },
     ];
 
     await db.insert(skins).values(SKIN_DATA);
