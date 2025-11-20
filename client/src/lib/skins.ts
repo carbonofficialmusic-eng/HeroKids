@@ -59,15 +59,15 @@ import deerGirlImg from "@assets/generated_images/deer_girl_brown_antlers.png";
 import raccoonGirlImg from "@assets/generated_images/raccoon_girl_gray_hoodie.png";
 import squirrelGirlImg from "@assets/generated_images/squirrel_girl_orange_acorn.png";
 
-// Tier 7 - Dino Adventure (Boys collection)
-import tRexKidImg from "@assets/generated_images/t-rex_kid_explorer_vest.png";
-import triceratopsKidImg from "@assets/generated_images/triceratops_kid_safety_helmet.png";
-import stegosaurusKidImg from "@assets/generated_images/stegosaurus_kid_colorful_plates.png";
-import velociraptorKidImg from "@assets/generated_images/velociraptor_kid_racing_goggles.png";
-import brachiosaurusKidImg from "@assets/generated_images/brachiosaurus_kid_long_neck.png";
-import pteranodonKidImg from "@assets/generated_images/pteranodon_kid_aviator_goggles.png";
-import ankylosaurusKidImg from "@assets/generated_images/ankylosaurus_kid_armored_shell.png";
-import spinosaurusKidImg from "@assets/generated_images/spinosaurus_kid_swimming_gear.png";
+// Tier 7 - Vampire Adventure (Boys collection)
+import classicVampireImg from "@assets/generated_images/classic_vampire_boy_avatar.png";
+import batBoyImg from "@assets/generated_images/bat_boy_vampire_avatar.png";
+import moonlightVampireImg from "@assets/generated_images/moonlight_vampire_boy_avatar.png";
+import gothicVampireImg from "@assets/generated_images/gothic_vampire_boy_avatar.png";
+import shadowVampireImg from "@assets/generated_images/shadow_vampire_boy_avatar.png";
+import nightHunterImg from "@assets/generated_images/night_hunter_vampire_boy_avatar.png";
+import bloodMoonVampireImg from "@assets/generated_images/blood_moon_vampire_boy_avatar.png";
+import vampirePrinceImg from "@assets/generated_images/vampire_prince_boy_avatar.png";
 
 // Tier 8 - Ballerina Dreams (Girls collection)
 import ballerinaPinkImg from "@assets/generated_images/ballerina_pink_tutu_classic.png";
@@ -151,15 +151,15 @@ import woodlandClearingBg from "@assets/generated_images/woodland_clearing_deer_
 import hollowTreeHouseBg from "@assets/generated_images/hollow_tree_house_cozy.png";
 import oakTreeParkBg from "@assets/generated_images/oak_tree_park_squirrel.png";
 
-// Tier 7 backgrounds - Dino Adventure
-import prehistoricJungleBg from "@assets/generated_images/prehistoric_jungle_volcano_waterfall.png";
-import excavationSiteBg from "@assets/generated_images/excavation_site_fossil_dig.png";
-import cretaceousPlainsPteranBg from "@assets/generated_images/cretaceous_plains_pteranodons_flying.png";
-import jurassicCoastlineBg from "@assets/generated_images/jurassic_coastline_ocean_plesiosaurs.png";
-import dinosaurMuseumBg from "@assets/generated_images/dinosaur_museum_skeleton_displays.png";
-import volcanicLandscapeBg from "@assets/generated_images/volcanic_landscape_lava_flows.png";
-import prehistoricCanyonBg from "@assets/generated_images/prehistoric_canyon_rock_layers.png";
-import dinoParkEntranceBg from "@assets/generated_images/dino_park_entrance_gates.png";
+// Tier 7 backgrounds - Vampire Adventure
+import gothicCastleBg from "@assets/generated_images/gothic_castle_vampire_background.png";
+import moonlitGraveyardBg from "@assets/generated_images/moonlit_graveyard_background.png";
+import darkEnchantedForestBg from "@assets/generated_images/dark_enchanted_forest_background.png";
+import vampireMansionBg from "@assets/generated_images/vampire_mansion_interior_background.png";
+import mistyNightBg from "@assets/generated_images/misty_night_landscape_background.png";
+import bloodMoonNightBg from "@assets/generated_images/blood_moon_night_background.png";
+import gothicCathedralBg from "@assets/generated_images/gothic_cathedral_background.png";
+import shadowyCryptBg from "@assets/generated_images/shadowy_crypt_background.png";
 
 // Tier 8 backgrounds - Ballerina Dreams
 import balletStageBg from "@assets/generated_images/ballet_stage_red_curtains.png";
@@ -243,15 +243,15 @@ export const SKIN_IMAGES: Record<string, string> = {
   "raccoon-girl": raccoonGirlImg,
   "squirrel-girl": squirrelGirlImg,
   
-  // Tier 7 - Dino Adventure
-  "t-rex-kid": tRexKidImg,
-  "triceratops-kid": triceratopsKidImg,
-  "stegosaurus-kid": stegosaurusKidImg,
-  "velociraptor-kid": velociraptorKidImg,
-  "brachiosaurus-kid": brachiosaurusKidImg,
-  "pteranodon-kid": pteranodonKidImg,
-  "ankylosaurus-kid": ankylosaurusKidImg,
-  "spinosaurus-kid": spinosaurusKidImg,
+  // Tier 7 - Vampire Adventure
+  "classic-vampire": classicVampireImg,
+  "bat-boy": batBoyImg,
+  "moonlight-vampire": moonlightVampireImg,
+  "gothic-vampire": gothicVampireImg,
+  "shadow-vampire": shadowVampireImg,
+  "night-hunter": nightHunterImg,
+  "blood-moon-vampire": bloodMoonVampireImg,
+  "vampire-prince": vampirePrinceImg,
   
   // Tier 8 - Ballerina Dreams
   "ballerina-pink": ballerinaPinkImg,
@@ -336,15 +336,15 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "raccoon-girl": hollowTreeHouseBg,
   "squirrel-girl": oakTreeParkBg,
   
-  // Tier 7 - Dino Adventure
-  "t-rex-kid": prehistoricJungleBg,
-  "triceratops-kid": excavationSiteBg,
-  "stegosaurus-kid": cretaceousPlainsPteranBg,
-  "velociraptor-kid": jurassicCoastlineBg,
-  "brachiosaurus-kid": dinosaurMuseumBg,
-  "pteranodon-kid": volcanicLandscapeBg,
-  "ankylosaurus-kid": prehistoricCanyonBg,
-  "spinosaurus-kid": dinoParkEntranceBg,
+  // Tier 7 - Vampire Adventure
+  "classic-vampire": gothicCastleBg,
+  "bat-boy": moonlitGraveyardBg,
+  "moonlight-vampire": darkEnchantedForestBg,
+  "gothic-vampire": vampireMansionBg,
+  "shadow-vampire": mistyNightBg,
+  "night-hunter": bloodMoonNightBg,
+  "blood-moon-vampire": gothicCathedralBg,
+  "vampire-prince": shadowyCryptBg,
   
   // Tier 8 - Ballerina Dreams
   "ballerina-pink": balletStageBg,
