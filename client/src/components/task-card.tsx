@@ -13,6 +13,17 @@ interface TaskCardProps {
   task: Task & {
     remainingSlots?: number | null;
     memberHasCompleted?: boolean;
+    completions?: Array<{
+      id: string;
+      memberId: string;
+      memberDisplayName: string;
+      memberAvatarUrl: string | null;
+      memberActiveSkinId: string | null;
+      memberUseCustomAvatar: boolean;
+      memberColor: string;
+      status: "pending" | "approved" | "rejected";
+      completedAt: Date | null;
+    }>;
   };
   assignedTo?: FamilyMember;
   onComplete?: (taskId: string) => void;
@@ -116,6 +127,38 @@ export function TaskCard({
               >
                 {task.description}
               </p>
+            )}
+
+            {/* Multi-Completion Participants */}
+            {task.maxCompletions !== null && task.completions && task.completions.length > 0 && (
+              <div className="mb-2" data-testid={`participants-${task.id}`}>
+                <p className="text-xs font-medium text-muted-foreground mb-1.5">
+                  {t('tasks.participants')}:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {task.completions.map((completion) => (
+                    <Badge 
+                      key={completion.id} 
+                      variant="secondary" 
+                      className="gap-1.5 text-xs"
+                      data-testid={`participant-${completion.memberId}`}
+                    >
+                      <Avatar className="h-4 w-4">
+                        <AvatarImage src={getAvatarUrl(completion.memberActiveSkinId, completion.memberAvatarUrl, completion.memberUseCustomAvatar)} />
+                        <AvatarFallback 
+                          className="text-xs text-white font-bold"
+                          style={{ backgroundColor: completion.memberColor }}
+                        >
+                          {completion.memberDisplayName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      {completion.memberDisplayName}
+                      {completion.status === "pending" && " ⏳"}
+                      {completion.status === "approved" && " ✓"}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
             )}
 
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
