@@ -225,15 +225,15 @@ async function autoSeedSkinsIfNeeded() {
       { id: "raccoon-girl", name: "Raccoon Girl", description: "Mischievous raccoon character in gray hoodie with mask!", imageUrl: "🦝", pointsRequired: 2920, bonusPoints: 0 },
       { id: "squirrel-girl", name: "Squirrel Girl", description: "Energetic squirrel character collecting acorns and treasures!", imageUrl: "🐿️", pointsRequired: 3000, bonusPoints: 25 },
       
-      // Tier 7 - Dino Adventure (Boys collection, 3060-3500 points)
-      { id: "t-rex-kid", name: "T-Rex Explorer", description: "Young dino adventurer dressed as a mighty T-Rex!", imageUrl: "🦖", pointsRequired: 3060, bonusPoints: 0 },
-      { id: "triceratops-kid", name: "Triceratops Scout", description: "Brave explorer with triceratops safety helmet!", imageUrl: "🦕", pointsRequired: 3120, bonusPoints: 10 },
-      { id: "stegosaurus-kid", name: "Stegosaurus Hero", description: "Dino fan with colorful stegosaurus plates costume!", imageUrl: "🦴", pointsRequired: 3180, bonusPoints: 0 },
-      { id: "velociraptor-kid", name: "Velociraptor Racer", description: "Speedy adventurer with velociraptor racing goggles!", imageUrl: "🦎", pointsRequired: 3240, bonusPoints: 0 },
-      { id: "brachiosaurus-kid", name: "Brachiosaurus Climber", description: "Tall explorer reaching new heights like a brachiosaur!", imageUrl: "🦕", pointsRequired: 3300, bonusPoints: 20 },
-      { id: "pteranodon-kid", name: "Pteranodon Pilot", description: "Flying adventurer with pteranodon aviator gear!", imageUrl: "🦅", pointsRequired: 3360, bonusPoints: 0 },
-      { id: "ankylosaurus-kid", name: "Ankylosaurus Defender", description: "Protected explorer in armored ankylosaurus shell!", imageUrl: "🦴", pointsRequired: 3420, bonusPoints: 0 },
-      { id: "spinosaurus-kid", name: "Spinosaurus Swimmer", description: "Water adventurer with spinosaurus swimming gear!", imageUrl: "🦖", pointsRequired: 3500, bonusPoints: 30 },
+      // Tier 7 - Vampire Adventure (Boys collection, 3060-3500 points)
+      { id: "classic-vampire", name: "Classic Vampire", description: "Traditional vampire with elegant black cape and friendly fangs!", imageUrl: "🧛", pointsRequired: 3060, bonusPoints: 0 },
+      { id: "bat-boy", name: "Bat Boy", description: "Vampire boy with small bat wings and purple vest!", imageUrl: "🦇", pointsRequired: 3120, bonusPoints: 10 },
+      { id: "moonlight-vampire", name: "Moonlight Vampire", description: "Silver-haired vampire glowing with mystical moonlight!", imageUrl: "🌙", pointsRequired: 3180, bonusPoints: 0 },
+      { id: "gothic-vampire", name: "Gothic Vampire", description: "Edgy vampire in dark purple and black with silver chains!", imageUrl: "🖤", pointsRequired: 3240, bonusPoints: 0 },
+      { id: "shadow-vampire", name: "Shadow Vampire", description: "Mysterious vampire with shadow powers and glowing red eyes!", imageUrl: "👤", pointsRequired: 3300, bonusPoints: 20 },
+      { id: "night-hunter", name: "Night Hunter", description: "Brave vampire hunter boy with wooden cross and courage!", imageUrl: "🗡️", pointsRequired: 3360, bonusPoints: 0 },
+      { id: "blood-moon-vampire", name: "Blood Moon Vampire", description: "Dramatic vampire under blood moon influence with crimson power!", imageUrl: "🌕", pointsRequired: 3420, bonusPoints: 0 },
+      { id: "vampire-prince", name: "Vampire Prince", description: "Royal vampire prince in elegant black and gold with small crown!", imageUrl: "👑", pointsRequired: 3500, bonusPoints: 30 },
       
       // Tier 8 - Ballerina Dreams (Girls collection, 3560-4000 points)
       { id: "ballerina-pink", name: "Pink Ballerina", description: "Classic ballerina in pink tutu with sparkling grace!", imageUrl: "🩰", pointsRequired: 3560, bonusPoints: 0 },
