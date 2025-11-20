@@ -512,6 +512,27 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
+  async resetTask(taskId: string): Promise<void> {
+    // Manual task reset - deletes ALL completions and resets counters
+    // Used by parents to manually reset a task if automatic reset fails
+    await db.transaction(async (tx) => {
+      // Delete all completions for this task
+      await tx
+        .delete(taskCompletions)
+        .where(eq(taskCompletions.taskId, taskId));
+      
+      // Reset task counters and nextAvailableDate
+      await tx
+        .update(tasks)
+        .set({ 
+          completionCount: 0,
+          nextAvailableDate: null,
+          updatedAt: new Date() 
+        })
+        .where(eq(tasks.id, taskId));
+    });
+  }
+
   async setPinCode(memberId: string, pinCode: string): Promise<void> {
     const bcrypt = await import("bcrypt");
     const hashedPin = await bcrypt.hash(pinCode, 10);

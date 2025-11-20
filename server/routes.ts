@@ -1025,6 +1025,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual task reset (for parents to reset recurring tasks manually)
+  app.post("/api/tasks/:taskId/reset", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { taskId } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can reset tasks
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can reset tasks" });
+      }
+      
+      // Get the task to verify it exists and belongs to the same family
+      const task = await storage.getTask(taskId);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      if (task.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Cannot reset tasks from another family" });
+      }
+      
+      // Reset the task (delete all completions and reset counters)
+      await storage.resetTask(taskId);
+      
+      // Get updated task to return
+      const updatedTask = await storage.getTask(taskId);
+      
+      // Broadcast task reset to family
+      broadcastToFamily(member.familyName, {
+        type: "task_updated",
+        task: updatedTask,
+      });
+      
+      res.json({ success: true, message: "Task reset successfully", task: updatedTask });
+    } catch (error: any) {
+      console.error("Error resetting task:", error);
+      res.status(500).json({ message: "Failed to reset task" });
+    }
+  });
+
   // Get presigned URL for task proof upload (client-side upload to Object Storage)
   app.post("/api/tasks/upload-proof-url", isAuthenticated, async (req: any, res) => {
     try {

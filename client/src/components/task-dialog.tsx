@@ -28,6 +28,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -36,7 +46,9 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Sparkles } from "lucide-react";
+import { Sparkles, RotateCcw } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
@@ -71,6 +83,8 @@ export function TaskDialog({
 }: TaskDialogProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showResetDialog, setShowResetDialog] = useState(false);
   
   // Calculate total number of family members (parents + children)
   const totalMemberCount = useMemo(() => {
@@ -274,6 +288,43 @@ export function TaskDialog({
       setRecurrenceMode("standard");
     }
   };
+
+  // Manual task reset mutation
+  const resetTaskMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      return await apiRequest(`/api/tasks/${taskId}/reset`, {
+        method: "POST",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      toast({
+        title: t('tasks.resetSuccess'),
+        description: t('tasks.resetSuccessDesc'),
+      });
+      setShowResetDialog(false);
+      onOpenChange(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: t('tasks.resetError'),
+        description: error.message || t('tasks.resetErrorDesc'),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleResetClick = () => {
+    if (editingTask) {
+      resetTaskMutation.mutate(editingTask.id);
+    }
+  };
+
+  // Check if task is recurring (for showing reset button)
+  const isRecurringTask = editingTask && (
+    editingTask.recurrence !== "none" || 
+    (editingTask.recurrenceDays && editingTask.recurrenceDays > 0)
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -714,9 +765,51 @@ export function TaskDialog({
                 {isSubmitting ? (editingTask ? t('tasks.updating') : t('tasks.creating')) : editingTask ? t('tasks.updateTaskButton') : t('tasks.createTaskButton')}
               </Button>
             </div>
+
+            {isRecurringTask && (
+              <div className="pt-4 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowResetDialog(true)}
+                  data-testid="button-reset-task"
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  {t('tasks.resetTask')}
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  {t('tasks.resetTaskDesc')}
+                </p>
+              </div>
+            )}
           </form>
         </Form>
       </DialogContent>
+
+      {/* Reset Confirmation Dialog */}
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent data-testid="dialog-reset-confirmation">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('tasks.resetTaskConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('tasks.resetTaskConfirmDesc')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-reset">
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleResetClick}
+              disabled={resetTaskMutation.isPending}
+              data-testid="button-confirm-reset"
+            >
+              {resetTaskMutation.isPending ? t('tasks.resetting') : t('tasks.resetConfirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
