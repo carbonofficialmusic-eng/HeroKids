@@ -833,13 +833,14 @@ export class DatabaseStorage implements IStorage {
         .where(eq(taskCompletions.id, completionId));
     }
     
-    // 4. If maxCompletions mode: increment counter and check threshold
+    // 4. Handle task status updates based on completion
+    const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
+    
     if (task.maxCompletions !== null) {
+      // Multi-Completion mode: increment counter and check threshold
       // For recurring tasks: keep status as "active" even when maxCompletions reached
       // The nextAvailableDate (set in routes.ts) will make it unavailable until reset
       // For non-recurring tasks: set status to "completed" when maxCompletions reached
-      const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
-      
       await tx.update(tasks)
         .set({
           completionCount: sql<number>`completion_count + 1`,
@@ -849,6 +850,17 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date()
         })
         .where(eq(tasks.id, task.id));
+    } else {
+      // Normal mode (no maxCompletions): Set one-time tasks to "completed" immediately
+      // Recurring tasks remain "active" to allow future completions
+      if (!isRecurring) {
+        await tx.update(tasks)
+          .set({
+            status: 'completed',
+            updatedAt: new Date()
+          })
+          .where(eq(tasks.id, task.id));
+      }
     }
     
     // 5. Award points to member (existing logic from old approveTaskCompletion)
