@@ -53,6 +53,8 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gt, sql, inArray } from "drizzle-orm";
+import { startOfDay } from 'date-fns';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 /**
  * Helper function to check if a date is today in a specific timezone
@@ -436,21 +438,78 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resetDailyTasksForFamily(familyName: string): Promise<void> {
-    // Reset completion_count and nextAvailableDate for all daily recurring tasks
-    // This ensures multi-completion tasks (e.g., 2/3) are fully reset at midnight
-    await db
-      .update(tasks)
-      .set({ 
-        completionCount: 0,
-        nextAvailableDate: null,
-        updatedAt: new Date() 
-      })
-      .where(
-        and(
-          eq(tasks.familyName, familyName),
-          eq(tasks.recurrence, "daily")
+    // Reset daily recurring tasks by deleting previous day's completions
+    // Uses date-fns-tz for timezone-aware start-of-day calculation
+    await db.transaction(async (tx) => {
+      // Get family timezone
+      const [family] = await tx
+        .select()
+        .from(families)
+        .where(eq(families.familyName, familyName));
+      
+      if (!family) return;
+      
+      const familyTimezone = family.timezone || "Europe/Berlin";
+      
+      // Calculate start of today in family's timezone using date-fns-tz
+      // This correctly handles DST transitions and all timezone offsets
+      const now = new Date();
+      const familyNow = toZonedTime(now, familyTimezone); // Current time in family's TZ
+      const startOfDayLocal = startOfDay(familyNow); // Midnight in family's TZ
+      const startOfDayUTC = fromZonedTime(startOfDayLocal, familyTimezone); // Convert to UTC
+      
+      // Lock all daily tasks for this family to prevent concurrent modifications
+      const dailyTasks = await tx
+        .select()
+        .from(tasks)
+        .where(
+          and(
+            eq(tasks.familyName, familyName),
+            eq(tasks.recurrence, "daily")
+          )
         )
-      );
+        .for('update'); // Row-level write lock prevents concurrent task updates
+      
+      // Delete ONLY completions from previous days (preserve today's completions)
+      if (dailyTasks.length > 0) {
+        const taskIds = dailyTasks.map(t => t.id);
+        
+        await tx
+          .delete(taskCompletions)
+          .where(
+            and(
+              inArray(taskCompletions.taskId, taskIds),
+              sql`${taskCompletions.completedAt} < ${startOfDayUTC}`
+            )
+          );
+        
+        // For each task, recompute completion_count from remaining completions
+        // This includes any completions from today that were preserved
+        for (const task of dailyTasks) {
+          const remainingCompletions = await tx
+            .select({ count: sql<number>`count(*)` })
+            .from(taskCompletions)
+            .where(
+              and(
+                eq(taskCompletions.taskId, task.id),
+                inArray(taskCompletions.status, ["pending", "approved"])
+              )
+            );
+          
+          const actualCount = Number(remainingCompletions[0]?.count || 0);
+          
+          // Update task with recomputed count and reset nextAvailableDate
+          await tx
+            .update(tasks)
+            .set({ 
+              completionCount: actualCount,
+              nextAvailableDate: null,
+              updatedAt: new Date() 
+            })
+            .where(eq(tasks.id, task.id));
+        }
+      }
+    });
   }
 
   async setPinCode(memberId: string, pinCode: string): Promise<void> {
