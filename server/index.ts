@@ -7,6 +7,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { startPointsResetScheduler } from "./scheduler";
 import { db } from "./db";
 import { skins } from "../shared/schema";
+import { sql } from "drizzle-orm";
 import Stripe from "stripe";
 
 const app = express();
@@ -264,11 +265,54 @@ async function autoSeedSkinsIfNeeded() {
   }
 }
 
+// Auto-migrate old Dino Adventure skins to new Vampire Adventure skins
+async function migrateDinoToVampireSkins() {
+  try {
+    // Check if old Dino Adventure skins exist
+    const oldDinoSkins = await db.select().from(skins).where(
+      sql`${skins.id} IN ('t-rex-kid', 'triceratops-kid', 'stegosaurus-kid', 'velociraptor-kid', 'brachiosaurus-kid', 'pteranodon-kid', 'ankylosaurus-kid', 'spinosaurus-kid')`
+    );
+
+    if (oldDinoSkins.length === 0) {
+      log("✅ Vampire Adventure skins already migrated");
+      return;
+    }
+
+    log(`🔄 Migrating ${oldDinoSkins.length} old Dino Adventure skins to Vampire Adventure...`);
+
+    // Delete old Dino Adventure skins
+    await db.delete(skins).where(
+      sql`${skins.id} IN ('t-rex-kid', 'triceratops-kid', 'stegosaurus-kid', 'velociraptor-kid', 'brachiosaurus-kid', 'pteranodon-kid', 'ankylosaurus-kid', 'spinosaurus-kid')`
+    );
+
+    // Insert new Vampire Adventure skins
+    const VAMPIRE_SKINS = [
+      { id: "classic-vampire", name: "Classic Vampire", description: "Traditional vampire with elegant black cape and friendly fangs!", imageUrl: "🧛", pointsRequired: 3060, bonusPoints: 0 },
+      { id: "bat-boy", name: "Bat Boy", description: "Vampire boy with small bat wings and purple vest!", imageUrl: "🦇", pointsRequired: 3120, bonusPoints: 10 },
+      { id: "moonlight-vampire", name: "Moonlight Vampire", description: "Silver-haired vampire glowing with mystical moonlight!", imageUrl: "🌙", pointsRequired: 3180, bonusPoints: 0 },
+      { id: "gothic-vampire", name: "Gothic Vampire", description: "Edgy vampire in dark purple and black with silver chains!", imageUrl: "🖤", pointsRequired: 3240, bonusPoints: 0 },
+      { id: "shadow-vampire", name: "Shadow Vampire", description: "Mysterious vampire with shadow powers and glowing red eyes!", imageUrl: "👤", pointsRequired: 3300, bonusPoints: 20 },
+      { id: "night-hunter", name: "Night Hunter", description: "Brave vampire hunter boy with wooden cross and courage!", imageUrl: "🗡️", pointsRequired: 3360, bonusPoints: 0 },
+      { id: "blood-moon-vampire", name: "Blood Moon Vampire", description: "Dramatic vampire under blood moon influence with crimson power!", imageUrl: "🌕", pointsRequired: 3420, bonusPoints: 0 },
+      { id: "vampire-prince", name: "Vampire Prince", description: "Royal vampire prince in elegant black and gold with small crown!", imageUrl: "👑", pointsRequired: 3500, bonusPoints: 30 },
+    ];
+
+    await db.insert(skins).values(VAMPIRE_SKINS);
+
+    log(`✅ Successfully migrated to Vampire Adventure! (${VAMPIRE_SKINS.length} new skins)`);
+  } catch (error) {
+    console.error("❌ Error migrating Dino to Vampire skins:", error);
+  }
+}
+
 (async () => {
   const server = await registerRoutes(app);
 
   // Auto-seed character skins on first startup
   await autoSeedSkinsIfNeeded();
+
+  // Auto-migrate old Dino Adventure to Vampire Adventure
+  await migrateDinoToVampireSkins();
 
   // Start points reset scheduler
   startPointsResetScheduler();
