@@ -962,22 +962,22 @@ export default function KidDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="p-8 bg-gradient-to-br from-primary/10 via-card/80 to-purple-500/10 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-xl">
-            <div className="flex items-center justify-between flex-wrap gap-6">
-              <div className="flex items-center gap-6">
+          <Card className="p-6 bg-gradient-to-br from-primary/10 via-card/80 to-purple-500/10 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-xl">
+            <div className="flex items-center justify-between flex-wrap gap-5">
+              <div className="flex items-center gap-5">
                 <motion.div
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Avatar className="h-24 w-24 border-4 border-primary shadow-lg">
+                  <Avatar className="h-20 w-20 border-4 border-primary shadow-lg">
                     <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar)} />
-                    <AvatarFallback style={{ backgroundColor: member.color }} className="text-4xl font-bold text-white">
+                    <AvatarFallback style={{ backgroundColor: member.color }} className="text-3xl font-bold text-white">
                       {member.displayName[0]}
                     </AvatarFallback>
                   </Avatar>
                 </motion.div>
                 <div>
-                  <h1 className="text-5xl font-bold mb-2" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                  <h1 className="text-4xl font-bold mb-1" style={{ fontFamily: "Fredoka, sans-serif" }}>
                     {member.displayName}
                   </h1>
                   {streak > 0 && (
@@ -993,14 +993,14 @@ export default function KidDashboard() {
                   )}
                 </div>
               </div>
-              <div className="bg-card/80 backdrop-blur-sm p-6 rounded-2xl border-2 border-primary/30 min-w-[280px]">
-                <p className="text-base text-muted-foreground mb-4 font-medium text-center">Deine Punkte:</p>
-                <div className="space-y-4">
+              <div className="bg-card/80 backdrop-blur-sm p-5 rounded-2xl border-2 border-primary/30 min-w-[260px]">
+                <p className="text-sm text-muted-foreground mb-3 font-medium text-center">Deine Punkte:</p>
+                <div className="space-y-3">
                   {/* Total Earned - Prominent Display */}
-                  <div className="text-center pb-4 border-b border-border">
-                    <p className="text-sm text-muted-foreground mb-2">Total verdient</p>
+                  <div className="text-center pb-3 border-b border-border">
+                    <p className="text-xs text-muted-foreground mb-1">Total verdient</p>
                     <motion.div
-                      className="text-5xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
+                      className="text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
                       animate={{ scale: [1, 1.05, 1] }}
                       transition={{ repeat: Infinity, duration: 2 }}
                       style={{ fontFamily: "Fredoka, sans-serif" }}
@@ -1013,10 +1013,10 @@ export default function KidDashboard() {
                   {/* Available Points */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Coins className="h-5 w-5 text-green-500" />
-                      <span className="font-semibold">Verfügbar:</span>
+                      <Coins className="h-4 w-4 text-green-500" />
+                      <span className="font-semibold text-sm">Verfügbar:</span>
                     </div>
-                    <span className="text-2xl font-bold text-green-600 dark:text-green-400" data-testid="text-total-points">
+                    <span className="text-xl font-bold text-green-600 dark:text-green-400" data-testid="text-total-points">
                       {member.totalPoints.toLocaleString()}
                     </span>
                   </div>
