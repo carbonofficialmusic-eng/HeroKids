@@ -59,6 +59,7 @@ import { RewardRequestDialog } from "@/components/reward-request-dialog";
 import { Leaderboard } from "@/components/leaderboard";
 import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature, type SubscriptionTier } from "@shared/tier-config";
+import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 // Extended Task type with metadata from API
 interface TaskWithMeta extends Task {
@@ -942,6 +943,19 @@ export default function KidDashboard() {
       </header>
 
       <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-6 pb-28">
+        {/* HeroKids Logo */}
+        <div className="flex justify-center">
+          <motion.img 
+            src={logoUrl} 
+            alt="HeroKids Logo" 
+            className="h-32 w-auto object-contain"
+            data-testid="img-kid-dashboard-logo"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+          />
+        </div>
+
         {/* Hero Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
