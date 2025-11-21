@@ -942,7 +942,7 @@ export default function KidDashboard() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-6 pb-28">
+      <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-6 pb-[calc(8rem+env(safe-area-inset-bottom))]">
         {/* HeroKids Logo */}
         <div className="flex justify-center">
           <motion.img 
@@ -962,7 +962,7 @@ export default function KidDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="p-6 bg-gradient-to-br from-primary/10 via-card/80 to-purple-500/10 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-xl">
+          <Card className="p-7 bg-gradient-to-br from-primary/10 via-card/80 to-purple-500/10 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-xl">
             <div className="flex items-center justify-between flex-wrap gap-5">
               <div className="flex items-center gap-5">
                 <motion.div
@@ -1027,7 +1027,7 @@ export default function KidDashboard() {
         </motion.div>
 
         {/* Rewards Section */}
-        <div className="space-y-6">
+        <div className="space-y-6 mb-4">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl">
               <Trophy className="h-8 w-8 text-white" />
