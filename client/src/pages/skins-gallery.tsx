@@ -149,6 +149,9 @@ export default function SkinsGallery() {
   const tier7Skins = skins.filter(s => s.tier === 7);
   const tier8Skins = skins.filter(s => s.tier === 8);
   const tier9Skins = skins.filter(s => s.tier === 9);
+  const tier10Skins = skins.filter(s => s.tier === 10);
+  const tier11Skins = skins.filter(s => s.tier === 11);
+  const tier12Skins = skins.filter(s => s.tier === 12);
   
   console.log('🎨 Frontend: Tier distribution:', {
     tier1: tier1Skins.length,
@@ -160,6 +163,9 @@ export default function SkinsGallery() {
     tier7: tier7Skins.length,
     tier8: tier8Skins.length,
     tier9: tier9Skins.length,
+    tier10: tier10Skins.length,
+    tier11: tier11Skins.length,
+    tier12: tier12Skins.length,
   });
 
   const renderSkinCard = (skin: Skin) => {
@@ -535,6 +541,75 @@ export default function SkinsGallery() {
           <div className="grid grid-cols-4 gap-2">
             {tier9Skins.length > 0 ? (
               tier9Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 10 - Mecha Robots */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              Mecha Robots
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 10
+                ? t('skins.unlockedUseCards')
+                : "Unlock at 6,300 points"}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier10Skins.length > 0 ? (
+              tier10Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 11 - Manga Heroes */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              Manga Heroes
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 11
+                ? t('skins.unlockedUseCards')
+                : "Unlock at 7,000 points"}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier11Skins.length > 0 ? (
+              tier11Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 12 - Gaming Legends */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              Gaming Legends
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 12
+                ? t('skins.unlockedUseCards')
+                : "Unlock at 7,700 points"}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier12Skins.length > 0 ? (
+              tier12Skins.map(renderSkinCard)
             ) : (
               <p className="col-span-4 text-center text-muted-foreground py-8">
                 {t('skins.noSkinsInTier')}
