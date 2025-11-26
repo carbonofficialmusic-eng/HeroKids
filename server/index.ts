@@ -163,7 +163,7 @@ async function autoSeedSkinsIfNeeded() {
       return;
     }
 
-    log("🌱 Skins table is empty, auto-seeding 72 character skins...");
+    log("🌱 Skins table is empty, auto-seeding 96 character skins...");
 
     const SKIN_DATA = [
       // Tier 1 - Starter Heroes (0-500 points)
