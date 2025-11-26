@@ -78,6 +78,27 @@ export const SKIN_TIERS: SkinTierConfig[] = [
     pointsPerCard: 80,
     skinCount: 8,
   },
+  {
+    tier: 10,
+    name: "Mecha Robots",
+    unlockThreshold: 6300,
+    pointsPerCard: 80,
+    skinCount: 8,
+  },
+  {
+    tier: 11,
+    name: "Manga Heroes",
+    unlockThreshold: 7000,
+    pointsPerCard: 80,
+    skinCount: 8,
+  },
+  {
+    tier: 12,
+    name: "Gaming Legends",
+    unlockThreshold: 7700,
+    pointsPerCard: 80,
+    skinCount: 8,
+  },
 ];
 
 /**
@@ -233,6 +254,36 @@ export const SKIN_IDS_BY_TIER: Record<number, string[]> = {
     "fire-hero",
     "shadow-ninja",
     "shield-hero",
+  ],
+  10: [
+    "titan-mech",
+    "cyber-warrior",
+    "iron-guardian",
+    "plasma-bot",
+    "steel-samurai",
+    "thunder-mech",
+    "neon-droid",
+    "battle-commander",
+  ],
+  11: [
+    "ninja-shadow",
+    "spirit-fox",
+    "dragon-slayer",
+    "magical-girl",
+    "samurai-hero",
+    "elemental-master",
+    "cat-fighter",
+    "school-hero",
+  ],
+  12: [
+    "pro-gamer",
+    "pixel-warrior",
+    "controller-king",
+    "vr-champion",
+    "stream-star",
+    "arcade-master",
+    "console-hero",
+    "level-boss",
   ],
 };
 
