@@ -211,14 +211,35 @@ import volcanicCraterBg from "@assets/generated_images/volcanic_crater_lava_glow
 import shadowDojoBg from "@assets/generated_images/shadow_dojo_ninja_training.png";
 import heroFortressBg from "@assets/generated_images/hero_fortress_gold_shields.png";
 
-// Tier 10 backgrounds - Mecha Robots
-import mechaRobotsBg from "@assets/generated_images/mecha_robots_tech_background.png";
+// Tier 10 backgrounds - Mecha Robots (individual backgrounds)
+import titanMechBg from "@assets/generated_images/titan_mech_hangar_background.png";
+import cyberWarriorBg from "@assets/generated_images/cyber_warrior_city_background.png";
+import ironGuardianBg from "@assets/generated_images/iron_guardian_fortress_background.png";
+import plasmaBotBg from "@assets/generated_images/plasma_bot_lab_background.png";
+import steelSamuraiBg from "@assets/generated_images/steel_samurai_castle_background.png";
+import thunderMechBg from "@assets/generated_images/thunder_mech_storm_background.png";
+import neonDroidBg from "@assets/generated_images/neon_droid_digital_background.png";
+import battleCommanderBg from "@assets/generated_images/battle_commander_center_background.png";
 
-// Tier 11 backgrounds - Manga Heroes
-import mangaHeroesBg from "@assets/generated_images/manga_heroes_anime_background.png";
+// Tier 11 backgrounds - Manga Heroes (individual backgrounds)
+import ninjaShadowBg from "@assets/generated_images/ninja_shadow_village_background.png";
+import spiritFoxBg from "@assets/generated_images/spirit_fox_shrine_background.png";
+import dragonSlayerBg from "@assets/generated_images/dragon_slayer_lair_background.png";
+import magicalGirlBg from "@assets/generated_images/magical_girl_sky_background.png";
+import samuraiHeroBg from "@assets/generated_images/samurai_hero_battlefield_background.png";
+import elementalMasterBg from "@assets/generated_images/elemental_master_chamber_background.png";
+import catFighterBg from "@assets/generated_images/cat_fighter_rooftop_background.png";
+import schoolHeroBg from "@assets/generated_images/school_hero_rooftop_background.png";
 
-// Tier 12 backgrounds - Gaming Legends
-import gamingLegendsBg from "@assets/generated_images/gaming_legends_esports_background.png";
+// Tier 12 backgrounds - Gaming Legends (individual backgrounds)
+import proGamerBg from "@assets/generated_images/pro_gamer_arena_background.png";
+import pixelWarriorBg from "@assets/generated_images/pixel_warrior_retro_background.png";
+import controllerKingBg from "@assets/generated_images/controller_king_throne_background.png";
+import vrChampionBg from "@assets/generated_images/vr_champion_cyberspace_background.png";
+import streamStarBg from "@assets/generated_images/stream_star_studio_background.png";
+import arcadeMasterBg from "@assets/generated_images/arcade_master_retro_background.png";
+import consoleHeroBg from "@assets/generated_images/console_hero_setup_background.png";
+import levelBossBg from "@assets/generated_images/level_boss_throne_background.png";
 
 // Skin image mappings for new HeroKids themed skins
 export const SKIN_IMAGES: Record<string, string> = {
@@ -435,35 +456,35 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "shadow-ninja": shadowDojoBg,
   "shield-hero": heroFortressBg,
   
-  // Tier 10 - Mecha Robots
-  "titan-mech": mechaRobotsBg,
-  "cyber-warrior": mechaRobotsBg,
-  "iron-guardian": mechaRobotsBg,
-  "plasma-bot": mechaRobotsBg,
-  "steel-samurai": mechaRobotsBg,
-  "thunder-mech": mechaRobotsBg,
-  "neon-droid": mechaRobotsBg,
-  "battle-commander": mechaRobotsBg,
+  // Tier 10 - Mecha Robots (individual backgrounds)
+  "titan-mech": titanMechBg,
+  "cyber-warrior": cyberWarriorBg,
+  "iron-guardian": ironGuardianBg,
+  "plasma-bot": plasmaBotBg,
+  "steel-samurai": steelSamuraiBg,
+  "thunder-mech": thunderMechBg,
+  "neon-droid": neonDroidBg,
+  "battle-commander": battleCommanderBg,
   
-  // Tier 11 - Manga Heroes
-  "ninja-shadow": mangaHeroesBg,
-  "spirit-fox": mangaHeroesBg,
-  "dragon-slayer": mangaHeroesBg,
-  "magical-girl": mangaHeroesBg,
-  "samurai-hero": mangaHeroesBg,
-  "elemental-master": mangaHeroesBg,
-  "cat-fighter": mangaHeroesBg,
-  "school-hero": mangaHeroesBg,
+  // Tier 11 - Manga Heroes (individual backgrounds)
+  "ninja-shadow": ninjaShadowBg,
+  "spirit-fox": spiritFoxBg,
+  "dragon-slayer": dragonSlayerBg,
+  "magical-girl": magicalGirlBg,
+  "samurai-hero": samuraiHeroBg,
+  "elemental-master": elementalMasterBg,
+  "cat-fighter": catFighterBg,
+  "school-hero": schoolHeroBg,
   
-  // Tier 12 - Gaming Legends
-  "pro-gamer": gamingLegendsBg,
-  "pixel-warrior": gamingLegendsBg,
-  "controller-king": gamingLegendsBg,
-  "vr-champion": gamingLegendsBg,
-  "stream-star": gamingLegendsBg,
-  "arcade-master": gamingLegendsBg,
-  "console-hero": gamingLegendsBg,
-  "level-boss": gamingLegendsBg,
+  // Tier 12 - Gaming Legends (individual backgrounds)
+  "pro-gamer": proGamerBg,
+  "pixel-warrior": pixelWarriorBg,
+  "controller-king": controllerKingBg,
+  "vr-champion": vrChampionBg,
+  "stream-star": streamStarBg,
+  "arcade-master": arcadeMasterBg,
+  "console-hero": consoleHeroBg,
+  "level-boss": levelBossBg,
 };
 
 // Helper to get avatar URL - respects useCustomAvatar flag to allow custom avatar + skin background
