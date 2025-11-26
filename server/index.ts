@@ -255,31 +255,61 @@ async function autoSeedSkinsIfNeeded() {
       { id: "fire-hero", name: "Fire Hero", description: "Blazing hero in orange flame suit with heat powers!", imageUrl: "🔥", pointsRequired: 4360, bonusPoints: 0 },
       { id: "shadow-ninja", name: "Shadow Ninja", description: "Stealthy ninja hero in black and purple suit!", imageUrl: "🥷", pointsRequired: 4420, bonusPoints: 0 },
       { id: "shield-hero", name: "Shield Hero", description: "Defensive hero in gold armor with energy shields!", imageUrl: "🛡️", pointsRequired: 4500, bonusPoints: 30 },
+      
+      // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points)
+      { id: "titan-mech", name: "Titan Mech", description: "Massive mech warrior with powerful hydraulic arms!", imageUrl: "🤖", pointsRequired: 4560, bonusPoints: 0 },
+      { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 10 },
+      { id: "iron-guardian", name: "Iron Guardian", description: "Heavy armored mech designed for defense and protection!", imageUrl: "🛡️", pointsRequired: 4680, bonusPoints: 0 },
+      { id: "plasma-bot", name: "Plasma Bot", description: "Energy-powered robot with glowing plasma core!", imageUrl: "💫", pointsRequired: 4740, bonusPoints: 0 },
+      { id: "steel-samurai", name: "Steel Samurai", description: "Japanese-inspired mech with katana and honor code!", imageUrl: "⚔️", pointsRequired: 4800, bonusPoints: 15 },
+      { id: "thunder-mech", name: "Thunder Mech", description: "Electric mech channeling lightning through its systems!", imageUrl: "⚡", pointsRequired: 4860, bonusPoints: 0 },
+      { id: "neon-droid", name: "Neon Droid", description: "Colorful robot with vibrant LED displays!", imageUrl: "✨", pointsRequired: 4920, bonusPoints: 0 },
+      { id: "battle-commander", name: "Battle Commander", description: "Elite mech leader coordinating robot squadrons!", imageUrl: "🎖️", pointsRequired: 5000, bonusPoints: 25 },
+      
+      // Tier 11 - Manga Heroes (Unisex collection, 5060-5500 points)
+      { id: "ninja-shadow", name: "Ninja Shadow", description: "Stealthy anime ninja with shadow jutsu techniques!", imageUrl: "🥷", pointsRequired: 5060, bonusPoints: 0 },
+      { id: "spirit-fox", name: "Spirit Fox", description: "Mystical kitsune character with nine glowing tails!", imageUrl: "🦊", pointsRequired: 5120, bonusPoints: 10 },
+      { id: "dragon-slayer", name: "Dragon Slayer", description: "Brave warrior wielding legendary dragon-forged sword!", imageUrl: "🐉", pointsRequired: 5180, bonusPoints: 0 },
+      { id: "magical-girl", name: "Magical Girl", description: "Sparkling magical girl with transformation powers!", imageUrl: "✨", pointsRequired: 5240, bonusPoints: 0 },
+      { id: "samurai-hero", name: "Samurai Hero", description: "Honorable samurai following the code of bushido!", imageUrl: "⚔️", pointsRequired: 5300, bonusPoints: 20 },
+      { id: "elemental-master", name: "Elemental Master", description: "Anime hero controlling fire, water, earth and air!", imageUrl: "🌊", pointsRequired: 5360, bonusPoints: 0 },
+      { id: "cat-fighter", name: "Cat Fighter", description: "Agile catgirl martial artist with lightning reflexes!", imageUrl: "🐱", pointsRequired: 5420, bonusPoints: 0 },
+      { id: "school-hero", name: "School Hero", description: "Ordinary student with extraordinary hidden powers!", imageUrl: "📚", pointsRequired: 5500, bonusPoints: 30 },
+      
+      // Tier 12 - Gaming Legends (Unisex collection, 5560-6000 points)
+      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 0 },
+      { id: "pixel-warrior", name: "Pixel Warrior", description: "Retro 8-bit hero from classic gaming era!", imageUrl: "👾", pointsRequired: 5620, bonusPoints: 10 },
+      { id: "controller-king", name: "Controller King", description: "Master of all gaming consoles and controllers!", imageUrl: "🕹️", pointsRequired: 5680, bonusPoints: 0 },
+      { id: "vr-champion", name: "VR Champion", description: "Virtual reality hero exploring digital worlds!", imageUrl: "🥽", pointsRequired: 5740, bonusPoints: 0 },
+      { id: "stream-star", name: "Stream Star", description: "Popular streamer bringing joy to millions!", imageUrl: "📺", pointsRequired: 5800, bonusPoints: 20 },
+      { id: "arcade-master", name: "Arcade Master", description: "Champion of classic arcade games with high scores!", imageUrl: "🕹️", pointsRequired: 5860, bonusPoints: 0 },
+      { id: "console-hero", name: "Console Hero", description: "Ultimate gaming hero with legendary achievements!", imageUrl: "🎮", pointsRequired: 5920, bonusPoints: 0 },
+      { id: "level-boss", name: "Level Boss", description: "Final boss character with epic powers and style!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 30 },
     ];
 
     await db.insert(skins).values(SKIN_DATA);
 
-    log(`✅ Successfully auto-seeded ${SKIN_DATA.length} character skins! (9 collections × 8 skins)`);
+    log(`✅ Successfully auto-seeded ${SKIN_DATA.length} character skins! (12 collections × 8 skins)`);
   } catch (error) {
     console.error("❌ Error auto-seeding skins:", error);
   }
 }
 
-// Force reseed all skins if new Vampire Adventure skins don't exist
+// Force reseed all skins if new skin collections don't exist
 // This is a one-time migration that will run on next app start (both dev and production)
 async function forceReseedSkinsIfNeeded() {
   try {
-    // Check if new Vampire Adventure skins exist
-    const vampireSkin = await db.select().from(skins).where(
-      sql`${skins.id} = 'classic-vampire'`
+    // Check if new Tier 10-12 skins exist (Mecha Robots, Manga Heroes, Gaming Legends)
+    const newSkins = await db.select().from(skins).where(
+      sql`${skins.id} = 'titan-mech'`
     );
 
-    if (vampireSkin.length > 0) {
-      log("✅ Skins are up-to-date (Vampire Adventure detected)");
+    if (newSkins.length > 0) {
+      log("✅ Skins are up-to-date (Tier 10-12 detected)");
       return;
     }
 
-    log("🔄 Vampire Adventure skins not found - force reseeding all 72 skins...");
+    log("🔄 New skin collections not found - force reseeding all 96 skins...");
     
     // Delete ALL existing skins (this is safe because we're reseeding immediately)
     await db.delete(skins);
@@ -377,11 +407,41 @@ async function forceReseedSkinsIfNeeded() {
       { id: "fire-hero", name: "Fire Hero", description: "Blazing hero in orange flame suit with heat powers!", imageUrl: "🔥", pointsRequired: 4360, bonusPoints: 0 },
       { id: "shadow-ninja", name: "Shadow Ninja", description: "Stealthy ninja hero in black and purple suit!", imageUrl: "🥷", pointsRequired: 4420, bonusPoints: 0 },
       { id: "shield-hero", name: "Shield Hero", description: "Defensive hero in gold armor with energy shields!", imageUrl: "🛡️", pointsRequired: 4500, bonusPoints: 30 },
+      
+      // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points)
+      { id: "titan-mech", name: "Titan Mech", description: "Massive mech warrior with powerful hydraulic arms!", imageUrl: "🤖", pointsRequired: 4560, bonusPoints: 0 },
+      { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 10 },
+      { id: "iron-guardian", name: "Iron Guardian", description: "Heavy armored mech designed for defense and protection!", imageUrl: "🛡️", pointsRequired: 4680, bonusPoints: 0 },
+      { id: "plasma-bot", name: "Plasma Bot", description: "Energy-powered robot with glowing plasma core!", imageUrl: "💫", pointsRequired: 4740, bonusPoints: 0 },
+      { id: "steel-samurai", name: "Steel Samurai", description: "Japanese-inspired mech with katana and honor code!", imageUrl: "⚔️", pointsRequired: 4800, bonusPoints: 15 },
+      { id: "thunder-mech", name: "Thunder Mech", description: "Electric mech channeling lightning through its systems!", imageUrl: "⚡", pointsRequired: 4860, bonusPoints: 0 },
+      { id: "neon-droid", name: "Neon Droid", description: "Colorful robot with vibrant LED displays!", imageUrl: "✨", pointsRequired: 4920, bonusPoints: 0 },
+      { id: "battle-commander", name: "Battle Commander", description: "Elite mech leader coordinating robot squadrons!", imageUrl: "🎖️", pointsRequired: 5000, bonusPoints: 25 },
+      
+      // Tier 11 - Manga Heroes (Unisex collection, 5060-5500 points)
+      { id: "ninja-shadow", name: "Ninja Shadow", description: "Stealthy anime ninja with shadow jutsu techniques!", imageUrl: "🥷", pointsRequired: 5060, bonusPoints: 0 },
+      { id: "spirit-fox", name: "Spirit Fox", description: "Mystical kitsune character with nine glowing tails!", imageUrl: "🦊", pointsRequired: 5120, bonusPoints: 10 },
+      { id: "dragon-slayer", name: "Dragon Slayer", description: "Brave warrior wielding legendary dragon-forged sword!", imageUrl: "🐉", pointsRequired: 5180, bonusPoints: 0 },
+      { id: "magical-girl", name: "Magical Girl", description: "Sparkling magical girl with transformation powers!", imageUrl: "✨", pointsRequired: 5240, bonusPoints: 0 },
+      { id: "samurai-hero", name: "Samurai Hero", description: "Honorable samurai following the code of bushido!", imageUrl: "⚔️", pointsRequired: 5300, bonusPoints: 20 },
+      { id: "elemental-master", name: "Elemental Master", description: "Anime hero controlling fire, water, earth and air!", imageUrl: "🌊", pointsRequired: 5360, bonusPoints: 0 },
+      { id: "cat-fighter", name: "Cat Fighter", description: "Agile catgirl martial artist with lightning reflexes!", imageUrl: "🐱", pointsRequired: 5420, bonusPoints: 0 },
+      { id: "school-hero", name: "School Hero", description: "Ordinary student with extraordinary hidden powers!", imageUrl: "📚", pointsRequired: 5500, bonusPoints: 30 },
+      
+      // Tier 12 - Gaming Legends (Unisex collection, 5560-6000 points)
+      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 0 },
+      { id: "pixel-warrior", name: "Pixel Warrior", description: "Retro 8-bit hero from classic gaming era!", imageUrl: "👾", pointsRequired: 5620, bonusPoints: 10 },
+      { id: "controller-king", name: "Controller King", description: "Master of all gaming consoles and controllers!", imageUrl: "🕹️", pointsRequired: 5680, bonusPoints: 0 },
+      { id: "vr-champion", name: "VR Champion", description: "Virtual reality hero exploring digital worlds!", imageUrl: "🥽", pointsRequired: 5740, bonusPoints: 0 },
+      { id: "stream-star", name: "Stream Star", description: "Popular streamer bringing joy to millions!", imageUrl: "📺", pointsRequired: 5800, bonusPoints: 20 },
+      { id: "arcade-master", name: "Arcade Master", description: "Champion of classic arcade games with high scores!", imageUrl: "🕹️", pointsRequired: 5860, bonusPoints: 0 },
+      { id: "console-hero", name: "Console Hero", description: "Ultimate gaming hero with legendary achievements!", imageUrl: "🎮", pointsRequired: 5920, bonusPoints: 0 },
+      { id: "level-boss", name: "Level Boss", description: "Final boss character with epic powers and style!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 30 },
     ];
 
     await db.insert(skins).values(SKIN_DATA);
 
-    log(`✅ Force reseeded all ${SKIN_DATA.length} character skins! (9 collections × 8 skins)`);
+    log(`✅ Force reseeded all ${SKIN_DATA.length} character skins! (12 collections × 8 skins)`);
   } catch (error) {
     console.error("❌ Error force reseeding skins:", error);
   }
