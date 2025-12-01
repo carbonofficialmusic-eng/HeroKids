@@ -196,89 +196,89 @@ async function autoSeedSkinsIfNeeded() {
       { id: "ankylosaurus", name: "Ankylosaurus", description: "Armored tank with a devastating club tail!", imageUrl: "🦴", pointsRequired: 1420, bonusPoints: 0 },
       { id: "allosaurus", name: "Allosaurus", description: "Apex predator of the Jurassic period!", imageUrl: "🦖", pointsRequired: 1500, bonusPoints: 0 },
       
-      // Tier 4 - Magical Princess World (Girls collection, 1560-2000 points)
-      { id: "princess-tiara", name: "Princess with Tiara", description: "Classic princess with magical tiara and sparkling gown!", imageUrl: "👑", pointsRequired: 1560, bonusPoints: 0 },
-      { id: "purple-princess", name: "Purple Princess", description: "Royal princess in glittering purple ballgown with mystical powers!", imageUrl: "💜", pointsRequired: 1620, bonusPoints: 10 },
+      // Tier 4 - Magical Princess World (Girls collection, 1560-2000 points) - Bonus Slots: 1, 4, 7
+      { id: "princess-tiara", name: "Princess with Tiara", description: "Classic princess with magical tiara and sparkling gown!", imageUrl: "👑", pointsRequired: 1560, bonusPoints: 10 },
+      { id: "purple-princess", name: "Purple Princess", description: "Royal princess in glittering purple ballgown with mystical powers!", imageUrl: "💜", pointsRequired: 1620, bonusPoints: 0 },
       { id: "ice-princess", name: "Ice Princess", description: "Frozen beauty with snowflake powers and icy elegance!", imageUrl: "❄️", pointsRequired: 1680, bonusPoints: 0 },
-      { id: "rainbow-princess", name: "Rainbow Princess", description: "Magical princess surrounded by colorful stars and rainbows!", imageUrl: "🌈", pointsRequired: 1740, bonusPoints: 0 },
-      { id: "nature-princess", name: "Nature Princess", description: "Green guardian princess who speaks to flowers and animals!", imageUrl: "🌸", pointsRequired: 1800, bonusPoints: 15 },
+      { id: "rainbow-princess", name: "Rainbow Princess", description: "Magical princess surrounded by colorful stars and rainbows!", imageUrl: "🌈", pointsRequired: 1740, bonusPoints: 15 },
+      { id: "nature-princess", name: "Nature Princess", description: "Green guardian princess who speaks to flowers and animals!", imageUrl: "🌸", pointsRequired: 1800, bonusPoints: 0 },
       { id: "sun-princess", name: "Sun Princess", description: "Golden princess radiating warmth and sunshine energy!", imageUrl: "☀️", pointsRequired: 1860, bonusPoints: 0 },
-      { id: "ocean-princess", name: "Ocean Princess", description: "Coral princess ruling the underwater kingdoms!", imageUrl: "🐚", pointsRequired: 1920, bonusPoints: 0 },
-      { id: "fairy-princess", name: "Fairy Princess", description: "Mystical fairy princess with butterfly wings and magic dust!", imageUrl: "🧚", pointsRequired: 2000, bonusPoints: 25 },
+      { id: "ocean-princess", name: "Ocean Princess", description: "Coral princess ruling the underwater kingdoms!", imageUrl: "🐚", pointsRequired: 1920, bonusPoints: 25 },
+      { id: "fairy-princess", name: "Fairy Princess", description: "Mystical fairy princess with butterfly wings and magic dust!", imageUrl: "🧚", pointsRequired: 2000, bonusPoints: 0 },
       
-      // Tier 5 - Space Explorers (Boys collection, 2060-2500 points)
+      // Tier 5 - Space Explorers (Boys collection, 2060-2500 points) - Bonus Slots: 3, 6, 8
       { id: "astronaut-kid", name: "Astronaut Kid", description: "Young space explorer in white spacesuit ready for adventure!", imageUrl: "🚀", pointsRequired: 2060, bonusPoints: 0 },
-      { id: "space-cadet-blue", name: "Space Cadet", description: "Blue-suited cadet training for space missions!", imageUrl: "👨‍🚀", pointsRequired: 2120, bonusPoints: 10 },
-      { id: "green-alien", name: "Friendly Alien", description: "Green alien explorer from a distant galaxy!", imageUrl: "👽", pointsRequired: 2180, bonusPoints: 0 },
+      { id: "space-cadet-blue", name: "Space Cadet", description: "Blue-suited cadet training for space missions!", imageUrl: "👨‍🚀", pointsRequired: 2120, bonusPoints: 0 },
+      { id: "green-alien", name: "Friendly Alien", description: "Green alien explorer from a distant galaxy!", imageUrl: "👽", pointsRequired: 2180, bonusPoints: 10 },
       { id: "rocket-pilot", name: "Rocket Pilot", description: "Red and yellow suited pilot commanding starships!", imageUrl: "🛸", pointsRequired: 2240, bonusPoints: 0 },
-      { id: "moon-walker", name: "Moon Walker", description: "Lunar explorer walking on the moon's surface!", imageUrl: "🌙", pointsRequired: 2300, bonusPoints: 20 },
-      { id: "galaxy-scout", name: "Galaxy Scout", description: "Purple-suited scout exploring cosmic mysteries!", imageUrl: "🌌", pointsRequired: 2360, bonusPoints: 0 },
+      { id: "moon-walker", name: "Moon Walker", description: "Lunar explorer walking on the moon's surface!", imageUrl: "🌙", pointsRequired: 2300, bonusPoints: 0 },
+      { id: "galaxy-scout", name: "Galaxy Scout", description: "Purple-suited scout exploring cosmic mysteries!", imageUrl: "🌌", pointsRequired: 2360, bonusPoints: 20 },
       { id: "robot-astronaut", name: "Robot Astronaut", description: "Friendly robot exploring space with metal determination!", imageUrl: "🤖", pointsRequired: 2420, bonusPoints: 0 },
       { id: "star-captain", name: "Star Captain", description: "Gold-suited captain commanding the space fleet!", imageUrl: "⭐", pointsRequired: 2500, bonusPoints: 30 },
       
-      // Tier 6 - Cute Animals (Girls collection, 2560-3000 points)
-      { id: "cat-girl", name: "Cat Girl", description: "Adorable kitty character in pink hoodie with cat ears!", imageUrl: "🐱", pointsRequired: 2560, bonusPoints: 0 },
-      { id: "bunny-girl", name: "Bunny Girl", description: "Sweet bunny character in lavender dress with floppy ears!", imageUrl: "🐰", pointsRequired: 2620, bonusPoints: 10 },
+      // Tier 6 - Cute Animals (Girls collection, 2560-3000 points) - Bonus Slots: 1, 4, 6
+      { id: "cat-girl", name: "Cat Girl", description: "Adorable kitty character in pink hoodie with cat ears!", imageUrl: "🐱", pointsRequired: 2560, bonusPoints: 10 },
+      { id: "bunny-girl", name: "Bunny Girl", description: "Sweet bunny character in lavender dress with floppy ears!", imageUrl: "🐰", pointsRequired: 2620, bonusPoints: 0 },
       { id: "fox-girl", name: "Fox Girl", description: "Clever fox character in orange outfit with fluffy tail!", imageUrl: "🦊", pointsRequired: 2680, bonusPoints: 0 },
-      { id: "puppy-girl", name: "Puppy Girl", description: "Playful puppy character in brown hoodie, always wagging!", imageUrl: "🐶", pointsRequired: 2740, bonusPoints: 0 },
-      { id: "panda-girl", name: "Panda Girl", description: "Cuddly panda character in black and white with bamboo!", imageUrl: "🐼", pointsRequired: 2800, bonusPoints: 15 },
-      { id: "deer-girl", name: "Deer Girl", description: "Gentle deer character with adorable antlers and spots!", imageUrl: "🦌", pointsRequired: 2860, bonusPoints: 0 },
+      { id: "puppy-girl", name: "Puppy Girl", description: "Playful puppy character in brown hoodie, always wagging!", imageUrl: "🐶", pointsRequired: 2740, bonusPoints: 15 },
+      { id: "panda-girl", name: "Panda Girl", description: "Cuddly panda character in black and white with bamboo!", imageUrl: "🐼", pointsRequired: 2800, bonusPoints: 0 },
+      { id: "deer-girl", name: "Deer Girl", description: "Gentle deer character with adorable antlers and spots!", imageUrl: "🦌", pointsRequired: 2860, bonusPoints: 25 },
       { id: "raccoon-girl", name: "Raccoon Girl", description: "Mischievous raccoon character in gray hoodie with mask!", imageUrl: "🦝", pointsRequired: 2920, bonusPoints: 0 },
-      { id: "squirrel-girl", name: "Squirrel Girl", description: "Energetic squirrel character collecting acorns and treasures!", imageUrl: "🐿️", pointsRequired: 3000, bonusPoints: 25 },
+      { id: "squirrel-girl", name: "Squirrel Girl", description: "Energetic squirrel character collecting acorns and treasures!", imageUrl: "🐿️", pointsRequired: 3000, bonusPoints: 0 },
       
-      // Tier 7 - Vampire Adventure (Boys collection, 3060-3500 points)
+      // Tier 7 - Vampire Adventure (Boys collection, 3060-3500 points) - Bonus Slots: 2, 4, 7
       { id: "classic-vampire", name: "Classic Vampire", description: "Traditional vampire with elegant black cape and friendly fangs!", imageUrl: "🧛", pointsRequired: 3060, bonusPoints: 0 },
       { id: "bat-boy", name: "Bat Boy", description: "Vampire boy with small bat wings and purple vest!", imageUrl: "🦇", pointsRequired: 3120, bonusPoints: 10 },
       { id: "moonlight-vampire", name: "Moonlight Vampire", description: "Silver-haired vampire glowing with mystical moonlight!", imageUrl: "🌙", pointsRequired: 3180, bonusPoints: 0 },
-      { id: "gothic-vampire", name: "Gothic Vampire", description: "Edgy vampire in dark purple and black with silver chains!", imageUrl: "🖤", pointsRequired: 3240, bonusPoints: 0 },
-      { id: "shadow-vampire", name: "Shadow Vampire", description: "Mysterious vampire with shadow powers and glowing red eyes!", imageUrl: "👤", pointsRequired: 3300, bonusPoints: 20 },
+      { id: "gothic-vampire", name: "Gothic Vampire", description: "Edgy vampire in dark purple and black with silver chains!", imageUrl: "🖤", pointsRequired: 3240, bonusPoints: 15 },
+      { id: "shadow-vampire", name: "Shadow Vampire", description: "Mysterious vampire with shadow powers and glowing red eyes!", imageUrl: "👤", pointsRequired: 3300, bonusPoints: 0 },
       { id: "night-hunter", name: "Night Hunter", description: "Brave vampire hunter boy with wooden cross and courage!", imageUrl: "🗡️", pointsRequired: 3360, bonusPoints: 0 },
-      { id: "blood-moon-vampire", name: "Blood Moon Vampire", description: "Dramatic vampire under blood moon influence with crimson power!", imageUrl: "🌕", pointsRequired: 3420, bonusPoints: 0 },
-      { id: "vampire-prince", name: "Vampire Prince", description: "Royal vampire prince in elegant black and gold with small crown!", imageUrl: "👑", pointsRequired: 3500, bonusPoints: 30 },
+      { id: "blood-moon-vampire", name: "Blood Moon Vampire", description: "Dramatic vampire under blood moon influence with crimson power!", imageUrl: "🌕", pointsRequired: 3420, bonusPoints: 30 },
+      { id: "vampire-prince", name: "Vampire Prince", description: "Royal vampire prince in elegant black and gold with small crown!", imageUrl: "👑", pointsRequired: 3500, bonusPoints: 0 },
       
-      // Tier 8 - Ballerina Dreams (Girls collection, 3560-4000 points)
+      // Tier 8 - Ballerina Dreams (Girls collection, 3560-4000 points) - Bonus Slots: 3, 5, 8
       { id: "ballerina-pink", name: "Pink Ballerina", description: "Classic ballerina in pink tutu with sparkling grace!", imageUrl: "🩰", pointsRequired: 3560, bonusPoints: 0 },
-      { id: "swan-ballerina", name: "Swan Ballerina", description: "Elegant swan lake ballerina in white feather tutu!", imageUrl: "🦢", pointsRequired: 3620, bonusPoints: 10 },
-      { id: "purple-ballerina", name: "Purple Ballerina", description: "Royal ballerina in lavender tutu with flower crown!", imageUrl: "💜", pointsRequired: 3680, bonusPoints: 0 },
+      { id: "swan-ballerina", name: "Swan Ballerina", description: "Elegant swan lake ballerina in white feather tutu!", imageUrl: "🦢", pointsRequired: 3620, bonusPoints: 0 },
+      { id: "purple-ballerina", name: "Purple Ballerina", description: "Royal ballerina in lavender tutu with flower crown!", imageUrl: "💜", pointsRequired: 3680, bonusPoints: 10 },
       { id: "blue-ballerina", name: "Ocean Ballerina", description: "Aqua ballerina dancing with ocean wave patterns!", imageUrl: "💙", pointsRequired: 3740, bonusPoints: 0 },
       { id: "golden-ballerina", name: "Golden Ballerina", description: "Radiant ballerina in golden tutu with star sequins!", imageUrl: "⭐", pointsRequired: 3800, bonusPoints: 15 },
       { id: "peach-ballerina", name: "Rose Ballerina", description: "Romantic ballerina in peach tutu with rose details!", imageUrl: "🌹", pointsRequired: 3860, bonusPoints: 0 },
       { id: "mint-ballerina", name: "Garden Ballerina", description: "Nature ballerina in mint green tutu with leaf patterns!", imageUrl: "🌿", pointsRequired: 3920, bonusPoints: 0 },
       { id: "rainbow-ballerina", name: "Rainbow Ballerina", description: "Magical ballerina in rainbow tutu spreading joy!", imageUrl: "🌈", pointsRequired: 4000, bonusPoints: 25 },
       
-      // Tier 9 - Superhero Squad (Boys collection, 4060-4500 points)
-      { id: "classic-superhero", name: "Classic Hero", description: "Iconic superhero in red and blue suit with star emblem!", imageUrl: "🦸", pointsRequired: 4060, bonusPoints: 0 },
-      { id: "lightning-speedster", name: "Lightning Speedster", description: "Super-fast hero in yellow suit with electric powers!", imageUrl: "⚡", pointsRequired: 4120, bonusPoints: 10 },
-      { id: "tech-hero", name: "Tech Hero", description: "High-tech hero in purple armor with advanced gadgets!", imageUrl: "🤖", pointsRequired: 4180, bonusPoints: 0 },
+      // Tier 9 - Superhero Squad (Boys collection, 4060-4500 points) - Bonus Slots: 1, 3, 7
+      { id: "classic-superhero", name: "Classic Hero", description: "Iconic superhero in red and blue suit with star emblem!", imageUrl: "🦸", pointsRequired: 4060, bonusPoints: 10 },
+      { id: "lightning-speedster", name: "Lightning Speedster", description: "Super-fast hero in yellow suit with electric powers!", imageUrl: "⚡", pointsRequired: 4120, bonusPoints: 0 },
+      { id: "tech-hero", name: "Tech Hero", description: "High-tech hero in purple armor with advanced gadgets!", imageUrl: "🤖", pointsRequired: 4180, bonusPoints: 15 },
       { id: "nature-guardian", name: "Nature Guardian", description: "Eco-hero in green suit protecting the environment!", imageUrl: "🌿", pointsRequired: 4240, bonusPoints: 0 },
-      { id: "ice-hero", name: "Ice Hero", description: "Cool hero in blue frost suit with ice powers!", imageUrl: "❄️", pointsRequired: 4300, bonusPoints: 20 },
+      { id: "ice-hero", name: "Ice Hero", description: "Cool hero in blue frost suit with ice powers!", imageUrl: "❄️", pointsRequired: 4300, bonusPoints: 0 },
       { id: "fire-hero", name: "Fire Hero", description: "Blazing hero in orange flame suit with heat powers!", imageUrl: "🔥", pointsRequired: 4360, bonusPoints: 0 },
-      { id: "shadow-ninja", name: "Shadow Ninja", description: "Stealthy ninja hero in black and purple suit!", imageUrl: "🥷", pointsRequired: 4420, bonusPoints: 0 },
-      { id: "shield-hero", name: "Shield Hero", description: "Defensive hero in gold armor with energy shields!", imageUrl: "🛡️", pointsRequired: 4500, bonusPoints: 30 },
+      { id: "shadow-ninja", name: "Shadow Ninja", description: "Stealthy ninja hero in black and purple suit!", imageUrl: "🥷", pointsRequired: 4420, bonusPoints: 30 },
+      { id: "shield-hero", name: "Shield Hero", description: "Defensive hero in gold armor with energy shields!", imageUrl: "🛡️", pointsRequired: 4500, bonusPoints: 0 },
       
-      // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points)
+      // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points) - Bonus Slots: 2, 6, 8
       { id: "titan-mech", name: "Titan Mech", description: "Massive mech warrior with powerful hydraulic arms!", imageUrl: "🤖", pointsRequired: 4560, bonusPoints: 0 },
       { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 10 },
       { id: "iron-guardian", name: "Iron Guardian", description: "Heavy armored mech designed for defense and protection!", imageUrl: "🛡️", pointsRequired: 4680, bonusPoints: 0 },
       { id: "plasma-bot", name: "Plasma Bot", description: "Energy-powered robot with glowing plasma core!", imageUrl: "💫", pointsRequired: 4740, bonusPoints: 0 },
-      { id: "steel-samurai", name: "Steel Samurai", description: "Japanese-inspired mech with katana and honor code!", imageUrl: "⚔️", pointsRequired: 4800, bonusPoints: 15 },
-      { id: "thunder-mech", name: "Thunder Mech", description: "Electric mech channeling lightning through its systems!", imageUrl: "⚡", pointsRequired: 4860, bonusPoints: 0 },
+      { id: "steel-samurai", name: "Steel Samurai", description: "Japanese-inspired mech with katana and honor code!", imageUrl: "⚔️", pointsRequired: 4800, bonusPoints: 0 },
+      { id: "thunder-mech", name: "Thunder Mech", description: "Electric mech channeling lightning through its systems!", imageUrl: "⚡", pointsRequired: 4860, bonusPoints: 20 },
       { id: "neon-droid", name: "Neon Droid", description: "Colorful robot with vibrant LED displays!", imageUrl: "✨", pointsRequired: 4920, bonusPoints: 0 },
       { id: "battle-commander", name: "Battle Commander", description: "Elite mech leader coordinating robot squadrons!", imageUrl: "🎖️", pointsRequired: 5000, bonusPoints: 25 },
       
-      // Tier 11 - Manga Heroes (Unisex collection, 5060-5500 points)
+      // Tier 11 - Manga Heroes (Unisex collection, 5060-5500 points) - Bonus Slots: 4, 5, 7
       { id: "ninja-shadow", name: "Ninja Shadow", description: "Stealthy anime ninja with shadow jutsu techniques!", imageUrl: "🥷", pointsRequired: 5060, bonusPoints: 0 },
-      { id: "spirit-fox", name: "Spirit Fox", description: "Mystical kitsune character with nine glowing tails!", imageUrl: "🦊", pointsRequired: 5120, bonusPoints: 10 },
+      { id: "spirit-fox", name: "Spirit Fox", description: "Mystical kitsune character with nine glowing tails!", imageUrl: "🦊", pointsRequired: 5120, bonusPoints: 0 },
       { id: "dragon-slayer", name: "Dragon Slayer", description: "Brave warrior wielding legendary dragon-forged sword!", imageUrl: "🐉", pointsRequired: 5180, bonusPoints: 0 },
-      { id: "magical-girl", name: "Magical Girl", description: "Sparkling magical girl with transformation powers!", imageUrl: "✨", pointsRequired: 5240, bonusPoints: 0 },
+      { id: "magical-girl", name: "Magical Girl", description: "Sparkling magical girl with transformation powers!", imageUrl: "✨", pointsRequired: 5240, bonusPoints: 10 },
       { id: "samurai-hero", name: "Samurai Hero", description: "Honorable samurai following the code of bushido!", imageUrl: "⚔️", pointsRequired: 5300, bonusPoints: 20 },
       { id: "elemental-master", name: "Elemental Master", description: "Anime hero controlling fire, water, earth and air!", imageUrl: "🌊", pointsRequired: 5360, bonusPoints: 0 },
-      { id: "cat-fighter", name: "Cat Fighter", description: "Agile catgirl martial artist with lightning reflexes!", imageUrl: "🐱", pointsRequired: 5420, bonusPoints: 0 },
-      { id: "school-hero", name: "School Hero", description: "Ordinary student with extraordinary hidden powers!", imageUrl: "📚", pointsRequired: 5500, bonusPoints: 30 },
+      { id: "cat-fighter", name: "Cat Fighter", description: "Agile catgirl martial artist with lightning reflexes!", imageUrl: "🐱", pointsRequired: 5420, bonusPoints: 30 },
+      { id: "school-hero", name: "School Hero", description: "Ordinary student with extraordinary hidden powers!", imageUrl: "📚", pointsRequired: 5500, bonusPoints: 0 },
       
-      // Tier 12 - Gaming Legends (Unisex collection, 5560-6000 points)
-      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 0 },
-      { id: "pixel-warrior", name: "Pixel Warrior", description: "Retro 8-bit hero from classic gaming era!", imageUrl: "👾", pointsRequired: 5620, bonusPoints: 10 },
+      // Tier 12 - Gaming Legends (Unisex collection, 5560-6000 points) - Bonus Slots: 1, 5, 8
+      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 10 },
+      { id: "pixel-warrior", name: "Pixel Warrior", description: "Retro 8-bit hero from classic gaming era!", imageUrl: "👾", pointsRequired: 5620, bonusPoints: 0 },
       { id: "controller-king", name: "Controller King", description: "Master of all gaming consoles and controllers!", imageUrl: "🕹️", pointsRequired: 5680, bonusPoints: 0 },
       { id: "vr-champion", name: "VR Champion", description: "Virtual reality hero exploring digital worlds!", imageUrl: "🥽", pointsRequired: 5740, bonusPoints: 0 },
       { id: "stream-star", name: "Stream Star", description: "Popular streamer bringing joy to millions!", imageUrl: "📺", pointsRequired: 5800, bonusPoints: 20 },
@@ -348,89 +348,89 @@ async function forceReseedSkinsIfNeeded() {
       { id: "ankylosaurus", name: "Ankylosaurus", description: "Armored tank with a devastating club tail!", imageUrl: "🦴", pointsRequired: 1420, bonusPoints: 0 },
       { id: "allosaurus", name: "Allosaurus", description: "Apex predator of the Jurassic period!", imageUrl: "🦖", pointsRequired: 1500, bonusPoints: 0 },
       
-      // Tier 4 - Magical Princess World (Girls collection, 1560-2000 points)
-      { id: "princess-tiara", name: "Princess with Tiara", description: "Classic princess with magical tiara and sparkling gown!", imageUrl: "👑", pointsRequired: 1560, bonusPoints: 0 },
-      { id: "purple-princess", name: "Purple Princess", description: "Royal princess in glittering purple ballgown with mystical powers!", imageUrl: "💜", pointsRequired: 1620, bonusPoints: 10 },
+      // Tier 4 - Magical Princess World (Girls collection, 1560-2000 points) - Bonus Slots: 1, 4, 7
+      { id: "princess-tiara", name: "Princess with Tiara", description: "Classic princess with magical tiara and sparkling gown!", imageUrl: "👑", pointsRequired: 1560, bonusPoints: 10 },
+      { id: "purple-princess", name: "Purple Princess", description: "Royal princess in glittering purple ballgown with mystical powers!", imageUrl: "💜", pointsRequired: 1620, bonusPoints: 0 },
       { id: "ice-princess", name: "Ice Princess", description: "Frozen beauty with snowflake powers and icy elegance!", imageUrl: "❄️", pointsRequired: 1680, bonusPoints: 0 },
-      { id: "rainbow-princess", name: "Rainbow Princess", description: "Magical princess surrounded by colorful stars and rainbows!", imageUrl: "🌈", pointsRequired: 1740, bonusPoints: 0 },
-      { id: "nature-princess", name: "Nature Princess", description: "Green guardian princess who speaks to flowers and animals!", imageUrl: "🌸", pointsRequired: 1800, bonusPoints: 15 },
+      { id: "rainbow-princess", name: "Rainbow Princess", description: "Magical princess surrounded by colorful stars and rainbows!", imageUrl: "🌈", pointsRequired: 1740, bonusPoints: 15 },
+      { id: "nature-princess", name: "Nature Princess", description: "Green guardian princess who speaks to flowers and animals!", imageUrl: "🌸", pointsRequired: 1800, bonusPoints: 0 },
       { id: "sun-princess", name: "Sun Princess", description: "Golden princess radiating warmth and sunshine energy!", imageUrl: "☀️", pointsRequired: 1860, bonusPoints: 0 },
-      { id: "ocean-princess", name: "Ocean Princess", description: "Coral princess ruling the underwater kingdoms!", imageUrl: "🐚", pointsRequired: 1920, bonusPoints: 0 },
-      { id: "fairy-princess", name: "Fairy Princess", description: "Mystical fairy princess with butterfly wings and magic dust!", imageUrl: "🧚", pointsRequired: 2000, bonusPoints: 25 },
+      { id: "ocean-princess", name: "Ocean Princess", description: "Coral princess ruling the underwater kingdoms!", imageUrl: "🐚", pointsRequired: 1920, bonusPoints: 25 },
+      { id: "fairy-princess", name: "Fairy Princess", description: "Mystical fairy princess with butterfly wings and magic dust!", imageUrl: "🧚", pointsRequired: 2000, bonusPoints: 0 },
       
-      // Tier 5 - Space Explorers (Boys collection, 2060-2500 points)
+      // Tier 5 - Space Explorers (Boys collection, 2060-2500 points) - Bonus Slots: 3, 6, 8
       { id: "astronaut-kid", name: "Astronaut Kid", description: "Young space explorer in white spacesuit ready for adventure!", imageUrl: "🚀", pointsRequired: 2060, bonusPoints: 0 },
-      { id: "space-cadet-blue", name: "Space Cadet", description: "Blue-suited cadet training for space missions!", imageUrl: "👨‍🚀", pointsRequired: 2120, bonusPoints: 10 },
-      { id: "green-alien", name: "Friendly Alien", description: "Green alien explorer from a distant galaxy!", imageUrl: "👽", pointsRequired: 2180, bonusPoints: 0 },
+      { id: "space-cadet-blue", name: "Space Cadet", description: "Blue-suited cadet training for space missions!", imageUrl: "👨‍🚀", pointsRequired: 2120, bonusPoints: 0 },
+      { id: "green-alien", name: "Friendly Alien", description: "Green alien explorer from a distant galaxy!", imageUrl: "👽", pointsRequired: 2180, bonusPoints: 10 },
       { id: "rocket-pilot", name: "Rocket Pilot", description: "Red and yellow suited pilot commanding starships!", imageUrl: "🛸", pointsRequired: 2240, bonusPoints: 0 },
-      { id: "moon-walker", name: "Moon Walker", description: "Lunar explorer walking on the moon's surface!", imageUrl: "🌙", pointsRequired: 2300, bonusPoints: 20 },
-      { id: "galaxy-scout", name: "Galaxy Scout", description: "Purple-suited scout exploring cosmic mysteries!", imageUrl: "🌌", pointsRequired: 2360, bonusPoints: 0 },
+      { id: "moon-walker", name: "Moon Walker", description: "Lunar explorer walking on the moon's surface!", imageUrl: "🌙", pointsRequired: 2300, bonusPoints: 0 },
+      { id: "galaxy-scout", name: "Galaxy Scout", description: "Purple-suited scout exploring cosmic mysteries!", imageUrl: "🌌", pointsRequired: 2360, bonusPoints: 20 },
       { id: "robot-astronaut", name: "Robot Astronaut", description: "Friendly robot exploring space with metal determination!", imageUrl: "🤖", pointsRequired: 2420, bonusPoints: 0 },
       { id: "star-captain", name: "Star Captain", description: "Gold-suited captain commanding the space fleet!", imageUrl: "⭐", pointsRequired: 2500, bonusPoints: 30 },
       
-      // Tier 6 - Cute Animals (Girls collection, 2560-3000 points)
-      { id: "cat-girl", name: "Cat Girl", description: "Adorable kitty character in pink hoodie with cat ears!", imageUrl: "🐱", pointsRequired: 2560, bonusPoints: 0 },
-      { id: "bunny-girl", name: "Bunny Girl", description: "Sweet bunny character in lavender dress with floppy ears!", imageUrl: "🐰", pointsRequired: 2620, bonusPoints: 10 },
+      // Tier 6 - Cute Animals (Girls collection, 2560-3000 points) - Bonus Slots: 1, 4, 6
+      { id: "cat-girl", name: "Cat Girl", description: "Adorable kitty character in pink hoodie with cat ears!", imageUrl: "🐱", pointsRequired: 2560, bonusPoints: 10 },
+      { id: "bunny-girl", name: "Bunny Girl", description: "Sweet bunny character in lavender dress with floppy ears!", imageUrl: "🐰", pointsRequired: 2620, bonusPoints: 0 },
       { id: "fox-girl", name: "Fox Girl", description: "Clever fox character in orange outfit with fluffy tail!", imageUrl: "🦊", pointsRequired: 2680, bonusPoints: 0 },
-      { id: "puppy-girl", name: "Puppy Girl", description: "Playful puppy character in brown hoodie, always wagging!", imageUrl: "🐶", pointsRequired: 2740, bonusPoints: 0 },
-      { id: "panda-girl", name: "Panda Girl", description: "Cuddly panda character in black and white with bamboo!", imageUrl: "🐼", pointsRequired: 2800, bonusPoints: 15 },
-      { id: "deer-girl", name: "Deer Girl", description: "Gentle deer character with adorable antlers and spots!", imageUrl: "🦌", pointsRequired: 2860, bonusPoints: 0 },
+      { id: "puppy-girl", name: "Puppy Girl", description: "Playful puppy character in brown hoodie, always wagging!", imageUrl: "🐶", pointsRequired: 2740, bonusPoints: 15 },
+      { id: "panda-girl", name: "Panda Girl", description: "Cuddly panda character in black and white with bamboo!", imageUrl: "🐼", pointsRequired: 2800, bonusPoints: 0 },
+      { id: "deer-girl", name: "Deer Girl", description: "Gentle deer character with adorable antlers and spots!", imageUrl: "🦌", pointsRequired: 2860, bonusPoints: 25 },
       { id: "raccoon-girl", name: "Raccoon Girl", description: "Mischievous raccoon character in gray hoodie with mask!", imageUrl: "🦝", pointsRequired: 2920, bonusPoints: 0 },
-      { id: "squirrel-girl", name: "Squirrel Girl", description: "Energetic squirrel character collecting acorns and treasures!", imageUrl: "🐿️", pointsRequired: 3000, bonusPoints: 25 },
+      { id: "squirrel-girl", name: "Squirrel Girl", description: "Energetic squirrel character collecting acorns and treasures!", imageUrl: "🐿️", pointsRequired: 3000, bonusPoints: 0 },
       
-      // Tier 7 - Vampire Adventure (Boys collection, 3060-3500 points)
+      // Tier 7 - Vampire Adventure (Boys collection, 3060-3500 points) - Bonus Slots: 2, 4, 7
       { id: "classic-vampire", name: "Classic Vampire", description: "Traditional vampire with elegant black cape and friendly fangs!", imageUrl: "🧛", pointsRequired: 3060, bonusPoints: 0 },
       { id: "bat-boy", name: "Bat Boy", description: "Vampire boy with small bat wings and purple vest!", imageUrl: "🦇", pointsRequired: 3120, bonusPoints: 10 },
       { id: "moonlight-vampire", name: "Moonlight Vampire", description: "Silver-haired vampire glowing with mystical moonlight!", imageUrl: "🌙", pointsRequired: 3180, bonusPoints: 0 },
-      { id: "gothic-vampire", name: "Gothic Vampire", description: "Edgy vampire in dark purple and black with silver chains!", imageUrl: "🖤", pointsRequired: 3240, bonusPoints: 0 },
-      { id: "shadow-vampire", name: "Shadow Vampire", description: "Mysterious vampire with shadow powers and glowing red eyes!", imageUrl: "👤", pointsRequired: 3300, bonusPoints: 20 },
+      { id: "gothic-vampire", name: "Gothic Vampire", description: "Edgy vampire in dark purple and black with silver chains!", imageUrl: "🖤", pointsRequired: 3240, bonusPoints: 15 },
+      { id: "shadow-vampire", name: "Shadow Vampire", description: "Mysterious vampire with shadow powers and glowing red eyes!", imageUrl: "👤", pointsRequired: 3300, bonusPoints: 0 },
       { id: "night-hunter", name: "Night Hunter", description: "Brave vampire hunter boy with wooden cross and courage!", imageUrl: "🗡️", pointsRequired: 3360, bonusPoints: 0 },
-      { id: "blood-moon-vampire", name: "Blood Moon Vampire", description: "Dramatic vampire under blood moon influence with crimson power!", imageUrl: "🌕", pointsRequired: 3420, bonusPoints: 0 },
-      { id: "vampire-prince", name: "Vampire Prince", description: "Royal vampire prince in elegant black and gold with small crown!", imageUrl: "👑", pointsRequired: 3500, bonusPoints: 30 },
+      { id: "blood-moon-vampire", name: "Blood Moon Vampire", description: "Dramatic vampire under blood moon influence with crimson power!", imageUrl: "🌕", pointsRequired: 3420, bonusPoints: 30 },
+      { id: "vampire-prince", name: "Vampire Prince", description: "Royal vampire prince in elegant black and gold with small crown!", imageUrl: "👑", pointsRequired: 3500, bonusPoints: 0 },
       
-      // Tier 8 - Ballerina Dreams (Girls collection, 3560-4000 points)
+      // Tier 8 - Ballerina Dreams (Girls collection, 3560-4000 points) - Bonus Slots: 3, 5, 8
       { id: "ballerina-pink", name: "Pink Ballerina", description: "Classic ballerina in pink tutu with sparkling grace!", imageUrl: "🩰", pointsRequired: 3560, bonusPoints: 0 },
-      { id: "swan-ballerina", name: "Swan Ballerina", description: "Elegant swan lake ballerina in white feather tutu!", imageUrl: "🦢", pointsRequired: 3620, bonusPoints: 10 },
-      { id: "purple-ballerina", name: "Purple Ballerina", description: "Royal ballerina in lavender tutu with flower crown!", imageUrl: "💜", pointsRequired: 3680, bonusPoints: 0 },
+      { id: "swan-ballerina", name: "Swan Ballerina", description: "Elegant swan lake ballerina in white feather tutu!", imageUrl: "🦢", pointsRequired: 3620, bonusPoints: 0 },
+      { id: "purple-ballerina", name: "Purple Ballerina", description: "Royal ballerina in lavender tutu with flower crown!", imageUrl: "💜", pointsRequired: 3680, bonusPoints: 10 },
       { id: "blue-ballerina", name: "Ocean Ballerina", description: "Aqua ballerina dancing with ocean wave patterns!", imageUrl: "💙", pointsRequired: 3740, bonusPoints: 0 },
       { id: "golden-ballerina", name: "Golden Ballerina", description: "Radiant ballerina in golden tutu with star sequins!", imageUrl: "⭐", pointsRequired: 3800, bonusPoints: 15 },
       { id: "peach-ballerina", name: "Rose Ballerina", description: "Romantic ballerina in peach tutu with rose details!", imageUrl: "🌹", pointsRequired: 3860, bonusPoints: 0 },
       { id: "mint-ballerina", name: "Garden Ballerina", description: "Nature ballerina in mint green tutu with leaf patterns!", imageUrl: "🌿", pointsRequired: 3920, bonusPoints: 0 },
       { id: "rainbow-ballerina", name: "Rainbow Ballerina", description: "Magical ballerina in rainbow tutu spreading joy!", imageUrl: "🌈", pointsRequired: 4000, bonusPoints: 25 },
       
-      // Tier 9 - Superhero Squad (Boys collection, 4060-4500 points)
-      { id: "classic-superhero", name: "Classic Hero", description: "Iconic superhero in red and blue suit with star emblem!", imageUrl: "🦸", pointsRequired: 4060, bonusPoints: 0 },
-      { id: "lightning-speedster", name: "Lightning Speedster", description: "Super-fast hero in yellow suit with electric powers!", imageUrl: "⚡", pointsRequired: 4120, bonusPoints: 10 },
-      { id: "tech-hero", name: "Tech Hero", description: "High-tech hero in purple armor with advanced gadgets!", imageUrl: "🤖", pointsRequired: 4180, bonusPoints: 0 },
+      // Tier 9 - Superhero Squad (Boys collection, 4060-4500 points) - Bonus Slots: 1, 3, 7
+      { id: "classic-superhero", name: "Classic Hero", description: "Iconic superhero in red and blue suit with star emblem!", imageUrl: "🦸", pointsRequired: 4060, bonusPoints: 10 },
+      { id: "lightning-speedster", name: "Lightning Speedster", description: "Super-fast hero in yellow suit with electric powers!", imageUrl: "⚡", pointsRequired: 4120, bonusPoints: 0 },
+      { id: "tech-hero", name: "Tech Hero", description: "High-tech hero in purple armor with advanced gadgets!", imageUrl: "🤖", pointsRequired: 4180, bonusPoints: 15 },
       { id: "nature-guardian", name: "Nature Guardian", description: "Eco-hero in green suit protecting the environment!", imageUrl: "🌿", pointsRequired: 4240, bonusPoints: 0 },
-      { id: "ice-hero", name: "Ice Hero", description: "Cool hero in blue frost suit with ice powers!", imageUrl: "❄️", pointsRequired: 4300, bonusPoints: 20 },
+      { id: "ice-hero", name: "Ice Hero", description: "Cool hero in blue frost suit with ice powers!", imageUrl: "❄️", pointsRequired: 4300, bonusPoints: 0 },
       { id: "fire-hero", name: "Fire Hero", description: "Blazing hero in orange flame suit with heat powers!", imageUrl: "🔥", pointsRequired: 4360, bonusPoints: 0 },
-      { id: "shadow-ninja", name: "Shadow Ninja", description: "Stealthy ninja hero in black and purple suit!", imageUrl: "🥷", pointsRequired: 4420, bonusPoints: 0 },
-      { id: "shield-hero", name: "Shield Hero", description: "Defensive hero in gold armor with energy shields!", imageUrl: "🛡️", pointsRequired: 4500, bonusPoints: 30 },
+      { id: "shadow-ninja", name: "Shadow Ninja", description: "Stealthy ninja hero in black and purple suit!", imageUrl: "🥷", pointsRequired: 4420, bonusPoints: 30 },
+      { id: "shield-hero", name: "Shield Hero", description: "Defensive hero in gold armor with energy shields!", imageUrl: "🛡️", pointsRequired: 4500, bonusPoints: 0 },
       
-      // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points)
+      // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points) - Bonus Slots: 2, 6, 8
       { id: "titan-mech", name: "Titan Mech", description: "Massive mech warrior with powerful hydraulic arms!", imageUrl: "🤖", pointsRequired: 4560, bonusPoints: 0 },
       { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 10 },
       { id: "iron-guardian", name: "Iron Guardian", description: "Heavy armored mech designed for defense and protection!", imageUrl: "🛡️", pointsRequired: 4680, bonusPoints: 0 },
       { id: "plasma-bot", name: "Plasma Bot", description: "Energy-powered robot with glowing plasma core!", imageUrl: "💫", pointsRequired: 4740, bonusPoints: 0 },
-      { id: "steel-samurai", name: "Steel Samurai", description: "Japanese-inspired mech with katana and honor code!", imageUrl: "⚔️", pointsRequired: 4800, bonusPoints: 15 },
-      { id: "thunder-mech", name: "Thunder Mech", description: "Electric mech channeling lightning through its systems!", imageUrl: "⚡", pointsRequired: 4860, bonusPoints: 0 },
+      { id: "steel-samurai", name: "Steel Samurai", description: "Japanese-inspired mech with katana and honor code!", imageUrl: "⚔️", pointsRequired: 4800, bonusPoints: 0 },
+      { id: "thunder-mech", name: "Thunder Mech", description: "Electric mech channeling lightning through its systems!", imageUrl: "⚡", pointsRequired: 4860, bonusPoints: 20 },
       { id: "neon-droid", name: "Neon Droid", description: "Colorful robot with vibrant LED displays!", imageUrl: "✨", pointsRequired: 4920, bonusPoints: 0 },
       { id: "battle-commander", name: "Battle Commander", description: "Elite mech leader coordinating robot squadrons!", imageUrl: "🎖️", pointsRequired: 5000, bonusPoints: 25 },
       
-      // Tier 11 - Manga Heroes (Unisex collection, 5060-5500 points)
+      // Tier 11 - Manga Heroes (Unisex collection, 5060-5500 points) - Bonus Slots: 4, 5, 7
       { id: "ninja-shadow", name: "Ninja Shadow", description: "Stealthy anime ninja with shadow jutsu techniques!", imageUrl: "🥷", pointsRequired: 5060, bonusPoints: 0 },
-      { id: "spirit-fox", name: "Spirit Fox", description: "Mystical kitsune character with nine glowing tails!", imageUrl: "🦊", pointsRequired: 5120, bonusPoints: 10 },
+      { id: "spirit-fox", name: "Spirit Fox", description: "Mystical kitsune character with nine glowing tails!", imageUrl: "🦊", pointsRequired: 5120, bonusPoints: 0 },
       { id: "dragon-slayer", name: "Dragon Slayer", description: "Brave warrior wielding legendary dragon-forged sword!", imageUrl: "🐉", pointsRequired: 5180, bonusPoints: 0 },
-      { id: "magical-girl", name: "Magical Girl", description: "Sparkling magical girl with transformation powers!", imageUrl: "✨", pointsRequired: 5240, bonusPoints: 0 },
+      { id: "magical-girl", name: "Magical Girl", description: "Sparkling magical girl with transformation powers!", imageUrl: "✨", pointsRequired: 5240, bonusPoints: 10 },
       { id: "samurai-hero", name: "Samurai Hero", description: "Honorable samurai following the code of bushido!", imageUrl: "⚔️", pointsRequired: 5300, bonusPoints: 20 },
       { id: "elemental-master", name: "Elemental Master", description: "Anime hero controlling fire, water, earth and air!", imageUrl: "🌊", pointsRequired: 5360, bonusPoints: 0 },
-      { id: "cat-fighter", name: "Cat Fighter", description: "Agile catgirl martial artist with lightning reflexes!", imageUrl: "🐱", pointsRequired: 5420, bonusPoints: 0 },
-      { id: "school-hero", name: "School Hero", description: "Ordinary student with extraordinary hidden powers!", imageUrl: "📚", pointsRequired: 5500, bonusPoints: 30 },
+      { id: "cat-fighter", name: "Cat Fighter", description: "Agile catgirl martial artist with lightning reflexes!", imageUrl: "🐱", pointsRequired: 5420, bonusPoints: 30 },
+      { id: "school-hero", name: "School Hero", description: "Ordinary student with extraordinary hidden powers!", imageUrl: "📚", pointsRequired: 5500, bonusPoints: 0 },
       
-      // Tier 12 - Gaming Legends (Unisex collection, 5560-6000 points)
-      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 0 },
-      { id: "pixel-warrior", name: "Pixel Warrior", description: "Retro 8-bit hero from classic gaming era!", imageUrl: "👾", pointsRequired: 5620, bonusPoints: 10 },
+      // Tier 12 - Gaming Legends (Unisex collection, 5560-6000 points) - Bonus Slots: 1, 5, 8
+      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 10 },
+      { id: "pixel-warrior", name: "Pixel Warrior", description: "Retro 8-bit hero from classic gaming era!", imageUrl: "👾", pointsRequired: 5620, bonusPoints: 0 },
       { id: "controller-king", name: "Controller King", description: "Master of all gaming consoles and controllers!", imageUrl: "🕹️", pointsRequired: 5680, bonusPoints: 0 },
       { id: "vr-champion", name: "VR Champion", description: "Virtual reality hero exploring digital worlds!", imageUrl: "🥽", pointsRequired: 5740, bonusPoints: 0 },
       { id: "stream-star", name: "Stream Star", description: "Popular streamer bringing joy to millions!", imageUrl: "📺", pointsRequired: 5800, bonusPoints: 20 },
