@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import Landing from "./landing";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { FamilySetup } from "@/components/family-setup";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface FamilyMember {
   id: string;
@@ -10,10 +12,53 @@ interface FamilyMember {
 
 export default function AutoRedirect() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   
   const { data: member, isLoading, isError } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
     retry: false,
+  });
+
+  const createFamilyMutation = useMutation({
+    mutationFn: async (data: { familyName: string; displayName: string; role: string; avatarUrl: string; color: string }) => {
+      const res = await apiRequest("POST", "/api/family-members", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+      setLocation("/dashboard");
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to create family",
+      });
+    },
+  });
+
+  const joinFamilyMutation = useMutation({
+    mutationFn: async (data: { joinCode: string; displayName: string; avatarUrl: string; color: string }): Promise<FamilyMember> => {
+      const res = await apiRequest("POST", "/api/join-family", data);
+      return res.json();
+    },
+    onSuccess: (data: FamilyMember) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+      if (data.role === "parent") {
+        setLocation("/dashboard");
+      } else {
+        setLocation("/kid-dashboard");
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to join family",
+      });
+    },
   });
 
   useEffect(() => {
@@ -38,7 +83,13 @@ export default function AutoRedirect() {
   }
 
   if (isError || !member) {
-    return <Landing />;
+    return (
+      <FamilySetup
+        onComplete={(data) => createFamilyMutation.mutate(data)}
+        onJoin={(data) => joinFamilyMutation.mutate(data)}
+        isSubmitting={createFamilyMutation.isPending || joinFamilyMutation.isPending}
+      />
+    );
   }
 
   return (
