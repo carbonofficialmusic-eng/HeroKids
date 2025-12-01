@@ -804,39 +804,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For children: filter and enhance tasks based on Multi-Completion mode
       if (member.role === "child") {
-        const tasksWithMeta = await Promise.all(
+        const tasksWithMeta = await Promise.allSettled(
           allTasks.map(async (task) => {
-            // Get completion status for this member
-            const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
-            // Only "approved" counts as truly completed for filtering purposes
-            // "pending" and "rejected" should still be shown to children
-            const hasCompleted = completionStatus === "approved";
-            
-            // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
-            if (task.maxCompletions !== null) {
-              // Get active completions to show participants
-              const completions = await storage.getActiveCompletionsByTask(task.id);
-              // Calculate completion count from approved completions
-              const completionCount = completions.filter(c => c.status === "approved").length;
+            try {
+              // Get completion status for this member
+              const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
+              // Only "approved" counts as truly completed for filtering purposes
+              // "pending" and "rejected" should still be shown to children
+              const hasCompleted = completionStatus === "approved";
+              
+              // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
+              if (task.maxCompletions !== null) {
+                // Get active completions to show participants
+                try {
+                  const completions = await storage.getActiveCompletionsByTask(task.id);
+                  // Calculate completion count from approved completions
+                  const completionCount = completions.filter(c => c.status === "approved").length;
+                  return {
+                    ...task,
+                    remainingSlots: task.maxCompletions - completionCount,
+                    memberHasCompleted: hasCompleted,
+                    memberCompletionStatus: completionStatus,
+                    completions, // Include participant list for multi-tasks
+                  };
+                } catch (err) {
+                  console.error(`Error getting completions for task ${task.id}:`, err);
+                  return {
+                    ...task,
+                    remainingSlots: task.maxCompletions,
+                    memberHasCompleted: hasCompleted,
+                    memberCompletionStatus: completionStatus,
+                    completions: [],
+                  };
+                }
+              }
+              
+              // Normal mode (maxCompletions == null) - Standard tasks visible to everyone
               return {
                 ...task,
-                remainingSlots: task.maxCompletions - completionCount,
+                remainingSlots: null,
                 memberHasCompleted: hasCompleted,
                 memberCompletionStatus: completionStatus,
-                completions, // Include participant list for multi-tasks
+                completions: [], // No participants for non-multi tasks
+              };
+            } catch (err) {
+              console.error(`Error processing task ${task.id}:`, err);
+              return {
+                ...task,
+                remainingSlots: task.maxCompletions !== null ? task.maxCompletions : null,
+                memberHasCompleted: false,
+                memberCompletionStatus: null,
+                completions: [],
               };
             }
-            
-            // Normal mode (maxCompletions == null) - Standard tasks visible to everyone
-            return {
-              ...task,
-              remainingSlots: null,
-              memberHasCompleted: hasCompleted,
-              memberCompletionStatus: completionStatus,
-              completions: [], // No participants for non-multi tasks
-            };
           })
-        );
+        ).then(results => results.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<any>).value));
         
         // Filter logic for different task types:
         // 1. Archived tasks: Hide for everyone
@@ -854,38 +876,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(filteredTasks);
       } else {
         // Parents see all tasks with metadata
-        const tasksWithMeta = await Promise.all(
+        const tasksWithMeta = await Promise.allSettled(
           allTasks.map(async (task) => {
-            // Get completion status for this member
-            const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
-            // Only "approved" counts as truly completed
-            const hasCompleted = completionStatus === "approved";
-            
-            // For multi-completion tasks, check if parent has already completed it
-            if (task.maxCompletions !== null) {
-              // Get active completions to show participants
-              const completions = await storage.getActiveCompletionsByTask(task.id);
-              // Calculate completion count from approved completions
-              const completionCount = completions.filter(c => c.status === "approved").length;
+            try {
+              // Get completion status for this member
+              const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
+              // Only "approved" counts as truly completed
+              const hasCompleted = completionStatus === "approved";
+              
+              // For multi-completion tasks, check if parent has already completed it
+              if (task.maxCompletions !== null) {
+                // Get active completions to show participants
+                try {
+                  const completions = await storage.getActiveCompletionsByTask(task.id);
+                  // Calculate completion count from approved completions
+                  const completionCount = completions.filter(c => c.status === "approved").length;
+                  return {
+                    ...task,
+                    remainingSlots: task.maxCompletions - completionCount,
+                    memberHasCompleted: hasCompleted,
+                    memberCompletionStatus: completionStatus,
+                    completions, // Include participant list for multi-tasks
+                  };
+                } catch (err) {
+                  console.error(`Error getting completions for task ${task.id}:`, err);
+                  return {
+                    ...task,
+                    remainingSlots: task.maxCompletions,
+                    memberHasCompleted: hasCompleted,
+                    memberCompletionStatus: completionStatus,
+                    completions: [],
+                  };
+                }
+              }
+              
+              // For non-multi-completion tasks - use same logic as multi-completion
               return {
                 ...task,
-                remainingSlots: task.maxCompletions - completionCount,
+                remainingSlots: null,
                 memberHasCompleted: hasCompleted,
                 memberCompletionStatus: completionStatus,
-                completions, // Include participant list for multi-tasks
+                completions: [], // No participants for non-multi tasks
+              };
+            } catch (err) {
+              console.error(`Error processing task ${task.id}:`, err);
+              return {
+                ...task,
+                remainingSlots: task.maxCompletions !== null ? task.maxCompletions : null,
+                memberHasCompleted: false,
+                memberCompletionStatus: null,
+                completions: [],
               };
             }
-            
-            // For non-multi-completion tasks - use same logic as multi-completion
-            return {
-              ...task,
-              remainingSlots: null,
-              memberHasCompleted: hasCompleted,
-              memberCompletionStatus: completionStatus,
-              completions: [], // No participants for non-multi tasks
-            };
           })
-        );
+        ).then(results => results.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<any>).value));
         
         // Disable caching for task data
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
