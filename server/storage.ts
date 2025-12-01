@@ -57,6 +57,94 @@ import { startOfDay } from 'date-fns';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 /**
+ * Default achievement templates - used by both seedDefaultAchievements and resetFamilyToFactory
+ * Only "Weekly Champion" and "Perfect Week" are active by default
+ */
+const DEFAULT_ACHIEVEMENT_TEMPLATES = [
+  {
+    type: "first_weekly_finisher" as const,
+    slug: "first-weekly-finisher",
+    title: "Weekly Champion",
+    description: "Be the first family member to complete all weekly tasks",
+    bonusPoints: 50,
+    isActive: true,
+    config: {},
+  },
+  {
+    type: "perfect_week" as const,
+    slug: "perfect-week",
+    title: "Perfect Week",
+    description: "Complete all your weekly tasks without any rejections",
+    bonusPoints: 100,
+    isActive: true,
+    config: {},
+  },
+  {
+    type: "task_streak" as const,
+    slug: "task-streak-7",
+    title: "7-Day Streak",
+    description: "Complete tasks for 7 days in a row",
+    bonusPoints: 75,
+    isActive: false,
+    config: { days: 7 },
+  },
+  {
+    type: "task_streak" as const,
+    slug: "task-streak-14",
+    title: "14-Day Streak",
+    description: "Complete tasks for 14 days in a row",
+    bonusPoints: 150,
+    isActive: false,
+    config: { days: 14 },
+  },
+  {
+    type: "task_streak" as const,
+    slug: "task-streak-30",
+    title: "30-Day Streak",
+    description: "Complete tasks for 30 days in a row",
+    bonusPoints: 300,
+    isActive: false,
+    config: { days: 30 },
+  },
+  {
+    type: "lifetime_milestone" as const,
+    slug: "lifetime-500",
+    title: "500 Points Milestone",
+    description: "Earn a total of 500 points",
+    bonusPoints: 100,
+    isActive: false,
+    config: { threshold: 500 },
+  },
+  {
+    type: "lifetime_milestone" as const,
+    slug: "lifetime-1000",
+    title: "1000 Points Milestone",
+    description: "Earn a total of 1000 points",
+    bonusPoints: 200,
+    isActive: false,
+    config: { threshold: 1000 },
+  },
+  {
+    type: "lifetime_milestone" as const,
+    slug: "lifetime-2000",
+    title: "2000 Points Milestone",
+    description: "Earn a total of 2000 points",
+    bonusPoints: 400,
+    isActive: false,
+    config: { threshold: 2000 },
+  },
+  {
+    type: "weekly_leaderboard" as const,
+    slug: "weekly-leaderboard-1st",
+    title: "Weekly Leader",
+    description: "Finish in 1st place on the weekly leaderboard",
+    bonusPoints: 75,
+    isActive: false,
+    config: { rank: 1 },
+  },
+];
+
+/**
  * Helper function to check if a date is today in a specific timezone
  */
 function isToday(date: Date, timezone: string): boolean {
@@ -1698,111 +1786,13 @@ export class DatabaseStorage implements IStorage {
         await tx.insert(tasks).values(task);
       }
 
-      // 15. Create default achievements with new defaults (only Weekly Champion and Perfect Week enabled)
-      const defaultAchievements = [
-        {
+      // 15. Create default achievements using shared template (only Weekly Champion and Perfect Week enabled)
+      for (const template of DEFAULT_ACHIEVEMENT_TEMPLATES) {
+        await tx.insert(achievementDefinitions).values({
+          ...template,
           familyName,
-          type: "first_weekly_finisher" as const,
-          slug: "first-weekly-finisher",
-          title: "Weekly Champion",
-          description: "Be the first family member to complete all weekly tasks",
-          bonusPoints: 50,
-          isActive: true,
-          config: {},
           updatedAt: new Date(),
-        },
-        {
-          familyName,
-          type: "perfect_week" as const,
-          slug: "perfect-week",
-          title: "Perfect Week",
-          description: "Complete all your weekly tasks without any rejections",
-          bonusPoints: 100,
-          isActive: true,
-          config: {},
-          updatedAt: new Date(),
-        },
-        {
-          familyName,
-          type: "task_streak" as const,
-          slug: "task-streak-7",
-          title: "7-Day Streak",
-          description: "Complete tasks for 7 days in a row",
-          bonusPoints: 75,
-          isActive: false,
-          config: { days: 7 },
-          updatedAt: new Date(),
-        },
-        {
-          familyName,
-          type: "task_streak" as const,
-          slug: "task-streak-14",
-          title: "14-Day Streak",
-          description: "Complete tasks for 14 days in a row",
-          bonusPoints: 150,
-          isActive: false,
-          config: { days: 14 },
-          updatedAt: new Date(),
-        },
-        {
-          familyName,
-          type: "task_streak" as const,
-          slug: "task-streak-30",
-          title: "30-Day Streak",
-          description: "Complete tasks for 30 days in a row",
-          bonusPoints: 300,
-          isActive: false,
-          config: { days: 30 },
-          updatedAt: new Date(),
-        },
-        {
-          familyName,
-          type: "lifetime_milestone" as const,
-          slug: "lifetime-500",
-          title: "500 Points Milestone",
-          description: "Earn a total of 500 points",
-          bonusPoints: 100,
-          isActive: false,
-          config: { threshold: 500 },
-          updatedAt: new Date(),
-        },
-        {
-          familyName,
-          type: "lifetime_milestone" as const,
-          slug: "lifetime-1000",
-          title: "1000 Points Milestone",
-          description: "Earn a total of 1000 points",
-          bonusPoints: 200,
-          isActive: false,
-          config: { threshold: 1000 },
-          updatedAt: new Date(),
-        },
-        {
-          familyName,
-          type: "lifetime_milestone" as const,
-          slug: "lifetime-2000",
-          title: "2000 Points Milestone",
-          description: "Earn a total of 2000 points",
-          bonusPoints: 400,
-          isActive: false,
-          config: { threshold: 2000 },
-          updatedAt: new Date(),
-        },
-        {
-          familyName,
-          type: "weekly_leaderboard" as const,
-          slug: "weekly-leaderboard-1st",
-          title: "Weekly Leader",
-          description: "Finish in 1st place on the weekly leaderboard",
-          bonusPoints: 75,
-          isActive: false,
-          config: { rank: 1 },
-          updatedAt: new Date(),
-        },
-      ];
-
-      for (const achievement of defaultAchievements) {
-        await tx.insert(achievementDefinitions).values(achievement);
+        });
       }
     });
   }
@@ -1942,105 +1932,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async seedDefaultAchievements(familyName: string): Promise<AchievementDefinition[]> {
-    const defaultAchievements: InsertAchievementDefinition[] = [
-      {
-        familyName,
-        type: "first_weekly_finisher",
-        slug: "first-weekly-finisher",
-        title: "Weekly Champion",
-        description: "Be the first family member to complete all weekly tasks",
-        bonusPoints: 50,
-        isActive: true,
-        config: {},
-      },
-      {
-        familyName,
-        type: "perfect_week",
-        slug: "perfect-week",
-        title: "Perfect Week",
-        description: "Complete all your weekly tasks without any rejections",
-        bonusPoints: 100,
-        isActive: true,
-        config: {},
-      },
-      {
-        familyName,
-        type: "task_streak",
-        slug: "task-streak-7",
-        title: "7-Day Streak",
-        description: "Complete tasks for 7 days in a row",
-        bonusPoints: 75,
-        isActive: false,
-        config: { days: 7 },
-      },
-      {
-        familyName,
-        type: "task_streak",
-        slug: "task-streak-14",
-        title: "14-Day Streak",
-        description: "Complete tasks for 14 days in a row",
-        bonusPoints: 150,
-        isActive: false,
-        config: { days: 14 },
-      },
-      {
-        familyName,
-        type: "task_streak",
-        slug: "task-streak-30",
-        title: "30-Day Streak",
-        description: "Complete tasks for 30 days in a row",
-        bonusPoints: 300,
-        isActive: false,
-        config: { days: 30 },
-      },
-      {
-        familyName,
-        type: "lifetime_milestone",
-        slug: "lifetime-500",
-        title: "500 Points Milestone",
-        description: "Earn a total of 500 points",
-        bonusPoints: 100,
-        isActive: false,
-        config: { threshold: 500 },
-      },
-      {
-        familyName,
-        type: "lifetime_milestone",
-        slug: "lifetime-1000",
-        title: "1000 Points Milestone",
-        description: "Earn a total of 1000 points",
-        bonusPoints: 200,
-        isActive: false,
-        config: { threshold: 1000 },
-      },
-      {
-        familyName,
-        type: "lifetime_milestone",
-        slug: "lifetime-2000",
-        title: "2000 Points Milestone",
-        description: "Earn a total of 2000 points",
-        bonusPoints: 400,
-        isActive: false,
-        config: { threshold: 2000 },
-      },
-      {
-        familyName,
-        type: "weekly_leaderboard",
-        slug: "weekly-leaderboard-1st",
-        title: "Weekly Leader",
-        description: "Finish in 1st place on the weekly leaderboard",
-        bonusPoints: 75,
-        isActive: false,
-        config: { rank: 1 },
-      },
-    ];
-
     const created: AchievementDefinition[] = [];
-    for (const achievement of defaultAchievements) {
+    for (const template of DEFAULT_ACHIEVEMENT_TEMPLATES) {
       const [result] = await db
         .insert(achievementDefinitions)
         .values({
-          ...achievement,
+          ...template,
+          familyName,
           updatedAt: new Date(),
         })
         .returning();
