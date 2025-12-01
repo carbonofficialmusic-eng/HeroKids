@@ -115,7 +115,7 @@ export function TaskCard({
                   className="shrink-0 text-xs"
                   data-testid={`badge-multi-completion-${task.id}`}
                 >
-                  {task.completionCount || 0}/{task.maxCompletions}
+                  {(task.completions?.filter(c => c.status === "approved").length) || 0}/{task.maxCompletions}
                 </Badge>
               )}
             </div>
