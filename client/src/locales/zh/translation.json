@@ -150,6 +150,15 @@
     "updating": "更新中...",
     "createTaskButton": "创建任务",
     "updateTaskButton": "更新任务",
+    "orChooseTemplate": "或选择模板",
+    "multiCompletionLabel": "多人可完成此任务",
+    "multiCompletionDescDisabled": "至少需要2名家庭成员。此功能允许多名家庭成员（父母和孩子）完成同一任务。",
+    "multiCompletionDesc": "允许多名家庭成员完成此任务。可调整范围：2至{{max}}（根据您的家庭规模）。",
+    "multiCompletionTimes": "次数：",
+    "multiCompletionNotAvailable": "不可用",
+    "multiCompletionNotAvailableDesc": "您需要至少2名家庭成员才能创建多人完成任务。",
+    "multiCompletionDisabled": "功能已禁用",
+    "multiCompletionDisabledDesc": "多人完成功能需要至少2名家庭成员。",
     "completeTask": "完成任务",
     "confirmCompletion": "确认任务完成以赢取积分！",
     "uploadPhotoProof": "上传照片证明",
@@ -161,36 +170,36 @@
   },
   "taskTemplates": {
     "cleanRoom": {
-      "title": "Clean Your Room",
-      "description": "Pick up toys, make bed, organize desk"
+      "title": "整理房间",
+      "description": "收拾玩具、整理床铺、整理书桌"
     },
     "dishes": {
-      "title": "Do the Dishes",
-      "description": "Wash and dry all dishes, clean the sink"
+      "title": "洗碗",
+      "description": "洗碗并擦干，清洁水槽"
     },
     "homework": {
-      "title": "Complete Homework",
-      "description": "Finish all assigned homework for today"
+      "title": "完成作业",
+      "description": "完成今天布置的所有作业"
     },
     "trash": {
-      "title": "Take Out Trash",
-      "description": "Take trash bins to the curb"
+      "title": "倒垃圾",
+      "description": "把垃圾桶拿到外面"
     },
     "laundry": {
-      "title": "Fold Laundry",
-      "description": "Fold clean clothes and put them away"
+      "title": "叠衣服",
+      "description": "叠好干净的衣服并收好"
     },
     "schoolWork": {
-      "title": "Write a Good Mark in School",
-      "description": "Get a good grade on schoolwork or test"
+      "title": "取得好成绩",
+      "description": "在作业或考试中取得好成绩"
     },
     "vacuum": {
-      "title": "Vacuum Living Room",
-      "description": "Vacuum the living room and hallway"
+      "title": "吸尘",
+      "description": "打扫客厅和走廊"
     },
     "dentist": {
-      "title": "Go to the Dentist",
-      "description": "Annual dental checkup and cleaning"
+      "title": "看牙医",
+      "description": "年度牙科检查和清洁"
     }
   },
   "rewards": {

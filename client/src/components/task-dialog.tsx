@@ -347,13 +347,13 @@ export function TaskDialog({
                 return (
                   <FormItem className="space-y-3">
                     <FormLabel className={isDisabled ? "text-muted-foreground" : ""}>
-                      Multiple Family Members Can Complete
+                      {t('tasks.multiCompletionLabel')}
                     </FormLabel>
                     <FormDescription>
                       {isDisabled ? (
-                        "⚠️ Mindestens 2 Familienmitglieder benötigt. Diese Funktion erlaubt es mehreren Familienmitgliedern (Eltern & Kinder), dieselbe Aufgabe zu erledigen."
+                        `⚠️ ${t('tasks.multiCompletionDescDisabled')}`
                       ) : (
-                        `Allow multiple family members to complete this task. Adjustable range: 2 to ${totalMemberCount} (based on your family size).`
+                        t('tasks.multiCompletionDesc', { max: totalMemberCount })
                       )}
                     </FormDescription>
                     <div className="flex items-center gap-4">
@@ -364,8 +364,8 @@ export function TaskDialog({
                           // Prevent enabling if less than 2 family members
                           if (checked && totalMemberCount < 2) {
                             toast({
-                              title: "Nicht verfügbar",
-                              description: "Sie benötigen mindestens 2 Familienmitglieder, um Multi-Completion Tasks zu erstellen.",
+                              title: t('tasks.multiCompletionNotAvailable'),
+                              description: t('tasks.multiCompletionNotAvailableDesc'),
                               variant: "destructive",
                             });
                             return;
@@ -378,8 +378,8 @@ export function TaskDialog({
                               field.onChange(undefined);
                               setMaxCompletionsInput("");
                               toast({
-                                title: "Feature deaktiviert",
-                                description: "Multi-Completion erfordert mindestens 2 Familienmitglieder.",
+                                title: t('tasks.multiCompletionDisabled'),
+                                description: t('tasks.multiCompletionDisabledDesc'),
                                 variant: "destructive",
                               });
                             } else {
@@ -396,7 +396,7 @@ export function TaskDialog({
                       />
                       {typeof field.value === 'number' && !isDisabled && (
                         <div className="flex items-center gap-2">
-                          <FormLabel className="text-sm">Times:</FormLabel>
+                          <FormLabel className="text-sm">{t('tasks.multiCompletionTimes')}</FormLabel>
                           <Input
                             type="number"
                             min={2}

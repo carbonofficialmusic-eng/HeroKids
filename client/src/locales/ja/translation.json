@@ -161,36 +161,36 @@
   },
   "taskTemplates": {
     "cleanRoom": {
-      "title": "Clean Your Room",
-      "description": "Pick up toys, make bed, organize desk"
+      "title": "部屋を片付ける",
+      "description": "おもちゃを片付け、ベッドを整え、机を整理"
     },
     "dishes": {
-      "title": "Do the Dishes",
-      "description": "Wash and dry all dishes, clean the sink"
+      "title": "食器洗い",
+      "description": "すべての食器を洗って乾かし、シンクを掃除"
     },
     "homework": {
-      "title": "Complete Homework",
-      "description": "Finish all assigned homework for today"
+      "title": "宿題を終わらせる",
+      "description": "今日の宿題をすべて終わらせる"
     },
     "trash": {
-      "title": "Take Out Trash",
-      "description": "Take trash bins to the curb"
+      "title": "ゴミ出し",
+      "description": "ゴミ箱を外に出す"
     },
     "laundry": {
-      "title": "Fold Laundry",
-      "description": "Fold clean clothes and put them away"
+      "title": "洗濯物をたたむ",
+      "description": "きれいな服をたたんで片付ける"
     },
     "schoolWork": {
-      "title": "Write a Good Mark in School",
-      "description": "Get a good grade on schoolwork or test"
+      "title": "学校で良い成績を取る",
+      "description": "学校の課題やテストで良い成績を取る"
     },
     "vacuum": {
-      "title": "Vacuum Living Room",
-      "description": "Vacuum the living room and hallway"
+      "title": "リビングの掃除機",
+      "description": "リビングと廊下に掃除機をかける"
     },
     "dentist": {
-      "title": "Go to the Dentist",
-      "description": "Annual dental checkup and cleaning"
+      "title": "歯医者に行く",
+      "description": "年に一度の歯科検診とクリーニング"
     }
   },
   "rewards": {
@@ -227,6 +227,15 @@
     "makeAvailable": "このごほうびを獲得可能にする",
     "saving": "保存中...",
     "creating": "作成中...",
+    "orChooseTemplate": "またはテンプレートを選択",
+    "multiCompletionLabel": "複数の家族メンバーが完了可能",
+    "multiCompletionDescDisabled": "2人以上の家族メンバーが必要です。この機能により、複数の家族メンバー（親と子）が同じタスクを完了できます。",
+    "multiCompletionDesc": "複数の家族メンバーがこのタスクを完了できるようにします。調整範囲：2〜{{max}}（家族の人数による）。",
+    "multiCompletionTimes": "回数：",
+    "multiCompletionNotAvailable": "利用不可",
+    "multiCompletionNotAvailableDesc": "複数完了タスクを作成するには、少なくとも2人の家族メンバーが必要です。",
+    "multiCompletionDisabled": "機能が無効",
+    "multiCompletionDisabledDesc": "複数完了には少なくとも2人の家族メンバーが必要です。",
     "saveChanges": "変更を保存",
     "createRewardButton": "ごほうびを作成",
     "requestAReward": "ごほうびをリクエスト",

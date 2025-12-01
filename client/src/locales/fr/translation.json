@@ -161,36 +161,36 @@
   },
   "taskTemplates": {
     "cleanRoom": {
-      "title": "Clean Your Room",
-      "description": "Pick up toys, make bed, organize desk"
+      "title": "Range ta chambre",
+      "description": "Ramasse les jouets, fais le lit, range le bureau"
     },
     "dishes": {
-      "title": "Do the Dishes",
-      "description": "Wash and dry all dishes, clean the sink"
+      "title": "Faire la vaisselle",
+      "description": "Laver et sécher toute la vaisselle, nettoyer l'évier"
     },
     "homework": {
-      "title": "Complete Homework",
-      "description": "Finish all assigned homework for today"
+      "title": "Faire les devoirs",
+      "description": "Terminer tous les devoirs assignés pour aujourd'hui"
     },
     "trash": {
-      "title": "Take Out Trash",
-      "description": "Take trash bins to the curb"
+      "title": "Sortir les poubelles",
+      "description": "Amener les poubelles dehors"
     },
     "laundry": {
-      "title": "Fold Laundry",
-      "description": "Fold clean clothes and put them away"
+      "title": "Plier le linge",
+      "description": "Plier les vêtements propres et les ranger"
     },
     "schoolWork": {
-      "title": "Write a Good Mark in School",
-      "description": "Get a good grade on schoolwork or test"
+      "title": "Avoir une bonne note",
+      "description": "Obtenir une bonne note à un devoir ou un examen"
     },
     "vacuum": {
-      "title": "Vacuum Living Room",
-      "description": "Vacuum the living room and hallway"
+      "title": "Passer l'aspirateur",
+      "description": "Passer l'aspirateur dans le salon et le couloir"
     },
     "dentist": {
-      "title": "Go to the Dentist",
-      "description": "Annual dental checkup and cleaning"
+      "title": "Aller chez le dentiste",
+      "description": "Contrôle dentaire annuel et nettoyage"
     }
   },
   "rewards": {
@@ -227,6 +227,15 @@
     "makeAvailable": "Rendre cette récompense disponible",
     "saving": "Enregistrement...",
     "creating": "Création...",
+    "orChooseTemplate": "Ou choisir un modèle",
+    "multiCompletionLabel": "Plusieurs membres peuvent compléter",
+    "multiCompletionDescDisabled": "Au moins 2 membres de la famille requis. Cette fonction permet à plusieurs membres de la famille (parents et enfants) de compléter la même tâche.",
+    "multiCompletionDesc": "Permettre à plusieurs membres de la famille de compléter cette tâche. Plage ajustable : 2 à {{max}} (selon la taille de votre famille).",
+    "multiCompletionTimes": "Fois :",
+    "multiCompletionNotAvailable": "Non disponible",
+    "multiCompletionNotAvailableDesc": "Vous avez besoin d'au moins 2 membres de famille pour créer des tâches à complétion multiple.",
+    "multiCompletionDisabled": "Fonction désactivée",
+    "multiCompletionDisabledDesc": "La complétion multiple nécessite au moins 2 membres de famille.",
     "saveChanges": "Enregistrer les modifications",
     "createRewardButton": "Créer une récompense",
     "requestAReward": "Demander une récompense",
