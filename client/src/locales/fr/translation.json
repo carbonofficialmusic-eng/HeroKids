@@ -157,7 +157,16 @@
     "choosePhoto": "Choisir une photo",
     "submitting": "Envoi...",
     "completeAndEarn": "Terminer et gagner des points !",
-    "pts": "pts"
+    "pts": "pts",
+    "orChooseTemplate": "Ou choisir un modèle",
+    "multiCompletionLabel": "Plusieurs membres peuvent compléter",
+    "multiCompletionDescDisabled": "Au moins 2 membres de la famille requis. Cette fonction permet à plusieurs membres de la famille (parents et enfants) de compléter la même tâche.",
+    "multiCompletionDesc": "Permettre à plusieurs membres de la famille de compléter cette tâche. Plage ajustable : 2 à {{max}} (selon la taille de votre famille).",
+    "multiCompletionTimes": "Fois :",
+    "multiCompletionNotAvailable": "Non disponible",
+    "multiCompletionNotAvailableDesc": "Vous avez besoin d'au moins 2 membres de famille pour créer des tâches à complétion multiple.",
+    "multiCompletionDisabled": "Fonction désactivée",
+    "multiCompletionDisabledDesc": "La complétion multiple nécessite au moins 2 membres de famille."
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -227,15 +236,6 @@
     "makeAvailable": "Rendre cette récompense disponible",
     "saving": "Enregistrement...",
     "creating": "Création...",
-    "orChooseTemplate": "Ou choisir un modèle",
-    "multiCompletionLabel": "Plusieurs membres peuvent compléter",
-    "multiCompletionDescDisabled": "Au moins 2 membres de la famille requis. Cette fonction permet à plusieurs membres de la famille (parents et enfants) de compléter la même tâche.",
-    "multiCompletionDesc": "Permettre à plusieurs membres de la famille de compléter cette tâche. Plage ajustable : 2 à {{max}} (selon la taille de votre famille).",
-    "multiCompletionTimes": "Fois :",
-    "multiCompletionNotAvailable": "Non disponible",
-    "multiCompletionNotAvailableDesc": "Vous avez besoin d'au moins 2 membres de famille pour créer des tâches à complétion multiple.",
-    "multiCompletionDisabled": "Fonction désactivée",
-    "multiCompletionDisabledDesc": "La complétion multiple nécessite au moins 2 membres de famille.",
     "saveChanges": "Enregistrer les modifications",
     "createRewardButton": "Créer une récompense",
     "requestAReward": "Demander une récompense",

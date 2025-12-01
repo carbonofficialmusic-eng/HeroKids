@@ -161,7 +161,16 @@
     "choosePhoto": "사진 선택",
     "submitting": "제출 중...",
     "completeAndEarn": "완료하고 포인트 획득!",
-    "pts": "포인트"
+    "pts": "포인트",
+    "orChooseTemplate": "또는 템플릿 선택",
+    "multiCompletionLabel": "여러 가족 구성원이 완료 가능",
+    "multiCompletionDescDisabled": "최소 2명의 가족 구성원이 필요합니다. 이 기능을 통해 여러 가족 구성원(부모 및 자녀)이 동일한 과제를 완료할 수 있습니다.",
+    "multiCompletionDesc": "여러 가족 구성원이 이 과제를 완료할 수 있도록 합니다. 조정 가능 범위: 2~{{max}} (가족 규모 기준).",
+    "multiCompletionTimes": "횟수:",
+    "multiCompletionNotAvailable": "사용 불가",
+    "multiCompletionNotAvailableDesc": "다중 완료 과제를 만들려면 최소 2명의 가족 구성원이 필요합니다.",
+    "multiCompletionDisabled": "기능 비활성화됨",
+    "multiCompletionDisabledDesc": "다중 완료는 최소 2명의 가족 구성원이 필요합니다."
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -231,15 +240,6 @@
     "makeAvailable": "이 보상을 사용 가능하게 만들기",
     "saving": "저장 중...",
     "creating": "생성 중...",
-    "orChooseTemplate": "또는 템플릿 선택",
-    "multiCompletionLabel": "여러 가족 구성원이 완료 가능",
-    "multiCompletionDescDisabled": "최소 2명의 가족 구성원이 필요합니다. 이 기능을 통해 여러 가족 구성원(부모 및 자녀)이 동일한 과제를 완료할 수 있습니다.",
-    "multiCompletionDesc": "여러 가족 구성원이 이 과제를 완료할 수 있도록 합니다. 조정 가능 범위: 2~{{max}} (가족 규모 기준).",
-    "multiCompletionTimes": "횟수:",
-    "multiCompletionNotAvailable": "사용 불가",
-    "multiCompletionNotAvailableDesc": "다중 완료 과제를 만들려면 최소 2명의 가족 구성원이 필요합니다.",
-    "multiCompletionDisabled": "기능 비활성화됨",
-    "multiCompletionDisabledDesc": "다중 완료는 최소 2명의 가족 구성원이 필요합니다.",
     "saveChanges": "변경사항 저장",
     "createRewardButton": "보상 만들기",
     "requestAReward": "보상 요청",

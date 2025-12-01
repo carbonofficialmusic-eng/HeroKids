@@ -157,7 +157,16 @@
     "choosePhoto": "Elegir Foto",
     "submitting": "Enviando...",
     "completeAndEarn": "¡Completar y Ganar Puntos!",
-    "pts": "pts"
+    "pts": "pts",
+    "orChooseTemplate": "O elige una plantilla",
+    "multiCompletionLabel": "Múltiples miembros pueden completar",
+    "multiCompletionDescDisabled": "Se requieren al menos 2 miembros. Esta función permite que múltiples miembros de la familia (padres e hijos) completen la misma tarea.",
+    "multiCompletionDesc": "Permitir que múltiples miembros completen esta tarea. Rango ajustable: 2 a {{max}} (según el tamaño de tu familia).",
+    "multiCompletionTimes": "Veces:",
+    "multiCompletionNotAvailable": "No disponible",
+    "multiCompletionNotAvailableDesc": "Necesitas al menos 2 miembros de familia para crear tareas de completado múltiple.",
+    "multiCompletionDisabled": "Función deshabilitada",
+    "multiCompletionDisabledDesc": "El completado múltiple requiere al menos 2 miembros de familia."
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -227,15 +236,6 @@
     "makeAvailable": "Hacer esta recompensa disponible para ganar",
     "saving": "Guardando...",
     "creating": "Creando...",
-    "orChooseTemplate": "O elige una plantilla",
-    "multiCompletionLabel": "Múltiples miembros pueden completar",
-    "multiCompletionDescDisabled": "Se requieren al menos 2 miembros. Esta función permite que múltiples miembros de la familia (padres e hijos) completen la misma tarea.",
-    "multiCompletionDesc": "Permitir que múltiples miembros completen esta tarea. Rango ajustable: 2 a {{max}} (según el tamaño de tu familia).",
-    "multiCompletionTimes": "Veces:",
-    "multiCompletionNotAvailable": "No disponible",
-    "multiCompletionNotAvailableDesc": "Necesitas al menos 2 miembros de familia para crear tareas de completado múltiple.",
-    "multiCompletionDisabled": "Función deshabilitada",
-    "multiCompletionDisabledDesc": "El completado múltiple requiere al menos 2 miembros de familia.",
     "saveChanges": "Guardar Cambios",
     "createRewardButton": "Crear Recompensa",
     "requestAReward": "Solicitar una Recompensa",

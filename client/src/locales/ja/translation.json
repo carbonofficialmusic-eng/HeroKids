@@ -157,7 +157,16 @@
     "choosePhoto": "写真を選択",
     "submitting": "送信中...",
     "completeAndEarn": "完了してポイントをゲット！",
-    "pts": "pt"
+    "pts": "pt",
+    "orChooseTemplate": "またはテンプレートを選択",
+    "multiCompletionLabel": "複数の家族メンバーが完了可能",
+    "multiCompletionDescDisabled": "2人以上の家族メンバーが必要です。この機能により、複数の家族メンバー（親と子）が同じタスクを完了できます。",
+    "multiCompletionDesc": "複数の家族メンバーがこのタスクを完了できるようにします。調整範囲：2〜{{max}}（家族の人数による）。",
+    "multiCompletionTimes": "回数：",
+    "multiCompletionNotAvailable": "利用不可",
+    "multiCompletionNotAvailableDesc": "複数完了タスクを作成するには、少なくとも2人の家族メンバーが必要です。",
+    "multiCompletionDisabled": "機能が無効",
+    "multiCompletionDisabledDesc": "複数完了には少なくとも2人の家族メンバーが必要です。"
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -227,15 +236,6 @@
     "makeAvailable": "このごほうびを獲得可能にする",
     "saving": "保存中...",
     "creating": "作成中...",
-    "orChooseTemplate": "またはテンプレートを選択",
-    "multiCompletionLabel": "複数の家族メンバーが完了可能",
-    "multiCompletionDescDisabled": "2人以上の家族メンバーが必要です。この機能により、複数の家族メンバー（親と子）が同じタスクを完了できます。",
-    "multiCompletionDesc": "複数の家族メンバーがこのタスクを完了できるようにします。調整範囲：2〜{{max}}（家族の人数による）。",
-    "multiCompletionTimes": "回数：",
-    "multiCompletionNotAvailable": "利用不可",
-    "multiCompletionNotAvailableDesc": "複数完了タスクを作成するには、少なくとも2人の家族メンバーが必要です。",
-    "multiCompletionDisabled": "機能が無効",
-    "multiCompletionDisabledDesc": "複数完了には少なくとも2人の家族メンバーが必要です。",
     "saveChanges": "変更を保存",
     "createRewardButton": "ごほうびを作成",
     "requestAReward": "ごほうびをリクエスト",
