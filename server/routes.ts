@@ -839,12 +839,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               }
               
-              // Normal mode (maxCompletions == null) - Standard tasks visible to everyone
+              // Normal mode (maxCompletions == null) - Standard tasks: if ANYONE completes it, it's done for everyone
+              // Use family-wide completion status for normal tasks
+              const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
+              const familyHasCompleted = familyCompletionStatus === "approved";
+              
               return {
                 ...task,
                 remainingSlots: null,
-                memberHasCompleted: hasCompleted,
-                memberCompletionStatus: completionStatus,
+                memberHasCompleted: familyHasCompleted, // True if ANY family member completed
+                memberCompletionStatus: familyCompletionStatus, // Family-wide status
                 completions: [], // No participants for non-multi tasks
               };
             } catch (err) {
@@ -915,12 +919,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               }
               
-              // For non-multi-completion tasks - use same logic as multi-completion
+              // For non-multi-completion tasks - if ANYONE completes it, it's done for everyone
+              const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
+              const familyHasCompleted = familyCompletionStatus === "approved";
+              
               return {
                 ...task,
                 remainingSlots: null,
-                memberHasCompleted: hasCompleted,
-                memberCompletionStatus: completionStatus,
+                memberHasCompleted: familyHasCompleted, // True if ANY family member completed
+                memberCompletionStatus: familyCompletionStatus, // Family-wide status
                 completions: [], // No participants for non-multi tasks
               };
             } catch (err) {

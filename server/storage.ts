@@ -887,6 +887,81 @@ export class DatabaseStorage implements IStorage {
     return completion?.status || null;
   }
 
+  /**
+   * For normal tasks (maxCompletions == null): Check if ANYONE in the family has completed the task.
+   * Returns the most favorable status (approved > pending > rejected > null).
+   * For daily tasks, only checks today's completions.
+   */
+  async getTaskCompletionStatusForFamily(taskId: string, txClient?: any): Promise<"pending" | "approved" | "rejected" | null> {
+    const client = txClient || db;
+    
+    // Get task info
+    const [task] = await client
+      .select({
+        recurrence: tasks.recurrence,
+        familyName: tasks.familyName
+      })
+      .from(tasks)
+      .where(eq(tasks.id, taskId));
+    
+    if (!task) return null;
+    
+    // For daily recurring tasks, only check completions from TODAY (in family timezone)
+    if (task.recurrence === 'daily') {
+      // Get family timezone
+      const [family] = await client
+        .select({ timezone: families.timezone })
+        .from(families)
+        .where(eq(families.familyName, task.familyName));
+      
+      const familyTimezone = family?.timezone || 'Europe/Berlin';
+      
+      // Get ALL completions for this task (from any family member)
+      const completions = await client
+        .select({ 
+          status: taskCompletions.status,
+          completedAt: taskCompletions.completedAt
+        })
+        .from(taskCompletions)
+        .where(
+          and(
+            eq(taskCompletions.taskId, taskId),
+            inArray(taskCompletions.status, ["pending", "approved", "rejected"])
+          )
+        )
+        .orderBy(desc(taskCompletions.completedAt));
+      
+      // Filter to today's completions
+      const todayCompletions = completions.filter((c: { status: string; completedAt: Date }) => 
+        isToday(c.completedAt, familyTimezone)
+      );
+      
+      // Return the most favorable status: approved > pending > rejected > null
+      if (todayCompletions.some((c: { status: string }) => c.status === "approved")) return "approved";
+      if (todayCompletions.some((c: { status: string }) => c.status === "pending")) return "pending";
+      if (todayCompletions.some((c: { status: string }) => c.status === "rejected")) return "rejected";
+      return null;
+    }
+    
+    // For non-daily tasks: check if anyone has completed it
+    const completions = await client
+      .select({ status: taskCompletions.status })
+      .from(taskCompletions)
+      .where(
+        and(
+          eq(taskCompletions.taskId, taskId),
+          inArray(taskCompletions.status, ["pending", "approved", "rejected"])
+        )
+      )
+      .orderBy(desc(taskCompletions.completedAt));
+    
+    // Return the most favorable status
+    if (completions.some((c: { status: string }) => c.status === "approved")) return "approved";
+    if (completions.some((c: { status: string }) => c.status === "pending")) return "pending";
+    if (completions.some((c: { status: string }) => c.status === "rejected")) return "rejected";
+    return null;
+  }
+
   async createTaskCompletion(completionData: InsertTaskCompletion): Promise<TaskCompletion> {
     return await db.transaction(async (tx) => {
       // 1. Lock task: SELECT * FROM tasks WHERE id = taskId FOR UPDATE
