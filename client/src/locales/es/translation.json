@@ -875,7 +875,28 @@
     "askParentsTasks": "Pide a tus padres que creen tareas para ti.",
     "leaderboard": "Clasificación",
     "requestNewReward": "¡Pide un deseo!",
-    "chat": "Chat"
+    "chat": "Chat",
+    "goalAchieved": "¡Logrado!",
+    "weeklyLabel": "Semanal",
+    "monthlyLabel": "Mensual",
+    "progressLabel": "Progreso",
+    "contributePoints": "Aportar {{count}} puntos",
+    "points": "puntos",
+    "weekFormat": "Semana {{week}}, {{year}}",
+    "monthNames": {
+      "jan": "Ene",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Abr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Ago",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dic"
+    }
   },
   "achievements": {
     "title": "Logros",

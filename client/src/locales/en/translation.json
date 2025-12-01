@@ -883,7 +883,28 @@
     "askParentsTasks": "Ask your parents to create some tasks for you.",
     "leaderboard": "Leaderboard",
     "requestNewReward": "Make a wish!",
-    "chat": "Chat"
+    "chat": "Chat",
+    "goalAchieved": "Achieved!",
+    "weeklyLabel": "Weekly",
+    "monthlyLabel": "Monthly",
+    "progressLabel": "Progress",
+    "contributePoints": "Contribute {{count}} points",
+    "points": "points",
+    "weekFormat": "Week {{week}}, {{year}}",
+    "monthNames": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dec"
+    }
   },
   "achievements": {
     "title": "Achievements",

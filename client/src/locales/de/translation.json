@@ -893,7 +893,28 @@
     "askParentsTasks": "Frage deine Eltern, ob sie Aufgaben für dich erstellen können.",
     "leaderboard": "Bestenliste",
     "requestNewReward": "Wünsch dir was!",
-    "chat": "Chat"
+    "chat": "Chat",
+    "goalAchieved": "Erreicht!",
+    "weeklyLabel": "Wöchentlich",
+    "monthlyLabel": "Monatlich",
+    "progressLabel": "Fortschritt",
+    "contributePoints": "{{count}} Punkte einzahlen",
+    "points": "Punkte",
+    "weekFormat": "Woche {{week}}, {{year}}",
+    "monthNames": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mär",
+      "apr": "Apr",
+      "may": "Mai",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Okt",
+      "nov": "Nov",
+      "dec": "Dez"
+    }
   },
   "achievements": {
     "title": "Erfolge",

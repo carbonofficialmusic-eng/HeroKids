@@ -875,7 +875,28 @@
     "askParentsTasks": "保護者にタスクを作成してもらおう。",
     "leaderboard": "ランキング",
     "requestNewReward": "願いを叶えて！",
-    "chat": "チャット"
+    "chat": "チャット",
+    "goalAchieved": "達成！",
+    "weeklyLabel": "週次",
+    "monthlyLabel": "月次",
+    "progressLabel": "進捗",
+    "contributePoints": "{{count}}ポイント寄付",
+    "points": "ポイント",
+    "weekFormat": "{{year}}年 第{{week}}週",
+    "monthNames": {
+      "jan": "1月",
+      "feb": "2月",
+      "mar": "3月",
+      "apr": "4月",
+      "may": "5月",
+      "jun": "6月",
+      "jul": "7月",
+      "aug": "8月",
+      "sep": "9月",
+      "oct": "10月",
+      "nov": "11月",
+      "dec": "12月"
+    }
   },
   "achievements": {
     "title": "達成項目",

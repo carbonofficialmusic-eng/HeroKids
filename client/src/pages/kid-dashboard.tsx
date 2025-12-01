@@ -142,22 +142,9 @@ function getWeekNumber(date: Date): number {
   return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 }
 
-// Helper: Format period for display
-function formatPeriod(period: string, type: "weekly" | "monthly"): string {
-  if (type === "weekly") {
-    const match = period.match(/(\d{4})-W(\d{2})/);
-    if (match) {
-      return `Woche ${match[2]}, ${match[1]}`;
-    }
-  } else {
-    const match = period.match(/(\d{4})-(\d{2})/);
-    if (match) {
-      const monthNames = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
-      return `${monthNames[parseInt(match[2]) - 1]} ${match[1]}`;
-    }
-  }
-  return period;
-}
+// Helper: Format period for display (moved inside component to use t())
+// Note: This is just a stub that returns the period - the actual implementation
+// is inside the component where t() is available
 
 // Get color based on progress percentage
 function getProgressColor(percentage: number) {
@@ -195,15 +182,15 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       toast({
-        title: "Belohnung angefordert! 🎉",
-        description: `Deine Anfrage für "${reward.title}" wartet auf Freigabe!`,
+        title: t("kidDashboard.rewardRequested"),
+        description: t("kidDashboard.rewardRequestedDesc", { title: reward.title }),
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Fehler",
-        description: "Belohnung konnte nicht angefordert werden.",
+        title: t("kidDashboard.error"),
+        description: t("kidDashboard.rewardRequestError"),
       });
     },
   });
@@ -251,13 +238,13 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
               {!isReady && (
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <Zap className="h-4 w-4 text-amber-500" />
-                  Noch <span className="font-bold">{remaining} Punkte</span>!
+                  {t("kidDashboard.pointsRemaining", { count: remaining })}
                 </p>
               )}
               {isReady && (
                 <p className="text-sm font-bold text-green-500 flex items-center gap-1">
                   <Sparkles className="h-4 w-4" />
-                  Bereit zum Anfragen!
+                  {t("kidDashboard.readyToRequest")}
                 </p>
               )}
             </div>
@@ -275,12 +262,12 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
                 ) : isReady ? (
                   <>
                     <Gift className="h-5 w-5 mr-2" />
-                    Jetzt!
+                    {t("kidDashboard.now")}
                   </>
                 ) : (
                   <>
                     <Trophy className="h-4 w-4 mr-2" />
-                    Sammeln
+                    {t("kidDashboard.collect")}
                   </>
                 )}
               </Button>
@@ -302,21 +289,21 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
             <AlertDialogDescription className="space-y-4 pt-4">
               {reward.description && (
                 <div className="text-base text-foreground">
-                  <p className="font-semibold mb-1">Beschreibung:</p>
+                  <p className="font-semibold mb-1">{t("kidDashboard.description")}</p>
                   <p>{reward.description}</p>
                 </div>
               )}
               
               <div className="space-y-2">
                 <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
-                  <span className="font-semibold">Benötigte Punkte:</span>
+                  <span className="font-semibold">{t("kidDashboard.pointsNeeded")}</span>
                   <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
                     {reward.pointThreshold}
                   </Badge>
                 </div>
                 
                 <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
-                  <span className="font-semibold">Dein Fortschritt:</span>
+                  <span className="font-semibold">{t("kidDashboard.yourProgress")}</span>
                   <span className="font-bold" style={{ color: progressColor }}>
                     {Math.round(percentage)}%
                   </span>
@@ -327,7 +314,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
                 <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800">
                   <p className="text-base font-bold flex items-center gap-2">
                     <Zap className="h-5 w-5 text-amber-500" />
-                    Noch {remaining} Punkte bis zur Belohnung!
+                    {t("kidDashboard.pointsUntilReward", { count: remaining })}
                   </p>
                 </div>
               )}
@@ -336,14 +323,14 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
                 <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-xl border border-green-200 dark:border-green-800">
                   <p className="text-base font-bold flex items-center gap-2 text-green-600 dark:text-green-400">
                     <Sparkles className="h-5 w-5" />
-                    Du kannst diese Belohnung jetzt anfragen!
+                    {t("kidDashboard.canRequestNow")}
                   </p>
                 </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction data-testid="button-close-details">Schließen</AlertDialogAction>
+            <AlertDialogAction data-testid="button-close-details">{t("kidDashboard.close")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -406,17 +393,17 @@ function TaskCard({
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       toast({
-        title: "Aufgabe abgeschlossen! 🎉",
+        title: t("kidDashboard.taskCompleted"),
         description: task.requiresApproval 
-          ? "Wartet auf Freigabe von deinen Eltern!"
-          : `Du hast ${task.points} Punkte verdient!`,
+          ? t("kidDashboard.waitingForApproval")
+          : t("kidDashboard.earnedPoints", { count: task.points }),
       });
     },
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Fehler",
-        description: error.message || "Aufgabe konnte nicht abgeschlossen werden.",
+        title: t("kidDashboard.error"),
+        description: error.message || t("kidDashboard.taskError"),
       });
     },
   });
@@ -438,19 +425,19 @@ function TaskCard({
   let statusColor = "";
   
   if (isPending) {
-    statusMessage = "Wartet auf Freigabe";
+    statusMessage = t("kidDashboard.waitingApproval");
     statusColor = "text-amber-600 dark:text-amber-400";
   } else if (isApproved) {
-    statusMessage = "Abgeschlossen & Genehmigt";
+    statusMessage = t("kidDashboard.completedApproved");
     statusColor = "text-green-600 dark:text-green-400";
   } else if (isRejected) {
-    statusMessage = "Nochmal versuchen";
+    statusMessage = t("kidDashboard.tryAgain");
     statusColor = "text-blue-600 dark:text-blue-400";
   } else if (hasNoSlots) {
-    statusMessage = "Alle Plätze belegt";
+    statusMessage = t("kidDashboard.allSlotsTaken");
     statusColor = "text-amber-600 dark:text-amber-400";
   } else if (isInactive) {
-    statusMessage = "Nicht verfügbar";
+    statusMessage = t("kidDashboard.notAvailable");
     statusColor = "text-muted-foreground";
   }
 
@@ -514,7 +501,7 @@ function TaskCard({
                 {statusMessage}
               </Badge>
               <p className="text-sm font-bold text-muted-foreground">
-                {task.points} Punkte
+                {task.points} {t("kidDashboard.points")}
               </p>
             </div>
           ) : (
@@ -522,13 +509,13 @@ function TaskCard({
               variant="default" 
               className="text-base px-3 py-1 font-bold rounded-xl"
             >
-              +{task.points} Punkte
+              {t("kidDashboard.plusPoints", { count: task.points })}
             </Badge>
           )}
           
           {hasNoSlots && task.remainingSlots === 0 && (
             <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-              Keine Plätze mehr verfügbar
+              {t("kidDashboard.noSlotsLeft")}
             </p>
           )}
         </div>
@@ -540,6 +527,25 @@ function TaskCard({
 export default function KidDashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  
+  // Helper: Format period for display with translations
+  const formatPeriod = (period: string, type: "weekly" | "monthly"): string => {
+    if (type === "weekly") {
+      const match = period.match(/(\d{4})-W(\d{2})/);
+      if (match) {
+        return t("kidDashboard.weekFormat", { week: match[2], year: match[1] });
+      }
+    } else {
+      const match = period.match(/(\d{4})-(\d{2})/);
+      if (match) {
+        const monthKeys = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+        const monthKey = monthKeys[parseInt(match[2]) - 1];
+        const monthName = t(`kidDashboard.monthNames.${monthKey}`);
+        return `${monthName} ${match[1]}`;
+      }
+    }
+    return period;
+  };
   const { user } = useAuth();
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
@@ -561,8 +567,8 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       toast({
-        title: "Punkte eingezahlt! 🎯",
-        description: "Dein Beitrag wurde zum Familienziel hinzugefügt.",
+        title: t("kidDashboard.pointsContributed"),
+        description: t("kidDashboard.contributionAdded"),
       });
       confetti({
         particleCount: 100,
@@ -572,8 +578,8 @@ export default function KidDashboard() {
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Beitrag konnte nicht eingezahlt werden",
+        title: t("kidDashboard.error"),
+        description: error.message || t("kidDashboard.contributionError"),
         variant: "destructive",
       });
     },
@@ -588,14 +594,14 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
       toast({
-        title: "Wunsch gesendet! 💡",
-        description: "Deine Eltern können deinen Wunsch jetzt sehen.",
+        title: t("kidDashboard.wishSent"),
+        description: t("kidDashboard.wishSentDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Wunsch konnte nicht gesendet werden",
+        title: t("kidDashboard.error"),
+        description: error.message || t("kidDashboard.wishError"),
         variant: "destructive",
       });
     },
@@ -610,14 +616,14 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       toast({
-        title: "Teilen gestartet! 🤝",
-        description: "Andere können jetzt beitreten.",
+        title: t("kidDashboard.sharingStarted"),
+        description: t("kidDashboard.othersCanJoin"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Teilen konnte nicht gestartet werden.",
+        title: t("kidDashboard.error"),
+        description: error.message || t("kidDashboard.sharingStartError"),
         variant: "destructive",
       });
     },
@@ -632,14 +638,14 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
-        title: "Erfolgreich beigetreten! 🎉",
-        description: "Du bist jetzt Teil der geteilten Belohnung.",
+        title: t("kidDashboard.joinedSuccess"),
+        description: t("kidDashboard.nowPartOfReward"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Beitreten nicht möglich.",
+        title: t("kidDashboard.error"),
+        description: error.message || t("kidDashboard.joinError"),
         variant: "destructive",
       });
     },
@@ -655,8 +661,8 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
-        title: "Teilen abgeschlossen! ✓",
-        description: "Die Punkte wurden gleichmäßig aufgeteilt.",
+        title: t("kidDashboard.sharingCompleted"),
+        description: t("kidDashboard.pointsSplitEvenly"),
       });
       confetti({
         particleCount: 100,
@@ -666,8 +672,8 @@ export default function KidDashboard() {
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Teilen konnte nicht abgeschlossen werden.",
+        title: t("kidDashboard.error"),
+        description: error.message || t("kidDashboard.sharingCompleteError"),
         variant: "destructive",
       });
     },
@@ -819,17 +825,17 @@ export default function KidDashboard() {
       setTaskDialogOpen(false);
       setSelectedTask(null);
       toast({
-        title: "Aufgabe abgeschlossen! 🎉",
+        title: t("kidDashboard.taskCompleted"),
         description: selectedTask?.requiresApproval 
-          ? "Wartet auf Freigabe von deinen Eltern!"
-          : `Du hast ${selectedTask?.points} Punkte verdient!`,
+          ? t("kidDashboard.waitingForApproval")
+          : t("kidDashboard.earnedPoints", { count: selectedTask?.points || 0 }),
       });
     },
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Fehler",
-        description: error.message || "Aufgabe konnte nicht abgeschlossen werden.",
+        title: t("kidDashboard.error"),
+        description: error.message || t("kidDashboard.taskError"),
       });
     },
   });
@@ -859,9 +865,9 @@ export default function KidDashboard() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Card className="p-8 text-center">
-          <p className="text-lg mb-4">Bitte melde dich an, um das Kinder-Dashboard zu sehen.</p>
+          <p className="text-lg mb-4">{t("kidDashboard.loginPrompt")}</p>
           <Button asChild>
-            <Link href="/dashboard">Zum Dashboard</Link>
+            <Link href="/dashboard">{t("kidDashboard.goToDashboard")}</Link>
           </Button>
         </Card>
       </div>
@@ -988,17 +994,17 @@ export default function KidDashboard() {
                       >
                         <Flame className="h-7 w-7 text-orange-500" />
                       </motion.div>
-                      <span className="text-lg font-bold">{streak}-Tage-Serie!</span>
+                      <span className="text-lg font-bold">{t("kidDashboard.dayStreak", { count: streak })}</span>
                     </div>
                   )}
                 </div>
               </div>
               <div className="bg-card/80 backdrop-blur-sm p-5 rounded-2xl border-2 border-primary/30 min-w-[260px]">
-                <p className="text-sm text-muted-foreground mb-3 font-medium text-center">Deine Punkte:</p>
+                <p className="text-sm text-muted-foreground mb-3 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
                 <div className="space-y-3">
                   {/* Total Earned - Prominent Display */}
                   <div className="text-center pb-3 border-b border-border">
-                    <p className="text-xs text-muted-foreground mb-1">Total verdient</p>
+                    <p className="text-xs text-muted-foreground mb-1">{t("kidDashboard.totalEarned")}</p>
                     <motion.div
                       className="text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
                       animate={{ scale: [1, 1.05, 1] }}
@@ -1014,7 +1020,7 @@ export default function KidDashboard() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Coins className="h-4 w-4 text-green-500" />
-                      <span className="font-semibold text-sm">Verfügbar:</span>
+                      <span className="font-semibold text-sm">{t("kidDashboard.available")}</span>
                     </div>
                     <span className="text-xl font-bold text-green-600 dark:text-green-400" data-testid="text-total-points">
                       {member.totalPoints.toLocaleString()}
@@ -1033,7 +1039,7 @@ export default function KidDashboard() {
               <Trophy className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-4xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              Belohnungen
+              {t("kidDashboard.rewards")}
             </h2>
             <Sparkles className="h-6 w-6 text-amber-500 animate-pulse" />
           </div>
@@ -1041,8 +1047,8 @@ export default function KidDashboard() {
           {activeRewards.length === 0 ? (
             <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
               <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-lg text-muted-foreground">Noch keine Belohnungen verfügbar.</p>
-              <p className="text-sm text-muted-foreground mt-2">Deine Eltern können Belohnungen für dich erstellen!</p>
+              <p className="text-lg text-muted-foreground">{t("kidDashboard.noRewardsYet")}</p>
+              <p className="text-sm text-muted-foreground mt-2">{t("kidDashboard.parentsCanCreate")}</p>
             </Card>
           ) : (
             <div className="space-y-4">
@@ -1069,12 +1075,12 @@ export default function KidDashboard() {
                   <CheckCircle2 className="h-7 w-7 text-green-500" />
                 </div>
                 <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                  Meine Belohnungen
+                  {t("kidDashboard.myRewards")}
                 </h2>
               </div>
               <Button variant="ghost" size="sm" asChild data-testid="button-view-all-rewards">
                 <Link href="/my-rewards">
-                  Alle ansehen →
+                  {t("kidDashboard.viewAll")}
                 </Link>
               </Button>
             </div>
@@ -1102,39 +1108,39 @@ export default function KidDashboard() {
                             <CheckCircle2 className="h-10 w-10 text-green-500" />
                           </div>
                           <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                            {redemption.rewardTitle || "Belohnung"}
+                            {redemption.rewardTitle || t("kidDashboard.reward")}
                           </h3>
                           <div className="flex flex-wrap gap-1.5 justify-center">
                             <Badge 
                               variant={redemption.status === "completed" ? "default" : "secondary"}
                               className="text-sm"
                             >
-                              {redemption.status === "completed" ? "✓ Erfüllt" : 
-                               redemption.status === "approved" ? "⏳ Warte" : 
-                               "⏸️ Ausstehend"}
+                              {redemption.status === "completed" ? `✓ ${t("kidDashboard.fulfilled")}` : 
+                               redemption.status === "approved" ? `⏳ ${t("kidDashboard.waiting")}` : 
+                               `⏸️ ${t("kidDashboard.pending")}`}
                             </Badge>
                             {isSharing && (
                               <Badge variant="secondary" className="gap-1.5 text-xs">
                                 <Users className="h-3 w-3" />
-                                Wird geteilt
+                                {t("kidDashboard.beingShared")}
                               </Badge>
                             )}
                             {isFinalized && (
                               <Badge variant="secondary" className="gap-1.5 text-xs">
                                 <CheckCircle2 className="h-3 w-3" />
-                                Geteilt
+                                {t("kidDashboard.shared")}
                               </Badge>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            {typed.pointsSpent} Punkte {isFinalized && `(war ${typed.originalPointsSpent})`}
+                            {t("kidDashboard.pointsSpent", { count: typed.pointsSpent })} {isFinalized && t("kidDashboard.wasPoints", { count: typed.originalPointsSpent })}
                           </p>
                         </div>
 
                         {/* Participants */}
                         {participants.length > 0 && (
                           <div className="flex items-center justify-center gap-1 flex-wrap">
-                            <p className="text-xs text-muted-foreground mr-1">Mit:</p>
+                            <p className="text-xs text-muted-foreground mr-1">{t("kidDashboard.with")}</p>
                             {participants.map(p => (
                               <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
                                 <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar)} />
@@ -1158,7 +1164,7 @@ export default function KidDashboard() {
                               data-testid={`button-start-share-${typed.id}`}
                             >
                               <Share2 className="h-3.5 w-3.5" />
-                              Teilen
+                              {t("kidDashboard.startSharing")}
                             </Button>
                           )}
                           {canFinalize && (
@@ -1171,7 +1177,7 @@ export default function KidDashboard() {
                               data-testid={`button-finalize-${typed.id}`}
                             >
                               <CheckCircle2 className="h-3.5 w-3.5" />
-                              Beenden
+                              {t("kidDashboard.finalize")}
                             </Button>
                           )}
                         </div>
@@ -1192,7 +1198,7 @@ export default function KidDashboard() {
                 <Users className="h-7 w-7 text-blue-500" />
               </div>
               <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                Teilen & Sparen 🤝
+                {t("kidDashboard.joinableRewards")}
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1216,7 +1222,7 @@ export default function KidDashboard() {
                               <Gift className="h-10 w-10 text-blue-500" />
                             </div>
                             <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                              {shared.reward?.title || "Belohnung"}
+                              {shared.reward?.title || t("kidDashboard.reward")}
                             </h3>
                             <div className="flex flex-col items-center gap-1.5">
                               <div className="flex items-center gap-2">
@@ -1229,23 +1235,23 @@ export default function KidDashboard() {
                                   </Avatar>
                                 )}
                                 <p className="text-sm text-muted-foreground">
-                                  {initiatorMember?.displayName} teilt
+                                  {initiatorMember?.displayName} {t("kidDashboard.startSharing")}
                                 </p>
                               </div>
                               <Badge variant="secondary" className="gap-1.5 text-xs">
                                 <Users className="h-3 w-3" />
-                                {shared.participants.length + 1} {shared.participants.length === 0 ? "Person" : "Personen"}
+                                {t("kidDashboard.participants", { count: shared.participants.length + 1 })}
                               </Badge>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              Original: {shared.originalPointsSpent} Punkte
+                              {t("kidDashboard.pointsSpent", { count: shared.originalPointsSpent })}
                             </p>
                           </div>
 
                           {/* Participants */}
                           {shared.participants.length > 0 && (
                             <div className="flex items-center justify-center gap-1 flex-wrap">
-                              <p className="text-xs text-muted-foreground mr-1">Dabei:</p>
+                              <p className="text-xs text-muted-foreground mr-1">{t("kidDashboard.with")}</p>
                               {shared.participants.map(p => (
                                 <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
                                   <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar)} />
@@ -1269,12 +1275,12 @@ export default function KidDashboard() {
                                 data-testid={`button-join-${shared.id}`}
                               >
                                 <UserPlus className="h-3.5 w-3.5" />
-                                Mitmachen
+                                {t("kidDashboard.joinFree")}
                               </Button>
                             ) : (
                               <Badge variant="secondary" className="w-full gap-1 justify-center">
                                 <CheckCircle2 className="h-3 w-3" />
-                                Du nimmst teil
+                                {t("kidDashboard.shared")}
                               </Badge>
                             )}
                           </div>
@@ -1294,15 +1300,15 @@ export default function KidDashboard() {
               <Star className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              Deine Aufgaben
+              {t("kidDashboard.tasks")}
             </h2>
           </div>
 
           {myTasks.length === 0 ? (
             <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
               <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-green-500" />
-              <p className="text-lg font-bold text-green-500">Alle Aufgaben erledigt!</p>
-              <p className="text-sm text-muted-foreground mt-2">Super gemacht! 🎉</p>
+              <p className="text-lg font-bold text-green-500">{t("kidDashboard.noTasksYet")}</p>
+              <p className="text-sm text-muted-foreground mt-2">{t("kidDashboard.askParentsTasks")}</p>
             </Card>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1328,7 +1334,7 @@ export default function KidDashboard() {
                 <Target className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-4xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                Familienziele 🎯
+                {t("kidDashboard.familyGoals")}
               </h2>
             </div>
 
@@ -1358,17 +1364,17 @@ export default function KidDashboard() {
                           {isCompleted && (
                             <Badge variant="default" className="gap-1 mb-2">
                               <CheckCircle2 className="h-3 w-3" />
-                              Erreicht!
+                              {t("kidDashboard.goalAchieved")}
                             </Badge>
                           )}
                           <div className="flex flex-wrap items-center gap-2 mt-2">
                             <Badge variant="secondary" className="gap-1 text-xs">
                               <Calendar className="h-3 w-3" />
-                              {goal.contributionPeriod === "weekly" ? "Wöchentlich" : "Monatlich"}
+                              {goal.contributionPeriod === "weekly" ? t("kidDashboard.weeklyLabel") : t("kidDashboard.monthlyLabel")}
                             </Badge>
                             <Badge variant="secondary" className="gap-1 text-xs">
                               <Coins className="h-3 w-3" />
-                              {goal.contributionAmount} Punkte
+                              {goal.contributionAmount} {t("kidDashboard.points")}
                             </Badge>
                           </div>
                         </div>
@@ -1376,9 +1382,9 @@ export default function KidDashboard() {
 
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Fortschritt</span>
+                          <span className="text-sm font-medium">{t("kidDashboard.progressLabel")}</span>
                           <span className="text-sm font-bold">
-                            {goal.currentPoints} / {goal.targetPoints} Punkte
+                            {t("kidDashboard.goalProgress", { current: goal.currentPoints, target: goal.targetPoints })}
                           </span>
                         </div>
                         <Progress value={progress} className="h-3" />
@@ -1396,7 +1402,7 @@ export default function KidDashboard() {
                             className="font-bold"
                           >
                             <TrendingUp className="h-4 w-4 mr-2" />
-                            {goal.contributionAmount} Punkte einzahlen
+                            {t("kidDashboard.contributePoints", { count: goal.contributionAmount })}
                           </Button>
                         )}
                       </div>
@@ -1416,7 +1422,7 @@ export default function KidDashboard() {
                 <Trophy className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-4xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                Bestenliste 🏆
+                {t("kidDashboard.leaderboard")}
               </h2>
             </div>
 
@@ -1465,7 +1471,7 @@ export default function KidDashboard() {
                 className="h-14 px-5 rounded-2xl"
               >
                 <Lightbulb className="h-6 w-6 mr-2 text-amber-500" />
-                <span className="font-bold text-base">Wunsch</span>
+                <span className="font-bold text-base">{t("kidDashboard.requestNewReward")}</span>
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>

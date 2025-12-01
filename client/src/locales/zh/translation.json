@@ -875,7 +875,28 @@
     "askParentsTasks": "请你的家长为你创建一些任务。",
     "leaderboard": "排行榜",
     "requestNewReward": "许个愿望！",
-    "chat": "聊天"
+    "chat": "聊天",
+    "goalAchieved": "已达成！",
+    "weeklyLabel": "每周",
+    "monthlyLabel": "每月",
+    "progressLabel": "进度",
+    "contributePoints": "贡献{{count}}积分",
+    "points": "积分",
+    "weekFormat": "{{year}}年 第{{week}}周",
+    "monthNames": {
+      "jan": "1月",
+      "feb": "2月",
+      "mar": "3月",
+      "apr": "4月",
+      "may": "5月",
+      "jun": "6月",
+      "jul": "7月",
+      "aug": "8月",
+      "sep": "9月",
+      "oct": "10月",
+      "nov": "11月",
+      "dec": "12月"
+    }
   },
   "achievements": {
     "title": "成就",
