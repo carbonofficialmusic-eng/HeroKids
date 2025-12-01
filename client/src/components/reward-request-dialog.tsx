@@ -102,7 +102,7 @@ export function RewardRequestDialog({
           <DialogDescription>
             {isEditing 
               ? t('rewards.adjustRewardDetails')
-              : t('rewards.tellParentsReward')
+              : t('rewards.tellParentsWhatYouWant')
             }
           </DialogDescription>
         </DialogHeader>
@@ -114,10 +114,10 @@ export function RewardRequestDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('rewards.whatRewardWant')}</FormLabel>
+                  <FormLabel>{t('rewards.whatRewardDoYouWant')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t('rewards.requestTitlePlaceholder')}
+                      placeholder={t('rewards.rewardRequestPlaceholder')}
                       {...field}
                       data-testid="input-request-title"
                     />
@@ -135,7 +135,7 @@ export function RewardRequestDialog({
                   <FormLabel>{t('rewards.tellUsMore')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder={t('rewards.requestDescriptionPlaceholder')}
+                      placeholder={t('rewards.tellUsMorePlaceholder')}
                       {...field}
                       value={field.value || ""}
                       data-testid="input-request-description"
@@ -151,7 +151,7 @@ export function RewardRequestDialog({
               name="pointThreshold"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('rewards.howManyPointsCost')}</FormLabel>
+                  <FormLabel>{t('rewards.howManyPoints')}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -181,7 +181,7 @@ export function RewardRequestDialog({
                 disabled={isSubmitting}
                 data-testid={isEditing ? "button-save-request" : "button-submit-request"}
               >
-                {isSubmitting ? (isEditing ? t('rewards.savingRequest') : t('rewards.sendingRequest')) : (isEditing ? t('rewards.saveChanges') : t('rewards.sendRequest'))}
+                {isSubmitting ? (isEditing ? t('rewards.saving') : t('rewards.sending')) : (isEditing ? t('rewards.saveChanges') : t('rewards.sendRequest'))}
               </Button>
             </div>
           </form>
