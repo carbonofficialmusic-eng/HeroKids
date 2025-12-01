@@ -179,7 +179,7 @@ export default function FamilyGoals() {
         <div className="mb-8">
           <Link href="/dashboard">
             <Button variant="outline" data-testid="button-back-dashboard" className="mb-4">
-              {t("backToDashboard")}
+              {t("common.backToDashboard")}
             </Button>
           </Link>
           <h1 className="text-4xl font-black font-accent flex items-center gap-3">
