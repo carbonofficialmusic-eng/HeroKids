@@ -156,6 +156,7 @@ function getProgressColor(percentage: number) {
 
 // Reward Card Component
 function RewardCard({ reward, currentPoints, member }: { reward: Reward; currentPoints: number; member: FamilyMember }) {
+  const { t } = useTranslation();
   const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
   const percentage = Math.min((currentPoints / reward.pointThreshold) * 100, 100);
@@ -348,6 +349,7 @@ function TaskCard({
   member: FamilyMember;
   onOpenTaskDialog: (task: TaskWithMeta) => void;
 }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   
   // Determine task state based on memberCompletionStatus
