@@ -1693,7 +1693,7 @@ export class DatabaseStorage implements IStorage {
       await tx.delete(familyGoals)
         .where(eq(familyGoals.familyName, familyName));
 
-      // 13. Reset all family member stats to zero
+      // 13. Reset all family member stats to zero (including PIN codes)
       for (const memberId of memberIds) {
         await tx.update(familyMembers)
           .set({
@@ -1705,6 +1705,7 @@ export class DatabaseStorage implements IStorage {
             unlockedSkins: [],
             discoveredSkinIds: [],
             activeSkinId: null,
+            pinCode: null,
             updatedAt: new Date(),
           })
           .where(eq(familyMembers.id, memberId));
