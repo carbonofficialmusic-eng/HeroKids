@@ -858,14 +858,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
               };
             }
           })
-        ).then(results => results.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<any>).value));
+        );
+        
+        // Extract successful results from settled promises
+        const resolvedTasks = tasksWithMeta
+          .filter((r) => r.status === "fulfilled")
+          .map((r) => (r as PromiseFulfilledResult<any>).value);
         
         // Filter logic for different task types:
         // 1. Archived tasks: Hide for everyone
         // 2. One-time completed tasks (recurrence = "none" AND status = "completed"): Hide for everyone
         // 3. Recurring tasks: Show even if completed (they will be grayed out in UI)
         // 4. Active tasks: Always show
-        const filteredTasks = tasksWithMeta.filter(
+        const filteredTasks = resolvedTasks.filter(
           (task) => 
             task.status !== "archived" && // Hide archived
             !(task.status === "completed" && task.recurrence === "none") // Hide one-time completed tasks
@@ -929,11 +934,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               };
             }
           })
-        ).then(results => results.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<any>).value));
+        );
+        
+        // Extract successful results from settled promises
+        const resolvedParentTasks = tasksWithMeta
+          .filter((r) => r.status === "fulfilled")
+          .map((r) => (r as PromiseFulfilledResult<any>).value);
         
         // Disable caching for task data
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-        res.json(tasksWithMeta);
+        res.json(resolvedParentTasks);
       }
     } catch (error) {
       console.error("Error fetching tasks:", error);
