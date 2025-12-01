@@ -66,6 +66,12 @@ export const families = pgTable("families", {
   weeklyPrize: text("weekly_prize"), // Prize for weekly leaderboard winner
   monthlyPrize: text("monthly_prize"), // Prize for monthly leaderboard winner
   yearlyPrize: text("yearly_prize"), // Prize for yearly leaderboard winner
+  lastDailyReset: timestamp("last_daily_reset"), // When daily tasks were last reset (null = never)
+  lastWeeklyReset: timestamp("last_weekly_reset"), // When weekly points were last reset (null = never)
+  lastMonthlyReset: timestamp("last_monthly_reset"), // When monthly points were last reset (null = never)
+  lastDailyPeriod: varchar("last_daily_period", { length: 10 }), // Family-local date string "YYYY-MM-DD"
+  lastWeeklyPeriod: varchar("last_weekly_period", { length: 10 }), // Family-local ISO week "RRRR-Www"
+  lastMonthlyPeriod: varchar("last_monthly_period", { length: 7 }), // Family-local month "YYYY-MM"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

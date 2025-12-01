@@ -1,13 +1,7 @@
 import { storage } from "./storage";
 import { achievementEngine } from "./achievementEngine";
-
-// Track last reset dates PER FAMILY to prevent duplicate resets
-// Map: familyName -> { weekly, monthly, daily }
-const lastResetByFamily: Map<string, {
-  weekly: Date;
-  monthly: Date;
-  daily: Date;
-}> = new Map();
+import type { Family } from "@shared/schema";
+import { formatInTimeZone } from "date-fns-tz";
 
 export function startPointsResetScheduler() {
   const startTime = new Date();
@@ -26,87 +20,141 @@ async function checkAndResetPoints() {
     const families = await storage.getFamilies();
     
     for (const family of families) {
-      const familyTimezone = family.timezone || "Europe/Berlin"; // Default to Berlin if not set
-      
-      // Initialize tracking for this family if not exists
-      if (!lastResetByFamily.has(family.familyName)) {
-        lastResetByFamily.set(family.familyName, {
-          weekly: new Date(0),
-          monthly: new Date(0),
-          daily: new Date(0),
-        });
-      }
-      
-      const familyResets = lastResetByFamily.get(family.familyName)!;
-      
-      // Get current time in family's timezone
-      const now = new Date();
-      const familyTimeString = now.toLocaleString('en-US', { 
-        timeZone: familyTimezone,
-        hour12: false,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        weekday: 'long'
-      });
-      
-      // Parse the family's local date/time
-      const familyDate = new Date(now.toLocaleString('en-US', { timeZone: familyTimezone }));
-      
-      // Check for weekly reset (Monday in family's timezone)
-      const isMonday = familyDate.getDay() === 1;
-      const weekNumber = getWeekNumber(familyDate);
-      const lastWeeklyWeekNumber = getWeekNumber(familyResets.weekly);
-      const isSameWeek = 
-        familyResets.weekly.getFullYear() === familyDate.getFullYear() &&
-        lastWeeklyWeekNumber === weekNumber;
-      
-      if (isMonday && !isSameWeek) {
-        console.log(`⏰ Running weekly reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone})`);
-        await resetWeeklyPointsForFamily(family.familyName);
-        familyResets.weekly = familyDate; // Store family's local date, not server time
-      }
-      
-      // Check for monthly reset (1st of month in family's timezone)
-      const isFirstOfMonth = familyDate.getDate() === 1;
-      const isSameMonth =
-        familyResets.monthly.getMonth() === familyDate.getMonth() &&
-        familyResets.monthly.getFullYear() === familyDate.getFullYear();
-      
-      if (isFirstOfMonth && !isSameMonth) {
-        console.log(`⏰ Running monthly reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone})`);
-        await resetMonthlyPointsForFamily(family.familyName);
-        familyResets.monthly = familyDate; // Store family's local date, not server time
-      }
-      
-      // Check for daily reset (new day in family's timezone)
-      const isSameDay =
-        familyResets.daily.getDate() === familyDate.getDate() &&
-        familyResets.daily.getMonth() === familyDate.getMonth() &&
-        familyResets.daily.getFullYear() === familyDate.getFullYear();
-      
-      if (!isSameDay) {
-        const currentHour = familyDate.getHours();
-        const isNearMidnight = currentHour === 0; // Between 00:00 and 00:59
-        const isSafeForLateReset = currentHour >= 2; // After 02:00 (safe time after early morning completions)
-        
-        // Run reset if:
-        // 1. Ideally: Between 00:00-01:00 (near midnight)
-        // 2. Fallback: After 02:00 if reset wasn't executed yet (e.g., due to server downtime)
-        if (isNearMidnight || isSafeForLateReset) {
-          console.log(`⏰ Running daily reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone})`);
-          await resetDailyTasksForFamily(family.familyName);
-          await runDailyAchievementCheckForFamily(family.familyName);
-          familyResets.daily = familyDate; // Store family's local date, not server time
-        } else {
-          console.log(`⏭️  Waiting for safe reset time for family "${family.familyName}" (current hour: ${currentHour}, will reset at 02:00 or later)`);
-        }
-      }
+      await checkAndResetFamily(family);
     }
   } catch (error) {
     console.error("Error checking and resetting points:", error);
+  }
+}
+
+// Get period identifier strings in family's timezone
+function getCurrentPeriods(now: Date, timezone: string): {
+  day: string;       // "2024-12-01"
+  week: string;      // "2024-W49"
+  month: string;     // "2024-12"
+  hour: number;      // 0-23
+  dayOfWeek: number; // 1=Monday, 7=Sunday
+  dayOfMonth: number; // 1-31
+} {
+  return {
+    day: formatInTimeZone(now, timezone, 'yyyy-MM-dd'),
+    week: formatInTimeZone(now, timezone, "RRRR-'W'II"),
+    month: formatInTimeZone(now, timezone, 'yyyy-MM'),
+    hour: parseInt(formatInTimeZone(now, timezone, 'H'), 10),
+    dayOfWeek: parseInt(formatInTimeZone(now, timezone, 'i'), 10), // 1=Monday, 7=Sunday (ISO)
+    dayOfMonth: parseInt(formatInTimeZone(now, timezone, 'd'), 10),
+  };
+}
+
+// Get period from a timestamp in family's timezone (for migration from old timestamps)
+function getPeriodFromTimestamp(timestamp: Date | null, timezone: string): {
+  day: string | null;
+  week: string | null;
+  month: string | null;
+} {
+  if (!timestamp) return { day: null, week: null, month: null };
+  return {
+    day: formatInTimeZone(timestamp, timezone, 'yyyy-MM-dd'),
+    week: formatInTimeZone(timestamp, timezone, "RRRR-'W'II"),
+    month: formatInTimeZone(timestamp, timezone, 'yyyy-MM'),
+  };
+}
+
+async function checkAndResetFamily(family: Family) {
+  const familyTimezone = family.timezone || "Europe/Berlin";
+  const now = new Date();
+  
+  // Get current period identifiers in family's timezone
+  const current = getCurrentPeriods(now, familyTimezone);
+  
+  // Format for logging
+  const familyTimeString = formatInTimeZone(now, familyTimezone, "EEEE, yyyy-MM-dd HH:mm");
+  
+  // Get stored period strings
+  let lastDailyPeriod = family.lastDailyPeriod;
+  let lastWeeklyPeriod = family.lastWeeklyPeriod;
+  let lastMonthlyPeriod = family.lastMonthlyPeriod;
+  
+  // If ANY period strings are null, initialize them and skip resets for this tick
+  // This prevents immediate resets after migration/deployment
+  const needsPeriodInit = !lastDailyPeriod || !lastWeeklyPeriod || !lastMonthlyPeriod;
+  if (needsPeriodInit) {
+    const fromTimestamps = {
+      daily: getPeriodFromTimestamp(family.lastDailyReset, familyTimezone),
+      weekly: getPeriodFromTimestamp(family.lastWeeklyReset, familyTimezone),
+      monthly: getPeriodFromTimestamp(family.lastMonthlyReset, familyTimezone),
+    };
+    
+    // Initialize from timestamps if available, otherwise set to current period
+    const initDailyPeriod = lastDailyPeriod || fromTimestamps.daily.day || current.day;
+    const initWeeklyPeriod = lastWeeklyPeriod || fromTimestamps.weekly.week || current.week;
+    const initMonthlyPeriod = lastMonthlyPeriod || fromTimestamps.monthly.month || current.month;
+    
+    // Persist the initialized periods
+    console.log(`📝 Initializing period strings for family "${family.familyName}": daily=${initDailyPeriod}, weekly=${initWeeklyPeriod}, monthly=${initMonthlyPeriod}`);
+    await storage.updateFamily(family.familyName, {
+      lastDailyPeriod: initDailyPeriod,
+      lastWeeklyPeriod: initWeeklyPeriod,
+      lastMonthlyPeriod: initMonthlyPeriod,
+    });
+    
+    // Skip reset checks for this tick - we just initialized, don't reset immediately
+    return;
+  }
+  
+  // Check for weekly reset - ONLY on Monday (dayOfWeek=1) and if different week
+  const isMonday = current.dayOfWeek === 1;
+  const needsWeeklyReset = isMonday && lastWeeklyPeriod !== current.week;
+  
+  if (needsWeeklyReset) {
+    console.log(`⏰ Running weekly reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone}) [Week ${current.week} vs stored ${lastWeeklyPeriod}]`);
+    await resetWeeklyPointsForFamily(family.familyName);
+    await storage.updateFamily(family.familyName, { 
+      lastWeeklyReset: now,
+      lastWeeklyPeriod: current.week 
+    });
+    // Update local variable for consistency in subsequent checks
+    lastWeeklyPeriod = current.week;
+  }
+  
+  // Check for monthly reset - ONLY on day 1 and if different month
+  const isFirstOfMonth = current.dayOfMonth === 1;
+  const needsMonthlyReset = isFirstOfMonth && lastMonthlyPeriod !== current.month;
+  
+  if (needsMonthlyReset) {
+    console.log(`⏰ Running monthly reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone}) [Month ${current.month} vs stored ${lastMonthlyPeriod}]`);
+    await resetMonthlyPointsForFamily(family.familyName);
+    await storage.updateFamily(family.familyName, { 
+      lastMonthlyReset: now,
+      lastMonthlyPeriod: current.month 
+    });
+    // Update local variable for consistency
+    lastMonthlyPeriod = current.month;
+  }
+  
+  // Check for daily reset - run if we're in a different day
+  const needsDailyReset = lastDailyPeriod !== current.day;
+  
+  if (needsDailyReset) {
+    const isNearMidnight = current.hour === 0; // Between 00:00 and 00:59
+    const isSafeForLateReset = current.hour >= 2; // After 02:00 (safe time after early morning completions)
+    
+    // Run reset if:
+    // 1. Ideally: Between 00:00-01:00 (near midnight)
+    // 2. Fallback: After 02:00 if reset wasn't executed yet (e.g., due to server downtime)
+    if (isNearMidnight || isSafeForLateReset) {
+      console.log(`⏰ Running daily reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone}) [Day ${current.day} vs stored ${lastDailyPeriod}]`);
+      await resetDailyTasksForFamily(family.familyName);
+      await runDailyAchievementCheckForFamily(family.familyName);
+      await storage.updateFamily(family.familyName, { 
+        lastDailyReset: now,
+        lastDailyPeriod: current.day 
+      });
+      // Update local variable for consistency
+      lastDailyPeriod = current.day;
+    } else {
+      console.log(`⏭️  Waiting for safe reset time for family "${family.familyName}" (current hour: ${current.hour}, will reset at 02:00 or later)`);
+    }
   }
 }
 
@@ -136,10 +184,16 @@ async function resetWeeklyPointsForFamily(familyName: string) {
     await storage.resetWeeklyPointsForFamily(familyName);
     console.log(`✅ Weekly points reset for family "${familyName}"`);
     
+    // First: Calculate and award achievements (Perfect Week, Weekly Leader) 
+    // using the current week's data
     await achievementEngine.processEvent({
       type: "midnight_reset",
       familyName,
     });
+    
+    // Then: Reset the weekly achievement counters for the new week
+    await storage.resetWeeklyAchievements(familyName);
+    console.log(`✅ Weekly achievement counters reset for family "${familyName}"`);
   } catch (error) {
     console.error(`Error resetting weekly points for family "${familyName}":`, error);
   }
@@ -152,13 +206,4 @@ async function resetMonthlyPointsForFamily(familyName: string) {
   } catch (error) {
     console.error(`Error resetting monthly points for family "${familyName}":`, error);
   }
-}
-
-// Helper function to get week number
-function getWeekNumber(date: Date): number {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 }
