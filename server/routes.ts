@@ -816,9 +816,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (task.maxCompletions !== null) {
               // Get active completions to show participants
               const completions = await storage.getActiveCompletionsByTask(task.id);
+              // Calculate completion count from approved completions
+              const completionCount = completions.filter(c => c.status === "approved").length;
               return {
                 ...task,
-                remainingSlots: task.maxCompletions - task.completionCount,
+                remainingSlots: task.maxCompletions - completionCount,
                 memberHasCompleted: hasCompleted,
                 memberCompletionStatus: completionStatus,
                 completions, // Include participant list for multi-tasks
@@ -863,9 +865,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (task.maxCompletions !== null) {
               // Get active completions to show participants
               const completions = await storage.getActiveCompletionsByTask(task.id);
+              // Calculate completion count from approved completions
+              const completionCount = completions.filter(c => c.status === "approved").length;
               return {
                 ...task,
-                remainingSlots: task.maxCompletions - task.completionCount,
+                remainingSlots: task.maxCompletions - completionCount,
                 memberHasCompleted: hasCompleted,
                 memberCompletionStatus: completionStatus,
                 completions, // Include participant list for multi-tasks
