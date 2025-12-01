@@ -209,6 +209,7 @@
   },
   "rewards": {
     "title": "Rewards",
+    "requestReward": "Request Reward",
     "createReward": "Create New Reward",
     "editReward": "Edit Reward",
     "availableRewards": "Available Rewards",

@@ -204,6 +204,7 @@
   },
   "rewards": {
     "title": "奖励",
+    "requestReward": "申请奖励",
     "createReward": "创建新奖励",
     "editReward": "编辑奖励",
     "availableRewards": "可兑换奖励",

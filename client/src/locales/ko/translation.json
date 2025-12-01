@@ -208,6 +208,7 @@
   },
   "rewards": {
     "title": "보상",
+    "requestReward": "보상 요청하기",
     "createReward": "새 보상 만들기",
     "editReward": "보상 수정",
     "availableRewards": "사용 가능한 보상",

@@ -219,6 +219,7 @@
   },
   "rewards": {
     "title": "Belohnungen",
+    "requestReward": "Belohnung anfragen",
     "createReward": "Neue Belohnung erstellen",
     "editReward": "Belohnung bearbeiten",
     "availableRewards": "Verfügbare Belohnungen",

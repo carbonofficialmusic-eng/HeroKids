@@ -204,6 +204,7 @@
   },
   "rewards": {
     "title": "Récompenses",
+    "requestReward": "Demander une récompense",
     "createReward": "Créer une nouvelle récompense",
     "editReward": "Modifier la récompense",
     "availableRewards": "Récompenses disponibles",

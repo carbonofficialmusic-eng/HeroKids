@@ -204,6 +204,7 @@
   },
   "rewards": {
     "title": "ごほうび",
+    "requestReward": "ごほうびをリクエスト",
     "createReward": "新しいごほうびを作成",
     "editReward": "ごほうびを編集",
     "availableRewards": "利用可能なごほうび",
