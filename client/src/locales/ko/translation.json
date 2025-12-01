@@ -658,6 +658,28 @@
     "backToDashboard": "대시보드로",
     "proofImage": "증빙 이미지"
   },
+  "rewardsBoard": {
+    "title": "보상 게시판",
+    "backToDashboard": "대시보드로 돌아가기",
+    "loading": "로딩 중...",
+    "manageRedemptions": "가족의 보상 교환을 관리하세요",
+    "trackRewards": "교환한 보상을 추적하세요",
+    "noRewardsYet": "아직 보상이 없습니다",
+    "noRewardsFamilyDesc": "아직 가족이 교환한 보상이 없습니다.",
+    "noRewardsYouDesc": "아직 교환한 보상이 없습니다. 계속 포인트를 모으세요!",
+    "redeemedBy": "{{name}}님이 {{date}}에 교환",
+    "pointsSpent": "{{count}} 포인트",
+    "statusPending": "대기 중",
+    "statusApproved": "승인됨",
+    "statusCompleted": "완료됨",
+    "approve": "승인",
+    "markFulfilled": "완료로 표시",
+    "resetPending": "대기 중으로 되돌리기",
+    "toastStatusUpdated": "상태 업데이트됨",
+    "toastStatusUpdatedDesc": "보상 상태가 성공적으로 업데이트되었습니다.",
+    "toastError": "오류",
+    "toastErrorDesc": "보상 상태를 업데이트하지 못했습니다."
+  },
   "analytics": {
     "title": "분석",
     "familyAnalytics": "가족 분석",
