@@ -1587,11 +1587,25 @@ export class DatabaseStorage implements IStorage {
       await tx.delete(chatMessages)
         .where(eq(chatMessages.familyName, familyName));
 
-      // 9. Delete all family goals (goalContributions will cascade delete automatically)
+      // 9. Delete all achievement awards for members (must be before achievement definitions due to FK)
+      for (const memberId of memberIds) {
+        await tx.delete(achievementAwards)
+          .where(eq(achievementAwards.memberId, memberId));
+      }
+
+      // 10. Delete all achievement members for this family
+      await tx.delete(achievementMembers)
+        .where(eq(achievementMembers.familyName, familyName));
+
+      // 11. Delete all achievement definitions for this family
+      await tx.delete(achievementDefinitions)
+        .where(eq(achievementDefinitions.familyName, familyName));
+
+      // 12. Delete all family goals (goalContributions will cascade delete automatically)
       await tx.delete(familyGoals)
         .where(eq(familyGoals.familyName, familyName));
 
-      // 10. Reset all family member stats to zero
+      // 13. Reset all family member stats to zero
       for (const memberId of memberIds) {
         await tx.update(familyMembers)
           .set({
@@ -1608,7 +1622,7 @@ export class DatabaseStorage implements IStorage {
           .where(eq(familyMembers.id, memberId));
       }
 
-      // 11. Create default tasks for the family (customized baseline)
+      // 14. Create default tasks for the family (customized baseline)
       const defaultTasks = [
         {
           id: crypto.randomUUID(),
@@ -1682,6 +1696,113 @@ export class DatabaseStorage implements IStorage {
 
       for (const task of defaultTasks) {
         await tx.insert(tasks).values(task);
+      }
+
+      // 15. Create default achievements with new defaults (only Weekly Champion and Perfect Week enabled)
+      const defaultAchievements = [
+        {
+          familyName,
+          type: "first_weekly_finisher" as const,
+          slug: "first-weekly-finisher",
+          title: "Weekly Champion",
+          description: "Be the first family member to complete all weekly tasks",
+          bonusPoints: 50,
+          isActive: true,
+          config: {},
+          updatedAt: new Date(),
+        },
+        {
+          familyName,
+          type: "perfect_week" as const,
+          slug: "perfect-week",
+          title: "Perfect Week",
+          description: "Complete all your weekly tasks without any rejections",
+          bonusPoints: 100,
+          isActive: true,
+          config: {},
+          updatedAt: new Date(),
+        },
+        {
+          familyName,
+          type: "task_streak" as const,
+          slug: "task-streak-7",
+          title: "7-Day Streak",
+          description: "Complete tasks for 7 days in a row",
+          bonusPoints: 75,
+          isActive: false,
+          config: { days: 7 },
+          updatedAt: new Date(),
+        },
+        {
+          familyName,
+          type: "task_streak" as const,
+          slug: "task-streak-14",
+          title: "14-Day Streak",
+          description: "Complete tasks for 14 days in a row",
+          bonusPoints: 150,
+          isActive: false,
+          config: { days: 14 },
+          updatedAt: new Date(),
+        },
+        {
+          familyName,
+          type: "task_streak" as const,
+          slug: "task-streak-30",
+          title: "30-Day Streak",
+          description: "Complete tasks for 30 days in a row",
+          bonusPoints: 300,
+          isActive: false,
+          config: { days: 30 },
+          updatedAt: new Date(),
+        },
+        {
+          familyName,
+          type: "lifetime_milestone" as const,
+          slug: "lifetime-500",
+          title: "500 Points Milestone",
+          description: "Earn a total of 500 points",
+          bonusPoints: 100,
+          isActive: false,
+          config: { threshold: 500 },
+          updatedAt: new Date(),
+        },
+        {
+          familyName,
+          type: "lifetime_milestone" as const,
+          slug: "lifetime-1000",
+          title: "1000 Points Milestone",
+          description: "Earn a total of 1000 points",
+          bonusPoints: 200,
+          isActive: false,
+          config: { threshold: 1000 },
+          updatedAt: new Date(),
+        },
+        {
+          familyName,
+          type: "lifetime_milestone" as const,
+          slug: "lifetime-2000",
+          title: "2000 Points Milestone",
+          description: "Earn a total of 2000 points",
+          bonusPoints: 400,
+          isActive: false,
+          config: { threshold: 2000 },
+          updatedAt: new Date(),
+        },
+        {
+          familyName,
+          type: "weekly_leaderboard" as const,
+          slug: "weekly-leaderboard-1st",
+          title: "Weekly Leader",
+          description: "Finish in 1st place on the weekly leaderboard",
+          bonusPoints: 75,
+          isActive: false,
+          config: { rank: 1 },
+          updatedAt: new Date(),
+        },
+      ];
+
+      for (const achievement of defaultAchievements) {
+        await tx.insert(achievementDefinitions).values(achievement);
       }
     });
   }
@@ -1849,7 +1970,7 @@ export class DatabaseStorage implements IStorage {
         title: "7-Day Streak",
         description: "Complete tasks for 7 days in a row",
         bonusPoints: 75,
-        isActive: true,
+        isActive: false,
         config: { days: 7 },
       },
       {
@@ -1859,7 +1980,7 @@ export class DatabaseStorage implements IStorage {
         title: "14-Day Streak",
         description: "Complete tasks for 14 days in a row",
         bonusPoints: 150,
-        isActive: true,
+        isActive: false,
         config: { days: 14 },
       },
       {
@@ -1869,7 +1990,7 @@ export class DatabaseStorage implements IStorage {
         title: "30-Day Streak",
         description: "Complete tasks for 30 days in a row",
         bonusPoints: 300,
-        isActive: true,
+        isActive: false,
         config: { days: 30 },
       },
       {
@@ -1879,7 +2000,7 @@ export class DatabaseStorage implements IStorage {
         title: "500 Points Milestone",
         description: "Earn a total of 500 points",
         bonusPoints: 100,
-        isActive: true,
+        isActive: false,
         config: { threshold: 500 },
       },
       {
@@ -1889,7 +2010,7 @@ export class DatabaseStorage implements IStorage {
         title: "1000 Points Milestone",
         description: "Earn a total of 1000 points",
         bonusPoints: 200,
-        isActive: true,
+        isActive: false,
         config: { threshold: 1000 },
       },
       {
@@ -1899,7 +2020,7 @@ export class DatabaseStorage implements IStorage {
         title: "2000 Points Milestone",
         description: "Earn a total of 2000 points",
         bonusPoints: 400,
-        isActive: true,
+        isActive: false,
         config: { threshold: 2000 },
       },
       {
@@ -1909,7 +2030,7 @@ export class DatabaseStorage implements IStorage {
         title: "Weekly Leader",
         description: "Finish in 1st place on the weekly leaderboard",
         bonusPoints: 75,
-        isActive: true,
+        isActive: false,
         config: { rank: 1 },
       },
     ];
