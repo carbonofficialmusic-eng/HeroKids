@@ -243,14 +243,14 @@ export default function Settings() {
       setMemberForPinSetting(null);
       setNewPin("");
       toast({
-        title: "PIN aktualisiert",
-        description: "Der PIN-Code wurde erfolgreich gesetzt",
+        title: t('settings.pinUpdated'),
+        description: t('settings.pinUpdatedDesc'),
       });
     },
     onError: () => {
       toast({
         title: t('errors.somethingWrong'),
-        description: "Fehler beim Setzen des PIN-Codes",
+        description: t('settings.errorSetPin'),
         variant: "destructive",
       });
     },
@@ -579,20 +579,20 @@ export default function Settings() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <span className="text-xl">🕐</span>
-                <CardTitle>Zeitzone</CardTitle>
+                <CardTitle>{t('settings.timezoneTitle')}</CardTitle>
               </div>
               <CardDescription>
-                Legen Sie Ihre lokale Zeitzone fest. Täglich, wöchentliche und monatliche Resets erfolgen um Mitternacht in Ihrer Zeitzone.
+                {t('settings.timezoneDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5 flex-1">
                   <Label htmlFor="timezone-select" className="text-base">
-                    Ihre Zeitzone
+                    {t('settings.yourTimezone')}
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Aktuell erkannt: <span className="font-mono text-xs">{browserTimezone}</span>
+                    {t('settings.currentlyDetected')} <span className="font-mono text-xs">{browserTimezone}</span>
                   </p>
                 </div>
                 <Select
@@ -601,7 +601,7 @@ export default function Settings() {
                   disabled={updateSettingsMutation.isPending}
                 >
                   <SelectTrigger className="w-[240px]" data-testid="select-timezone">
-                    <SelectValue placeholder="Zeitzone wählen" />
+                    <SelectValue placeholder={t('settings.selectTimezone')} />
                   </SelectTrigger>
                   <SelectContent>
                     {timezoneOptions.map((tz) => (
@@ -615,7 +615,7 @@ export default function Settings() {
               {familyData?.timezone !== browserTimezone && (
                 <div className="p-3 rounded-lg bg-muted/50 border border-muted">
                   <p className="text-sm text-muted-foreground">
-                    💡 <strong>Hinweis:</strong> Ihre eingestellte Zeitzone ({familyData?.timezone}) unterscheidet sich von Ihrer Browser-Zeitzone ({browserTimezone}).
+                    💡 <strong>{t('settings.timezoneNote')}</strong> {t('settings.timezoneMismatch', { set: familyData?.timezone, browser: browserTimezone })}
                   </p>
                 </div>
               )}
@@ -762,22 +762,22 @@ export default function Settings() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Key className="h-5 w-5 text-primary" />
-                <CardTitle>App-Nutzung auf einem Gerät</CardTitle>
+                <CardTitle>{t('settings.singleDeviceTitle')}</CardTitle>
               </div>
               <CardDescription>
-                Schützen Sie Elternprofile mit PIN-Codes bei gemeinsamer Gerätenutzung
+                {t('settings.singleDeviceDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="single-device-mode" className="text-base">
-                    Einzelgerät-Modus
+                    {t('settings.singleDeviceMode')}
                   </Label>
                   <p className="text-sm text-muted-foreground">
                     {familyData?.singleDeviceMode 
-                      ? "Kinder benötigen PIN-Code um zu Elternprofilen zu wechseln"
-                      : "Kinder können frei zwischen allen Profilen wechseln"}
+                      ? t('settings.singleDeviceModeEnabled')
+                      : t('settings.singleDeviceModeDisabled')}
                   </p>
                 </div>
                 <Switch
@@ -797,16 +797,16 @@ export default function Settings() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Key className="h-5 w-5 text-primary" />
-                  <CardTitle>Eltern PIN-Codes</CardTitle>
+                  <CardTitle>{t('settings.parentPinCodesTitle')}</CardTitle>
                 </div>
                 <CardDescription>
-                  Verwalten Sie die PIN-Codes für Eltern-Profile
+                  {t('settings.parentPinCodesDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {membersLoading ? (
                   <div className="text-center py-4 text-muted-foreground">
-                    Lade Mitglieder...
+                    {t('settings.loadingMembers')}
                   </div>
                 ) : familyMembers && familyMembers.length > 0 ? (
                   <div className="space-y-3">
@@ -828,7 +828,7 @@ export default function Settings() {
                             <div>
                               <div className="font-medium">{parent.displayName}</div>
                               <div className="text-sm text-muted-foreground">
-                                {parent.pinCode ? "PIN gesetzt" : "Kein PIN"}
+                                {parent.pinCode ? t('settings.pinSet') : t('settings.noPin')}
                               </div>
                             </div>
                           </div>
@@ -842,14 +842,14 @@ export default function Settings() {
                             data-testid={`button-set-pin-${parent.id}`}
                           >
                             <Key className="h-4 w-4 mr-2" />
-                            {parent.pinCode ? "PIN ändern" : "PIN setzen"}
+                            {parent.pinCode ? t('settings.changePin') : t('settings.setPin')}
                           </Button>
                         </div>
                       ))}
                   </div>
                 ) : (
                   <div className="text-center py-4 text-muted-foreground">
-                    Keine Eltern gefunden
+                    {t('settings.noMembersYet')}
                   </div>
                 )}
               </CardContent>
@@ -861,15 +861,15 @@ export default function Settings() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-primary" />
-                <CardTitle>Achievements & Allowance Bonuses</CardTitle>
+                <CardTitle>{t('settings.achievementsTitle')}</CardTitle>
               </div>
               <CardDescription>
-                Configure automatic bonus points when children reach milestones
+                {t('settings.achievementsDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Set up achievements like "First to Finish Weekly Tasks" or "Perfect Week" that automatically award bonus points.
+                {t('settings.achievementsInfo')}
               </p>
               <Button 
                 onClick={() => setLocation("/achievements")}
@@ -877,7 +877,7 @@ export default function Settings() {
                 className="w-full"
               >
                 <Trophy className="h-4 w-4 mr-2" />
-                Configure Achievements
+                {t('settings.configureAchievements')}
               </Button>
             </CardContent>
           </Card>
@@ -996,15 +996,15 @@ export default function Settings() {
         <AlertDialogContent data-testid="dialog-set-pin">
           <AlertDialogHeader>
             <AlertDialogTitle>
-              PIN-Code {memberForPinSetting?.pinCode ? "ändern" : "setzen"}
+              {memberForPinSetting?.pinCode ? t('settings.changePin') : t('settings.setPinTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Setzen Sie einen 4-stelligen PIN-Code für {memberForPinSetting?.displayName}
+              {t('settings.setPinDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="pin-input">PIN-Code (4 Ziffern)</Label>
+              <Label htmlFor="pin-input">{t('settings.enterPin')}</Label>
               <Input
                 id="pin-input"
                 type="text"
@@ -1016,13 +1016,10 @@ export default function Settings() {
                   const value = e.target.value.replace(/[^0-9]/g, '');
                   setNewPin(value);
                 }}
-                placeholder="0000"
+                placeholder={t('settings.pinPlaceholder')}
                 className="text-center text-2xl tracking-widest font-mono"
                 data-testid="input-pin-code"
               />
-              <p className="text-sm text-muted-foreground">
-                Dieser PIN wird benötigt, um zu diesem Profil zu wechseln
-              </p>
             </div>
           </div>
           <AlertDialogFooter>
@@ -1037,7 +1034,7 @@ export default function Settings() {
                 disabled={setPinMutation.isPending}
                 data-testid="button-clear-pin"
               >
-                PIN löschen
+                {t('settings.removePin')}
               </Button>
             )}
             <AlertDialogCancel
@@ -1049,7 +1046,7 @@ export default function Settings() {
               disabled={setPinMutation.isPending}
               data-testid="button-cancel-pin"
             >
-              Abbrechen
+              {t('settings.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
@@ -1060,7 +1057,7 @@ export default function Settings() {
               disabled={setPinMutation.isPending || newPin.length !== 4}
               data-testid="button-save-pin"
             >
-              {setPinMutation.isPending ? "Speichern..." : "Speichern"}
+              {setPinMutation.isPending ? t('settings.saving') : t('settings.savePin')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
