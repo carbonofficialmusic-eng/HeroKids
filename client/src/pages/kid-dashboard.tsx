@@ -894,11 +894,13 @@ export default function KidDashboard() {
 
   // Filter tasks: different logic for multi-completion vs normal tasks
   const myTasks = tasks.filter(t => {
-    // Multi-Completion Tasks: Show until ALL slots are filled (hide only when remainingSlots <= 0)
-    // This way all family members see the counter (1/3, 2/3) until fully complete
+    // Multi-Completion Tasks
     if (t.maxCompletions !== null) {
-      // remainingSlots > 0 means there are still open slots - keep showing
-      // remainingSlots <= 0 means all slots are filled - hide for everyone
+      // Recurring Multi-Tasks: Always show (grayed out when all slots filled)
+      if (t.recurrence !== "none") {
+        return true;
+      }
+      // One-time Multi-Tasks: Hide when ALL slots are filled (remainingSlots <= 0)
       return t.remainingSlots === null || t.remainingSlots === undefined || t.remainingSlots > 0;
     }
     // Normal one-time tasks: Hide when member (or family) has completed
