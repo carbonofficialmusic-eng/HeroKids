@@ -233,7 +233,7 @@ import schoolHeroBg from "@assets/generated_images/school_hero_rooftop_backgroun
 
 // Tier 12 backgrounds - Gaming Legends (individual backgrounds)
 import proGamerBg from "@assets/generated_images/pro_gamer_arena_background.png";
-import pixelWarriorBg from "@assets/generated_images/pixel_warrior_retro_background.png";
+import pixelWarriorBg from "@assets/generated_images/pixel_warrior_fantasy_landscape_background.png";
 import controllerKingBg from "@assets/generated_images/controller_king_throne_background.png";
 import vrChampionBg from "@assets/generated_images/vr_champion_cyberspace_background.png";
 import streamStarBg from "@assets/generated_images/stream_star_studio_background.png";
