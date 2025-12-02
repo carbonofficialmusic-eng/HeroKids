@@ -892,10 +892,18 @@ export default function KidDashboard() {
       return Math.abs(currentPoints - a.pointThreshold) - Math.abs(currentPoints - b.pointThreshold);
     });
 
-  // Filter tasks: show incomplete tasks or recurring tasks
-  const myTasks = tasks.filter(t => 
-    !t.memberHasCompleted || t.recurrence !== "none"
-  );
+  // Filter tasks: different logic for multi-completion vs normal tasks
+  const myTasks = tasks.filter(t => {
+    // Multi-Completion Tasks: Show until ALL slots are filled (hide only when remainingSlots <= 0)
+    // This way all family members see the counter (1/3, 2/3) until fully complete
+    if (t.maxCompletions !== null) {
+      // remainingSlots > 0 means there are still open slots - keep showing
+      // remainingSlots <= 0 means all slots are filled - hide for everyone
+      return t.remainingSlots === null || t.remainingSlots === undefined || t.remainingSlots > 0;
+    }
+    // Normal one-time tasks: Hide when member (or family) has completed
+    return !t.memberHasCompleted || t.recurrence !== "none";
+  });
 
   return (
     <div className="min-h-screen pb-20">
