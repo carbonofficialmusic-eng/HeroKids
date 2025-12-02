@@ -408,7 +408,15 @@
     "stream-star": "Star du Stream",
     "arcade-master": "Maître d'Arcade",
     "console-hero": "Héros Console",
-    "level-boss": "Boss de Niveau"
+    "level-boss": "Boss de Niveau",
+    "shield-blaze": "Flamme Bouclier",
+    "comet-dash": "Sprint Comète",
+    "wave-glider": "Surfeur des Vagues",
+    "forest-guard": "Gardien de la Forêt",
+    "luna-beacon": "Phare Lunaire",
+    "sunrise-spark": "Étincelle d'Aurore",
+    "bloom-guardian": "Gardienne Florale",
+    "breeze-captain": "Capitaine du Vent"
   },
   "chat": {
     "title": "Chat Familial",

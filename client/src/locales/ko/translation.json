@@ -413,7 +413,15 @@
     "stream-star": "스트림 스타",
     "arcade-master": "아케이드 마스터",
     "console-hero": "콘솔 영웅",
-    "level-boss": "레벨 보스"
+    "level-boss": "레벨 보스",
+    "shield-blaze": "실드 블레이즈",
+    "comet-dash": "코멧 대시",
+    "wave-glider": "웨이브 글라이더",
+    "forest-guard": "포레스트 가드",
+    "luna-beacon": "루나 비콘",
+    "sunrise-spark": "선라이즈 스파크",
+    "bloom-guardian": "블룸 가디언",
+    "breeze-captain": "브리즈 캡틴"
   },
   "chat": {
     "title": "가족 채팅",

@@ -408,7 +408,15 @@
     "stream-star": "直播明星",
     "arcade-master": "街机大师",
     "console-hero": "主机英雄",
-    "level-boss": "关卡老大"
+    "level-boss": "关卡老大",
+    "shield-blaze": "护盾之焰",
+    "comet-dash": "彗星冲刺",
+    "wave-glider": "波浪滑翔者",
+    "forest-guard": "森林守护者",
+    "luna-beacon": "月光灯塔",
+    "sunrise-spark": "日出火花",
+    "bloom-guardian": "花朵守护者",
+    "breeze-captain": "微风队长"
   },
   "chat": {
     "title": "家庭聊天",

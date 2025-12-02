@@ -408,7 +408,15 @@
     "stream-star": "ストリームスター",
     "arcade-master": "アーケードマスター",
     "console-hero": "コンソールヒーロー",
-    "level-boss": "レベルボス"
+    "level-boss": "レベルボス",
+    "shield-blaze": "シールドブレイズ",
+    "comet-dash": "コメットダッシュ",
+    "wave-glider": "ウェーブグライダー",
+    "forest-guard": "フォレストガード",
+    "luna-beacon": "ルナビーコン",
+    "sunrise-spark": "サンライズスパーク",
+    "bloom-guardian": "ブルームガーディアン",
+    "breeze-captain": "ブリーズキャプテン"
   },
   "chat": {
     "title": "ファミリーチャット",

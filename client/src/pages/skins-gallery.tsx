@@ -152,6 +152,7 @@ export default function SkinsGallery() {
   const tier10Skins = skins.filter(s => s.tier === 10);
   const tier11Skins = skins.filter(s => s.tier === 11);
   const tier12Skins = skins.filter(s => s.tier === 12);
+  const tier13Skins = skins.filter(s => s.tier === 13);
   
   console.log('🎨 Frontend: Tier distribution:', {
     tier1: tier1Skins.length,
@@ -166,6 +167,7 @@ export default function SkinsGallery() {
     tier10: tier10Skins.length,
     tier11: tier11Skins.length,
     tier12: tier12Skins.length,
+    tier13: tier13Skins.length,
   });
 
   const renderSkinCard = (skin: Skin) => {
@@ -610,6 +612,29 @@ export default function SkinsGallery() {
           <div className="grid grid-cols-4 gap-2">
             {tier12Skins.length > 0 ? (
               tier12Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 13 - HeroKids Legacy */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              HeroKids Legacy
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 13
+                ? t('skins.unlockedUseCards')
+                : "Unlock at 8,400 points"}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier13Skins.length > 0 ? (
+              tier13Skins.map(renderSkinCard)
             ) : (
               <p className="col-span-4 text-center text-muted-foreground py-8">
                 {t('skins.noSkinsInTier')}

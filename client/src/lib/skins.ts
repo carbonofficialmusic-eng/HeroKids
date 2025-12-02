@@ -119,6 +119,16 @@ import arcadeMasterImg from "@assets/generated_images/arcade_master_retro_avatar
 import consoleHeroImg from "@assets/generated_images/console_hero_gamer_avatar.png";
 import levelBossImg from "@assets/generated_images/level_boss_gaming_avatar.png";
 
+// Tier 13 - HeroKids Legacy (Logo-style superhero collection - 4 boys, 4 girls)
+import shieldBlazeImg from "@assets/generated_images/shield_blaze_boy_hero_avatar.png";
+import cometDashImg from "@assets/generated_images/comet_dash_boy_hero_avatar.png";
+import waveGliderImg from "@assets/generated_images/wave_glider_boy_hero_avatar.png";
+import forestGuardImg from "@assets/generated_images/forest_guard_boy_hero_avatar.png";
+import lunaBeaconImg from "@assets/generated_images/luna_beacon_girl_hero_avatar.png";
+import sunriseSparkImg from "@assets/generated_images/sunrise_spark_girl_hero_avatar.png";
+import bloomGuardianImg from "@assets/generated_images/bloom_guardian_girl_hero_avatar.png";
+import breezeCaptainImg from "@assets/generated_images/breeze_captain_girl_hero_avatar.png";
+
 // Import themed background images
 // Modern fresh backgrounds for Tier 1
 import modernCitySkylineBg from "@assets/generated_images/Modern_city_skyline_background_a5f841c6.png";
@@ -241,6 +251,16 @@ import arcadeMasterBg from "@assets/generated_images/arcade_master_retro_backgro
 import consoleHeroBg from "@assets/generated_images/console_hero_setup_background.png";
 import levelBossBg from "@assets/generated_images/level_boss_throne_background.png";
 
+// Tier 13 backgrounds - HeroKids Legacy
+import shieldBlazeBg from "@assets/generated_images/shield_blaze_city_protection_background.png";
+import cometDashBg from "@assets/generated_images/comet_dash_sky_bridge_background.png";
+import waveGliderBg from "@assets/generated_images/wave_glider_ocean_bay_background.png";
+import forestGuardBg from "@assets/generated_images/forest_guard_nature_clearing_background.png";
+import lunaBeaconBg from "@assets/generated_images/luna_beacon_moonlit_rooftop_background.png";
+import sunriseSparkBg from "@assets/generated_images/sunrise_spark_hilltop_dawn_background.png";
+import bloomGuardianBg from "@assets/generated_images/bloom_guardian_flower_garden_background.png";
+import breezeCaptainBg from "@assets/generated_images/breeze_captain_cloud_deck_background.png";
+
 // Skin image mappings for new HeroKids themed skins
 export const SKIN_IMAGES: Record<string, string> = {
   // Tier 1 - Starter Heroes
@@ -362,6 +382,16 @@ export const SKIN_IMAGES: Record<string, string> = {
   "arcade-master": arcadeMasterImg,
   "console-hero": consoleHeroImg,
   "level-boss": levelBossImg,
+  
+  // Tier 13 - HeroKids Legacy (Logo-style)
+  "shield-blaze": shieldBlazeImg,
+  "comet-dash": cometDashImg,
+  "wave-glider": waveGliderImg,
+  "forest-guard": forestGuardImg,
+  "luna-beacon": lunaBeaconImg,
+  "sunrise-spark": sunriseSparkImg,
+  "bloom-guardian": bloomGuardianImg,
+  "breeze-captain": breezeCaptainImg,
 };
 
 // Themed background mappings for new HeroKids themed skins
@@ -485,6 +515,16 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "arcade-master": arcadeMasterBg,
   "console-hero": consoleHeroBg,
   "level-boss": levelBossBg,
+  
+  // Tier 13 - HeroKids Legacy (Logo-style backgrounds)
+  "shield-blaze": shieldBlazeBg,
+  "comet-dash": cometDashBg,
+  "wave-glider": waveGliderBg,
+  "forest-guard": forestGuardBg,
+  "luna-beacon": lunaBeaconBg,
+  "sunrise-spark": sunriseSparkBg,
+  "bloom-guardian": bloomGuardianBg,
+  "breeze-captain": breezeCaptainBg,
 };
 
 // Helper to get avatar URL - respects useCustomAvatar flag to allow custom avatar + skin background

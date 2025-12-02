@@ -424,7 +424,15 @@
     "stream-star": "Stream-Star",
     "arcade-master": "Arcade-Meister",
     "console-hero": "Konsolen-Held",
-    "level-boss": "Level-Boss"
+    "level-boss": "Level-Boss",
+    "shield-blaze": "Schildflamme",
+    "comet-dash": "Kometensprint",
+    "wave-glider": "Wellengleiter",
+    "forest-guard": "Waldwächter",
+    "luna-beacon": "Mondlicht",
+    "sunrise-spark": "Sonnenfunke",
+    "bloom-guardian": "Blütenwächterin",
+    "breeze-captain": "Windkapitänin"
   },
   "chat": {
     "title": "Familien-Chat",

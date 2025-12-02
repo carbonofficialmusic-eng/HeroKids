@@ -414,7 +414,15 @@
     "stream-star": "Stream Star",
     "arcade-master": "Arcade Master",
     "console-hero": "Console Hero",
-    "level-boss": "Level Boss"
+    "level-boss": "Level Boss",
+    "shield-blaze": "Shield Blaze",
+    "comet-dash": "Comet Dash",
+    "wave-glider": "Wave Glider",
+    "forest-guard": "Forest Guard",
+    "luna-beacon": "Luna Beacon",
+    "sunrise-spark": "Sunrise Spark",
+    "bloom-guardian": "Bloom Guardian",
+    "breeze-captain": "Breeze Captain"
   },
   "chat": {
     "title": "Family Chat",

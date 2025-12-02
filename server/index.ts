@@ -285,13 +285,55 @@ async function autoSeedSkinsIfNeeded() {
       { id: "arcade-master", name: "Arcade Master", description: "Champion of classic arcade games with high scores!", imageUrl: "🕹️", pointsRequired: 5860, bonusPoints: 0 },
       { id: "console-hero", name: "Console Hero", description: "Ultimate gaming hero with legendary achievements!", imageUrl: "🎮", pointsRequired: 5920, bonusPoints: 0 },
       { id: "level-boss", name: "Level Boss", description: "Final boss character with epic powers and style!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 30 },
+      
+      // Tier 13 - HeroKids Legacy (Logo-style collection, 6060-6500 points) - Bonus Slots: 1, 4, 7
+      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6060, bonusPoints: 10 },
+      { id: "comet-dash", name: "Comet Dash", description: "Super-fast hero boy with comet trail speed!", imageUrl: "☄️", pointsRequired: 6120, bonusPoints: 0 },
+      { id: "wave-glider", name: "Wave Glider", description: "Ocean hero boy surfing on water powers!", imageUrl: "🌊", pointsRequired: 6180, bonusPoints: 0 },
+      { id: "forest-guard", name: "Forest Guard", description: "Nature hero boy with leaf shield protection!", imageUrl: "🌲", pointsRequired: 6240, bonusPoints: 15 },
+      { id: "luna-beacon", name: "Luna Beacon", description: "Moonlight hero girl casting lunar beams!", imageUrl: "🌙", pointsRequired: 6300, bonusPoints: 0 },
+      { id: "sunrise-spark", name: "Sunrise Spark", description: "Dawn hero girl radiating sun energy!", imageUrl: "🌅", pointsRequired: 6360, bonusPoints: 0 },
+      { id: "bloom-guardian", name: "Bloom Guardian", description: "Flower hero girl with petal shield powers!", imageUrl: "🌸", pointsRequired: 6420, bonusPoints: 25 },
+      { id: "breeze-captain", name: "Breeze Captain", description: "Wind hero girl guiding air currents!", imageUrl: "💨", pointsRequired: 6500, bonusPoints: 0 },
     ];
 
     await db.insert(skins).values(SKIN_DATA);
 
-    log(`✅ Successfully auto-seeded ${SKIN_DATA.length} character skins! (12 collections × 8 skins)`);
+    log(`✅ Successfully auto-seeded ${SKIN_DATA.length} character skins! (13 collections × 8 skins)`);
   } catch (error) {
     console.error("❌ Error auto-seeding skins:", error);
+  }
+}
+
+// Add Tier 13 skins incrementally if they don't exist
+async function addTier13SkinsIfNeeded() {
+  try {
+    const tier13Skin = await db.select().from(skins).where(
+      sql`${skins.id} = 'shield-blaze'`
+    );
+
+    if (tier13Skin.length > 0) {
+      log("✅ Tier 13 HeroKids Legacy skins already exist");
+      return;
+    }
+
+    log("🌱 Adding Tier 13 HeroKids Legacy skins (8 new skins)...");
+    
+    const TIER_13_SKINS = [
+      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6060, bonusPoints: 10 },
+      { id: "comet-dash", name: "Comet Dash", description: "Super-fast hero boy with comet trail speed!", imageUrl: "☄️", pointsRequired: 6120, bonusPoints: 0 },
+      { id: "wave-glider", name: "Wave Glider", description: "Ocean hero boy surfing on water powers!", imageUrl: "🌊", pointsRequired: 6180, bonusPoints: 0 },
+      { id: "forest-guard", name: "Forest Guard", description: "Nature hero boy with leaf shield protection!", imageUrl: "🌲", pointsRequired: 6240, bonusPoints: 15 },
+      { id: "luna-beacon", name: "Luna Beacon", description: "Moonlight hero girl casting lunar beams!", imageUrl: "🌙", pointsRequired: 6300, bonusPoints: 0 },
+      { id: "sunrise-spark", name: "Sunrise Spark", description: "Dawn hero girl radiating sun energy!", imageUrl: "🌅", pointsRequired: 6360, bonusPoints: 0 },
+      { id: "bloom-guardian", name: "Bloom Guardian", description: "Flower hero girl with petal shield powers!", imageUrl: "🌸", pointsRequired: 6420, bonusPoints: 25 },
+      { id: "breeze-captain", name: "Breeze Captain", description: "Wind hero girl guiding air currents!", imageUrl: "💨", pointsRequired: 6500, bonusPoints: 0 },
+    ];
+
+    await db.insert(skins).values(TIER_13_SKINS);
+    log("✅ Successfully added Tier 13 HeroKids Legacy skins!");
+  } catch (error) {
+    console.error("❌ Error adding Tier 13 skins:", error);
   }
 }
 
@@ -437,11 +479,21 @@ async function forceReseedSkinsIfNeeded() {
       { id: "arcade-master", name: "Arcade Master", description: "Champion of classic arcade games with high scores!", imageUrl: "🕹️", pointsRequired: 5860, bonusPoints: 0 },
       { id: "console-hero", name: "Console Hero", description: "Ultimate gaming hero with legendary achievements!", imageUrl: "🎮", pointsRequired: 5920, bonusPoints: 0 },
       { id: "level-boss", name: "Level Boss", description: "Final boss character with epic powers and style!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 30 },
+      
+      // Tier 13 - HeroKids Legacy (Logo-style collection, 6060-6500 points) - Bonus Slots: 1, 4, 7
+      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6060, bonusPoints: 10 },
+      { id: "comet-dash", name: "Comet Dash", description: "Super-fast hero boy with comet trail speed!", imageUrl: "☄️", pointsRequired: 6120, bonusPoints: 0 },
+      { id: "wave-glider", name: "Wave Glider", description: "Ocean hero boy surfing on water powers!", imageUrl: "🌊", pointsRequired: 6180, bonusPoints: 0 },
+      { id: "forest-guard", name: "Forest Guard", description: "Nature hero boy with leaf shield protection!", imageUrl: "🌲", pointsRequired: 6240, bonusPoints: 15 },
+      { id: "luna-beacon", name: "Luna Beacon", description: "Moonlight hero girl casting lunar beams!", imageUrl: "🌙", pointsRequired: 6300, bonusPoints: 0 },
+      { id: "sunrise-spark", name: "Sunrise Spark", description: "Dawn hero girl radiating sun energy!", imageUrl: "🌅", pointsRequired: 6360, bonusPoints: 0 },
+      { id: "bloom-guardian", name: "Bloom Guardian", description: "Flower hero girl with petal shield powers!", imageUrl: "🌸", pointsRequired: 6420, bonusPoints: 25 },
+      { id: "breeze-captain", name: "Breeze Captain", description: "Wind hero girl guiding air currents!", imageUrl: "💨", pointsRequired: 6500, bonusPoints: 0 },
     ];
 
     await db.insert(skins).values(SKIN_DATA);
 
-    log(`✅ Force reseeded all ${SKIN_DATA.length} character skins! (12 collections × 8 skins)`);
+    log(`✅ Force reseeded all ${SKIN_DATA.length} character skins! (13 collections × 8 skins)`);
   } catch (error) {
     console.error("❌ Error force reseeding skins:", error);
   }
@@ -455,6 +507,9 @@ async function forceReseedSkinsIfNeeded() {
 
   // Force reseed all skins if Vampire Adventure doesn't exist (one-time migration)
   await forceReseedSkinsIfNeeded();
+  
+  // Add Tier 13 HeroKids Legacy skins if they don't exist
+  await addTier13SkinsIfNeeded();
 
   // Start points reset scheduler
   startPointsResetScheduler();
