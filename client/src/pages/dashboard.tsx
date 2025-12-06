@@ -731,9 +731,11 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-3">
                 {/* Row 1: Approvals, Rewards Board */}
                 <Link href="/approvals" className="w-full">
-                  <Button variant="card" data-testid="button-approvals" className="relative w-full h-14 whitespace-normal leading-tight">
-                    <ClipboardCheck className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="text-center">{t("dashboard.approvals")}</span>
+                  <Button variant="card" data-testid="button-approvals" className="relative w-full h-14 justify-start px-4 gap-3">
+                    <span className="w-6 flex-shrink-0 flex justify-center">
+                      <ClipboardCheck className="h-5 w-5" />
+                    </span>
+                    <span className="text-left flex-1">{t("dashboard.approvals")}</span>
                     {pendingApprovalsData && pendingApprovalsData.count > 0 && (
                       <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex-shrink-0" data-testid="badge-pending-approvals">
                         {pendingApprovalsData.count}
@@ -742,9 +744,11 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 <Link href="/rewards-board" className="w-full">
-                  <Button variant="card" data-testid="button-rewards-board" className="relative w-full h-14 whitespace-normal leading-tight">
-                    <Gift className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="text-center">{t("dashboard.rewardsBoard")}</span>
+                  <Button variant="card" data-testid="button-rewards-board" className="relative w-full h-14 justify-start px-4 gap-3">
+                    <span className="w-6 flex-shrink-0 flex justify-center">
+                      <Gift className="h-5 w-5" />
+                    </span>
+                    <span className="text-left flex-1">{t("dashboard.rewardsBoard")}</span>
                     {pendingRewardsData && pendingRewardsData.count > 0 && (
                       <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex-shrink-0" data-testid="badge-pending-rewards">
                         {pendingRewardsData.count}
@@ -754,15 +758,19 @@ export default function Dashboard() {
                 </Link>
                 {/* Row 2: Family Goals, Family Chat */}
                 <Link href="/family-goals" className="w-full">
-                  <Button variant="card" data-testid="button-family-goals" className="w-full h-14 whitespace-normal leading-tight">
-                    <Target className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="text-center">{t("dashboard.familyGoals")}</span>
+                  <Button variant="card" data-testid="button-family-goals" className="w-full h-14 justify-start px-4 gap-3">
+                    <span className="w-6 flex-shrink-0 flex justify-center">
+                      <Target className="h-5 w-5" />
+                    </span>
+                    <span className="text-left flex-1">{t("dashboard.familyGoals")}</span>
                   </Button>
                 </Link>
                 <Link href="/chat" className="w-full">
-                  <Button variant="card" data-testid="button-chat" className="relative w-full h-14 whitespace-normal leading-tight">
-                    <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="text-center">{t("nav.chat")}</span>
+                  <Button variant="card" data-testid="button-chat" className="relative w-full h-14 justify-start px-4 gap-3">
+                    <span className="w-6 flex-shrink-0 flex justify-center">
+                      <MessageCircle className="h-5 w-5" />
+                    </span>
+                    <span className="text-left flex-1">{t("nav.chat")}</span>
                     {unreadChatData && unreadChatData.count > 0 && (
                       <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex-shrink-0" data-testid="badge-unread-count">
                         {unreadChatData.count}
@@ -777,10 +785,12 @@ export default function Dashboard() {
                     setTaskDialogOpen(true);
                   }}
                   data-testid="button-add-task"
-                  className="w-full h-14 whitespace-normal leading-tight"
+                  className="w-full h-14 justify-start px-4 gap-3"
                 >
-                  <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <span className="text-center">{t("dashboard.addTask")}</span>
+                  <span className="w-6 flex-shrink-0 flex justify-center">
+                    <Plus className="h-5 w-5" />
+                  </span>
+                  <span className="text-left flex-1">{t("dashboard.addTask")}</span>
                 </Button>
                 <Button
                   onClick={() => {
@@ -788,10 +798,12 @@ export default function Dashboard() {
                     setRewardDialogOpen(true);
                   }}
                   data-testid="button-add-reward"
-                  className="w-full h-14 whitespace-normal leading-tight"
+                  className="w-full h-14 justify-start px-4 gap-3"
                 >
-                  <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <span className="text-center">{t("dashboard.addReward")}</span>
+                  <span className="w-6 flex-shrink-0 flex justify-center">
+                    <Plus className="h-5 w-5" />
+                  </span>
+                  <span className="text-left flex-1">{t("dashboard.addReward")}</span>
                 </Button>
               </div>
 
