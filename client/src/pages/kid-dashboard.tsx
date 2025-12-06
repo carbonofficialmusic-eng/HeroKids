@@ -1540,25 +1540,25 @@ export default function KidDashboard() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5, type: "spring" }}
       >
-        <Card className="p-1.5 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl mx-auto">
-          <div className="flex justify-around gap-2">
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+        <Card className="p-1.5 mx-2 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl sm:mx-auto">
+          <div className="flex justify-center gap-1 sm:gap-2">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px]">
               <Button 
                 variant="ghost" 
                 size="lg" 
                 onClick={() => setRequestRewardDialogOpen(true)}
                 data-testid="button-nav-request-reward" 
-                className="h-14 px-5 rounded-2xl"
+                className="h-14 w-full px-3 sm:px-5 rounded-2xl"
               >
-                <Lightbulb className="h-6 w-6 mr-2 text-amber-500" />
-                <span className="font-bold text-base">{t("kidDashboard.requestNewReward")}</span>
+                <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-amber-500 flex-shrink-0" />
+                <span className="font-bold text-sm sm:text-base truncate">{t("kidDashboard.requestNewReward")}</span>
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 px-5 rounded-2xl">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px]">
+              <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
                 <Link href="/chat">
-                  <MessageCircle className="h-6 w-6 mr-2 text-blue-500" />
-                  <span className="font-bold text-base">{t("nav.chat")}</span>
+                  <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
+                  <span className="font-bold text-sm sm:text-base truncate">{t("nav.chat")}</span>
                 </Link>
               </Button>
             </motion.div>
