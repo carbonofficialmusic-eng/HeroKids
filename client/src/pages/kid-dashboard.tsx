@@ -287,47 +287,49 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
               </div>
               {reward.title}
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4 pt-4">
-              {reward.description && (
-                <div className="text-base text-foreground">
-                  <p className="font-semibold mb-1">{t("kidDashboard.description")}</p>
-                  <p>{reward.description}</p>
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
-                  <span className="font-semibold">{t("kidDashboard.pointsNeeded")}</span>
-                  <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
-                    {reward.pointThreshold}
-                  </Badge>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 pt-4">
+                {reward.description && (
+                  <div className="text-base text-foreground">
+                    <span className="font-semibold block mb-1">{t("kidDashboard.description")}</span>
+                    <span className="block">{reward.description}</span>
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
+                    <span className="font-semibold">{t("kidDashboard.pointsNeeded")}</span>
+                    <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
+                      {reward.pointThreshold}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
+                    <span className="font-semibold">{t("kidDashboard.yourProgress")}</span>
+                    <span className="font-bold" style={{ color: progressColor }}>
+                      {Math.round(percentage)}%
+                    </span>
+                  </div>
                 </div>
                 
-                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
-                  <span className="font-semibold">{t("kidDashboard.yourProgress")}</span>
-                  <span className="font-bold" style={{ color: progressColor }}>
-                    {Math.round(percentage)}%
-                  </span>
-                </div>
+                {!isReady && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800">
+                    <span className="text-base font-bold flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-amber-500" />
+                      {t("kidDashboard.pointsUntilReward", { count: remaining })}
+                    </span>
+                  </div>
+                )}
+                
+                {isReady && (
+                  <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-xl border border-green-200 dark:border-green-800">
+                    <span className="text-base font-bold flex items-center gap-2 text-green-600 dark:text-green-400">
+                      <Sparkles className="h-5 w-5" />
+                      {t("kidDashboard.canRequestNow")}
+                    </span>
+                  </div>
+                )}
               </div>
-              
-              {!isReady && (
-                <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800">
-                  <p className="text-base font-bold flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-amber-500" />
-                    {t("kidDashboard.pointsUntilReward", { count: remaining })}
-                  </p>
-                </div>
-              )}
-              
-              {isReady && (
-                <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-xl border border-green-200 dark:border-green-800">
-                  <p className="text-base font-bold flex items-center gap-2 text-green-600 dark:text-green-400">
-                    <Sparkles className="h-5 w-5" />
-                    {t("kidDashboard.canRequestNow")}
-                  </p>
-                </div>
-              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -351,6 +353,7 @@ function TaskCard({
 }) {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const [showDetails, setShowDetails] = useState(false);
   
   // Determine task state based on memberCompletionStatus
   const completionStatus = task.memberCompletionStatus;
@@ -482,6 +485,21 @@ function TaskCard({
             <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
               {task.title}
             </h3>
+            {/* Info Button - only show if description exists */}
+            {task.description && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDetails(true);
+                }}
+                className="h-7 w-7 rounded-full shrink-0"
+                data-testid={`button-info-task-${task.id}`}
+              >
+                <Info className="h-4 w-4 text-primary" />
+              </Button>
+            )}
             {/* Multi-Completion Counter Badge */}
             {task.maxCompletions !== null && task.maxCompletions !== undefined && (
               <Badge 
@@ -522,6 +540,56 @@ function TaskCard({
           )}
         </div>
       </Card>
+
+      {/* Task Details Dialog */}
+      <AlertDialog open={showDetails} onOpenChange={setShowDetails}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-3 text-2xl" style={{ fontFamily: "Fredoka, sans-serif" }}>
+              <div className="p-3 bg-primary/10 rounded-2xl">
+                <TaskIcon className="h-10 w-10 text-primary" />
+              </div>
+              {task.title}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 pt-4">
+                {task.description && (
+                  <div className="text-base text-foreground">
+                    <span className="font-semibold block mb-1">{t("kidDashboard.description")}</span>
+                    <span className="whitespace-pre-wrap block">{task.description}</span>
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
+                    <span className="font-semibold">{t("kidDashboard.pointsToEarn")}</span>
+                    <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
+                      +{task.points}
+                    </Badge>
+                  </div>
+                  
+                  {task.requiresApproval && (
+                    <div className="flex justify-between items-center p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800">
+                      <span className="font-semibold">{t("kidDashboard.needsApproval")}</span>
+                      <CheckCircle2 className="h-5 w-5 text-amber-500" />
+                    </div>
+                  )}
+                  
+                  {task.requiresProof && (
+                    <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
+                      <span className="font-semibold">{t("kidDashboard.needsPhoto")}</span>
+                      <Lightbulb className="h-5 w-5 text-blue-500" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction data-testid="button-close-task-details">{t("kidDashboard.close")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 }
