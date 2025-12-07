@@ -1049,6 +1049,7 @@
     "enterPin": "Enter PIN",
     "invalidPin": "Invalid PIN. Please try again.",
     "pinRequired": "For security, please enter your 4-digit parent PIN.",
+    "pinRequiredHint": "To link devices, you must first set a PIN in your profile.",
     "noPinSet": "You haven't set a PIN yet. Please set a PIN in settings first."
   },
   "linkDevice": {

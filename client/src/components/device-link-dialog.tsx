@@ -171,8 +171,11 @@ export function DeviceLinkDialog({ member, open, onOpenChange }: DeviceLinkDialo
             <Smartphone className="h-5 w-5" />
             {t("deviceLink.title")}
           </DialogTitle>
-          <DialogDescription>
-            {t("deviceLink.description", { name: member.displayName })}
+          <DialogDescription className="space-y-2">
+            <span>{t("deviceLink.description", { name: member.displayName })}</span>
+            <span className="block text-xs text-amber-600 dark:text-amber-400">
+              {t("deviceLink.pinRequiredHint")}
+            </span>
           </DialogDescription>
         </DialogHeader>
 

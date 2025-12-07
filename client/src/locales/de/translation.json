@@ -1059,6 +1059,7 @@
     "enterPin": "PIN eingeben",
     "invalidPin": "Ungültige PIN. Bitte versuche es erneut.",
     "pinRequired": "Zur Sicherheit gib bitte deine 4-stellige Eltern-PIN ein.",
+    "pinRequiredHint": "Um Geräte zu verknüpfen, musst du zuerst eine PIN in deinem Profil festlegen.",
     "noPinSet": "Du hast noch keine PIN gesetzt. Bitte setze zuerst eine PIN in den Einstellungen."
   },
   "linkDevice": {
