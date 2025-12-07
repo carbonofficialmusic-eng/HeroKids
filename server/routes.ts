@@ -3639,7 +3639,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Generate device session token
-      const { token, hash } = generateDeviceToken();
+      const { token, hash } = await generateDeviceToken();
 
       // Create device session
       const session = await storage.createChildDeviceSession({
