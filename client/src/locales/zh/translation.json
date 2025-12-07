@@ -1026,7 +1026,7 @@
     "codeGeneratedDesc": "代码已成功创建，有效期15分钟。",
     "generateError": "生成代码失败",
     "expiresIn": "{{time}}后过期",
-    "instructions": "在新设备的"关联账户"中输入此代码。",
+    "instructions": "在新设备的'关联账户'中输入此代码。",
     "codeCopied": "已复制！",
     "codeCopiedDesc": "代码已复制到剪贴板。",
     "copyError": "复制失败",
