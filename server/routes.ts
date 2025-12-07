@@ -2801,8 +2801,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const redemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
-      // Count redemptions that are not yet fulfilled (completed)
-      const pendingCount = redemptions.filter(r => r.status !== "completed").length;
+      // Count redemptions that need parent attention:
+      // 1. Not yet fulfilled (status !== "completed")
+      // 2. OR sharing is still active (even if status is completed, sharing needs to be finalized)
+      const pendingCount = redemptions.filter(r => 
+        r.status !== "completed" || r.sharingStatus === "sharing_active"
+      ).length;
       
       res.json({ count: pendingCount });
     } catch (error: any) {
