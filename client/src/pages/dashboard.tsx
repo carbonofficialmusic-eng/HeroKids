@@ -731,26 +731,26 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-3">
                 {/* Row 1: Approvals, Rewards Board */}
                 <Link href="/approvals" className="w-full">
-                  <Button variant="card" data-testid="button-approvals" className="relative w-full h-14 justify-start pl-4 pr-10 gap-3">
+                  <Button variant="card" data-testid="button-approvals" className="relative w-full h-14 justify-start px-4 gap-3 overflow-visible">
                     <span className="w-6 flex-shrink-0 flex justify-center">
                       <ClipboardCheck className="h-5 w-5" />
                     </span>
-                    <span className="text-left flex-1 truncate">{t("dashboard.approvals")}</span>
+                    <span className="text-left flex-1">{t("dashboard.approvals")}</span>
                     {pendingApprovalsData && pendingApprovalsData.count > 0 && (
-                      <Badge variant="destructive" className="absolute top-1/2 -translate-y-1/2 right-2 h-6 min-w-6 flex items-center justify-center rounded-full text-xs font-bold" data-testid="badge-pending-approvals">
+                      <Badge variant="destructive" className="absolute -top-1.5 -right-1.5 h-5 min-w-5 flex items-center justify-center rounded-full text-[10px] font-bold shadow-md" data-testid="badge-pending-approvals">
                         {pendingApprovalsData.count}
                       </Badge>
                     )}
                   </Button>
                 </Link>
                 <Link href="/rewards-board" className="w-full">
-                  <Button variant="card" data-testid="button-rewards-board" className="relative w-full h-14 justify-start pl-4 pr-10 gap-3">
+                  <Button variant="card" data-testid="button-rewards-board" className="relative w-full h-14 justify-start px-4 gap-3 overflow-visible">
                     <span className="w-6 flex-shrink-0 flex justify-center">
                       <Gift className="h-5 w-5" />
                     </span>
-                    <span className="text-left flex-1 truncate">{t("dashboard.rewardsBoard")}</span>
+                    <span className="text-left flex-1">{t("dashboard.rewardsBoard")}</span>
                     {pendingRewardsData && pendingRewardsData.count > 0 && (
-                      <Badge variant="destructive" className="absolute top-1/2 -translate-y-1/2 right-2 h-6 min-w-6 flex items-center justify-center rounded-full text-xs font-bold" data-testid="badge-pending-rewards">
+                      <Badge variant="destructive" className="absolute -top-1.5 -right-1.5 h-5 min-w-5 flex items-center justify-center rounded-full text-[10px] font-bold shadow-md" data-testid="badge-pending-rewards">
                         {pendingRewardsData.count}
                       </Badge>
                     )}
@@ -758,21 +758,21 @@ export default function Dashboard() {
                 </Link>
                 {/* Row 2: Family Goals, Family Chat */}
                 <Link href="/family-goals" className="w-full">
-                  <Button variant="card" data-testid="button-family-goals" className="w-full h-14 justify-start pl-4 pr-10 gap-3">
+                  <Button variant="card" data-testid="button-family-goals" className="w-full h-14 justify-start px-4 gap-3">
                     <span className="w-6 flex-shrink-0 flex justify-center">
                       <Target className="h-5 w-5" />
                     </span>
-                    <span className="text-left flex-1 truncate">{t("dashboard.familyGoals")}</span>
+                    <span className="text-left flex-1">{t("dashboard.familyGoals")}</span>
                   </Button>
                 </Link>
                 <Link href="/chat" className="w-full">
-                  <Button variant="card" data-testid="button-chat" className="relative w-full h-14 justify-start pl-4 pr-10 gap-3">
+                  <Button variant="card" data-testid="button-chat" className="relative w-full h-14 justify-start px-4 gap-3 overflow-visible">
                     <span className="w-6 flex-shrink-0 flex justify-center">
                       <MessageCircle className="h-5 w-5" />
                     </span>
-                    <span className="text-left flex-1 truncate">{t("nav.chat")}</span>
+                    <span className="text-left flex-1">{t("nav.chat")}</span>
                     {unreadChatData && unreadChatData.count > 0 && (
-                      <Badge variant="destructive" className="absolute top-1/2 -translate-y-1/2 right-2 h-6 min-w-6 flex items-center justify-center rounded-full text-xs font-bold" data-testid="badge-unread-count">
+                      <Badge variant="destructive" className="absolute -top-1.5 -right-1.5 h-5 min-w-5 flex items-center justify-center rounded-full text-[10px] font-bold shadow-md" data-testid="badge-unread-count">
                         {unreadChatData.count}
                       </Badge>
                     )}
