@@ -238,8 +238,8 @@ import dragonSlayerBg from "@assets/generated_images/dragon_slayer_lair_backgrou
 import magicalGirlBg from "@assets/generated_images/magical_girl_sky_background.png";
 import samuraiHeroBg from "@assets/generated_images/samurai_hero_battlefield_background.png";
 import elementalMasterBg from "@assets/generated_images/elemental_master_chamber_background.png";
-import catFighterBg from "@assets/generated_images/cat_fighter_rooftop_background.png";
-import schoolHeroBg from "@assets/generated_images/school_hero_rooftop_background.png";
+import catFighterBg from "@assets/generated_images/cat_fighter_rooftop_scene.png";
+import schoolHeroBg from "@assets/generated_images/anime_school_rooftop_sunset.png";
 
 // Tier 12 backgrounds - Gaming Legends (individual backgrounds)
 import proGamerBg from "@assets/generated_images/pro_gamer_arena_background.png";
