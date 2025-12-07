@@ -466,26 +466,36 @@ export class DatabaseStorage implements IStorage {
       throw new Error("Direct pinCode updates not allowed. Use setPinCode or clearPinCode methods.");
     }
     
-    // Manage avatar history if a new avatar is being uploaded
-    let finalUpdates: any = { ...safeUpdates, updatedAt: new Date() };
-    if (safeUpdates.avatarUrl) {
-      // Get current member to access avatar history
-      const currentMember = await this.getFamilyMemberById(id);
-      if (currentMember) {
+    // Use transaction with row locking to prevent race conditions with avatar history
+    return await db.transaction(async (tx) => {
+      // Lock the row first to prevent concurrent updates from reading stale data
+      const [currentMember] = await tx
+        .select()
+        .from(familyMembers)
+        .where(eq(familyMembers.id, id))
+        .for('update');
+      
+      if (!currentMember) {
+        throw new Error(`Family member with id ${id} not found`);
+      }
+      
+      // Manage avatar history if a new avatar is being uploaded
+      let finalUpdates: any = { ...safeUpdates, updatedAt: new Date() };
+      if (safeUpdates.avatarUrl) {
         const currentHistory = ((currentMember as any).avatarHistory as string[] | null) || [];
         
         // Add new avatar to front of history, keep only last 3
         const newHistory = [safeUpdates.avatarUrl, ...currentHistory.filter(url => url !== safeUpdates.avatarUrl)].slice(0, 3);
         finalUpdates.avatarHistory = newHistory;
       }
-    }
-    
-    const [updated] = await db
-      .update(familyMembers)
-      .set(finalUpdates)
-      .where(eq(familyMembers.id, id))
-      .returning();
-    return updated as FamilyMember;
+      
+      const [updated] = await tx
+        .update(familyMembers)
+        .set(finalUpdates)
+        .where(eq(familyMembers.id, id))
+        .returning();
+      return updated as FamilyMember;
+    });
   }
 
 
