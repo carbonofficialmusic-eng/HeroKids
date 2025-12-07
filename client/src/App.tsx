@@ -73,6 +73,9 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
           className="fixed inset-0 theme-background-layer"
           style={{
             backgroundImage: `url(${previousBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat',
             zIndex: 0,
             opacity: showNew ? 0 : 1,
           }}
@@ -84,6 +87,9 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
           className="fixed inset-0 theme-background-layer"
           style={{
             backgroundImage: `url(${currentBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat',
             zIndex: 0,
             opacity: showNew ? 1 : 0,
           }}
