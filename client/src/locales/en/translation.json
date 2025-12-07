@@ -674,7 +674,9 @@
     "joinCodePlaceholder": "Enter 6-character code",
     "askParentForCode": "Ask a parent in your family for the join code",
     "joinFamilyButton": "Join Family",
-    "joining": "Joining..."
+    "joining": "Joining...",
+    "alreadyHaveAccount": "Already have an account on another device?",
+    "linkExistingDevice": "Link Device"
   },
   "landing": {
     "getStarted": "Get Started",

@@ -24,7 +24,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AvatarSelector } from "./avatar-selector";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
-import { Users, UserPlus } from "lucide-react";
+import { Users, UserPlus, Smartphone } from "lucide-react";
+import { Link } from "wouter";
 
 const createFamilySchema = z.object({
   familyName: z.string().min(1, "Family name is required"),
@@ -331,6 +332,18 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
             </Form>
           </TabsContent>
         </Tabs>
+
+        <div className="mt-6 pt-6 border-t text-center">
+          <p className="text-sm text-muted-foreground mb-3">
+            {t('familySetup.alreadyHaveAccount')}
+          </p>
+          <Link href="/link-device">
+            <Button variant="outline" className="gap-2" data-testid="button-link-device">
+              <Smartphone className="h-4 w-4" />
+              {t('familySetup.linkExistingDevice')}
+            </Button>
+          </Link>
+        </div>
       </Card>
     </div>
   );

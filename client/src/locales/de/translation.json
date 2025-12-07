@@ -684,7 +684,9 @@
     "joinCodePlaceholder": "6-stelligen Code eingeben",
     "askParentForCode": "Frage ein Elternteil in deiner Familie nach dem Beitrittscode",
     "joinFamilyButton": "Familie beitreten",
-    "joining": "Wird beigetreten..."
+    "joining": "Wird beigetreten...",
+    "alreadyHaveAccount": "Du hast bereits ein Konto auf einem anderen Gerät?",
+    "linkExistingDevice": "Gerät verknüpfen"
   },
   "landing": {
     "getStarted": "Loslegen",
