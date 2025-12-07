@@ -237,32 +237,33 @@ export default function RewardsBoard() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="space-y-4">
-        <Link href="/">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
-            data-testid="button-back-dashboard"
-          >
-            <Home className="h-4 w-4" />
-            {t("rewardsBoard.backToDashboard")}
-          </Button>
-        </Link>
-        <div className="flex items-center gap-3">
-          <Gift className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-accent font-bold">{t("rewardsBoard.title")}</h1>
-            <p className="text-muted-foreground">
-              {isParent 
-                ? t("rewardsBoard.manageRedemptions")
-                : t("rewardsBoard.trackRewards")}
-            </p>
+    <div className="min-h-screen p-4 sm:p-6">
+      <div className="container mx-auto max-w-4xl space-y-6">
+        {/* Header */}
+        <div className="space-y-4">
+          <Link href="/">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+              data-testid="button-back-dashboard"
+            >
+              <Home className="h-4 w-4" />
+              {t("rewardsBoard.backToDashboard")}
+            </Button>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Gift className="h-8 w-8 text-primary" />
+            <div>
+              <h1 className="text-3xl font-accent font-bold">{t("rewardsBoard.title")}</h1>
+              <p className="text-muted-foreground">
+                {isParent 
+                  ? t("rewardsBoard.manageRedemptions")
+                  : t("rewardsBoard.trackRewards")}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Shared Rewards Section */}
       {sharedRewards.length > 0 && (
@@ -521,6 +522,7 @@ export default function RewardsBoard() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
