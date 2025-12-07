@@ -737,7 +737,7 @@ export default function Dashboard() {
                     </span>
                     <span className="text-left flex-1">{t("dashboard.approvals")}</span>
                     {pendingApprovalsData && pendingApprovalsData.count > 0 && (
-                      <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 text-xs" data-testid="badge-pending-approvals">
+                      <Badge variant="destructive" className="absolute top-1 right-1 h-5 min-w-5 px-1.5 text-xs" data-testid="badge-pending-approvals">
                         {pendingApprovalsData.count}
                       </Badge>
                     )}
@@ -750,7 +750,7 @@ export default function Dashboard() {
                     </span>
                     <span className="text-left flex-1">{t("dashboard.rewardsBoard")}</span>
                     {pendingRewardsData && pendingRewardsData.count > 0 && (
-                      <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 text-xs" data-testid="badge-pending-rewards">
+                      <Badge variant="destructive" className="absolute top-1 right-1 h-5 min-w-5 px-1.5 text-xs" data-testid="badge-pending-rewards">
                         {pendingRewardsData.count}
                       </Badge>
                     )}
@@ -772,7 +772,7 @@ export default function Dashboard() {
                     </span>
                     <span className="text-left flex-1">{t("nav.chat")}</span>
                     {unreadChatData && unreadChatData.count > 0 && (
-                      <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 text-xs" data-testid="badge-unread-count">
+                      <Badge variant="destructive" className="absolute top-1 right-1 h-5 min-w-5 px-1.5 text-xs" data-testid="badge-unread-count">
                         {unreadChatData.count}
                       </Badge>
                     )}
