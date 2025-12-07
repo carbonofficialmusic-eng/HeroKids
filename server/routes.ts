@@ -5,6 +5,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { join } from "path";
 import { z } from "zod";
 import crypto from "crypto";
+import bcrypt from "bcrypt";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { db } from "./db";
