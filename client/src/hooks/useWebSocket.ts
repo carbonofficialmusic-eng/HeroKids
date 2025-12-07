@@ -34,8 +34,9 @@ export function useWebSocket(familyName: string | null) {
             case "task_completion_approved":
             case "task_completion_rejected":
             case "task_deleted":
-              // Invalidate tasks and family members to refetch
+              // Invalidate tasks, pending count, and family members to refetch
               queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               break;
 
@@ -56,6 +57,7 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
               queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
               break;
 
             case "member_joined":
