@@ -731,12 +731,7 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-3">
                 {/* Row 1: Approvals, Rewards Board */}
                 <div className="relative w-full">
-                  {pendingApprovalsData && pendingApprovalsData.count > 0 && (
-                    <Badge variant="destructive" className="absolute top-2 right-2 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-pending-approvals">
-                      {pendingApprovalsData.count}
-                    </Badge>
-                  )}
-                  <Link href="/approvals" className="w-full">
+                  <Link href="/approvals" className="w-full block">
                     <Button variant="card" data-testid="button-approvals" className="w-full h-14 justify-start px-4 gap-3">
                       <span className="w-6 flex-shrink-0 flex justify-center">
                         <ClipboardCheck className="h-5 w-5" />
@@ -744,14 +739,14 @@ export default function Dashboard() {
                       <span className="text-left flex-1">{t("dashboard.approvals")}</span>
                     </Button>
                   </Link>
+                  {pendingApprovalsData && pendingApprovalsData.count > 0 && (
+                    <span className="absolute top-2 right-2 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold" data-testid="badge-pending-approvals">
+                      {pendingApprovalsData.count}
+                    </span>
+                  )}
                 </div>
                 <div className="relative w-full">
-                  {pendingRewardsData && pendingRewardsData.count > 0 && (
-                    <Badge variant="destructive" className="absolute top-2 right-2 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-pending-rewards">
-                      {pendingRewardsData.count}
-                    </Badge>
-                  )}
-                  <Link href="/rewards-board" className="w-full">
+                  <Link href="/rewards-board" className="w-full block">
                     <Button variant="card" data-testid="button-rewards-board" className="w-full h-14 justify-start px-4 gap-3">
                       <span className="w-6 flex-shrink-0 flex justify-center">
                         <Gift className="h-5 w-5" />
@@ -759,6 +754,11 @@ export default function Dashboard() {
                       <span className="text-left flex-1">{t("dashboard.rewardsBoard")}</span>
                     </Button>
                   </Link>
+                  {pendingRewardsData && pendingRewardsData.count > 0 && (
+                    <span className="absolute top-2 right-2 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold" data-testid="badge-pending-rewards">
+                      {pendingRewardsData.count}
+                    </span>
+                  )}
                 </div>
                 {/* Row 2: Family Goals, Family Chat */}
                 <Link href="/family-goals" className="w-full">
@@ -770,12 +770,7 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 <div className="relative w-full">
-                  {unreadChatData && unreadChatData.count > 0 && (
-                    <Badge variant="destructive" className="absolute top-2 right-2 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-unread-count">
-                      {unreadChatData.count}
-                    </Badge>
-                  )}
-                  <Link href="/chat" className="w-full">
+                  <Link href="/chat" className="w-full block">
                     <Button variant="card" data-testid="button-chat" className="w-full h-14 justify-start px-4 gap-3">
                       <span className="w-6 flex-shrink-0 flex justify-center">
                         <MessageCircle className="h-5 w-5" />
@@ -783,6 +778,11 @@ export default function Dashboard() {
                       <span className="text-left flex-1">{t("nav.chat")}</span>
                     </Button>
                   </Link>
+                  {unreadChatData && unreadChatData.count > 0 && (
+                    <span className="absolute top-2 right-2 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold" data-testid="badge-unread-count">
+                      {unreadChatData.count}
+                    </span>
+                  )}
                 </div>
                 {/* Row 3: Add Task, Add Reward */}
                 <Button
