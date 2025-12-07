@@ -730,32 +730,36 @@ export default function Dashboard() {
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3">
                 {/* Row 1: Approvals, Rewards Board */}
-                <Link href="/approvals" className="relative w-full block">
+                <div className="relative w-full">
                   {pendingApprovalsData && pendingApprovalsData.count > 0 && (
                     <Badge variant="destructive" className="absolute top-2 right-2 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-pending-approvals">
                       {pendingApprovalsData.count}
                     </Badge>
                   )}
-                  <Button variant="card" data-testid="button-approvals" className="w-full h-14 justify-start px-4 gap-3">
-                    <span className="w-6 flex-shrink-0 flex justify-center">
-                      <ClipboardCheck className="h-5 w-5" />
-                    </span>
-                    <span className="text-left flex-1">{t("dashboard.approvals")}</span>
-                  </Button>
-                </Link>
-                <Link href="/rewards-board" className="relative w-full block">
+                  <Link href="/approvals" className="w-full">
+                    <Button variant="card" data-testid="button-approvals" className="w-full h-14 justify-start px-4 gap-3">
+                      <span className="w-6 flex-shrink-0 flex justify-center">
+                        <ClipboardCheck className="h-5 w-5" />
+                      </span>
+                      <span className="text-left flex-1">{t("dashboard.approvals")}</span>
+                    </Button>
+                  </Link>
+                </div>
+                <div className="relative w-full">
                   {pendingRewardsData && pendingRewardsData.count > 0 && (
                     <Badge variant="destructive" className="absolute top-2 right-2 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-pending-rewards">
                       {pendingRewardsData.count}
                     </Badge>
                   )}
-                  <Button variant="card" data-testid="button-rewards-board" className="w-full h-14 justify-start px-4 gap-3">
-                    <span className="w-6 flex-shrink-0 flex justify-center">
-                      <Gift className="h-5 w-5" />
-                    </span>
-                    <span className="text-left flex-1">{t("dashboard.rewardsBoard")}</span>
-                  </Button>
-                </Link>
+                  <Link href="/rewards-board" className="w-full">
+                    <Button variant="card" data-testid="button-rewards-board" className="w-full h-14 justify-start px-4 gap-3">
+                      <span className="w-6 flex-shrink-0 flex justify-center">
+                        <Gift className="h-5 w-5" />
+                      </span>
+                      <span className="text-left flex-1">{t("dashboard.rewardsBoard")}</span>
+                    </Button>
+                  </Link>
+                </div>
                 {/* Row 2: Family Goals, Family Chat */}
                 <Link href="/family-goals" className="w-full">
                   <Button variant="card" data-testid="button-family-goals" className="w-full h-14 justify-start px-4 gap-3">
@@ -765,19 +769,21 @@ export default function Dashboard() {
                     <span className="text-left flex-1">{t("dashboard.familyGoals")}</span>
                   </Button>
                 </Link>
-                <Link href="/chat" className="relative w-full block">
+                <div className="relative w-full">
                   {unreadChatData && unreadChatData.count > 0 && (
                     <Badge variant="destructive" className="absolute top-2 right-2 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-unread-count">
                       {unreadChatData.count}
                     </Badge>
                   )}
-                  <Button variant="card" data-testid="button-chat" className="w-full h-14 justify-start px-4 gap-3">
-                    <span className="w-6 flex-shrink-0 flex justify-center">
-                      <MessageCircle className="h-5 w-5" />
-                    </span>
-                    <span className="text-left flex-1">{t("nav.chat")}</span>
-                  </Button>
-                </Link>
+                  <Link href="/chat" className="w-full">
+                    <Button variant="card" data-testid="button-chat" className="w-full h-14 justify-start px-4 gap-3">
+                      <span className="w-6 flex-shrink-0 flex justify-center">
+                        <MessageCircle className="h-5 w-5" />
+                      </span>
+                      <span className="text-left flex-1">{t("nav.chat")}</span>
+                    </Button>
+                  </Link>
+                </div>
                 {/* Row 3: Add Task, Add Reward */}
                 <Button
                   onClick={() => {
