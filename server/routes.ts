@@ -29,6 +29,21 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Track uploaded photos to prevent URL spoofing (now using Object Storage instead of multer)
 const uploadedPhotos = new Map<string, { memberId: string; taskId: string; timestamp: number }>();
 
+// Helper function to get the current member from a request (supports both Replit Auth and Device sessions)
+async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isDeviceSession: boolean } | null> {
+  // Device-linked session: member is directly available
+  if (req.user?.authMethod === "device" && req.user?.member) {
+    return { member: req.user.member, isDeviceSession: true };
+  }
+  
+  // Normal Replit Auth flow
+  const userId = req.user?.claims?.sub;
+  if (!userId) return null;
+  
+  const member = await storage.getFamilyMemberByUserId(userId);
+  return member ? { member, isDeviceSession: false } : null;
+}
+
 // Clean up old uploads every hour
 setInterval(() => {
   const oneHourAgo = Date.now() - (60 * 60 * 1000);
@@ -80,6 +95,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
+      // Check if this is a device-linked session
+      if (req.user.authMethod === "device" && req.user.member) {
+        const member = req.user.member;
+        // Return a user-like object for device sessions
+        res.json({
+          id: `device:${member.id}`,
+          email: null,
+          firstName: member.displayName,
+          lastName: null,
+          profileImageUrl: member.avatarUrl,
+          authMethod: "device",
+          memberId: member.id,
+          familyName: member.familyName,
+          role: member.role,
+        });
+        return;
+      }
+      
+      // Normal Replit Auth flow
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       res.json(user);
@@ -92,8 +126,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Family routes
   app.get("/api/families/current", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      let member;
+      
+      // Device-linked session: member is directly available
+      if (req.user.authMethod === "device" && req.user.member) {
+        member = req.user.member;
+      } else {
+        // Normal Replit Auth flow
+        const userId = req.user.claims.sub;
+        member = await storage.getFamilyMemberByUserId(userId);
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -116,8 +158,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get family settings (includes showLeaderboard)
   app.get("/api/families/settings", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      let member;
+      
+      // Device-linked session: member is directly available
+      if (req.user.authMethod === "device" && req.user.member) {
+        member = req.user.member;
+      } else {
+        // Normal Replit Auth flow
+        const userId = req.user.claims.sub;
+        member = await storage.getFamilyMemberByUserId(userId);
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -241,7 +291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/family-members/current", isAuthenticated, async (req: any, res) => {
     try {
       // Check if we're acting as another member
-      if (req.session.actingAsMemberId) {
+      if (req.session?.actingAsMemberId) {
         const actingAsMember = await storage.getFamilyMember(req.session.actingAsMemberId);
         if (actingAsMember) {
           return res.json(actingAsMember);
@@ -250,6 +300,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         delete req.session.actingAsMemberId;
       }
       
+      // Device-linked session: member is directly available
+      if (req.user.authMethod === "device" && req.user.member) {
+        return res.json(req.user.member);
+      }
+      
+      // Normal Replit Auth flow
       const userId = req.user.claims.sub;
       const member = await storage.getFamilyMemberByUserId(userId);
       
@@ -267,6 +323,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get the real authenticated user's member record (not acting as)
   app.get("/api/family-members/real", isAuthenticated, async (req: any, res) => {
     try {
+      // Device-linked session: member is directly available
+      if (req.user.authMethod === "device" && req.user.member) {
+        return res.json(req.user.member);
+      }
+      
+      // Normal Replit Auth flow
       const userId = req.user.claims.sub;
       const member = await storage.getFamilyMemberByUserId(userId);
       
@@ -409,14 +471,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/family-members", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const currentMember = await storage.getFamilyMemberByUserId(userId);
-      
-      if (!currentMember) {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      const members = await storage.getFamilyMembersByFamily(currentMember.familyName);
+      const members = await storage.getFamilyMembersByFamily(result.member.familyName);
       res.json(members);
     } catch (error) {
       console.error("Error fetching family members:", error);
@@ -781,16 +841,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
   app.get("/api/tasks", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const realMember = await storage.getFamilyMemberByUserId(userId);
+      let realMember;
+      
+      // Device-linked session: member is directly available
+      if (req.user.authMethod === "device" && req.user.member) {
+        realMember = req.user.member;
+      } else {
+        // Normal Replit Auth flow
+        const userId = req.user.claims.sub;
+        realMember = await storage.getFamilyMemberByUserId(userId);
+      }
       
       if (!realMember) {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Use acting member if available, otherwise use authenticated user
+      // Use acting member if available, otherwise use authenticated user (only for non-device sessions)
       let member = realMember;
-      if (req.session.actingAsMemberId) {
+      if (req.session?.actingAsMemberId && !req.user.authMethod) {
         const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
         
         // Security: Validate acting member belongs to same family
@@ -1607,14 +1675,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Reward routes
   app.get("/api/rewards", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
-      
-      if (!member) {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      const rewards = await storage.getRewardsByFamily(member.familyName);
+      const rewards = await storage.getRewardsByFamily(result.member.familyName);
       res.json(rewards);
     } catch (error) {
       console.error("Error fetching rewards:", error);

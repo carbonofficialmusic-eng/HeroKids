@@ -6,6 +6,7 @@ import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
+import bcrypt from "bcrypt";
 
 if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
@@ -126,28 +127,53 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
-    return res.status(401).json({ message: "Unauthorized" });
+  // First, try Replit Auth
+  if (req.isAuthenticated() && user?.expires_at) {
+    const now = Math.floor(Date.now() / 1000);
+    if (now <= user.expires_at) {
+      return next();
+    }
+
+    const refreshToken = user.refresh_token;
+    if (refreshToken) {
+      try {
+        const config = await getOidcConfig();
+        const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+        updateUserSession(user, tokenResponse);
+        return next();
+      } catch (error) {
+        // Fall through to device token check
+      }
+    }
   }
 
-  const now = Math.floor(Date.now() / 1000);
-  if (now <= user.expires_at) {
-    return next();
+  // Second, try Device-Link Token (for linked child devices)
+  const deviceToken = req.cookies?.child_device_token;
+  if (deviceToken) {
+    try {
+      const session = await storage.findValidChildDeviceSession(deviceToken);
+      if (session) {
+        const member = await storage.getFamilyMember(session.memberId);
+        if (member) {
+          // Update last seen
+          await storage.updateDeviceSessionLastSeen(session.id);
+          
+          // Attach device auth info to request
+          (req as any).user = {
+            claims: {
+              sub: `device:${member.id}`,
+            },
+            authMethod: "device",
+            deviceSession: session,
+            member: member,
+          };
+          return next();
+        }
+      }
+    } catch (error) {
+      console.error("Device token validation error:", error);
+    }
   }
 
-  const refreshToken = user.refresh_token;
-  if (!refreshToken) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
-
-  try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-    updateUserSession(user, tokenResponse);
-    return next();
-  } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
+  return res.status(401).json({ message: "Unauthorized" });
 };
