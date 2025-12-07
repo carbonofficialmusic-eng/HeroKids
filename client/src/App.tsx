@@ -25,6 +25,7 @@ import SkinsGallery from "@/pages/skins-gallery";
 import Achievements from "@/pages/achievements";
 import FamilyGoals from "@/pages/family-goals";
 import MyRewards from "@/pages/my-rewards";
+import LinkDevice from "@/pages/link-device";
 
 interface FamilyMember {
   id: number;
@@ -117,6 +118,7 @@ function Router() {
       <BackgroundWrapper>
         <Switch>
           <Route path="/" component={Landing} />
+          <Route path="/link-device" component={LinkDevice} />
           <Route component={NotFound} />
         </Switch>
       </BackgroundWrapper>
@@ -152,6 +154,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
         <Route path="/family-goals" component={FamilyGoals} />
+        <Route path="/link-device" component={LinkDevice} />
         <Route component={NotFound} />
       </Switch>
     </BackgroundWrapper>

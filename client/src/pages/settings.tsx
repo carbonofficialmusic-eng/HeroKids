@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages } from "lucide-react";
+import { DeviceLinkDialog } from "@/components/device-link-dialog";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -46,6 +47,8 @@ export default function Settings() {
   const [memberForPinSetting, setMemberForPinSetting] = useState<FamilyMember | null>(null);
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
   const [newPin, setNewPin] = useState("");
+  const [memberForDeviceLink, setMemberForDeviceLink] = useState<FamilyMember | null>(null);
+  const [deviceLinkDialogOpen, setDeviceLinkDialogOpen] = useState(false);
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -447,6 +450,20 @@ export default function Settings() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          {familyMember.role === "child" && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setMemberForDeviceLink(familyMember);
+                                setDeviceLinkDialogOpen(true);
+                              }}
+                              data-testid={`button-link-device-${familyMember.id}`}
+                              title={t('settings.linkDevice')}
+                            >
+                              <Smartphone className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -1121,6 +1138,13 @@ export default function Settings() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Device Link Dialog */}
+      <DeviceLinkDialog
+        member={memberForDeviceLink}
+        open={deviceLinkDialogOpen}
+        onOpenChange={setDeviceLinkDialogOpen}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { join } from "path";
 import { z } from "zod";
+import crypto from "crypto";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { db } from "./db";
@@ -12,7 +13,7 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers } from "@shared/schema";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, childDeviceSessions } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { calculateAvailableCards, getUnlockedTier, getSkinTier } from "@shared/skin-config";
@@ -3512,6 +3513,301 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // NOTE: Stripe webhook is now handled in server/index.ts with express.raw() middleware
+  
+  // ========================================
+  // Device Linking - Allow children to link their account to a new device
+  // ========================================
+
+  // Generate a 6-character alphanumeric code
+  function generateLinkCode(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Avoid confusing chars like 0/O, 1/I
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  // Generate secure token and its bcrypt hash
+  async function generateDeviceToken(): Promise<{ token: string; hash: string }> {
+    const token = crypto.randomBytes(32).toString('hex');
+    const hash = await bcrypt.hash(token, 10);
+    return { token, hash };
+  }
+
+  // Parent: Generate a link code for a child member
+  app.post("/api/device-link/generate-code", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const parentMember = await storage.getFamilyMemberByUserId(userId);
+
+      if (!parentMember || parentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can generate link codes" });
+      }
+
+      const { memberId, pin } = req.body;
+      if (!memberId) {
+        return res.status(400).json({ message: "Member ID is required" });
+      }
+
+      // Verify parent's PIN
+      if (!pin) {
+        return res.status(400).json({ message: "PIN is required" });
+      }
+      
+      if (!parentMember.pinCode) {
+        return res.status(400).json({ message: "No PIN set. Please set a PIN first." });
+      }
+
+      const isPinValid = await bcrypt.compare(pin, parentMember.pinCode);
+      if (!isPinValid) {
+        return res.status(401).json({ message: "Invalid PIN" });
+      }
+
+      // Get the child member
+      const childMember = await storage.getFamilyMember(memberId);
+      if (!childMember) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      // Ensure they're in the same family
+      if (childMember.familyName !== parentMember.familyName) {
+        return res.status(403).json({ message: "Member not in your family" });
+      }
+
+      // Ensure it's a child account
+      if (childMember.role !== "child") {
+        return res.status(400).json({ message: "Can only link child accounts" });
+      }
+
+      // Check for existing active code and invalidate it
+      const existingCode = await storage.getActiveDeviceLinkCodeForMember(memberId);
+      if (existingCode) {
+        await storage.deleteDeviceLinkCode(existingCode.id);
+      }
+
+      // Generate new code (valid for 15 minutes)
+      const code = generateLinkCode();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+      const linkCode = await storage.createDeviceLinkCode({
+        memberId,
+        createdByParentId: parentMember.id,
+        code,
+        expiresAt,
+      });
+
+      res.json({
+        code: linkCode.code,
+        expiresAt: linkCode.expiresAt,
+        memberName: childMember.displayName,
+      });
+    } catch (error) {
+      console.error("Error generating link code:", error);
+      res.status(500).json({ message: "Failed to generate link code" });
+    }
+  });
+
+  // Public: Verify a link code and create device session (no auth required)
+  app.post("/api/device-link/verify-code", async (req: any, res) => {
+    try {
+      const { code, deviceLabel } = req.body;
+      if (!code) {
+        return res.status(400).json({ message: "Code is required" });
+      }
+
+      const linkCode = await storage.getDeviceLinkCodeByCode(code.toUpperCase());
+      if (!linkCode) {
+        return res.status(404).json({ message: "Invalid code" });
+      }
+
+      // Check if expired
+      if (new Date() > linkCode.expiresAt) {
+        return res.status(400).json({ message: "Code has expired" });
+      }
+
+      // Check if already consumed
+      if (linkCode.consumedAt) {
+        return res.status(400).json({ message: "Code has already been used" });
+      }
+
+      // Get the member
+      const member = await storage.getFamilyMember(linkCode.memberId);
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      // Generate device session token
+      const { token, hash } = generateDeviceToken();
+
+      // Create device session
+      const session = await storage.createChildDeviceSession({
+        memberId: member.id,
+        tokenHash: hash,
+        deviceLabel: deviceLabel || null,
+      });
+
+      // Mark link code as consumed
+      await storage.consumeDeviceLinkCode(linkCode.id);
+
+      // Set secure cookie with the token
+      res.cookie('child_device_token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        path: '/',
+      });
+
+      res.json({
+        success: true,
+        memberId: member.id,
+        memberName: member.displayName,
+        familyName: member.familyName,
+      });
+    } catch (error) {
+      console.error("Error verifying link code:", error);
+      res.status(500).json({ message: "Failed to verify code" });
+    }
+  });
+
+  // Check if current request has a valid child device session
+  app.get("/api/device-link/session", async (req: any, res) => {
+    try {
+      const token = req.cookies?.child_device_token;
+      if (!token) {
+        return res.json({ authenticated: false });
+      }
+
+      // Get all active sessions and verify token against each (bcrypt compare)
+      const session = await storage.findValidChildDeviceSession(token);
+
+      if (!session) {
+        // Clear invalid cookie
+        res.clearCookie('child_device_token', { path: '/' });
+        return res.json({ authenticated: false });
+      }
+
+      // Update last seen
+      await storage.updateDeviceSessionLastSeen(session.id);
+
+      // Get member details
+      const member = await storage.getFamilyMember(session.memberId);
+      if (!member) {
+        return res.json({ authenticated: false });
+      }
+
+      res.json({
+        authenticated: true,
+        memberId: member.id,
+        memberName: member.displayName,
+        familyName: member.familyName,
+        role: member.role,
+        avatarUrl: member.avatarUrl,
+        color: member.color,
+        activeSkinId: member.activeSkinId,
+        totalPoints: member.totalPoints,
+        totalEarned: member.totalEarned,
+      });
+    } catch (error) {
+      console.error("Error checking device session:", error);
+      res.status(500).json({ message: "Failed to check session" });
+    }
+  });
+
+  // Child device: Logout (clear session)
+  app.post("/api/device-link/logout", async (req: any, res) => {
+    try {
+      const token = req.cookies?.child_device_token;
+      if (token) {
+        const hash = crypto.createHash('sha256').update(token).digest('hex');
+        const session = await storage.getChildDeviceSessionByTokenHash(hash);
+        if (session) {
+          await storage.revokeDeviceSession(session.id);
+        }
+      }
+
+      res.clearCookie('child_device_token', { path: '/' });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error logging out device:", error);
+      res.status(500).json({ message: "Failed to logout" });
+    }
+  });
+
+  // Parent: Get linked devices for a child member
+  app.get("/api/device-link/devices/:memberId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const parentMember = await storage.getFamilyMemberByUserId(userId);
+
+      if (!parentMember || parentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can view linked devices" });
+      }
+
+      const { memberId } = req.params;
+      const childMember = await storage.getFamilyMember(memberId);
+
+      if (!childMember || childMember.familyName !== parentMember.familyName) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      const sessions = await storage.getActiveDeviceSessionsForMember(memberId);
+      
+      res.json(sessions.map(s => ({
+        id: s.id,
+        deviceLabel: s.deviceLabel,
+        lastSeenAt: s.lastSeenAt,
+        createdAt: s.createdAt,
+      })));
+    } catch (error) {
+      console.error("Error fetching linked devices:", error);
+      res.status(500).json({ message: "Failed to fetch linked devices" });
+    }
+  });
+
+  // Parent: Revoke a device session
+  app.delete("/api/device-link/devices/:sessionId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const parentMember = await storage.getFamilyMemberByUserId(userId);
+
+      if (!parentMember || parentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can revoke device access" });
+      }
+
+      const { sessionId } = req.params;
+      
+      // Get session to verify it belongs to a family member
+      const sessions = await db.select()
+        .from(familyMembers)
+        .innerJoin(childDeviceSessions, eq(childDeviceSessions.memberId, familyMembers.id))
+        .where(eq(childDeviceSessions.id, sessionId));
+
+      if (sessions.length === 0) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+
+      const session = sessions[0];
+      if (session.family_members.familyName !== parentMember.familyName) {
+        return res.status(403).json({ message: "Session not in your family" });
+      }
+
+      await storage.revokeDeviceSession(sessionId);
+      
+      // Broadcast to family that device was revoked
+      broadcastToFamily(parentMember.familyName, { type: "device_revoked", sessionId });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error revoking device session:", error);
+      res.status(500).json({ message: "Failed to revoke device access" });
+    }
+  });
+
+  // ========================================
+  // End of Device Linking
+  // ========================================
   
   const httpServer = createServer(app);
 

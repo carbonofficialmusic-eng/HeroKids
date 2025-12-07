@@ -607,3 +607,62 @@ export const insertGoalContributionSchema = createInsertSchema(goalContributions
 
 export type InsertGoalContribution = z.infer<typeof insertGoalContributionSchema>;
 export type GoalContribution = typeof goalContributions.$inferSelect;
+
+// Device Link Codes - One-time codes for linking child accounts to new devices
+export const deviceLinkCodes = pgTable("device_link_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  createdByParentId: varchar("created_by_parent_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  code: varchar("code", { length: 6 }).notNull(), // 6-digit alphanumeric code
+  expiresAt: timestamp("expires_at").notNull(), // Code expires after 15 minutes
+  consumedAt: timestamp("consumed_at"), // When code was used (null if unused)
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const deviceLinkCodesRelations = relations(deviceLinkCodes, ({ one }) => ({
+  member: one(familyMembers, {
+    fields: [deviceLinkCodes.memberId],
+    references: [familyMembers.id],
+  }),
+  createdByParent: one(familyMembers, {
+    fields: [deviceLinkCodes.createdByParentId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertDeviceLinkCodeSchema = createInsertSchema(deviceLinkCodes).omit({
+  id: true,
+  consumedAt: true,
+  createdAt: true,
+});
+
+export type InsertDeviceLinkCode = z.infer<typeof insertDeviceLinkCodeSchema>;
+export type DeviceLinkCode = typeof deviceLinkCodes.$inferSelect;
+
+// Child Device Sessions - Active sessions for children on their own devices
+export const childDeviceSessions = pgTable("child_device_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  tokenHash: varchar("token_hash", { length: 64 }).notNull().unique(), // SHA-256 hash of session token
+  deviceLabel: varchar("device_label", { length: 100 }), // Optional device name (e.g., "Marias iPhone")
+  lastSeenAt: timestamp("last_seen_at").defaultNow(),
+  revokedAt: timestamp("revoked_at"), // When session was revoked (null if active)
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const childDeviceSessionsRelations = relations(childDeviceSessions, ({ one }) => ({
+  member: one(familyMembers, {
+    fields: [childDeviceSessions.memberId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertChildDeviceSessionSchema = createInsertSchema(childDeviceSessions).omit({
+  id: true,
+  lastSeenAt: true,
+  revokedAt: true,
+  createdAt: true,
+});
+
+export type InsertChildDeviceSession = z.infer<typeof insertChildDeviceSessionSchema>;
+export type ChildDeviceSession = typeof childDeviceSessions.$inferSelect;

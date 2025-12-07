@@ -50,11 +50,18 @@ import {
   type InsertFamilyGoal,
   type GoalContribution,
   type InsertGoalContribution,
+  deviceLinkCodes,
+  childDeviceSessions,
+  type DeviceLinkCode,
+  type InsertDeviceLinkCode,
+  type ChildDeviceSession,
+  type InsertChildDeviceSession,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gt, sql, inArray } from "drizzle-orm";
 import { startOfDay } from 'date-fns';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+import bcrypt from 'bcrypt';
 
 /**
  * Default achievement templates - used by both seedDefaultAchievements and resetFamilyToFactory
@@ -2311,6 +2318,122 @@ export class DatabaseStorage implements IStorage {
       .update(familyGoals)
       .set({ isActive: false, completedAt: new Date() })
       .where(eq(familyGoals.id, goalId));
+  }
+
+  // Device Link Codes
+  async createDeviceLinkCode(data: InsertDeviceLinkCode): Promise<DeviceLinkCode> {
+    const [code] = await db.insert(deviceLinkCodes).values(data).returning();
+    return code;
+  }
+
+  async getDeviceLinkCodeByCode(code: string): Promise<DeviceLinkCode | undefined> {
+    const [linkCode] = await db
+      .select()
+      .from(deviceLinkCodes)
+      .where(eq(deviceLinkCodes.code, code));
+    return linkCode;
+  }
+
+  async getActiveDeviceLinkCodeForMember(memberId: string): Promise<DeviceLinkCode | undefined> {
+    const now = new Date();
+    const [linkCode] = await db
+      .select()
+      .from(deviceLinkCodes)
+      .where(
+        and(
+          eq(deviceLinkCodes.memberId, memberId),
+          gt(deviceLinkCodes.expiresAt, now),
+          sql`${deviceLinkCodes.consumedAt} IS NULL`
+        )
+      );
+    return linkCode;
+  }
+
+  async consumeDeviceLinkCode(codeId: string): Promise<void> {
+    await db
+      .update(deviceLinkCodes)
+      .set({ consumedAt: new Date() })
+      .where(eq(deviceLinkCodes.id, codeId));
+  }
+
+  async deleteDeviceLinkCode(codeId: string): Promise<void> {
+    await db
+      .delete(deviceLinkCodes)
+      .where(eq(deviceLinkCodes.id, codeId));
+  }
+
+  // Child Device Sessions
+  async createChildDeviceSession(data: InsertChildDeviceSession): Promise<ChildDeviceSession> {
+    const [session] = await db.insert(childDeviceSessions).values(data).returning();
+    return session;
+  }
+
+  async getChildDeviceSessionByTokenHash(tokenHash: string): Promise<ChildDeviceSession | undefined> {
+    const [session] = await db
+      .select()
+      .from(childDeviceSessions)
+      .where(
+        and(
+          eq(childDeviceSessions.tokenHash, tokenHash),
+          sql`${childDeviceSessions.revokedAt} IS NULL`
+        )
+      );
+    return session;
+  }
+
+  async getActiveDeviceSessionsForMember(memberId: string): Promise<ChildDeviceSession[]> {
+    return await db
+      .select()
+      .from(childDeviceSessions)
+      .where(
+        and(
+          eq(childDeviceSessions.memberId, memberId),
+          sql`${childDeviceSessions.revokedAt} IS NULL`
+        )
+      )
+      .orderBy(desc(childDeviceSessions.lastSeenAt));
+  }
+
+  async updateDeviceSessionLastSeen(sessionId: string): Promise<void> {
+    await db
+      .update(childDeviceSessions)
+      .set({ lastSeenAt: new Date() })
+      .where(eq(childDeviceSessions.id, sessionId));
+  }
+
+  async revokeDeviceSession(sessionId: string): Promise<void> {
+    await db
+      .update(childDeviceSessions)
+      .set({ revokedAt: new Date() })
+      .where(eq(childDeviceSessions.id, sessionId));
+  }
+
+  async revokeAllDeviceSessionsForMember(memberId: string): Promise<void> {
+    await db
+      .update(childDeviceSessions)
+      .set({ revokedAt: new Date() })
+      .where(
+        and(
+          eq(childDeviceSessions.memberId, memberId),
+          sql`${childDeviceSessions.revokedAt} IS NULL`
+        )
+      );
+  }
+
+  async findValidChildDeviceSession(token: string): Promise<ChildDeviceSession | undefined> {
+    // Get all active sessions and verify token against each with bcrypt
+    const sessions = await db
+      .select()
+      .from(childDeviceSessions)
+      .where(sql`${childDeviceSessions.revokedAt} IS NULL`);
+    
+    for (const session of sessions) {
+      const isValid = await bcrypt.compare(token, session.tokenHash);
+      if (isValid) {
+        return session;
+      }
+    }
+    return undefined;
   }
 }
 

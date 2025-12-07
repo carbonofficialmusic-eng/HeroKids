@@ -2,6 +2,7 @@
 process.env.TZ = 'Europe/Berlin';
 
 import express, { type Request, Response, NextFunction } from "express";
+import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { startPointsResetScheduler } from "./scheduler";
@@ -122,6 +123,7 @@ app.post("/api/stripe-webhook",
 // Now load normal JSON middleware for other routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 app.use((req, res, next) => {
   const start = Date.now();
