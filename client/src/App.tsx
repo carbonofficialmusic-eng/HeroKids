@@ -67,10 +67,10 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
   }, [backgroundUrl, currentBg]);
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen min-h-dvh relative bg-background">
       {previousBg && (
         <div 
-          className="fixed inset-0 bg-cover bg-center theme-background-layer"
+          className="fixed inset-0 theme-background-layer"
           style={{
             backgroundImage: `url(${previousBg})`,
             zIndex: 0,
@@ -81,12 +81,20 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
       
       {currentBg && (
         <div 
-          className="fixed inset-0 bg-cover bg-center theme-background-layer"
+          className="fixed inset-0 theme-background-layer"
           style={{
             backgroundImage: `url(${currentBg})`,
             zIndex: 0,
             opacity: showNew ? 1 : 0,
           }}
+        />
+      )}
+      
+      {/* Fallback background when no skin is active */}
+      {!currentBg && !previousBg && (
+        <div 
+          className="fixed inset-0 bg-background"
+          style={{ zIndex: 0 }}
         />
       )}
       

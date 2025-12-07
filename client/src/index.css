@@ -4,6 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global viewport settings for mobile devices */
+html, body {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);
@@ -368,6 +382,16 @@
 
   .theme-background-layer {
     transition: opacity 0.8s ease-in-out;
+    /* Ensure background always covers the entire viewport on all devices */
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    /* Use modern viewport units that account for mobile browser chrome */
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
+    width: 100%;
+    /* Prevent any gaps from appearing */
+    background-color: hsl(var(--background));
   }
 
   /* Improved text readability */
