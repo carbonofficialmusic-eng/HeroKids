@@ -23,7 +23,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 
 type RewardFormData = z.infer<typeof insertRewardSchema>;
 
@@ -155,28 +154,6 @@ export function RewardDialog({
                     {t('rewards.pointsRequiredDesc')}
                   </FormDescription>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="isActive"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">{t('rewards.active')}</FormLabel>
-                    <FormDescription>
-                      {t('rewards.activeDesc')}
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      data-testid="switch-reward-active"
-                    />
-                  </FormControl>
                 </FormItem>
               )}
             />
