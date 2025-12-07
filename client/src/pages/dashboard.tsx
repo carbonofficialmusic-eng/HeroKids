@@ -732,7 +732,7 @@ export default function Dashboard() {
                 {/* Row 1: Approvals, Rewards Board */}
                 <Link href="/approvals" className="relative w-full block">
                   {pendingApprovalsData && pendingApprovalsData.count > 0 && (
-                    <Badge variant="destructive" className="absolute top-1 left-1 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-pending-approvals">
+                    <Badge variant="destructive" className="absolute top-2 right-2 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-pending-approvals">
                       {pendingApprovalsData.count}
                     </Badge>
                   )}
@@ -745,7 +745,7 @@ export default function Dashboard() {
                 </Link>
                 <Link href="/rewards-board" className="relative w-full block">
                   {pendingRewardsData && pendingRewardsData.count > 0 && (
-                    <Badge variant="destructive" className="absolute top-1 left-1 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-pending-rewards">
+                    <Badge variant="destructive" className="absolute top-2 right-2 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-pending-rewards">
                       {pendingRewardsData.count}
                     </Badge>
                   )}
@@ -767,7 +767,7 @@ export default function Dashboard() {
                 </Link>
                 <Link href="/chat" className="relative w-full block">
                   {unreadChatData && unreadChatData.count > 0 && (
-                    <Badge variant="destructive" className="absolute top-1 left-1 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-unread-count">
+                    <Badge variant="destructive" className="absolute top-2 right-2 z-10 h-5 w-5 flex items-center justify-center rounded-full text-[10px] font-bold p-0" data-testid="badge-unread-count">
                       {unreadChatData.count}
                     </Badge>
                   )}
