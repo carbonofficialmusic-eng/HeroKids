@@ -68,41 +68,39 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen min-h-dvh relative bg-background">
-      {previousBg && (
-        <div 
-          className="fixed inset-0 theme-background-layer"
-          style={{
-            backgroundImage: `url(${previousBg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center center',
-            backgroundRepeat: 'no-repeat',
-            zIndex: 0,
-            opacity: showNew ? 0 : 1,
-          }}
-        />
-      )}
-      
-      {currentBg && (
-        <div 
-          className="fixed inset-0 theme-background-layer"
-          style={{
-            backgroundImage: `url(${currentBg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center center',
-            backgroundRepeat: 'no-repeat',
-            zIndex: 0,
-            opacity: showNew ? 1 : 0,
-          }}
-        />
-      )}
-      
-      {/* Fallback background when no skin is active */}
-      {!currentBg && !previousBg && (
-        <div 
-          className="fixed inset-0 bg-background"
-          style={{ zIndex: 0 }}
-        />
-      )}
+      {/* Background container - fixed positioning with proper iOS Safari support */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+        {previousBg && (
+          <img 
+            src={previousBg}
+            alt=""
+            className="absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out"
+            style={{
+              objectFit: 'cover',
+              objectPosition: 'center center',
+              opacity: showNew ? 0 : 1,
+            }}
+          />
+        )}
+        
+        {currentBg && (
+          <img 
+            src={currentBg}
+            alt=""
+            className="absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out"
+            style={{
+              objectFit: 'cover',
+              objectPosition: 'center center',
+              opacity: showNew ? 1 : 0,
+            }}
+          />
+        )}
+        
+        {/* Fallback background when no skin is active */}
+        {!currentBg && !previousBg && (
+          <div className="absolute inset-0 bg-background" />
+        )}
+      </div>
       
       <div className="relative" style={{ zIndex: 1 }}>
         {children}

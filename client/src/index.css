@@ -7,14 +7,17 @@
 /* Global viewport settings for mobile devices */
 html, body {
   min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  min-height: -webkit-fill-available; /* iOS Safari fallback */
+  min-height: 100dvh; /* Dynamic viewport height for modern mobile browsers */
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 #root {
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   min-height: 100dvh;
 }
 
