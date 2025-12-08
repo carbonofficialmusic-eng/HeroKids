@@ -4,18 +4,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global viewport settings for mobile devices */
+/* Global viewport settings for mobile devices - iOS Safari fix */
 html, body {
+  /* Both height AND min-height needed for iOS Safari to correctly compute viewport */
+  height: 100vh;
+  height: -webkit-fill-available;
+  height: 100dvh;
   min-height: 100vh;
-  min-height: -webkit-fill-available; /* iOS Safari fallback */
-  min-height: 100dvh; /* Dynamic viewport height for modern mobile browsers */
+  min-height: -webkit-fill-available;
+  min-height: 100dvh;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  /* Support for safe-area-inset on notched devices */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 #root {
+  height: 100%;
   min-height: 100vh;
   min-height: -webkit-fill-available;
   min-height: 100dvh;
