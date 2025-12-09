@@ -4,34 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global viewport settings for mobile devices - iOS Safari fix */
-/* Uses JavaScript-set --vh variable for stable viewport height on iOS Safari.
-   The --vh variable is set in main.tsx and only updates on resize/orientation,
-   NOT on scroll, which prevents layout jumps when toolbar appears/disappears. */
-:root {
-  --vh: 1vh; /* Fallback, will be overwritten by JS */
-}
-
+/* Global viewport settings */
 html, body {
-  height: auto;
   min-height: 100vh;
-  min-height: calc(var(--vh, 1vh) * 100); /* Use JS-calculated stable height */
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
 }
 
 #root {
-  height: auto;
   min-height: 100vh;
-  min-height: calc(var(--vh, 1vh) * 100);
-}
-
-/* iOS-stable app shell - uses JS-calculated --vh for stable height */
-.app-shell {
-  min-height: 100vh;
-  min-height: calc(var(--vh, 1vh) * 100);
 }
 
 
@@ -397,10 +379,6 @@ html, body {
     background-clip: text;
   }
 
-  .theme-background-layer {
-    transition: opacity 0.8s ease-in-out;
-  }
-
   /* Improved text readability */
   body {
     font-weight: 500;
@@ -462,22 +440,3 @@ html, body {
   }
 }
 
-/* Critical background layer styles - defined outside @layer to ensure highest priority */
-.theme-background-layer {
-  /* Ensure background always covers the entire viewport on all devices */
-  background-size: cover !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
-  /* Use modern viewport units that account for mobile browser chrome */
-  min-height: 100vh;
-  min-height: 100dvh;
-  width: 100vw;
-  /* Prevent any gaps from appearing - use theme background color */
-  background-color: hsl(var(--background));
-  /* Fix for iOS Safari address bar */
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
