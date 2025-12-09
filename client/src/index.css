@@ -5,30 +5,30 @@
 @tailwind utilities;
 
 /* Global viewport settings for mobile devices - iOS Safari fix */
+/* IMPORTANT: Do NOT use explicit height on html/body - iOS Safari recalculates 
+   100dvh when toolbar shows/hides, causing layout jumps. Use only min-height. */
 html, body {
-  /* Both height AND min-height needed for iOS Safari to correctly compute viewport */
-  height: 100vh;
-  height: -webkit-fill-available;
-  height: 100dvh;
+  height: auto;
   min-height: 100vh;
-  min-height: -webkit-fill-available;
   min-height: 100dvh;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  /* Support for safe-area-inset on notched devices */
+  -webkit-overflow-scrolling: touch;
+}
+
+#root {
+  height: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Safe-area wrapper class - apply to inner app shell, NOT to html/body */
+.safe-area-padding {
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
-}
-
-#root {
-  height: 100%;
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
-  min-height: 100dvh;
 }
 
 /* LIGHT MODE */
