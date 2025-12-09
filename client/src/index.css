@@ -5,20 +5,26 @@
 @tailwind utilities;
 
 /* Global viewport settings */
-html, body {
+html {
+  margin: 0;
+  padding: 0;
+  /* Firefox fix: use overflow-x: clip instead of hidden on html */
+  overflow-x: clip;
+}
+
+body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-}
-
-/* Firefox bug: overflow-x: hidden on html causes 100vh issues */
-/* Only apply to body, not html */
-body {
   overflow-x: hidden;
+  /* Prevent horizontal scroll from any overflowing content */
+  max-width: 100vw;
 }
 
 #root {
   min-height: 100vh;
+  /* Extra safety: clip any overflow */
+  overflow-x: clip;
 }
 
 
