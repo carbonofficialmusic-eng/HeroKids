@@ -67,7 +67,7 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
   }, [backgroundUrl, currentBg]);
 
   return (
-    <div className="min-h-screen min-h-dvh relative bg-background">
+    <div className="app-shell relative bg-background">
       {/* Background container - fixed positioning with proper iOS Safari support */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
         {previousBg && (
