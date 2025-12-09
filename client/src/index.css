@@ -34,6 +34,7 @@ html, body {
   min-height: calc(var(--vh, 1vh) * 100);
 }
 
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);
