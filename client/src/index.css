@@ -9,6 +9,11 @@ html, body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
+}
+
+/* Firefox bug: overflow-x: hidden on html causes 100vh issues */
+/* Only apply to body, not html */
+body {
   overflow-x: hidden;
 }
 
