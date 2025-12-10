@@ -3723,10 +3723,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.consumeDeviceLinkCode(linkCode.id);
 
       // Set secure cookie with the token
+      // Use sameSite: 'lax' to allow cookie to be sent on same-site navigation
+      const isProduction = process.env.NODE_ENV === 'production';
       res.cookie('child_device_token', token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
+        secure: isProduction, // Only require HTTPS in production
+        sameSite: 'lax', // Allow cookie on same-site navigation
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         path: '/',
       });
