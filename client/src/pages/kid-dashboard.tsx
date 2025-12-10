@@ -756,11 +756,18 @@ export default function KidDashboard() {
   });
 
   // Check for device session (for linked child devices)
+  // This response now includes full member data
   const { data: deviceSession, isLoading: deviceSessionLoading } = useQuery<{
     authenticated: boolean;
     memberId?: string;
     memberName?: string;
     familyName?: string;
+    role?: string;
+    avatarUrl?: string | null;
+    color?: string;
+    activeSkinId?: string | null;
+    totalPoints?: number;
+    totalEarned?: number;
   }>({
     queryKey: ["/api/device-link/session"],
     retry: false,
@@ -770,10 +777,42 @@ export default function KidDashboard() {
   const isDeviceAuthenticated = deviceSession?.authenticated === true;
   const hasAnyAuth = !!authUser || isDeviceAuthenticated;
 
-  const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
+  // For Replit Auth users, fetch member from API
+  // For Device Session users, we already have member data in deviceSession
+  const { data: memberFromApi, isLoading: memberApiLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
-    enabled: hasAnyAuth,
+    enabled: !!authUser, // Only fetch via API for Replit Auth users
   });
+
+  // Build member object from device session if available
+  const memberFromDeviceSession: FamilyMember | undefined = isDeviceAuthenticated && deviceSession?.memberId ? {
+    id: deviceSession.memberId,
+    familyName: deviceSession.familyName || "",
+    displayName: deviceSession.memberName || "",
+    role: (deviceSession.role as "parent" | "child") || "child",
+    avatarUrl: deviceSession.avatarUrl || null,
+    color: deviceSession.color || "#3B82F6",
+    activeSkinId: deviceSession.activeSkinId || null,
+    totalPoints: deviceSession.totalPoints || 0,
+    totalEarned: deviceSession.totalEarned || 0,
+    weeklyPoints: 0,
+    monthlyPoints: 0,
+    userId: null,
+    pinCode: null,
+    rewardsRedeemed: 0,
+    unlockedSkins: [],
+    discoveredSkinIds: [],
+    useCustomAvatar: false,
+    avatarHistory: [],
+    lastReadChatAt: null,
+    excludeFromLeaderboard: false,
+    createdAt: null,
+    updatedAt: null,
+  } : undefined;
+
+  // Use API member for Replit Auth, device session member for Device Link
+  const member = memberFromApi || memberFromDeviceSession;
+  const memberLoading = authUser ? memberApiLoading : deviceSessionLoading;
 
   // WebSocket connection for real-time updates
   useWebSocket(member?.familyName || null);
