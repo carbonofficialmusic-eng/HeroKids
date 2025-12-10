@@ -131,6 +131,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Landing} />
           <Route path="/link-device" component={LinkDevice} />
+          <Route path="/kid-dashboard" component={KidDashboard} />
           <Route component={NotFound} />
         </Switch>
       </BackgroundWrapper>

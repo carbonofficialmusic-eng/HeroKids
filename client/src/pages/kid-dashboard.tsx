@@ -749,14 +749,30 @@ export default function KidDashboard() {
     },
   });
 
-  // Load user and member data
+  // Load user and member data - support both Replit Auth and Device Sessions
   const { data: authUser, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
+    retry: false,
   });
+
+  // Check for device session (for linked child devices)
+  const { data: deviceSession, isLoading: deviceSessionLoading } = useQuery<{
+    authenticated: boolean;
+    memberId?: string;
+    memberName?: string;
+    familyName?: string;
+  }>({
+    queryKey: ["/api/device-link/session"],
+    retry: false,
+  });
+
+  // User is authenticated via either Replit Auth OR Device Session
+  const isDeviceAuthenticated = deviceSession?.authenticated === true;
+  const hasAnyAuth = !!authUser || isDeviceAuthenticated;
 
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
-    enabled: !!authUser,
+    enabled: hasAnyAuth,
   });
 
   // WebSocket connection for real-time updates
@@ -764,7 +780,7 @@ export default function KidDashboard() {
 
   const { data: realMember } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/real"],
-    enabled: !!authUser,
+    enabled: hasAnyAuth,
   });
 
   const { data: familyData } = useQuery<Family>({
@@ -922,7 +938,8 @@ export default function KidDashboard() {
   };
 
   // Show loading state
-  if (userLoading || memberLoading) {
+  const isLoading = userLoading || deviceSessionLoading || memberLoading;
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -930,8 +947,8 @@ export default function KidDashboard() {
     );
   }
 
-  // If not logged in
-  if (!authUser || !member) {
+  // If not logged in via either method
+  if (!hasAnyAuth || !member) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Card className="p-8 text-center">
