@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Star, Trophy, Users, CheckCircle, Zap } from "lucide-react";
+import { Star, Trophy, Users, CheckCircle, Zap, Smartphone } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useTranslation } from "react-i18next";
+import { Link } from "wouter";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 export default function Landing() {
@@ -54,6 +55,17 @@ export default function Landing() {
               <Star className="h-5 w-5 mr-2" />
               {t('landing.startYourAdventure')}
             </Button>
+            <Link href="/link-device">
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg h-14 px-8"
+                data-testid="button-link-device-landing"
+              >
+                <Smartphone className="h-5 w-5 mr-2" />
+                {t('landing.linkDevice')}
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
