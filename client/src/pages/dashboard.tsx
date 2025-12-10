@@ -63,6 +63,24 @@ export default function Dashboard() {
   const [childActiveTab, setChildActiveTab] = useState<string>("active");
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("month");
   const [subscriptionProcessing, setSubscriptionProcessing] = useState(false);
+  const [debugTapCount, setDebugTapCount] = useState(0);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const debugTapTimeout = useState<NodeJS.Timeout | null>(null);
+
+  // Debug tap handler - 5 taps on logo shows viewport info
+  const handleDebugTap = () => {
+    setDebugTapCount(prev => {
+      const newCount = prev + 1;
+      if (newCount >= 5) {
+        setShowDebugInfo(true);
+        return 0;
+      }
+      return newCount;
+    });
+    // Reset tap count after 2 seconds of no taps
+    if (debugTapTimeout[0]) clearTimeout(debugTapTimeout[0]);
+    debugTapTimeout[0] = setTimeout(() => setDebugTapCount(0), 2000);
+  };
 
   // Check for subscription=success in URL and verify checkout session
   useEffect(() => {
@@ -707,8 +725,9 @@ export default function Dashboard() {
                   <img 
                     src={logoUrl} 
                     alt="HeroKids Logo" 
-                    className="h-32 w-auto object-contain"
+                    className="h-32 w-auto object-contain cursor-pointer"
                     data-testid="img-dashboard-logo"
+                    onClick={handleDebugTap}
                   />
                 </div>
                 <div className="space-y-3 mb-4">
@@ -1069,8 +1088,9 @@ export default function Dashboard() {
                 <img 
                   src={logoUrl} 
                   alt="HeroKids Logo" 
-                  className="h-40 w-auto object-contain"
+                  className="h-40 w-auto object-contain cursor-pointer"
                   data-testid="img-dashboard-logo-child"
+                  onClick={handleDebugTap}
                 />
               </div>
               <div className="space-y-3 mb-4">
@@ -1377,6 +1397,33 @@ export default function Dashboard() {
           onComplete={() => setCelebration(null)}
         />
       )}
+
+      {/* Debug Info Panel - activated by 5 taps on logo */}
+      <AlertDialog open={showDebugInfo} onOpenChange={setShowDebugInfo}>
+        <AlertDialogContent data-testid="dialog-debug-info">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Viewport Debug Info</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-left font-mono text-xs">
+                <p><strong>innerWidth:</strong> {typeof window !== 'undefined' ? window.innerWidth : 'N/A'}px</p>
+                <p><strong>innerHeight:</strong> {typeof window !== 'undefined' ? window.innerHeight : 'N/A'}px</p>
+                <p><strong>outerWidth:</strong> {typeof window !== 'undefined' ? window.outerWidth : 'N/A'}px</p>
+                <p><strong>outerHeight:</strong> {typeof window !== 'undefined' ? window.outerHeight : 'N/A'}px</p>
+                <p><strong>documentElement.clientWidth:</strong> {typeof document !== 'undefined' ? document.documentElement.clientWidth : 'N/A'}px</p>
+                <p><strong>documentElement.clientHeight:</strong> {typeof document !== 'undefined' ? document.documentElement.clientHeight : 'N/A'}px</p>
+                <p><strong>body.clientWidth:</strong> {typeof document !== 'undefined' ? document.body?.clientWidth : 'N/A'}px</p>
+                <p><strong>body.scrollWidth:</strong> {typeof document !== 'undefined' ? document.body?.scrollWidth : 'N/A'}px</p>
+                <p><strong>devicePixelRatio:</strong> {typeof window !== 'undefined' ? window.devicePixelRatio : 'N/A'}</p>
+                <p><strong>User Agent:</strong> {typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 80) + '...' : 'N/A'}</p>
+                <p className="text-muted-foreground mt-2">Wenn scrollWidth {'>'} clientWidth, gibt es horizontalen Overflow!</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction data-testid="button-close-debug">Schließen</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
