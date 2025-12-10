@@ -2628,11 +2628,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat endpoints (Family+ and Family Hero tier)
+  // Chat endpoints (Family+ and Family Hero tier) - supports Device Sessions
   app.get("/api/chat", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2667,8 +2671,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/chat", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2756,11 +2764,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get unread message count
+  // Get unread message count - supports Device Sessions
   app.get("/api/chat/unread-count", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2785,11 +2797,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mark chat messages as read
+  // Mark chat messages as read - supports Device Sessions
   app.post("/api/chat/mark-read", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });

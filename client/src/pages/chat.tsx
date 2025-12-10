@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,20 +26,19 @@ interface ChatMessage {
 
 export default function Chat() {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const { toast } = useToast();
   const [messageText, setMessageText] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { data: member } = useQuery<any>({
+  // Use member query directly - works for both Replit Auth and Device Sessions
+  const { data: member, isLoading: memberLoading } = useQuery<any>({
     queryKey: ["/api/family-members/current"],
-    enabled: !!user,
   });
 
   const { data: messages = [], isLoading, error } = useQuery<ChatMessage[]>({
     queryKey: ["/api/chat"],
-    enabled: !!user,
+    enabled: !!member, // Enable when member is loaded (works for Device Sessions)
     refetchInterval: 5000, // Refetch every 5 seconds as fallback
   });
 
@@ -102,7 +100,7 @@ export default function Chat() {
     setMessageText((prev) => prev + emoticon + " ");
   };
 
-  if (isLoading) {
+  if (isLoading || memberLoading) {
     return (
       <div className="container mx-auto p-6">
         <Link href={dashboardUrl}>
