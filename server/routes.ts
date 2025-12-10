@@ -2382,14 +2382,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Skins routes
+  // Skins routes - supports both Replit Auth and Device Sessions
   app.get("/api/skins", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // For Replit Auth, also check if acting as another member
+      let member = result.member;
+      if (!result.isDeviceSession && req.session.actingAsMemberId) {
+        member = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2445,13 +2451,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/skins/discover", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { skinId } = req.body;
       
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // For Replit Auth, also check if acting as another member
+      let member = result.member;
+      if (!result.isDeviceSession && req.session.actingAsMemberId) {
+        member = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2528,13 +2540,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/skins/select", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { skinId } = req.body;
       
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // For Replit Auth, also check if acting as another member
+      let member = result.member;
+      if (!result.isDeviceSession && req.session.actingAsMemberId) {
+        member = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
