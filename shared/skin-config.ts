@@ -101,8 +101,15 @@ export const SKIN_TIERS: SkinTierConfig[] = [
   },
   {
     tier: 13,
-    name: "HeroKids Legacy",
+    name: "Pterosaur Sky",
     unlockThreshold: 8400,
+    pointsPerCard: 80,
+    skinCount: 8,
+  },
+  {
+    tier: 14,
+    name: "HeroKids Legacy",
+    unlockThreshold: 9100,
     pointsPerCard: 80,
     skinCount: 8,
   },
@@ -293,6 +300,16 @@ export const SKIN_IDS_BY_TIER: Record<number, string[]> = {
     "level-boss",
   ],
   13: [
+    "pteranodon",
+    "quetzalcoatlus",
+    "rhamphorhynchus",
+    "pterodactylus",
+    "dimorphodon",
+    "tapejara",
+    "anhanguera",
+    "dsungaripterus",
+  ],
+  14: [
     "shield-blaze",
     "comet-dash",
     "wave-glider",
