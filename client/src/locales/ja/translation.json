@@ -310,7 +310,10 @@
     "failedToSelect": "スキンを選択できませんでした",
     "yourAvatar": "あなたのアバター",
     "unlockAt700": "🔒 通算700ポイントでアンロック",
-    "unlockAt1400": "🔒 通算1400ポイントでアンロック"
+    "unlockAt1400": "🔒 通算1400ポイントでアンロック",
+    "noSkinsInTier": "このパッケージにスキンはありません",
+    "pterosaurSky": "翼竜の空",
+    "unlockAtPoints": "🔒 通算{{points}}ポイントでアンロック"
   },
   "skinNames": {
     "junior-champion": "ジュニアチャンピオン",

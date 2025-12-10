@@ -310,7 +310,10 @@
     "failedToSelect": "无法选择皮肤",
     "yourAvatar": "你的头像",
     "unlockAt700": "🔒 累计700积分解锁",
-    "unlockAt1400": "🔒 累计1400积分解锁"
+    "unlockAt1400": "🔒 累计1400积分解锁",
+    "noSkinsInTier": "此包中没有可用的皮肤",
+    "pterosaurSky": "翼龙天空",
+    "unlockAtPoints": "🔒 累计{{points}}积分解锁"
   },
   "skinNames": {
     "junior-champion": "少年冠军",

@@ -310,7 +310,10 @@
     "failedToSelect": "Impossible de sélectionner l'apparence",
     "yourAvatar": "Ton Avatar",
     "unlockAt700": "🔒 Déverrouiller avec 700 points totaux",
-    "unlockAt1400": "🔒 Déverrouiller avec 1400 points totaux"
+    "unlockAt1400": "🔒 Déverrouiller avec 1400 points totaux",
+    "noSkinsInTier": "Aucune apparence disponible dans ce pack",
+    "pterosaurSky": "Ciel des Ptérosaures",
+    "unlockAtPoints": "🔒 Déverrouiller avec {{points}} points totaux"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

@@ -288,54 +288,75 @@ async function autoSeedSkinsIfNeeded() {
       { id: "console-hero", name: "Console Hero", description: "Ultimate gaming hero with legendary achievements!", imageUrl: "🎮", pointsRequired: 5920, bonusPoints: 0 },
       { id: "level-boss", name: "Level Boss", description: "Final boss character with epic powers and style!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 30 },
       
-      // Tier 13 - HeroKids Legacy (Logo-style collection, 6060-6500 points) - Bonus Slots: 1, 4, 7
-      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6060, bonusPoints: 10 },
-      { id: "comet-dash", name: "Comet Dash", description: "Super-fast hero boy with comet trail speed!", imageUrl: "☄️", pointsRequired: 6120, bonusPoints: 0 },
-      { id: "wave-glider", name: "Wave Glider", description: "Ocean hero boy surfing on water powers!", imageUrl: "🌊", pointsRequired: 6180, bonusPoints: 0 },
-      { id: "forest-guard", name: "Forest Guard", description: "Nature hero boy with leaf shield protection!", imageUrl: "🌲", pointsRequired: 6240, bonusPoints: 15 },
-      { id: "luna-beacon", name: "Luna Beacon", description: "Moonlight hero girl casting lunar beams!", imageUrl: "🌙", pointsRequired: 6300, bonusPoints: 0 },
-      { id: "sunrise-spark", name: "Sunrise Spark", description: "Dawn hero girl radiating sun energy!", imageUrl: "🌅", pointsRequired: 6360, bonusPoints: 0 },
-      { id: "bloom-guardian", name: "Bloom Guardian", description: "Flower hero girl with petal shield powers!", imageUrl: "🌸", pointsRequired: 6420, bonusPoints: 25 },
-      { id: "breeze-captain", name: "Breeze Captain", description: "Wind hero girl guiding air currents!", imageUrl: "💨", pointsRequired: 6500, bonusPoints: 0 },
+      // Tier 13 - Pterosaur Sky (Flying Dinosaurs collection, 6060-6500 points) - Bonus Slots: 2, 5, 8
+      { id: "pteranodon", name: "Pteranodon", description: "Majestic flying reptile with distinctive long head crest!", imageUrl: "🦅", pointsRequired: 6060, bonusPoints: 0 },
+      { id: "quetzalcoatlus", name: "Quetzalcoatlus", description: "One of the largest flying animals ever - truly gigantic!", imageUrl: "🦅", pointsRequired: 6120, bonusPoints: 15 },
+      { id: "rhamphorhynchus", name: "Rhamphorhynchus", description: "Small agile flyer with long tail and diamond tip!", imageUrl: "🦅", pointsRequired: 6180, bonusPoints: 0 },
+      { id: "pterodactylus", name: "Pterodactylus", description: "The classic pterosaur from prehistoric skies!", imageUrl: "🦅", pointsRequired: 6240, bonusPoints: 0 },
+      { id: "dimorphodon", name: "Dimorphodon", description: "Compact flyer with powerful jaws and strong teeth!", imageUrl: "🦅", pointsRequired: 6300, bonusPoints: 20 },
+      { id: "tapejara", name: "Tapejara", description: "Stunning pterosaur with spectacular colorful head crest!", imageUrl: "🦅", pointsRequired: 6360, bonusPoints: 0 },
+      { id: "anhanguera", name: "Anhanguera", description: "Expert fish hunter with long toothy snout!", imageUrl: "🦅", pointsRequired: 6420, bonusPoints: 0 },
+      { id: "dsungaripterus", name: "Dsungaripterus", description: "Shell-crushing specialist with unique curved beak!", imageUrl: "🦅", pointsRequired: 6500, bonusPoints: 25 },
+      
+      // Tier 14 - HeroKids Legacy (Logo-style collection, 6560-7000 points) - Bonus Slots: 1, 4, 7
+      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6560, bonusPoints: 10 },
+      { id: "comet-dash", name: "Comet Dash", description: "Super-fast hero boy with comet trail speed!", imageUrl: "☄️", pointsRequired: 6620, bonusPoints: 0 },
+      { id: "wave-glider", name: "Wave Glider", description: "Ocean hero boy surfing on water powers!", imageUrl: "🌊", pointsRequired: 6680, bonusPoints: 0 },
+      { id: "forest-guard", name: "Forest Guard", description: "Nature hero boy with leaf shield protection!", imageUrl: "🌲", pointsRequired: 6740, bonusPoints: 15 },
+      { id: "luna-beacon", name: "Luna Beacon", description: "Moonlight hero girl casting lunar beams!", imageUrl: "🌙", pointsRequired: 6800, bonusPoints: 0 },
+      { id: "sunrise-spark", name: "Sunrise Spark", description: "Dawn hero girl radiating sun energy!", imageUrl: "🌅", pointsRequired: 6860, bonusPoints: 0 },
+      { id: "bloom-guardian", name: "Bloom Guardian", description: "Flower hero girl with petal shield powers!", imageUrl: "🌸", pointsRequired: 6920, bonusPoints: 25 },
+      { id: "breeze-captain", name: "Breeze Captain", description: "Wind hero girl guiding air currents!", imageUrl: "💨", pointsRequired: 7000, bonusPoints: 0 },
     ];
 
     await db.insert(skins).values(SKIN_DATA);
 
-    log(`✅ Successfully auto-seeded ${SKIN_DATA.length} character skins! (13 collections × 8 skins)`);
+    log(`✅ Successfully auto-seeded ${SKIN_DATA.length} character skins! (14 collections × 8 skins)`);
   } catch (error) {
     console.error("❌ Error auto-seeding skins:", error);
   }
 }
 
-// Add Tier 13 skins incrementally if they don't exist
-async function addTier13SkinsIfNeeded() {
+// Add Tier 13 Pterosaur Sky skins incrementally if they don't exist
+async function addTier13PterosaursIfNeeded() {
   try {
     const tier13Skin = await db.select().from(skins).where(
-      sql`${skins.id} = 'shield-blaze'`
+      sql`${skins.id} = 'pteranodon'`
     );
 
     if (tier13Skin.length > 0) {
-      log("✅ Tier 13 HeroKids Legacy skins already exist");
+      log("✅ Tier 13 Pterosaur Sky skins already exist");
       return;
     }
 
-    log("🌱 Adding Tier 13 HeroKids Legacy skins (8 new skins)...");
+    log("🌱 Adding Tier 13 Pterosaur Sky skins (8 new skins)...");
     
     const TIER_13_SKINS = [
-      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6060, bonusPoints: 10 },
-      { id: "comet-dash", name: "Comet Dash", description: "Super-fast hero boy with comet trail speed!", imageUrl: "☄️", pointsRequired: 6120, bonusPoints: 0 },
-      { id: "wave-glider", name: "Wave Glider", description: "Ocean hero boy surfing on water powers!", imageUrl: "🌊", pointsRequired: 6180, bonusPoints: 0 },
-      { id: "forest-guard", name: "Forest Guard", description: "Nature hero boy with leaf shield protection!", imageUrl: "🌲", pointsRequired: 6240, bonusPoints: 15 },
-      { id: "luna-beacon", name: "Luna Beacon", description: "Moonlight hero girl casting lunar beams!", imageUrl: "🌙", pointsRequired: 6300, bonusPoints: 0 },
-      { id: "sunrise-spark", name: "Sunrise Spark", description: "Dawn hero girl radiating sun energy!", imageUrl: "🌅", pointsRequired: 6360, bonusPoints: 0 },
-      { id: "bloom-guardian", name: "Bloom Guardian", description: "Flower hero girl with petal shield powers!", imageUrl: "🌸", pointsRequired: 6420, bonusPoints: 25 },
-      { id: "breeze-captain", name: "Breeze Captain", description: "Wind hero girl guiding air currents!", imageUrl: "💨", pointsRequired: 6500, bonusPoints: 0 },
+      { id: "pteranodon", name: "Pteranodon", description: "Majestic flying reptile with distinctive long head crest!", imageUrl: "🦅", pointsRequired: 6060, bonusPoints: 0 },
+      { id: "quetzalcoatlus", name: "Quetzalcoatlus", description: "One of the largest flying animals ever - truly gigantic!", imageUrl: "🦅", pointsRequired: 6120, bonusPoints: 15 },
+      { id: "rhamphorhynchus", name: "Rhamphorhynchus", description: "Small agile flyer with long tail and diamond tip!", imageUrl: "🦅", pointsRequired: 6180, bonusPoints: 0 },
+      { id: "pterodactylus", name: "Pterodactylus", description: "The classic pterosaur from prehistoric skies!", imageUrl: "🦅", pointsRequired: 6240, bonusPoints: 0 },
+      { id: "dimorphodon", name: "Dimorphodon", description: "Compact flyer with powerful jaws and strong teeth!", imageUrl: "🦅", pointsRequired: 6300, bonusPoints: 20 },
+      { id: "tapejara", name: "Tapejara", description: "Stunning pterosaur with spectacular colorful head crest!", imageUrl: "🦅", pointsRequired: 6360, bonusPoints: 0 },
+      { id: "anhanguera", name: "Anhanguera", description: "Expert fish hunter with long toothy snout!", imageUrl: "🦅", pointsRequired: 6420, bonusPoints: 0 },
+      { id: "dsungaripterus", name: "Dsungaripterus", description: "Shell-crushing specialist with unique curved beak!", imageUrl: "🦅", pointsRequired: 6500, bonusPoints: 25 },
     ];
 
     await db.insert(skins).values(TIER_13_SKINS);
-    log("✅ Successfully added Tier 13 HeroKids Legacy skins!");
+    log("✅ Successfully added Tier 13 Pterosaur Sky skins!");
+    
+    // Also update HeroKids Legacy points to new Tier 14 range (6560-7000)
+    await db.execute(sql`UPDATE skins SET points_required = 6560 WHERE id = 'shield-blaze'`);
+    await db.execute(sql`UPDATE skins SET points_required = 6620 WHERE id = 'comet-dash'`);
+    await db.execute(sql`UPDATE skins SET points_required = 6680 WHERE id = 'wave-glider'`);
+    await db.execute(sql`UPDATE skins SET points_required = 6740 WHERE id = 'forest-guard'`);
+    await db.execute(sql`UPDATE skins SET points_required = 6800 WHERE id = 'luna-beacon'`);
+    await db.execute(sql`UPDATE skins SET points_required = 6860 WHERE id = 'sunrise-spark'`);
+    await db.execute(sql`UPDATE skins SET points_required = 6920 WHERE id = 'bloom-guardian'`);
+    await db.execute(sql`UPDATE skins SET points_required = 7000 WHERE id = 'breeze-captain'`);
+    log("✅ Updated HeroKids Legacy skins to Tier 14 point range!");
   } catch (error) {
-    console.error("❌ Error adding Tier 13 skins:", error);
+    console.error("❌ Error adding Tier 13 Pterosaur skins:", error);
   }
 }
 
@@ -482,20 +503,30 @@ async function forceReseedSkinsIfNeeded() {
       { id: "console-hero", name: "Console Hero", description: "Ultimate gaming hero with legendary achievements!", imageUrl: "🎮", pointsRequired: 5920, bonusPoints: 0 },
       { id: "level-boss", name: "Level Boss", description: "Final boss character with epic powers and style!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 30 },
       
-      // Tier 13 - HeroKids Legacy (Logo-style collection, 6060-6500 points) - Bonus Slots: 1, 4, 7
-      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6060, bonusPoints: 10 },
-      { id: "comet-dash", name: "Comet Dash", description: "Super-fast hero boy with comet trail speed!", imageUrl: "☄️", pointsRequired: 6120, bonusPoints: 0 },
-      { id: "wave-glider", name: "Wave Glider", description: "Ocean hero boy surfing on water powers!", imageUrl: "🌊", pointsRequired: 6180, bonusPoints: 0 },
-      { id: "forest-guard", name: "Forest Guard", description: "Nature hero boy with leaf shield protection!", imageUrl: "🌲", pointsRequired: 6240, bonusPoints: 15 },
-      { id: "luna-beacon", name: "Luna Beacon", description: "Moonlight hero girl casting lunar beams!", imageUrl: "🌙", pointsRequired: 6300, bonusPoints: 0 },
-      { id: "sunrise-spark", name: "Sunrise Spark", description: "Dawn hero girl radiating sun energy!", imageUrl: "🌅", pointsRequired: 6360, bonusPoints: 0 },
-      { id: "bloom-guardian", name: "Bloom Guardian", description: "Flower hero girl with petal shield powers!", imageUrl: "🌸", pointsRequired: 6420, bonusPoints: 25 },
-      { id: "breeze-captain", name: "Breeze Captain", description: "Wind hero girl guiding air currents!", imageUrl: "💨", pointsRequired: 6500, bonusPoints: 0 },
+      // Tier 13 - Pterosaur Sky (Flying Dinosaurs collection, 6060-6500 points) - Bonus Slots: 2, 5, 8
+      { id: "pteranodon", name: "Pteranodon", description: "Majestic flying reptile with distinctive long head crest!", imageUrl: "🦅", pointsRequired: 6060, bonusPoints: 0 },
+      { id: "quetzalcoatlus", name: "Quetzalcoatlus", description: "One of the largest flying animals ever - truly gigantic!", imageUrl: "🦅", pointsRequired: 6120, bonusPoints: 15 },
+      { id: "rhamphorhynchus", name: "Rhamphorhynchus", description: "Small agile flyer with long tail and diamond tip!", imageUrl: "🦅", pointsRequired: 6180, bonusPoints: 0 },
+      { id: "pterodactylus", name: "Pterodactylus", description: "The classic pterosaur from prehistoric skies!", imageUrl: "🦅", pointsRequired: 6240, bonusPoints: 0 },
+      { id: "dimorphodon", name: "Dimorphodon", description: "Compact flyer with powerful jaws and strong teeth!", imageUrl: "🦅", pointsRequired: 6300, bonusPoints: 20 },
+      { id: "tapejara", name: "Tapejara", description: "Stunning pterosaur with spectacular colorful head crest!", imageUrl: "🦅", pointsRequired: 6360, bonusPoints: 0 },
+      { id: "anhanguera", name: "Anhanguera", description: "Expert fish hunter with long toothy snout!", imageUrl: "🦅", pointsRequired: 6420, bonusPoints: 0 },
+      { id: "dsungaripterus", name: "Dsungaripterus", description: "Shell-crushing specialist with unique curved beak!", imageUrl: "🦅", pointsRequired: 6500, bonusPoints: 25 },
+      
+      // Tier 14 - HeroKids Legacy (Logo-style collection, 6560-7000 points) - Bonus Slots: 1, 4, 7
+      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6560, bonusPoints: 10 },
+      { id: "comet-dash", name: "Comet Dash", description: "Super-fast hero boy with comet trail speed!", imageUrl: "☄️", pointsRequired: 6620, bonusPoints: 0 },
+      { id: "wave-glider", name: "Wave Glider", description: "Ocean hero boy surfing on water powers!", imageUrl: "🌊", pointsRequired: 6680, bonusPoints: 0 },
+      { id: "forest-guard", name: "Forest Guard", description: "Nature hero boy with leaf shield protection!", imageUrl: "🌲", pointsRequired: 6740, bonusPoints: 15 },
+      { id: "luna-beacon", name: "Luna Beacon", description: "Moonlight hero girl casting lunar beams!", imageUrl: "🌙", pointsRequired: 6800, bonusPoints: 0 },
+      { id: "sunrise-spark", name: "Sunrise Spark", description: "Dawn hero girl radiating sun energy!", imageUrl: "🌅", pointsRequired: 6860, bonusPoints: 0 },
+      { id: "bloom-guardian", name: "Bloom Guardian", description: "Flower hero girl with petal shield powers!", imageUrl: "🌸", pointsRequired: 6920, bonusPoints: 25 },
+      { id: "breeze-captain", name: "Breeze Captain", description: "Wind hero girl guiding air currents!", imageUrl: "💨", pointsRequired: 7000, bonusPoints: 0 },
     ];
 
     await db.insert(skins).values(SKIN_DATA);
 
-    log(`✅ Force reseeded all ${SKIN_DATA.length} character skins! (13 collections × 8 skins)`);
+    log(`✅ Force reseeded all ${SKIN_DATA.length} character skins! (14 collections × 8 skins)`);
   } catch (error) {
     console.error("❌ Error force reseeding skins:", error);
   }
@@ -510,8 +541,8 @@ async function forceReseedSkinsIfNeeded() {
   // Force reseed all skins if Vampire Adventure doesn't exist (one-time migration)
   await forceReseedSkinsIfNeeded();
   
-  // Add Tier 13 HeroKids Legacy skins if they don't exist
-  await addTier13SkinsIfNeeded();
+  // Add Tier 13 Pterosaur Sky skins if they don't exist (and update HeroKids Legacy to Tier 14)
+  await addTier13PterosaursIfNeeded();
 
   // Start points reset scheduler
   startPointsResetScheduler();

@@ -310,7 +310,10 @@
     "failedToSelect": "No se pudo seleccionar el aspecto",
     "yourAvatar": "Tu Avatar",
     "unlockAt700": "🔒 Desbloquear con 700 puntos totales",
-    "unlockAt1400": "🔒 Desbloquear con 1400 puntos totales"
+    "unlockAt1400": "🔒 Desbloquear con 1400 puntos totales",
+    "noSkinsInTier": "No hay skins disponibles en este paquete",
+    "pterosaurSky": "Cielo de Pterosaurios",
+    "unlockAtPoints": "🔒 Desbloquear con {{points}} puntos totales"
   },
   "skinNames": {
     "junior-champion": "Campeón Junior",

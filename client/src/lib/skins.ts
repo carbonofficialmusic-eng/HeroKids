@@ -119,7 +119,17 @@ import arcadeMasterImg from "@assets/generated_images/arcade_master_retro_avatar
 import consoleHeroImg from "@assets/generated_images/console_hero_gamer_avatar.png";
 import levelBossImg from "@assets/generated_images/level_boss_gaming_avatar.png";
 
-// Tier 13 - HeroKids Legacy (Logo-style superhero collection - 4 boys, 4 girls)
+// Tier 13 - Pterosaur Sky (Flying Dinosaurs collection)
+import pteranodonImg from "@assets/generated_images/pteranodon_flying_dinosaur_avatar.png";
+import quetzalcoatlusImg from "@assets/generated_images/quetzalcoatlus_giant_pterosaur_avatar.png";
+import rhamphorhynchusImg from "@assets/generated_images/rhamphorhynchus_small_pterosaur_avatar.png";
+import pterodactylusImg from "@assets/generated_images/pterodactylus_classic_pterosaur_avatar.png";
+import dimorphodonImg from "@assets/generated_images/dimorphodon_strong-jawed_pterosaur_avatar.png";
+import tapejaraImg from "@assets/generated_images/tapejara_crested_pterosaur_avatar.png";
+import anhangueraImg from "@assets/generated_images/anhanguera_fish-hunting_pterosaur_avatar.png";
+import dsungaripterusImg from "@assets/generated_images/dsungaripterus_shell-crusher_pterosaur_avatar.png";
+
+// Tier 14 - HeroKids Legacy (Logo-style superhero collection - 4 boys, 4 girls)
 import shieldBlazeImg from "@assets/generated_images/shield_blaze_boy_hero_avatar.png";
 import cometDashImg from "@assets/generated_images/comet_dash_boy_hero_avatar.png";
 import waveGliderImg from "@assets/generated_images/wave_glider_boy_hero_avatar.png";
@@ -251,7 +261,17 @@ import arcadeMasterBg from "@assets/generated_images/arcade_master_retro_backgro
 import consoleHeroBg from "@assets/generated_images/console_hero_setup_background.png";
 import levelBossBg from "@assets/generated_images/level_boss_throne_background.png";
 
-// Tier 13 backgrounds - HeroKids Legacy
+// Tier 13 backgrounds - Pterosaur Sky (individual backgrounds)
+import pteranodonBg from "@assets/generated_images/pteranodon_prehistoric_sky_background.png";
+import quetzalcoatlusBg from "@assets/generated_images/quetzalcoatlus_canyon_background.png";
+import rhamphorhynchusBg from "@assets/generated_images/rhamphorhynchus_coastal_cliffs_background.png";
+import pterodactylusBg from "@assets/generated_images/pterodactylus_jurassic_landscape_background.png";
+import dimorphodonBg from "@assets/generated_images/dimorphodon_jungle_canyon_background.png";
+import tapejaraBg from "@assets/generated_images/tapejara_tropical_beach_background.png";
+import anhangueraBg from "@assets/generated_images/anhanguera_ocean_fishing_background.png";
+import dsungaripterusBg from "@assets/generated_images/dsungaripterus_rocky_shoreline_background.png";
+
+// Tier 14 backgrounds - HeroKids Legacy
 import shieldBlazeBg from "@assets/generated_images/shield_blaze_city_protection_background.png";
 import cometDashBg from "@assets/generated_images/comet_dash_sky_bridge_background.png";
 import waveGliderBg from "@assets/generated_images/wave_glider_ocean_bay_background.png";
@@ -383,7 +403,17 @@ export const SKIN_IMAGES: Record<string, string> = {
   "console-hero": consoleHeroImg,
   "level-boss": levelBossImg,
   
-  // Tier 13 - HeroKids Legacy (Logo-style)
+  // Tier 13 - Pterosaur Sky (Flying Dinosaurs)
+  "pteranodon": pteranodonImg,
+  "quetzalcoatlus": quetzalcoatlusImg,
+  "rhamphorhynchus": rhamphorhynchusImg,
+  "pterodactylus": pterodactylusImg,
+  "dimorphodon": dimorphodonImg,
+  "tapejara": tapejaraImg,
+  "anhanguera": anhangueraImg,
+  "dsungaripterus": dsungaripterusImg,
+  
+  // Tier 14 - HeroKids Legacy (Logo-style)
   "shield-blaze": shieldBlazeImg,
   "comet-dash": cometDashImg,
   "wave-glider": waveGliderImg,
@@ -516,7 +546,17 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "console-hero": consoleHeroBg,
   "level-boss": levelBossBg,
   
-  // Tier 13 - HeroKids Legacy (Logo-style backgrounds)
+  // Tier 13 - Pterosaur Sky (individual backgrounds)
+  "pteranodon": pteranodonBg,
+  "quetzalcoatlus": quetzalcoatlusBg,
+  "rhamphorhynchus": rhamphorhynchusBg,
+  "pterodactylus": pterodactylusBg,
+  "dimorphodon": dimorphodonBg,
+  "tapejara": tapejaraBg,
+  "anhanguera": anhangueraBg,
+  "dsungaripterus": dsungaripterusBg,
+  
+  // Tier 14 - HeroKids Legacy (Logo-style backgrounds)
   "shield-blaze": shieldBlazeBg,
   "comet-dash": cometDashBg,
   "wave-glider": waveGliderBg,

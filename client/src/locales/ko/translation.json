@@ -315,7 +315,9 @@
     "discoveryFailed": "발견 실패",
     "failedToDiscover": "스킨 발견에 실패했습니다",
     "failedToSelect": "스킨 선택에 실패했습니다",
-    "noSkinsInTier": "이 패키지에 사용 가능한 스킨이 없습니다"
+    "noSkinsInTier": "이 패키지에 사용 가능한 스킨이 없습니다",
+    "pterosaurSky": "익룡의 하늘",
+    "unlockAtPoints": "🔒 총 {{points}} 포인트에서 잠금 해제"
   },
   "skinNames": {
     "junior-champion": "주니어 챔피언",

@@ -153,6 +153,7 @@ export default function SkinsGallery() {
   const tier11Skins = skins.filter(s => s.tier === 11);
   const tier12Skins = skins.filter(s => s.tier === 12);
   const tier13Skins = skins.filter(s => s.tier === 13);
+  const tier14Skins = skins.filter(s => s.tier === 14);
   
   console.log('🎨 Frontend: Tier distribution:', {
     tier1: tier1Skins.length,
@@ -168,6 +169,7 @@ export default function SkinsGallery() {
     tier11: tier11Skins.length,
     tier12: tier12Skins.length,
     tier13: tier13Skins.length,
+    tier14: tier14Skins.length,
   });
 
   const renderSkinCard = (skin: Skin) => {
@@ -620,21 +622,44 @@ export default function SkinsGallery() {
           </div>
         </div>
 
-        {/* Tier 13 - HeroKids Legacy */}
+        {/* Tier 13 - Pterosaur Sky */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
+              {t('skins.pterosaurSky', 'Pterosaur Sky')}
+            </h2>
+            <p className="text-sm font-semibold text-glow-white">
+              {unlockedTier >= 13
+                ? t('skins.unlockedUseCards')
+                : t('skins.unlockAtPoints', { points: '8,400' })}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tier13Skins.length > 0 ? (
+              tier13Skins.map(renderSkinCard)
+            ) : (
+              <p className="col-span-4 text-center text-muted-foreground py-8">
+                {t('skins.noSkinsInTier')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier 14 - HeroKids Legacy */}
         <div className="mb-8">
           <div className="mb-4">
             <h2 className="text-2xl font-black font-accent mb-1 text-glow-white">
               HeroKids Legacy
             </h2>
             <p className="text-sm font-semibold text-glow-white">
-              {unlockedTier >= 13
+              {unlockedTier >= 14
                 ? t('skins.unlockedUseCards')
-                : "Unlock at 8,400 points"}
+                : t('skins.unlockAtPoints', { points: '9,100' })}
             </p>
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {tier13Skins.length > 0 ? (
-              tier13Skins.map(renderSkinCard)
+            {tier14Skins.length > 0 ? (
+              tier14Skins.map(renderSkinCard)
             ) : (
               <p className="col-span-4 text-center text-muted-foreground py-8">
                 {t('skins.noSkinsInTier')}

@@ -326,7 +326,9 @@
     "yourAvatar": "Dein Avatar",
     "unlockAt700": "🔒 Freischalten mit 700 Gesamtpunkten",
     "unlockAt1400": "🔒 Freischalten mit 1400 Gesamtpunkten",
-    "noSkinsInTier": "Keine Skins in diesem Paket verfügbar"
+    "noSkinsInTier": "Keine Skins in diesem Paket verfügbar",
+    "pterosaurSky": "Flugsaurier-Himmel",
+    "unlockAtPoints": "🔒 Freischalten mit {{points}} Gesamtpunkten"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",
