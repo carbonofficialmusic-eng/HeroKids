@@ -3781,8 +3781,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         avatarUrl: member.avatarUrl,
         color: member.color,
         activeSkinId: member.activeSkinId,
+        discoveredSkinIds: member.discoveredSkinIds,
+        useCustomAvatar: member.useCustomAvatar,
         totalPoints: member.totalPoints,
         totalEarned: member.totalEarned,
+        weeklyPoints: member.weeklyPoints,
+        monthlyPoints: member.monthlyPoints,
       });
     } catch (error) {
       console.error("Error checking device session:", error);

@@ -756,7 +756,7 @@ export default function KidDashboard() {
   });
 
   // Check for device session (for linked child devices)
-  // This response now includes full member data
+  // This response now includes full member data including skin fields
   const { data: deviceSession, isLoading: deviceSessionLoading } = useQuery<{
     authenticated: boolean;
     memberId?: string;
@@ -766,8 +766,12 @@ export default function KidDashboard() {
     avatarUrl?: string | null;
     color?: string;
     activeSkinId?: string | null;
+    discoveredSkinIds?: string[];
+    useCustomAvatar?: boolean;
     totalPoints?: number;
     totalEarned?: number;
+    weeklyPoints?: number;
+    monthlyPoints?: number;
   }>({
     queryKey: ["/api/device-link/session"],
     retry: false,
@@ -795,14 +799,14 @@ export default function KidDashboard() {
     activeSkinId: deviceSession.activeSkinId || null,
     totalPoints: deviceSession.totalPoints || 0,
     totalEarned: deviceSession.totalEarned || 0,
-    weeklyPoints: 0,
-    monthlyPoints: 0,
+    weeklyPoints: deviceSession.weeklyPoints || 0,
+    monthlyPoints: deviceSession.monthlyPoints || 0,
     userId: null,
     pinCode: null,
     rewardsRedeemed: 0,
     unlockedSkins: [],
-    discoveredSkinIds: [],
-    useCustomAvatar: false,
+    discoveredSkinIds: deviceSession.discoveredSkinIds || [],
+    useCustomAvatar: deviceSession.useCustomAvatar || false,
     avatarHistory: [],
     lastReadChatAt: null,
     excludeFromLeaderboard: false,
