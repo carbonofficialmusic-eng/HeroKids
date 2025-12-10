@@ -119,15 +119,15 @@ import arcadeMasterImg from "@assets/generated_images/arcade_master_retro_avatar
 import consoleHeroImg from "@assets/generated_images/console_hero_gamer_avatar.png";
 import levelBossImg from "@assets/generated_images/level_boss_gaming_avatar.png";
 
-// Tier 13 - Pterosaur Sky (Flying Dinosaurs collection)
-import pteranodonImg from "@assets/generated_images/pteranodon_flying_dinosaur_avatar.png";
-import quetzalcoatlusImg from "@assets/generated_images/quetzalcoatlus_giant_pterosaur_avatar.png";
-import rhamphorhynchusImg from "@assets/generated_images/rhamphorhynchus_small_pterosaur_avatar.png";
-import pterodactylusImg from "@assets/generated_images/pterodactylus_classic_pterosaur_avatar.png";
-import dimorphodonImg from "@assets/generated_images/dimorphodon_strong-jawed_pterosaur_avatar.png";
-import tapejaraImg from "@assets/generated_images/tapejara_crested_pterosaur_avatar.png";
-import anhangueraImg from "@assets/generated_images/anhanguera_fish-hunting_pterosaur_avatar.png";
-import dsungaripterusImg from "@assets/generated_images/dsungaripterus_shell-crusher_pterosaur_avatar.png";
+// Tier 13 - Pterosaur Sky (Flying Dinosaurs collection - realistic style like Tier 3)
+import pteranodonImg from "@assets/generated_images/realistic_pteranodon_portrait.png";
+import quetzalcoatlusImg from "@assets/generated_images/realistic_quetzalcoatlus_portrait.png";
+import rhamphorhynchusImg from "@assets/generated_images/realistic_rhamphorhynchus_portrait.png";
+import pterodactylusImg from "@assets/generated_images/realistic_pterodactylus_portrait.png";
+import dimorphodonImg from "@assets/generated_images/realistic_dimorphodon_portrait.png";
+import tapejaraImg from "@assets/generated_images/realistic_tapejara_portrait.png";
+import anhangueraImg from "@assets/generated_images/realistic_anhanguera_portrait.png";
+import dsungaripterusImg from "@assets/generated_images/realistic_dsungaripterus_portrait.png";
 
 // Tier 14 - HeroKids Legacy (Logo-style superhero collection - 4 boys, 4 girls)
 import shieldBlazeImg from "@assets/generated_images/shield_blaze_boy_hero_avatar.png";
