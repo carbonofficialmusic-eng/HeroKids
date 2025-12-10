@@ -32,7 +32,9 @@ export default function Approvals() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       toast({
         title: t("approvals.toastApproved"),
         description: t("approvals.toastAwardedPoints", { points: data.pointsAwarded, name: data.updatedMember?.displayName }),
@@ -54,6 +56,8 @@ export default function Approvals() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       setRejectDialogOpen(false);
       setSelectedCompletion(null);
       setRejectionReason("");
