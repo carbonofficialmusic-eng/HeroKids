@@ -191,15 +191,8 @@ import woodlandClearingBg from "@assets/generated_images/woodland_clearing_deer_
 import hollowTreeHouseBg from "@assets/generated_images/hollow_tree_house_cozy.png";
 import oakTreeParkBg from "@assets/generated_images/oak_tree_park_squirrel.png";
 
-// Tier 7 backgrounds - Vampire Adventure
-import gothicCastleBg from "@assets/generated_images/gothic_castle_vampire_background.png";
-import moonlitGraveyardBg from "@assets/generated_images/moonlit_graveyard_background.png";
-import darkEnchantedForestBg from "@assets/generated_images/dark_enchanted_forest_background.png";
-import vampireMansionBg from "@assets/generated_images/vampire_mansion_interior_background.png";
-import mistyNightBg from "@assets/generated_images/misty_night_landscape_background.png";
-import bloodMoonNightBg from "@assets/generated_images/blood_moon_night_background.png";
-import gothicCathedralBg from "@assets/generated_images/gothic_cathedral_background.png";
-import shadowyCryptBg from "@assets/generated_images/shadowy_crypt_background.png";
+// Tier 7 backgrounds - Vampire Adventure (new 3D style)
+import vampireCastle3dBg from "@assets/generated_images/3d_vampire_castle_background.png";
 
 // Tier 8 backgrounds - Ballerina Dreams
 import balletStageBg from "@assets/generated_images/ballet_stage_red_curtains.png";
@@ -456,15 +449,15 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "raccoon-girl": hollowTreeHouseBg,
   "squirrel-girl": oakTreeParkBg,
   
-  // Tier 7 - Vampire Adventure
-  "classic-vampire": gothicCastleBg,
-  "bat-boy": moonlitGraveyardBg,
-  "moonlight-vampire": darkEnchantedForestBg,
-  "gothic-vampire": vampireMansionBg,
-  "shadow-vampire": mistyNightBg,
-  "night-hunter": bloodMoonNightBg,
-  "blood-moon-vampire": gothicCathedralBg,
-  "vampire-prince": shadowyCryptBg,
+  // Tier 7 - Vampire Adventure (all use new 3D background)
+  "classic-vampire": vampireCastle3dBg,
+  "bat-boy": vampireCastle3dBg,
+  "moonlight-vampire": vampireCastle3dBg,
+  "gothic-vampire": vampireCastle3dBg,
+  "shadow-vampire": vampireCastle3dBg,
+  "night-hunter": vampireCastle3dBg,
+  "blood-moon-vampire": vampireCastle3dBg,
+  "vampire-prince": vampireCastle3dBg,
   
   // Tier 8 - Ballerina Dreams
   "ballerina-pink": balletStageBg,
