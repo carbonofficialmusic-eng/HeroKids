@@ -713,12 +713,12 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="container mx-auto max-w-7xl px-4 py-8">
+      <div className="container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden">
         {isParent ? (
           /* Parent View */
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-6 min-w-0">
               {/* Logo and Stats Section */}
               <div className="text-center">
                 <div className="mb-4 flex justify-center">
