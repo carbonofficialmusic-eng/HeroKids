@@ -261,15 +261,15 @@ import arcadeMasterBg from "@assets/generated_images/arcade_master_retro_backgro
 import consoleHeroBg from "@assets/generated_images/console_hero_setup_background.png";
 import levelBossBg from "@assets/generated_images/level_boss_throne_background.png";
 
-// Tier 13 backgrounds - Pterosaur Sky (individual backgrounds)
-import pteranodonBg from "@assets/generated_images/pteranodon_prehistoric_sky_background.png";
-import quetzalcoatlusBg from "@assets/generated_images/quetzalcoatlus_canyon_background.png";
-import rhamphorhynchusBg from "@assets/generated_images/rhamphorhynchus_coastal_cliffs_background.png";
-import pterodactylusBg from "@assets/generated_images/pterodactylus_jurassic_landscape_background.png";
-import dimorphodonBg from "@assets/generated_images/dimorphodon_jungle_canyon_background.png";
-import tapejaraBg from "@assets/generated_images/tapejara_tropical_beach_background.png";
-import anhangueraBg from "@assets/generated_images/anhanguera_ocean_fishing_background.png";
-import dsungaripterusBg from "@assets/generated_images/dsungaripterus_rocky_shoreline_background.png";
+// Tier 13 backgrounds - Pterosaur Sky (realistic style like Tier 3)
+import pteranodonBg from "@assets/generated_images/pteranodon_realistic_cretaceous_sky.png";
+import quetzalcoatlusBg from "@assets/generated_images/quetzalcoatlus_realistic_canyon_landscape.png";
+import rhamphorhynchusBg from "@assets/generated_images/rhamphorhynchus_realistic_coastal_cliffs.png";
+import pterodactylusBg from "@assets/generated_images/pterodactylus_realistic_jurassic_forest.png";
+import dimorphodonBg from "@assets/generated_images/dimorphodon_realistic_jungle_canyon.png";
+import tapejaraBg from "@assets/generated_images/tapejara_realistic_tropical_coast.png";
+import anhangueraBg from "@assets/generated_images/anhanguera_realistic_ocean_seascape.png";
+import dsungaripterusBg from "@assets/generated_images/dsungaripterus_realistic_rocky_shoreline.png";
 
 // Tier 14 backgrounds - HeroKids Legacy
 import shieldBlazeBg from "@assets/generated_images/shield_blaze_city_protection_background.png";
