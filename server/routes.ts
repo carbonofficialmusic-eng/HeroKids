@@ -3682,6 +3682,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public: Verify a link code and create device session (no auth required)
   app.post("/api/device-link/verify-code", async (req: any, res) => {
     try {
+      console.log("[Device-Link] Verify code request received:", { code: req.body?.code, deviceLabel: req.body?.deviceLabel });
       const { code, deviceLabel } = req.body;
       if (!code) {
         return res.status(400).json({ message: "Code is required" });
@@ -3746,6 +3747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/device-link/session", async (req: any, res) => {
     try {
       const token = req.cookies?.child_device_token;
+      console.log("[Device-Link] Session check - token present:", !!token, "cookies:", Object.keys(req.cookies || {}));
       if (!token) {
         return res.json({ authenticated: false });
       }
