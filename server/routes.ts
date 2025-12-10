@@ -812,21 +812,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Set ACL policy for uploaded avatar
+  // Set ACL policy for uploaded avatar - supports Device Sessions
   app.put("/api/avatar", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { avatarUrl } = req.body;
       
       if (!avatarUrl) {
         return res.status(400).json({ message: "avatarUrl is required" });
       }
       
+      // Get owner ID for ACL (either userId or device member ID)
+      let ownerId: string;
+      if (req.user.authMethod === "device" && req.user.member) {
+        ownerId = `device:${req.user.member.id}`;
+      } else {
+        ownerId = req.user.claims.sub;
+      }
+      
       const objectStorageService = new ObjectStorageService();
       const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
         avatarUrl,
         {
-          owner: userId,
+          owner: ownerId,
           visibility: "public", // Avatars are public, accessible by everyone
         }
       );
@@ -1205,11 +1212,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get presigned URL for task proof upload (client-side upload to Object Storage)
+  // Get presigned URL for task proof upload (client-side upload to Object Storage) - supports Device Sessions
   app.post("/api/tasks/upload-proof-url", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -1240,10 +1251,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Set ACL policy for uploaded task proof photo
+  // Set ACL policy for uploaded task proof photo - supports Device Sessions
   app.put("/api/tasks/:taskId/proof-photo", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { taskId } = req.params;
       const { photoUrl } = req.body;
       
@@ -1251,19 +1261,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "photoUrl is required" });
       }
       
-      // Use same member resolution logic as POST /complete to ensure consistency
-      let member;
-      if (req.session.actingAsMemberId) {
-        member = await storage.getFamilyMember(req.session.actingAsMemberId);
-        if (!member) {
-          // If acting as member not found, clear the session and fall through
-          delete req.session.actingAsMemberId;
-        }
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
       }
       
-      // If not acting as someone or actingAs member not found, use real user
-      if (!member) {
-        member = await storage.getFamilyMemberByUserId(userId);
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMember(req.session.actingAsMemberId);
+        if (!actingMember) {
+          delete req.session.actingAsMemberId;
+        } else {
+          member = actingMember;
+        }
       }
       
       if (!member) {
@@ -1283,7 +1296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
         photoUrl,
         {
-          owner: userId,
+          owner: member.id, // Use member.id for Device Sessions compatibility
           visibility: "private", // Task proofs are private, only accessible by family members
         }
       );
@@ -1304,23 +1317,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/tasks/:taskId/complete", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { taskId } = req.params;
       const { proofPhotoUrl } = req.body;
       
-      // Check if we're acting as another member
-      let member;
-      if (req.session.actingAsMemberId) {
-        member = await storage.getFamilyMember(req.session.actingAsMemberId);
-        if (!member) {
-          // If acting as member not found, clear the session and fall through
-          delete req.session.actingAsMemberId;
-        }
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
       }
       
-      // If not acting as someone or actingAs member not found, use real user
-      if (!member) {
-        member = await storage.getFamilyMemberByUserId(userId);
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMember(req.session.actingAsMemberId);
+        if (!actingMember) {
+          delete req.session.actingAsMemberId;
+        } else {
+          member = actingMember;
+        }
       }
       
       if (!member) {
@@ -1799,22 +1814,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Redeem a reward
+  // Redeem a reward - supports Device Sessions
   app.post("/api/rewards/:rewardId/redeem", isAuthenticated, async (req: any, res) => {
     console.log('🎯 POST /api/rewards/:rewardId/redeem called');
     console.log('   rewardId:', req.params.rewardId);
-    console.log('   userId:', req.user?.claims?.sub);
     
     try {
-      const userId = req.user.claims.sub;
       const { rewardId } = req.params;
       
-      console.log('   Checking for acting member...');
-      // Use acting member if available, otherwise use authenticated user
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
       
       console.log('   Member found:', member ? `${member.displayName} (${member.id})` : 'null');
       console.log('   Member role:', member?.role);
@@ -1906,14 +1928,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get reward redemptions for current family
+  // Get reward redemptions for current family - supports Device Sessions
   app.get("/api/reward-redemptions", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2189,18 +2221,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Reward sharing routes
+  // Reward sharing routes - supports Device Sessions
   // Start sharing a reward
   app.post("/api/rewards/redemptions/:redemptionId/share", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { redemptionId } = req.params;
       
-      // Use acting member if available
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2240,17 +2281,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Join a shared reward
+  // Join a shared reward - supports Device Sessions
   app.post("/api/rewards/redemptions/:redemptionId/join", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { redemptionId } = req.params;
       
-      // Use acting member if available
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2305,17 +2355,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Finalize a shared reward (calculate and distribute costs)
+  // Finalize a shared reward (calculate and distribute costs) - supports Device Sessions
   app.post("/api/rewards/redemptions/:redemptionId/finalize", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { redemptionId } = req.params;
       
-      // Use acting member if available
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2360,14 +2419,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all active shared rewards for family
+  // Get all active shared rewards for family - supports Device Sessions
   app.get("/api/rewards/shared", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2741,11 +2810,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get pending approvals count (for parents)
+  // Get pending approvals count (for parents) - supports Device Sessions
   app.get("/api/tasks/pending-count", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2819,11 +2892,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get pending reward redemptions count (for parents)
+  // Get pending reward redemptions count (for parents) - supports Device Sessions
   app.get("/api/reward-redemptions/pending-count", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2851,11 +2928,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ===== Achievement System =====
 
-  // Get achievement definitions for family
+  // Get achievement definitions for family - supports Device Sessions
   app.get("/api/achievements", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -3023,11 +3103,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get achievement awards history
+  // Get achievement awards history - supports Device Sessions
   app.get("/api/achievements/awards", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -3041,16 +3124,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get achievement awards for current member
+  // Get achievement awards for current member - supports Device Sessions
   app.get("/api/achievements/my-awards", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       
-      // Use acting member if available
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -3066,13 +3157,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ===== Family Goals =====
   
-  // Get all family goals for the current family
+  // Get all family goals for the current family - supports Device Sessions
   app.get("/api/family-goals", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      
-      // Always use authenticated user
-      const member = await storage.getFamilyMemberByUserId(userId);
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -3086,14 +3178,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get a specific family goal with contributions
+  // Get a specific family goal with contributions - supports Device Sessions
   app.get("/api/family-goals/:id", isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
       
-      // Always use authenticated user
-      const member = await storage.getFamilyMemberByUserId(userId);
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -3299,18 +3393,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Contribute points to a family goal
+  // Contribute points to a family goal - supports Device Sessions
   app.post("/api/family-goals/:id/contribute", isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
       
-      // Get current member (either acting as or real authenticated user)
-      let member;
-      if (req.session.actingAsMemberId) {
-        member = await storage.getFamilyMember(req.session.actingAsMemberId);
-      } else {
-        const userId = req.user.claims.sub;
-        member = await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
       }
       
       if (!member) {
