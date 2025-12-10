@@ -59,14 +59,14 @@ import deerGirlImg from "@assets/generated_images/deer_girl_brown_antlers.png";
 import raccoonGirlImg from "@assets/generated_images/raccoon_girl_gray_hoodie.png";
 import squirrelGirlImg from "@assets/generated_images/squirrel_girl_orange_acorn.png";
 
-// Tier 7 - Vampire Adventure (Boys collection)
+// Tier 7 - Vampire Adventure (Boys collection - new 3D style)
 import classicVampireImg from "@assets/generated_images/classic_vampire_boy_avatar.png";
 import batBoyImg from "@assets/generated_images/bat_boy_vampire_avatar.png";
 import moonlightVampireImg from "@assets/generated_images/moonlight_vampire_boy_avatar.png";
 import gothicVampireImg from "@assets/generated_images/gothic_vampire_boy_avatar.png";
 import shadowVampireImg from "@assets/generated_images/shadow_vampire_boy_avatar.png";
-import nightHunterImg from "@assets/generated_images/night_hunter_vampire_boy_avatar.png";
-import bloodMoonVampireImg from "@assets/generated_images/blood_moon_vampire_boy_avatar.png";
+import nightHunterImg from "@assets/generated_images/night_hunter_vampire_3d_avatar.png";
+import bloodMoonVampireImg from "@assets/generated_images/blood_moon_vampire_3d_avatar.png";
 import vampirePrinceImg from "@assets/generated_images/vampire_prince_boy_avatar.png";
 
 // Tier 8 - Ballerina Dreams (Girls collection)
@@ -191,8 +191,15 @@ import woodlandClearingBg from "@assets/generated_images/woodland_clearing_deer_
 import hollowTreeHouseBg from "@assets/generated_images/hollow_tree_house_cozy.png";
 import oakTreeParkBg from "@assets/generated_images/oak_tree_park_squirrel.png";
 
-// Tier 7 backgrounds - Vampire Adventure (new 3D style)
+// Tier 7 backgrounds - Vampire Adventure (new 3D style - 8 unique backgrounds)
 import vampireCastle3dBg from "@assets/generated_images/3d_vampire_castle_background.png";
+import vampireMansion3dBg from "@assets/generated_images/3d_vampire_mansion_interior.png";
+import moonlitForest3dBg from "@assets/generated_images/3d_moonlit_enchanted_forest.png";
+import gothicCathedral3dBg from "@assets/generated_images/3d_gothic_cathedral_interior.png";
+import shadowyCrypt3dBg from "@assets/generated_images/3d_shadowy_crystal_crypt.png";
+import bloodMoonSky3dBg from "@assets/generated_images/3d_blood_moon_night_sky.png";
+import vampireThrone3dBg from "@assets/generated_images/3d_vampire_throne_room.png";
+import gothicGraveyard3dBg from "@assets/generated_images/3d_whimsical_gothic_graveyard.png";
 
 // Tier 8 backgrounds - Ballerina Dreams
 import balletStageBg from "@assets/generated_images/ballet_stage_red_curtains.png";
@@ -449,15 +456,15 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "raccoon-girl": hollowTreeHouseBg,
   "squirrel-girl": oakTreeParkBg,
   
-  // Tier 7 - Vampire Adventure (all use new 3D background)
+  // Tier 7 - Vampire Adventure (each with unique 3D background)
   "classic-vampire": vampireCastle3dBg,
-  "bat-boy": vampireCastle3dBg,
-  "moonlight-vampire": vampireCastle3dBg,
-  "gothic-vampire": vampireCastle3dBg,
-  "shadow-vampire": vampireCastle3dBg,
-  "night-hunter": vampireCastle3dBg,
-  "blood-moon-vampire": vampireCastle3dBg,
-  "vampire-prince": vampireCastle3dBg,
+  "bat-boy": gothicGraveyard3dBg,
+  "moonlight-vampire": moonlitForest3dBg,
+  "gothic-vampire": gothicCathedral3dBg,
+  "shadow-vampire": shadowyCrypt3dBg,
+  "night-hunter": vampireMansion3dBg,
+  "blood-moon-vampire": bloodMoonSky3dBg,
+  "vampire-prince": vampireThrone3dBg,
   
   // Tier 8 - Ballerina Dreams
   "ballerina-pink": balletStageBg,
