@@ -864,6 +864,13 @@ export default function KidDashboard() {
     enabled: !!member,
   });
 
+  // Fetch unread chat message count
+  const { data: unreadChatData } = useQuery<{ count: number }>({
+    queryKey: ["/api/chat/unread-count"],
+    enabled: !!member && hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat"),
+    refetchInterval: 10000,
+  });
+
   // Filter to show only this child's redemptions, sorted by newest first
   const myRedemptions = member 
     ? redemptions
@@ -1626,13 +1633,21 @@ export default function KidDashboard() {
                 <span className="font-bold text-sm sm:text-base truncate">{t("kidDashboard.requestNewReward")}</span>
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px]">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px] relative">
               <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
                 <Link href="/chat">
                   <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
                   <span className="font-bold text-sm sm:text-base truncate">{t("nav.chat")}</span>
                 </Link>
               </Button>
+              {unreadChatData && unreadChatData.count > 0 && (
+                <span 
+                  className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                  data-testid="badge-unread-chat-count"
+                >
+                  {unreadChatData.count}
+                </span>
+              )}
             </motion.div>
           </div>
         </Card>
