@@ -900,6 +900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   return {
                     ...task,
                     remainingSlots: task.maxCompletions - completionCount,
+                    completionCount, // Explicit count for UI display
                     memberHasCompleted: hasCompleted,
                     memberCompletionStatus: completionStatus,
                     completions, // Include participant list for multi-tasks
@@ -909,6 +910,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   return {
                     ...task,
                     remainingSlots: task.maxCompletions,
+                    completionCount: 0,
                     memberHasCompleted: hasCompleted,
                     memberCompletionStatus: completionStatus,
                     completions: [],
