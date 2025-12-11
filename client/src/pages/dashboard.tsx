@@ -929,7 +929,7 @@ export default function Dashboard() {
                                 )}
                               </div>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
                               <Button
                                 onClick={() => {
                                   setRequestToEdit(request);
