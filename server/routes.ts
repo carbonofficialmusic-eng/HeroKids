@@ -2027,17 +2027,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create a reward request (children only)
+  // Create a reward request (children only) - supports Device Sessions
   app.post("/api/reward-requests", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { title, description, pointThreshold } = req.body;
       
-      // Use acting member if available, otherwise use authenticated user
-      const actingMemberId = req.session.actingAsMemberId;
-      const member = actingMemberId 
-        ? await storage.getFamilyMemberById(actingMemberId)
-        : await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -2077,11 +2086,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all reward requests for the current family
+  // Get all reward requests for the current family - supports Device Sessions
   app.get("/api/reward-requests", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const member = result.member;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
