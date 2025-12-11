@@ -868,7 +868,7 @@ export default function KidDashboard() {
   const { data: unreadChatData } = useQuery<{ count: number }>({
     queryKey: ["/api/chat/unread-count"],
     enabled: !!member && hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat"),
-    refetchInterval: 10000,
+    refetchInterval: 5000,
   });
 
   // Filter to show only this child's redemptions, sorted by newest first
