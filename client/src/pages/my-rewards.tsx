@@ -216,7 +216,7 @@ export default function MyRewards() {
               </div>
             </div>
 
-            <div className="grid gap-3">
+            <div className="grid grid-cols-1 gap-3 w-full">
               {myRedemptions.map((redemption, index) => {
                 const typed = redemption as RedemptionWithDetails;
                 const shared = sharedRewards.find(s => s.id === typed.id);
