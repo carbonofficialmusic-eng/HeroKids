@@ -261,15 +261,8 @@ import arcadeMasterBg from "@assets/generated_images/arcade_master_retro_backgro
 import consoleHeroBg from "@assets/generated_images/console_hero_setup_background.png";
 import levelBossBg from "@assets/generated_images/level_boss_throne_background.png";
 
-// Tier 13 backgrounds - Pterosaur Sky (realistic style like Tier 3)
-import pteranodonBg from "@assets/generated_images/pteranodon_realistic_cretaceous_sky.png";
-import quetzalcoatlusBg from "@assets/generated_images/quetzalcoatlus_realistic_canyon_landscape.png";
-import rhamphorhynchusBg from "@assets/generated_images/rhamphorhynchus_prehistoric_sky_background.png";
-import pterodactylusBg from "@assets/generated_images/pterodactylus_realistic_jurassic_forest.png";
-import dimorphodonBg from "@assets/generated_images/dimorphodon_realistic_jungle_canyon.png";
-import tapejaraBg from "@assets/generated_images/tapejara_realistic_tropical_coast.png";
-import anhangueraBg from "@assets/generated_images/anhanguera_realistic_ocean_seascape.png";
-import dsungaripterusBg from "@assets/generated_images/dsungaripterus_realistic_rocky_shoreline.png";
+// Tier 13 backgrounds - Pterosaur Sky (shared prehistoric sunset sky)
+import pterosaurSkyBg from "@assets/generated_images/pterosaur_prehistoric_sunset_sky.png";
 
 // Tier 14 backgrounds - HeroKids Legacy
 import shieldBlazeBg from "@assets/generated_images/shield_blaze_city_protection_background.png";
@@ -546,15 +539,15 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "console-hero": consoleHeroBg,
   "level-boss": levelBossBg,
   
-  // Tier 13 - Pterosaur Sky (individual backgrounds)
-  "pteranodon": pteranodonBg,
-  "quetzalcoatlus": quetzalcoatlusBg,
-  "rhamphorhynchus": rhamphorhynchusBg,
-  "pterodactylus": pterodactylusBg,
-  "dimorphodon": dimorphodonBg,
-  "tapejara": tapejaraBg,
-  "anhanguera": anhangueraBg,
-  "dsungaripterus": dsungaripterusBg,
+  // Tier 13 - Pterosaur Sky (shared prehistoric sunset sky)
+  "pteranodon": pterosaurSkyBg,
+  "quetzalcoatlus": pterosaurSkyBg,
+  "rhamphorhynchus": pterosaurSkyBg,
+  "pterodactylus": pterosaurSkyBg,
+  "dimorphodon": pterosaurSkyBg,
+  "tapejara": pterosaurSkyBg,
+  "anhanguera": pterosaurSkyBg,
+  "dsungaripterus": pterosaurSkyBg,
   
   // Tier 14 - HeroKids Legacy (Logo-style backgrounds)
   "shield-blaze": shieldBlazeBg,
