@@ -1279,15 +1279,21 @@ export default function KidDashboard() {
 
                         {/* Participants */}
                         {participants.length > 0 && (
-                          <div className="flex items-center justify-center gap-1 flex-wrap">
+                          <div className="flex items-center justify-center gap-1.5 flex-wrap">
                             <p className="text-xs text-muted-foreground mr-1">{t("kidDashboard.with")}</p>
                             {participants.map(p => (
-                              <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
-                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar)} />
-                                <AvatarFallback className="text-xs">
-                                  {p.member.displayName[0]}
-                                </AvatarFallback>
-                              </Avatar>
+                              <Badge key={p.id} variant="secondary" className="gap-1.5 text-xs py-1">
+                                <Avatar className="h-5 w-5">
+                                  <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar)} />
+                                  <AvatarFallback 
+                                    className="text-xs text-white font-bold"
+                                    style={{ backgroundColor: p.member.color }}
+                                  >
+                                    {p.member.displayName[0]}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {p.member.displayName}
+                              </Badge>
                             ))}
                           </div>
                         )}
@@ -1390,15 +1396,21 @@ export default function KidDashboard() {
 
                           {/* Participants */}
                           {shared.participants.length > 0 && (
-                            <div className="flex items-center justify-center gap-1 flex-wrap">
+                            <div className="flex items-center justify-center gap-1.5 flex-wrap">
                               <p className="text-xs text-muted-foreground mr-1">{t("kidDashboard.with")}</p>
                               {shared.participants.map(p => (
-                                <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
-                                  <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar)} />
-                                  <AvatarFallback className="text-xs">
-                                    {p.member.displayName[0]}
-                                  </AvatarFallback>
-                                </Avatar>
+                                <Badge key={p.id} variant="secondary" className="gap-1.5 text-xs py-1">
+                                  <Avatar className="h-5 w-5">
+                                    <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar)} />
+                                    <AvatarFallback 
+                                      className="text-xs text-white font-bold"
+                                      style={{ backgroundColor: p.member.color }}
+                                    >
+                                      {p.member.displayName[0]}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  {p.member.displayName}
+                                </Badge>
                               ))}
                             </div>
                           )}
