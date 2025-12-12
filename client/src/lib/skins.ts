@@ -261,8 +261,15 @@ import arcadeMasterBg from "@assets/generated_images/arcade_master_retro_backgro
 import consoleHeroBg from "@assets/generated_images/console_hero_setup_background.png";
 import levelBossBg from "@assets/generated_images/level_boss_throne_background.png";
 
-// Tier 13 backgrounds - Pterosaur Sky (shared prehistoric sunset sky)
-import pterosaurSkyBg from "@assets/generated_images/pterosaur_prehistoric_sunset_sky.png";
+// Tier 13 backgrounds - Pterosaur Sky (individual prehistoric scenes)
+import pteranodonBg from "@assets/generated_images/pteranodon_ocean_sunset_scene.png";
+import quetzalcoatlusBg from "@assets/generated_images/quetzalcoatlus_canyon_landscape.png";
+import rhamphorhynchusBg from "@assets/generated_images/rhamphorhynchus_lagoon_twilight.png";
+import pterodactylusBg from "@assets/generated_images/pterodactylus_forest_canopy.png";
+import dimorphodonBg from "@assets/generated_images/dimorphodon_jungle_cliff.png";
+import tapejaraBg from "@assets/generated_images/tapejara_tropical_coast.png";
+import anhangueraBg from "@assets/generated_images/anhanguera_ocean_hunting.png";
+import dsungaripterusBg from "@assets/generated_images/dsungaripterus_rocky_shore.png";
 
 // Tier 14 backgrounds - HeroKids Legacy
 import shieldBlazeBg from "@assets/generated_images/shield_blaze_city_protection_background.png";
@@ -539,15 +546,15 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "console-hero": consoleHeroBg,
   "level-boss": levelBossBg,
   
-  // Tier 13 - Pterosaur Sky (shared prehistoric sunset sky)
-  "pteranodon": pterosaurSkyBg,
-  "quetzalcoatlus": pterosaurSkyBg,
-  "rhamphorhynchus": pterosaurSkyBg,
-  "pterodactylus": pterosaurSkyBg,
-  "dimorphodon": pterosaurSkyBg,
-  "tapejara": pterosaurSkyBg,
-  "anhanguera": pterosaurSkyBg,
-  "dsungaripterus": pterosaurSkyBg,
+  // Tier 13 - Pterosaur Sky (individual prehistoric scenes)
+  "pteranodon": pteranodonBg,
+  "quetzalcoatlus": quetzalcoatlusBg,
+  "rhamphorhynchus": rhamphorhynchusBg,
+  "pterodactylus": pterodactylusBg,
+  "dimorphodon": dimorphodonBg,
+  "tapejara": tapejaraBg,
+  "anhanguera": anhangueraBg,
+  "dsungaripterus": dsungaripterusBg,
   
   // Tier 14 - HeroKids Legacy (Logo-style backgrounds)
   "shield-blaze": shieldBlazeBg,
