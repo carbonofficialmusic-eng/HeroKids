@@ -245,6 +245,7 @@ export interface IStorage {
   startRewardSharing(redemptionId: string): Promise<void>;
   joinRewardSharing(redemptionId: string, memberId: string): Promise<RewardSharingParticipant>;
   finalizeRewardSharing(redemptionId: string): Promise<void>;
+  cancelRewardSharing(redemptionId: string): Promise<void>;
   getRewardSharingParticipants(redemptionId: string): Promise<Array<RewardSharingParticipant & { member: FamilyMember }>>;
   getActiveSharedRewards(familyName: string): Promise<Array<RewardRedemption & { participants: Array<RewardSharingParticipant & { member: FamilyMember }> }>>;
 
@@ -1505,6 +1506,44 @@ export class DatabaseStorage implements IStorage {
         .set({
           sharingStatus: "sharing_finalized",
           pointsSpent: pointsPerPerson,
+        })
+        .where(eq(rewardRedemptions.id, redemptionId));
+    });
+  }
+
+  async cancelRewardSharing(redemptionId: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      // Get redemption
+      const [redemption] = await tx
+        .select()
+        .from(rewardRedemptions)
+        .where(eq(rewardRedemptions.id, redemptionId))
+        .limit(1);
+
+      if (!redemption) {
+        throw new Error("Redemption not found");
+      }
+
+      if (redemption.sharingStatus !== "sharing_active") {
+        throw new Error("Sharing is not active for this reward");
+      }
+
+      // Get all participants
+      const participants = await tx
+        .select()
+        .from(rewardSharingParticipants)
+        .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
+
+      // Can only cancel if no one has joined yet
+      if (participants.length > 0) {
+        throw new Error("Cannot cancel sharing after others have joined. Use finalize instead.");
+      }
+
+      // Reset sharing status back to not_shared
+      await tx
+        .update(rewardRedemptions)
+        .set({
+          sharingStatus: "not_shared",
         })
         .where(eq(rewardRedemptions.id, redemptionId));
     });

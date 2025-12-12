@@ -2435,6 +2435,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cancel sharing (only works if no one joined yet) - supports Device Sessions
+  app.post("/api/rewards/redemptions/:redemptionId/cancel-sharing", isAuthenticated, async (req: any, res) => {
+    try {
+      const { redemptionId } = req.params;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get the redemption
+      const redemption = await storage.getRewardRedemption(redemptionId);
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      
+      // Only the original redeemer can cancel
+      if (redemption.memberId !== member.id) {
+        return res.status(403).json({ message: "Only the original redeemer can cancel sharing" });
+      }
+      
+      // Cancel sharing
+      await storage.cancelRewardSharing(redemptionId);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_sharing_cancelled",
+        redemptionId,
+      });
+      
+      res.json({ 
+        message: "Sharing cancelled. You can now redeem this reward solo.",
+      });
+    } catch (error: any) {
+      console.error("Error cancelling shared reward:", error);
+      res.status(500).json({ message: error.message || "Failed to cancel sharing" });
+    }
+  });
+
   // Get all active shared rewards for family - supports Device Sessions
   app.get("/api/rewards/shared", isAuthenticated, async (req: any, res) => {
     try {

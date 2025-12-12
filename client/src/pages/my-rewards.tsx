@@ -13,6 +13,7 @@ import {
   Users,
   Share2,
   UserPlus,
+  X,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -152,6 +153,27 @@ export default function MyRewards() {
     },
   });
 
+  const cancelSharingMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/cancel-sharing`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      toast({
+        title: "Teilen abgebrochen",
+        description: "Du kannst die Belohnung jetzt alleine einlösen.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fehler",
+        description: error.message || "Teilen konnte nicht abgebrochen werden.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Filter and sort redemptions by newest first
   const myRedemptions = member 
     ? redemptions
@@ -225,6 +247,7 @@ export default function MyRewards() {
                 const isFinalized = typed.sharingStatus === "sharing_finalized";
                 const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared";
                 const canFinalize = isSharing && participants.length > 0;
+                const canCancelSharing = isSharing && participants.length === 0;
 
                 return (
                   <motion.div
@@ -301,8 +324,8 @@ export default function MyRewards() {
                         )}
 
                         {/* Sharing Actions */}
-                        {(canShare || canFinalize) && (
-                          <div className="pt-2 border-t flex gap-2">
+                        {(canShare || canFinalize || canCancelSharing) && (
+                          <div className="pt-2 border-t flex gap-2 flex-wrap">
                             {canShare && (
                               <Button
                                 size="sm"
@@ -314,6 +337,19 @@ export default function MyRewards() {
                               >
                                 <Share2 className="h-3.5 w-3.5" />
                                 Teilen
+                              </Button>
+                            )}
+                            {canCancelSharing && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 gap-1.5 text-xs"
+                                onClick={() => cancelSharingMutation.mutate(typed.id)}
+                                disabled={cancelSharingMutation.isPending}
+                                data-testid={`button-cancel-share-${typed.id}`}
+                              >
+                                <X className="h-3.5 w-3.5" />
+                                Teilen abbrechen
                               </Button>
                             )}
                             {canFinalize && (
