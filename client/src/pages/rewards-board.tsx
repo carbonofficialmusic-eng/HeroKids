@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2 } from "lucide-react";
+import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X } from "lucide-react";
 import { format } from "date-fns";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Link } from "wouter";
@@ -184,6 +184,28 @@ export default function RewardsBoard() {
       toast({
         title: "Fehler",
         description: error.message || "Teilen konnte nicht abgeschlossen werden.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Cancel sharing (when no participants have joined)
+  const cancelSharingMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/cancel-sharing`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      toast({
+        title: t("kidDashboard.sharingCancelled"),
+        description: t("kidDashboard.canRedeemSolo"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fehler",
+        description: error.message || "Teilen konnte nicht abgebrochen werden.",
         variant: "destructive",
       });
     },
@@ -377,9 +399,22 @@ export default function RewardsBoard() {
                         </Button>
                       )}
                       {isInitiator && shared.participants.length === 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          Warte auf Teilnehmer...
-                        </p>
+                        <div className="flex items-center gap-3">
+                          <p className="text-sm text-muted-foreground">
+                            Warte auf Teilnehmer...
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-2"
+                            onClick={() => cancelSharingMutation.mutate(shared.id)}
+                            disabled={cancelSharingMutation.isPending}
+                            data-testid={`button-cancel-sharing-${shared.id}`}
+                          >
+                            <X className="h-4 w-4" />
+                            {t("kidDashboard.cancelSharing")}
+                          </Button>
+                        </div>
                       )}
                       {!isInitiator && !hasJoined && (
                         <Button
