@@ -47,6 +47,7 @@ import {
   Users,
   Share2,
   UserPlus,
+  X,
 } from "lucide-react";
 import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -749,6 +750,27 @@ export default function KidDashboard() {
     },
   });
 
+  const cancelSharingMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/cancel-sharing`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      toast({
+        title: t("kidDashboard.sharingCancelled"),
+        description: t("kidDashboard.canRedeemSolo"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("kidDashboard.error"),
+        description: error.message || t("kidDashboard.sharingCancelError"),
+        variant: "destructive",
+      });
+    },
+  });
+
   // Load user and member data - support both Replit Auth and Device Sessions
   const { data: authUser, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -1240,6 +1262,7 @@ export default function KidDashboard() {
                 const isFinalized = typed.sharingStatus === "sharing_finalized";
                 const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared";
                 const canFinalize = isSharing && participants.length > 0;
+                const canCancelSharing = isSharing && participants.length === 0;
 
                 return (
                   <motion.div
@@ -1306,34 +1329,49 @@ export default function KidDashboard() {
                         )}
 
                         {/* Sharing Actions */}
-                        <div className="flex gap-2 pt-2 border-t border-green-500/20">
-                          {canShare && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="flex-1 gap-1.5 text-xs"
-                              onClick={() => startSharingMutation.mutate(typed.id)}
-                              disabled={startSharingMutation.isPending}
-                              data-testid={`button-start-share-${typed.id}`}
-                            >
-                              <Share2 className="h-3.5 w-3.5" />
-                              {t("kidDashboard.startSharing")}
-                            </Button>
-                          )}
-                          {canFinalize && (
-                            <Button
-                              size="sm"
-                              variant="default"
-                              className="flex-1 gap-1.5 text-xs"
-                              onClick={() => finalizeSharingMutation.mutate(typed.id)}
-                              disabled={finalizeSharingMutation.isPending}
-                              data-testid={`button-finalize-${typed.id}`}
-                            >
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                              {t("kidDashboard.finalize")}
-                            </Button>
-                          )}
-                        </div>
+                        {(canShare || canFinalize || canCancelSharing) && (
+                          <div className="flex gap-2 pt-2 border-t border-green-500/20 flex-wrap">
+                            {canShare && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 gap-1.5 text-xs"
+                                onClick={() => startSharingMutation.mutate(typed.id)}
+                                disabled={startSharingMutation.isPending}
+                                data-testid={`button-start-share-${typed.id}`}
+                              >
+                                <Share2 className="h-3.5 w-3.5" />
+                                {t("kidDashboard.startSharing")}
+                              </Button>
+                            )}
+                            {canCancelSharing && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 gap-1.5 text-xs"
+                                onClick={() => cancelSharingMutation.mutate(typed.id)}
+                                disabled={cancelSharingMutation.isPending}
+                                data-testid={`button-cancel-share-${typed.id}`}
+                              >
+                                <X className="h-3.5 w-3.5" />
+                                {t("kidDashboard.cancelSharing")}
+                              </Button>
+                            )}
+                            {canFinalize && (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="flex-1 gap-1.5 text-xs"
+                                onClick={() => finalizeSharingMutation.mutate(typed.id)}
+                                disabled={finalizeSharingMutation.isPending}
+                                data-testid={`button-finalize-${typed.id}`}
+                              >
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                {t("kidDashboard.finalize")}
+                              </Button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </Card>
                   </motion.div>
