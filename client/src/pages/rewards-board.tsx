@@ -384,7 +384,12 @@ export default function RewardsBoard() {
                     )}
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2 pt-2 border-t">
+                    <div className="flex gap-2 pt-2 border-t flex-wrap">
+                      {isInitiator && shared.participants.length === 0 && (
+                        <p className="text-sm text-muted-foreground w-full">
+                          Warte auf Teilnehmer...
+                        </p>
+                      )}
                       {isInitiator && shared.participants.length > 0 && (
                         <Button
                           size="sm"
@@ -398,23 +403,18 @@ export default function RewardsBoard() {
                           Teilen beenden
                         </Button>
                       )}
-                      {isInitiator && shared.participants.length === 0 && (
-                        <div className="flex items-center gap-3">
-                          <p className="text-sm text-muted-foreground">
-                            Warte auf Teilnehmer...
-                          </p>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-2"
-                            onClick={() => cancelSharingMutation.mutate(shared.id)}
-                            disabled={cancelSharingMutation.isPending}
-                            data-testid={`button-cancel-sharing-${shared.id}`}
-                          >
-                            <X className="h-4 w-4" />
-                            {t("kidDashboard.cancelSharing")}
-                          </Button>
-                        </div>
+                      {isInitiator && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                          onClick={() => cancelSharingMutation.mutate(shared.id)}
+                          disabled={cancelSharingMutation.isPending}
+                          data-testid={`button-cancel-sharing-${shared.id}`}
+                        >
+                          <X className="h-4 w-4" />
+                          {t("kidDashboard.cancelSharing")}
+                        </Button>
                       )}
                       {!isInitiator && !hasJoined && (
                         <Button

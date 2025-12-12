@@ -1262,7 +1262,7 @@ export default function KidDashboard() {
                 const isFinalized = typed.sharingStatus === "sharing_finalized";
                 const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared";
                 const canFinalize = isSharing && participants.length > 0;
-                const canCancelSharing = isSharing && participants.length === 0;
+                const canCancelSharing = isSharing; // Can cancel anytime while sharing is active
 
                 return (
                   <motion.div

@@ -1528,16 +1528,10 @@ export class DatabaseStorage implements IStorage {
         throw new Error("Sharing is not active for this reward");
       }
 
-      // Get all participants
-      const participants = await tx
-        .select()
-        .from(rewardSharingParticipants)
+      // Delete all participants (they haven't paid points yet - that happens at finalize)
+      await tx
+        .delete(rewardSharingParticipants)
         .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
-
-      // Can only cancel if no one has joined yet
-      if (participants.length > 0) {
-        throw new Error("Cannot cancel sharing after others have joined. Use finalize instead.");
-      }
 
       // Reset sharing status back to not_shared
       await tx
