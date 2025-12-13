@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest, ApiError } from "@/lib/queryClient";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,9 @@ export default function SkinsGallery() {
   const { data: memberData, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
   });
+
+  // Subscribe to WebSocket for real-time updates (points changes unlock new skins)
+  useWebSocket(memberData?.familyName || null);
 
   const isChild = memberData?.role === "child";
   const dashboardUrl = isChild ? "/kid-dashboard" : "/dashboard";

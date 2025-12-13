@@ -29,15 +29,23 @@ export function useWebSocket(familyName: string | null) {
           switch (data.type) {
             case "task_created":
             case "task_updated":
+            case "task_deleted":
+              // Invalidate tasks and pending count
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+              break;
+
             case "task_completed":
             case "task_completion_pending":
             case "task_completion_approved":
             case "task_completion_rejected":
-            case "task_deleted":
-              // Invalidate tasks, pending count, and family members to refetch
+              // Invalidate tasks, pending count, family members, and skins (points changed = new skins unlockable)
               queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
               queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
               break;
 
             case "reward_created":
