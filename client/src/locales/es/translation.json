@@ -781,6 +781,7 @@
     "subtitle": "Selecciona el plan perfecto para las necesidades de tu familia. Todos los planes incluyen funciones básicas de gestión de tareas.",
     "backToDashboard": "← Volver al Panel",
     "onlyParents": "Nota: Solo los padres pueden cambiar los planes de suscripción.",
+    "testModeNotice": "Estos paquetes actualmente solo se pueden reservar con un código de prueba.",
     "mostPopular": "Más Popular",
     "unlimitedMembers": "Miembros ilimitados",
     "upToMembers": "Hasta {{count}} miembros",

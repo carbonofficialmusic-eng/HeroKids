@@ -781,6 +781,7 @@
     "subtitle": "为您的家庭需求选择完美的套餐。所有套餐都包含核心任务管理功能。",
     "backToDashboard": "← 返回仪表板",
     "onlyParents": "注意：只有家长可以更改订阅套餐。",
+    "testModeNotice": "这些套餐目前只能使用测试代码预订。",
     "mostPopular": "最受欢迎",
     "unlimitedMembers": "无限成员",
     "upToMembers": "最多{{count}}名成员",

@@ -781,6 +781,7 @@
     "subtitle": "Sélectionnez la formule parfaite pour les besoins de votre famille. Toutes les formules incluent les fonctionnalités de gestion de tâches de base.",
     "backToDashboard": "← Retour au Tableau de Bord",
     "onlyParents": "Note : Seuls les parents peuvent modifier les formules d'abonnement.",
+    "testModeNotice": "Ces forfaits ne sont actuellement réservables qu'avec un code de test.",
     "mostPopular": "Plus Populaire",
     "unlimitedMembers": "Membres illimités",
     "upToMembers": "Jusqu'à {{count}} membres",

@@ -155,6 +155,9 @@ export default function Pricing() {
           <p className="text-lg text-muted-foreground">
             {t("pricing.subtitle")}
           </p>
+          <p className="text-sm text-amber-600 dark:text-amber-400 mt-4 font-medium bg-amber-50 dark:bg-amber-950/30 px-4 py-2 rounded-lg inline-block">
+            {t("pricing.testModeNotice")}
+          </p>
           {!isParent && (
             <p className="text-sm text-amber-600 dark:text-amber-500 mt-4">
               {t("pricing.onlyParents")}

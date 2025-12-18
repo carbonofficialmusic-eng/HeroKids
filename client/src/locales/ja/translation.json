@@ -781,6 +781,7 @@
     "subtitle": "ご家族のニーズに最適なプランを選択してください。すべてのプランには基本的なタスク管理機能が含まれています。",
     "backToDashboard": "← ダッシュボードに戻る",
     "onlyParents": "注：サブスクリプションプランの変更は保護者のみ可能です。",
+    "testModeNotice": "これらのパッケージは現在、テストコードでのみ予約可能です。",
     "mostPopular": "最も人気のある",
     "unlimitedMembers": "無制限のメンバー",
     "upToMembers": "最大{{count}}人のメンバー",

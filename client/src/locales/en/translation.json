@@ -800,6 +800,7 @@
     "subtitle": "Select the perfect plan for your family's needs. All plans include core task management features.",
     "backToDashboard": "← Back to Dashboard",
     "onlyParents": "Note: Only parents can change subscription plans.",
+    "testModeNotice": "These packages are currently only bookable with a test code.",
     "mostPopular": "Most Popular",
     "unlimitedMembers": "Unlimited members",
     "upToMembers": "Up to {{count}} members",

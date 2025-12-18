@@ -810,6 +810,7 @@
     "subtitle": "Wähle den perfekten Plan für die Bedürfnisse deiner Familie. Alle Pläne beinhalten grundlegende Aufgabenverwaltungsfunktionen.",
     "backToDashboard": "← Zurück zum Dashboard",
     "onlyParents": "Hinweis: Nur Eltern können Abonnement-Pläne ändern.",
+    "testModeNotice": "Diese Pakete sind momentan nur mit Test Code buchbar.",
     "mostPopular": "Beliebteste",
     "unlimitedMembers": "Unbegrenzte Mitglieder",
     "upToMembers": "Bis zu {{count}} Mitglieder",
