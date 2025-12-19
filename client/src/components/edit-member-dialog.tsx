@@ -28,9 +28,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { AvatarSelector } from "./avatar-selector";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
-import { getAvatarUrl } from "@/lib/skins";
+import { getAvatarUrl, SKIN_IMAGES } from "@/lib/skins";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { FamilyMember } from "@shared/schema";
 
@@ -63,6 +64,7 @@ export function EditMemberDialog({
   const [selectedColor, setSelectedColor] = useState(member?.color || colorOptions[0].value);
   const [uploadedAvatarFile, setUploadedAvatarFile] = useState<File | null>(null);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
+  const [useCustomAvatarToggle, setUseCustomAvatarToggle] = useState(member?.useCustomAvatar || false);
 
   const form = useForm<EditMemberForm>({
     resolver: zodResolver(editMemberSchema),
@@ -83,11 +85,14 @@ export function EditMemberDialog({
       setSelectedColor(member.color || colorOptions[0].value);
       setUploadedAvatarFile(null);
       setUploadedAvatarUrl(null);
+      setUseCustomAvatarToggle(member.useCustomAvatar || false);
     }
   }, [member, form]);
 
   const handleCustomUpload = (file: File) => {
     setUploadedAvatarFile(file);
+    // When uploading a new photo, automatically enable custom avatar
+    setUseCustomAvatarToggle(true);
   };
 
   const handleClearCustomUpload = () => {
@@ -161,12 +166,15 @@ export function EditMemberDialog({
 
     // Determine useCustomAvatar flag:
     // - If new avatar uploaded or history selected → true
-    // - If no change to avatar → keep existing flag
+    // - If toggle was changed by user → use toggle value
     // - If reverted to skin/default avatar → false
     let useCustomAvatarFlag: boolean;
     if (uploadedAvatarUrl || (uploadedAvatarFile && uploadedAvatarFile.size > 0)) {
-      // New upload or history selection
+      // New upload or history selection → always use custom avatar
       useCustomAvatarFlag = true;
+    } else if (member.activeSkinId) {
+      // If skin is active, respect the toggle value
+      useCustomAvatarFlag = useCustomAvatarToggle;
     } else if (finalAvatarUrl !== member.avatarUrl) {
       // Avatar changed to something else (likely skin asset)
       useCustomAvatarFlag = false;
@@ -238,17 +246,58 @@ export function EditMemberDialog({
             />
 
             {member.activeSkinId && (
-              <div className="space-y-2" data-testid="active-skin-preview">
+              <div className="space-y-3" data-testid="active-skin-preview">
                 <FormLabel>{t('memberDialogs.currentDisplayAvatar')}</FormLabel>
-                <div className="flex items-center gap-3 p-3 rounded-md bg-muted">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} alt={member.displayName} />
-                    <AvatarFallback>{member.displayName[0]?.toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <p className="text-sm text-muted-foreground">
-                    {t('memberDialogs.activeSkinOverride')}
-                  </p>
+                <div className="flex items-center gap-4 p-3 rounded-md bg-muted">
+                  <div className="flex gap-2">
+                    <Avatar className="h-14 w-14 border-2 border-primary">
+                      <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, useCustomAvatarToggle, member.updatedAt)} alt={member.displayName} />
+                      <AvatarFallback>{member.displayName[0]?.toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      {t('memberDialogs.activeSkinOverride')}
+                    </p>
+                    {member.avatarUrl && member.avatarUrl.startsWith('/objects/') && (
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id="use-custom-avatar"
+                          checked={useCustomAvatarToggle}
+                          onCheckedChange={setUseCustomAvatarToggle}
+                          data-testid="switch-use-custom-avatar"
+                        />
+                        <label htmlFor="use-custom-avatar" className="text-sm cursor-pointer">
+                          {t('memberDialogs.useOwnPhoto')}
+                        </label>
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {member.avatarUrl && member.avatarUrl.startsWith('/objects/') && (
+                  <div className="flex gap-3 p-2 rounded-md bg-muted/50">
+                    <div 
+                      className={`cursor-pointer transition-all ${!useCustomAvatarToggle ? 'ring-2 ring-primary ring-offset-2' : 'opacity-60'}`}
+                      onClick={() => setUseCustomAvatarToggle(false)}
+                    >
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={SKIN_IMAGES[member.activeSkinId]} alt="Skin Avatar" />
+                        <AvatarFallback>S</AvatarFallback>
+                      </Avatar>
+                      <p className="text-xs text-center mt-1 text-muted-foreground">Skin</p>
+                    </div>
+                    <div 
+                      className={`cursor-pointer transition-all ${useCustomAvatarToggle ? 'ring-2 ring-primary ring-offset-2' : 'opacity-60'}`}
+                      onClick={() => setUseCustomAvatarToggle(true)}
+                    >
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={member.avatarUrl} alt="Eigenes Foto" />
+                        <AvatarFallback>{member.displayName[0]?.toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <p className="text-xs text-center mt-1 text-muted-foreground">{t('memberDialogs.ownPhoto')}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
