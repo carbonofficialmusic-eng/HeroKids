@@ -62,7 +62,7 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
             <div className="flex flex-col items-center" data-testid={`podium-rank-2`}>
               <div className="mb-2">{getTrophyIcon(1)}</div>
               <Avatar className="h-12 w-12 mb-2" style={{ borderWidth: "4px", borderColor: top3[1].color }}>
-                <AvatarImage src={getAvatarUrl(top3[1].activeSkinId, top3[1].avatarUrl, top3[1].useCustomAvatar)} />
+                <AvatarImage src={getAvatarUrl(top3[1].activeSkinId, top3[1].avatarUrl, top3[1].useCustomAvatar, top3[1].updatedAt)} />
                 <AvatarFallback style={{ backgroundColor: top3[1].color }} className="text-white">
                   {top3[1].displayName[0]}
                 </AvatarFallback>
@@ -81,7 +81,7 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
             <div className="flex flex-col items-center transform -translate-y-4" data-testid={`podium-rank-1`}>
               <div className="mb-2">{getTrophyIcon(0)}</div>
               <Avatar className="h-16 w-16 mb-2" style={{ borderWidth: "4px", borderColor: top3[0].color }}>
-                <AvatarImage src={getAvatarUrl(top3[0].activeSkinId, top3[0].avatarUrl, top3[0].useCustomAvatar)} />
+                <AvatarImage src={getAvatarUrl(top3[0].activeSkinId, top3[0].avatarUrl, top3[0].useCustomAvatar, top3[0].updatedAt)} />
                 <AvatarFallback style={{ backgroundColor: top3[0].color }} className="text-white">
                   {top3[0].displayName[0]}
                 </AvatarFallback>
@@ -100,7 +100,7 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
             <div className="flex flex-col items-center" data-testid={`podium-rank-3`}>
               <div className="mb-2">{getTrophyIcon(2)}</div>
               <Avatar className="h-12 w-12 mb-2" style={{ borderWidth: "4px", borderColor: top3[2].color }}>
-                <AvatarImage src={getAvatarUrl(top3[2].activeSkinId, top3[2].avatarUrl, top3[2].useCustomAvatar)} />
+                <AvatarImage src={getAvatarUrl(top3[2].activeSkinId, top3[2].avatarUrl, top3[2].useCustomAvatar, top3[2].updatedAt)} />
                 <AvatarFallback style={{ backgroundColor: top3[2].color }} className="text-white">
                   {top3[2].displayName[0]}
                 </AvatarFallback>
@@ -131,7 +131,7 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
                   {rank}
                 </div>
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar)} />
+                  <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} />
                   <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
                     {member.displayName[0]}
                   </AvatarFallback>

@@ -567,15 +567,30 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "breeze-captain": breezeCaptainBg,
 };
 
+// Helper to add cache-busting parameter to /objects/ URLs
+function addCacheBuster(url: string | undefined, updatedAt?: Date | string | null): string | undefined {
+  if (!url) return url;
+  
+  // Only add cache buster to /objects/ URLs (uploaded files)
+  if (url.startsWith('/objects/') && updatedAt) {
+    const timestamp = typeof updatedAt === 'string' ? new Date(updatedAt).getTime() : updatedAt.getTime();
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}v=${timestamp}`;
+  }
+  
+  return url;
+}
+
 // Helper to get avatar URL - respects useCustomAvatar flag to allow custom avatar + skin background
 export function getAvatarUrl(
   activeSkinId: string | null | undefined, 
   customAvatarUrl: string | null | undefined,
-  useCustomAvatar: boolean = false
+  useCustomAvatar: boolean = false,
+  updatedAt?: Date | string | null
 ): string | undefined {
   // If custom avatar flag is set and there's a custom avatar, use it
   if (useCustomAvatar && customAvatarUrl) {
-    return customAvatarUrl;
+    return addCacheBuster(customAvatarUrl, updatedAt);
   }
   
   // Otherwise, use skin avatar if available
@@ -584,7 +599,7 @@ export function getAvatarUrl(
   }
   
   // Final fallback to custom avatar
-  return customAvatarUrl || undefined;
+  return addCacheBuster(customAvatarUrl ?? undefined, updatedAt) || undefined;
 }
 
 // Helper to get background URL for active skin

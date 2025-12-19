@@ -242,7 +242,7 @@ export function EditMemberDialog({
                 <FormLabel>{t('memberDialogs.currentDisplayAvatar')}</FormLabel>
                 <div className="flex items-center gap-3 p-3 rounded-md bg-muted">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar)} alt={member.displayName} />
+                    <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} alt={member.displayName} />
                     <AvatarFallback>{member.displayName[0]?.toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <p className="text-sm text-muted-foreground">
