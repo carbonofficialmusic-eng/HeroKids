@@ -907,7 +907,7 @@ export default function KidDashboard() {
   // Edit member mutation
   const editMemberMutation = useMutation({
     mutationFn: async ({ memberId, data }: { memberId: string; data: any }) => {
-      return await apiRequest("PATCH", `/api/family-members/${memberId}`, data);
+      return await apiRequest("PUT", `/api/family-members/${memberId}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
