@@ -1299,7 +1299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         photoUrl,
         {
           owner: member.id, // Use member.id for Device Sessions compatibility
-          visibility: "private", // Task proofs are private, only accessible by family members
+          visibility: "public", // Task proofs are public so parents can view them in approvals
         }
       );
       
