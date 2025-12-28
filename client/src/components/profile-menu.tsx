@@ -79,7 +79,7 @@ export function ProfileMenu({
         <Button
           variant="ghost"
           size="icon"
-          className="flex-shrink-0"
+          className="flex-shrink-0 bg-background/60 backdrop-blur-sm border border-border/50"
           data-testid="button-profile-menu"
         >
           <Menu className="h-5 w-5" data-testid="icon-menu" />
