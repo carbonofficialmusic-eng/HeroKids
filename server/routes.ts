@@ -3684,11 +3684,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create Stripe Checkout Session
   app.post("/api/create-checkout-session", isAuthenticated, async (req: any, res) => {
     try {
-      console.log("🔑 Stripe Key Check:", {
-        hasSecret: !!process.env.STRIPE_SECRET_KEY,
-        keyPrefix: process.env.STRIPE_SECRET_KEY?.substring(0, 7) // sk_test_ or sk_live_
-      });
-      
       const userId = req.user.claims.sub;
       const { tier } = req.body;
       
