@@ -666,3 +666,62 @@ export const insertChildDeviceSessionSchema = createInsertSchema(childDeviceSess
 
 export type InsertChildDeviceSession = z.infer<typeof insertChildDeviceSessionSchema>;
 export type ChildDeviceSession = typeof childDeviceSessions.$inferSelect;
+
+// Mobile Push Tokens - For push notifications on mobile devices
+export const pushTokenPlatformEnum = pgEnum("push_token_platform", ["ios", "android", "expo"]);
+
+export const mobilePushTokens = pgTable("mobile_push_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  token: text("token").notNull(), // Push token from Expo/APNs/FCM
+  platform: pushTokenPlatformEnum("platform").notNull(),
+  deviceId: varchar("device_id", { length: 100 }), // Unique device identifier
+  isActive: boolean("is_active").notNull().default(true),
+  lastUsedAt: timestamp("last_used_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueMemberToken: unique("unique_member_token").on(table.memberId, table.token),
+}));
+
+export const mobilePushTokensRelations = relations(mobilePushTokens, ({ one }) => ({
+  member: one(familyMembers, {
+    fields: [mobilePushTokens.memberId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertMobilePushTokenSchema = createInsertSchema(mobilePushTokens).omit({
+  id: true,
+  lastUsedAt: true,
+  createdAt: true,
+});
+
+export type InsertMobilePushToken = z.infer<typeof insertMobilePushTokenSchema>;
+export type MobilePushToken = typeof mobilePushTokens.$inferSelect;
+
+// Mobile Refresh Tokens - For JWT refresh token rotation
+export const mobileRefreshTokens = pgTable("mobile_refresh_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  tokenHash: varchar("token_hash", { length: 64 }).notNull().unique(), // SHA-256 hash of refresh token
+  deviceId: varchar("device_id", { length: 100 }), // Unique device identifier
+  expiresAt: timestamp("expires_at").notNull(),
+  revokedAt: timestamp("revoked_at"), // When token was revoked (null if active)
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const mobileRefreshTokensRelations = relations(mobileRefreshTokens, ({ one }) => ({
+  member: one(familyMembers, {
+    fields: [mobileRefreshTokens.memberId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertMobileRefreshTokenSchema = createInsertSchema(mobileRefreshTokens).omit({
+  id: true,
+  revokedAt: true,
+  createdAt: true,
+});
+
+export type InsertMobileRefreshToken = z.infer<typeof insertMobileRefreshTokenSchema>;
+export type MobileRefreshToken = typeof mobileRefreshTokens.$inferSelect;

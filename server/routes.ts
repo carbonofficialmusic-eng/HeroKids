@@ -10,6 +10,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { generateTokenPair, refreshAccessToken, revokeRefreshToken, registerPushToken, unregisterPushToken } from "./mobileAuth";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { achievementEngine } from "./achievementEngine";
@@ -29,11 +30,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Track uploaded photos to prevent URL spoofing (now using Object Storage instead of multer)
 const uploadedPhotos = new Map<string, { memberId: string; taskId: string; timestamp: number }>();
 
-// Helper function to get the current member from a request (supports both Replit Auth and Device sessions)
-async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isDeviceSession: boolean } | null> {
+// Helper function to get the current member from a request (supports Replit Auth, Device sessions, and Mobile JWT)
+async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isDeviceSession: boolean; isMobileSession: boolean } | null> {
+  // Mobile JWT session: member is directly available
+  if (req.user?.authMethod === "mobile" && req.user?.member) {
+    return { member: req.user.member, isDeviceSession: false, isMobileSession: true };
+  }
+  
   // Device-linked session: member is directly available
   if (req.user?.authMethod === "device" && req.user?.member) {
-    return { member: req.user.member, isDeviceSession: true };
+    return { member: req.user.member, isDeviceSession: true, isMobileSession: false };
   }
   
   // Normal Replit Auth flow
@@ -41,7 +47,7 @@ async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isD
   if (!userId) return null;
   
   const member = await storage.getFamilyMemberByUserId(userId);
-  return member ? { member, isDeviceSession: false } : null;
+  return member ? { member, isDeviceSession: false, isMobileSession: false } : null;
 }
 
 // Clean up old uploads every hour
@@ -95,6 +101,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
+      // Check if this is a mobile JWT session
+      if (req.user.authMethod === "mobile" && req.user.member) {
+        const member = req.user.member;
+        res.json({
+          id: `mobile:${member.id}`,
+          email: null,
+          firstName: member.displayName,
+          lastName: null,
+          profileImageUrl: member.avatarUrl,
+          authMethod: "mobile",
+          memberId: member.id,
+          familyName: member.familyName,
+          role: member.role,
+        });
+        return;
+      }
+      
       // Check if this is a device-linked session
       if (req.user.authMethod === "device" && req.user.member) {
         const member = req.user.member;
@@ -121,6 +144,204 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
+  });
+
+  // ============================================
+  // Mobile API Routes (for React Native app)
+  // ============================================
+
+  // Mobile login using device link code (same as web device linking, but returns JWT)
+  app.post("/api/mobile/auth/login", async (req, res) => {
+    try {
+      const { code, deviceId } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ message: "Device link code is required" });
+      }
+
+      // Find and validate the device link code
+      const linkCode = await storage.getDeviceLinkCodeByCode(code.toUpperCase());
+      if (!linkCode) {
+        return res.status(401).json({ message: "Invalid or expired code" });
+      }
+      
+      // Check if code is expired or already consumed
+      const now = new Date();
+      if (linkCode.expiresAt < now || linkCode.consumedAt) {
+        return res.status(401).json({ message: "Invalid or expired code" });
+      }
+
+      // Get the member
+      const member = await storage.getFamilyMember(linkCode.memberId);
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      // Mark code as consumed
+      await storage.consumeDeviceLinkCode(linkCode.id);
+
+      // Generate JWT tokens
+      const tokens = await generateTokenPair(member, deviceId);
+
+      res.json({
+        ...tokens,
+        member: {
+          id: member.id,
+          displayName: member.displayName,
+          role: member.role,
+          familyName: member.familyName,
+          avatarUrl: member.avatarUrl,
+          activeSkinId: member.activeSkinId,
+        },
+      });
+    } catch (error) {
+      console.error("Mobile login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Mobile login using PIN (for returning users in single-device mode)
+  app.post("/api/mobile/auth/login-pin", async (req, res) => {
+    try {
+      const { memberId, pin, deviceId } = req.body;
+      
+      if (!memberId || !pin) {
+        return res.status(400).json({ message: "Member ID and PIN are required" });
+      }
+
+      const member = await storage.getFamilyMember(memberId);
+      if (!member || !member.pinCode) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Verify PIN
+      const isValid = await bcrypt.compare(pin, member.pinCode);
+      if (!isValid) {
+        return res.status(401).json({ message: "Invalid PIN" });
+      }
+
+      // Generate JWT tokens
+      const tokens = await generateTokenPair(member, deviceId);
+
+      res.json({
+        ...tokens,
+        member: {
+          id: member.id,
+          displayName: member.displayName,
+          role: member.role,
+          familyName: member.familyName,
+          avatarUrl: member.avatarUrl,
+          activeSkinId: member.activeSkinId,
+        },
+      });
+    } catch (error) {
+      console.error("Mobile PIN login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Refresh access token
+  app.post("/api/mobile/auth/refresh", async (req, res) => {
+    try {
+      const { refreshToken, deviceId } = req.body;
+      
+      if (!refreshToken) {
+        return res.status(400).json({ message: "Refresh token is required" });
+      }
+
+      const tokens = await refreshAccessToken(refreshToken, deviceId);
+      if (!tokens) {
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
+      }
+
+      res.json(tokens);
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      res.status(500).json({ message: "Token refresh failed" });
+    }
+  });
+
+  // Mobile logout (revoke refresh token)
+  app.post("/api/mobile/auth/logout", async (req, res) => {
+    try {
+      const { refreshToken } = req.body;
+      
+      if (refreshToken) {
+        await revokeRefreshToken(refreshToken);
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Mobile logout error:", error);
+      res.status(500).json({ message: "Logout failed" });
+    }
+  });
+
+  // Register push notification token
+  app.post("/api/mobile/push/register", isAuthenticated, async (req: any, res) => {
+    try {
+      const memberResult = await getCurrentMemberFromRequest(req);
+      if (!memberResult) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { token, platform, deviceId } = req.body;
+      
+      if (!token || !platform) {
+        return res.status(400).json({ message: "Token and platform are required" });
+      }
+
+      if (!["ios", "android", "expo"].includes(platform)) {
+        return res.status(400).json({ message: "Invalid platform" });
+      }
+
+      await registerPushToken(memberResult.member.id, token, platform, deviceId);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Push token registration error:", error);
+      res.status(500).json({ message: "Failed to register push token" });
+    }
+  });
+
+  // Unregister push notification token
+  app.post("/api/mobile/push/unregister", isAuthenticated, async (req: any, res) => {
+    try {
+      const memberResult = await getCurrentMemberFromRequest(req);
+      if (!memberResult) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Token is required" });
+      }
+
+      await unregisterPushToken(memberResult.member.id, token);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Push token unregistration error:", error);
+      res.status(500).json({ message: "Failed to unregister push token" });
+    }
+  });
+
+  // Mobile API info endpoint (no auth required)
+  app.get("/api/mobile/info", (req, res) => {
+    res.json({
+      version: "1.0.0",
+      minAppVersion: "1.0.0",
+      features: ["push_notifications", "offline_mode"],
+      endpoints: {
+        login: "/api/mobile/auth/login",
+        loginPin: "/api/mobile/auth/login-pin",
+        refresh: "/api/mobile/auth/refresh",
+        logout: "/api/mobile/auth/logout",
+        pushRegister: "/api/mobile/push/register",
+        pushUnregister: "/api/mobile/push/unregister",
+      },
+    });
   });
 
   // Family routes

@@ -7,6 +7,7 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
+import { verifyAccessToken } from "./mobileAuth";
 
 if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
@@ -147,7 +148,32 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     }
   }
 
-  // Second, try Device-Link Token (for linked child devices)
+  // Second, try JWT Bearer Token (for mobile apps)
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.substring(7);
+    const payload = verifyAccessToken(token);
+    if (payload) {
+      try {
+        const member = await storage.getFamilyMember(payload.memberId);
+        if (member) {
+          (req as any).user = {
+            claims: {
+              sub: `mobile:${member.id}`,
+            },
+            authMethod: "mobile",
+            member: member,
+            jwtPayload: payload,
+          };
+          return next();
+        }
+      } catch (error) {
+        console.error("JWT token validation error:", error);
+      }
+    }
+  }
+
+  // Third, try Device-Link Token (for linked child devices via cookies)
   const deviceToken = req.cookies?.child_device_token;
   if (deviceToken) {
     try {
