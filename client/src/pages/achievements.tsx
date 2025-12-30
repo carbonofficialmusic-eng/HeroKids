@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +16,91 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { FamilyMember } from "@shared/schema";
+
+// Debounced input component for text fields
+function DebouncedInput({ 
+  value, 
+  onChange, 
+  delay = 800,
+  ...props 
+}: { 
+  value: string; 
+  onChange: (value: string) => void; 
+  delay?: number;
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>) {
+  const [localValue, setLocalValue] = useState(value);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setLocalValue(newValue);
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      onChange(newValue);
+    }, delay);
+  }, [onChange, delay]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  return <Input value={localValue} onChange={handleChange} {...props} />;
+}
+
+// Debounced number input component
+function DebouncedNumberInput({ 
+  value, 
+  onChange, 
+  delay = 800,
+  ...props 
+}: { 
+  value: number; 
+  onChange: (value: number) => void; 
+  delay?: number;
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>) {
+  const [localValue, setLocalValue] = useState(String(value));
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setLocalValue(String(value));
+  }, [value]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setLocalValue(newValue);
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      const numValue = parseInt(newValue) || 0;
+      onChange(numValue);
+    }, delay);
+  }, [onChange, delay]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  return <Input type="number" value={localValue} onChange={handleChange} {...props} />;
+}
 
 interface AchievementDefinition {
   id: string;
@@ -239,7 +324,7 @@ export default function Achievements() {
                     />
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="min-h-[140px]">
                   <div className="space-y-4">
                     {/* Reward Type Selection */}
                     <div>
@@ -283,14 +368,12 @@ export default function Achievements() {
                             {t("achievements.bonusPoints")}
                           </Label>
                           <div className="flex items-center gap-2 mt-2">
-                            <Input
+                            <DebouncedNumberInput
                               id={`bonus-${achievement.id}`}
-                              type="number"
-                              min="0"
-                              step="10"
+                              min={0}
+                              step={10}
                               value={achievement.bonusPoints}
-                              onChange={(e) => {
-                                const value = parseInt(e.target.value) || 0;
+                              onChange={(value) => {
                                 updateAchievementMutation.mutate({
                                   id: achievement.id,
                                   data: { bonusPoints: value },
@@ -319,15 +402,15 @@ export default function Achievements() {
                           <Label htmlFor={`custom-reward-${achievement.id}`} className="text-sm font-medium">
                             {t("achievements.customRewardLabel")}
                           </Label>
-                          <Input
+                          <DebouncedInput
                             id={`custom-reward-${achievement.id}`}
                             type="text"
                             placeholder={t("achievements.customRewardPlaceholder")}
                             value={achievement.customReward || ""}
-                            onChange={(e) => {
+                            onChange={(value) => {
                               updateAchievementMutation.mutate({
                                 id: achievement.id,
-                                data: { customReward: e.target.value },
+                                data: { customReward: value },
                               });
                             }}
                             disabled={!achievement.isActive}
