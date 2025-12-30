@@ -1017,7 +1017,13 @@
     "savedSuccessfully": "Configuración de logros guardada exitosamente",
     "failedToUpdate": "Error al actualizar el logro",
     "accessDenied": "Acceso denegado",
-    "onlyParents": "Solo los padres pueden configurar los logros"
+    "onlyParents": "Solo los padres pueden configurar los logros",
+    "rewardType": "Tipo de recompensa",
+    "rewardTypePoints": "Puntos de bonificación",
+    "rewardTypeCustom": "Recompensa personalizada",
+    "customRewardLabel": "Recompensa personalizada",
+    "customRewardPlaceholder": "ej. Dinero extra, Noche de películas, Helado...",
+    "customReward": "Recompensa personalizada"
   },
   "error": "Error",
   "goBack": "Volver",

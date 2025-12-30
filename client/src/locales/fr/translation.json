@@ -1017,7 +1017,13 @@
     "savedSuccessfully": "Paramètres de réalisation enregistrés avec succès",
     "failedToUpdate": "Échec de la mise à jour de la réalisation",
     "accessDenied": "Accès refusé",
-    "onlyParents": "Seuls les parents peuvent configurer les réalisations"
+    "onlyParents": "Seuls les parents peuvent configurer les réalisations",
+    "rewardType": "Type de récompense",
+    "rewardTypePoints": "Points bonus",
+    "rewardTypeCustom": "Récompense personnalisée",
+    "customRewardLabel": "Récompense personnalisée",
+    "customRewardPlaceholder": "ex. Argent de poche supplémentaire, Soirée cinéma, Glace...",
+    "customReward": "Récompense personnalisée"
   },
   "error": "Erreur",
   "goBack": "Retour",

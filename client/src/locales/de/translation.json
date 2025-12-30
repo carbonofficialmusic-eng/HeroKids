@@ -1048,7 +1048,13 @@
     "savedSuccessfully": "Erfolgseinstellungen erfolgreich gespeichert",
     "failedToUpdate": "Erfolg konnte nicht aktualisiert werden",
     "accessDenied": "Zugriff verweigert",
-    "onlyParents": "Nur Eltern können Erfolge konfigurieren"
+    "onlyParents": "Nur Eltern können Erfolge konfigurieren",
+    "rewardType": "Belohnungsart",
+    "rewardTypePoints": "Bonuspunkte",
+    "rewardTypeCustom": "Eigene Belohnung",
+    "customRewardLabel": "Eigene Belohnung",
+    "customRewardPlaceholder": "z.B. Extra Taschengeld, Filmabend, Eis...",
+    "customReward": "Eigene Belohnung"
   },
   "error": "Fehler",
   "goBack": "Zurück",

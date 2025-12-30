@@ -1017,7 +1017,13 @@
     "savedSuccessfully": "成就设置保存成功",
     "failedToUpdate": "更新成就失败",
     "accessDenied": "访问被拒绝",
-    "onlyParents": "只有家长可以配置成就"
+    "onlyParents": "只有家长可以配置成就",
+    "rewardType": "奖励类型",
+    "rewardTypePoints": "奖励积分",
+    "rewardTypeCustom": "自定义奖励",
+    "customRewardLabel": "自定义奖励",
+    "customRewardPlaceholder": "例如：额外零花钱、电影之夜、冰淇淋...",
+    "customReward": "自定义奖励"
   },
   "error": "错误",
   "goBack": "返回",

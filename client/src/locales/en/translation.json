@@ -1038,7 +1038,13 @@
     "savedSuccessfully": "Achievement settings saved successfully",
     "failedToUpdate": "Failed to update achievement",
     "accessDenied": "Access Denied",
-    "onlyParents": "Only parents can configure achievements"
+    "onlyParents": "Only parents can configure achievements",
+    "rewardType": "Reward Type",
+    "rewardTypePoints": "Bonus Points",
+    "rewardTypeCustom": "Custom Reward",
+    "customRewardLabel": "Custom Reward",
+    "customRewardPlaceholder": "e.g. Extra pocket money, Movie night, Ice cream...",
+    "customReward": "Custom Reward"
   },
   "error": "Error",
   "goBack": "Go Back",

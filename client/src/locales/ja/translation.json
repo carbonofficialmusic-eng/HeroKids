@@ -1017,7 +1017,13 @@
     "savedSuccessfully": "達成項目の設定が正常に保存されました",
     "failedToUpdate": "達成項目の更新に失敗しました",
     "accessDenied": "アクセスが拒否されました",
-    "onlyParents": "保護者のみが達成項目を設定できます"
+    "onlyParents": "保護者のみが達成項目を設定できます",
+    "rewardType": "報酬タイプ",
+    "rewardTypePoints": "ボーナスポイント",
+    "rewardTypeCustom": "カスタム報酬",
+    "customRewardLabel": "カスタム報酬",
+    "customRewardPlaceholder": "例：追加のお小遣い、映画の夜、アイスクリーム...",
+    "customReward": "カスタム報酬"
   },
   "error": "エラー",
   "goBack": "戻る",
