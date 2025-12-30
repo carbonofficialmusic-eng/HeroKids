@@ -78,7 +78,8 @@
     "noRewardsAvailable": "暂无可用奖励",
     "requestRewardReview": "申请一个奖励，家长会审核！",
     "requestFirstReward": "申请你的第一个奖励",
-    "pointsLabel": "积分"
+    "pointsLabel": "积分",
+    "specialPrizes": "特别奖品"
   },
   "tasks": {
     "title": "任务",
@@ -952,6 +953,7 @@
     "joinableRewardsDesc": "其他人正在分享 - 现在加入！",
     "initiated": "发起者",
     "participants": "{{count}}位参与者",
+    "specialPrizes": "特别奖品",
     "joinFree": "加入！",
     "joining": "加入中...",
     "familyGoals": "家庭目标",

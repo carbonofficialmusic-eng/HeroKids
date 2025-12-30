@@ -78,7 +78,8 @@
     "noRewardsAvailable": "利用可能なごほうびがありません",
     "requestRewardReview": "ごほうびをリクエストすると、お父さんやお母さんが確認してくれます！",
     "requestFirstReward": "最初のごほうびをリクエスト",
-    "pointsLabel": "ポイント"
+    "pointsLabel": "ポイント",
+    "specialPrizes": "特別賞"
   },
   "tasks": {
     "title": "タスク",
@@ -952,6 +953,7 @@
     "joinableRewardsDesc": "他の人が共有中 - 今すぐ参加！",
     "initiated": "開始者",
     "participants": "{{count}}人の参加者",
+    "specialPrizes": "特別賞",
     "joinFree": "参加！",
     "joining": "参加中...",
     "familyGoals": "ファミリー目標",

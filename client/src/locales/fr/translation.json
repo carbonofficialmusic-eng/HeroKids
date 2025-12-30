@@ -78,7 +78,8 @@
     "noRewardsAvailable": "Aucune récompense disponible",
     "requestRewardReview": "Demande une récompense et tes parents l'examineront !",
     "requestFirstReward": "Demande ta première récompense",
-    "pointsLabel": "points"
+    "pointsLabel": "points",
+    "specialPrizes": "Prix spéciaux"
   },
   "tasks": {
     "title": "Tâches",
@@ -952,6 +953,7 @@
     "joinableRewardsDesc": "D'autres partagent - rejoins maintenant !",
     "initiated": "Initié par",
     "participants": "{{count}} participants",
+    "specialPrizes": "Prix spéciaux",
     "joinFree": "Rejoindre !",
     "joining": "Rejoindre...",
     "familyGoals": "Objectifs familiaux",

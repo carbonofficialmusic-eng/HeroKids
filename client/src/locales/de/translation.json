@@ -82,7 +82,8 @@
     "subscription_processing": "Zahlung wird verarbeitet...",
     "subscription_processing_desc": "Deine Zahlung wird gerade verarbeitet. Dies dauert nur wenige Sekunden. Die Seite wird automatisch aktualisiert.",
     "subscription_activated": "Abonnement aktiviert!",
-    "subscription_activated_desc": "Dein Abonnement wurde erfolgreich aktiviert. Viel Spaß mit den neuen Features!"
+    "subscription_activated_desc": "Dein Abonnement wurde erfolgreich aktiviert. Viel Spaß mit den neuen Features!",
+    "specialPrizes": "Spezial-Preise"
   },
   "tasks": {
     "title": "Aufgaben",
@@ -983,6 +984,7 @@
     "joinableRewardsDesc": "Andere teilen gerade - jetzt mitmachen!",
     "initiated": "Gestartet von",
     "participants": "{{count}} Teilnehmer",
+    "specialPrizes": "Spezial-Preise",
     "joinFree": "Mitmachen!",
     "joining": "Beitreten...",
     "familyGoals": "Familienziele",

@@ -99,6 +99,21 @@ type SharedReward = RedemptionWithDetails & {
   }>;
 };
 
+// Achievement definition type for special rewards display
+interface AchievementDefinition {
+  id: string;
+  familyName: string;
+  type: "first_weekly_finisher" | "weekly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak";
+  slug: string;
+  title: string;
+  description: string;
+  bonusPoints: number;
+  rewardType: "points" | "custom";
+  customReward: string | null;
+  isActive: boolean;
+  config: Record<string, any>;
+}
+
 // Helper: Get generic icon for rewards
 function getRewardIcon(title: string) {
   const lowerTitle = title.toLowerCase();
@@ -893,6 +908,17 @@ export default function KidDashboard() {
     refetchInterval: 5000,
   });
 
+  // Fetch achievement definitions for special rewards display
+  const { data: achievements = [] } = useQuery<AchievementDefinition[]>({
+    queryKey: ["/api/achievements"],
+    enabled: !!member,
+  });
+
+  // Filter for active achievements with custom rewards
+  const specialRewards = achievements.filter(
+    a => a.isActive && a.rewardType === "custom" && a.customReward
+  );
+
   // Filter to show only this child's redemptions, sorted by newest first
   const myRedemptions = member 
     ? redemptions
@@ -1200,6 +1226,52 @@ export default function KidDashboard() {
             </div>
           </Card>
         </motion.div>
+
+        {/* Special Achievement Rewards Section */}
+        {specialRewards.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
+                <Trophy className="h-7 w-7 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                {t("kidDashboard.specialPrizes")}
+              </h2>
+              <Sparkles className="h-5 w-5 text-purple-500 animate-pulse" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {specialRewards.map((achievement, index) => (
+                <motion.div
+                  key={achievement.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-2 border-purple-500/30 rounded-2xl">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-purple-500/20 flex-shrink-0">
+                        <Gift className="h-6 w-6 text-purple-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-base truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                          {achievement.title}
+                        </h3>
+                        <p className="text-sm text-purple-600 dark:text-purple-400 font-medium truncate">
+                          {achievement.customReward}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Rewards Section */}
         <div className="space-y-6 mb-4">

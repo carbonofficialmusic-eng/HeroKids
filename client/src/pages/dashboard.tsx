@@ -30,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -209,6 +209,28 @@ export default function Dashboard() {
     enabled: !!member && member?.role === "parent",
     refetchInterval: 10000, // Refetch every 10 seconds
   });
+
+  // Fetch achievement definitions for special rewards display
+  const { data: achievements = [] } = useQuery<{
+    id: string;
+    familyName: string;
+    type: string;
+    slug: string;
+    title: string;
+    description: string;
+    bonusPoints: number;
+    rewardType: "points" | "custom";
+    customReward: string | null;
+    isActive: boolean;
+  }[]>({
+    queryKey: ["/api/achievements"],
+    enabled: !!member,
+  });
+
+  // Filter for active achievements with custom rewards
+  const specialRewards = achievements.filter(
+    a => a.isActive && a.rewardType === "custom" && a.customReward
+  );
 
   // Reset child tab to "active" when leaderboard becomes unavailable
   useEffect(() => {
@@ -831,6 +853,32 @@ export default function Dashboard() {
                   <span className="text-left flex-1">{t("dashboard.addReward")}</span>
                 </Button>
               </div>
+
+              {/* Special Achievement Rewards Section */}
+              {specialRewards.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-purple-500" />
+                    <h2 className="text-lg font-bold font-accent">{t("dashboard.specialPrizes")}</h2>
+                    <Sparkles className="h-4 w-4 text-purple-500" />
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {specialRewards.map((achievement) => (
+                      <Card key={achievement.id} className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-purple-500/20 flex-shrink-0">
+                            <Gift className="h-5 w-5 text-purple-500" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm truncate">{achievement.title}</h3>
+                            <p className="text-sm text-purple-600 dark:text-purple-400 truncate">{achievement.customReward}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {activeTasks.length === 0 ? (
                 <Card className="p-12 text-center">
