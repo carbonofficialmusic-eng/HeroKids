@@ -417,6 +417,7 @@ export default function Achievements() {
                             type="text"
                             placeholder={t("achievements.customRewardPlaceholder")}
                             value={achievement.customReward || ""}
+                            delay={2000}
                             onChange={(value) => {
                               updateAchievementMutation.mutate({
                                 id: achievement.id,
