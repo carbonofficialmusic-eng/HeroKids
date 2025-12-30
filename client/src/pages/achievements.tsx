@@ -286,7 +286,17 @@ export default function Achievements() {
               </div>
             ) : (
               <div className="space-y-4">
-            {achievements.map((achievement) => (
+            {[...achievements].sort((a, b) => {
+              // Custom sort order: perfect_week and weekly_leaderboard first
+              const order: Record<string, number> = {
+                "perfect_week": 0,
+                "weekly_leaderboard": 1,
+                "first_weekly_finisher": 2,
+                "lifetime_milestone": 3,
+                "task_streak": 4,
+              };
+              return (order[a.type] ?? 99) - (order[b.type] ?? 99);
+            }).map((achievement) => (
               <Card 
                 key={achievement.id} 
                 data-testid={`achievement-card-${achievement.slug}`}
