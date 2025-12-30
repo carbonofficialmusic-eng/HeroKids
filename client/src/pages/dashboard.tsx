@@ -854,32 +854,6 @@ export default function Dashboard() {
                 </Button>
               </div>
 
-              {/* Special Achievement Rewards Section */}
-              {specialRewards.length > 0 && (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-purple-500" />
-                    <h2 className="text-lg font-bold font-accent">{t("dashboard.specialPrizes")}</h2>
-                    <Sparkles className="h-4 w-4 text-purple-500" />
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-3">
-                    {specialRewards.map((achievement) => (
-                      <Card key={achievement.id} className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-purple-500/20 flex-shrink-0">
-                            <Gift className="h-5 w-5 text-purple-500" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm truncate">{achievement.title}</h3>
-                            <p className="text-sm text-purple-600 dark:text-purple-400 truncate">{achievement.customReward}</p>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {activeTasks.length === 0 ? (
                 <Card className="p-12 text-center">
                   <Star className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -1110,6 +1084,32 @@ export default function Dashboard() {
 
             {/* Sidebar */}
             <div className="space-y-6">
+              {/* Special Achievement Rewards Section */}
+              {specialRewards.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-purple-500" />
+                    <h2 className="text-lg font-bold font-accent">{t("dashboard.specialPrizes")}</h2>
+                    <Sparkles className="h-4 w-4 text-purple-500" />
+                  </div>
+                  <div className="space-y-3">
+                    {specialRewards.map((achievement) => (
+                      <Card key={achievement.id} className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-purple-500/20 flex-shrink-0">
+                            <Gift className="h-5 w-5 text-purple-500" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm truncate">{achievement.title}</h3>
+                            <p className="text-sm text-purple-600 dark:text-purple-400 truncate">{achievement.customReward}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Leaderboard with tier-gated period selector */}
               {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
                 <div className="mb-4">
