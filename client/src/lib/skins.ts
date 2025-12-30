@@ -59,15 +59,15 @@ import deerGirlImg from "@assets/generated_images/deer_girl_brown_antlers.png";
 import raccoonGirlImg from "@assets/generated_images/raccoon_girl_gray_hoodie.png";
 import squirrelGirlImg from "@assets/generated_images/squirrel_girl_orange_acorn.png";
 
-// Tier 7 - Vampire Adventure (Boys collection - new 3D style)
-import classicVampireImg from "@assets/generated_images/classic_vampire_boy_avatar.png";
-import batBoyImg from "@assets/generated_images/bat_boy_vampire_avatar.png";
-import moonlightVampireImg from "@assets/generated_images/moonlight_vampire_boy_avatar.png";
-import gothicVampireImg from "@assets/generated_images/gothic_vampire_boy_avatar.png";
-import shadowVampireImg from "@assets/generated_images/shadow_vampire_boy_avatar.png";
-import nightHunterImg from "@assets/generated_images/night_hunter_vampire_3d_avatar.png";
-import bloodMoonVampireImg from "@assets/generated_images/blood_moon_vampire_3d_avatar.png";
-import vampirePrinceImg from "@assets/generated_images/vampire_prince_boy_avatar.png";
+// Tier 7 - Vampire Adventure (Boys collection - 3D style with white backgrounds)
+import classicVampireImg from "@assets/generated_images/classic_vampire_boy_white_bg.png";
+import batBoyImg from "@assets/generated_images/bat_boy_vampire_white_bg.png";
+import moonlightVampireImg from "@assets/generated_images/moonlight_vampire_white_bg.png";
+import gothicVampireImg from "@assets/generated_images/gothic_vampire_white_bg.png";
+import shadowVampireImg from "@assets/generated_images/shadow_vampire_white_bg.png";
+import nightHunterImg from "@assets/generated_images/night_hunter_vampire_white_bg.png";
+import bloodMoonVampireImg from "@assets/generated_images/blood_moon_vampire_white_bg.png";
+import vampirePrinceImg from "@assets/generated_images/vampire_prince_white_bg.png";
 
 // Tier 8 - Ballerina Dreams (Girls collection)
 import ballerinaPinkImg from "@assets/generated_images/ballerina_pink_tutu_classic.png";
@@ -119,15 +119,15 @@ import arcadeMasterImg from "@assets/generated_images/arcade_master_retro_avatar
 import consoleHeroImg from "@assets/generated_images/console_hero_gamer_avatar.png";
 import levelBossImg from "@assets/generated_images/level_boss_gaming_avatar.png";
 
-// Tier 13 - Pterosaur Sky (Flying Dinosaurs collection - realistic style like Tier 3)
-import pteranodonImg from "@assets/generated_images/realistic_pteranodon_portrait.png";
-import quetzalcoatlusImg from "@assets/generated_images/realistic_quetzalcoatlus_portrait.png";
-import rhamphorhynchusImg from "@assets/generated_images/realistic_rhamphorhynchus_portrait.png";
-import pterodactylusImg from "@assets/generated_images/realistic_pterodactylus_portrait.png";
-import dimorphodonImg from "@assets/generated_images/realistic_dimorphodon_portrait.png";
-import tapejaraImg from "@assets/generated_images/realistic_tapejara_portrait.png";
-import anhangueraImg from "@assets/generated_images/realistic_anhanguera_portrait.png";
-import dsungaripterusImg from "@assets/generated_images/realistic_dsungaripterus_portrait.png";
+// Tier 13 - Pterosaur Sky (Flying Dinosaurs collection - realistic style with white backgrounds)
+import pteranodonImg from "@assets/generated_images/pteranodon_white_bg.png";
+import quetzalcoatlusImg from "@assets/generated_images/quetzalcoatlus_white_bg.png";
+import rhamphorhynchusImg from "@assets/generated_images/rhamphorhynchus_white_bg.png";
+import pterodactylusImg from "@assets/generated_images/pterodactylus_white_bg.png";
+import dimorphodonImg from "@assets/generated_images/dimorphodon_white_bg.png";
+import tapejaraImg from "@assets/generated_images/tapejara_white_bg.png";
+import anhangueraImg from "@assets/generated_images/anhanguera_white_bg.png";
+import dsungaripterusImg from "@assets/generated_images/dsungaripterus_white_bg.png";
 
 // Tier 14 - HeroKids Legacy (Logo-style superhero collection - 4 boys, 4 girls)
 import shieldBlazeImg from "@assets/generated_images/shield_blaze_boy_hero_avatar.png";
