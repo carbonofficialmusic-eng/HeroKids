@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -1277,6 +1278,16 @@ export default function KidDashboard() {
                           {achievement.customReward}
                         </p>
                       </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" data-testid={`button-info-${achievement.slug}`}>
+                            <Info className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left" className="max-w-[250px]">
+                          <p className="text-sm">{achievement.description}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </Card>
                 </motion.div>
