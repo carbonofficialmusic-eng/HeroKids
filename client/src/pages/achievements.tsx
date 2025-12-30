@@ -295,7 +295,10 @@ export default function Achievements() {
                 "lifetime_milestone": 3,
                 "task_streak": 4,
               };
-              return (order[a.type] ?? 99) - (order[b.type] ?? 99);
+              const typeDiff = (order[a.type] ?? 99) - (order[b.type] ?? 99);
+              // Use slug as tie-breaker for stable ordering
+              if (typeDiff !== 0) return typeDiff;
+              return a.slug.localeCompare(b.slug);
             }).map((achievement) => (
               <Card 
                 key={achievement.id} 

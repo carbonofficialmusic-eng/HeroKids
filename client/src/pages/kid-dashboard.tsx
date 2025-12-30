@@ -915,9 +915,21 @@ export default function KidDashboard() {
   });
 
   // Filter for active achievements with custom rewards
-  const specialRewards = achievements.filter(
-    a => a.isActive && a.rewardType === "custom" && a.customReward
-  );
+  const specialRewards = achievements
+    .filter(a => a.isActive && a.rewardType === "custom" && a.customReward)
+    .sort((a, b) => {
+      // Sort by type priority, then by slug for stable ordering
+      const order: Record<string, number> = {
+        "perfect_week": 0,
+        "weekly_leaderboard": 1,
+        "first_weekly_finisher": 2,
+        "lifetime_milestone": 3,
+        "task_streak": 4,
+      };
+      const typeDiff = (order[a.type] ?? 99) - (order[b.type] ?? 99);
+      if (typeDiff !== 0) return typeDiff;
+      return a.slug.localeCompare(b.slug);
+    });
 
   // Filter to show only this child's redemptions, sorted by newest first
   const myRedemptions = member 
