@@ -31,7 +31,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles, Info } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -1116,16 +1116,16 @@ export default function Dashboard() {
                             <h3 className="font-semibold text-sm truncate">{achievement.title}</h3>
                             <p className="text-sm text-purple-600 dark:text-purple-400 truncate">{achievement.customReward}</p>
                           </div>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
+                          <Popover>
+                            <PopoverTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" data-testid={`button-info-${achievement.slug}`}>
                                 <Info className="h-4 w-4 text-muted-foreground" />
                               </Button>
-                            </TooltipTrigger>
-                            <TooltipContent side="left" className="max-w-[250px]">
+                            </PopoverTrigger>
+                            <PopoverContent side="left" className="max-w-[250px]">
                               <p className="text-sm">{achievement.description}</p>
-                            </TooltipContent>
-                          </Tooltip>
+                            </PopoverContent>
+                          </Popover>
                         </div>
                       </Card>
                     ))}
