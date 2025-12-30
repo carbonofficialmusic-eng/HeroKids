@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, Trophy, Star, Award, TrendingUp, Flame, History, Sparkles } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ChevronLeft, Trophy, Star, Award, TrendingUp, Flame, History, Sparkles, Gift, Coins } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +25,8 @@ interface AchievementDefinition {
   title: string;
   description: string;
   bonusPoints: number;
+  rewardType: "points" | "custom";
+  customReward: string | null;
   isActive: boolean;
   config: Record<string, any>;
 }
@@ -33,6 +36,8 @@ interface AchievementAward {
   achievementDefinitionId: string;
   memberId: string;
   bonusPoints: number;
+  rewardType: "points" | "custom";
+  customReward: string | null;
   awardedAt: Date;
   achievementDefinition: AchievementDefinition;
   member: {
@@ -235,38 +240,111 @@ export default function Achievements() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <Label htmlFor={`bonus-${achievement.id}`} className="text-sm font-medium">
-                        {t("achievements.bonusPoints")}
+                  <div className="space-y-4">
+                    {/* Reward Type Selection */}
+                    <div>
+                      <Label className="text-sm font-medium mb-3 block">
+                        {t("achievements.rewardType")}
                       </Label>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Input
-                          id={`bonus-${achievement.id}`}
-                          type="number"
-                          min="0"
-                          step="10"
-                          value={achievement.bonusPoints}
-                          onChange={(e) => {
-                            const value = parseInt(e.target.value) || 0;
-                            updateAchievementMutation.mutate({
-                              id: achievement.id,
-                              data: { bonusPoints: value },
-                            });
-                          }}
-                          disabled={!achievement.isActive}
-                          className="w-32"
-                          data-testid={`input-${achievement.slug}-bonus`}
-                        />
-                        <span className="text-sm text-muted-foreground">{t("points")}</span>
-                      </div>
+                      <RadioGroup
+                        value={achievement.rewardType || "points"}
+                        onValueChange={(value: "points" | "custom") => {
+                          updateAchievementMutation.mutate({
+                            id: achievement.id,
+                            data: { rewardType: value },
+                          });
+                        }}
+                        disabled={!achievement.isActive}
+                        className="flex gap-4"
+                        data-testid={`radio-${achievement.slug}-reward-type`}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="points" id={`points-${achievement.id}`} />
+                          <Label htmlFor={`points-${achievement.id}`} className="flex items-center gap-1 cursor-pointer">
+                            <Coins className="h-4 w-4 text-primary" />
+                            {t("achievements.rewardTypePoints")}
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="custom" id={`custom-${achievement.id}`} />
+                          <Label htmlFor={`custom-${achievement.id}`} className="flex items-center gap-1 cursor-pointer">
+                            <Gift className="h-4 w-4 text-primary" />
+                            {t("achievements.rewardTypeCustom")}
+                          </Label>
+                        </div>
+                      </RadioGroup>
                     </div>
-                    <div className="text-right">
-                      <div className="text-3xl font-bold text-primary">+{achievement.bonusPoints}</div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                        {t("achievements.reward")}
+
+                    {/* Points Input (shown when reward type is points) */}
+                    {(achievement.rewardType === "points" || !achievement.rewardType) && (
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <Label htmlFor={`bonus-${achievement.id}`} className="text-sm font-medium">
+                            {t("achievements.bonusPoints")}
+                          </Label>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Input
+                              id={`bonus-${achievement.id}`}
+                              type="number"
+                              min="0"
+                              step="10"
+                              value={achievement.bonusPoints}
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value) || 0;
+                                updateAchievementMutation.mutate({
+                                  id: achievement.id,
+                                  data: { bonusPoints: value },
+                                });
+                              }}
+                              disabled={!achievement.isActive}
+                              className="w-32"
+                              data-testid={`input-${achievement.slug}-bonus`}
+                            />
+                            <span className="text-sm text-muted-foreground">{t("points")}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-3xl font-bold text-primary">+{achievement.bonusPoints}</div>
+                          <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                            {t("achievements.reward")}
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {/* Custom Reward Input (shown when reward type is custom) */}
+                    {achievement.rewardType === "custom" && (
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <Label htmlFor={`custom-reward-${achievement.id}`} className="text-sm font-medium">
+                            {t("achievements.customRewardLabel")}
+                          </Label>
+                          <Input
+                            id={`custom-reward-${achievement.id}`}
+                            type="text"
+                            placeholder={t("achievements.customRewardPlaceholder")}
+                            value={achievement.customReward || ""}
+                            onChange={(e) => {
+                              updateAchievementMutation.mutate({
+                                id: achievement.id,
+                                data: { customReward: e.target.value },
+                              });
+                            }}
+                            disabled={!achievement.isActive}
+                            className="mt-2"
+                            data-testid={`input-${achievement.slug}-custom-reward`}
+                          />
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Gift className="h-6 w-6 text-primary" />
+                          </div>
+                          <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                            {t("achievements.customReward")}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -325,7 +403,7 @@ export default function Achievements() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                            <Trophy className="h-5 w-5" />
+                            {award.rewardType === "custom" ? <Gift className="h-5 w-5" /> : <Trophy className="h-5 w-5" />}
                           </div>
                           <div>
                             <div className="font-medium">{award.achievementDefinition.title}</div>
@@ -335,7 +413,14 @@ export default function Achievements() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-lg font-bold text-primary">+{award.bonusPoints}</div>
+                          {award.rewardType === "custom" && award.customReward ? (
+                            <div className="text-sm font-medium text-primary flex items-center gap-1 justify-end">
+                              <Gift className="h-4 w-4" />
+                              {award.customReward}
+                            </div>
+                          ) : (
+                            <div className="text-lg font-bold text-primary">+{award.bonusPoints}</div>
+                          )}
                           <div className="text-xs text-muted-foreground">
                             {format(new Date(award.awardedAt), "MMM d, yyyy")}
                           </div>
