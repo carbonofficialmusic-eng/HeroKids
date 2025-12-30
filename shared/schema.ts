@@ -450,7 +450,9 @@ export const achievementDefinitions = pgTable("achievement_definitions", {
   title: varchar("title").notNull(), // Display name (e.g., "Weekly Champion")
   description: text("description").notNull(), // Description shown to members
   config: jsonb("config").notNull().default(sql`'{}'::jsonb`), // Type-specific config (e.g., { threshold: 100, rank: "gold" })
-  bonusPoints: integer("bonus_points").notNull(), // Points awarded when achievement is earned
+  bonusPoints: integer("bonus_points").notNull(), // Points awarded when achievement is earned (if rewardType is "points")
+  rewardType: varchar("reward_type").notNull().default("points"), // "points" or "custom"
+  customReward: text("custom_reward"), // Custom reward text (e.g., "Extra pocket money", "Movie night")
   isActive: boolean("is_active").notNull().default(true), // Parents can enable/disable
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -519,6 +521,8 @@ export const achievementAwards = pgTable("achievement_awards", {
   memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
   pointsHistoryId: varchar("points_history_id").references(() => pointsHistory.id, { onDelete: "set null" }), // Link to points history entry
   bonusPoints: integer("bonus_points").notNull(), // Points awarded (snapshot at award time)
+  rewardType: varchar("reward_type").notNull().default("points"), // "points" or "custom" (snapshot at award time)
+  customReward: text("custom_reward"), // Custom reward text (snapshot at award time)
   awardedAt: timestamp("awarded_at").defaultNow(),
 });
 
