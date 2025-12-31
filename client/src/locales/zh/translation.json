@@ -1027,7 +1027,16 @@
     "rewardTypeCustom": "自定义奖励",
     "customRewardLabel": "自定义奖励",
     "customRewardPlaceholder": "例如：额外零花钱、电影之夜、冰淇淋...",
-    "customReward": "自定义奖励"
+    "customReward": "自定义奖励",
+    "desc_first-weekly-finisher": "成为第一个完成所有每周任务的家庭成员",
+    "desc_perfect-week": "完成所有每周任务且没有被拒绝",
+    "desc_task-streak-7": "连续7天完成任务",
+    "desc_task-streak-14": "连续14天完成任务",
+    "desc_task-streak-30": "连续30天完成任务",
+    "desc_lifetime-500": "累计获得500积分",
+    "desc_lifetime-1000": "累计获得1000积分",
+    "desc_lifetime-2000": "累计获得2000积分",
+    "desc_weekly-leaderboard-1st": "在每周排行榜中获得第1名"
   },
   "error": "错误",
   "goBack": "返回",

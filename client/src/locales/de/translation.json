@@ -1058,7 +1058,16 @@
     "rewardTypeCustom": "Eigene Belohnung",
     "customRewardLabel": "Eigene Belohnung",
     "customRewardPlaceholder": "z.B. Extra Taschengeld, Filmabend, Eis...",
-    "customReward": "Eigene Belohnung"
+    "customReward": "Eigene Belohnung",
+    "desc_first-weekly-finisher": "Sei das erste Familienmitglied, das alle wöchentlichen Aufgaben erledigt",
+    "desc_perfect-week": "Erledige alle deine wöchentlichen Aufgaben ohne Ablehnungen",
+    "desc_task-streak-7": "Erledige 7 Tage hintereinander Aufgaben",
+    "desc_task-streak-14": "Erledige 14 Tage hintereinander Aufgaben",
+    "desc_task-streak-30": "Erledige 30 Tage hintereinander Aufgaben",
+    "desc_lifetime-500": "Verdiene insgesamt 500 Punkte",
+    "desc_lifetime-1000": "Verdiene insgesamt 1000 Punkte",
+    "desc_lifetime-2000": "Verdiene insgesamt 2000 Punkte",
+    "desc_weekly-leaderboard-1st": "Belege den 1. Platz in der wöchentlichen Bestenliste"
   },
   "error": "Fehler",
   "goBack": "Zurück",

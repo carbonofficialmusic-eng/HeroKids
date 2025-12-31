@@ -1285,7 +1285,7 @@ export default function KidDashboard() {
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent side="left" className="max-w-[250px]">
-                          <p className="text-sm">{achievement.description}</p>
+                          <p className="text-sm">{t(`achievements.desc_${achievement.slug}`)}</p>
                         </PopoverContent>
                       </Popover>
                     </div>

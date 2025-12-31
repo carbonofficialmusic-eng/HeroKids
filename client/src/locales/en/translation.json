@@ -1048,7 +1048,16 @@
     "rewardTypeCustom": "Custom Reward",
     "customRewardLabel": "Custom Reward",
     "customRewardPlaceholder": "e.g. Extra pocket money, Movie night, Ice cream...",
-    "customReward": "Custom Reward"
+    "customReward": "Custom Reward",
+    "desc_first-weekly-finisher": "Be the first family member to complete all weekly tasks",
+    "desc_perfect-week": "Complete all your weekly tasks without any rejections",
+    "desc_task-streak-7": "Complete tasks for 7 days in a row",
+    "desc_task-streak-14": "Complete tasks for 14 days in a row",
+    "desc_task-streak-30": "Complete tasks for 30 days in a row",
+    "desc_lifetime-500": "Earn a total of 500 points",
+    "desc_lifetime-1000": "Earn a total of 1000 points",
+    "desc_lifetime-2000": "Earn a total of 2000 points",
+    "desc_weekly-leaderboard-1st": "Finish in 1st place on the weekly leaderboard"
   },
   "error": "Error",
   "goBack": "Go Back",

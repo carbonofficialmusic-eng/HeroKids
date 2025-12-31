@@ -1027,7 +1027,16 @@
     "rewardTypeCustom": "Récompense personnalisée",
     "customRewardLabel": "Récompense personnalisée",
     "customRewardPlaceholder": "ex. Argent de poche supplémentaire, Soirée cinéma, Glace...",
-    "customReward": "Récompense personnalisée"
+    "customReward": "Récompense personnalisée",
+    "desc_first-weekly-finisher": "Soyez le premier membre de la famille à terminer toutes les tâches hebdomadaires",
+    "desc_perfect-week": "Terminez toutes vos tâches hebdomadaires sans aucun rejet",
+    "desc_task-streak-7": "Terminez des tâches pendant 7 jours consécutifs",
+    "desc_task-streak-14": "Terminez des tâches pendant 14 jours consécutifs",
+    "desc_task-streak-30": "Terminez des tâches pendant 30 jours consécutifs",
+    "desc_lifetime-500": "Gagnez un total de 500 points",
+    "desc_lifetime-1000": "Gagnez un total de 1000 points",
+    "desc_lifetime-2000": "Gagnez un total de 2000 points",
+    "desc_weekly-leaderboard-1st": "Terminez à la 1ère place du classement hebdomadaire"
   },
   "error": "Erreur",
   "goBack": "Retour",
