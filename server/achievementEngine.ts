@@ -115,9 +115,12 @@ export class AchievementEngine {
       .filter(m => !m.excludeFromLeaderboard)
       .sort((a, b) => b.weeklyPoints - a.weeklyPoints);
 
-    const config = definition.config as { rank: "gold" | "silver" | "bronze" };
-    const rankMap = { gold: 0, silver: 1, bronze: 2 };
-    const rankIndex = rankMap[config.rank] || 0;
+    const config = definition.config as { rank: number | "gold" | "silver" | "bronze" };
+    // Support both numeric rank (1, 2, 3) and string rank ("gold", "silver", "bronze")
+    const rankMap: Record<string, number> = { gold: 0, silver: 1, bronze: 2 };
+    const rankIndex = typeof config.rank === "number" 
+      ? config.rank - 1  // Convert 1-based to 0-based index
+      : (rankMap[config.rank] ?? 0);
 
     if (sortedMembers.length > rankIndex) {
       const winner = sortedMembers[rankIndex];
@@ -235,8 +238,8 @@ export class AchievementEngine {
             lastStreakDate: today,
           });
 
-          const config = definition.config as { threshold: number };
-          const threshold = config.threshold || 7;
+          const config = definition.config as { days?: number; threshold?: number };
+          const threshold = config.days ?? config.threshold ?? 7;
 
           if (newStreak === threshold) {
             await storage.awardAchievement(definition.id, member.id, definition.bonusPoints);
