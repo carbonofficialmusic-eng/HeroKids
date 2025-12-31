@@ -388,6 +388,7 @@ export default function Settings() {
             size="icon"
             onClick={() => setLocation("/")}
             data-testid="button-back"
+            className="bg-card/90 backdrop-blur-sm border-border"
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
