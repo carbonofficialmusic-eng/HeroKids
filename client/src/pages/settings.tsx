@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone } from "lucide-react";
+import { ChevronLeft, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3 } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -874,28 +874,25 @@ export default function Settings() {
             </Card>
           )}
 
-          {/* Achievement Configuration */}
-          <Card className="border-primary/50">
+          {/* Analytics */}
+          <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-primary" />
-                <CardTitle>{t('settings.achievementsTitle')}</CardTitle>
+                <BarChart3 className="h-5 w-5 text-primary" />
+                <CardTitle>{t('dashboard.analytics')}</CardTitle>
               </div>
               <CardDescription>
-                {t('settings.achievementsDesc')}
+                {t('settings.analyticsDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                {t('settings.achievementsInfo')}
-              </p>
               <Button 
-                onClick={() => setLocation("/achievements")}
-                data-testid="button-configure-achievements"
+                onClick={() => setLocation("/analytics")}
+                data-testid="button-open-analytics"
                 className="w-full"
               >
-                <Trophy className="h-4 w-4 mr-2" />
-                {t('settings.configureAchievements')}
+                <BarChart3 className="h-4 w-4 mr-2" />
+                {t('settings.openAnalytics')}
               </Button>
             </CardContent>
           </Card>

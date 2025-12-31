@@ -560,7 +560,9 @@
     "achievementsTitle": "Succès et Bonus d'Argent de Poche",
     "achievementsDesc": "Configurez des points bonus automatiques lorsque les enfants atteignent des étapes",
     "achievementsInfo": "Créez des succès comme \"Premier à Terminer les Tâches Hebdomadaires\" ou \"Semaine Parfaite\" qui attribuent automatiquement des points bonus.",
-    "configureAchievements": "Configurer les Succès"
+    "configureAchievements": "Configurer les Succès",
+    "analyticsDesc": "Consultez les statistiques des tâches, les tendances de points et les progrès de la famille.",
+    "openAnalytics": "Ouvrir les Statistiques"
   },
   "subscription": {
     "free": "Free",

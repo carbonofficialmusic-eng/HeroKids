@@ -584,7 +584,9 @@
     "achievementsTitle": "Achievements & Taschengeld-Boni",
     "achievementsDesc": "Konfiguriere automatische Bonuspunkte, wenn Kinder Meilensteine erreichen",
     "achievementsInfo": "Erstelle Achievements wie \"Erster der wöchentlichen Aufgaben\" oder \"Perfekte Woche\", die automatisch Bonuspunkte vergeben.",
-    "configureAchievements": "Achievements konfigurieren"
+    "configureAchievements": "Achievements konfigurieren",
+    "analyticsDesc": "Aufgabenstatistiken, Punktetrends und Familienfortschritte ansehen.",
+    "openAnalytics": "Statistiken öffnen"
   },
   "subscription": {
     "free": "Free",

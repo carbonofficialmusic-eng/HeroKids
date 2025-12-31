@@ -564,7 +564,9 @@
     "achievementsTitle": "성과 및 용돈 보너스",
     "achievementsDesc": "자녀가 마일스톤에 도달하면 자동 보너스 포인트 구성",
     "achievementsInfo": "\"주간 과제 첫 번째 완료\" 또는 \"퍼펙트 위크\"와 같은 성과를 만들어 자동으로 보너스 포인트를 부여합니다.",
-    "configureAchievements": "성과 구성"
+    "configureAchievements": "성과 구성",
+    "analyticsDesc": "과제 통계, 포인트 추세, 가족 진행 상황 확인.",
+    "openAnalytics": "통계 열기"
   },
   "subscription": {
     "free": "무료",

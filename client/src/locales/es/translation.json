@@ -560,7 +560,9 @@
     "achievementsTitle": "Logros y Bonificaciones de Mesada",
     "achievementsDesc": "Configura puntos de bonificación automáticos cuando los niños alcanzan hitos",
     "achievementsInfo": "Crea logros como \"Primero en Terminar Tareas Semanales\" o \"Semana Perfecta\" que otorgan puntos de bonificación automáticamente.",
-    "configureAchievements": "Configurar Logros"
+    "configureAchievements": "Configurar Logros",
+    "analyticsDesc": "Ver estadísticas de tareas, tendencias de puntos y progreso familiar.",
+    "openAnalytics": "Abrir Estadísticas"
   },
   "subscription": {
     "free": "Free",

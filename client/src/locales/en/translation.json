@@ -574,7 +574,9 @@
     "achievementsTitle": "Achievements & Allowance Bonuses",
     "achievementsDesc": "Configure automatic bonus points when children reach milestones",
     "achievementsInfo": "Set up achievements like \"First to Finish Weekly Tasks\" or \"Perfect Week\" that automatically award bonus points.",
-    "configureAchievements": "Configure Achievements"
+    "configureAchievements": "Configure Achievements",
+    "analyticsDesc": "View task statistics, points trends, and family progress.",
+    "openAnalytics": "Open Analytics"
   },
   "subscription": {
     "free": "Free",
