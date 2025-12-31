@@ -384,7 +384,7 @@ export default function Settings() {
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
             onClick={() => setLocation("/")}
             data-testid="button-back"

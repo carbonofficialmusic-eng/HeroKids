@@ -248,7 +248,7 @@ export default function Achievements() {
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
             onClick={() => setLocation("/settings")}
             data-testid="button-back"
