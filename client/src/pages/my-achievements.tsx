@@ -117,7 +117,7 @@ export default function MyAchievements() {
     <div className="min-h-screen p-4 pb-20">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
-          <Link href="/kid-dashboard">
+          <Link href={member?.role === "parent" ? "/" : "/kid-dashboard"}>
             <button className="p-2 rounded-full bg-card/80 backdrop-blur-md" data-testid="button-back">
               <ArrowLeft className="h-6 w-6" />
             </button>
