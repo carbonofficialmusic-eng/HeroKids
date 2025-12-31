@@ -79,7 +79,8 @@
     "requestRewardReview": "申请一个奖励，家长会审核！",
     "requestFirstReward": "申请你的第一个奖励",
     "pointsLabel": "积分",
-    "specialPrizes": "特别奖品"
+    "specialPrizes": "特别奖品",
+    "viewAll": "查看全部 →"
   },
   "tasks": {
     "title": "任务",

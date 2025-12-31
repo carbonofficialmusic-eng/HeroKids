@@ -79,7 +79,8 @@
     "requestRewardReview": "Demande une récompense et tes parents l'examineront !",
     "requestFirstReward": "Demande ta première récompense",
     "pointsLabel": "points",
-    "specialPrizes": "Prix spéciaux"
+    "specialPrizes": "Prix spéciaux",
+    "viewAll": "Voir tout →"
   },
   "tasks": {
     "title": "Tâches",

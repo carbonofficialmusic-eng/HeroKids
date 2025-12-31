@@ -83,7 +83,8 @@
     "subscription_processing_desc": "Deine Zahlung wird gerade verarbeitet. Dies dauert nur wenige Sekunden. Die Seite wird automatisch aktualisiert.",
     "subscription_activated": "Abonnement aktiviert!",
     "subscription_activated_desc": "Dein Abonnement wurde erfolgreich aktiviert. Viel Spaß mit den neuen Features!",
-    "specialPrizes": "Spezial-Preise"
+    "specialPrizes": "Spezial-Preise",
+    "viewAll": "Alle ansehen →"
   },
   "tasks": {
     "title": "Aufgaben",

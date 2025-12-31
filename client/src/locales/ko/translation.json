@@ -83,7 +83,8 @@
     "subscription_processing_desc": "결제가 처리되고 있습니다. 몇 초만 기다려 주세요. 페이지가 자동으로 새로고침됩니다.",
     "subscription_activated": "구독 활성화됨!",
     "subscription_activated_desc": "구독이 성공적으로 활성화되었습니다. 새로운 기능을 즐기세요!",
-    "specialPrizes": "특별 상품"
+    "specialPrizes": "특별 상품",
+    "viewAll": "모두 보기 →"
   },
   "tasks": {
     "title": "과제",

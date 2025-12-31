@@ -79,7 +79,8 @@
     "requestRewardReview": "¡Solicita una recompensa y tus padres la revisarán!",
     "requestFirstReward": "Solicita tu Primera Recompensa",
     "pointsLabel": "puntos",
-    "specialPrizes": "Premios especiales"
+    "specialPrizes": "Premios especiales",
+    "viewAll": "Ver todo →"
   },
   "tasks": {
     "title": "Tareas",

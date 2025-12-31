@@ -1248,17 +1248,26 @@ export default function KidDashboard() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="space-y-4"
           >
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
-                <Trophy className="h-7 w-7 text-white" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
+                  <Trophy className="h-7 w-7 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                  {t("kidDashboard.specialPrizes")}
+                </h2>
+                <Sparkles className="h-5 w-5 text-purple-500 animate-pulse" />
               </div>
-              <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                {t("kidDashboard.specialPrizes")}
-              </h2>
-              <Sparkles className="h-5 w-5 text-purple-500 animate-pulse" />
+              {specialRewards.length > 3 && (
+                <Button variant="ghost" size="sm" asChild data-testid="button-view-all-achievements">
+                  <Link href="/achievements">
+                    {t("kidDashboard.viewAll")}
+                  </Link>
+                </Button>
+              )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {specialRewards.map((achievement, index) => (
+              {specialRewards.slice(0, 3).map((achievement, index) => (
                 <motion.div
                   key={achievement.id}
                   initial={{ opacity: 0, scale: 0.9 }}

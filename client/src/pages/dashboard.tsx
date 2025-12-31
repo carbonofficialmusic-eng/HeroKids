@@ -1100,13 +1100,22 @@ export default function Dashboard() {
               {/* Special Achievement Rewards Section */}
               {specialRewards.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-purple-500" />
-                    <h2 className="text-lg font-bold font-accent">{t("dashboard.specialPrizes")}</h2>
-                    <Sparkles className="h-4 w-4 text-purple-500" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="h-5 w-5 text-purple-500" />
+                      <h2 className="text-lg font-bold font-accent">{t("dashboard.specialPrizes")}</h2>
+                      <Sparkles className="h-4 w-4 text-purple-500" />
+                    </div>
+                    {specialRewards.length > 3 && (
+                      <Button variant="ghost" size="sm" asChild data-testid="button-view-all-achievements">
+                        <Link href="/achievements">
+                          {t("dashboard.viewAll")}
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                   <div className="space-y-3">
-                    {specialRewards.map((achievement) => (
+                    {specialRewards.slice(0, 3).map((achievement) => (
                       <Card key={achievement.id} className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30">
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-lg bg-purple-500/20 flex-shrink-0">

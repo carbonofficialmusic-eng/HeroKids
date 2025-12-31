@@ -83,7 +83,8 @@
     "subscription_processing_desc": "Your payment is being processed. This will only take a few seconds. The page will reload automatically.",
     "subscription_activated": "Subscription Activated!",
     "subscription_activated_desc": "Your subscription has been successfully activated. Enjoy your new features!",
-    "specialPrizes": "Special Prizes"
+    "specialPrizes": "Special Prizes",
+    "viewAll": "View all →"
   },
   "tasks": {
     "title": "Tasks",

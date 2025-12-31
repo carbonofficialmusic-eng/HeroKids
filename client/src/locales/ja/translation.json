@@ -79,7 +79,8 @@
     "requestRewardReview": "ごほうびをリクエストすると、お父さんやお母さんが確認してくれます！",
     "requestFirstReward": "最初のごほうびをリクエスト",
     "pointsLabel": "ポイント",
-    "specialPrizes": "特別賞"
+    "specialPrizes": "特別賞",
+    "viewAll": "すべて表示 →"
   },
   "tasks": {
     "title": "タスク",
