@@ -228,9 +228,9 @@ export default function Dashboard() {
     enabled: !!member,
   });
 
-  // Filter for active achievements with custom rewards
+  // Filter for all active achievements
   const specialRewards = achievements
-    .filter(a => a.isActive && a.rewardType === "custom" && a.customReward)
+    .filter(a => a.isActive)
     .sort((a, b) => {
       // Sort by type priority, then by slug for stable ordering
       const order: Record<string, number> = {
@@ -1114,7 +1114,11 @@ export default function Dashboard() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm truncate">{achievement.title}</h3>
-                            <p className="text-sm text-purple-600 dark:text-purple-400 truncate">{achievement.customReward}</p>
+                            <p className="text-sm text-purple-600 dark:text-purple-400 truncate">
+                              {achievement.rewardType === "custom" && achievement.customReward
+                                ? achievement.customReward
+                                : `+${achievement.bonusPoints} ${t("points")}`}
+                            </p>
                           </div>
                           <Popover>
                             <PopoverTrigger asChild>

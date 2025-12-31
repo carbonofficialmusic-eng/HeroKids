@@ -915,9 +915,9 @@ export default function KidDashboard() {
     enabled: !!member,
   });
 
-  // Filter for active achievements with custom rewards
+  // Filter for all active achievements
   const specialRewards = achievements
-    .filter(a => a.isActive && a.rewardType === "custom" && a.customReward)
+    .filter(a => a.isActive)
     .sort((a, b) => {
       // Sort by type priority, then by slug for stable ordering
       const order: Record<string, number> = {
@@ -1275,7 +1275,9 @@ export default function KidDashboard() {
                           {achievement.title}
                         </h3>
                         <p className="text-sm text-purple-600 dark:text-purple-400 font-medium truncate">
-                          {achievement.customReward}
+                          {achievement.rewardType === "custom" && achievement.customReward
+                            ? achievement.customReward
+                            : `+${achievement.bonusPoints} ${t("points")}`}
                         </p>
                       </div>
                       <Popover>
