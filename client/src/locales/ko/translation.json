@@ -936,6 +936,12 @@
       "dec": "12월"
     }
   },
+  "myAchievements": {
+    "title": "내 성취",
+    "allAchievements": "모든 특별 상품",
+    "achievementsCount": "{{count}}개 성취 가능",
+    "noAchievements": "아직 활성화된 성취가 없습니다"
+  },
   "achievements": {
     "title": "성취",
     "subtitle": "마일스톤 달성 시 자동 용돈 보너스 구성",

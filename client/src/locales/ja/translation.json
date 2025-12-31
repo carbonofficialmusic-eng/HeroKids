@@ -994,6 +994,12 @@
       "dec": "12月"
     }
   },
+  "myAchievements": {
+    "title": "マイ達成",
+    "allAchievements": "すべての特別賞",
+    "achievementsCount": "{{count}}個の達成項目",
+    "noAchievements": "まだ有効な達成項目がありません"
+  },
   "achievements": {
     "title": "達成項目",
     "subtitle": "マイルストーン達成時の自動お小遣いボーナスを設定",

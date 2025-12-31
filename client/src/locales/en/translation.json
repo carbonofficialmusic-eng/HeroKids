@@ -1015,6 +1015,12 @@
       "dec": "Dec"
     }
   },
+  "myAchievements": {
+    "title": "My Achievements",
+    "allAchievements": "All Special Prizes",
+    "achievementsCount": "{{count}} achievements available",
+    "noAchievements": "No achievements active yet"
+  },
   "achievements": {
     "title": "Achievements",
     "subtitle": "Configure automatic allowance bonuses for achieving milestones",

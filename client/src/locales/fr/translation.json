@@ -994,6 +994,12 @@
       "dec": "Déc"
     }
   },
+  "myAchievements": {
+    "title": "Mes réalisations",
+    "allAchievements": "Tous les prix spéciaux",
+    "achievementsCount": "{{count}} réalisations disponibles",
+    "noAchievements": "Aucune réalisation active pour l'instant"
+  },
   "achievements": {
     "title": "Réalisations",
     "subtitle": "Configurez les bonus automatiques d'argent de poche pour atteindre les jalons",

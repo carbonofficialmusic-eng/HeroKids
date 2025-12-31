@@ -1108,7 +1108,7 @@ export default function Dashboard() {
                     </div>
                     {specialRewards.length > 3 && (
                       <Button variant="ghost" size="sm" asChild data-testid="button-view-all-achievements">
-                        <Link href="/achievements">
+                        <Link href="/my-achievements">
                           {t("dashboard.viewAll")}
                         </Link>
                       </Button>

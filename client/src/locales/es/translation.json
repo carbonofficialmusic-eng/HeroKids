@@ -994,6 +994,12 @@
       "dec": "Dic"
     }
   },
+  "myAchievements": {
+    "title": "Mis logros",
+    "allAchievements": "Todos los premios especiales",
+    "achievementsCount": "{{count}} logros disponibles",
+    "noAchievements": "Aún no hay logros activos"
+  },
   "achievements": {
     "title": "Logros",
     "subtitle": "Configura bonificaciones automáticas de mesada por alcanzar hitos",

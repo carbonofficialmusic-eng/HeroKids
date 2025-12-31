@@ -994,6 +994,12 @@
       "dec": "12月"
     }
   },
+  "myAchievements": {
+    "title": "我的成就",
+    "allAchievements": "所有特别奖品",
+    "achievementsCount": "{{count}} 个成就可获得",
+    "noAchievements": "暂无活跃成就"
+  },
   "achievements": {
     "title": "成就",
     "subtitle": "配置达成里程碑时的自动零花钱奖励",

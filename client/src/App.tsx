@@ -25,6 +25,7 @@ import SkinsGallery from "@/pages/skins-gallery";
 import Achievements from "@/pages/achievements";
 import FamilyGoals from "@/pages/family-goals";
 import MyRewards from "@/pages/my-rewards";
+import MyAchievements from "@/pages/my-achievements";
 import LinkDevice from "@/pages/link-device";
 
 interface FamilyMember {
@@ -146,6 +147,7 @@ function Router() {
         <Route path="/kid-dashboard" component={KidDashboard} />
         <Route path="/kid-dashboard-old" component={KidDashboardOld} />
         <Route path="/my-rewards" component={MyRewards} />
+        <Route path="/my-achievements" component={MyAchievements} />
         <Route path="/tasks" component={Dashboard} />
         <Route path="/rewards" component={Dashboard} />
         <Route path="/leaderboard" component={Dashboard} />

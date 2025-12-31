@@ -1025,6 +1025,12 @@
       "dec": "Dez"
     }
   },
+  "myAchievements": {
+    "title": "Meine Erfolge",
+    "allAchievements": "Alle Spezial-Preise",
+    "achievementsCount": "{{count}} Erfolge verfügbar",
+    "noAchievements": "Noch keine Erfolge aktiv"
+  },
   "achievements": {
     "title": "Erfolge",
     "subtitle": "Konfiguriere automatische Taschengeld-Boni für erreichte Meilensteine",
