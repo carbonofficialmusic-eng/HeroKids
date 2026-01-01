@@ -250,7 +250,7 @@ export default function Achievements() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setLocation("/settings")}
+            onClick={() => setLocation("/")}
             data-testid="button-back"
             className="bg-card/90 backdrop-blur-sm border-border"
           >
