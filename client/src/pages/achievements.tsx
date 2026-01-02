@@ -207,7 +207,7 @@ export default function Achievements() {
 
   if (!isParent) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle>{t("achievements.accessDenied")}</CardTitle>
@@ -243,7 +243,7 @@ export default function Achievements() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4 md:p-6">
+    <div className="min-h-screen p-4 md:p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
