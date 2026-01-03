@@ -34,6 +34,7 @@ export default function SkinsGallery() {
   const [celebration, setCelebration] = useState<{ points: number; message: string } | null>(null);
   const [selectedSkinId, setSelectedSkinId] = useState<string | null>(null);
   const [discoverDialogSkin, setDiscoverDialogSkin] = useState<Skin | null>(null);
+  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
 
   const { data: memberData, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
@@ -59,7 +60,8 @@ export default function SkinsGallery() {
       return await res.json();
     },
     onSuccess: (result) => {
-      setDiscoverDialogSkin(null); // Close the dialog
+      setDiscoverDialogSkin(null); // Close the popup
+      setPopupPosition(null);
       const skin = data?.skins.find(s => s.id === result.skinId);
       const skinName = skin?.id ? t(`skinNames.${skin.id}`) : "Skin";
       setCelebration({
@@ -163,9 +165,15 @@ export default function SkinsGallery() {
     const isSelected = selectedSkinId === skin.id;
     const isLegacy = isLegacySkin(skin.id);
 
-    const handleClick = () => {
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
       // If it's an undiscovered skin that can be discovered, show the popup
       if (canDiscover && !isDiscovered) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        // Position popup below the card, centered
+        setPopupPosition({
+          x: rect.left + rect.width / 2,
+          y: rect.bottom + 8
+        });
         setDiscoverDialogSkin(skin);
       } else {
         setSelectedSkinId(skin.id);
@@ -465,28 +473,40 @@ export default function SkinsGallery() {
         </div>
       </div>
 
-      {/* Discovery Popup - simple overlay */}
-      {discoverDialogSkin && (
+      {/* Discovery Popup - positioned near clicked card */}
+      {discoverDialogSkin && popupPosition && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          onClick={() => setDiscoverDialogSkin(null)}
+          className="fixed inset-0 z-50"
+          onClick={() => {
+            setDiscoverDialogSkin(null);
+            setPopupPosition(null);
+          }}
         >
-          <Button
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              discoverDialogSkin && discoverSkinMutation.mutate(discoverDialogSkin.id);
+          <div
+            className="absolute"
+            style={{
+              left: popupPosition.x,
+              top: popupPosition.y,
+              transform: 'translateX(-50%)'
             }}
-            disabled={discoverSkinMutation.isPending}
-            data-testid="button-discover-popup"
           >
-            {discoverSkinMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Sparkles className="h-4 w-4 mr-2" />
-            )}
-            {t('skins.discover')}
-          </Button>
+            <Button
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                discoverDialogSkin && discoverSkinMutation.mutate(discoverDialogSkin.id);
+              }}
+              disabled={discoverSkinMutation.isPending}
+              data-testid="button-discover-popup"
+            >
+              {discoverSkinMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Sparkles className="h-4 w-4 mr-2" />
+              )}
+              {t('skins.discover')}
+            </Button>
+          </div>
         </div>
       )}
 
