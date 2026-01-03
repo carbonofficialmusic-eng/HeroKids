@@ -207,8 +207,8 @@ export default function SkinsGallery() {
               </div>
             )
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center">
-              <span className="text-2xl font-bold text-muted-foreground/50">?</span>
+            <div className="w-full h-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+              <span className="text-2xl font-bold text-primary/60">?</span>
             </div>
           )}
         </div>
