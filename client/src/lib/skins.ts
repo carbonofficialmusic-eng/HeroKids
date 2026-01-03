@@ -155,11 +155,11 @@ import pirateShipDeckBg from "@assets/generated_images/pirate_ship_deck_backgrou
 import wizardTowerBg from "@assets/generated_images/wizard_tower_magical_background.png";
 import detectiveOfficeBg from "@assets/generated_images/detective_mystery_office_background.png";
 
-// New Legacy skin backgrounds (scene-based cinematic style like Comet Dash)
-import legacyStormRunnerBg from "@assets/generated_images/storm_runner_coastal_storm_highway.png";
-import legacyStarGuardianBg from "@assets/generated_images/star_guardian_aurora_observatory_city.png";
-import legacyThunderBoltBg from "@assets/generated_images/thunder_bolt_lightning_city_rooftop.png";
-import legacyHeartShieldBg from "@assets/generated_images/heart_shield_sunrise_plaza_sanctuary.png";
+// New Legacy skin backgrounds (cel-shaded vector style like Comet Dash)
+import legacyStormRunnerBg from "@assets/generated_images/storm_runner_cel-shaded_coastal_highway.png";
+import legacyStarGuardianBg from "@assets/generated_images/star_guardian_cel-shaded_observatory.png";
+import legacyThunderBoltBg from "@assets/generated_images/thunder_bolt_cel-shaded_storm_city.png";
+import legacyHeartShieldBg from "@assets/generated_images/heart_shield_cel-shaded_plaza.png";
 
 // Import themed background images
 // Modern fresh backgrounds for Tier 1
