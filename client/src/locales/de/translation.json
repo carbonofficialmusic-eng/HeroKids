@@ -330,7 +330,12 @@
     "unlockAt1400": "🔒 Freischalten mit 1400 Gesamtpunkten",
     "noSkinsInTier": "Keine Skins in diesem Paket verfügbar",
     "pterosaurSky": "Flugsaurier-Himmel",
-    "unlockAtPoints": "🔒 Freischalten mit {{points}} Gesamtpunkten"
+    "unlockAtPoints": "🔒 Freischalten mit {{points}} Gesamtpunkten",
+    "cardsAvailable": "Karten verfügbar",
+    "locked": "Gesperrt",
+    "unlocked": "Freigeschaltet",
+    "useDefault": "Standard verwenden",
+    "nextUnlock": "Nächste Freischaltung bei"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

@@ -18,7 +18,7 @@ import { wsClients, broadcastToFamily } from "./websocket";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, childDeviceSessions } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
-import { calculateAvailableCards, getUnlockedTier, getSkinTier } from "@shared/skin-config";
+import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD } from "@shared/skin-config";
 import { eq } from "drizzle-orm";
 import "./types";
 
@@ -2764,44 +2764,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allSkins = await storage.getSkins();
       const discoveredSkinIds = member.discoveredSkinIds || [];
       
-      // Calculate available discovery cards using tier-based system
+      // Calculate available discovery cards using new linear system
       const availableCards = calculateAvailableCards(member.totalEarned, discoveredSkinIds.length);
-      
-      // Determine which package tiers are unlocked based on total earned points
-      const unlockedTier = getUnlockedTier(member.totalEarned);
       
       // Enrich skins with discovery status for this member
       const skinsWithStatus = allSkins.map(skin => {
         const isDiscovered = discoveredSkinIds.includes(skin.id);
         const isActive = member.activeSkinId === skin.id;
         
-        // Determine skin tier using centralized function
-        const skinTier = getSkinTier(skin.id);
+        // Check if skin can be unlocked based on position and points
+        const canDiscover = !isDiscovered && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length);
         
-        // Can discover if: package is unlocked AND not already discovered AND has available cards
-        const canDiscover = skinTier <= unlockedTier && !isDiscovered && availableCards > 0;
+        // Get position for ordering (legacy skins have tier 14)
+        const tier = isLegacySkin(skin.id) ? 14 : 1;
         
         return {
           ...skin,
           isDiscovered,
           isActive,
           canDiscover,
-          tier: skinTier,
+          tier,
+          position: getSkinPosition(skin.id),
         };
       });
       
-      // Debug log to check tier distribution
-      const tierCounts = skinsWithStatus.reduce((acc, skin) => {
-        acc[skin.tier] = (acc[skin.tier] || 0) + 1;
-        return acc;
-      }, {} as Record<number, number>);
-      console.log(`🎨 Skins API: totalEarned=${member.totalEarned}, unlockedTier=${unlockedTier}, tierCounts:`, tierCounts);
+      console.log(`🎨 Skins API: totalEarned=${member.totalEarned}, discovered=${discoveredSkinIds.length}, available=${availableCards}`);
       
       res.json({
         skins: skinsWithStatus,
         totalEarned: member.totalEarned,
         availableCards,
-        unlockedTier,
+        unlockedTier: 999, // Legacy compatibility - all skins are now position-based
       });
     } catch (error: any) {
       console.error("Error fetching skins:", error);
@@ -2843,21 +2836,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Skin already discovered" });
       }
       
-      // Calculate available cards using tier-based system
-      const availableCards = calculateAvailableCards(member.totalEarned, discoveredSkinIds.length);
-      
-      if (availableCards <= 0) {
-        return res.status(403).json({ message: "No discovery cards available" });
-      }
-      
-      // Check if skin's package tier is unlocked
-      const unlockedTier = getUnlockedTier(member.totalEarned);
-      
-      // Determine skin tier using centralized function
-      const skinTier = getSkinTier(skinId);
-      
-      if (skinTier > unlockedTier) {
-        return res.status(403).json({ message: "Skin package not unlocked yet" });
+      // Check if skin can be unlocked using new position-based system
+      if (!canUnlockSkin(skinId, member.totalEarned, discoveredSkinIds.length)) {
+        return res.status(403).json({ message: "Not enough points to unlock this skin" });
       }
       
       // Add skin to discovered list
@@ -2886,11 +2867,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bonusPoints,
       });
       
+      // Calculate remaining available cards after discovery
+      const remainingCards = calculateAvailableCards(member.totalEarned, updatedDiscoveredSkins.length);
+      
       res.json({ 
         message: "Skin discovered!", 
         skinId,
         bonusPoints,
-        availableCards: availableCards - 1,
+        availableCards: remainingCards,
       });
     } catch (error: any) {
       console.error("Error discovering skin:", error);

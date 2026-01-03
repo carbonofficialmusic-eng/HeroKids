@@ -1,334 +1,277 @@
 /**
  * Character Skin System Configuration
- * Defines tier unlocks, card costs, and skin discovery mechanics
+ * NEW: Mixed skin order with linear unlock (80 points per skin)
+ * HeroKids Legacy skins remain at the end
  */
 
-export interface SkinTierConfig {
-  tier: number;
-  name: string;
-  unlockThreshold: number; // Total points required to unlock this tier's skins
-  pointsPerCard: number; // Points required to earn 1 discovery card for this tier
-  skinCount: number;
-}
+export const POINTS_PER_SKIN = 80;
+export const LEGACY_UNLOCK_THRESHOLD = 9100; // Points needed to unlock Legacy skins
 
 /**
- * Tier configuration for the skin discovery system
+ * All regular skin IDs in mixed order (alternating between different themes)
+ * This creates variety so children always have something interesting to unlock
  */
-export const SKIN_TIERS: SkinTierConfig[] = [
-  {
-    tier: 1,
-    name: "Starter Heroes",
-    unlockThreshold: 0, // Available from the start
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 2,
-    name: "Elite Heroes",
-    unlockThreshold: 700,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 3,
-    name: "Dinosaur Heroes",
-    unlockThreshold: 1400,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 4,
-    name: "Magical Princess World",
-    unlockThreshold: 2100,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 5,
-    name: "Space Explorers",
-    unlockThreshold: 2800,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 6,
-    name: "Cute Animals",
-    unlockThreshold: 3500,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 7,
-    name: "Vampire Adventure",
-    unlockThreshold: 4200,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 8,
-    name: "Ballerina Dreams",
-    unlockThreshold: 4900,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 9,
-    name: "Superhero Squad",
-    unlockThreshold: 5600,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 10,
-    name: "Mecha Robots",
-    unlockThreshold: 6300,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 11,
-    name: "Manga Heroes",
-    unlockThreshold: 7000,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 12,
-    name: "Gaming Legends",
-    unlockThreshold: 7700,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 13,
-    name: "Pterosaur Sky",
-    unlockThreshold: 8400,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
-  {
-    tier: 14,
-    name: "HeroKids Legacy",
-    unlockThreshold: 9100,
-    pointsPerCard: 80,
-    skinCount: 8,
-  },
+export const MIXED_SKIN_ORDER: string[] = [
+  // Mix skins from different packs for variety
+  "junior-champion",      // Starter
+  "t-rex",                // Dinosaur
+  "princess-tiara",       // Princess
+  "tech-ninja",           // Elite
+  "astronaut-kid",        // Space
+  "cat-girl",             // Animals
+  "classic-vampire",      // Vampire
+  "ballerina-pink",       // Ballerina
+  "classic-superhero",    // Superhero
+  "titan-mech",           // Mecha
+  "ninja-shadow",         // Manga
+  "pro-gamer",            // Gaming
+  "pteranodon",           // Pterosaur
+  
+  "brave-explorer",       // Starter
+  "triceratops",          // Dinosaur
+  "purple-princess",      // Princess
+  "ocean-guardian",       // Elite
+  "space-cadet-blue",     // Space
+  "bunny-girl",           // Animals
+  "bat-boy",              // Vampire
+  "swan-ballerina",       // Ballerina
+  "lightning-speedster",  // Superhero
+  "cyber-warrior",        // Mecha
+  "spirit-fox",           // Manga
+  "pixel-warrior",        // Gaming
+  "quetzalcoatlus",       // Pterosaur
+  
+  "star-cadet",           // Starter
+  "stegosaurus",          // Dinosaur
+  "ice-princess",         // Princess
+  "sky-knight",           // Elite
+  "green-alien",          // Space
+  "fox-girl",             // Animals
+  "moonlight-vampire",    // Vampire
+  "purple-ballerina",     // Ballerina
+  "tech-hero",            // Superhero
+  "iron-guardian",        // Mecha
+  "dragon-slayer",        // Manga
+  "controller-king",      // Gaming
+  "rhamphorhynchus",      // Pterosaur
+  
+  "nature-scout",         // Starter
+  "velociraptor",         // Dinosaur
+  "rainbow-princess",     // Princess
+  "fire-phoenix",         // Elite
+  "rocket-pilot",         // Space
+  "puppy-girl",           // Animals
+  "gothic-vampire",       // Vampire
+  "blue-ballerina",       // Ballerina
+  "nature-guardian",      // Superhero
+  "plasma-bot",           // Mecha
+  "magical-girl",         // Manga
+  "vr-champion",          // Gaming
+  "pterodactylus",        // Pterosaur
+  
+  "speed-runner",         // Starter
+  "brachiosaurus",        // Dinosaur
+  "nature-princess",      // Princess
+  "crystal-mage",         // Elite
+  "moon-walker",          // Space
+  "panda-girl",           // Animals
+  "shadow-vampire",       // Vampire
+  "golden-ballerina",     // Ballerina
+  "ice-hero",             // Superhero
+  "steel-samurai",        // Mecha
+  "samurai-hero",         // Manga
+  "stream-star",          // Gaming
+  "dimorphodon",          // Pterosaur
+  
+  "book-wizard",          // Starter
+  "spinosaurus",          // Dinosaur
+  "sun-princess",         // Princess
+  "neon-rebel",           // Elite
+  "galaxy-scout",         // Space
+  "deer-girl",            // Animals
+  "night-hunter",         // Vampire
+  "peach-ballerina",      // Ballerina
+  "fire-hero",            // Superhero
+  "thunder-mech",         // Mecha
+  "elemental-master",     // Manga
+  "arcade-master",        // Gaming
+  "tapejara",             // Pterosaur
+  
+  "kitchen-hero",         // Starter
+  "ankylosaurus",         // Dinosaur
+  "ocean-princess",       // Princess
+  "cosmic-drifter",       // Elite
+  "robot-astronaut",      // Space
+  "raccoon-girl",         // Animals
+  "blood-moon-vampire",   // Vampire
+  "mint-ballerina",       // Ballerina
+  "shadow-ninja",         // Superhero
+  "neon-droid",           // Mecha
+  "cat-fighter",          // Manga
+  "console-hero",         // Gaming
+  "anhanguera",           // Pterosaur
+  
+  "art-master",           // Starter
+  "allosaurus",           // Dinosaur
+  "fairy-princess",       // Princess
+  "thunder-champion",     // Elite
+  "star-captain",         // Space
+  "squirrel-girl",        // Animals
+  "vampire-prince",       // Vampire
+  "rainbow-ballerina",    // Ballerina
+  "shield-hero",          // Superhero
+  "battle-commander",     // Mecha
+  "school-hero",          // Manga
+  "level-boss",           // Gaming
+  "dsungaripterus",       // Pterosaur
 ];
 
 /**
- * Get tier configuration by tier number
+ * HeroKids Legacy skins (unlock after all regular skins at 9100+ points)
  */
-export function getTierConfig(tier: number): SkinTierConfig | undefined {
-  return SKIN_TIERS.find(t => t.tier === tier);
-}
+export const LEGACY_SKIN_ORDER: string[] = [
+  "shield-blaze",
+  "comet-dash",
+  "wave-glider",
+  "forest-guard",
+  "luna-beacon",
+  "sunrise-spark",
+  "bloom-guardian",
+  "breeze-captain",
+];
 
 /**
- * Determine which tier is unlocked based on total earned points
+ * Get the position of a skin in the unlock order
+ * Returns -1 if skin is not found in regular order (might be Legacy)
  */
-export function getUnlockedTier(totalEarned: number): number {
-  // Start from highest tier and work down
-  for (let i = SKIN_TIERS.length - 1; i >= 0; i--) {
-    if (totalEarned >= SKIN_TIERS[i].unlockThreshold) {
-      return SKIN_TIERS[i].tier;
-    }
+export function getSkinPosition(skinId: string): number {
+  const regularIndex = MIXED_SKIN_ORDER.indexOf(skinId);
+  if (regularIndex !== -1) {
+    return regularIndex;
   }
-  return 1; // Default to tier 1
+  
+  // Check legacy skins
+  const legacyIndex = LEGACY_SKIN_ORDER.indexOf(skinId);
+  if (legacyIndex !== -1) {
+    return MIXED_SKIN_ORDER.length + legacyIndex;
+  }
+  
+  return -1;
 }
 
 /**
- * Calculate total available discovery cards across all unlocked tiers
- * Simplified: All tiers cost 80 points per card
- * - Tier 1 unlocks at 0 points (8 skins = max 640 points to discover all)
- * - Tier 2 unlocks at 700 points (8 skins = max 640 points to discover all)
- * - Tier 3 unlocks at 1400 points (8 skins = max 640 points to discover all)
+ * Check if a skin is a Legacy skin
+ */
+export function isLegacySkin(skinId: string): boolean {
+  return LEGACY_SKIN_ORDER.includes(skinId);
+}
+
+/**
+ * Calculate how many skins can be unlocked with given points
+ * Regular skins: 80 points each
+ * Legacy skins: only available after 9100 points
+ */
+export function calculateUnlockableSkins(totalEarned: number): number {
+  // Regular skins: floor(points / 80), max 104
+  const regularUnlocks = Math.min(
+    Math.floor(totalEarned / POINTS_PER_SKIN),
+    MIXED_SKIN_ORDER.length
+  );
+  
+  // Legacy skins: available if points >= 9100
+  if (totalEarned >= LEGACY_UNLOCK_THRESHOLD) {
+    const pointsAfterThreshold = totalEarned - LEGACY_UNLOCK_THRESHOLD;
+    const legacyUnlocks = Math.min(
+      Math.floor(pointsAfterThreshold / POINTS_PER_SKIN) + 1,
+      LEGACY_SKIN_ORDER.length
+    );
+    return regularUnlocks + legacyUnlocks;
+  }
+  
+  return regularUnlocks;
+}
+
+/**
+ * Calculate available discovery cards (skins that can be unlocked)
  */
 export function calculateAvailableCards(totalEarned: number, discoveredCount: number): number {
-  // Simple calculation: total points divided by 80, minus already discovered
-  const totalCards = Math.floor(totalEarned / 80);
-  const availableCards = totalCards - discoveredCount;
-  
-  // Never return negative cards
-  return Math.max(0, availableCards);
+  const maxUnlockable = calculateUnlockableSkins(totalEarned);
+  const available = maxUnlockable - discoveredCount;
+  return Math.max(0, available);
 }
 
 /**
- * Calculate progress toward next discovery card in current tier
- * Returns { current: number, max: number } representing partial progress
+ * Check if a specific skin can be unlocked based on its position and points
  */
-export function getCardProgress(totalEarned: number, discoveredCount: number): { current: number; max: number } {
-  const unlockedTier = getUnlockedTier(totalEarned);
-  const tierConfig = getTierConfig(unlockedTier);
+export function canUnlockSkin(skinId: string, totalEarned: number, discoveredCount: number): boolean {
+  const position = getSkinPosition(skinId);
+  if (position === -1) return false;
   
-  if (!tierConfig) {
-    return { current: 0, max: 80 };
+  // Check if we have available cards
+  const availableCards = calculateAvailableCards(totalEarned, discoveredCount);
+  if (availableCards <= 0) return false;
+  
+  // For legacy skins, check threshold
+  if (isLegacySkin(skinId)) {
+    return totalEarned >= LEGACY_UNLOCK_THRESHOLD;
   }
+  
+  // For regular skins, check if position is within unlockable range
+  const maxUnlockable = calculateUnlockableSkins(totalEarned);
+  return position < maxUnlockable;
+}
 
-  // Calculate how many points we've earned beyond this tier's unlock threshold
-  const pointsIntoCurrentTier = totalEarned - tierConfig.unlockThreshold;
-  
-  // Calculate the remainder (progress toward next card in this tier)
-  const remainder = pointsIntoCurrentTier % tierConfig.pointsPerCard;
-  
+/**
+ * Get progress toward next skin unlock
+ */
+export function getCardProgress(totalEarned: number): { current: number; max: number } {
+  const remainder = totalEarned % POINTS_PER_SKIN;
   return {
     current: remainder,
-    max: tierConfig.pointsPerCard,
+    max: POINTS_PER_SKIN,
   };
 }
 
-/**
- * Skin IDs grouped by tier for easy filtering
- */
-export const SKIN_IDS_BY_TIER: Record<number, string[]> = {
-  1: [
-    "junior-champion",
-    "brave-explorer",
-    "star-cadet",
-    "nature-scout",
-    "speed-runner",
-    "book-wizard",
-    "kitchen-hero",
-    "art-master",
-  ],
-  2: [
-    "tech-ninja",
-    "ocean-guardian",
-    "sky-knight",
-    "fire-phoenix",
-    "crystal-mage",
-    "neon-rebel",
-    "cosmic-drifter",
-    "thunder-champion",
-  ],
-  3: [
-    "t-rex",
-    "triceratops",
-    "stegosaurus",
-    "velociraptor",
-    "brachiosaurus",
-    "spinosaurus",
-    "ankylosaurus",
-    "allosaurus",
-  ],
-  4: [
-    "princess-tiara",
-    "purple-princess",
-    "ice-princess",
-    "rainbow-princess",
-    "nature-princess",
-    "sun-princess",
-    "ocean-princess",
-    "fairy-princess",
-  ],
-  5: [
-    "astronaut-kid",
-    "space-cadet-blue",
-    "green-alien",
-    "rocket-pilot",
-    "moon-walker",
-    "galaxy-scout",
-    "robot-astronaut",
-    "star-captain",
-  ],
-  6: [
-    "cat-girl",
-    "bunny-girl",
-    "fox-girl",
-    "puppy-girl",
-    "panda-girl",
-    "deer-girl",
-    "raccoon-girl",
-    "squirrel-girl",
-  ],
-  7: [
-    "classic-vampire",
-    "bat-boy",
-    "moonlight-vampire",
-    "gothic-vampire",
-    "shadow-vampire",
-    "night-hunter",
-    "blood-moon-vampire",
-    "vampire-prince",
-  ],
-  8: [
-    "ballerina-pink",
-    "swan-ballerina",
-    "purple-ballerina",
-    "blue-ballerina",
-    "golden-ballerina",
-    "peach-ballerina",
-    "mint-ballerina",
-    "rainbow-ballerina",
-  ],
-  9: [
-    "classic-superhero",
-    "lightning-speedster",
-    "tech-hero",
-    "nature-guardian",
-    "ice-hero",
-    "fire-hero",
-    "shadow-ninja",
-    "shield-hero",
-  ],
-  10: [
-    "titan-mech",
-    "cyber-warrior",
-    "iron-guardian",
-    "plasma-bot",
-    "steel-samurai",
-    "thunder-mech",
-    "neon-droid",
-    "battle-commander",
-  ],
-  11: [
-    "ninja-shadow",
-    "spirit-fox",
-    "dragon-slayer",
-    "magical-girl",
-    "samurai-hero",
-    "elemental-master",
-    "cat-fighter",
-    "school-hero",
-  ],
-  12: [
-    "pro-gamer",
-    "pixel-warrior",
-    "controller-king",
-    "vr-champion",
-    "stream-star",
-    "arcade-master",
-    "console-hero",
-    "level-boss",
-  ],
-  13: [
-    "pteranodon",
-    "quetzalcoatlus",
-    "rhamphorhynchus",
-    "pterodactylus",
-    "dimorphodon",
-    "tapejara",
-    "anhanguera",
-    "dsungaripterus",
-  ],
-  14: [
-    "shield-blaze",
-    "comet-dash",
-    "wave-glider",
-    "forest-guard",
-    "luna-beacon",
-    "sunrise-spark",
-    "bloom-guardian",
-    "breeze-captain",
-  ],
-};
+// Legacy exports for backward compatibility
+export const SKIN_TIERS: any[] = []; // Empty - no longer used
+export function getUnlockedTier(totalEarned: number): number {
+  // Return a high number so all skins are "unlocked" tier-wise
+  // The new system uses position-based unlocking
+  return 999;
+}
+export function getSkinTier(skinId: string): number {
+  // Legacy skins return tier 14, others return 1
+  return isLegacySkin(skinId) ? 14 : 1;
+}
+export function getTierConfig(tier: number): any {
+  return { tier, name: "", unlockThreshold: 0, pointsPerCard: 80, skinCount: 0 };
+}
 
 /**
- * Get tier number for a specific skin ID
+ * Get all skins in the correct display order (mixed + legacy at end)
  */
-export function getSkinTier(skinId: string): number {
-  for (const [tier, skinIds] of Object.entries(SKIN_IDS_BY_TIER)) {
-    if (skinIds.includes(skinId)) {
-      return parseInt(tier);
-    }
+export function getAllSkinsInOrder(): string[] {
+  return [...MIXED_SKIN_ORDER, ...LEGACY_SKIN_ORDER];
+}
+
+/**
+ * Get skin info including position and unlock requirements
+ */
+export function getSkinUnlockInfo(skinId: string): {
+  position: number;
+  pointsRequired: number;
+  isLegacy: boolean;
+} {
+  const position = getSkinPosition(skinId);
+  const isLegacy = isLegacySkin(skinId);
+  
+  let pointsRequired: number;
+  if (isLegacy) {
+    const legacyPosition = LEGACY_SKIN_ORDER.indexOf(skinId);
+    pointsRequired = LEGACY_UNLOCK_THRESHOLD + (legacyPosition * POINTS_PER_SKIN);
+  } else {
+    pointsRequired = (position + 1) * POINTS_PER_SKIN;
   }
-  return 1; // Default to tier 1
+  
+  return { position, pointsRequired, isLegacy };
 }

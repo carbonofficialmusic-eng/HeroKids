@@ -320,7 +320,12 @@
     "failedToSelect": "Failed to select skin",
     "noSkinsInTier": "No skins available in this package",
     "pterosaurSky": "Pterosaur Sky",
-    "unlockAtPoints": "🔒 Unlock at {{points}} lifetime points"
+    "unlockAtPoints": "🔒 Unlock at {{points}} lifetime points",
+    "cardsAvailable": "cards available",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "useDefault": "Use Default",
+    "nextUnlock": "Next unlock at"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",
