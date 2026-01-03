@@ -170,7 +170,6 @@ export default function SkinsGallery() {
           rounded-md overflow-hidden border-2
           ${isSelected ? "border-primary ring-2 ring-primary/50 scale-105" : "border-transparent"}
           ${isActive ? "ring-2 ring-yellow-400" : ""}
-          ${!isDiscovered ? "grayscale opacity-60" : ""}
           hover:scale-105 hover:border-primary/50
         `}
         data-testid={`mini-skin-${skin.id}`}
@@ -189,15 +188,8 @@ export default function SkinsGallery() {
               </div>
             )
           ) : (
-            <div className="w-full h-full bg-muted/80 flex items-center justify-center">
-              {SKIN_IMAGES[skin.id] ? (
-                <img
-                  src={SKIN_IMAGES[skin.id]}
-                  alt="?"
-                  className="w-full h-full object-cover opacity-30"
-                />
-              ) : null}
-              <Lock className="h-4 w-4 text-muted-foreground absolute" />
+            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center">
+              <span className="text-2xl font-bold text-muted-foreground/50">?</span>
             </div>
           )}
         </div>
@@ -266,37 +258,37 @@ export default function SkinsGallery() {
             <div className="lg:w-80 flex-shrink-0">
               <Card className="bg-card/90 backdrop-blur-md p-4 sticky top-4">
                 {/* Preview Image */}
-                <div className={`relative aspect-square rounded-lg overflow-hidden mb-4 bg-gradient-to-br from-muted to-card ${previewSkin && !previewSkin.isDiscovered ? "grayscale" : ""}`}>
+                <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-gradient-to-br from-muted to-card">
                   {previewSkin ? (
-                    <>
-                      {SKIN_BACKGROUNDS[previewSkin.id] && (
+                    previewSkin.isDiscovered ? (
+                      <>
+                        {SKIN_BACKGROUNDS[previewSkin.id] && (
+                          <img
+                            src={SKIN_BACKGROUNDS[previewSkin.id]}
+                            alt=""
+                            className="absolute inset-0 w-full h-full object-cover opacity-50"
+                          />
+                        )}
                         <img
-                          src={SKIN_BACKGROUNDS[previewSkin.id]}
-                          alt=""
-                          className={`absolute inset-0 w-full h-full object-cover ${previewSkin.isDiscovered ? "opacity-50" : "opacity-30"}`}
+                          src={SKIN_IMAGES[previewSkin.id]}
+                          alt={t(`skinNames.${previewSkin.id}`)}
+                          className="relative w-full h-full object-contain p-4"
                         />
-                      )}
-                      <img
-                        src={SKIN_IMAGES[previewSkin.id]}
-                        alt={t(`skinNames.${previewSkin.id}`)}
-                        className={`relative w-full h-full object-contain p-4 ${!previewSkin.isDiscovered ? "opacity-60" : ""}`}
-                      />
-                      {!previewSkin.isDiscovered && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="bg-black/40 rounded-full p-4">
-                            <Lock className="h-8 w-8 text-white/80" />
+                        {previewSkin.isActive && (
+                          <div className="absolute top-2 right-2">
+                            <Badge className="bg-yellow-400 text-yellow-900">
+                              <Check className="h-3 w-3 mr-1" />
+                              {t('skins.equipped')}
+                            </Badge>
                           </div>
-                        </div>
-                      )}
-                      {previewSkin.isActive && (
-                        <div className="absolute top-2 right-2">
-                          <Badge className="bg-yellow-400 text-yellow-900">
-                            <Check className="h-3 w-3 mr-1" />
-                            {t('skins.equipped')}
-                          </Badge>
-                        </div>
-                      )}
-                    </>
+                        )}
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center">
+                        <div className="text-8xl font-bold text-muted-foreground/30 mb-2">?</div>
+                        <p className="text-muted-foreground text-sm">{t('skins.mystery')}</p>
+                      </div>
+                    )
                   ) : memberData?.avatarUrl ? (
                     <Avatar className="w-full h-full">
                       <AvatarImage src={memberData.avatarUrl} className="object-cover" />
@@ -314,9 +306,11 @@ export default function SkinsGallery() {
                 {/* Preview Info */}
                 <div className="text-center mb-4">
                   <h2 className="text-xl font-bold font-accent">
-                    {previewSkin ? t(`skinNames.${previewSkin.id}`) : t('skins.default')}
+                    {previewSkin 
+                      ? (previewSkin.isDiscovered ? t(`skinNames.${previewSkin.id}`) : "???")
+                      : t('skins.default')}
                   </h2>
-                  {previewSkin && isLegacySkin(previewSkin.id) && (
+                  {previewSkin && previewSkin.isDiscovered && isLegacySkin(previewSkin.id) && (
                     <Badge variant="secondary" className="mt-1">
                       <Crown className="h-3 w-3 mr-1" />
                       HeroKids Legacy

@@ -335,7 +335,8 @@
     "locked": "Gesperrt",
     "unlocked": "Freigeschaltet",
     "useDefault": "Standard verwenden",
-    "nextUnlock": "Nächste Freischaltung bei"
+    "nextUnlock": "Nächste Freischaltung bei",
+    "mystery": "Entdecken um zu enthüllen!"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

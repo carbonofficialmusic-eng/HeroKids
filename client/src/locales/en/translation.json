@@ -325,7 +325,8 @@
     "locked": "Locked",
     "unlocked": "Unlocked",
     "useDefault": "Use Default",
-    "nextUnlock": "Next unlock at"
+    "nextUnlock": "Next unlock at",
+    "mystery": "Discover to reveal!"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",
