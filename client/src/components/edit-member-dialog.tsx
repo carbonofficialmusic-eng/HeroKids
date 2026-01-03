@@ -259,7 +259,7 @@ export function EditMemberDialog({
                     <p className="text-sm text-muted-foreground">
                       {t('memberDialogs.activeSkinOverride')}
                     </p>
-                    {member.avatarUrl && member.avatarUrl.startsWith('/objects/') && (
+                    {member.avatarUrl && (
                       <div className="flex items-center gap-2">
                         <Switch
                           id="use-custom-avatar"
@@ -274,7 +274,7 @@ export function EditMemberDialog({
                     )}
                   </div>
                 </div>
-                {member.avatarUrl && member.avatarUrl.startsWith('/objects/') && (
+                {member.avatarUrl && (
                   <div className="flex gap-3 p-2 rounded-md bg-muted/50">
                     <div 
                       className={`cursor-pointer transition-all ${!useCustomAvatarToggle ? 'ring-2 ring-primary ring-offset-2' : 'opacity-60'}`}
