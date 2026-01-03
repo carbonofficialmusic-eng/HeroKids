@@ -266,21 +266,28 @@ export default function SkinsGallery() {
             <div className="lg:w-80 flex-shrink-0">
               <Card className="bg-card/90 backdrop-blur-md p-4 sticky top-4">
                 {/* Preview Image */}
-                <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-gradient-to-br from-muted to-card">
+                <div className={`relative aspect-square rounded-lg overflow-hidden mb-4 bg-gradient-to-br from-muted to-card ${previewSkin && !previewSkin.isDiscovered ? "grayscale" : ""}`}>
                   {previewSkin ? (
                     <>
                       {SKIN_BACKGROUNDS[previewSkin.id] && (
                         <img
                           src={SKIN_BACKGROUNDS[previewSkin.id]}
                           alt=""
-                          className="absolute inset-0 w-full h-full object-cover opacity-50"
+                          className={`absolute inset-0 w-full h-full object-cover ${previewSkin.isDiscovered ? "opacity-50" : "opacity-30"}`}
                         />
                       )}
                       <img
                         src={SKIN_IMAGES[previewSkin.id]}
                         alt={t(`skinNames.${previewSkin.id}`)}
-                        className="relative w-full h-full object-contain p-4"
+                        className={`relative w-full h-full object-contain p-4 ${!previewSkin.isDiscovered ? "opacity-60" : ""}`}
                       />
+                      {!previewSkin.isDiscovered && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-black/40 rounded-full p-4">
+                            <Lock className="h-8 w-8 text-white/80" />
+                          </div>
+                        </div>
+                      )}
                       {previewSkin.isActive && (
                         <div className="absolute top-2 right-2">
                           <Badge className="bg-yellow-400 text-yellow-900">
