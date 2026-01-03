@@ -149,6 +149,9 @@ import wizardKidImg from "@assets/generated_images/wizard_kid_avatar.png";
 import rockStarImg from "@assets/generated_images/rock_star_kid_avatar.png";
 import detectiveKidImg from "@assets/generated_images/detective_kid_avatar.png";
 
+// Bonus Adventure Pack backgrounds
+import rockConcertStageBg from "@assets/generated_images/rock_concert_stage_background.png";
+
 // Import themed background images
 // Modern fresh backgrounds for Tier 1
 import modernCitySkylineBg from "@assets/generated_images/Modern_city_skyline_background_a5f841c6.png";
@@ -593,7 +596,7 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   // Tier 15 - Bonus Adventure Pack
   "pirate-captain": eliteOceanDepthsBg,
   "wizard-kid": modernMagicalLibraryBg,
-  "rock-star": neonCityBg,
+  "rock-star": rockConcertStageBg,
   "detective-kid": skylineBg,
 };
 
