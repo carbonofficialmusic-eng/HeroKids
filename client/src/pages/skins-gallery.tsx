@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Loader2, Lock, Check, Trophy, ArrowLeft, User, Star, Sparkles, Crown, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SuccessCelebration } from "@/components/success-celebration";
@@ -33,6 +34,7 @@ export default function SkinsGallery() {
   const { t } = useTranslation();
   const [celebration, setCelebration] = useState<{ points: number; message: string } | null>(null);
   const [selectedSkinId, setSelectedSkinId] = useState<string | null>(null);
+  const [discoverDialogSkin, setDiscoverDialogSkin] = useState<Skin | null>(null);
 
   const { data: memberData, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
@@ -58,6 +60,7 @@ export default function SkinsGallery() {
       return await res.json();
     },
     onSuccess: (result) => {
+      setDiscoverDialogSkin(null); // Close the dialog
       const skin = data?.skins.find(s => s.id === result.skinId);
       const skinName = skin?.id ? t(`skinNames.${skin.id}`) : "Skin";
       setCelebration({
@@ -161,10 +164,19 @@ export default function SkinsGallery() {
     const isSelected = selectedSkinId === skin.id;
     const isLegacy = isLegacySkin(skin.id);
 
+    const handleClick = () => {
+      // If it's an undiscovered skin that can be discovered, show the popup
+      if (canDiscover && !isDiscovered) {
+        setDiscoverDialogSkin(skin);
+      } else {
+        setSelectedSkinId(skin.id);
+      }
+    };
+
     return (
       <div
         key={skin.id}
-        onClick={() => setSelectedSkinId(skin.id)}
+        onClick={handleClick}
         className={`
           relative cursor-pointer transition-all duration-200
           rounded-md overflow-hidden border-2
@@ -453,6 +465,43 @@ export default function SkinsGallery() {
           </div>
         </div>
       </div>
+
+      {/* Discovery Dialog for undiscovered skins */}
+      <Dialog open={!!discoverDialogSkin} onOpenChange={(open) => !open && setDiscoverDialogSkin(null)}>
+        <DialogContent className="sm:max-w-[320px] p-0 overflow-hidden bg-gradient-to-br from-primary/20 via-card to-card border-primary/30">
+          <div className="p-6 text-center">
+            {/* Mystery Card */}
+            <div className="relative aspect-square w-48 mx-auto mb-6 rounded-xl overflow-hidden bg-gradient-to-br from-muted to-muted/60 shadow-xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
+              <div className="w-full h-full flex flex-col items-center justify-center">
+                <div className="text-8xl font-bold text-muted-foreground/30 mb-2 animate-pulse">?</div>
+                <p className="text-muted-foreground text-sm">{t('skins.mystery')}</p>
+              </div>
+              <Sparkles className="absolute top-3 right-3 h-6 w-6 text-primary animate-pulse" />
+              <Sparkles className="absolute bottom-3 left-3 h-5 w-5 text-primary/70 animate-pulse" />
+            </div>
+            
+            {/* Text */}
+            <h3 className="text-xl font-bold font-accent mb-2">???</h3>
+            <p className="text-muted-foreground text-sm mb-6">{t('skins.mystery')}</p>
+            
+            {/* Discover Button */}
+            <Button
+              className="w-full text-lg py-6"
+              onClick={() => discoverDialogSkin && discoverSkinMutation.mutate(discoverDialogSkin.id)}
+              disabled={discoverSkinMutation.isPending}
+              data-testid="button-discover-popup"
+            >
+              {discoverSkinMutation.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+              ) : (
+                <Sparkles className="h-5 w-5 mr-2" />
+              )}
+              {t('skins.discover')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {celebration && (
         <SuccessCelebration
