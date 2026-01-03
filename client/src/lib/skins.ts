@@ -151,6 +151,15 @@ import detectiveKidImg from "@assets/generated_images/detective_kid_avatar.png";
 
 // Bonus Adventure Pack backgrounds
 import rockConcertStageBg from "@assets/generated_images/rock_concert_stage_background.png";
+import pirateShipDeckBg from "@assets/generated_images/pirate_ship_deck_background.png";
+import wizardTowerBg from "@assets/generated_images/wizard_tower_magical_background.png";
+import detectiveOfficeBg from "@assets/generated_images/detective_mystery_office_background.png";
+
+// New Legacy skin backgrounds (flat vector HeroKids style)
+import legacyStormRunnerBg from "@assets/generated_images/legacy_storm_runner_background.png";
+import legacyStarGuardianBg from "@assets/generated_images/legacy_star_guardian_background.png";
+import legacyThunderBoltBg from "@assets/generated_images/legacy_thunder_bolt_background.png";
+import legacyHeartShieldBg from "@assets/generated_images/legacy_heart_shield_background.png";
 
 // Import themed background images
 // Modern fresh backgrounds for Tier 1
@@ -588,16 +597,16 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "sunrise-spark": sunriseSparkBg,
   "bloom-guardian": bloomGuardianBg,
   "breeze-captain": breezeCaptainBg,
-  "storm-runner": stormBg,
-  "star-guardian": rainbowSkyBg,
-  "thunder-bolt": lightningStormBg,
-  "heart-shield": pinkCastleBg,
+  "storm-runner": legacyStormRunnerBg,
+  "star-guardian": legacyStarGuardianBg,
+  "thunder-bolt": legacyThunderBoltBg,
+  "heart-shield": legacyHeartShieldBg,
   
   // Tier 15 - Bonus Adventure Pack
-  "pirate-captain": eliteOceanDepthsBg,
-  "wizard-kid": modernMagicalLibraryBg,
+  "pirate-captain": pirateShipDeckBg,
+  "wizard-kid": wizardTowerBg,
   "rock-star": rockConcertStageBg,
-  "detective-kid": skylineBg,
+  "detective-kid": detectiveOfficeBg,
 };
 
 // Helper to add cache-busting parameter to /objects/ URLs
