@@ -336,7 +336,10 @@
     "unlocked": "Freigeschaltet",
     "useDefault": "Standard verwenden",
     "nextUnlock": "Nächste Freischaltung bei",
-    "mystery": "Entdecken um zu enthüllen!"
+    "mystery": "Entdecken um zu enthüllen!",
+    "yourPhoto": "Dein Foto",
+    "useYourPhoto": "Dein Foto verwenden",
+    "photoEquipped": "Dein Foto ausgewählt!"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

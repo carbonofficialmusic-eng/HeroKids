@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, Lock, Check, Trophy, ArrowLeft, User, Star, Sparkles, Crown } from "lucide-react";
+import { Loader2, Lock, Check, Trophy, ArrowLeft, User, Star, Sparkles, Crown, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { Link } from "wouter";
@@ -90,7 +90,7 @@ export default function SkinsGallery() {
       if (skinId === null) {
         setCelebration({
           points: 0,
-          message: t('skins.defaultAvatarEquipped'),
+          message: t('skins.photoEquipped'),
         });
       } else {
         const selectedSkin = data?.skins.find(s => s.id === skinId);
@@ -308,13 +308,19 @@ export default function SkinsGallery() {
                   <h2 className="text-xl font-bold font-accent">
                     {previewSkin 
                       ? (previewSkin.isDiscovered ? t(`skinNames.${previewSkin.id}`) : "???")
-                      : t('skins.default')}
+                      : t('skins.yourPhoto')}
                   </h2>
                   {previewSkin && previewSkin.isDiscovered && isLegacySkin(previewSkin.id) && (
                     <Badge variant="secondary" className="mt-1">
                       <Crown className="h-3 w-3 mr-1" />
                       HeroKids Legacy
                     </Badge>
+                  )}
+                  {!previewSkin && memberData?.avatarUrl && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      <Camera className="h-3 w-3 inline mr-1" />
+                      {t('skins.yourPhoto')}
+                    </p>
                   )}
                 </div>
                 
@@ -347,7 +353,7 @@ export default function SkinsGallery() {
                         {t('skins.locked')}
                       </Button>
                     )
-                  ) : (
+                  ) : memberData?.avatarUrl ? (
                     <Button
                       className="w-full"
                       variant={isDefaultActive ? "secondary" : "default"}
@@ -355,9 +361,10 @@ export default function SkinsGallery() {
                       disabled={isDefaultActive || selectSkinMutation.isPending}
                       data-testid="button-equip-default"
                     >
-                      {isDefaultActive ? t('skins.equipped') : t('skins.useDefault')}
+                      <Camera className="h-4 w-4 mr-2" />
+                      {isDefaultActive ? t('skins.equipped') : t('skins.useYourPhoto')}
                     </Button>
-                  )}
+                  ) : null}
                 </div>
                 
                 {/* Progress to next unlock */}
@@ -380,40 +387,43 @@ export default function SkinsGallery() {
 
             {/* Skins Grid - Right Side */}
             <div className="flex-1">
-              {/* Default Avatar Option */}
-              <div className="mb-4">
-                <div
-                  onClick={() => setSelectedSkinId(null)}
-                  className={`
-                    inline-block cursor-pointer transition-all duration-200
-                    rounded-md overflow-hidden border-2 w-14 h-14
-                    ${selectedSkinId === null && !previewSkin ? "border-primary ring-2 ring-primary/50" : "border-transparent"}
-                    ${isDefaultActive ? "ring-2 ring-yellow-400" : ""}
-                    hover:scale-105 hover:border-primary/50
-                  `}
-                  data-testid="mini-skin-default"
-                >
-                  <div className="w-full h-full bg-card flex items-center justify-center">
-                    {memberData?.avatarUrl ? (
+              {/* Your Photo Option - only show if user has a photo */}
+              {memberData?.avatarUrl && (
+                <div className="mb-4">
+                  <div
+                    onClick={() => setSelectedSkinId(null)}
+                    className={`
+                      relative inline-block cursor-pointer transition-all duration-200
+                      rounded-md overflow-hidden border-2 w-14 h-14
+                      ${selectedSkinId === null && !previewSkin ? "border-blue-500 ring-2 ring-blue-500/50" : "border-blue-300"}
+                      ${isDefaultActive ? "ring-2 ring-yellow-400" : ""}
+                      hover:scale-105 hover:border-blue-400
+                    `}
+                    data-testid="mini-skin-default"
+                  >
+                    <div className="w-full h-full bg-card flex items-center justify-center">
                       <Avatar className="w-full h-full">
                         <AvatarImage src={memberData.avatarUrl} className="object-cover" />
                         <AvatarFallback>
                           <User className="h-6 w-6" />
                         </AvatarFallback>
                       </Avatar>
-                    ) : (
-                      <User className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    {isDefaultActive && (
+                      <div className="absolute top-0.5 right-0.5">
+                        <div className="bg-yellow-400 rounded-full p-0.5">
+                          <Check className="h-2 w-2 text-yellow-900" />
+                        </div>
+                      </div>
                     )}
-                  </div>
-                  {isDefaultActive && (
-                    <div className="absolute top-0.5 right-0.5">
-                      <div className="bg-yellow-400 rounded-full p-0.5">
-                        <Check className="h-2 w-2 text-yellow-900" />
+                    <div className="absolute bottom-0.5 left-0.5">
+                      <div className="bg-blue-500 rounded-full p-0.5">
+                        <Camera className="h-2 w-2 text-white" />
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Regular Skins Grid */}
               <Card className="bg-card/80 backdrop-blur-md p-3 mb-4">

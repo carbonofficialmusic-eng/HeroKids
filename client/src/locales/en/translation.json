@@ -326,7 +326,10 @@
     "unlocked": "Unlocked",
     "useDefault": "Use Default",
     "nextUnlock": "Next unlock at",
-    "mystery": "Discover to reveal!"
+    "mystery": "Discover to reveal!",
+    "yourPhoto": "Your Photo",
+    "useYourPhoto": "Use Your Photo",
+    "photoEquipped": "Your Photo Equipped!"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",
