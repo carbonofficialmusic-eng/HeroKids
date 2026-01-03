@@ -466,40 +466,22 @@ export default function SkinsGallery() {
         </div>
       </div>
 
-      {/* Discovery Dialog for undiscovered skins */}
+      {/* Discovery Dialog - compact version */}
       <Dialog open={!!discoverDialogSkin} onOpenChange={(open) => !open && setDiscoverDialogSkin(null)}>
-        <DialogContent className="sm:max-w-[320px] p-0 overflow-hidden bg-gradient-to-br from-primary/20 via-card to-card border-primary/30">
-          <div className="p-6 text-center">
-            {/* Mystery Card */}
-            <div className="relative aspect-square w-48 mx-auto mb-6 rounded-xl overflow-hidden bg-gradient-to-br from-muted to-muted/60 shadow-xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
-              <div className="w-full h-full flex flex-col items-center justify-center">
-                <div className="text-8xl font-bold text-muted-foreground/30 mb-2 animate-pulse">?</div>
-                <p className="text-muted-foreground text-sm">{t('skins.mystery')}</p>
-              </div>
-              <Sparkles className="absolute top-3 right-3 h-6 w-6 text-primary animate-pulse" />
-              <Sparkles className="absolute bottom-3 left-3 h-5 w-5 text-primary/70 animate-pulse" />
-            </div>
-            
-            {/* Text */}
-            <h3 className="text-xl font-bold font-accent mb-2">???</h3>
-            <p className="text-muted-foreground text-sm mb-6">{t('skins.mystery')}</p>
-            
-            {/* Discover Button */}
-            <Button
-              className="w-full text-lg py-6"
-              onClick={() => discoverDialogSkin && discoverSkinMutation.mutate(discoverDialogSkin.id)}
-              disabled={discoverSkinMutation.isPending}
-              data-testid="button-discover-popup"
-            >
-              {discoverSkinMutation.isPending ? (
-                <Loader2 className="h-5 w-5 animate-spin mr-2" />
-              ) : (
-                <Sparkles className="h-5 w-5 mr-2" />
-              )}
-              {t('skins.discover')}
-            </Button>
-          </div>
+        <DialogContent className="sm:max-w-[200px] p-4">
+          <Button
+            className="w-full"
+            onClick={() => discoverDialogSkin && discoverSkinMutation.mutate(discoverDialogSkin.id)}
+            disabled={discoverSkinMutation.isPending}
+            data-testid="button-discover-popup"
+          >
+            {discoverSkinMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Sparkles className="h-4 w-4 mr-2" />
+            )}
+            {t('skins.discover')}
+          </Button>
         </DialogContent>
       </Dialog>
 
