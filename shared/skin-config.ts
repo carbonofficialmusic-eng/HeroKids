@@ -133,23 +133,10 @@ export const MIXED_SKIN_ORDER: string[] = [
 ];
 
 /**
- * Always available skins - these can be discovered from the start regardless of points
- * (Last 6 standard skins before Legacy)
+ * Check if a skin is a standard skin (not Legacy) - these are always discoverable
  */
-export const ALWAYS_AVAILABLE_SKINS: string[] = [
-  "level-boss",           // Gaming
-  "dsungaripterus",       // Pterosaur
-  "pirate-captain",       // Adventure
-  "wizard-kid",           // Adventure
-  "rock-star",            // Adventure
-  "detective-kid",        // Adventure
-];
-
-/**
- * Check if a skin is always available (no point requirement)
- */
-export function isAlwaysAvailableSkin(skinId: string): boolean {
-  return ALWAYS_AVAILABLE_SKINS.includes(skinId);
+export function isStandardSkin(skinId: string): boolean {
+  return MIXED_SKIN_ORDER.includes(skinId);
 }
 
 /**
@@ -198,15 +185,12 @@ export function isLegacySkin(skinId: string): boolean {
 
 /**
  * Calculate how many skins can be unlocked with given points
- * Regular skins: 80 points each
+ * Standard skins: ALL available from start (no point requirement)
  * Legacy skins: only available after 9100 points
  */
 export function calculateUnlockableSkins(totalEarned: number): number {
-  // Regular skins: floor(points / 80), max 104
-  const regularUnlocks = Math.min(
-    Math.floor(totalEarned / POINTS_PER_SKIN),
-    MIXED_SKIN_ORDER.length
-  );
+  // All standard skins are always unlockable
+  const standardUnlocks = MIXED_SKIN_ORDER.length;
   
   // Legacy skins: available if points >= 9100
   if (totalEarned >= LEGACY_UNLOCK_THRESHOLD) {
@@ -215,10 +199,10 @@ export function calculateUnlockableSkins(totalEarned: number): number {
       Math.floor(pointsAfterThreshold / POINTS_PER_SKIN) + 1,
       LEGACY_SKIN_ORDER.length
     );
-    return regularUnlocks + legacyUnlocks;
+    return standardUnlocks + legacyUnlocks;
   }
   
-  return regularUnlocks;
+  return standardUnlocks;
 }
 
 /**
@@ -237,30 +221,34 @@ export function canUnlockSkin(skinId: string, totalEarned: number, discoveredCou
   const position = getSkinPosition(skinId);
   if (position === -1) return false;
   
-  // Always-available skins can be discovered anytime (if not already discovered)
-  if (isAlwaysAvailableSkin(skinId)) {
+  // Standard skins are always discoverable (no point requirement)
+  if (isStandardSkin(skinId)) {
     return true;
   }
   
-  // Check if we have available cards
-  const availableCards = calculateAvailableCards(totalEarned, discoveredCount);
-  if (availableCards <= 0) return false;
-  
-  // For legacy skins, check threshold
+  // For legacy skins, check threshold (9100+ points required)
   if (isLegacySkin(skinId)) {
     return totalEarned >= LEGACY_UNLOCK_THRESHOLD;
   }
   
-  // For regular skins, check if position is within unlockable range
-  const maxUnlockable = calculateUnlockableSkins(totalEarned);
-  return position < maxUnlockable;
+  return false;
 }
 
 /**
- * Get progress toward next skin unlock
+ * Get progress toward Legacy skin unlock
+ * Standard skins don't require points - this is only for Legacy
  */
 export function getCardProgress(totalEarned: number): { current: number; max: number } {
-  const remainder = totalEarned % POINTS_PER_SKIN;
+  if (totalEarned < LEGACY_UNLOCK_THRESHOLD) {
+    // Show progress toward first Legacy skin
+    return {
+      current: totalEarned,
+      max: LEGACY_UNLOCK_THRESHOLD,
+    };
+  }
+  // After threshold, show progress for next Legacy skin
+  const pointsAfterThreshold = totalEarned - LEGACY_UNLOCK_THRESHOLD;
+  const remainder = pointsAfterThreshold % POINTS_PER_SKIN;
   return {
     current: remainder,
     max: POINTS_PER_SKIN,
