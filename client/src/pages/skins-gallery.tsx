@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Lock, Check, Trophy, ArrowLeft, User, Star, Sparkles, Crown, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SuccessCelebration } from "@/components/success-celebration";
@@ -468,9 +468,11 @@ export default function SkinsGallery() {
 
       {/* Discovery Dialog - minimal floating button */}
       <Dialog open={!!discoverDialogSkin} onOpenChange={(open) => !open && setDiscoverDialogSkin(null)}>
-        <DialogContent className="max-w-fit p-2 border-0 bg-card/90 backdrop-blur-sm shadow-lg [&>button]:hidden">
+        <DialogContent className="max-w-[160px] p-3 rounded-xl [&>button]:hidden" aria-describedby={undefined}>
+          <DialogTitle className="sr-only">{t('skins.discover')}</DialogTitle>
           <Button
             size="sm"
+            className="w-full"
             onClick={() => discoverDialogSkin && discoverSkinMutation.mutate(discoverDialogSkin.id)}
             disabled={discoverSkinMutation.isPending}
             data-testid="button-discover-popup"
