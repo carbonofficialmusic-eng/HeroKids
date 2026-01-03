@@ -446,7 +446,7 @@ export default function SkinsGallery() {
 
               {/* Regular Skins Grid */}
               <Card className="bg-card/80 backdrop-blur-md p-3 mb-4">
-                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-8 xl:grid-cols-10 gap-2">
+                <div className="grid grid-cols-8 gap-2">
                   {regularSkins.map((skin, index) => renderMiniCard(skin, index))}
                 </div>
               </Card>
@@ -463,7 +463,7 @@ export default function SkinsGallery() {
                         : `${LEGACY_UNLOCK_THRESHOLD} ${t('common.points')}`}
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-8 xl:grid-cols-10 gap-2">
+                  <div className="grid grid-cols-8 gap-2">
                     {legacySkins.map((skin, index) => renderMiniCard(skin, index))}
                   </div>
                 </Card>
