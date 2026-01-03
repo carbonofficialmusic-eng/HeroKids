@@ -453,7 +453,15 @@
     "luna-beacon": "Mondlicht",
     "sunrise-spark": "Sonnenfunke",
     "bloom-guardian": "Blütenwächterin",
-    "breeze-captain": "Windkapitänin"
+    "breeze-captain": "Windkapitänin",
+    "storm-runner": "Sturmläufer",
+    "star-guardian": "Sternenwächterin",
+    "thunder-bolt": "Donnerblitz",
+    "heart-shield": "Herzschild",
+    "pirate-captain": "Piratenkapitän",
+    "wizard-kid": "Zauberkind",
+    "rock-star": "Rockstar",
+    "detective-kid": "Detektivkind"
   },
   "chat": {
     "title": "Familien-Chat",

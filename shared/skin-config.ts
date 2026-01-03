@@ -124,6 +124,12 @@ export const MIXED_SKIN_ORDER: string[] = [
   "school-hero",          // Manga
   "level-boss",           // Gaming
   "dsungaripterus",       // Pterosaur
+  
+  // Bonus Adventure Pack (fills remaining slots)
+  "pirate-captain",       // Adventure
+  "wizard-kid",           // Adventure
+  "rock-star",            // Adventure
+  "detective-kid",        // Adventure
 ];
 
 /**
@@ -138,6 +144,10 @@ export const LEGACY_SKIN_ORDER: string[] = [
   "sunrise-spark",
   "bloom-guardian",
   "breeze-captain",
+  "storm-runner",
+  "star-guardian",
+  "thunder-bolt",
+  "heart-shield",
 ];
 
 /**

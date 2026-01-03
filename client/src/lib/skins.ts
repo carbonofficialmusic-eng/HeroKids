@@ -138,6 +138,16 @@ import lunaBeaconImg from "@assets/generated_images/luna_beacon_girl_hero_avatar
 import sunriseSparkImg from "@assets/generated_images/sunrise_spark_girl_hero_avatar.png";
 import bloomGuardianImg from "@assets/generated_images/bloom_guardian_girl_hero_avatar.png";
 import breezeCaptainImg from "@assets/generated_images/breeze_captain_girl_hero_avatar.png";
+import stormRunnerImg from "@assets/generated_images/legacy_hero_boy_logo_style.png";
+import starGuardianImg from "@assets/generated_images/legacy_hero_girl_logo_style.png";
+import thunderBoltImg from "@assets/generated_images/legacy_thunder_boy_logo.png";
+import heartShieldImg from "@assets/generated_images/legacy_heart_girl_logo.png";
+
+// Tier 15 - Bonus Adventure Pack (Mixed collection)
+import pirateCaptainImg from "@assets/generated_images/pirate_captain_kid_avatar.png";
+import wizardKidImg from "@assets/generated_images/wizard_kid_avatar.png";
+import rockStarImg from "@assets/generated_images/rock_star_kid_avatar.png";
+import detectiveKidImg from "@assets/generated_images/detective_kid_avatar.png";
 
 // Import themed background images
 // Modern fresh backgrounds for Tier 1
@@ -422,6 +432,16 @@ export const SKIN_IMAGES: Record<string, string> = {
   "sunrise-spark": sunriseSparkImg,
   "bloom-guardian": bloomGuardianImg,
   "breeze-captain": breezeCaptainImg,
+  "storm-runner": stormRunnerImg,
+  "star-guardian": starGuardianImg,
+  "thunder-bolt": thunderBoltImg,
+  "heart-shield": heartShieldImg,
+  
+  // Tier 15 - Bonus Adventure Pack
+  "pirate-captain": pirateCaptainImg,
+  "wizard-kid": wizardKidImg,
+  "rock-star": rockStarImg,
+  "detective-kid": detectiveKidImg,
 };
 
 // Themed background mappings for new HeroKids themed skins
@@ -565,6 +585,16 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "sunrise-spark": sunriseSparkBg,
   "bloom-guardian": bloomGuardianBg,
   "breeze-captain": breezeCaptainBg,
+  "storm-runner": stormBg,
+  "star-guardian": rainbowSkyBg,
+  "thunder-bolt": lightningStormBg,
+  "heart-shield": pinkCastleBg,
+  
+  // Tier 15 - Bonus Adventure Pack
+  "pirate-captain": eliteOceanDepthsBg,
+  "wizard-kid": modernMagicalLibraryBg,
+  "rock-star": neonCityBg,
+  "detective-kid": skylineBg,
 };
 
 // Helper to add cache-busting parameter to /objects/ URLs
