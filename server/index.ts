@@ -360,6 +360,43 @@ async function addTier13PterosaursIfNeeded() {
   }
 }
 
+// Add Tier 15 Bonus Adventure Pack + new Legacy skins if they don't exist
+async function addBonusAdventurePackIfNeeded() {
+  try {
+    const bonusSkin = await db.select().from(skins).where(
+      sql`${skins.id} = 'pirate-captain'`
+    );
+
+    if (bonusSkin.length > 0) {
+      log("✅ Bonus Adventure Pack skins already exist");
+      return;
+    }
+
+    log("🌱 Adding Bonus Adventure Pack + new Legacy skins (8 new skins)...");
+    
+    // Tier 15 - Bonus Adventure Pack (4 regular skins)
+    const BONUS_SKINS = [
+      { id: "pirate-captain", name: "Pirate Captain", description: "Brave pirate captain sailing the seven seas!", imageUrl: "🏴‍☠️", pointsRequired: 7060, bonusPoints: 0 },
+      { id: "wizard-kid", name: "Wizard Kid", description: "Young wizard with magical powers and a trusty wand!", imageUrl: "🧙", pointsRequired: 7120, bonusPoints: 15 },
+      { id: "rock-star", name: "Rock Star", description: "Cool rock star with a guitar and awesome shades!", imageUrl: "🎸", pointsRequired: 7180, bonusPoints: 0 },
+      { id: "detective-kid", name: "Detective Kid", description: "Clever detective solving mysteries everywhere!", imageUrl: "🔍", pointsRequired: 7240, bonusPoints: 0 },
+    ];
+
+    // New Legacy skins (4 more Legacy heroes)
+    const NEW_LEGACY_SKINS = [
+      { id: "storm-runner", name: "Storm Runner", description: "Swift hero racing through thunderstorms!", imageUrl: "⚡", pointsRequired: 7300, bonusPoints: 20 },
+      { id: "star-guardian", name: "Star Guardian", description: "Celestial protector from the stars above!", imageUrl: "🌟", pointsRequired: 7360, bonusPoints: 0 },
+      { id: "thunder-bolt", name: "Thunder Bolt", description: "Electric hero with lightning speed powers!", imageUrl: "⚡", pointsRequired: 7420, bonusPoints: 0 },
+      { id: "heart-shield", name: "Heart Shield", description: "Brave hero protecting everyone with love!", imageUrl: "💖", pointsRequired: 7500, bonusPoints: 25 },
+    ];
+
+    await db.insert(skins).values([...BONUS_SKINS, ...NEW_LEGACY_SKINS]);
+    log("✅ Successfully added Bonus Adventure Pack and new Legacy skins!");
+  } catch (error) {
+    console.error("❌ Error adding Bonus Adventure Pack skins:", error);
+  }
+}
+
 // Force reseed all skins if new skin collections don't exist
 // This is a one-time migration that will run on next app start (both dev and production)
 async function forceReseedSkinsIfNeeded() {
@@ -543,6 +580,9 @@ async function forceReseedSkinsIfNeeded() {
   
   // Add Tier 13 Pterosaur Sky skins if they don't exist (and update HeroKids Legacy to Tier 14)
   await addTier13PterosaursIfNeeded();
+  
+  // Add Bonus Adventure Pack + new Legacy skins
+  await addBonusAdventurePackIfNeeded();
 
   // Start points reset scheduler
   startPointsResetScheduler();
