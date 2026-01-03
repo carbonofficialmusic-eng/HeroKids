@@ -468,7 +468,7 @@ export default function SkinsGallery() {
 
       {/* Discovery Dialog - minimal floating button */}
       <Dialog open={!!discoverDialogSkin} onOpenChange={(open) => !open && setDiscoverDialogSkin(null)}>
-        <DialogContent className="max-w-fit p-0 border-0 bg-transparent shadow-none [&>button]:hidden">
+        <DialogContent className="max-w-fit p-2 border-0 bg-card/90 backdrop-blur-sm shadow-lg [&>button]:hidden">
           <Button
             size="sm"
             onClick={() => discoverDialogSkin && discoverSkinMutation.mutate(discoverDialogSkin.id)}
