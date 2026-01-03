@@ -133,6 +133,26 @@ export const MIXED_SKIN_ORDER: string[] = [
 ];
 
 /**
+ * Always available skins - these can be discovered from the start regardless of points
+ * (Last 6 standard skins before Legacy)
+ */
+export const ALWAYS_AVAILABLE_SKINS: string[] = [
+  "level-boss",           // Gaming
+  "dsungaripterus",       // Pterosaur
+  "pirate-captain",       // Adventure
+  "wizard-kid",           // Adventure
+  "rock-star",            // Adventure
+  "detective-kid",        // Adventure
+];
+
+/**
+ * Check if a skin is always available (no point requirement)
+ */
+export function isAlwaysAvailableSkin(skinId: string): boolean {
+  return ALWAYS_AVAILABLE_SKINS.includes(skinId);
+}
+
+/**
  * HeroKids Legacy skins (unlock after all regular skins at 9100+ points)
  */
 export const LEGACY_SKIN_ORDER: string[] = [
