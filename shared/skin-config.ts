@@ -185,12 +185,15 @@ export function isLegacySkin(skinId: string): boolean {
 
 /**
  * Calculate how many skins can be unlocked with given points
- * Standard skins: ALL available from start (no point requirement)
+ * Standard skins: 80 points each, user can choose ANY standard skin
  * Legacy skins: only available after 9100 points
  */
 export function calculateUnlockableSkins(totalEarned: number): number {
-  // All standard skins are always unlockable
-  const standardUnlocks = MIXED_SKIN_ORDER.length;
+  // Standard skins: 80 points each, max is all standard skins
+  const standardUnlocks = Math.min(
+    Math.floor(totalEarned / POINTS_PER_SKIN),
+    MIXED_SKIN_ORDER.length
+  );
   
   // Legacy skins: available if points >= 9100
   if (totalEarned >= LEGACY_UNLOCK_THRESHOLD) {
@@ -215,18 +218,24 @@ export function calculateAvailableCards(totalEarned: number, discoveredCount: nu
 }
 
 /**
- * Check if a specific skin can be unlocked based on its position and points
+ * Check if a specific skin can be unlocked
+ * Standard skins: User can choose ANY standard skin if they have available cards
+ * Legacy skins: Need 9100+ points AND available cards
  */
 export function canUnlockSkin(skinId: string, totalEarned: number, discoveredCount: number): boolean {
   const position = getSkinPosition(skinId);
   if (position === -1) return false;
   
-  // Standard skins are always discoverable (no point requirement)
+  // Check if we have available cards
+  const availableCards = calculateAvailableCards(totalEarned, discoveredCount);
+  if (availableCards <= 0) return false;
+  
+  // Standard skins: user can choose ANY if they have available cards
   if (isStandardSkin(skinId)) {
     return true;
   }
   
-  // For legacy skins, check threshold (9100+ points required)
+  // For legacy skins, also check threshold (9100+ points required)
   if (isLegacySkin(skinId)) {
     return totalEarned >= LEGACY_UNLOCK_THRESHOLD;
   }
@@ -235,20 +244,11 @@ export function canUnlockSkin(skinId: string, totalEarned: number, discoveredCou
 }
 
 /**
- * Get progress toward Legacy skin unlock
- * Standard skins don't require points - this is only for Legacy
+ * Get progress toward next skin unlock
+ * Shows progress for next discovery card (80 points each)
  */
 export function getCardProgress(totalEarned: number): { current: number; max: number } {
-  if (totalEarned < LEGACY_UNLOCK_THRESHOLD) {
-    // Show progress toward first Legacy skin
-    return {
-      current: totalEarned,
-      max: LEGACY_UNLOCK_THRESHOLD,
-    };
-  }
-  // After threshold, show progress for next Legacy skin
-  const pointsAfterThreshold = totalEarned - LEGACY_UNLOCK_THRESHOLD;
-  const remainder = pointsAfterThreshold % POINTS_PER_SKIN;
+  const remainder = totalEarned % POINTS_PER_SKIN;
   return {
     current: remainder,
     max: POINTS_PER_SKIN,
