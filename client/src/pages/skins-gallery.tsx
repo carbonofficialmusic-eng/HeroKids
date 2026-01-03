@@ -472,7 +472,8 @@ export default function SkinsGallery() {
           <DialogTitle className="sr-only">{t('skins.discover')}</DialogTitle>
           <Button
             size="sm"
-            className="w-full"
+            variant="default"
+            className="w-full bg-primary text-primary-foreground"
             onClick={() => discoverDialogSkin && discoverSkinMutation.mutate(discoverDialogSkin.id)}
             disabled={discoverSkinMutation.isPending}
             data-testid="button-discover-popup"
