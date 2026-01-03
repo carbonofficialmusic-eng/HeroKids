@@ -237,6 +237,11 @@ export function canUnlockSkin(skinId: string, totalEarned: number, discoveredCou
   const position = getSkinPosition(skinId);
   if (position === -1) return false;
   
+  // Always-available skins can be discovered anytime (if not already discovered)
+  if (isAlwaysAvailableSkin(skinId)) {
+    return true;
+  }
+  
   // Check if we have available cards
   const availableCards = calculateAvailableCards(totalEarned, discoveredCount);
   if (availableCards <= 0) return false;
