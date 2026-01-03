@@ -25,10 +25,20 @@ export function AvatarSelector({
 }: AvatarSelectorProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(uploadedAvatarUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const lastProcessedFileRef = useRef<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Create a unique identifier for this file to prevent duplicate processing
+      const fileKey = `${file.name}-${file.size}-${file.lastModified}`;
+      
+      // Skip if we just processed this exact file (prevents mobile camera duplicate events)
+      if (lastProcessedFileRef.current === fileKey) {
+        return;
+      }
+      lastProcessedFileRef.current = fileKey;
+      
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -45,6 +55,7 @@ export function AvatarSelector({
 
   const clearCustomPhoto = () => {
     setPreviewUrl(null);
+    lastProcessedFileRef.current = null;
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
