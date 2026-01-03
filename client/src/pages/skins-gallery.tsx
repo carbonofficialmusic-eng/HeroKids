@@ -224,7 +224,7 @@ export default function SkinsGallery() {
       <div className="min-h-screen p-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <Link href={dashboardUrl}>
               <Button 
                 variant="outline" 
@@ -237,15 +237,15 @@ export default function SkinsGallery() {
               </Button>
             </Link>
             
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-sm font-bold">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="text-sm font-bold whitespace-nowrap">
                 <Trophy className="h-4 w-4 mr-1" />
                 {totalEarned} {t('common.points')}
               </Badge>
               
               {availableCards > 0 && (
-                <Badge className="text-sm font-bold animate-pulse">
-                  <Sparkles className="h-4 w-4 mr-1" />
+                <Badge className="text-base font-bold animate-pulse whitespace-nowrap">
+                  <Sparkles className="h-5 w-5 mr-1" />
                   {availableCards} {t('skins.cardsAvailable')}
                 </Badge>
               )}
