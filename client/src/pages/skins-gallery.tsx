@@ -169,10 +169,10 @@ export default function SkinsGallery() {
       // If it's an undiscovered skin that can be discovered, show the popup
       if (canDiscover && !isDiscovered) {
         const rect = e.currentTarget.getBoundingClientRect();
-        // Position popup below the card, centered
+        // Position popup above the card, centered
         setPopupPosition({
           x: rect.left + rect.width / 2,
-          y: rect.bottom + 8
+          y: rect.top - 8
         });
         setDiscoverDialogSkin(skin);
       } else {
@@ -487,7 +487,7 @@ export default function SkinsGallery() {
             style={{
               left: popupPosition.x,
               top: popupPosition.y,
-              transform: 'translateX(-50%)'
+              transform: 'translate(-50%, -100%)'
             }}
           >
             <Button
