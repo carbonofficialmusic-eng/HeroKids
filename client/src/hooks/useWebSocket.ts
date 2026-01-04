@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { queryClient } from "@/lib/queryClient";
 import confetti from "canvas-confetti";
+import { toast } from "@/hooks/use-toast";
 
 export function useWebSocket(familyName: string | null) {
   const wsRef = useRef<WebSocket | null>(null);
@@ -135,7 +136,14 @@ export function useWebSocket(familyName: string | null) {
                   });
                 }, 250);
                 
-                console.log(`🎉 ${data.memberName} earned "${data.achievementTitle}" (+${data.bonusPoints} points)!`);
+                // Show toast notification for achievement
+                toast({
+                  title: `🏆 ${data.achievementTitle}`,
+                  description: data.bonusPoints > 0 
+                    ? `${data.memberName} hat +${data.bonusPoints} Bonuspunkte verdient!`
+                    : `Herzlichen Glückwunsch, ${data.memberName}!`,
+                  duration: 6000,
+                });
               }
               break;
 
