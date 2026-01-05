@@ -322,7 +322,7 @@ export default function Achievements() {
                           )}
                         </div>
                         <CardDescription className="mt-1">
-                          {achievement.description}
+                          {t(`achievements.desc_${achievement.slug}`)}
                         </CardDescription>
                       </div>
                     </div>
