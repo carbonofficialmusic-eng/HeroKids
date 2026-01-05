@@ -88,7 +88,7 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
   family: {
     id: "family",
     name: "Family",
-    price: 4.99,
+    price: 2,
     maxMembers: 6,
     features: {
       // Core features
@@ -123,7 +123,7 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
   family_hero: {
     id: "family_hero",
     name: "Family Hero",
-    price: 12.99,
+    price: 12,
     maxMembers: 999, // Effectively unlimited
     features: {
       // Core features
