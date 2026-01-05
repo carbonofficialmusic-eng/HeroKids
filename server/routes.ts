@@ -2992,12 +2992,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family not found" });
       }
       
-      // Check tier access (Family+ tier and above)
+      // Check tier access (Family tier and above)
       if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat")) {
         return res.status(403).json({ 
-          message: "Family chat is only available for Family+ tier and above",
+          message: "Family chat is only available for Family tier and above",
           tier: family.subscriptionTier,
-          requiredTier: "family_plus"
+          requiredTier: "family"
         });
       }
       
@@ -3032,12 +3032,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family not found" });
       }
       
-      // Check tier access (Family+ tier and above)
+      // Check tier access (Family tier and above)
       if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat")) {
         return res.status(403).json({ 
-          message: "Family chat is only available for Family+ tier and above",
+          message: "Family chat is only available for Family tier and above",
           tier: family.subscriptionTier,
-          requiredTier: "family_plus"
+          requiredTier: "family"
         });
       }
       
@@ -3132,7 +3132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family not found" });
       }
       
-      // Check tier access (Family+ tier and above)
+      // Check tier access (Family tier and above)
       if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat")) {
         return res.json({ count: 0 }); // Return 0 if feature not available
       }
@@ -3848,7 +3848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const familyName = session.metadata?.familyName;
-      const tier = session.metadata?.tier as "free" | "family" | "family_plus" | "family_hero";
+      const tier = session.metadata?.tier as "free" | "family" | "family_hero";
       
       if (!familyName || !tier) {
         return res.status(400).json({ message: "Invalid session metadata" });
@@ -3892,7 +3892,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { tier } = req.body;
       
-      if (!tier || !["family", "family_plus", "family_hero"].includes(tier)) {
+      if (!tier || !["family", "family_hero"].includes(tier)) {
         return res.status(400).json({ message: "Invalid subscription tier" });
       }
       

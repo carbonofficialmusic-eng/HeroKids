@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { getTierConfig, hasFeature, canAddMember, getMaxSkins } from "@shared/tier-config";
-import type { SubscriptionTier, TierConfig } from "@shared/tier-config";
+import { getTierConfig, hasFeature, canAddMember, getMaxSkins, normalizeTier } from "@shared/tier-config";
+import type { SubscriptionTier, SubscriptionTierLegacy, TierConfig } from "@shared/tier-config";
 import type { FamilyMember, Family } from "@shared/schema";
 
 /**
@@ -31,7 +31,8 @@ export function addTierCapabilities(
     return next();
   }
 
-  const tier = family.subscriptionTier || "free";
+  const legacyTier = family.subscriptionTier || "free";
+  const tier = normalizeTier(legacyTier as SubscriptionTierLegacy);
   const config = getTierConfig(tier);
   
   req.tierCapabilities = config.features;
@@ -78,7 +79,7 @@ export function checkMemberLimit(
       message: `Member limit reached for ${config.name} tier`,
       currentMembers: currentMemberCount,
       maxMembers: config.maxMembers,
-      upgradeTier: tier === "free" ? "family" : tier === "family" ? "family_plus" : "family_hero",
+      upgradeTier: tier === "free" ? "family" : "family_hero",
     });
   }
   
@@ -97,7 +98,7 @@ export function canUnlockSkin(tier: SubscriptionTier, currentUnlockedCount: numb
  * Helper to get the minimum tier required for a feature
  */
 function getRequiredTierForFeature(feature: keyof TierConfig["features"]): SubscriptionTier {
-  const tiers: SubscriptionTier[] = ["free", "family", "family_plus", "family_hero"];
+  const tiers: SubscriptionTier[] = ["free", "family", "family_hero"];
   
   for (const tier of tiers) {
     if (hasFeature(tier, feature)) {
