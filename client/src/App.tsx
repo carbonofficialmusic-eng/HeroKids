@@ -133,6 +133,7 @@ function Router() {
           <Route path="/" component={Landing} />
           <Route path="/link-device" component={LinkDevice} />
           <Route path="/kid-dashboard" component={KidDashboard} />
+          <Route path="/pricing" component={Pricing} />
           <Route component={NotFound} />
         </Switch>
       </BackgroundWrapper>
