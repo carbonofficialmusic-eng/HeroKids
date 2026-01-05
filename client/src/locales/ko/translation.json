@@ -15,7 +15,8 @@
     "search": "검색",
     "filter": "필터",
     "select": "선택",
-    "error": "오류"
+    "error": "오류",
+    "monthsShort": ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"]
   },
   "nav": {
     "dashboard": "대시보드",
@@ -1098,5 +1099,40 @@
       "Family의 모든 기능",
       "모든 미래 기능 포함"
     ]
+  },
+  "familyGoals": {
+    "backToDashboard": "대시보드로 돌아가기",
+    "title": "가족 목표",
+    "subtitle": "함께 목표를 향해 노력하고 멋진 보상을 받으세요!",
+    "loading": "목표 불러오는 중...",
+    "createNewGoal": "새 목표 만들기",
+    "createNewGoalDesc": "온 가족을 위한 공동 목표를 만드세요. 모든 가족이 정기적으로 같은 포인트를 기여합니다.",
+    "createGoal": "목표 만들기",
+    "noGoalsYet": "아직 목표가 없어요",
+    "noGoalsParent": "온 가족이 함께 노력할 수 있는 목표를 만들어보세요!",
+    "noGoalsChild": "부모님이 가족 목표를 만들 수 있어요.",
+    "achieved": "달성!",
+    "weekly": "매주",
+    "monthly": "매월",
+    "pointsAmount": "{{amount}}포인트",
+    "progress": "진행률",
+    "progressPoints": "{{current}} / {{target}}포인트",
+    "contributePoints": "{{amount}}포인트 기여하기",
+    "achievedGoals": "달성한 목표",
+    "achievedOn": "{{date}}에 달성",
+    "deleteGoalTitle": "목표를 삭제할까요?",
+    "deleteGoalConfirm": "정말로 \"{{title}}\"을(를) 삭제하시겠어요?",
+    "deleteGoalRefund": "기여된 {{points}}포인트가 모두 자동으로 환불됩니다.",
+    "goalCreated": "목표가 생성되었어요! 🎯",
+    "goalCreatedDesc": "새 목표가 모두에게 보입니다.",
+    "errorCreateGoal": "목표를 만들 수 없었어요",
+    "pointsContributed": "포인트를 기여했어요! 🎯",
+    "pointsContributedDesc": "기여가 목표에 추가되었어요.",
+    "errorContribute": "기여할 수 없었어요",
+    "goalDeleted": "목표가 삭제되었어요",
+    "goalDeletedDesc": "목표가 삭제되고 모든 포인트가 환불되었어요.",
+    "errorDeleteGoal": "목표를 삭제할 수 없었어요",
+    "weekFormat": "{{year}}년 {{week}}주차",
+    "monthFormat": "{{year}}년 {{month}}"
   }
 }

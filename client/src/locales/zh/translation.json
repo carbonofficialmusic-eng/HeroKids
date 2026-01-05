@@ -15,7 +15,8 @@
     "filter": "筛选",
     "select": "选择",
     "backToDashboard": "返回主页",
-    "error": "错误"
+    "error": "错误",
+    "monthsShort": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
   },
   "nav": {
     "dashboard": "主页",
@@ -1098,5 +1099,40 @@
     "linked": "关联成功！",
     "linkedDesc": "欢迎回来，{{name}}！您的账户现已关联到此设备。",
     "backToLogin": "返回登录"
+  },
+  "familyGoals": {
+    "backToDashboard": "返回仪表板",
+    "title": "家庭目标",
+    "subtitle": "一起努力实现共同目标，赢取丰厚奖励！",
+    "loading": "正在加载目标...",
+    "createNewGoal": "创建新目标",
+    "createNewGoalDesc": "为全家人创建一个共同目标。所有成员定期贡献相同的积分。",
+    "createGoal": "创建目标",
+    "noGoalsYet": "还没有目标",
+    "noGoalsParent": "创建一个全家人都能努力实现的目标吧！",
+    "noGoalsChild": "爸爸妈妈可以创建家庭目标。",
+    "achieved": "已达成！",
+    "weekly": "每周",
+    "monthly": "每月",
+    "pointsAmount": "{{amount}}积分",
+    "progress": "进度",
+    "progressPoints": "{{current}} / {{target}}积分",
+    "contributePoints": "贡献{{amount}}积分",
+    "achievedGoals": "已达成的目标",
+    "achievedOn": "于{{date}}达成",
+    "deleteGoalTitle": "删除目标？",
+    "deleteGoalConfirm": "确定要删除\"{{title}}\"吗？",
+    "deleteGoalRefund": "所有贡献的{{points}}积分将自动退还给贡献者。",
+    "goalCreated": "目标已创建！🎯",
+    "goalCreatedDesc": "新目标现在对所有人可见。",
+    "errorCreateGoal": "无法创建目标",
+    "pointsContributed": "积分已贡献！🎯",
+    "pointsContributedDesc": "你的贡献已添加到目标中。",
+    "errorContribute": "无法贡献积分",
+    "goalDeleted": "目标已删除",
+    "goalDeletedDesc": "目标已删除，所有积分已退还。",
+    "errorDeleteGoal": "无法删除目标",
+    "weekFormat": "{{year}}年第{{week}}周",
+    "monthFormat": "{{year}}年{{month}}"
   }
 }

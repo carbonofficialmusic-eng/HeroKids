@@ -15,7 +15,8 @@
     "filter": "Filtrar",
     "select": "Seleccionar",
     "backToDashboard": "Volver al Panel",
-    "error": "Error"
+    "error": "Error",
+    "monthsShort": ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
   },
   "nav": {
     "dashboard": "Panel",
@@ -1098,5 +1099,40 @@
     "linked": "¡Vinculado con éxito!",
     "linkedDesc": "¡Bienvenido de vuelta, {{name}}! Tu cuenta ahora está vinculada a este dispositivo.",
     "backToLogin": "Volver al inicio de sesión"
+  },
+  "familyGoals": {
+    "backToDashboard": "Volver al panel",
+    "title": "Objetivos familiares",
+    "subtitle": "¡Trabajen juntos en objetivos compartidos y ganen grandes recompensas!",
+    "loading": "Cargando objetivos...",
+    "createNewGoal": "Crear nuevo objetivo",
+    "createNewGoalDesc": "Crea un objetivo compartido para toda la familia. Todos los miembros contribuyen regularmente la misma cantidad de puntos.",
+    "createGoal": "Crear objetivo",
+    "noGoalsYet": "Aún no hay objetivos",
+    "noGoalsParent": "¡Crea un objetivo hacia el que toda la familia pueda trabajar!",
+    "noGoalsChild": "Tus padres pueden crear objetivos familiares.",
+    "achieved": "¡Logrado!",
+    "weekly": "Semanal",
+    "monthly": "Mensual",
+    "pointsAmount": "{{amount}} puntos",
+    "progress": "Progreso",
+    "progressPoints": "{{current}} / {{target}} puntos",
+    "contributePoints": "Contribuir {{amount}} puntos",
+    "achievedGoals": "Objetivos logrados",
+    "achievedOn": "Logrado el {{date}}",
+    "deleteGoalTitle": "¿Eliminar objetivo?",
+    "deleteGoalConfirm": "¿Realmente quieres eliminar el objetivo \"{{title}}\"?",
+    "deleteGoalRefund": "Todos los {{points}} puntos contribuidos serán reembolsados automáticamente.",
+    "goalCreated": "¡Objetivo creado! 🎯",
+    "goalCreatedDesc": "El nuevo objetivo ahora es visible para todos.",
+    "errorCreateGoal": "No se pudo crear el objetivo",
+    "pointsContributed": "¡Puntos contribuidos! 🎯",
+    "pointsContributedDesc": "Tu contribución fue añadida al objetivo.",
+    "errorContribute": "No se pudo contribuir",
+    "goalDeleted": "Objetivo eliminado",
+    "goalDeletedDesc": "El objetivo fue eliminado y todos los puntos fueron reembolsados.",
+    "errorDeleteGoal": "No se pudo eliminar el objetivo",
+    "weekFormat": "Semana {{week}}/{{year}}",
+    "monthFormat": "{{month}} {{year}}"
   }
 }

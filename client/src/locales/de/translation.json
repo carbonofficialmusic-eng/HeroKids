@@ -15,7 +15,21 @@
     "filter": "Filtern",
     "select": "Auswählen",
     "backToDashboard": "Zurück zum Dashboard",
-    "error": "Fehler"
+    "error": "Fehler",
+    "monthsShort": {
+      "0": "Jan",
+      "1": "Feb",
+      "2": "Mär",
+      "3": "Apr",
+      "4": "Mai",
+      "5": "Jun",
+      "6": "Jul",
+      "7": "Aug",
+      "8": "Sep",
+      "9": "Okt",
+      "10": "Nov",
+      "11": "Dez"
+    }
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -1150,5 +1164,40 @@
     "linked": "Erfolgreich verknüpft!",
     "linkedDesc": "Willkommen zurück, {{name}}! Dein Account ist jetzt mit diesem Gerät verknüpft.",
     "backToLogin": "Zurück zur Anmeldung"
+  },
+  "familyGoals": {
+    "backToDashboard": "Zurück zum Dashboard",
+    "title": "Familienziele",
+    "subtitle": "Arbeitet zusammen an gemeinsamen Zielen und verdient tolle Belohnungen!",
+    "loading": "Lädt Familienziele...",
+    "createNewGoal": "Neues Familienziel erstellen",
+    "createNewGoalDesc": "Erstelle ein gemeinsames Ziel für die ganze Familie. Alle Mitglieder zahlen regelmäßig die gleiche Punktzahl ein.",
+    "createGoal": "Ziel erstellen",
+    "noGoalsYet": "Noch keine Familienziele",
+    "noGoalsParent": "Erstelle ein Ziel, auf das die ganze Familie hinarbeiten kann!",
+    "noGoalsChild": "Deine Eltern können Familienziele erstellen.",
+    "achieved": "Erreicht!",
+    "weekly": "Wöchentlich",
+    "monthly": "Monatlich",
+    "pointsAmount": "{{amount}} Punkte",
+    "progress": "Fortschritt",
+    "progressPoints": "{{current}} / {{target}} Punkte",
+    "contributePoints": "{{amount}} Punkte einzahlen",
+    "achievedGoals": "Erreichte Ziele",
+    "achievedOn": "Erreicht am {{date}}",
+    "deleteGoalTitle": "Familienziel löschen?",
+    "deleteGoalConfirm": "Möchtest du das Ziel \"{{title}}\" wirklich löschen?",
+    "deleteGoalRefund": "Alle eingezahlten {{points}} Punkte werden automatisch an die Einzahler zurückerstattet.",
+    "goalCreated": "Familienziel erstellt! 🎯",
+    "goalCreatedDesc": "Das neue Ziel ist jetzt für alle sichtbar.",
+    "errorCreateGoal": "Ziel konnte nicht erstellt werden",
+    "pointsContributed": "Punkte eingezahlt! 🎯",
+    "pointsContributedDesc": "Dein Beitrag wurde zum Familienziel hinzugefügt.",
+    "errorContribute": "Beitrag konnte nicht eingezahlt werden",
+    "goalDeleted": "Familienziel gelöscht",
+    "goalDeletedDesc": "Das Ziel wurde gelöscht und alle eingezahlten Punkte wurden zurückerstattet.",
+    "errorDeleteGoal": "Ziel konnte nicht gelöscht werden",
+    "weekFormat": "Woche {{week}}/{{year}}",
+    "monthFormat": "{{month}} {{year}}"
   }
 }

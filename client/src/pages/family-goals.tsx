@@ -28,7 +28,8 @@ import {
   Calendar,
   CheckCircle2,
   Coins,
-  Trash2
+  Trash2,
+  ArrowLeft
 } from "lucide-react";
 import { Link } from "wouter";
 import type { FamilyGoal, GoalContribution, FamilyMember } from "@shared/schema";
@@ -75,14 +76,14 @@ export default function FamilyGoals() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
       setCreateDialogOpen(false);
       toast({
-        title: "Familienziel erstellt! 🎯",
-        description: "Das neue Ziel ist jetzt für alle sichtbar.",
+        title: t("familyGoals.goalCreated"),
+        description: t("familyGoals.goalCreatedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Ziel konnte nicht erstellt werden",
+        title: t("errors.error"),
+        description: error.message || t("familyGoals.errorCreateGoal"),
         variant: "destructive",
       });
     },
@@ -96,14 +97,14 @@ export default function FamilyGoals() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       toast({
-        title: "Punkte eingezahlt! 🎯",
-        description: "Dein Beitrag wurde zum Familienziel hinzugefügt.",
+        title: t("familyGoals.pointsContributed"),
+        description: t("familyGoals.pointsContributedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Beitrag konnte nicht eingezahlt werden",
+        title: t("errors.error"),
+        description: error.message || t("familyGoals.errorContribute"),
         variant: "destructive",
       });
     },
@@ -120,14 +121,14 @@ export default function FamilyGoals() {
       setDeleteDialogOpen(false);
       setGoalToDelete(null);
       toast({
-        title: "Familienziel gelöscht",
-        description: "Das Ziel wurde gelöscht und alle eingezahlten Punkte wurden zurückerstattet.",
+        title: t("familyGoals.goalDeleted"),
+        description: t("familyGoals.goalDeletedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Ziel konnte nicht gelöscht werden",
+        title: t("errors.error"),
+        description: error.message || t("familyGoals.errorDeleteGoal"),
         variant: "destructive",
       });
     },
@@ -144,11 +145,11 @@ export default function FamilyGoals() {
   const formatPeriod = (period: string, contributionPeriod: "weekly" | "monthly") => {
     if (contributionPeriod === "weekly") {
       const parts = period.split("-W");
-      return `Woche ${parts[1]}/${parts[0]}`;
+      return t("familyGoals.weekFormat", { week: parts[1], year: parts[0] });
     } else {
       const parts = period.split("-");
-      const monthNames = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
-      return `${monthNames[parseInt(parts[1]) - 1]} ${parts[0]}`;
+      const monthIndex = parseInt(parts[1]) - 1;
+      return t("familyGoals.monthFormat", { month: t(`common.monthsShort.${monthIndex}`), year: parts[0] });
     }
   };
 
@@ -165,7 +166,7 @@ export default function FamilyGoals() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Lädt Familienziele...</div>
+        <div className="text-lg">{t("familyGoals.loading")}</div>
       </div>
     );
   }
@@ -178,16 +179,22 @@ export default function FamilyGoals() {
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="mb-8">
           <Link href="/dashboard">
-            <Button variant="outline" data-testid="button-back-dashboard" className="mb-4">
-              {t("common.backToDashboard")}
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
+              data-testid="button-back-dashboard"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t("familyGoals.backToDashboard")}
             </Button>
           </Link>
           <h1 className="text-4xl font-black font-accent flex items-center gap-3">
             <Target className="h-10 w-10" />
-            Familienziele
+            {t("familyGoals.title")}
           </h1>
           <p className="text-muted-foreground mt-2">
-            Arbeitet zusammen an gemeinsamen Zielen und verdient tolle Belohnungen!
+            {t("familyGoals.subtitle")}
           </p>
         </div>
 
@@ -198,13 +205,13 @@ export default function FamilyGoals() {
                 <Plus className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-lg mb-1">Neues Familienziel erstellen</h3>
+                <h3 className="font-semibold text-lg mb-1">{t("familyGoals.createNewGoal")}</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Erstelle ein gemeinsames Ziel für die ganze Familie. Alle Mitglieder zahlen regelmäßig die gleiche Punktzahl ein.
+                  {t("familyGoals.createNewGoalDesc")}
                 </p>
                 <Button onClick={() => setCreateDialogOpen(true)} data-testid="button-create-goal">
                   <Plus className="h-4 w-4 mr-2" />
-                  Ziel erstellen
+                  {t("familyGoals.createGoal")}
                 </Button>
               </div>
             </div>
@@ -214,11 +221,11 @@ export default function FamilyGoals() {
         {activeGoals.length === 0 && (
           <Card className="p-12 text-center">
             <Target className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Noch keine Familienziele</h3>
+            <h3 className="text-xl font-semibold mb-2">{t("familyGoals.noGoalsYet")}</h3>
             <p className="text-muted-foreground mb-6">
               {member?.role === "parent" 
-                ? "Erstelle ein Ziel, auf das die ganze Familie hinarbeiten kann!"
-                : "Deine Eltern können Familienziele erstellen."}
+                ? t("familyGoals.noGoalsParent")
+                : t("familyGoals.noGoalsChild")}
             </p>
           </Card>
         )}
@@ -259,17 +266,17 @@ export default function FamilyGoals() {
                         {isCompleted && (
                           <Badge variant="default" className="gap-1 mt-2">
                             <CheckCircle2 className="h-3 w-3" />
-                            Erreicht!
+                            {t("familyGoals.achieved")}
                           </Badge>
                         )}
                         <div className="flex flex-wrap items-center gap-2 mt-3">
                           <Badge variant="secondary" className="gap-1 text-xs">
                             <Calendar className="h-3 w-3" />
-                            {goal.contributionPeriod === "weekly" ? "Wöchentlich" : "Monatlich"}
+                            {goal.contributionPeriod === "weekly" ? t("familyGoals.weekly") : t("familyGoals.monthly")}
                           </Badge>
                           <Badge variant="secondary" className="gap-1 text-xs">
                             <Coins className="h-3 w-3" />
-                            {goal.contributionAmount} Punkte
+                            {t("familyGoals.pointsAmount", { amount: goal.contributionAmount })}
                           </Badge>
                         </div>
                       </div>
@@ -279,9 +286,9 @@ export default function FamilyGoals() {
                   <div className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Fortschritt</span>
+                        <span className="text-sm font-medium">{t("familyGoals.progress")}</span>
                         <span className="text-sm font-bold">
-                          {goal.currentPoints} / {goal.targetPoints} Punkte
+                          {t("familyGoals.progressPoints", { current: goal.currentPoints, target: goal.targetPoints })}
                         </span>
                       </div>
                       <Progress value={progress} className="h-3" />
@@ -301,7 +308,7 @@ export default function FamilyGoals() {
                           data-testid={`button-contribute-${goal.id}`}
                         >
                           <TrendingUp className="h-4 w-4 mr-2" />
-                          {goal.contributionAmount} Punkte einzahlen
+                          {t("familyGoals.contributePoints", { amount: goal.contributionAmount })}
                         </Button>
                       )}
                     </div>
@@ -316,7 +323,7 @@ export default function FamilyGoals() {
           <div className="mt-12">
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
               <CheckCircle2 className="h-6 w-6 text-green-500" />
-              Erreichte Ziele
+              {t("familyGoals.achievedGoals")}
             </h2>
             <div className="grid gap-4">
               {completedGoals.map((goal) => (
@@ -326,12 +333,12 @@ export default function FamilyGoals() {
                     <div className="flex-1">
                       <h4 className="font-semibold">{goal.title}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Erreicht am {new Date(goal.completedAt!).toLocaleDateString("de-DE")}
+                        {t("familyGoals.achievedOn", { date: new Date(goal.completedAt!).toLocaleDateString() })}
                       </p>
                     </div>
                     <Badge variant="outline" className="gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      {goal.targetPoints} Punkte
+                      {t("familyGoals.pointsAmount", { amount: goal.targetPoints })}
                     </Badge>
                   </div>
                 </Card>
@@ -354,15 +361,15 @@ export default function FamilyGoals() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent data-testid="dialog-delete-goal">
           <AlertDialogHeader>
-            <AlertDialogTitle>Familienziel löschen?</AlertDialogTitle>
+            <AlertDialogTitle>{t("familyGoals.deleteGoalTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
               {goalToDelete && (
                 <>
-                  Möchtest du das Ziel <strong>"{goalToDelete.title}"</strong> wirklich löschen?
+                  {t("familyGoals.deleteGoalConfirm", { title: goalToDelete.title })}
                   <br /><br />
                   {goalToDelete.currentPoints > 0 && (
                     <span className="text-primary font-semibold">
-                      Alle eingezahlten {goalToDelete.currentPoints} Punkte werden automatisch an die Einzahler zurückerstattet.
+                      {t("familyGoals.deleteGoalRefund", { points: goalToDelete.currentPoints })}
                     </span>
                   )}
                 </>
@@ -370,7 +377,7 @@ export default function FamilyGoals() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel data-testid="button-cancel-delete">{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (goalToDelete) {
@@ -380,7 +387,7 @@ export default function FamilyGoals() {
               data-testid="button-confirm-delete"
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Löschen
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

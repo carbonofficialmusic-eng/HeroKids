@@ -15,7 +15,8 @@
     "search": "Search",
     "filter": "Filter",
     "select": "Select",
-    "error": "Error"
+    "error": "Error",
+    "monthsShort": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -1140,5 +1141,40 @@
     "linked": "Successfully Linked!",
     "linkedDesc": "Welcome back, {{name}}! Your account is now linked to this device.",
     "backToLogin": "Back to Login"
+  },
+  "familyGoals": {
+    "backToDashboard": "Back to Dashboard",
+    "title": "Family Goals",
+    "subtitle": "Work together on shared goals and earn great rewards!",
+    "loading": "Loading family goals...",
+    "createNewGoal": "Create New Family Goal",
+    "createNewGoalDesc": "Create a shared goal for the whole family. All members contribute the same amount of points regularly.",
+    "createGoal": "Create Goal",
+    "noGoalsYet": "No family goals yet",
+    "noGoalsParent": "Create a goal that the whole family can work towards!",
+    "noGoalsChild": "Your parents can create family goals.",
+    "achieved": "Achieved!",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "pointsAmount": "{{amount}} points",
+    "progress": "Progress",
+    "progressPoints": "{{current}} / {{target}} points",
+    "contributePoints": "Contribute {{amount}} points",
+    "achievedGoals": "Achieved Goals",
+    "achievedOn": "Achieved on {{date}}",
+    "deleteGoalTitle": "Delete Family Goal?",
+    "deleteGoalConfirm": "Do you really want to delete the goal \"{{title}}\"?",
+    "deleteGoalRefund": "All contributed {{points}} points will be automatically refunded to the contributors.",
+    "goalCreated": "Family goal created! 🎯",
+    "goalCreatedDesc": "The new goal is now visible to everyone.",
+    "errorCreateGoal": "Could not create goal",
+    "pointsContributed": "Points contributed! 🎯",
+    "pointsContributedDesc": "Your contribution was added to the family goal.",
+    "errorContribute": "Could not contribute points",
+    "goalDeleted": "Family goal deleted",
+    "goalDeletedDesc": "The goal was deleted and all contributed points were refunded.",
+    "errorDeleteGoal": "Could not delete goal",
+    "weekFormat": "Week {{week}}/{{year}}",
+    "monthFormat": "{{month}} {{year}}"
   }
 }

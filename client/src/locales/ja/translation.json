@@ -15,7 +15,8 @@
     "filter": "フィルター",
     "select": "選択",
     "backToDashboard": "ダッシュボードに戻る",
-    "error": "エラー"
+    "error": "エラー",
+    "monthsShort": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
   },
   "nav": {
     "dashboard": "ダッシュボード",
@@ -1098,5 +1099,40 @@
     "linked": "リンク成功！",
     "linkedDesc": "おかえりなさい、{{name}}さん！アカウントがこのデバイスにリンクされました。",
     "backToLogin": "ログインに戻る"
+  },
+  "familyGoals": {
+    "backToDashboard": "ダッシュボードに戻る",
+    "title": "家族の目標",
+    "subtitle": "一緒に目標に向かって頑張って、素敵なご褒美をゲットしよう！",
+    "loading": "目標を読み込み中...",
+    "createNewGoal": "新しい目標を作成",
+    "createNewGoalDesc": "家族全員の共通目標を作成します。全員が定期的に同じポイントを貢献します。",
+    "createGoal": "目標を作成",
+    "noGoalsYet": "まだ目標がありません",
+    "noGoalsParent": "家族みんなで目指せる目標を作成しましょう！",
+    "noGoalsChild": "お父さんお母さんが目標を作成できます。",
+    "achieved": "達成！",
+    "weekly": "毎週",
+    "monthly": "毎月",
+    "pointsAmount": "{{amount}}ポイント",
+    "progress": "進捗",
+    "progressPoints": "{{current}} / {{target}}ポイント",
+    "contributePoints": "{{amount}}ポイントを貢献",
+    "achievedGoals": "達成した目標",
+    "achievedOn": "{{date}}に達成",
+    "deleteGoalTitle": "目標を削除しますか？",
+    "deleteGoalConfirm": "本当に「{{title}}」を削除しますか？",
+    "deleteGoalRefund": "貢献された{{points}}ポイントはすべて自動的に返金されます。",
+    "goalCreated": "目標を作成しました！🎯",
+    "goalCreatedDesc": "新しい目標が全員に表示されます。",
+    "errorCreateGoal": "目標を作成できませんでした",
+    "pointsContributed": "ポイントを貢献しました！🎯",
+    "pointsContributedDesc": "あなたの貢献が目標に追加されました。",
+    "errorContribute": "貢献できませんでした",
+    "goalDeleted": "目標を削除しました",
+    "goalDeletedDesc": "目標が削除され、すべてのポイントが返金されました。",
+    "errorDeleteGoal": "目標を削除できませんでした",
+    "weekFormat": "{{year}}年第{{week}}週",
+    "monthFormat": "{{year}}年{{month}}"
   }
 }
