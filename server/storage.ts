@@ -1543,6 +1543,61 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
+  async cancelRewardRedemption(redemptionId: string): Promise<{ memberId: string; pointsRefunded: number; rewardId: string }> {
+    return await db.transaction(async (tx) => {
+      const [redemption] = await tx
+        .select()
+        .from(rewardRedemptions)
+        .where(eq(rewardRedemptions.id, redemptionId))
+        .limit(1);
+
+      if (!redemption) {
+        throw new Error("Redemption not found");
+      }
+
+      const pointsToRefund = redemption.pointsSpent;
+      const memberId = redemption.memberId;
+      const rewardId = redemption.rewardId;
+
+      if (redemption.sharingStatus === "sharing_active" || redemption.sharingStatus === "sharing_finalized") {
+        await tx
+          .delete(rewardSharingParticipants)
+          .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
+        
+        if (redemption.sharingStatus === "sharing_finalized") {
+          const participants = await tx
+            .select()
+            .from(rewardSharingParticipants)
+            .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
+          
+          for (const participant of participants) {
+            if (participant.pointsContributed && participant.pointsContributed > 0) {
+              await tx
+                .update(familyMembers)
+                .set({
+                  totalPoints: sql`${familyMembers.totalPoints} + ${participant.pointsContributed}`,
+                })
+                .where(eq(familyMembers.id, participant.memberId));
+            }
+          }
+        }
+      }
+
+      await tx
+        .update(familyMembers)
+        .set({
+          totalPoints: sql`${familyMembers.totalPoints} + ${pointsToRefund}`,
+        })
+        .where(eq(familyMembers.id, memberId));
+
+      await tx
+        .delete(rewardRedemptions)
+        .where(eq(rewardRedemptions.id, redemptionId));
+
+      return { memberId, pointsRefunded: pointsToRefund, rewardId };
+    });
+  }
+
   async getRewardSharingParticipants(redemptionId: string): Promise<Array<RewardSharingParticipant & { member: FamilyMember }>> {
     return await db
       .select({
