@@ -1122,7 +1122,7 @@ export default function Dashboard() {
                             <Gift className="h-5 w-5 text-purple-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm truncate">{achievement.title}</h3>
+                            <h3 className="font-semibold text-sm truncate">{t(`achievements.title_${achievement.slug}`)}</h3>
                             <p className="text-sm text-purple-600 dark:text-purple-400 truncate">
                               {achievement.rewardType === "custom" && achievement.customReward
                                 ? achievement.customReward
