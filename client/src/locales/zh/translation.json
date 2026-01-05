@@ -37,6 +37,15 @@
     "createFamily": "创建新家庭",
     "joinFamily": "加入家庭"
   },
+  "avatarSelector": {
+    "chooseYourAvatar": "选择你的头像",
+    "customPhoto": "自定义照片",
+    "yourUploadedPicture": "你上传的照片",
+    "uploadYourPhoto": "上传你的照片",
+    "chooseYourColor": "选择你的颜色",
+    "preview": "预览",
+    "avatarWithColorRing": "带色环的头像"
+  },
   "dashboard": {
     "title": "主页",
     "welcome": "欢迎，{{name}}！",

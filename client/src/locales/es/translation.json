@@ -37,6 +37,15 @@
     "createFamily": "Crear Nueva Familia",
     "joinFamily": "Unirse a una Familia"
   },
+  "avatarSelector": {
+    "chooseYourAvatar": "Elige tu avatar",
+    "customPhoto": "Foto personalizada",
+    "yourUploadedPicture": "Tu foto subida",
+    "uploadYourPhoto": "Sube tu propia foto",
+    "chooseYourColor": "Elige tu color",
+    "preview": "Vista previa",
+    "avatarWithColorRing": "Tu avatar con anillo de color"
+  },
   "dashboard": {
     "title": "Panel",
     "welcome": "¡Bienvenido, {{name}}!",

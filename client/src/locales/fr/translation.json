@@ -37,6 +37,15 @@
     "createFamily": "Créer une nouvelle famille",
     "joinFamily": "Rejoindre une famille"
   },
+  "avatarSelector": {
+    "chooseYourAvatar": "Choisissez votre avatar",
+    "customPhoto": "Photo personnalisée",
+    "yourUploadedPicture": "Votre photo téléchargée",
+    "uploadYourPhoto": "Télécharger votre photo",
+    "chooseYourColor": "Choisissez votre couleur",
+    "preview": "Aperçu",
+    "avatarWithColorRing": "Votre avatar avec anneau de couleur"
+  },
   "dashboard": {
     "title": "Tableau de bord",
     "welcome": "Bienvenue, {{name}} !",

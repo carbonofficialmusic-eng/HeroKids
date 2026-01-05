@@ -37,6 +37,15 @@
     "createFamily": "새 가족 만들기",
     "joinFamily": "가족 참여하기"
   },
+  "avatarSelector": {
+    "chooseYourAvatar": "아바타 선택",
+    "customPhoto": "사용자 정의 사진",
+    "yourUploadedPicture": "업로드한 사진",
+    "uploadYourPhoto": "나만의 사진 업로드",
+    "chooseYourColor": "색상 선택",
+    "preview": "미리보기",
+    "avatarWithColorRing": "색상 링이 있는 아바타"
+  },
   "dashboard": {
     "title": "대시보드",
     "welcome": "환영합니다, {{name}}님!",

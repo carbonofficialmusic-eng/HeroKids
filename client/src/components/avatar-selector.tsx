@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
 import { Check, Upload, X } from "lucide-react";
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 interface AvatarSelectorProps {
   selectedAvatar: string;
@@ -23,6 +24,7 @@ export function AvatarSelector({
   onClearCustomUpload,
   uploadedAvatarUrl,
 }: AvatarSelectorProps) {
+  const { t } = useTranslation();
   const [previewUrl, setPreviewUrl] = useState<string | null>(uploadedAvatarUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastProcessedFileRef = useRef<string | null>(null);
@@ -72,7 +74,7 @@ export function AvatarSelector({
       {/* Avatar Selection */}
       <div>
         <label className="text-sm font-medium mb-3 block" data-testid="label-avatar-selection">
-          Choose Your Avatar
+          {t("avatarSelector.chooseYourAvatar")}
         </label>
         
         {/* Custom Upload Option */}
@@ -93,8 +95,8 @@ export function AvatarSelector({
                 className="h-16 w-16 rounded-full object-cover"
               />
               <div className="flex-1">
-                <p className="text-sm font-medium">Custom Photo</p>
-                <p className="text-xs text-muted-foreground">Your uploaded picture</p>
+                <p className="text-sm font-medium">{t("avatarSelector.customPhoto")}</p>
+                <p className="text-xs text-muted-foreground">{t("avatarSelector.yourUploadedPicture")}</p>
               </div>
               <Button
                 type="button"
@@ -116,7 +118,7 @@ export function AvatarSelector({
             >
               <div className="flex flex-col items-center gap-2">
                 <Upload className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">Upload Your Own Photo</span>
+                <span className="text-sm">{t("avatarSelector.uploadYourPhoto")}</span>
               </div>
             </Button>
           )}
@@ -155,7 +157,7 @@ export function AvatarSelector({
       {/* Color Selection */}
       <div>
         <label className="text-sm font-medium mb-3 block" data-testid="label-color-selection">
-          Choose Your Color
+          {t("avatarSelector.chooseYourColor")}
         </label>
         <div className="grid grid-cols-4 gap-3">
           {colorOptions.map((color) => (
@@ -195,8 +197,8 @@ export function AvatarSelector({
           </AvatarFallback>
         </Avatar>
         <div>
-          <p className="text-sm font-medium text-muted-foreground">Preview</p>
-          <p className="font-semibold">Your avatar with color ring</p>
+          <p className="text-sm font-medium text-muted-foreground">{t("avatarSelector.preview")}</p>
+          <p className="font-semibold">{t("avatarSelector.avatarWithColorRing")}</p>
         </div>
       </div>
     </div>

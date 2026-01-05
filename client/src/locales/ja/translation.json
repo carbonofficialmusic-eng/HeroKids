@@ -37,6 +37,15 @@
     "createFamily": "新しい家族を作成",
     "joinFamily": "家族に参加"
   },
+  "avatarSelector": {
+    "chooseYourAvatar": "アバターを選ぶ",
+    "customPhoto": "カスタム写真",
+    "yourUploadedPicture": "アップロードした写真",
+    "uploadYourPhoto": "自分の写真をアップロード",
+    "chooseYourColor": "色を選ぶ",
+    "preview": "プレビュー",
+    "avatarWithColorRing": "カラーリング付きアバター"
+  },
   "dashboard": {
     "title": "ダッシュボード",
     "welcome": "ようこそ、{{name}}さん！",

@@ -37,6 +37,15 @@
     "createFamily": "Skapa ny familj",
     "joinFamily": "Gå med i en familj"
   },
+  "avatarSelector": {
+    "chooseYourAvatar": "Välj din avatar",
+    "customPhoto": "Eget foto",
+    "yourUploadedPicture": "Din uppladdade bild",
+    "uploadYourPhoto": "Ladda upp ditt eget foto",
+    "chooseYourColor": "Välj din färg",
+    "preview": "Förhandsvisning",
+    "avatarWithColorRing": "Din avatar med färgring"
+  },
   "dashboard": {
     "title": "Instrumentpanel",
     "welcome": "Välkommen, {{name}}!",

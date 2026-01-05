@@ -50,6 +50,15 @@
     "createFamily": "Neue Familie erstellen",
     "joinFamily": "Einer Familie beitreten"
   },
+  "avatarSelector": {
+    "chooseYourAvatar": "Wähle deinen Avatar",
+    "customPhoto": "Eigenes Foto",
+    "yourUploadedPicture": "Dein hochgeladenes Bild",
+    "uploadYourPhoto": "Eigenes Foto hochladen",
+    "chooseYourColor": "Wähle deine Farbe",
+    "preview": "Vorschau",
+    "avatarWithColorRing": "Dein Avatar mit Farbring"
+  },
   "dashboard": {
     "title": "Übersicht",
     "welcome": "Willkommen, {{name}}!",
