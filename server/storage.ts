@@ -230,6 +230,7 @@ export interface IStorage {
 
   // Reward operations
   getRewardsByFamily(familyName: string): Promise<Reward[]>;
+  getRewardById(id: string): Promise<Reward | undefined>;
   createReward(reward: InsertReward): Promise<Reward>;
   updateReward(id: string, reward: Partial<InsertReward> | { isActive: boolean }): Promise<Reward>;
   deleteReward(id: string): Promise<void>;
@@ -1248,6 +1249,15 @@ export class DatabaseStorage implements IStorage {
       .from(rewards)
       .where(eq(rewards.familyName, familyName))
       .orderBy(rewards.pointThreshold);
+  }
+
+  async getRewardById(id: string): Promise<Reward | undefined> {
+    const [reward] = await db
+      .select()
+      .from(rewards)
+      .where(eq(rewards.id, id))
+      .limit(1);
+    return reward;
   }
 
   async createReward(rewardData: InsertReward): Promise<Reward> {

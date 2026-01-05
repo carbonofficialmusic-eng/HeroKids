@@ -211,6 +211,32 @@ export default function RewardsBoard() {
     },
   });
 
+  // Cancel redemption and refund points (parents only)
+  const cancelRedemptionMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("DELETE", `/api/reward-redemptions/${redemptionId}`, {});
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
+      toast({
+        title: t("rewardsBoard.redemptionCancelled"),
+        description: t("rewardsBoard.pointsRefunded", { count: data.pointsRefunded }),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("common.error"),
+        description: error.message || t("rewardsBoard.cancelError"),
+        variant: "destructive",
+      });
+    },
+  });
+
   // Filter redemptions based on role
   const displayRedemptions = isParent 
     ? redemptions 
@@ -549,6 +575,17 @@ export default function RewardsBoard() {
                       data-testid={`button-complete-${redemption.id}`}
                     >
                       {t("rewardsBoard.markFulfilled")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => cancelRedemptionMutation.mutate(redemption.id)}
+                      disabled={cancelRedemptionMutation.isPending}
+                      data-testid={`button-cancel-redemption-${redemption.id}`}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      {t("rewardsBoard.cancelRedemption")}
                     </Button>
                   </div>
                 )}
