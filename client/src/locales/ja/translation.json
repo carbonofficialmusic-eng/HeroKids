@@ -933,6 +933,7 @@
     "waiting": "待機中",
     "pending": "保留中",
     "beingShared": "共有中",
+    "cancelSharing": "共有をキャンセル",
     "shared": "共有済み",
     "pointsSpent": "{{count}}ポイント",
     "wasPoints": "(元は{{count}})",

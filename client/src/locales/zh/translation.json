@@ -933,6 +933,7 @@
     "waiting": "等待中",
     "pending": "待处理",
     "beingShared": "分享中",
+    "cancelSharing": "取消分享",
     "shared": "已分享",
     "pointsSpent": "{{count}}积分",
     "wasPoints": "(原为{{count}})",

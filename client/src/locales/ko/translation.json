@@ -878,6 +878,7 @@
     "waiting": "대기 중",
     "pending": "보류 중",
     "beingShared": "공유 중",
+    "cancelSharing": "공유 취소",
     "shared": "공유됨",
     "pointsSpent": "{{count}} 포인트",
     "wasPoints": "(원래 {{count}})",

@@ -933,6 +933,7 @@
     "waiting": "Esperando",
     "pending": "Pendiente",
     "beingShared": "Siendo compartida",
+    "cancelSharing": "Cancelar compartir",
     "shared": "Compartido",
     "pointsSpent": "{{count}} puntos",
     "wasPoints": "(era {{count}})",
