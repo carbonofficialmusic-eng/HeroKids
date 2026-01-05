@@ -92,7 +92,7 @@ export function SwitchMemberDialog({
                         <Lock className="h-3 w-3 text-muted-foreground" />
                       )}
                     </div>
-                    <div className="text-sm text-muted-foreground capitalize">{member.role}</div>
+                    <div className="text-sm text-muted-foreground">{member.role === "parent" ? t('settings.parent') : t('settings.child')}</div>
                   </div>
                   
                   {selectedMemberId === member.id && (
