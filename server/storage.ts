@@ -1901,83 +1901,8 @@ export class DatabaseStorage implements IStorage {
           .where(eq(familyMembers.id, memberId));
       }
 
-      // 14. Create default tasks for the family (customized baseline)
-      const defaultTasks = [
-        {
-          id: crypto.randomUUID(),
-          familyName,
-          title: "Complete Homework",
-          description: "Finish all assigned homework for today",
-          points: 40,
-          recurrence: "daily" as const,
-          recurrenceDays: null,
-          nextAvailableDate: null,
-          requiresProof: false,
-          requiresApproval: false,
-          iconEmoji: "📚",
-          status: "active" as const,
-          createdBy: memberIds[0], // Assign to first member (typically the parent who created the family)
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: crypto.randomUUID(),
-          familyName,
-          title: "Clean Your Room",
-          description: "Pick up toys, make bed, organize desk",
-          points: 30,
-          recurrence: "none" as const,
-          recurrenceDays: null,
-          nextAvailableDate: null,
-          requiresProof: false,
-          requiresApproval: false,
-          iconEmoji: "🧹",
-          status: "active" as const,
-          createdBy: memberIds[0],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: crypto.randomUUID(),
-          familyName,
-          title: "Write a Good Mark in School",
-          description: "Get a good grade on schoolwork or test",
-          points: 40,
-          recurrence: "none" as const,
-          recurrenceDays: null,
-          nextAvailableDate: null,
-          requiresProof: false,
-          requiresApproval: false,
-          iconEmoji: "✏️",
-          status: "active" as const,
-          createdBy: memberIds[0],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: crypto.randomUUID(),
-          familyName,
-          title: "Take Out Trash",
-          description: "Take trash bins to the curb",
-          points: 15,
-          recurrence: "daily" as const,
-          recurrenceDays: null,
-          nextAvailableDate: null,
-          requiresProof: false,
-          requiresApproval: false,
-          iconEmoji: "🗑️",
-          status: "active" as const,
-          createdBy: memberIds[0],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
-
-      for (const task of defaultTasks) {
-        await tx.insert(tasks).values(task);
-      }
-
-      // 15. Create default achievements using shared template (only Weekly Champion and Perfect Week enabled)
+      // 14. Create default achievements using shared template (only Weekly Champion and Perfect Week enabled)
+      // Note: Default tasks removed - families now start fresh and parents create tasks in their language
       for (const template of DEFAULT_ACHIEVEMENT_TEMPLATES) {
         await tx.insert(achievementDefinitions).values({
           ...template,
