@@ -457,7 +457,7 @@ export default function Settings() {
                               )}
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <span className="capitalize">{familyMember.role}</span>
+                              <span>{familyMember.role === "parent" ? t('settings.parent') : t('settings.child')}</span>
                               <span>•</span>
                               <span>{familyMember.totalPoints} {t('dashboard.pointsLabel')}</span>
                             </div>
