@@ -804,41 +804,38 @@
     "toastCheckoutError": "结账错误",
     "toastNoCheckoutUrl": "未从服务器收到结账URL",
     "toastCheckoutFailed": "启动结账流程失败",
+    "perMonth": "每月",
     "tierFreeDesc": "完美开始",
-    "tierFamilyDesc": "非常适合小家庭",
-    "tierFamilyPlusDesc": "适合大家庭",
-    "tierFamilyHeroDesc": "终极家庭管理",
+    "tierFamilyDesc": "所有高级功能",
+    "tierFamilyHeroDesc": "适合大家庭",
     "tierFreeFeatures": [
-      "最多2名家庭成员",
+      "最多3名家庭成员",
+      "父母和孩子仪表板",
+      "每周和每月排行榜",
       "无限任务",
-      "月度排行榜",
+      "重复任务",
       "自定义奖励",
       "深色模式",
-      "3个可解锁角色皮肤"
+      "3个可解锁皮肤",
+      "单设备使用",
+      "统计数据"
     ],
     "tierFamilyFeatures": [
-      "最多4名家庭成员",
+      "最多6名家庭成员",
       "Free套餐的所有功能",
       "任务照片证明",
-      "重复任务",
-      "每周和每月排行榜",
-      "高级分析",
-      "10个可解锁角色皮肤"
-    ],
-    "tierFamilyPlusFeatures": [
-      "最多6名家庭成员",
-      "Family套餐的所有功能",
+      "多任务功能",
+      "家庭目标",
+      "共享奖励",
       "家庭聊天",
-      "任务评论",
-      "推送通知",
-      "所有角色皮肤已解锁"
+      "所有皮肤可解锁",
+      "儿童设备连接",
+      "成就和徽章",
+      "推送通知"
     ],
     "tierFamilyHeroFeatures": [
       "无限家庭成员",
-      "Family+套餐的所有功能",
-      "优先支持",
-      "新功能抢先体验",
-      "自定义集成（即将推出）",
+      "Family套餐的所有功能",
       "包含所有未来功能"
     ]
   },

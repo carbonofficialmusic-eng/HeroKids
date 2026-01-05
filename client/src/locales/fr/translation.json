@@ -804,41 +804,38 @@
     "toastCheckoutError": "Erreur de Paiement",
     "toastNoCheckoutUrl": "Aucune URL de paiement reçue du serveur",
     "toastCheckoutFailed": "Échec du démarrage du processus de paiement",
+    "perMonth": "par mois",
     "tierFreeDesc": "Parfait pour commencer",
-    "tierFamilyDesc": "Idéal pour les petites familles",
-    "tierFamilyPlusDesc": "Pour les grandes familles",
-    "tierFamilyHeroDesc": "Gestion familiale ultime",
+    "tierFamilyDesc": "Toutes les fonctionnalités premium",
+    "tierFamilyHeroDesc": "Pour les grandes familles",
     "tierFreeFeatures": [
-      "Jusqu'à 2 membres de la famille",
+      "Jusqu'à 3 membres de la famille",
+      "Tableau de bord parents & enfants",
+      "Classements hebdomadaires & mensuels",
       "Tâches illimitées",
-      "Classement mensuel",
+      "Tâches récurrentes",
       "Récompenses personnalisées",
       "Mode sombre",
-      "3 skins de personnages déverrouillables"
+      "3 skins déverrouillables",
+      "Utilisation sur un seul appareil",
+      "Statistiques"
     ],
     "tierFamilyFeatures": [
-      "Jusqu'à 4 membres de la famille",
+      "Jusqu'à 6 membres de la famille",
       "Tout de la formule Free",
       "Preuve photo pour les tâches",
-      "Tâches récurrentes",
-      "Classements hebdomadaires et mensuels",
-      "Analyses avancées",
-      "10 skins de personnages déverrouillables"
-    ],
-    "tierFamilyPlusFeatures": [
-      "Jusqu'à 6 membres de la famille",
-      "Tout de la formule Family",
+      "Fonction multi-tâches",
+      "Objectifs familiaux",
+      "Récompenses partagées",
       "Chat familial",
-      "Commentaires sur les tâches",
-      "Notifications push",
-      "Tous les skins de personnages déverrouillés"
+      "Tous les skins déverrouillables",
+      "Liaison d'appareils pour les enfants",
+      "Succès et achievements",
+      "Notifications push"
     ],
     "tierFamilyHeroFeatures": [
       "Membres de famille illimités",
-      "Tout de la formule Family+",
-      "Support prioritaire",
-      "Accès anticipé aux nouvelles fonctionnalités",
-      "Intégrations personnalisées (bientôt disponible)",
+      "Tout de la formule Family",
       "Toutes les fonctionnalités futures incluses"
     ]
   },

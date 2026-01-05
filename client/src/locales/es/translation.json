@@ -804,41 +804,38 @@
     "toastCheckoutError": "Error de Pago",
     "toastNoCheckoutUrl": "No se recibió URL de pago del servidor",
     "toastCheckoutFailed": "Falló el inicio del proceso de pago",
+    "perMonth": "por mes",
     "tierFreeDesc": "Perfecto para empezar",
-    "tierFamilyDesc": "Ideal para familias pequeñas",
-    "tierFamilyPlusDesc": "Para familias más grandes",
-    "tierFamilyHeroDesc": "Gestión familiar definitiva",
+    "tierFamilyDesc": "Todas las funciones premium",
+    "tierFamilyHeroDesc": "Para familias grandes",
     "tierFreeFeatures": [
-      "Hasta 2 miembros de la familia",
+      "Hasta 3 miembros de la familia",
+      "Panel de padres e hijos",
+      "Tablas de clasificación semanales y mensuales",
       "Tareas ilimitadas",
-      "Tabla de clasificación mensual",
+      "Tareas recurrentes",
       "Recompensas personalizadas",
       "Modo oscuro",
-      "3 skins de personajes desbloqueables"
+      "3 skins desbloqueables",
+      "Uso en un solo dispositivo",
+      "Estadísticas"
     ],
     "tierFamilyFeatures": [
-      "Hasta 4 miembros de la familia",
+      "Hasta 6 miembros de la familia",
       "Todo de Free",
       "Prueba fotográfica para tareas",
-      "Tareas recurrentes",
-      "Tablas de clasificación semanales y mensuales",
-      "Análisis avanzado",
-      "10 skins de personajes desbloqueables"
-    ],
-    "tierFamilyPlusFeatures": [
-      "Hasta 6 miembros de la familia",
-      "Todo de Family",
+      "Función multi-tarea",
+      "Objetivos familiares",
+      "Recompensas compartidas",
       "Chat familiar",
-      "Comentarios en tareas",
-      "Notificaciones push",
-      "Todos los skins de personajes desbloqueados"
+      "Todos los skins desbloqueables",
+      "Vinculación de dispositivos para niños",
+      "Logros y achievements",
+      "Notificaciones push"
     ],
     "tierFamilyHeroFeatures": [
       "Miembros de familia ilimitados",
-      "Todo de Family+",
-      "Soporte prioritario",
-      "Acceso anticipado a nuevas funciones",
-      "Integraciones personalizadas (próximamente)",
+      "Todo de Family",
       "Todas las funciones futuras incluidas"
     ]
   },
