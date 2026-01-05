@@ -764,7 +764,10 @@
     "toastStatusUpdated": "Estado actualizado",
     "toastStatusUpdatedDesc": "El estado de la recompensa se ha actualizado correctamente.",
     "toastError": "Error",
-    "toastErrorDesc": "No se pudo actualizar el estado de la recompensa."
+    "toastErrorDesc": "No se pudo actualizar el estado de la recompensa.",
+    "cancelRedemption": "Cancelar",
+    "redemptionCancelled": "Canje cancelado",
+    "cancelError": "No se pudo cancelar el canje"
   },
   "analytics": {
     "title": "Panel de Análisis",

@@ -764,7 +764,10 @@
     "toastStatusUpdated": "ステータス更新",
     "toastStatusUpdatedDesc": "ごほうびのステータスが正常に更新されました。",
     "toastError": "エラー",
-    "toastErrorDesc": "ごほうびのステータスを更新できませんでした。"
+    "toastErrorDesc": "ごほうびのステータスを更新できませんでした。",
+    "cancelRedemption": "キャンセル",
+    "redemptionCancelled": "交換がキャンセルされました",
+    "cancelError": "交換をキャンセルできませんでした"
   },
   "analytics": {
     "title": "分析ダッシュボード",

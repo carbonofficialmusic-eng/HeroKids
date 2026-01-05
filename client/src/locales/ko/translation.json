@@ -783,7 +783,10 @@
     "toastStatusUpdated": "상태 업데이트됨",
     "toastStatusUpdatedDesc": "보상 상태가 성공적으로 업데이트되었습니다.",
     "toastError": "오류",
-    "toastErrorDesc": "보상 상태를 업데이트하지 못했습니다."
+    "toastErrorDesc": "보상 상태를 업데이트하지 못했습니다.",
+    "cancelRedemption": "취소",
+    "redemptionCancelled": "교환 취소됨",
+    "cancelError": "교환을 취소하지 못했습니다"
   },
   "analytics": {
     "title": "분석",

@@ -764,7 +764,10 @@
     "toastStatusUpdated": "状态已更新",
     "toastStatusUpdatedDesc": "奖励状态已成功更新。",
     "toastError": "错误",
-    "toastErrorDesc": "无法更新奖励状态。"
+    "toastErrorDesc": "无法更新奖励状态。",
+    "cancelRedemption": "取消",
+    "redemptionCancelled": "兑换已取消",
+    "cancelError": "无法取消兑换"
   },
   "analytics": {
     "title": "分析仪表板",

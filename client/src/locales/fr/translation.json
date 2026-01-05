@@ -764,7 +764,10 @@
     "toastStatusUpdated": "Statut mis à jour",
     "toastStatusUpdatedDesc": "Le statut de la récompense a été mis à jour avec succès.",
     "toastError": "Erreur",
-    "toastErrorDesc": "Échec de la mise à jour du statut de la récompense."
+    "toastErrorDesc": "Échec de la mise à jour du statut de la récompense.",
+    "cancelRedemption": "Annuler",
+    "redemptionCancelled": "Échange annulé",
+    "cancelError": "Impossible d'annuler l'échange"
   },
   "analytics": {
     "title": "Tableau de Bord Analytique",
