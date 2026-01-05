@@ -3884,6 +3884,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint to verify checkout session (no auth required)
+  // Used when user returns from Stripe but session has expired
+  app.post("/api/verify-checkout-public", async (req: any, res) => {
+    try {
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+      
+      // Fetch the checkout session from Stripe
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      console.log("🔍 Public verification of checkout session:", {
+        sessionId: session.id,
+        paymentStatus: session.payment_status,
+        metadata: session.metadata,
+      });
+      
+      // Only process if payment was successful
+      if (session.payment_status !== "paid") {
+        return res.status(400).json({ message: "Payment not completed", status: session.payment_status });
+      }
+      
+      const familyName = session.metadata?.familyName;
+      const tier = session.metadata?.tier as "free" | "family" | "family_hero";
+      
+      if (!familyName || !tier) {
+        return res.status(400).json({ message: "Invalid session metadata" });
+      }
+      
+      // Update the family subscription
+      await storage.updateFamily(familyName, {
+        subscriptionTier: tier,
+        subscriptionStatus: "active",
+        billingSubscriptionId: session.subscription as string,
+      });
+      
+      console.log(`✅ Public verification: Subscription activated for ${familyName}: ${tier}`);
+      
+      // Broadcast subscription update to all family members
+      broadcastToFamily(familyName, {
+        type: 'subscription-updated',
+        tier,
+      });
+      
+      res.json({ 
+        success: true,
+        message: "Subscription activated successfully",
+        tier,
+        familyName 
+      });
+    } catch (error: any) {
+      console.error("Error in public checkout verification:", error);
+      res.status(500).json({ message: "Failed to verify checkout session" });
+    }
+  });
+
   // ===== Stripe Integration =====
   
   // Create Stripe Checkout Session

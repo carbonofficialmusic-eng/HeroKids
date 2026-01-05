@@ -1,13 +1,65 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Star, Trophy, Users, CheckCircle, Zap, Smartphone } from "lucide-react";
+import { Star, Trophy, Users, CheckCircle, Zap, Smartphone, Loader2 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useTranslation } from "react-i18next";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 export default function Landing() {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
+
+  // Check for Stripe redirect with session_id
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session_id");
+    const subscriptionSuccess = urlParams.get("subscription");
+    
+    if (sessionId && subscriptionSuccess === "success") {
+      setVerifyingPayment(true);
+      
+      // Verify the checkout session and activate subscription
+      fetch("/api/verify-checkout-public", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            toast({
+              title: t("pricing.subscriptionActivated") || "Subscription activated!",
+              description: `${data.tier} tier activated for ${data.familyName}`,
+            });
+          }
+          // Redirect to login after verification
+          window.location.href = "/api/login";
+        })
+        .catch(err => {
+          console.error("Error verifying checkout:", err);
+          // Still redirect to login
+          window.location.href = "/api/login";
+        });
+    }
+  }, [toast, t]);
+
+  // Show loading state while verifying payment
+  if (verifyingPayment) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-lg text-muted-foreground">{t("pricing.verifyingPayment") || "Verifying payment..."}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       {/* Header */}

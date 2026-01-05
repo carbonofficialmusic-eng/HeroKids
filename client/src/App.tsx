@@ -34,10 +34,11 @@ interface FamilyMember {
 }
 
 function RedirectToLanding() {
-  const [, setLocation] = useLocation();
   useEffect(() => {
-    setLocation("/");
-  }, [setLocation]);
+    // Preserve query parameters when redirecting (for Stripe session_id)
+    const currentSearch = window.location.search;
+    window.location.href = "/" + currentSearch;
+  }, []);
   return null;
 }
 
