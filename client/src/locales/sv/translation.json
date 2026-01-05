@@ -1112,14 +1112,9 @@
   },
   "myAchievements": {
     "title": "Mina prestationer",
-    "subtitle": "Dina prestationer och belöningar",
-    "backToDashboard": "Tillbaka till instrumentpanelen",
-    "loading": "Laddar...",
-    "noAchievements": "Inga prestationer ännu",
-    "noAchievementsDesc": "Fortsätt slutföra uppgifter för att låsa upp prestationer!",
-    "earnedOn": "Tjänad {{date}}",
-    "bonusPoints": "+{{count}} bonuspoäng",
-    "customReward": "Belöning: {{reward}}"
+    "allAchievements": "Alla specialpriser",
+    "achievementsCount": "{{count}} prestationer tillgängliga",
+    "noAchievements": "Inga aktiva prestationer ännu"
   },
   "myRewards": {
     "title": "Mina belöningar",
