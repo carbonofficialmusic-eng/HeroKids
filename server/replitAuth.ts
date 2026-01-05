@@ -40,6 +40,7 @@ export function getSession() {
     cookie: {
       httpOnly: true,
       secure: true,
+      sameSite: 'none', // Required for cross-site navigation from Stripe checkout
       maxAge: sessionTtl,
     },
   });
