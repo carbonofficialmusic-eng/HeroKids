@@ -1106,7 +1106,7 @@ export default function Dashboard() {
                       <h2 className="text-lg font-bold font-accent">{t("dashboard.specialPrizes")}</h2>
                       <Sparkles className="h-4 w-4 text-purple-500" />
                     </div>
-                    {specialRewards.length > 3 && (
+                    {specialRewards.length > 2 && (
                       <Button variant="ghost" size="sm" asChild data-testid="button-view-all-achievements">
                         <Link href="/my-achievements">
                           {t("dashboard.viewAll")}
@@ -1115,7 +1115,7 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div className="space-y-3">
-                    {specialRewards.slice(0, 3).map((achievement) => (
+                    {specialRewards.slice(0, 2).map((achievement) => (
                       <Card key={achievement.id} className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30">
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-lg bg-purple-500/20 flex-shrink-0">

@@ -1259,7 +1259,7 @@ export default function KidDashboard() {
                 </h2>
                 <Sparkles className="h-5 w-5 text-purple-500 animate-pulse" />
               </div>
-              {specialRewards.length > 3 && (
+              {specialRewards.length > 2 && (
                 <Button variant="ghost" size="sm" asChild data-testid="button-view-all-achievements">
                   <Link href="/my-achievements">
                     {t("kidDashboard.viewAll")}
@@ -1268,7 +1268,7 @@ export default function KidDashboard() {
               )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {specialRewards.slice(0, 3).map((achievement, index) => (
+              {specialRewards.slice(0, 2).map((achievement, index) => (
                 <motion.div
                   key={achievement.id}
                   initial={{ opacity: 0, scale: 0.9 }}
