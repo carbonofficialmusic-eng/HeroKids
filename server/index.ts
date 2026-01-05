@@ -170,7 +170,7 @@ async function autoSeedSkinsIfNeeded() {
     const SKIN_DATA = [
       // Tier 1 - Starter Heroes (0-500 points)
       { id: "junior-champion", name: "Junior Champion", description: "The classic HeroKids hero with a teal cape - start your journey here!", imageUrl: "🏆", pointsRequired: 0, bonusPoints: 0 },
-      { id: "brave-explorer", name: "Brave Explorer", description: "A fearless adventurer with a compass and backpack, ready to explore!", imageUrl: "🧭", pointsRequired: 60, bonusPoints: 5 },
+      { id: "brave-explorer", name: "Brave Explorer", description: "A fearless adventurer with a compass and backpack, ready to explore!", imageUrl: "🧭", pointsRequired: 60, bonusPoints: 0 },
       { id: "star-cadet", name: "Star Cadet", description: "A space-themed hero with a jetpack and stars in their eyes!", imageUrl: "⭐", pointsRequired: 120, bonusPoints: 0 },
       { id: "nature-scout", name: "Nature Scout", description: "A green-thumbed hero who loves plants and the outdoors!", imageUrl: "🌿", pointsRequired: 180, bonusPoints: 0 },
       { id: "speed-runner", name: "Speed Runner", description: "Lightning-fast hero with super speed and energy!", imageUrl: "⚡", pointsRequired: 240, bonusPoints: 0 },
@@ -179,7 +179,7 @@ async function autoSeedSkinsIfNeeded() {
       { id: "art-master", name: "Art Master", description: "Creative hero with paintbrush and endless imagination!", imageUrl: "🎨", pointsRequired: 500, bonusPoints: 0 },
       
       // Tier 2 - Elite Heroes (501-1000 points)
-      { id: "tech-ninja", name: "Tech Ninja", description: "Cyber warrior with advanced gadgets and tech skills!", imageUrl: "🥷", pointsRequired: 560, bonusPoints: 5 },
+      { id: "tech-ninja", name: "Tech Ninja", description: "Cyber warrior with advanced gadgets and tech skills!", imageUrl: "🥷", pointsRequired: 560, bonusPoints: 0 },
       { id: "ocean-guardian", name: "Ocean Guardian", description: "Protector of the seas with water powers!", imageUrl: "🌊", pointsRequired: 620, bonusPoints: 0 },
       { id: "sky-knight", name: "Sky Knight", description: "Aerial warrior soaring through the clouds!", imageUrl: "☁️", pointsRequired: 680, bonusPoints: 0 },
       { id: "fire-phoenix", name: "Fire Phoenix", description: "Legendary bird rising from flames with fire powers!", imageUrl: "🔥", pointsRequired: 740, bonusPoints: 5 },
@@ -192,14 +192,14 @@ async function autoSeedSkinsIfNeeded() {
       { id: "t-rex", name: "Tyrannosaurus Rex", description: "The mighty king of dinosaurs with fearsome power!", imageUrl: "🦖", pointsRequired: 1060, bonusPoints: 0 },
       { id: "triceratops", name: "Triceratops", description: "Triple-horned defender with incredible strength!", imageUrl: "🦕", pointsRequired: 1120, bonusPoints: 0 },
       { id: "stegosaurus", name: "Stegosaurus", description: "Plated warrior with spiked tail defense!", imageUrl: "🦴", pointsRequired: 1180, bonusPoints: 0 },
-      { id: "velociraptor", name: "Velociraptor", description: "Swift and clever predator with razor-sharp claws!", imageUrl: "🦎", pointsRequired: 1240, bonusPoints: 5 },
-      { id: "brachiosaurus", name: "Brachiosaurus", description: "Gentle giant reaching for the sky!", imageUrl: "🦕", pointsRequired: 1300, bonusPoints: 5 },
+      { id: "velociraptor", name: "Velociraptor", description: "Swift and clever predator with razor-sharp claws!", imageUrl: "🦎", pointsRequired: 1240, bonusPoints: 0 },
+      { id: "brachiosaurus", name: "Brachiosaurus", description: "Gentle giant reaching for the sky!", imageUrl: "🦕", pointsRequired: 1300, bonusPoints: 0 },
       { id: "spinosaurus", name: "Spinosaurus", description: "Sail-backed hunter of land and water!", imageUrl: "🦖", pointsRequired: 1360, bonusPoints: 0 },
       { id: "ankylosaurus", name: "Ankylosaurus", description: "Armored tank with a devastating club tail!", imageUrl: "🦴", pointsRequired: 1420, bonusPoints: 0 },
       { id: "allosaurus", name: "Allosaurus", description: "Apex predator of the Jurassic period!", imageUrl: "🦖", pointsRequired: 1500, bonusPoints: 0 },
       
       // Tier 4 - Magical Princess World (Girls collection, 1560-2000 points) - Bonus Slots: 1, 4, 7
-      { id: "princess-tiara", name: "Princess with Tiara", description: "Classic princess with magical tiara and sparkling gown!", imageUrl: "👑", pointsRequired: 1560, bonusPoints: 5 },
+      { id: "princess-tiara", name: "Princess with Tiara", description: "Classic princess with magical tiara and sparkling gown!", imageUrl: "👑", pointsRequired: 1560, bonusPoints: 0 },
       { id: "purple-princess", name: "Purple Princess", description: "Royal princess in glittering purple ballgown with mystical powers!", imageUrl: "💜", pointsRequired: 1620, bonusPoints: 0 },
       { id: "ice-princess", name: "Ice Princess", description: "Frozen beauty with snowflake powers and icy elegance!", imageUrl: "❄️", pointsRequired: 1680, bonusPoints: 0 },
       { id: "rainbow-princess", name: "Rainbow Princess", description: "Magical princess surrounded by colorful stars and rainbows!", imageUrl: "🌈", pointsRequired: 1740, bonusPoints: 10 },
@@ -211,7 +211,7 @@ async function autoSeedSkinsIfNeeded() {
       // Tier 5 - Space Explorers (Boys collection, 2060-2500 points) - Bonus Slots: 3, 6, 8
       { id: "astronaut-kid", name: "Astronaut Kid", description: "Young space explorer in white spacesuit ready for adventure!", imageUrl: "🚀", pointsRequired: 2060, bonusPoints: 0 },
       { id: "space-cadet-blue", name: "Space Cadet", description: "Blue-suited cadet training for space missions!", imageUrl: "👨‍🚀", pointsRequired: 2120, bonusPoints: 0 },
-      { id: "green-alien", name: "Friendly Alien", description: "Green alien explorer from a distant galaxy!", imageUrl: "👽", pointsRequired: 2180, bonusPoints: 5 },
+      { id: "green-alien", name: "Friendly Alien", description: "Green alien explorer from a distant galaxy!", imageUrl: "👽", pointsRequired: 2180, bonusPoints: 0 },
       { id: "rocket-pilot", name: "Rocket Pilot", description: "Red and yellow suited pilot commanding starships!", imageUrl: "🛸", pointsRequired: 2240, bonusPoints: 0 },
       { id: "moon-walker", name: "Moon Walker", description: "Lunar explorer walking on the moon's surface!", imageUrl: "🌙", pointsRequired: 2300, bonusPoints: 0 },
       { id: "galaxy-scout", name: "Galaxy Scout", description: "Purple-suited scout exploring cosmic mysteries!", imageUrl: "🌌", pointsRequired: 2360, bonusPoints: 15 },
@@ -219,7 +219,7 @@ async function autoSeedSkinsIfNeeded() {
       { id: "star-captain", name: "Star Captain", description: "Gold-suited captain commanding the space fleet!", imageUrl: "⭐", pointsRequired: 2500, bonusPoints: 20 },
       
       // Tier 6 - Cute Animals (Girls collection, 2560-3000 points) - Bonus Slots: 1, 4, 6
-      { id: "cat-girl", name: "Cat Girl", description: "Adorable kitty character in pink hoodie with cat ears!", imageUrl: "🐱", pointsRequired: 2560, bonusPoints: 5 },
+      { id: "cat-girl", name: "Cat Girl", description: "Adorable kitty character in pink hoodie with cat ears!", imageUrl: "🐱", pointsRequired: 2560, bonusPoints: 0 },
       { id: "bunny-girl", name: "Bunny Girl", description: "Sweet bunny character in lavender dress with floppy ears!", imageUrl: "🐰", pointsRequired: 2620, bonusPoints: 0 },
       { id: "fox-girl", name: "Fox Girl", description: "Clever fox character in orange outfit with fluffy tail!", imageUrl: "🦊", pointsRequired: 2680, bonusPoints: 0 },
       { id: "puppy-girl", name: "Puppy Girl", description: "Playful puppy character in brown hoodie, always wagging!", imageUrl: "🐶", pointsRequired: 2740, bonusPoints: 10 },
@@ -230,7 +230,7 @@ async function autoSeedSkinsIfNeeded() {
       
       // Tier 7 - Vampire Adventure (Boys collection, 3060-3500 points) - Bonus Slots: 2, 4, 7
       { id: "classic-vampire", name: "Classic Vampire", description: "Traditional vampire with elegant black cape and friendly fangs!", imageUrl: "🧛", pointsRequired: 3060, bonusPoints: 0 },
-      { id: "bat-boy", name: "Bat Boy", description: "Vampire boy with small bat wings and purple vest!", imageUrl: "🦇", pointsRequired: 3120, bonusPoints: 5 },
+      { id: "bat-boy", name: "Bat Boy", description: "Vampire boy with small bat wings and purple vest!", imageUrl: "🦇", pointsRequired: 3120, bonusPoints: 0 },
       { id: "moonlight-vampire", name: "Moonlight Vampire", description: "Silver-haired vampire glowing with mystical moonlight!", imageUrl: "🌙", pointsRequired: 3180, bonusPoints: 0 },
       { id: "gothic-vampire", name: "Gothic Vampire", description: "Edgy vampire in dark purple and black with silver chains!", imageUrl: "🖤", pointsRequired: 3240, bonusPoints: 10 },
       { id: "shadow-vampire", name: "Shadow Vampire", description: "Mysterious vampire with shadow powers and glowing red eyes!", imageUrl: "👤", pointsRequired: 3300, bonusPoints: 0 },
@@ -241,7 +241,7 @@ async function autoSeedSkinsIfNeeded() {
       // Tier 8 - Ballerina Dreams (Girls collection, 3560-4000 points) - Bonus Slots: 3, 5, 8
       { id: "ballerina-pink", name: "Pink Ballerina", description: "Classic ballerina in pink tutu with sparkling grace!", imageUrl: "🩰", pointsRequired: 3560, bonusPoints: 0 },
       { id: "swan-ballerina", name: "Swan Ballerina", description: "Elegant swan lake ballerina in white feather tutu!", imageUrl: "🦢", pointsRequired: 3620, bonusPoints: 0 },
-      { id: "purple-ballerina", name: "Purple Ballerina", description: "Royal ballerina in lavender tutu with flower crown!", imageUrl: "💜", pointsRequired: 3680, bonusPoints: 5 },
+      { id: "purple-ballerina", name: "Purple Ballerina", description: "Royal ballerina in lavender tutu with flower crown!", imageUrl: "💜", pointsRequired: 3680, bonusPoints: 0 },
       { id: "blue-ballerina", name: "Ocean Ballerina", description: "Aqua ballerina dancing with ocean wave patterns!", imageUrl: "💙", pointsRequired: 3740, bonusPoints: 0 },
       { id: "golden-ballerina", name: "Golden Ballerina", description: "Radiant ballerina in golden tutu with star sequins!", imageUrl: "⭐", pointsRequired: 3800, bonusPoints: 10 },
       { id: "peach-ballerina", name: "Rose Ballerina", description: "Romantic ballerina in peach tutu with rose details!", imageUrl: "🌹", pointsRequired: 3860, bonusPoints: 0 },
@@ -249,7 +249,7 @@ async function autoSeedSkinsIfNeeded() {
       { id: "rainbow-ballerina", name: "Rainbow Ballerina", description: "Magical ballerina in rainbow tutu spreading joy!", imageUrl: "🌈", pointsRequired: 4000, bonusPoints: 15 },
       
       // Tier 9 - Superhero Squad (Boys collection, 4060-4500 points) - Bonus Slots: 1, 3, 7
-      { id: "classic-superhero", name: "Classic Hero", description: "Iconic superhero in red and blue suit with star emblem!", imageUrl: "🦸", pointsRequired: 4060, bonusPoints: 5 },
+      { id: "classic-superhero", name: "Classic Hero", description: "Iconic superhero in red and blue suit with star emblem!", imageUrl: "🦸", pointsRequired: 4060, bonusPoints: 0 },
       { id: "lightning-speedster", name: "Lightning Speedster", description: "Super-fast hero in yellow suit with electric powers!", imageUrl: "⚡", pointsRequired: 4120, bonusPoints: 0 },
       { id: "tech-hero", name: "Tech Hero", description: "High-tech hero in purple armor with advanced gadgets!", imageUrl: "🤖", pointsRequired: 4180, bonusPoints: 10 },
       { id: "nature-guardian", name: "Nature Guardian", description: "Eco-hero in green suit protecting the environment!", imageUrl: "🌿", pointsRequired: 4240, bonusPoints: 0 },
@@ -260,7 +260,7 @@ async function autoSeedSkinsIfNeeded() {
       
       // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points) - Bonus Slots: 2, 6, 8
       { id: "titan-mech", name: "Titan Mech", description: "Massive mech warrior with powerful hydraulic arms!", imageUrl: "🤖", pointsRequired: 4560, bonusPoints: 0 },
-      { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 5 },
+      { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 0 },
       { id: "iron-guardian", name: "Iron Guardian", description: "Heavy armored mech designed for defense and protection!", imageUrl: "🛡️", pointsRequired: 4680, bonusPoints: 0 },
       { id: "plasma-bot", name: "Plasma Bot", description: "Energy-powered robot with glowing plasma core!", imageUrl: "💫", pointsRequired: 4740, bonusPoints: 0 },
       { id: "steel-samurai", name: "Steel Samurai", description: "Japanese-inspired mech with katana and honor code!", imageUrl: "⚔️", pointsRequired: 4800, bonusPoints: 0 },
@@ -272,14 +272,14 @@ async function autoSeedSkinsIfNeeded() {
       { id: "ninja-shadow", name: "Ninja Shadow", description: "Stealthy anime ninja with shadow jutsu techniques!", imageUrl: "🥷", pointsRequired: 5060, bonusPoints: 0 },
       { id: "spirit-fox", name: "Spirit Fox", description: "Mystical kitsune character with nine glowing tails!", imageUrl: "🦊", pointsRequired: 5120, bonusPoints: 0 },
       { id: "dragon-slayer", name: "Dragon Slayer", description: "Brave warrior wielding legendary dragon-forged sword!", imageUrl: "🐉", pointsRequired: 5180, bonusPoints: 0 },
-      { id: "magical-girl", name: "Magical Girl", description: "Sparkling magical girl with transformation powers!", imageUrl: "✨", pointsRequired: 5240, bonusPoints: 5 },
+      { id: "magical-girl", name: "Magical Girl", description: "Sparkling magical girl with transformation powers!", imageUrl: "✨", pointsRequired: 5240, bonusPoints: 0 },
       { id: "samurai-hero", name: "Samurai Hero", description: "Honorable samurai following the code of bushido!", imageUrl: "⚔️", pointsRequired: 5300, bonusPoints: 15 },
       { id: "elemental-master", name: "Elemental Master", description: "Anime hero controlling fire, water, earth and air!", imageUrl: "🌊", pointsRequired: 5360, bonusPoints: 0 },
       { id: "cat-fighter", name: "Cat Fighter", description: "Agile catgirl martial artist with lightning reflexes!", imageUrl: "🐱", pointsRequired: 5420, bonusPoints: 20 },
       { id: "school-hero", name: "School Hero", description: "Ordinary student with extraordinary hidden powers!", imageUrl: "📚", pointsRequired: 5500, bonusPoints: 0 },
       
       // Tier 12 - Gaming Legends (Unisex collection, 5560-6000 points) - Bonus Slots: 1, 5, 8
-      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 5 },
+      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 0 },
       { id: "pixel-warrior", name: "Pixel Warrior", description: "Retro 8-bit hero from classic gaming era!", imageUrl: "👾", pointsRequired: 5620, bonusPoints: 0 },
       { id: "controller-king", name: "Controller King", description: "Master of all gaming consoles and controllers!", imageUrl: "🕹️", pointsRequired: 5680, bonusPoints: 0 },
       { id: "vr-champion", name: "VR Champion", description: "Virtual reality hero exploring digital worlds!", imageUrl: "🥽", pointsRequired: 5740, bonusPoints: 0 },
@@ -290,16 +290,16 @@ async function autoSeedSkinsIfNeeded() {
       
       // Tier 13 - Pterosaur Sky (Flying Dinosaurs collection, 6060-6500 points) - Bonus Slots: 2, 5, 8
       { id: "pteranodon", name: "Pteranodon", description: "Majestic flying reptile with distinctive long head crest!", imageUrl: "🦅", pointsRequired: 6060, bonusPoints: 0 },
-      { id: "quetzalcoatlus", name: "Quetzalcoatlus", description: "One of the largest flying animals ever - truly gigantic!", imageUrl: "🦅", pointsRequired: 6120, bonusPoints: 10 },
+      { id: "quetzalcoatlus", name: "Quetzalcoatlus", description: "One of the largest flying animals ever - truly gigantic!", imageUrl: "🦅", pointsRequired: 6120, bonusPoints: 0 },
       { id: "rhamphorhynchus", name: "Rhamphorhynchus", description: "Small agile flyer with long tail and diamond tip!", imageUrl: "🦅", pointsRequired: 6180, bonusPoints: 0 },
       { id: "pterodactylus", name: "Pterodactylus", description: "The classic pterosaur from prehistoric skies!", imageUrl: "🦅", pointsRequired: 6240, bonusPoints: 0 },
       { id: "dimorphodon", name: "Dimorphodon", description: "Compact flyer with powerful jaws and strong teeth!", imageUrl: "🦅", pointsRequired: 6300, bonusPoints: 15 },
       { id: "tapejara", name: "Tapejara", description: "Stunning pterosaur with spectacular colorful head crest!", imageUrl: "🦅", pointsRequired: 6360, bonusPoints: 0 },
       { id: "anhanguera", name: "Anhanguera", description: "Expert fish hunter with long toothy snout!", imageUrl: "🦅", pointsRequired: 6420, bonusPoints: 0 },
-      { id: "dsungaripterus", name: "Dsungaripterus", description: "Shell-crushing specialist with unique curved beak!", imageUrl: "🦅", pointsRequired: 6500, bonusPoints: 15 },
+      { id: "dsungaripterus", name: "Dsungaripterus", description: "Shell-crushing specialist with unique curved beak!", imageUrl: "🦅", pointsRequired: 6500, bonusPoints: 0 },
       
       // Tier 14 - HeroKids Legacy (Logo-style collection, 6560-7000 points) - Bonus Slots: 1, 4, 7
-      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6560, bonusPoints: 5 },
+      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6560, bonusPoints: 0 },
       { id: "comet-dash", name: "Comet Dash", description: "Super-fast hero boy with comet trail speed!", imageUrl: "☄️", pointsRequired: 6620, bonusPoints: 0 },
       { id: "wave-glider", name: "Wave Glider", description: "Ocean hero boy surfing on water powers!", imageUrl: "🌊", pointsRequired: 6680, bonusPoints: 0 },
       { id: "forest-guard", name: "Forest Guard", description: "Nature hero boy with leaf shield protection!", imageUrl: "🌲", pointsRequired: 6740, bonusPoints: 10 },
@@ -333,13 +333,13 @@ async function addTier13PterosaursIfNeeded() {
     
     const TIER_13_SKINS = [
       { id: "pteranodon", name: "Pteranodon", description: "Majestic flying reptile with distinctive long head crest!", imageUrl: "🦅", pointsRequired: 6060, bonusPoints: 0 },
-      { id: "quetzalcoatlus", name: "Quetzalcoatlus", description: "One of the largest flying animals ever - truly gigantic!", imageUrl: "🦅", pointsRequired: 6120, bonusPoints: 10 },
+      { id: "quetzalcoatlus", name: "Quetzalcoatlus", description: "One of the largest flying animals ever - truly gigantic!", imageUrl: "🦅", pointsRequired: 6120, bonusPoints: 0 },
       { id: "rhamphorhynchus", name: "Rhamphorhynchus", description: "Small agile flyer with long tail and diamond tip!", imageUrl: "🦅", pointsRequired: 6180, bonusPoints: 0 },
       { id: "pterodactylus", name: "Pterodactylus", description: "The classic pterosaur from prehistoric skies!", imageUrl: "🦅", pointsRequired: 6240, bonusPoints: 0 },
       { id: "dimorphodon", name: "Dimorphodon", description: "Compact flyer with powerful jaws and strong teeth!", imageUrl: "🦅", pointsRequired: 6300, bonusPoints: 15 },
       { id: "tapejara", name: "Tapejara", description: "Stunning pterosaur with spectacular colorful head crest!", imageUrl: "🦅", pointsRequired: 6360, bonusPoints: 0 },
       { id: "anhanguera", name: "Anhanguera", description: "Expert fish hunter with long toothy snout!", imageUrl: "🦅", pointsRequired: 6420, bonusPoints: 0 },
-      { id: "dsungaripterus", name: "Dsungaripterus", description: "Shell-crushing specialist with unique curved beak!", imageUrl: "🦅", pointsRequired: 6500, bonusPoints: 15 },
+      { id: "dsungaripterus", name: "Dsungaripterus", description: "Shell-crushing specialist with unique curved beak!", imageUrl: "🦅", pointsRequired: 6500, bonusPoints: 0 },
     ];
 
     await db.insert(skins).values(TIER_13_SKINS);
@@ -422,7 +422,7 @@ async function forceReseedSkinsIfNeeded() {
     const SKIN_DATA = [
       // Tier 1 - Starter Heroes (0-500 points)
       { id: "junior-champion", name: "Junior Champion", description: "The classic HeroKids hero with a teal cape - start your journey here!", imageUrl: "🏆", pointsRequired: 0, bonusPoints: 0 },
-      { id: "brave-explorer", name: "Brave Explorer", description: "A fearless adventurer with a compass and backpack, ready to explore!", imageUrl: "🧭", pointsRequired: 60, bonusPoints: 5 },
+      { id: "brave-explorer", name: "Brave Explorer", description: "A fearless adventurer with a compass and backpack, ready to explore!", imageUrl: "🧭", pointsRequired: 60, bonusPoints: 0 },
       { id: "star-cadet", name: "Star Cadet", description: "A space-themed hero with a jetpack and stars in their eyes!", imageUrl: "⭐", pointsRequired: 120, bonusPoints: 0 },
       { id: "nature-scout", name: "Nature Scout", description: "A green-thumbed hero who loves plants and the outdoors!", imageUrl: "🌿", pointsRequired: 180, bonusPoints: 0 },
       { id: "speed-runner", name: "Speed Runner", description: "Lightning-fast hero with super speed and energy!", imageUrl: "⚡", pointsRequired: 240, bonusPoints: 0 },
@@ -431,7 +431,7 @@ async function forceReseedSkinsIfNeeded() {
       { id: "art-master", name: "Art Master", description: "Creative hero with paintbrush and endless imagination!", imageUrl: "🎨", pointsRequired: 500, bonusPoints: 0 },
       
       // Tier 2 - Elite Heroes (501-1000 points)
-      { id: "tech-ninja", name: "Tech Ninja", description: "Cyber warrior with advanced gadgets and tech skills!", imageUrl: "🥷", pointsRequired: 560, bonusPoints: 5 },
+      { id: "tech-ninja", name: "Tech Ninja", description: "Cyber warrior with advanced gadgets and tech skills!", imageUrl: "🥷", pointsRequired: 560, bonusPoints: 0 },
       { id: "ocean-guardian", name: "Ocean Guardian", description: "Protector of the seas with water powers!", imageUrl: "🌊", pointsRequired: 620, bonusPoints: 0 },
       { id: "sky-knight", name: "Sky Knight", description: "Aerial warrior soaring through the clouds!", imageUrl: "☁️", pointsRequired: 680, bonusPoints: 0 },
       { id: "fire-phoenix", name: "Fire Phoenix", description: "Legendary bird rising from flames with fire powers!", imageUrl: "🔥", pointsRequired: 740, bonusPoints: 5 },
@@ -444,14 +444,14 @@ async function forceReseedSkinsIfNeeded() {
       { id: "t-rex", name: "Tyrannosaurus Rex", description: "The mighty king of dinosaurs with fearsome power!", imageUrl: "🦖", pointsRequired: 1060, bonusPoints: 0 },
       { id: "triceratops", name: "Triceratops", description: "Triple-horned defender with incredible strength!", imageUrl: "🦕", pointsRequired: 1120, bonusPoints: 0 },
       { id: "stegosaurus", name: "Stegosaurus", description: "Plated warrior with spiked tail defense!", imageUrl: "🦴", pointsRequired: 1180, bonusPoints: 0 },
-      { id: "velociraptor", name: "Velociraptor", description: "Swift and clever predator with razor-sharp claws!", imageUrl: "🦎", pointsRequired: 1240, bonusPoints: 5 },
-      { id: "brachiosaurus", name: "Brachiosaurus", description: "Gentle giant reaching for the sky!", imageUrl: "🦕", pointsRequired: 1300, bonusPoints: 5 },
+      { id: "velociraptor", name: "Velociraptor", description: "Swift and clever predator with razor-sharp claws!", imageUrl: "🦎", pointsRequired: 1240, bonusPoints: 0 },
+      { id: "brachiosaurus", name: "Brachiosaurus", description: "Gentle giant reaching for the sky!", imageUrl: "🦕", pointsRequired: 1300, bonusPoints: 0 },
       { id: "spinosaurus", name: "Spinosaurus", description: "Sail-backed hunter of land and water!", imageUrl: "🦖", pointsRequired: 1360, bonusPoints: 0 },
       { id: "ankylosaurus", name: "Ankylosaurus", description: "Armored tank with a devastating club tail!", imageUrl: "🦴", pointsRequired: 1420, bonusPoints: 0 },
       { id: "allosaurus", name: "Allosaurus", description: "Apex predator of the Jurassic period!", imageUrl: "🦖", pointsRequired: 1500, bonusPoints: 0 },
       
       // Tier 4 - Magical Princess World (Girls collection, 1560-2000 points) - Bonus Slots: 1, 4, 7
-      { id: "princess-tiara", name: "Princess with Tiara", description: "Classic princess with magical tiara and sparkling gown!", imageUrl: "👑", pointsRequired: 1560, bonusPoints: 5 },
+      { id: "princess-tiara", name: "Princess with Tiara", description: "Classic princess with magical tiara and sparkling gown!", imageUrl: "👑", pointsRequired: 1560, bonusPoints: 0 },
       { id: "purple-princess", name: "Purple Princess", description: "Royal princess in glittering purple ballgown with mystical powers!", imageUrl: "💜", pointsRequired: 1620, bonusPoints: 0 },
       { id: "ice-princess", name: "Ice Princess", description: "Frozen beauty with snowflake powers and icy elegance!", imageUrl: "❄️", pointsRequired: 1680, bonusPoints: 0 },
       { id: "rainbow-princess", name: "Rainbow Princess", description: "Magical princess surrounded by colorful stars and rainbows!", imageUrl: "🌈", pointsRequired: 1740, bonusPoints: 10 },
@@ -463,7 +463,7 @@ async function forceReseedSkinsIfNeeded() {
       // Tier 5 - Space Explorers (Boys collection, 2060-2500 points) - Bonus Slots: 3, 6, 8
       { id: "astronaut-kid", name: "Astronaut Kid", description: "Young space explorer in white spacesuit ready for adventure!", imageUrl: "🚀", pointsRequired: 2060, bonusPoints: 0 },
       { id: "space-cadet-blue", name: "Space Cadet", description: "Blue-suited cadet training for space missions!", imageUrl: "👨‍🚀", pointsRequired: 2120, bonusPoints: 0 },
-      { id: "green-alien", name: "Friendly Alien", description: "Green alien explorer from a distant galaxy!", imageUrl: "👽", pointsRequired: 2180, bonusPoints: 5 },
+      { id: "green-alien", name: "Friendly Alien", description: "Green alien explorer from a distant galaxy!", imageUrl: "👽", pointsRequired: 2180, bonusPoints: 0 },
       { id: "rocket-pilot", name: "Rocket Pilot", description: "Red and yellow suited pilot commanding starships!", imageUrl: "🛸", pointsRequired: 2240, bonusPoints: 0 },
       { id: "moon-walker", name: "Moon Walker", description: "Lunar explorer walking on the moon's surface!", imageUrl: "🌙", pointsRequired: 2300, bonusPoints: 0 },
       { id: "galaxy-scout", name: "Galaxy Scout", description: "Purple-suited scout exploring cosmic mysteries!", imageUrl: "🌌", pointsRequired: 2360, bonusPoints: 15 },
@@ -471,7 +471,7 @@ async function forceReseedSkinsIfNeeded() {
       { id: "star-captain", name: "Star Captain", description: "Gold-suited captain commanding the space fleet!", imageUrl: "⭐", pointsRequired: 2500, bonusPoints: 20 },
       
       // Tier 6 - Cute Animals (Girls collection, 2560-3000 points) - Bonus Slots: 1, 4, 6
-      { id: "cat-girl", name: "Cat Girl", description: "Adorable kitty character in pink hoodie with cat ears!", imageUrl: "🐱", pointsRequired: 2560, bonusPoints: 5 },
+      { id: "cat-girl", name: "Cat Girl", description: "Adorable kitty character in pink hoodie with cat ears!", imageUrl: "🐱", pointsRequired: 2560, bonusPoints: 0 },
       { id: "bunny-girl", name: "Bunny Girl", description: "Sweet bunny character in lavender dress with floppy ears!", imageUrl: "🐰", pointsRequired: 2620, bonusPoints: 0 },
       { id: "fox-girl", name: "Fox Girl", description: "Clever fox character in orange outfit with fluffy tail!", imageUrl: "🦊", pointsRequired: 2680, bonusPoints: 0 },
       { id: "puppy-girl", name: "Puppy Girl", description: "Playful puppy character in brown hoodie, always wagging!", imageUrl: "🐶", pointsRequired: 2740, bonusPoints: 10 },
@@ -482,7 +482,7 @@ async function forceReseedSkinsIfNeeded() {
       
       // Tier 7 - Vampire Adventure (Boys collection, 3060-3500 points) - Bonus Slots: 2, 4, 7
       { id: "classic-vampire", name: "Classic Vampire", description: "Traditional vampire with elegant black cape and friendly fangs!", imageUrl: "🧛", pointsRequired: 3060, bonusPoints: 0 },
-      { id: "bat-boy", name: "Bat Boy", description: "Vampire boy with small bat wings and purple vest!", imageUrl: "🦇", pointsRequired: 3120, bonusPoints: 5 },
+      { id: "bat-boy", name: "Bat Boy", description: "Vampire boy with small bat wings and purple vest!", imageUrl: "🦇", pointsRequired: 3120, bonusPoints: 0 },
       { id: "moonlight-vampire", name: "Moonlight Vampire", description: "Silver-haired vampire glowing with mystical moonlight!", imageUrl: "🌙", pointsRequired: 3180, bonusPoints: 0 },
       { id: "gothic-vampire", name: "Gothic Vampire", description: "Edgy vampire in dark purple and black with silver chains!", imageUrl: "🖤", pointsRequired: 3240, bonusPoints: 10 },
       { id: "shadow-vampire", name: "Shadow Vampire", description: "Mysterious vampire with shadow powers and glowing red eyes!", imageUrl: "👤", pointsRequired: 3300, bonusPoints: 0 },
@@ -493,7 +493,7 @@ async function forceReseedSkinsIfNeeded() {
       // Tier 8 - Ballerina Dreams (Girls collection, 3560-4000 points) - Bonus Slots: 3, 5, 8
       { id: "ballerina-pink", name: "Pink Ballerina", description: "Classic ballerina in pink tutu with sparkling grace!", imageUrl: "🩰", pointsRequired: 3560, bonusPoints: 0 },
       { id: "swan-ballerina", name: "Swan Ballerina", description: "Elegant swan lake ballerina in white feather tutu!", imageUrl: "🦢", pointsRequired: 3620, bonusPoints: 0 },
-      { id: "purple-ballerina", name: "Purple Ballerina", description: "Royal ballerina in lavender tutu with flower crown!", imageUrl: "💜", pointsRequired: 3680, bonusPoints: 5 },
+      { id: "purple-ballerina", name: "Purple Ballerina", description: "Royal ballerina in lavender tutu with flower crown!", imageUrl: "💜", pointsRequired: 3680, bonusPoints: 0 },
       { id: "blue-ballerina", name: "Ocean Ballerina", description: "Aqua ballerina dancing with ocean wave patterns!", imageUrl: "💙", pointsRequired: 3740, bonusPoints: 0 },
       { id: "golden-ballerina", name: "Golden Ballerina", description: "Radiant ballerina in golden tutu with star sequins!", imageUrl: "⭐", pointsRequired: 3800, bonusPoints: 10 },
       { id: "peach-ballerina", name: "Rose Ballerina", description: "Romantic ballerina in peach tutu with rose details!", imageUrl: "🌹", pointsRequired: 3860, bonusPoints: 0 },
@@ -501,7 +501,7 @@ async function forceReseedSkinsIfNeeded() {
       { id: "rainbow-ballerina", name: "Rainbow Ballerina", description: "Magical ballerina in rainbow tutu spreading joy!", imageUrl: "🌈", pointsRequired: 4000, bonusPoints: 15 },
       
       // Tier 9 - Superhero Squad (Boys collection, 4060-4500 points) - Bonus Slots: 1, 3, 7
-      { id: "classic-superhero", name: "Classic Hero", description: "Iconic superhero in red and blue suit with star emblem!", imageUrl: "🦸", pointsRequired: 4060, bonusPoints: 5 },
+      { id: "classic-superhero", name: "Classic Hero", description: "Iconic superhero in red and blue suit with star emblem!", imageUrl: "🦸", pointsRequired: 4060, bonusPoints: 0 },
       { id: "lightning-speedster", name: "Lightning Speedster", description: "Super-fast hero in yellow suit with electric powers!", imageUrl: "⚡", pointsRequired: 4120, bonusPoints: 0 },
       { id: "tech-hero", name: "Tech Hero", description: "High-tech hero in purple armor with advanced gadgets!", imageUrl: "🤖", pointsRequired: 4180, bonusPoints: 10 },
       { id: "nature-guardian", name: "Nature Guardian", description: "Eco-hero in green suit protecting the environment!", imageUrl: "🌿", pointsRequired: 4240, bonusPoints: 0 },
@@ -512,7 +512,7 @@ async function forceReseedSkinsIfNeeded() {
       
       // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points) - Bonus Slots: 2, 6, 8
       { id: "titan-mech", name: "Titan Mech", description: "Massive mech warrior with powerful hydraulic arms!", imageUrl: "🤖", pointsRequired: 4560, bonusPoints: 0 },
-      { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 5 },
+      { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 0 },
       { id: "iron-guardian", name: "Iron Guardian", description: "Heavy armored mech designed for defense and protection!", imageUrl: "🛡️", pointsRequired: 4680, bonusPoints: 0 },
       { id: "plasma-bot", name: "Plasma Bot", description: "Energy-powered robot with glowing plasma core!", imageUrl: "💫", pointsRequired: 4740, bonusPoints: 0 },
       { id: "steel-samurai", name: "Steel Samurai", description: "Japanese-inspired mech with katana and honor code!", imageUrl: "⚔️", pointsRequired: 4800, bonusPoints: 0 },
@@ -524,14 +524,14 @@ async function forceReseedSkinsIfNeeded() {
       { id: "ninja-shadow", name: "Ninja Shadow", description: "Stealthy anime ninja with shadow jutsu techniques!", imageUrl: "🥷", pointsRequired: 5060, bonusPoints: 0 },
       { id: "spirit-fox", name: "Spirit Fox", description: "Mystical kitsune character with nine glowing tails!", imageUrl: "🦊", pointsRequired: 5120, bonusPoints: 0 },
       { id: "dragon-slayer", name: "Dragon Slayer", description: "Brave warrior wielding legendary dragon-forged sword!", imageUrl: "🐉", pointsRequired: 5180, bonusPoints: 0 },
-      { id: "magical-girl", name: "Magical Girl", description: "Sparkling magical girl with transformation powers!", imageUrl: "✨", pointsRequired: 5240, bonusPoints: 5 },
+      { id: "magical-girl", name: "Magical Girl", description: "Sparkling magical girl with transformation powers!", imageUrl: "✨", pointsRequired: 5240, bonusPoints: 0 },
       { id: "samurai-hero", name: "Samurai Hero", description: "Honorable samurai following the code of bushido!", imageUrl: "⚔️", pointsRequired: 5300, bonusPoints: 15 },
       { id: "elemental-master", name: "Elemental Master", description: "Anime hero controlling fire, water, earth and air!", imageUrl: "🌊", pointsRequired: 5360, bonusPoints: 0 },
       { id: "cat-fighter", name: "Cat Fighter", description: "Agile catgirl martial artist with lightning reflexes!", imageUrl: "🐱", pointsRequired: 5420, bonusPoints: 20 },
       { id: "school-hero", name: "School Hero", description: "Ordinary student with extraordinary hidden powers!", imageUrl: "📚", pointsRequired: 5500, bonusPoints: 0 },
       
       // Tier 12 - Gaming Legends (Unisex collection, 5560-6000 points) - Bonus Slots: 1, 5, 8
-      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 5 },
+      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 0 },
       { id: "pixel-warrior", name: "Pixel Warrior", description: "Retro 8-bit hero from classic gaming era!", imageUrl: "👾", pointsRequired: 5620, bonusPoints: 0 },
       { id: "controller-king", name: "Controller King", description: "Master of all gaming consoles and controllers!", imageUrl: "🕹️", pointsRequired: 5680, bonusPoints: 0 },
       { id: "vr-champion", name: "VR Champion", description: "Virtual reality hero exploring digital worlds!", imageUrl: "🥽", pointsRequired: 5740, bonusPoints: 0 },
@@ -542,16 +542,16 @@ async function forceReseedSkinsIfNeeded() {
       
       // Tier 13 - Pterosaur Sky (Flying Dinosaurs collection, 6060-6500 points) - Bonus Slots: 2, 5, 8
       { id: "pteranodon", name: "Pteranodon", description: "Majestic flying reptile with distinctive long head crest!", imageUrl: "🦅", pointsRequired: 6060, bonusPoints: 0 },
-      { id: "quetzalcoatlus", name: "Quetzalcoatlus", description: "One of the largest flying animals ever - truly gigantic!", imageUrl: "🦅", pointsRequired: 6120, bonusPoints: 10 },
+      { id: "quetzalcoatlus", name: "Quetzalcoatlus", description: "One of the largest flying animals ever - truly gigantic!", imageUrl: "🦅", pointsRequired: 6120, bonusPoints: 0 },
       { id: "rhamphorhynchus", name: "Rhamphorhynchus", description: "Small agile flyer with long tail and diamond tip!", imageUrl: "🦅", pointsRequired: 6180, bonusPoints: 0 },
       { id: "pterodactylus", name: "Pterodactylus", description: "The classic pterosaur from prehistoric skies!", imageUrl: "🦅", pointsRequired: 6240, bonusPoints: 0 },
       { id: "dimorphodon", name: "Dimorphodon", description: "Compact flyer with powerful jaws and strong teeth!", imageUrl: "🦅", pointsRequired: 6300, bonusPoints: 15 },
       { id: "tapejara", name: "Tapejara", description: "Stunning pterosaur with spectacular colorful head crest!", imageUrl: "🦅", pointsRequired: 6360, bonusPoints: 0 },
       { id: "anhanguera", name: "Anhanguera", description: "Expert fish hunter with long toothy snout!", imageUrl: "🦅", pointsRequired: 6420, bonusPoints: 0 },
-      { id: "dsungaripterus", name: "Dsungaripterus", description: "Shell-crushing specialist with unique curved beak!", imageUrl: "🦅", pointsRequired: 6500, bonusPoints: 15 },
+      { id: "dsungaripterus", name: "Dsungaripterus", description: "Shell-crushing specialist with unique curved beak!", imageUrl: "🦅", pointsRequired: 6500, bonusPoints: 0 },
       
       // Tier 14 - HeroKids Legacy (Logo-style collection, 6560-7000 points) - Bonus Slots: 1, 4, 7
-      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6560, bonusPoints: 5 },
+      { id: "shield-blaze", name: "Shield Blaze", description: "Protective hero boy with energy shield powers!", imageUrl: "🛡️", pointsRequired: 6560, bonusPoints: 0 },
       { id: "comet-dash", name: "Comet Dash", description: "Super-fast hero boy with comet trail speed!", imageUrl: "☄️", pointsRequired: 6620, bonusPoints: 0 },
       { id: "wave-glider", name: "Wave Glider", description: "Ocean hero boy surfing on water powers!", imageUrl: "🌊", pointsRequired: 6680, bonusPoints: 0 },
       { id: "forest-guard", name: "Forest Guard", description: "Nature hero boy with leaf shield protection!", imageUrl: "🌲", pointsRequired: 6740, bonusPoints: 10 },
