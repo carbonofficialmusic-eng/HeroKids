@@ -1282,7 +1282,7 @@ export default function KidDashboard() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-base truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                          {achievement.title}
+                          {t(`achievements.title_${achievement.slug}`)}
                         </h3>
                         <p className="text-sm text-purple-600 dark:text-purple-400 font-medium truncate">
                           {achievement.rewardType === "custom" && achievement.customReward
