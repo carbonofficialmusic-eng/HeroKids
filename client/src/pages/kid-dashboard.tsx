@@ -1275,7 +1275,7 @@ export default function KidDashboard() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="p-4 bg-gradient-to-br from-purple-500/5 to-pink-500/5 backdrop-blur-sm border-2 border-purple-500/20 rounded-2xl">
+                  <Card className="p-4 bg-white/10 dark:bg-black/10 backdrop-blur-sm border-2 border-purple-500/15 rounded-2xl">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-xl bg-purple-500/20 flex-shrink-0">
                         <Gift className="h-6 w-6 text-purple-500" />
