@@ -314,7 +314,7 @@ export default function Achievements() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <CardTitle className="text-lg">{achievement.title}</CardTitle>
+                          <CardTitle className="text-lg">{t(`achievements.title_${achievement.slug}`)}</CardTitle>
                           {!achievement.isActive && (
                             <Badge variant="secondary" className="text-xs">
                               {t("achievements.inactive")}
