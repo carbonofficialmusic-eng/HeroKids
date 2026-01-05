@@ -838,41 +838,38 @@
     "toastCheckoutError": "Checkout Error",
     "toastNoCheckoutUrl": "No checkout URL received from server",
     "toastCheckoutFailed": "Failed to start checkout process",
+    "perMonth": "per month",
     "tierFreeDesc": "Perfect for getting started",
-    "tierFamilyDesc": "Great for small families",
-    "tierFamilyPlusDesc": "For larger families",
-    "tierFamilyHeroDesc": "Ultimate family management",
+    "tierFamilyDesc": "All premium features",
+    "tierFamilyHeroDesc": "For large families",
     "tierFreeFeatures": [
-      "Up to 2 family members",
+      "Up to 3 family members",
+      "Parent & kids dashboard",
+      "Weekly & monthly leaderboards",
       "Unlimited tasks",
-      "Monthly leaderboard",
+      "Recurring tasks",
       "Custom rewards",
       "Dark mode",
-      "3 unlockable character skins"
+      "3 unlockable skins",
+      "Single device usage",
+      "Statistics"
     ],
     "tierFamilyFeatures": [
-      "Up to 4 family members",
+      "Up to 6 family members",
       "Everything in Free",
       "Photo proof for tasks",
-      "Recurring tasks",
-      "Weekly & monthly leaderboards",
-      "Advanced analytics",
-      "10 unlockable character skins"
-    ],
-    "tierFamilyPlusFeatures": [
-      "Up to 6 family members",
-      "Everything in Family",
+      "Multi-task feature",
+      "Family goals",
+      "Shared rewards",
       "Family chat",
-      "Task comments",
-      "Push notifications",
-      "All character skins unlocked"
+      "All skins unlockable",
+      "Device linking for kids",
+      "Achievements",
+      "Push notifications"
     ],
     "tierFamilyHeroFeatures": [
       "Unlimited family members",
-      "Everything in Family+",
-      "Priority support",
-      "Early access to new features",
-      "Custom integrations (coming soon)",
+      "Everything in Family",
       "All future features included"
     ]
   },

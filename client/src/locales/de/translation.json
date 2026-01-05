@@ -848,41 +848,38 @@
     "toastCheckoutError": "Checkout-Fehler",
     "toastNoCheckoutUrl": "Keine Checkout-URL vom Server erhalten",
     "toastCheckoutFailed": "Checkout-Prozess konnte nicht gestartet werden",
+    "perMonth": "pro Monat",
     "tierFreeDesc": "Perfekt für den Einstieg",
-    "tierFamilyDesc": "Ideal für kleine Familien",
-    "tierFamilyPlusDesc": "Für größere Familien",
-    "tierFamilyHeroDesc": "Ultimatives Familienmanagement",
+    "tierFamilyDesc": "Alle Premium-Funktionen",
+    "tierFamilyHeroDesc": "Für große Familien",
     "tierFreeFeatures": [
-      "Bis zu 2 Familienmitglieder",
+      "Bis zu 3 Familienmitglieder",
+      "Eltern- und Kinder-Dashboard",
+      "Wöchentliche & monatliche Bestenlisten",
       "Unbegrenzte Aufgaben",
-      "Monatliche Bestenliste",
+      "Wiederkehrende Aufgaben",
       "Individuelle Belohnungen",
       "Dark Mode",
-      "3 freischaltbare Charakter-Skins"
+      "3 freischaltbare Skins",
+      "Nutzung auf einem Gerät",
+      "Statistiken"
     ],
     "tierFamilyFeatures": [
-      "Bis zu 4 Familienmitglieder",
+      "Bis zu 6 Familienmitglieder",
       "Alles aus Free",
       "Foto-Nachweis für Aufgaben",
-      "Wiederkehrende Aufgaben",
-      "Wöchentliche & monatliche Bestenlisten",
-      "Erweiterte Analysen",
-      "10 freischaltbare Charakter-Skins"
-    ],
-    "tierFamilyPlusFeatures": [
-      "Bis zu 6 Familienmitglieder",
-      "Alles aus Family",
+      "Multi-Task Funktion",
+      "Familienziele",
+      "Belohnungen teilen",
       "Familien-Chat",
-      "Aufgaben-Kommentare",
-      "Push-Benachrichtigungen",
-      "Alle Charakter-Skins freigeschaltet"
+      "Alle Skins freischaltbar",
+      "Geräte-Verknüpfung für Kinder",
+      "Erfolge & Achievements",
+      "Push-Benachrichtigungen"
     ],
     "tierFamilyHeroFeatures": [
       "Unbegrenzte Familienmitglieder",
-      "Alles aus Family+",
-      "Prioritäts-Support",
-      "Früher Zugriff auf neue Funktionen",
-      "Individuelle Integrationen (kommt bald)",
+      "Alles aus Family",
       "Alle zukünftigen Funktionen inklusive"
     ]
   },

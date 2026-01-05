@@ -16,7 +16,7 @@ const TIERS = (t: (key: string, options?: any) => any) => [
     id: "free",
     name: "Free",
     icon: Users,
-    memberLimit: 2,
+    memberLimit: 3,
     price: "€0",
     period: "forever",
     description: t("pricing.tierFreeDesc"),
@@ -27,31 +27,20 @@ const TIERS = (t: (key: string, options?: any) => any) => [
     id: "family",
     name: "Family",
     icon: Trophy,
-    memberLimit: 4,
-    price: "€2",
-    period: "per month",
+    memberLimit: 6,
+    price: "€4,99",
+    period: t("pricing.perMonth"),
     description: t("pricing.tierFamilyDesc"),
     features: t("pricing.tierFamilyFeatures", { returnObjects: true }) as string[],
     popular: true,
-  },
-  {
-    id: "family_plus",
-    name: "Family+",
-    icon: Zap,
-    memberLimit: 6,
-    price: "€5",
-    period: "per month",
-    description: t("pricing.tierFamilyPlusDesc"),
-    features: t("pricing.tierFamilyPlusFeatures", { returnObjects: true }) as string[],
-    popular: false,
   },
   {
     id: "family_hero",
     name: "Family Hero",
     icon: Crown,
     memberLimit: 999,
-    price: "€12",
-    period: "per month",
+    price: "€12,99",
+    period: t("pricing.perMonth"),
     description: t("pricing.tierFamilyHeroDesc"),
     features: t("pricing.tierFamilyHeroFeatures", { returnObjects: true }) as string[],
     popular: false,
@@ -165,7 +154,7 @@ export default function Pricing() {
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {tiers.map((tier) => {
             const Icon = tier.icon;
             const isCurrentTier = familyData?.subscriptionTier === tier.id;
