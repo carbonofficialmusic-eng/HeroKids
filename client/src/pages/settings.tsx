@@ -86,20 +86,28 @@ export default function Settings() {
     }) => {
       return await apiRequest("PATCH", "/api/families/settings", settings);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/families/settings"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
-      toast({
-        title: t('settings.settingsUpdated'),
-        description: t('settings.settingsSavedDesc'),
+    onMutate: async (settings) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/families/current"] });
+      const previousData = queryClient.getQueryData(["/api/families/current"]);
+      queryClient.setQueryData(["/api/families/current"], (old: any) => {
+        if (!old) return old;
+        return { ...old, ...settings };
       });
+      return { previousData };
     },
-    onError: () => {
+    onError: (_error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(["/api/families/current"], context.previousData);
+      }
       toast({
         title: t('errors.somethingWrong'),
         description: t('settings.errorUpdateSettings'),
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/families/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
     },
   });
 
@@ -192,21 +200,33 @@ export default function Settings() {
     },
   });
 
-  // Toggle leaderboard exclusion mutation
+  // Toggle leaderboard exclusion mutation with optimistic updates
   const toggleLeaderboardExclusionMutation = useMutation({
     mutationFn: async ({ memberId, excludeFromLeaderboard }: { memberId: string; excludeFromLeaderboard: boolean }) => {
       return await apiRequest("PUT", `/api/family-members/${memberId}`, { excludeFromLeaderboard });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+    onMutate: async ({ memberId, excludeFromLeaderboard }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/family-members"] });
+      const previousMembers = queryClient.getQueryData(["/api/family-members"]);
+      queryClient.setQueryData(["/api/family-members"], (old: any) => {
+        if (!old) return old;
+        return old.map((m: any) => m.id === memberId ? { ...m, excludeFromLeaderboard } : m);
+      });
+      return { previousMembers };
     },
-    onError: () => {
+    onError: (_error, _variables, context) => {
+      if (context?.previousMembers) {
+        queryClient.setQueryData(["/api/family-members"], context.previousMembers);
+      }
       toast({
         title: t('errors.somethingWrong'),
         description: t('settings.errorUpdateLeaderboard'),
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
     },
   });
 

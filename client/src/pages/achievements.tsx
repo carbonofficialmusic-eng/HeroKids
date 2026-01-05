@@ -182,24 +182,42 @@ export default function Achievements() {
     },
   });
 
-  // Update achievement mutation
+  // Update achievement mutation with optimistic updates for instant UI response
   const updateAchievementMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<AchievementDefinition> }) => {
       return await apiRequest("PATCH", `/api/achievements/${id}`, data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
-      toast({
-        title: t("achievements.updated"),
-        description: t("achievements.savedSuccessfully"),
+    onMutate: async ({ id, data }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["/api/achievements"] });
+      
+      // Snapshot previous value
+      const previousAchievements = queryClient.getQueryData<AchievementDefinition[]>(["/api/achievements"]);
+      
+      // Optimistically update the cache immediately
+      queryClient.setQueryData<AchievementDefinition[]>(["/api/achievements"], (old) => {
+        if (!old) return old;
+        return old.map((achievement) =>
+          achievement.id === id ? { ...achievement, ...data } : achievement
+        );
       });
+      
+      return { previousAchievements };
     },
-    onError: () => {
+    onError: (_error, _variables, context) => {
+      // Rollback on error
+      if (context?.previousAchievements) {
+        queryClient.setQueryData(["/api/achievements"], context.previousAchievements);
+      }
       toast({
         title: t("error"),
         description: t("achievements.failedToUpdate"),
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      // Refetch after mutation settles to ensure sync
+      queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
     },
   });
 
