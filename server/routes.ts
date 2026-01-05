@@ -2256,6 +2256,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cancel a reward redemption and refund points (parents only)
+  app.delete("/api/reward-redemptions/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can cancel redemptions" });
+      }
+
+      const familyRedemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
+      const redemption = familyRedemptions.find(r => r.id === id);
+
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+
+      const { memberId, pointsRefunded, rewardId } = await storage.cancelRewardRedemption(id);
+
+      const refundedMember = await storage.getFamilyMemberById(memberId);
+
+      const reward = await storage.getRewardById(rewardId);
+      if (reward && reward.oneTimeOnly && !reward.isActive) {
+        await storage.updateReward(rewardId, { isActive: true });
+      }
+
+      broadcastToFamily(member.familyName, {
+        type: "redemption_cancelled",
+        redemptionId: id,
+        memberId,
+        pointsRefunded,
+        member: refundedMember,
+        rewardReactivated: reward?.oneTimeOnly || false,
+      });
+
+      res.json({ 
+        message: "Redemption cancelled and points refunded", 
+        pointsRefunded,
+        memberId,
+      });
+    } catch (error) {
+      console.error("Error cancelling redemption:", error);
+      res.status(500).json({ message: "Failed to cancel redemption" });
+    }
+  });
+
   // Create a reward request (children only) - supports Device Sessions
   app.post("/api/reward-requests", isAuthenticated, async (req: any, res) => {
     try {
