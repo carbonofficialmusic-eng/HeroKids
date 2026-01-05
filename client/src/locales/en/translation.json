@@ -691,7 +691,9 @@
     "switchMemberDesc": "Act as a different family member to test their view",
     "switchBackToMe": "Switch Back to Me",
     "switching": "Switching...",
-    "switch": "Switch"
+    "switch": "Switch",
+    "pinRequired": "PIN code required",
+    "enterPinFor": "Enter the PIN code for {{name}}"
   },
   "familySetup": {
     "welcomeToHeroKids": "Welcome to HeroKids!",

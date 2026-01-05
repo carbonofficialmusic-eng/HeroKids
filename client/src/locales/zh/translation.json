@@ -656,11 +656,13 @@
     "ownPhoto": "自己的",
     "recentAvatars": "最近的头像",
     "recentAvatarsHint": "点击最近的头像重新使用",
-    "switchMember": "Switch Member",
-    "switchMemberDesc": "Act as a different family member to test their view",
-    "switchBackToMe": "Switch Back to Me",
-    "switching": "Switching...",
-    "switch": "Switch"
+    "switchMember": "切换成员",
+    "switchMemberDesc": "作为其他家庭成员操作以测试他们的视图",
+    "switchBackToMe": "切回到我",
+    "switching": "切换中...",
+    "switch": "切换",
+    "pinRequired": "需要PIN码",
+    "enterPinFor": "请输入{{name}}的PIN码"
   },
   "familySetup": {
     "welcomeToHeroKids": "Welcome to HeroKids!",

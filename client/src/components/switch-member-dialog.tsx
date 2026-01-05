@@ -105,10 +105,10 @@ export function SwitchMemberDialog({
                   <div className="mt-2 space-y-2 p-4 rounded-lg border bg-accent/20">
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Lock className="h-4 w-4" />
-                      <span>PIN-Code erforderlich</span>
+                      <span>{t('memberDialogs.pinRequired')}</span>
                     </div>
                     <Label htmlFor="pin-input-switch" className="text-sm text-muted-foreground">
-                      Geben Sie den PIN-Code für {member.displayName} ein
+                      {t('memberDialogs.enterPinFor', { name: member.displayName })}
                     </Label>
                     <Input
                       id="pin-input-switch"

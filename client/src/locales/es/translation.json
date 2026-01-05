@@ -656,11 +656,13 @@
     "ownPhoto": "Propia",
     "recentAvatars": "Avatares recientes",
     "recentAvatarsHint": "Haz clic en un avatar reciente para usarlo de nuevo",
-    "switchMember": "Switch Member",
-    "switchMemberDesc": "Act as a different family member to test their view",
-    "switchBackToMe": "Switch Back to Me",
-    "switching": "Switching...",
-    "switch": "Switch"
+    "switchMember": "Cambiar miembro",
+    "switchMemberDesc": "Actuar como otro miembro de la familia para probar su vista",
+    "switchBackToMe": "Volver a mí",
+    "switching": "Cambiando...",
+    "switch": "Cambiar",
+    "pinRequired": "Código PIN requerido",
+    "enterPinFor": "Ingresa el código PIN para {{name}}"
   },
   "familySetup": {
     "welcomeToHeroKids": "Welcome to HeroKids!",

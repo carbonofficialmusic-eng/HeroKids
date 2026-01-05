@@ -691,7 +691,9 @@
     "switchMemberDesc": "Agera som en annan familjemedlem för att testa deras vy",
     "switchBackToMe": "Byt tillbaka till mig",
     "switching": "Byter...",
-    "switch": "Byt"
+    "switch": "Byt",
+    "pinRequired": "PIN-kod krävs",
+    "enterPinFor": "Ange PIN-koden för {{name}}"
   },
   "familySetup": {
     "welcomeToHeroKids": "Välkommen till HeroKids!",

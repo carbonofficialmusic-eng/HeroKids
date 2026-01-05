@@ -656,11 +656,13 @@
     "ownPhoto": "自分の",
     "recentAvatars": "最近のアバター",
     "recentAvatarsHint": "最近のアバターをクリックして再利用",
-    "switchMember": "Switch Member",
-    "switchMemberDesc": "Act as a different family member to test their view",
-    "switchBackToMe": "Switch Back to Me",
-    "switching": "Switching...",
-    "switch": "Switch"
+    "switchMember": "メンバー切り替え",
+    "switchMemberDesc": "別の家族メンバーとして行動し、彼らの画面をテスト",
+    "switchBackToMe": "自分に戻る",
+    "switching": "切り替え中...",
+    "switch": "切り替え",
+    "pinRequired": "PINコードが必要です",
+    "enterPinFor": "{{name}}のPINコードを入力してください"
   },
   "familySetup": {
     "welcomeToHeroKids": "Welcome to HeroKids!",
