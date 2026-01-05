@@ -238,6 +238,8 @@
     "pointsRequired": "필요한 포인트",
     "pointsRequiredDesc": "이 보상을 얻기 위해 필요한 포인트",
     "pointsNeeded": "이 보상을 얻기 위해 필요한 포인트",
+    "oneTimeOnly": "일회성 보상",
+    "oneTimeOnlyDesc": "교환 후 이 보상은 사라집니다 (예: 특정 장난감)",
     "active": "활성",
     "activeDesc": "이 보상을 사용 가능하게 만들기",
     "makeAvailable": "이 보상을 사용 가능하게 만들기",

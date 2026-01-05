@@ -239,6 +239,8 @@
     "pointsRequired": "Points Required",
     "pointsRequiredDesc": "How many points needed to earn this reward",
     "pointsNeeded": "How many points needed to earn this reward",
+    "oneTimeOnly": "One-time Reward",
+    "oneTimeOnlyDesc": "After redemption, this reward disappears (e.g., a specific toy)",
     "active": "Active",
     "activeDesc": "Make this reward available to earn",
     "makeAvailable": "Make this reward available to earn",

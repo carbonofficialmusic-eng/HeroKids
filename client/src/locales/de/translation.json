@@ -249,6 +249,8 @@
     "pointsRequired": "Benötigte Punkte",
     "pointsRequiredDesc": "Wie viele Punkte werden benötigt, um diese Belohnung zu verdienen",
     "pointsNeeded": "Wie viele Punkte werden benötigt, um diese Belohnung zu verdienen",
+    "oneTimeOnly": "Einmalige Belohnung",
+    "oneTimeOnlyDesc": "Nach dem Einlösen verschwindet diese Belohnung (z.B. eine bestimmte Puppe)",
     "active": "Aktiv",
     "activeDesc": "Diese Belohnung zum Verdienen verfügbar machen",
     "makeAvailable": "Diese Belohnung zum Verdienen verfügbar machen",

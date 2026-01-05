@@ -234,6 +234,8 @@
     "pointsRequired": "必要ポイント",
     "pointsRequiredDesc": "このごほうびを獲得するのに必要なポイント数",
     "pointsNeeded": "このごほうびを獲得するのに必要なポイント数",
+    "oneTimeOnly": "一回限りのごほうび",
+    "oneTimeOnlyDesc": "交換後、このごほうびは消えます（例：特定のおもちゃ）",
     "active": "有効",
     "activeDesc": "このごほうびを獲得可能にする",
     "makeAvailable": "このごほうびを獲得可能にする",

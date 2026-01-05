@@ -254,6 +254,7 @@ export const rewards = pgTable("rewards", {
   description: text("description"),
   pointThreshold: integer("point_threshold").notNull(),
   isActive: boolean("is_active").notNull().default(true),
+  oneTimeOnly: boolean("one_time_only").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

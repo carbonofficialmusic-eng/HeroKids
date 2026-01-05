@@ -234,6 +234,8 @@
     "pointsRequired": "Points requis",
     "pointsRequiredDesc": "Combien de points sont nécessaires pour gagner cette récompense",
     "pointsNeeded": "Combien de points sont nécessaires pour gagner cette récompense",
+    "oneTimeOnly": "Récompense unique",
+    "oneTimeOnlyDesc": "Après échange, cette récompense disparaît (ex: un jouet spécifique)",
     "active": "Active",
     "activeDesc": "Rendre cette récompense disponible",
     "makeAvailable": "Rendre cette récompense disponible",

@@ -2130,11 +2130,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Increment rewards redeemed counter (kept for analytics)
       await storage.incrementRewardsRedeemed(member.id);
       
+      // If one-time-only reward, deactivate it after redemption
+      if (reward.oneTimeOnly) {
+        await storage.updateReward(reward.id, { isActive: false });
+      }
+      
       // Broadcast redemption to family
       broadcastToFamily(member.familyName, {
         type: "reward_redeemed",
         redemption,
         member: { ...member, totalPoints: newTotalPoints },
+        rewardDeactivated: reward.oneTimeOnly,
       });
       
       res.json({ 

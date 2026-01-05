@@ -234,6 +234,8 @@
     "pointsRequired": "所需积分",
     "pointsRequiredDesc": "需要多少积分才能赢取此奖励",
     "pointsNeeded": "需要多少积分才能赢取此奖励",
+    "oneTimeOnly": "一次性奖励",
+    "oneTimeOnlyDesc": "兑换后，此奖励将消失（例如：特定的玩具）",
     "active": "启用",
     "activeDesc": "启用此奖励供兑换",
     "makeAvailable": "启用此奖励供兑换",
