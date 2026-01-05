@@ -199,6 +199,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
       });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       toast({
         title: t("kidDashboard.rewardRequested"),
         description: t("kidDashboard.rewardRequestedDesc", { title: reward.title }),
