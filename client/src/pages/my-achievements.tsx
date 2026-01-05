@@ -176,7 +176,7 @@ export default function MyAchievements() {
                       </div>
                       <div className="flex-1 min-w-0 space-y-2">
                         <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                          {achievement.title}
+                          {t(`achievements.title_${achievement.slug}`)}
                         </h3>
                         <p className="text-sm text-muted-foreground">
                           {t(`achievements.desc_${achievement.slug}`)}
