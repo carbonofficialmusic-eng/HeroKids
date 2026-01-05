@@ -52,7 +52,7 @@ export function TaskCard({
   
   return (
     <motion.div
-      className="min-h-[140px]"
+      className="min-h-[140px] min-w-0 w-full"
       initial={false}
       animate={{
         opacity: isGrayedOut ? 0.6 : 1,
