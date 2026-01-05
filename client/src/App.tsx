@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -31,6 +31,14 @@ import LinkDevice from "@/pages/link-device";
 interface FamilyMember {
   id: number;
   activeSkinId: string | null;
+}
+
+function RedirectToLanding() {
+  const [, setLocation] = useLocation();
+  useEffect(() => {
+    setLocation("/");
+  }, [setLocation]);
+  return null;
 }
 
 function BackgroundWrapper({ children }: { children: React.ReactNode }) {
@@ -134,6 +142,9 @@ function Router() {
           <Route path="/link-device" component={LinkDevice} />
           <Route path="/kid-dashboard" component={KidDashboard} />
           <Route path="/pricing" component={Pricing} />
+          <Route path="/dashboard">
+            <RedirectToLanding />
+          </Route>
           <Route component={NotFound} />
         </Switch>
       </BackgroundWrapper>
