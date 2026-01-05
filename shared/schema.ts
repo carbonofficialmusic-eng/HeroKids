@@ -61,7 +61,7 @@ export const families = pgTable("families", {
   tierExpiresAt: timestamp("tier_expires_at"), // When subscription expires (for grace periods)
   showLeaderboard: boolean("show_leaderboard").notNull().default(true), // Parents can hide leaderboard from children
   singleDeviceMode: boolean("single_device_mode").notNull().default(false), // Enable PIN protection for member switching
-  language: varchar("language", { length: 2 }).notNull().default("en"), // Family language (de, en, fr, es, ja, zh, ko)
+  language: varchar("language", { length: 2 }).notNull().default("en"), // Family language (de, en, fr, es, ja, zh, ko, sv)
   timezone: varchar("timezone", { length: 50 }).notNull().default("Europe/Berlin"), // IANA timezone (e.g., "America/New_York", "Asia/Tokyo")
   weeklyPrize: text("weekly_prize"), // Prize for weekly leaderboard winner
   monthlyPrize: text("monthly_prize"), // Prize for monthly leaderboard winner

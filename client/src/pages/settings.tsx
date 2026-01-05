@@ -79,7 +79,7 @@ export default function Settings() {
     mutationFn: async (settings: { 
       showLeaderboard?: boolean;
       singleDeviceMode?: boolean;
-      language?: "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko";
+      language?: "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" | "sv";
       timezone?: string;
       weeklyPrize?: string | null;
       monthlyPrize?: string | null;
@@ -326,7 +326,7 @@ export default function Settings() {
   };
 
   const handleLanguageChange = (language: string) => {
-    updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" });
+    updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" | "sv" });
   };
 
   const handleTimezoneChange = (timezone: string) => {
@@ -348,11 +348,13 @@ export default function Settings() {
     { value: "ja", label: "日本語" },
     { value: "zh", label: "中文" },
     { value: "ko", label: "한국어" },
+    { value: "sv", label: "Svenska" },
   ];
 
   // Common timezones grouped by region
   const timezoneOptions = [
     { value: "Europe/Berlin", label: "🇩🇪 Berlin (MEZ/MESZ)" },
+    { value: "Europe/Stockholm", label: "🇸🇪 Stockholm (MEZ/MESZ)" },
     { value: "Europe/London", label: "🇬🇧 London (GMT/BST)" },
     { value: "Europe/Paris", label: "🇫🇷 Paris (MEZ/MESZ)" },
     { value: "Europe/Madrid", label: "🇪🇸 Madrid (MEZ/MESZ)" },
