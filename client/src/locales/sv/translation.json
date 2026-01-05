@@ -1053,7 +1053,16 @@
     "bonusPointsReward": "Bonuspoäng",
     "customReward": "Anpassad belöning",
     "customRewardPlaceholder": "t.ex., Extra veckopeng, Filmkväll",
-    "customRewardDesc": "Beskriv belöningen (t.ex., \"Extra veckopeng\", \"Glass\")"
+    "customRewardDesc": "Beskriv belöningen (t.ex., \"Extra veckopeng\", \"Glass\")",
+    "desc_first-weekly-finisher": "Var den första familjemedlemmen som slutför alla veckans uppgifter",
+    "desc_perfect-week": "Slutför alla dina veckoupgifter utan avslag",
+    "desc_task-streak-7": "Slutför uppgifter 7 dagar i rad",
+    "desc_task-streak-14": "Slutför uppgifter 14 dagar i rad",
+    "desc_task-streak-30": "Slutför uppgifter 30 dagar i rad",
+    "desc_lifetime-500": "Tjäna totalt 500 poäng",
+    "desc_lifetime-1000": "Tjäna totalt 1000 poäng",
+    "desc_lifetime-2000": "Tjäna totalt 2000 poäng",
+    "desc_weekly-leaderboard-1st": "Ta 1:a platsen på veckans topplista"
   },
   "myAchievements": {
     "title": "Mina prestationer",
