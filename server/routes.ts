@@ -5004,6 +5004,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ========================================
+  // Data Migration Routes (for syncing dev to production)
+  // ========================================
+  
+  // Export all data as JSON (for backup/migration)
+  app.get("/api/admin/export", isAdmin, async (req, res) => {
+    try {
+      const data = await storage.exportAllData();
+      res.json(data);
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      res.status(500).json({ message: "Failed to export data" });
+    }
+  });
+  
+  // Import data from JSON (for restoring to production)
+  app.post("/api/admin/import", isAdmin, async (req, res) => {
+    try {
+      const { data, skipExisting = true } = req.body;
+      
+      if (!data) {
+        return res.status(400).json({ message: "No data provided" });
+      }
+      
+      const result = await storage.importAllData(data, skipExisting);
+      res.json({ 
+        message: "Data imported successfully", 
+        ...result 
+      });
+    } catch (error: any) {
+      console.error("Error importing data:", error);
+      res.status(500).json({ message: "Failed to import data", error: error.message });
+    }
+  });
+  
+  // ========================================
   // End of Admin Dashboard Routes
   // ========================================
   

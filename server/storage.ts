@@ -2653,6 +2653,119 @@ export class DatabaseStorage implements IStorage {
       earnedLegacySkinIds: member?.earnedLegacySkinIds || []
     };
   }
+
+  // Data Migration Methods
+  async exportAllData(): Promise<any> {
+    const [
+      allFamilies,
+      allMembers,
+      allTasks,
+      allRewards,
+      allRewardRedemptions,
+      allTaskCompletions,
+      allChatMessages,
+      allAchievementDefs,
+      allAchievementAwards,
+      allFamilyGoals,
+      allStarPlacements,
+    ] = await Promise.all([
+      db.select().from(families),
+      db.select().from(familyMembers),
+      db.select().from(tasks),
+      db.select().from(rewards),
+      db.select().from(rewardRedemptions),
+      db.select().from(taskCompletions),
+      db.select().from(chatMessages),
+      db.select().from(achievementDefinitions),
+      db.select().from(achievementAwards),
+      db.select().from(familyGoals),
+      db.select().from(starPlacements),
+    ]);
+
+    return {
+      exportDate: new Date().toISOString(),
+      families: allFamilies,
+      familyMembers: allMembers,
+      tasks: allTasks,
+      rewards: allRewards,
+      rewardRedemptions: allRewardRedemptions,
+      taskCompletions: allTaskCompletions,
+      chatMessages: allChatMessages,
+      achievementDefinitions: allAchievementDefs,
+      achievementAwards: allAchievementAwards,
+      familyGoals: allFamilyGoals,
+      starPlacements: allStarPlacements,
+    };
+  }
+
+  async importAllData(data: any, skipExisting: boolean = true): Promise<{ imported: any; skipped: any }> {
+    const imported: any = {};
+    const skipped: any = {};
+
+    // Helper to safely insert records
+    const safeInsert = async (table: any, records: any[], tableName: string, idField: string = 'id') => {
+      let insertedCount = 0;
+      let skippedCount = 0;
+
+      for (const record of records) {
+        try {
+          if (skipExisting) {
+            // Check if record already exists
+            const existing = await db.select().from(table).where(eq(table[idField], record[idField])).limit(1);
+            if (existing.length > 0) {
+              skippedCount++;
+              continue;
+            }
+          }
+          await db.insert(table).values(record).onConflictDoNothing();
+          insertedCount++;
+        } catch (error: any) {
+          console.log(`Skipping ${tableName} record ${record[idField]}: ${error.message}`);
+          skippedCount++;
+        }
+      }
+
+      imported[tableName] = insertedCount;
+      skipped[tableName] = skippedCount;
+    };
+
+    // Import in order of dependencies
+    if (data.families?.length) {
+      await safeInsert(families, data.families, 'families', 'familyName');
+    }
+    if (data.familyMembers?.length) {
+      await safeInsert(familyMembers, data.familyMembers, 'familyMembers');
+    }
+    if (data.tasks?.length) {
+      await safeInsert(tasks, data.tasks, 'tasks');
+    }
+    if (data.rewards?.length) {
+      await safeInsert(rewards, data.rewards, 'rewards');
+    }
+    if (data.rewardRedemptions?.length) {
+      await safeInsert(rewardRedemptions, data.rewardRedemptions, 'rewardRedemptions');
+    }
+    if (data.taskCompletions?.length) {
+      await safeInsert(taskCompletions, data.taskCompletions, 'taskCompletions');
+    }
+    if (data.chatMessages?.length) {
+      await safeInsert(chatMessages, data.chatMessages, 'chatMessages');
+    }
+    if (data.achievementDefinitions?.length) {
+      await safeInsert(achievementDefinitions, data.achievementDefinitions, 'achievementDefinitions');
+    }
+    if (data.achievementAwards?.length) {
+      await safeInsert(achievementAwards, data.achievementAwards, 'achievementAwards');
+    }
+    if (data.familyGoals?.length) {
+      await safeInsert(familyGoals, data.familyGoals, 'familyGoals');
+    }
+    if (data.starPlacements?.length) {
+      await safeInsert(starPlacements, data.starPlacements, 'starPlacements');
+    }
+
+    return { imported, skipped };
+  }
 }
 
 export const storage = new DatabaseStorage();

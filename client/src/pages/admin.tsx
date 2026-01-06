@@ -32,7 +32,11 @@ import {
   UserMinus,
   BarChart3,
   PieChart,
-  Plus
+  Plus,
+  Database,
+  Download,
+  Upload,
+  Loader2
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/skins";
 import { queryClient } from "@/lib/queryClient";
@@ -439,7 +443,7 @@ export default function AdminPage() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-xl">
+          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
             <TabsTrigger value="overview" data-testid="tab-overview">
               <TrendingUp className="h-4 w-4 mr-2" />
               Overview
@@ -455,6 +459,10 @@ export default function AdminPage() {
             <TabsTrigger value="skins" data-testid="tab-skins">
               <Palette className="h-4 w-4 mr-2" />
               Skins
+            </TabsTrigger>
+            <TabsTrigger value="migration" data-testid="tab-migration">
+              <Database className="h-4 w-4 mr-2" />
+              Migration
             </TabsTrigger>
           </TabsList>
 
@@ -846,6 +854,134 @@ export default function AdminPage() {
                     </div>
                   </div>
                 ) : null}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Data Migration Tab */}
+          <TabsContent value="migration" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="h-5 w-5" />
+                  Data Migration
+                </CardTitle>
+                <CardDescription>
+                  Export data from development and import to production database
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Export Section */}
+                  <div className="space-y-4 p-4 border rounded-lg">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Download className="h-4 w-4" />
+                      Export Data
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Download all data from the current database as JSON.
+                    </p>
+                    <Button 
+                      onClick={async () => {
+                        try {
+                          const res = await fetch("/api/admin/export", {
+                            headers: { Authorization: `Bearer ${sessionStorage.getItem("adminToken")}` }
+                          });
+                          const data = await res.json();
+                          const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = `herokids-export-${new Date().toISOString().split("T")[0]}.json`;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                          toast({ title: "Export successful", description: "Data downloaded as JSON file" });
+                        } catch (err) {
+                          toast({ title: "Export failed", description: "Could not export data", variant: "destructive" });
+                        }
+                      }}
+                      data-testid="button-export-data"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Export All Data
+                    </Button>
+                  </div>
+
+                  {/* Import Section */}
+                  <div className="space-y-4 p-4 border rounded-lg">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      Import Data
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Upload a JSON export file to restore data.
+                    </p>
+                    <input
+                      type="file"
+                      accept=".json"
+                      id="import-file"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        
+                        try {
+                          const text = await file.text();
+                          const data = JSON.parse(text);
+                          
+                          const res = await fetch("/api/admin/import", {
+                            method: "POST",
+                            headers: { 
+                              "Content-Type": "application/json",
+                              Authorization: `Bearer ${sessionStorage.getItem("adminToken")}` 
+                            },
+                            body: JSON.stringify({ data, skipExisting: true })
+                          });
+                          
+                          const result = await res.json();
+                          if (res.ok) {
+                            toast({ 
+                              title: "Import successful", 
+                              description: `Imported: ${JSON.stringify(result.imported)}` 
+                            });
+                            refetchStats();
+                            refetchFamilies();
+                          } else {
+                            throw new Error(result.message);
+                          }
+                        } catch (err: any) {
+                          toast({ 
+                            title: "Import failed", 
+                            description: err.message || "Could not import data", 
+                            variant: "destructive" 
+                          });
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                    <Button 
+                      onClick={() => document.getElementById("import-file")?.click()}
+                      variant="outline"
+                      data-testid="button-import-data"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Import from JSON
+                    </Button>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2">Migration Instructions</h4>
+                  <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
+                    <li>Go to the <strong>Development</strong> environment and click "Export All Data"</li>
+                    <li>Save the JSON file to your computer</li>
+                    <li>Go to the <strong>Production</strong> app (herokids.replit.app/admin)</li>
+                    <li>Login to admin and click "Import from JSON"</li>
+                    <li>Select the exported JSON file - all families will be restored</li>
+                  </ol>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
