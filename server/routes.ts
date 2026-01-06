@@ -2881,17 +2881,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🎨 Skins API: totalEarned=${member.totalEarned}, discovered=${discoveredSkinIds.length}, available=${availableCards}`);
       
-      // Initialize star placements for child members and get star data
+      // Initialize star placements for all members and get star data
       let starStats = { starsFound: 0, totalStars: 0, earnedLegacySkinIds: [] as string[] };
       let starPlacements: Record<string, boolean> = {};
       
-      if (member.role === "child") {
-        await storage.initializeStarPlacements(member.id);
-        starStats = await storage.getMemberStarStats(member.id);
-        const placements = await storage.getStarPlacementsByMember(member.id);
-        for (const p of placements) {
-          starPlacements[p.skinId] = p.found;
-        }
+      await storage.initializeStarPlacements(member.id);
+      starStats = await storage.getMemberStarStats(member.id);
+      const placements = await storage.getStarPlacementsByMember(member.id);
+      for (const p of placements) {
+        starPlacements[p.skinId] = p.found;
       }
       
       res.json({
@@ -3067,10 +3065,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Initialize star placements for child members if not already done
-      if (member.role === "child") {
-        await storage.initializeStarPlacements(member.id);
-      }
+      // Initialize star placements for all members if not already done
+      await storage.initializeStarPlacements(member.id);
       
       const starStats = await storage.getMemberStarStats(member.id);
       const starPlacements = await storage.getStarPlacementsByMember(member.id);
@@ -3112,11 +3108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Only initialize for child members
-      if (member.role !== "child") {
-        return res.status(403).json({ message: "Star collection is only for children" });
-      }
-      
+      // Initialize star placements for all members (parents can also collect stars)
       await storage.initializeStarPlacements(member.id);
       const starStats = await storage.getMemberStarStats(member.id);
       
