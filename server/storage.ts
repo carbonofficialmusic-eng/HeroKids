@@ -2007,9 +2007,14 @@ export class DatabaseStorage implements IStorage {
       }
 
       // 14. Reset all family member stats to zero (including PIN codes, starsFound, Legacy skins, and profile photos)
-      // Give everyone the starter skin as a teaser
+      // Give everyone the starter skin as a teaser, and assign a random default avatar icon
       const STARTER_SKIN = "junior-champion";
+      const DEFAULT_AVATARS = ["default:fox", "default:bear", "default:rabbit", "default:cat", "default:penguin", "default:lion"];
+      
       for (const memberId of memberIds) {
+        // Pick a random default avatar for each member
+        const randomAvatar = DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)];
+        
         await tx.update(familyMembers)
           .set({
             totalEarned: 0,
@@ -2020,9 +2025,9 @@ export class DatabaseStorage implements IStorage {
             unlockedSkins: [],
             discoveredSkinIds: [STARTER_SKIN],
             earnedLegacySkinIds: [], // Reset HeroKids Legacy avatars earned through stars
-            activeSkinId: STARTER_SKIN, // Set starter skin as default avatar
-            avatarUrl: null, // Clear profile photos
-            useCustomAvatar: false, // Reset to use skin avatar
+            activeSkinId: null, // No skin selected - use avatarUrl instead
+            avatarUrl: randomAvatar, // Set random default avatar icon (resolved by frontend)
+            useCustomAvatar: true, // Use the default avatar icon
             pinCode: null,
             starsFound: 0,
             updatedAt: new Date(),

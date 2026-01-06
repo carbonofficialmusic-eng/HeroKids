@@ -25,3 +25,30 @@ export const colorOptions = [
   { id: "red", value: "#EF4444", name: "Red" },
   { id: "teal", value: "#14B8A6", name: "Teal" },
 ];
+
+// Default avatar IDs that the backend can use (prefixed with "default:")
+export const DEFAULT_AVATAR_PREFIX = "default:";
+
+// Get the default avatar IDs that can be stored in the database
+export const DEFAULT_AVATAR_IDS = avatarAssets.map(a => `${DEFAULT_AVATAR_PREFIX}${a.id}`);
+
+// Resolve a default avatar marker to the actual bundled URL
+export function resolveAvatarUrl(avatarUrl: string | null | undefined): string | null {
+  if (!avatarUrl) return null;
+  
+  // Check if it's a default avatar marker (e.g., "default:fox")
+  if (avatarUrl.startsWith(DEFAULT_AVATAR_PREFIX)) {
+    const avatarId = avatarUrl.slice(DEFAULT_AVATAR_PREFIX.length);
+    const asset = avatarAssets.find(a => a.id === avatarId);
+    return asset?.url || avatarAssets[0].url; // Fallback to fox if not found
+  }
+  
+  // Regular URL, return as-is
+  return avatarUrl;
+}
+
+// Get a random default avatar marker for factory reset
+export function getRandomDefaultAvatarMarker(): string {
+  const randomIndex = Math.floor(Math.random() * avatarAssets.length);
+  return `${DEFAULT_AVATAR_PREFIX}${avatarAssets[randomIndex].id}`;
+}

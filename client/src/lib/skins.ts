@@ -1,3 +1,6 @@
+// Import default avatar resolver
+import { resolveAvatarUrl } from "@/lib/avatarAssets";
+
 // Import skin images using @assets alias
 // Tier 1 - Starter Heroes (Modern fresh designs)
 import juniorChampionImg from "@assets/generated_images/Modern_Junior_Champion_avatar_2bc47f6b.png";
@@ -632,7 +635,11 @@ export function getAvatarUrl(
 ): string | undefined {
   // If custom avatar flag is set and there's a custom avatar, use it
   if (useCustomAvatar && customAvatarUrl) {
-    return addCacheBuster(customAvatarUrl, updatedAt);
+    // Resolve default avatar markers (e.g., "default:fox") to actual bundled URLs
+    const resolvedUrl = resolveAvatarUrl(customAvatarUrl);
+    if (resolvedUrl) {
+      return addCacheBuster(resolvedUrl, updatedAt);
+    }
   }
   
   // Otherwise, use skin avatar if available
@@ -640,8 +647,9 @@ export function getAvatarUrl(
     return SKIN_IMAGES[activeSkinId];
   }
   
-  // Final fallback to custom avatar
-  return addCacheBuster(customAvatarUrl ?? undefined, updatedAt) || undefined;
+  // Final fallback to custom avatar (also resolve default markers)
+  const resolvedFallback = resolveAvatarUrl(customAvatarUrl);
+  return addCacheBuster(resolvedFallback ?? undefined, updatedAt) || undefined;
 }
 
 // Helper to get background URL for active skin
