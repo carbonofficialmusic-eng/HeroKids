@@ -187,8 +187,8 @@ export default function SkinsGallery() {
         className={`
           relative cursor-pointer transition-all duration-200
           rounded-md overflow-hidden border-2
-          ${isSelected ? "border-primary ring-2 ring-primary/50 scale-105" : "border-transparent"}
-          ${isActive ? "ring-2 ring-yellow-400" : ""}
+          ${isSelected ? "border-primary border-4 ring-4 ring-primary/60 scale-110 shadow-lg shadow-primary/30" : "border-transparent"}
+          ${isActive ? "ring-4 ring-yellow-400 ring-offset-2" : ""}
           hover:scale-105 hover:border-primary/50
         `}
         data-testid={`mini-skin-${skin.id}`}

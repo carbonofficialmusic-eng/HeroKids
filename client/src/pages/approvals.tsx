@@ -11,11 +11,17 @@ import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { Locale } from "date-fns";
+import { de, enUS, fr, es, ja, zhCN, ko, sv } from "date-fns/locale";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 
+const dateFnsLocales: Record<string, Locale> = {
+  de, en: enUS, fr, es, ja, zh: zhCN, ko, sv
+};
+
 export default function Approvals() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedCompletion, setSelectedCompletion] = useState<any>(null);
@@ -168,7 +174,7 @@ export default function Approvals() {
                           {completion.taskTitle}
                         </CardTitle>
                         <CardDescription>
-                          {t("approvals.completedBy", { name: completion.memberName })} • {formatDistanceToNow(new Date(completion.completedAt))} {t("approvals.ago")}
+                          {t("approvals.completedBy", { name: completion.memberName })} • {formatDistanceToNow(new Date(completion.completedAt), { locale: dateFnsLocales[i18n.language] || enUS, addSuffix: true })}
                         </CardDescription>
                       </div>
                     </div>
