@@ -16,7 +16,8 @@
     "select": "选择",
     "backToDashboard": "返回主页",
     "error": "错误",
-    "monthsShort": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
+    "monthsShort": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+    "stars": "星星"
   },
   "nav": {
     "dashboard": "主页",
@@ -327,7 +328,9 @@
     "unlockAt1400": "🔒 累计1400积分解锁",
     "noSkinsInTier": "此包中没有可用的皮肤",
     "pterosaurSky": "翼龙天空",
-    "unlockAtPoints": "🔒 累计{{points}}积分解锁"
+    "unlockAtPoints": "🔒 累计{{points}}积分解锁",
+    "starFound": "你发现了一颗星！",
+    "legacyUnlocked": "HeroKids Legacy头像已解锁！"
   },
   "skinNames": {
     "junior-champion": "少年冠军",

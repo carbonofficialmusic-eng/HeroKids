@@ -16,7 +16,8 @@
     "select": "Sélectionner",
     "backToDashboard": "Retour au tableau de bord",
     "error": "Erreur",
-    "monthsShort": ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"]
+    "monthsShort": ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"],
+    "stars": "Étoiles"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -327,7 +328,9 @@
     "unlockAt1400": "🔒 Déverrouiller avec 1400 points totaux",
     "noSkinsInTier": "Aucune apparence disponible dans ce pack",
     "pterosaurSky": "Ciel des Ptérosaures",
-    "unlockAtPoints": "🔒 Déverrouiller avec {{points}} points totaux"
+    "unlockAtPoints": "🔒 Déverrouiller avec {{points}} points totaux",
+    "starFound": "Tu as trouvé une étoile !",
+    "legacyUnlocked": "Avatar HeroKids Legacy débloqué !"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

@@ -16,7 +16,8 @@
     "filter": "필터",
     "select": "선택",
     "error": "오류",
-    "monthsShort": ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"]
+    "monthsShort": ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+    "stars": "별"
   },
   "nav": {
     "dashboard": "대시보드",
@@ -331,7 +332,9 @@
     "failedToSelect": "스킨 선택에 실패했습니다",
     "noSkinsInTier": "이 패키지에 사용 가능한 스킨이 없습니다",
     "pterosaurSky": "익룡의 하늘",
-    "unlockAtPoints": "🔒 총 {{points}} 포인트에서 잠금 해제"
+    "unlockAtPoints": "🔒 총 {{points}} 포인트에서 잠금 해제",
+    "starFound": "별을 찾았어요!",
+    "legacyUnlocked": "HeroKids Legacy 아바타 획득!"
   },
   "skinNames": {
     "junior-champion": "주니어 챔피언",

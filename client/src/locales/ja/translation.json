@@ -16,7 +16,8 @@
     "select": "選択",
     "backToDashboard": "ダッシュボードに戻る",
     "error": "エラー",
-    "monthsShort": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
+    "monthsShort": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+    "stars": "スター"
   },
   "nav": {
     "dashboard": "ダッシュボード",
@@ -327,7 +328,9 @@
     "unlockAt1400": "🔒 通算1400ポイントでアンロック",
     "noSkinsInTier": "このパッケージにスキンはありません",
     "pterosaurSky": "翼竜の空",
-    "unlockAtPoints": "🔒 通算{{points}}ポイントでアンロック"
+    "unlockAtPoints": "🔒 通算{{points}}ポイントでアンロック",
+    "starFound": "星を見つけた！",
+    "legacyUnlocked": "HeroKids Legacyアバター獲得！"
   },
   "skinNames": {
     "junior-champion": "ジュニアチャンピオン",

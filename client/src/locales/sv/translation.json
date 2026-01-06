@@ -16,7 +16,8 @@
     "filter": "Filtrera",
     "select": "Välj",
     "error": "Fel",
-    "monthsShort": ["Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"]
+    "monthsShort": ["Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
+    "stars": "Stjärnor"
   },
   "nav": {
     "dashboard": "Instrumentpanel",
@@ -341,7 +342,9 @@
     "mystery": "Upptäck för att avslöja!",
     "yourPhoto": "Ditt foto",
     "useYourPhoto": "Använd ditt foto",
-    "photoEquipped": "Ditt foto utrustat!"
+    "photoEquipped": "Ditt foto utrustat!",
+    "starFound": "Du hittade en stjärna!",
+    "legacyUnlocked": "HeroKids Legacy-avatar upplåst!"
   },
   "skinNames": {
     "junior-champion": "Juniorchampion",
