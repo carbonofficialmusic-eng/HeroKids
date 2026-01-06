@@ -201,12 +201,22 @@ export default function AdminPage() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  type="password"
+                  type="text"
                   placeholder="Admin Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onPaste={(e) => {
+                    e.stopPropagation();
+                    const text = e.clipboardData.getData('text');
+                    setPassword(text);
+                  }}
                   className="pl-10"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   data-testid="input-admin-password"
+                  style={{ WebkitTextSecurity: 'disc' } as any}
                 />
               </div>
               <Button
