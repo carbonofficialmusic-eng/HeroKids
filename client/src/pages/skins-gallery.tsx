@@ -565,23 +565,15 @@ export default function SkinsGallery() {
                 </div>
               )}
 
-              {/* Regular Skins Grid */}
-              <Card className="bg-card/80 backdrop-blur-md p-3 mb-4">
-                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-8 xl:grid-cols-10 gap-2">
-                  {regularSkins.map((skin, index) => renderMiniCard(skin, index))}
-                </div>
-              </Card>
-
-              {/* Legacy Skins Section */}
+              {/* Legacy Skins Section - unlocked via stars */}
               {legacySkins.length > 0 && (
-                <Card className="bg-gradient-to-br from-purple-500/20 to-card/80 backdrop-blur-md p-3">
+                <Card className="bg-gradient-to-br from-purple-500/20 to-card/80 backdrop-blur-md p-3 mb-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Crown className="h-5 w-5 text-purple-400" />
                     <h3 className="font-bold font-accent text-purple-300">HeroKids Legacy</h3>
                     <Badge variant="secondary" className="text-xs">
-                      {totalEarned >= LEGACY_UNLOCK_THRESHOLD 
-                        ? t('skins.unlocked')
-                        : `${LEGACY_UNLOCK_THRESHOLD} ${t('common.points')}`}
+                      <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
+                      4 {t('common.stars')} = 1 Avatar
                     </Badge>
                   </div>
                   <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-8 xl:grid-cols-10 gap-2">
@@ -589,6 +581,13 @@ export default function SkinsGallery() {
                   </div>
                 </Card>
               )}
+
+              {/* Regular Skins Grid */}
+              <Card className="bg-card/80 backdrop-blur-md p-3">
+                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-8 xl:grid-cols-10 gap-2">
+                  {regularSkins.map((skin, index) => renderMiniCard(skin, index))}
+                </div>
+              </Card>
             </div>
           </div>
         </div>
