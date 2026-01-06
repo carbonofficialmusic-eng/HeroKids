@@ -409,9 +409,8 @@ export default function AdminPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="free">Free</SelectItem>
-                          <SelectItem value="family">Family</SelectItem>
-                          <SelectItem value="family_plus">Family+</SelectItem>
-                          <SelectItem value="family_hero">Family Hero</SelectItem>
+                          <SelectItem value="family">Family (2€)</SelectItem>
+                          <SelectItem value="family_hero">Family Hero (12€)</SelectItem>
                         </SelectContent>
                       </Select>
                       <ChevronRight className="h-5 w-5 text-muted-foreground" />
