@@ -1,10 +1,64 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { FamilySetup } from "@/components/family-setup";
+
+// Custom hook for sticky sidebar on desktop
+function useStickyPanel(isDesktop: boolean) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [stickyStyle, setStickyStyle] = useState<React.CSSProperties>({});
+
+  useEffect(() => {
+    if (!isDesktop) {
+      setStickyStyle({});
+      return;
+    }
+
+    const handleScroll = () => {
+      if (!containerRef.current || !panelRef.current) return;
+      
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const panelHeight = panelRef.current.offsetHeight;
+      const topOffset = 16;
+      
+      if (containerRect.top < topOffset) {
+        const maxScroll = containerRect.height - panelHeight;
+        const currentScroll = topOffset - containerRect.top;
+        
+        if (currentScroll < maxScroll) {
+          setStickyStyle({
+            position: 'fixed',
+            top: `${topOffset}px`,
+            width: `${panelRef.current.offsetWidth}px`,
+          });
+        } else {
+          setStickyStyle({
+            position: 'absolute',
+            bottom: '0',
+            top: 'auto',
+          });
+        }
+      } else {
+        setStickyStyle({});
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [isDesktop]);
+
+  return { containerRef, panelRef, stickyStyle };
+}
 import { PointCounter } from "@/components/point-counter";
 import { TaskCard } from "@/components/task-card";
 import { Leaderboard } from "@/components/leaderboard";
@@ -67,6 +121,17 @@ export default function Dashboard() {
   const [debugTapCount, setDebugTapCount] = useState(0);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
   const debugTapTimeout = useState<NodeJS.Timeout | null>(null);
+  
+  // Detect desktop for sticky sidebar (lg breakpoint = 1024px)
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
+  
+  const { containerRef, panelRef, stickyStyle } = useStickyPanel(isDesktop);
 
   // Debug tap handler - 5 taps on logo shows viewport info
   const handleDebugTap = () => {
@@ -751,7 +816,7 @@ export default function Dashboard() {
       <div className="container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden">
         {isParent ? (
           /* Parent View */
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6 min-w-0">
               {/* Logo and Stats Section */}
@@ -1095,8 +1160,9 @@ export default function Dashboard() {
 
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
+            {/* Sidebar - sticky on desktop */}
+            <div className="relative">
+              <div ref={panelRef} style={stickyStyle} className="space-y-6">
               {/* Special Achievement Rewards Section */}
               {specialRewards.length > 0 && (
                 <div className="space-y-3">
@@ -1163,6 +1229,7 @@ export default function Dashboard() {
                 weeklyPrize={familyData?.weeklyPrize}
                 monthlyPrize={familyData?.monthlyPrize}
               />
+              </div>
             </div>
           </div>
         ) : (
