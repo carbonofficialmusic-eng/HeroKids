@@ -31,7 +31,8 @@ import {
   Send,
   UserMinus,
   BarChart3,
-  PieChart
+  PieChart,
+  Plus
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/skins";
 import { queryClient } from "@/lib/queryClient";
@@ -139,6 +140,8 @@ export default function AdminPage() {
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
   const [messageToSend, setMessageToSend] = useState("");
   const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string; familyName: string } | null>(null);
+  const [memberToAddPoints, setMemberToAddPoints] = useState<{ id: string; name: string } | null>(null);
+  const [pointsToAdd, setPointsToAdd] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -297,6 +300,33 @@ export default function AdminPage() {
       refetchDetails();
       refetchFamilies();
       refetchStats();
+    },
+    onError: (error: Error) => {
+      toast({ title: error.message, variant: "destructive" });
+    },
+  });
+
+  const addPointsMutation = useMutation({
+    mutationFn: async ({ memberId, points }: { memberId: string; points: number }) => {
+      const res = await fetch(`/api/admin/members/${memberId}/points`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ points }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to add points");
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: `Punkte hinzugefügt! Neuer Stand: ${data.newTotalPoints}` });
+      setMemberToAddPoints(null);
+      setPointsToAdd("");
+      refetchDetails();
     },
     onError: (error: Error) => {
       toast({ title: error.message, variant: "destructive" });
@@ -927,6 +957,17 @@ export default function AdminPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => setMemberToAddPoints({ 
+                              id: member.id, 
+                              name: member.displayName 
+                            })}
+                            data-testid={`button-add-points-${member.id}`}
+                          >
+                            <Plus className="h-4 w-4 text-green-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setMemberToRemove({ 
                               id: member.id, 
                               name: member.displayName, 
@@ -979,6 +1020,77 @@ export default function AdminPage() {
                 data-testid="button-confirm-remove"
               >
                 {removeMemberMutation.isPending ? "Removing..." : "Remove"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!memberToAddPoints} onOpenChange={(open) => { if (!open) { setMemberToAddPoints(null); setPointsToAdd(""); } }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Punkte hinzufügen</DialogTitle>
+              <DialogDescription>
+                Punkte für <strong>{memberToAddPoints?.name}</strong> hinzufügen (für Testzwecke)
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Input
+                type="number"
+                placeholder="Anzahl Punkte (z.B. 100, 500, 1000)"
+                value={pointsToAdd}
+                onChange={(e) => setPointsToAdd(e.target.value)}
+                min="1"
+                data-testid="input-points-amount"
+              />
+              <div className="flex gap-2 mt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPointsToAdd("100")}
+                >
+                  +100
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPointsToAdd("500")}
+                >
+                  +500
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPointsToAdd("1000")}
+                >
+                  +1000
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPointsToAdd("5000")}
+                >
+                  +5000
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setMemberToAddPoints(null); setPointsToAdd(""); }}>
+                Abbrechen
+              </Button>
+              <Button
+                onClick={() => {
+                  const points = parseInt(pointsToAdd);
+                  if (memberToAddPoints && points > 0) {
+                    addPointsMutation.mutate({
+                      memberId: memberToAddPoints.id,
+                      points,
+                    });
+                  }
+                }}
+                disabled={addPointsMutation.isPending || !pointsToAdd || parseInt(pointsToAdd) <= 0}
+                data-testid="button-confirm-add-points"
+              >
+                {addPointsMutation.isPending ? "Wird hinzugefügt..." : "Punkte hinzufügen"}
               </Button>
             </DialogFooter>
           </DialogContent>

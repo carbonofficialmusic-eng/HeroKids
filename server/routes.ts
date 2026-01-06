@@ -4631,6 +4631,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add points to a member (admin action for testing)
+  app.post("/api/admin/members/:memberId/points", isAdmin, async (req, res) => {
+    try {
+      const { memberId } = req.params;
+      const { points } = req.body;
+      
+      if (typeof points !== 'number' || points <= 0) {
+        return res.status(400).json({ message: "Points must be a positive number" });
+      }
+      
+      const member = await storage.getFamilyMember(memberId);
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+      
+      // Update all point fields
+      await storage.updateFamilyMemberPoints(
+        memberId,
+        member.totalEarned + points,
+        member.totalPoints + points,
+        member.weeklyPoints + points,
+        member.monthlyPoints + points
+      );
+      
+      // Broadcast update via WebSocket
+      broadcastToFamily(member.familyName, { 
+        type: "points_updated", 
+        memberId,
+        addedPoints: points
+      });
+      
+      res.json({ success: true, newTotalPoints: member.totalPoints + points });
+    } catch (error) {
+      console.error("Error adding points:", error);
+      res.status(500).json({ message: "Failed to add points" });
+    }
+  });
+
   // Send admin message to a family (broadcasts via WebSocket only - no chat storage)
   app.post("/api/admin/families/:familyName/message", isAdmin, async (req, res) => {
     try {
