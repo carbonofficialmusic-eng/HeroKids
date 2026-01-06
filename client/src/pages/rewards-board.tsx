@@ -129,14 +129,14 @@ export default function RewardsBoard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       toast({
-        title: "Teilen gestartet!",
-        description: "Andere Familienmitglieder können jetzt beitreten.",
+        title: t("rewardsBoard.sharingStarted"),
+        description: t("rewardsBoard.sharingStartedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Teilen konnte nicht gestartet werden.",
+        title: t("rewardsBoard.toastError"),
+        description: error.message || t("rewardsBoard.sharingStartError"),
         variant: "destructive",
       });
     },
@@ -152,14 +152,14 @@ export default function RewardsBoard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
-        title: "Erfolgreich beigetreten!",
-        description: "Du bist jetzt Teil der geteilten Belohnung.",
+        title: t("rewardsBoard.joinedSuccess"),
+        description: t("rewardsBoard.joinedSuccessDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Beitreten nicht möglich.",
+        title: t("rewardsBoard.toastError"),
+        description: error.message || t("rewardsBoard.joinError"),
         variant: "destructive",
       });
     },
@@ -176,14 +176,14 @@ export default function RewardsBoard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
-        title: "Teilen abgeschlossen!",
-        description: "Die Punkte wurden gleichmäßig aufgeteilt.",
+        title: t("rewardsBoard.sharingFinalized"),
+        description: t("rewardsBoard.sharingFinalizedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Teilen konnte nicht abgeschlossen werden.",
+        title: t("rewardsBoard.toastError"),
+        description: error.message || t("rewardsBoard.sharingFinalizeError"),
         variant: "destructive",
       });
     },
@@ -204,8 +204,8 @@ export default function RewardsBoard() {
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Teilen konnte nicht abgebrochen werden.",
+        title: t("rewardsBoard.toastError"),
+        description: error.message || t("rewardsBoard.sharingCancelError"),
         variant: "destructive",
       });
     },
@@ -318,7 +318,7 @@ export default function RewardsBoard() {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Users className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-accent font-bold">Geteilte Belohnungen</h2>
+            <h2 className="text-2xl font-accent font-bold">{t("rewardsBoard.sharedRewards")}</h2>
           </div>
           <div className="grid gap-4">
             {sharedRewards.map((shared) => {
@@ -350,7 +350,7 @@ export default function RewardsBoard() {
                             </Badge>
                           </CardTitle>
                           <CardDescription>
-                            Geteilt von {shared.member.displayName}
+                            {t("rewardsBoard.sharedBy", { name: shared.member.displayName })}
                           </CardDescription>
                         </div>
                       </div>
@@ -367,17 +367,17 @@ export default function RewardsBoard() {
                     <div className="flex items-center gap-4 text-sm flex-wrap">
                       <Badge variant="outline" className="gap-1.5">
                         <Sparkles className="h-3 w-3" />
-                        {pointsPerPerson} Punkte pro Person
+                        {t("rewardsBoard.pointsPerPerson", { count: pointsPerPerson })}
                       </Badge>
                       <Badge variant="outline" className="gap-1.5">
-                        Original: {shared.originalPointsSpent} Punkte
+                        {t("rewardsBoard.originalPoints", { count: shared.originalPointsSpent })}
                       </Badge>
                     </div>
 
                     {/* Participants List */}
                     {shared.participants.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Teilnehmer:</p>
+                        <p className="text-sm font-medium">{t("rewardsBoard.participants")}</p>
                         <div className="flex flex-wrap gap-2">
                           <Badge variant="secondary" className="gap-2">
                             <Avatar className="h-5 w-5">
@@ -413,7 +413,7 @@ export default function RewardsBoard() {
                     <div className="flex gap-2 pt-2 border-t flex-wrap">
                       {isInitiator && shared.participants.length === 0 && (
                         <p className="text-sm text-muted-foreground w-full">
-                          Warte auf Teilnehmer...
+                          {t("rewardsBoard.waitingForParticipants")}
                         </p>
                       )}
                       {isInitiator && shared.participants.length > 0 && (
@@ -426,7 +426,7 @@ export default function RewardsBoard() {
                           data-testid={`button-finalize-${shared.id}`}
                         >
                           <CheckCircle2 className="h-4 w-4" />
-                          Teilen beenden
+                          {t("rewardsBoard.finalizeSharing")}
                         </Button>
                       )}
                       {isInitiator && (
@@ -452,13 +452,13 @@ export default function RewardsBoard() {
                           data-testid={`button-join-${shared.id}`}
                         >
                           <UserPlus className="h-4 w-4" />
-                          Mitmachen
+                          {t("rewardsBoard.joinSharing")}
                         </Button>
                       )}
                       {!isInitiator && hasJoined && (
                         <Badge variant="secondary" className="gap-1">
                           <CheckCircle2 className="h-3 w-3" />
-                          Du nimmst teil
+                          {t("rewardsBoard.youParticipate")}
                         </Badge>
                       )}
                     </div>
@@ -530,13 +530,13 @@ export default function RewardsBoard() {
                   {redemption.sharingStatus === "sharing_active" && (
                     <Badge variant="secondary" className="gap-1.5">
                       <Users className="h-3 w-3" />
-                      Wird geteilt
+                      {t("rewardsBoard.beingShared")}
                     </Badge>
                   )}
                   {redemption.sharingStatus === "sharing_finalized" && (
                     <Badge variant="secondary" className="gap-1.5">
                       <CheckCircle2 className="h-3 w-3" />
-                      Geteilt ({redemption.pointsSpent} Punkte pro Person)
+                      {t("rewardsBoard.sharedPointsPerPerson", { count: redemption.pointsSpent })}
                     </Badge>
                   )}
                 </div>
@@ -555,7 +555,7 @@ export default function RewardsBoard() {
                       data-testid={`button-share-${redemption.id}`}
                     >
                       <Share2 className="h-4 w-4" />
-                      Zum Teilen anbieten
+                      {t("rewardsBoard.offerToShare")}
                     </Button>
                   </div>
                 )}
