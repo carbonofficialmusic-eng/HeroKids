@@ -105,6 +105,8 @@ export const familyMembers = pgTable("family_members", {
   rewardsRedeemed: integer("rewards_redeemed").notNull().default(0), // Counter for unlocking skins
   unlockedSkins: text("unlocked_skins").array().notNull().default(sql`ARRAY[]::text[]`), // Array of unlocked skin IDs (deprecated, use discoveredSkinIds)
   discoveredSkinIds: text("discovered_skin_ids").array().notNull().default(sql`ARRAY[]::text[]`), // Skins the member has chosen/discovered (Tekken-style system)
+  starsFound: integer("stars_found").notNull().default(0), // Number of hidden stars found (32 total, every 4 = 1 HeroKids Legacy avatar)
+  earnedLegacySkinIds: text("earned_legacy_skin_ids").array().notNull().default(sql`ARRAY[]::text[]`), // HeroKids Legacy avatars earned through star collection
   activeSkinId: varchar("active_skin_id"), // Currently selected skin
   useCustomAvatar: boolean("use_custom_avatar").notNull().default(false), // Use custom avatar instead of skin avatar (background stays from skin)
   avatarHistory: jsonb("avatar_history").$type<string[]>().default(sql`'[]'::jsonb`), // Last 3 uploaded avatar URLs for quick selection
@@ -730,3 +732,31 @@ export const insertMobileRefreshTokenSchema = createInsertSchema(mobileRefreshTo
 
 export type InsertMobileRefreshToken = z.infer<typeof insertMobileRefreshTokenSchema>;
 export type MobileRefreshToken = typeof mobileRefreshTokens.$inferSelect;
+
+// Star Placements - Hidden stars on skin cards for gamification (32 stars total, 4 stars = 1 HeroKids Legacy avatar)
+export const starPlacements = pgTable("star_placements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  skinId: varchar("skin_id").notNull(), // The skin card where the star is hidden
+  found: boolean("found").notNull().default(false), // Whether the member has discovered this star
+  foundAt: timestamp("found_at"), // When the star was discovered
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique().on(table.memberId, table.skinId), // Each member can only have one star per skin position
+]);
+
+export const starPlacementsRelations = relations(starPlacements, ({ one }) => ({
+  member: one(familyMembers, {
+    fields: [starPlacements.memberId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertStarPlacementSchema = createInsertSchema(starPlacements).omit({
+  id: true,
+  foundAt: true,
+  createdAt: true,
+});
+
+export type InsertStarPlacement = z.infer<typeof insertStarPlacementSchema>;
+export type StarPlacement = typeof starPlacements.$inferSelect;
