@@ -523,14 +523,20 @@ export class DatabaseStorage implements IStorage {
     return members.length;
   }
 
+  // The first skin that all new members get for free as a teaser
+  private readonly STARTER_SKIN_ID = "junior-champion";
+
   async createFamilyMember(memberData: InsertFamilyMember): Promise<FamilyMember> {
+    // New members start with the first skin unlocked as a teaser
+    const memberWithStarterSkin = {
+      ...memberData,
+      discoveredSkinIds: [this.STARTER_SKIN_ID],
+    };
+    
     const [member] = await db
       .insert(familyMembers)
-      .values(memberData as any)
+      .values(memberWithStarterSkin as any)
       .returning();
-    
-    // New members start with no skins unlocked
-    // They will unlock skins as they redeem rewards (Dino at 3, Police at 6, etc.)
     
     return member;
   }
@@ -2001,6 +2007,8 @@ export class DatabaseStorage implements IStorage {
       }
 
       // 14. Reset all family member stats to zero (including PIN codes and starsFound)
+      // Give everyone the starter skin as a teaser
+      const STARTER_SKIN = "junior-champion";
       for (const memberId of memberIds) {
         await tx.update(familyMembers)
           .set({
@@ -2010,7 +2018,7 @@ export class DatabaseStorage implements IStorage {
             monthlyPoints: 0,
             rewardsRedeemed: 0,
             unlockedSkins: [],
-            discoveredSkinIds: [],
+            discoveredSkinIds: [STARTER_SKIN],
             activeSkinId: null,
             pinCode: null,
             starsFound: 0,
@@ -2608,11 +2616,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async initializeStarPlacements(memberId: string): Promise<void> {
-    // Get all standard (non-legacy) skins from database
+    // Get all standard (non-legacy) skins from database, excluding the starter skin
     const allSkins = await db.select({ id: skins.id }).from(skins);
     const standardSkinIds = allSkins
       .map(s => s.id)
-      .filter(id => !this.LEGACY_SKIN_IDS.includes(id));
+      .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID);
     
     if (standardSkinIds.length < 32) {
       console.warn(`Only ${standardSkinIds.length} standard skins available for star placement (need 32)`);
@@ -2624,7 +2632,7 @@ export class DatabaseStorage implements IStorage {
       return; // Already initialized
     }
 
-    // Randomly select 32 unique positions from standard skins
+    // Randomly select 32 unique positions from standard skins (excluding starter and legacy)
     const shuffled = [...standardSkinIds].sort(() => Math.random() - 0.5);
     const selectedPositions = shuffled.slice(0, Math.min(32, shuffled.length));
 
@@ -2647,18 +2655,22 @@ export class DatabaseStorage implements IStorage {
 
     const discoveredSkinIds = member.discoveredSkinIds || [];
     
-    // Filter out Legacy skins - stars can only be on standard skins
-    const standardDiscoveredIds = discoveredSkinIds.filter(id => !this.LEGACY_SKIN_IDS.includes(id));
+    // Filter out Legacy skins and starter skin - stars can only be on non-starter standard skins
+    const standardDiscoveredIds = discoveredSkinIds.filter(id => 
+      !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID
+    );
     
     if (standardDiscoveredIds.length === 0) {
-      console.log(`Member ${memberId} has no discovered standard skins - using all standard skins`);
+      console.log(`Member ${memberId} has no discovered standard skins (besides starter) - using all standard skins`);
       // Fall back to normal initialization if no discovered skins
       await db.delete(starPlacements).where(eq(starPlacements.memberId, memberId));
       await db.update(familyMembers).set({ starsFound: 0 }).where(eq(familyMembers.id, memberId));
       
-      // Reset and use normal initialization
+      // Reset and use normal initialization (excluding starter and legacy)
       const allSkins = await db.select({ id: skins.id }).from(skins);
-      const allStandardIds = allSkins.map(s => s.id).filter(id => !this.LEGACY_SKIN_IDS.includes(id));
+      const allStandardIds = allSkins.map(s => s.id).filter(id => 
+        !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID
+      );
       const shuffled = [...allStandardIds].sort(() => Math.random() - 0.5);
       const selectedPositions = shuffled.slice(0, Math.min(32, shuffled.length));
       
@@ -2674,7 +2686,7 @@ export class DatabaseStorage implements IStorage {
     // Reset starsFound counter
     await db.update(familyMembers).set({ starsFound: 0 }).where(eq(familyMembers.id, memberId));
 
-    // Randomly select up to 32 discovered skins for star placement
+    // Randomly select up to 32 discovered skins for star placement (excluding starter)
     const shuffled = [...standardDiscoveredIds].sort(() => Math.random() - 0.5);
     const selectedPositions = shuffled.slice(0, Math.min(32, shuffled.length));
 
