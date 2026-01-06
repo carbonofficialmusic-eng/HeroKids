@@ -790,7 +790,8 @@
     "youParticipate": "您已加入",
     "beingShared": "共享中",
     "sharedPointsPerPerson": "已共享 (每人{{count}}积分)",
-    "offerToShare": "提供共享"
+    "offerToShare": "提供共享",
+    "sharedWith": "共享给"
   },
   "analytics": {
     "title": "分析仪表板",

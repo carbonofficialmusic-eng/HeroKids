@@ -824,7 +824,8 @@
     "youParticipate": "You've joined",
     "beingShared": "Being shared",
     "sharedPointsPerPerson": "Shared ({{count}} pts each)",
-    "offerToShare": "Offer to Share"
+    "offerToShare": "Offer to Share",
+    "sharedWith": "Shared with"
   },
   "analytics": {
     "title": "Analytics Dashboard",

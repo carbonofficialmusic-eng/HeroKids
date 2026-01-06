@@ -790,7 +790,8 @@
     "youParticipate": "Participas",
     "beingShared": "Compartiéndose",
     "sharedPointsPerPerson": "Compartido ({{count}} pts c/u)",
-    "offerToShare": "Ofrecer para compartir"
+    "offerToShare": "Ofrecer para compartir",
+    "sharedWith": "Compartido con"
   },
   "analytics": {
     "title": "Panel de Análisis",

@@ -824,7 +824,8 @@
     "youParticipate": "Du deltar",
     "beingShared": "Delas",
     "sharedPointsPerPerson": "Delad ({{count}} poäng var)",
-    "offerToShare": "Erbjud att dela"
+    "offerToShare": "Erbjud att dela",
+    "sharedWith": "Delad med"
   },
   "analytics": {
     "title": "Statistikpanel",

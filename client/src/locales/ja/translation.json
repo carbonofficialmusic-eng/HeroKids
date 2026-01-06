@@ -790,7 +790,8 @@
     "youParticipate": "参加中",
     "beingShared": "シェア中",
     "sharedPointsPerPerson": "シェア済み (各{{count}}ポイント)",
-    "offerToShare": "シェアする"
+    "offerToShare": "シェアする",
+    "sharedWith": "シェア相手"
   },
   "analytics": {
     "title": "分析ダッシュボード",

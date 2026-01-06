@@ -25,6 +25,16 @@ type FamilyMember = {
   monthlyPoints: number;
 };
 
+type SharingParticipant = {
+  id: string;
+  memberId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  activeSkinId: string | null;
+  color: string;
+  pointsContributed: number;
+};
+
 type RedemptionWithDetails = {
   id: string;
   rewardId: string;
@@ -34,6 +44,7 @@ type RedemptionWithDetails = {
   status: string;
   sharingStatus: "not_shared" | "sharing_active" | "sharing_finalized";
   redeemedAt: string;
+  sharingParticipants?: SharingParticipant[];
   reward: {
     id: string;
     title: string;
@@ -540,6 +551,30 @@ export default function RewardsBoard() {
                     </Badge>
                   )}
                 </div>
+                
+                {/* Show participants for shared rewards */}
+                {(redemption.sharingStatus === "sharing_active" || redemption.sharingStatus === "sharing_finalized") && 
+                 redemption.sharingParticipants && redemption.sharingParticipants.length > 0 && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm text-muted-foreground">{t("rewardsBoard.sharedWith")}:</span>
+                    <div className="flex items-center gap-1">
+                      {redemption.sharingParticipants.map((participant) => (
+                        <div key={participant.id} className="flex items-center gap-1">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage src={getAvatarUrl(participant.activeSkinId, participant.avatarUrl)} />
+                            <AvatarFallback 
+                              className="text-white text-xs font-bold"
+                              style={{ backgroundColor: participant.color }}
+                            >
+                              {participant.displayName[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium">{participant.displayName}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Sharing Button - Only for own redemptions that are not yet shared and not completed */}
                 {redemption.memberId === member?.id && 

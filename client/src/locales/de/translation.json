@@ -847,7 +847,8 @@
     "youParticipate": "Du nimmst teil",
     "beingShared": "Wird geteilt",
     "sharedPointsPerPerson": "Geteilt ({{count}} Punkte pro Person)",
-    "offerToShare": "Zum Teilen anbieten"
+    "offerToShare": "Zum Teilen anbieten",
+    "sharedWith": "Geteilt mit"
   },
   "analytics": {
     "title": "Analyse-Dashboard",

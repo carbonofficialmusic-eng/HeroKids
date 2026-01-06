@@ -2187,13 +2187,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rewards = await storage.getRewardsByFamily(member.familyName);
       const rewardsMap = new Map(rewards.map(r => [r.id, r]));
       
-      // Attach reward titles to redemptions
-      const redemptionsWithTitles = redemptions.map(redemption => ({
-        ...redemption,
-        rewardTitle: rewardsMap.get(redemption.rewardId)?.title || "Belohnung",
+      // Attach reward titles and participants (for shared rewards) to redemptions
+      const redemptionsWithDetails = await Promise.all(redemptions.map(async (redemption) => {
+        const base = {
+          ...redemption,
+          rewardTitle: rewardsMap.get(redemption.rewardId)?.title || "Belohnung",
+        };
+        
+        // Include participants for shared rewards (active or finalized)
+        if (redemption.sharingStatus === "sharing_active" || redemption.sharingStatus === "sharing_finalized") {
+          const participants = await storage.getRewardSharingParticipants(redemption.id);
+          return {
+            ...base,
+            sharingParticipants: participants.map(p => ({
+              id: p.id,
+              memberId: p.memberId,
+              displayName: p.member.displayName,
+              avatarUrl: p.member.avatarUrl,
+              activeSkinId: p.member.activeSkinId,
+              color: p.member.color,
+              pointsContributed: p.pointsContributed,
+            })),
+          };
+        }
+        
+        return base;
       }));
       
-      res.json(redemptionsWithTitles);
+      res.json(redemptionsWithDetails);
     } catch (error) {
       console.error("Error fetching redemptions:", error);
       res.status(500).json({ message: "Failed to fetch redemptions" });
