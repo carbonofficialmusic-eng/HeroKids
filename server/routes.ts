@@ -7,6 +7,7 @@ import { z } from "zod";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import Stripe from "stripe";
+import { getISOWeek, getISOWeekYear } from "date-fns";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
@@ -3543,10 +3544,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family goal not found" });
       }
       
-      // Calculate current period identifier
+      // Calculate current period identifier using ISO week calculation
       const now = new Date();
       const period = goal.contributionPeriod === "weekly"
-        ? `${now.getFullYear()}-W${String(Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 604800000)).padStart(2, '0')}`
+        ? `${getISOWeekYear(now)}-W${String(getISOWeek(now)).padStart(2, '0')}`
         : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       
       const contributions = await storage.getGoalContributionsByGoalAndPeriod(id, period);
@@ -3772,10 +3773,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "This goal is no longer active" });
       }
       
-      // Calculate current period
+      // Calculate current period using ISO week calculation
       const now = new Date();
       const period = goal.contributionPeriod === "weekly"
-        ? `${now.getFullYear()}-W${String(Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 604800000)).padStart(2, '0')}`
+        ? `${getISOWeekYear(now)}-W${String(getISOWeek(now)).padStart(2, '0')}`
         : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       
       // Check if member has already contributed this period
