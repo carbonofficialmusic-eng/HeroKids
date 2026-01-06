@@ -155,14 +155,14 @@ export default function SkinsGallery() {
         setTimeout(() => {
           setShowStarAnimation(false);
           setCelebration({
-            points: result.bonusPoints || 0,
-            message: `${skinName} ${t('skins.discovered')}!${result.bonusPoints ? ` +${result.bonusPoints} ${t('common.points')}!` : ""}`,
+            points: 0,
+            message: `${skinName} ${t('skins.discovered')}!`,
           });
         }, 2500);
       } else {
         setCelebration({
-          points: result.bonusPoints || 0,
-          message: `${skinName} ${t('skins.discovered')}!${result.bonusPoints ? ` +${result.bonusPoints} ${t('common.points')}!` : ""}`,
+          points: 0,
+          message: `${skinName} ${t('skins.discovered')}!`,
         });
       }
       

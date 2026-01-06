@@ -50,13 +50,15 @@ export function SuccessCelebration({
           />
         ))}
         <div className="animate-bounce-in text-center">
-          <div
-            className="text-8xl font-black font-accent gradient-text-celebration mb-4"
-            data-testid="text-points-earned"
-          >
-            {points > 0 ? '+' : ''}{points} {t("celebration.pts")}
-          </div>
-          <div className="text-3xl font-bold text-white" data-testid="text-celebration-message">
+          {points > 0 && (
+            <div
+              className="text-8xl font-black font-accent gradient-text-celebration mb-4"
+              data-testid="text-points-earned"
+            >
+              +{points} {t("celebration.pts")}
+            </div>
+          )}
+          <div className={`font-bold text-white ${points > 0 ? 'text-3xl' : 'text-4xl'}`} data-testid="text-celebration-message">
             {message}
           </div>
         </div>
