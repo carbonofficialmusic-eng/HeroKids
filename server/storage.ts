@@ -2006,7 +2006,7 @@ export class DatabaseStorage implements IStorage {
           .where(eq(starPlacements.memberId, memberId));
       }
 
-      // 14. Reset all family member stats to zero (including PIN codes and starsFound)
+      // 14. Reset all family member stats to zero (including PIN codes, starsFound, and Legacy skins)
       // Give everyone the starter skin as a teaser
       const STARTER_SKIN = "junior-champion";
       for (const memberId of memberIds) {
@@ -2019,6 +2019,7 @@ export class DatabaseStorage implements IStorage {
             rewardsRedeemed: 0,
             unlockedSkins: [],
             discoveredSkinIds: [STARTER_SKIN],
+            earnedLegacySkinIds: [], // Reset HeroKids Legacy avatars earned through stars
             activeSkinId: null,
             pinCode: null,
             starsFound: 0,
