@@ -289,6 +289,7 @@
   },
   "skins": {
     "title": "Aspectos de Personaje",
+    "starCollection": "Colección de Estrellas",
     "description": "¡Gana cartas de aspecto completando tareas! Elige qué aspectos descubrir de los paquetes desbloqueados.",
     "availableCards": "¡Tienes {{count}} carta de aspecto para abrir!",
     "availableCards_other": "¡Tienes {{count}} cartas de aspecto para abrir!",

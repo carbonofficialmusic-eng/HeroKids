@@ -294,6 +294,7 @@
   },
   "skins": {
     "title": "Karaktärsskins",
+    "starCollection": "Stjärnsamling",
     "description": "Tjäna skinkort genom att slutföra uppgifter! Välj vilka skins du vill upptäcka från upplåsta paket.",
     "availableCards": "Du har {{count}} skinkort att öppna!",
     "availableCards_other": "Du har {{count}} skinkort att öppna!",

@@ -317,6 +317,7 @@
   },
   "skins": {
     "title": "Charakter-Skins",
+    "starCollection": "Sterne-Sammlung",
     "description": "Verdiene Skin-Karten durch das Abschließen von Aufgaben! Wähle, welche Skins du aus freigeschalteten Paketen entdecken möchtest.",
     "availableCards": "Du hast {{count}} Skin-Karte zum Öffnen!",
     "availableCards_other": "Du hast {{count}} Skin-Karten zum Öffnen!",

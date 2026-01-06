@@ -289,6 +289,7 @@
   },
   "skins": {
     "title": "角色皮肤",
+    "starCollection": "星星收集",
     "description": "完成任务获得皮肤卡！从解锁的套装中选择要发现的皮肤。",
     "availableCards": "你有{{count}}张皮肤卡可以打开！",
     "availableCards_other": "你有{{count}}张皮肤卡可以打开！",

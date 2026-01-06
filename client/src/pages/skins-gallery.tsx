@@ -374,7 +374,7 @@ export default function SkinsGallery() {
               </Badge>
               
               {/* Star counter for children */}
-              {isChild && starStats.totalStars > 0 && (
+              {starStats.totalStars > 0 && (
                 <Badge variant="outline" className="text-sm font-bold whitespace-nowrap bg-yellow-100 text-yellow-800 border-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-300">
                   <Star className="h-4 w-4 mr-1 fill-yellow-400" />
                   {starStats.starsFound}/{starStats.totalStars}

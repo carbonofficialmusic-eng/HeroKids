@@ -289,6 +289,7 @@
   },
   "skins": {
     "title": "キャラクタースキン",
+    "starCollection": "スターコレクション",
     "description": "タスクをクリアしてスキンカードを獲得しよう！アンロックされたパッケージから発見するスキンを選ぼう。",
     "availableCards": "開けるスキンカードが{{count}}枚あります！",
     "availableCards_other": "開けるスキンカードが{{count}}枚あります！",

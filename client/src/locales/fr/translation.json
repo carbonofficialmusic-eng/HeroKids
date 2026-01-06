@@ -289,6 +289,7 @@
   },
   "skins": {
     "title": "Apparences de Personnage",
+    "starCollection": "Collection d'étoiles",
     "description": "Gagne des cartes d'apparence en accomplissant des tâches ! Choisis quelles apparences découvrir parmi les paquets débloqués.",
     "availableCards": "Tu as {{count}} carte d'apparence à ouvrir !",
     "availableCards_other": "Tu as {{count}} cartes d'apparence à ouvrir !",
