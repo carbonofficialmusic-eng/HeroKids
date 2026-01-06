@@ -4601,6 +4601,147 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Remove member from family (admin action)
+  app.delete("/api/admin/families/:familyName/members/:memberId", isAdmin, async (req, res) => {
+    try {
+      const { familyName, memberId } = req.params;
+      
+      const member = await storage.getFamilyMember(memberId);
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+      
+      if (member.familyName !== familyName) {
+        return res.status(400).json({ message: "Member not in this family" });
+      }
+
+      // Check if this is the last parent
+      const allMembers = await storage.getFamilyMembersByFamily(familyName);
+      const parents = allMembers.filter(m => m.role === "parent");
+      
+      if (member.role === "parent" && parents.length <= 1) {
+        return res.status(400).json({ message: "Cannot remove the last parent from a family" });
+      }
+      
+      await storage.deleteFamilyMember(memberId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing member:", error);
+      res.status(500).json({ message: "Failed to remove member" });
+    }
+  });
+
+  // Send admin message to a family (broadcasts via WebSocket only - no chat storage)
+  app.post("/api/admin/families/:familyName/message", isAdmin, async (req, res) => {
+    try {
+      const { familyName } = req.params;
+      const { message } = req.body;
+      
+      if (!message || typeof message !== "string") {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      // Get family to verify it exists
+      const family = await storage.getFamily(familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+
+      // Broadcast admin notification to family via WebSocket
+      broadcastToFamily(familyName, { 
+        type: "admin_message", 
+        message,
+        senderName: "HeroKids Admin",
+        timestamp: new Date().toISOString()
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error sending admin message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Get skin statistics
+  app.get("/api/admin/skins/stats", isAdmin, async (req, res) => {
+    try {
+      const allSkins = await storage.getSkins();
+      const allMembers = await storage.getAllFamilyMembers();
+      
+      // Count how many times each skin is actively used
+      const skinUsage: Record<string, { count: number; skin: any }> = {};
+      
+      for (const skin of allSkins) {
+        skinUsage[skin.id] = { count: 0, skin };
+      }
+      
+      for (const member of allMembers) {
+        if (member.activeSkinId && skinUsage[member.activeSkinId]) {
+          skinUsage[member.activeSkinId].count++;
+        }
+      }
+      
+      // Sort by usage count
+      const sortedStats = Object.values(skinUsage)
+        .sort((a, b) => b.count - a.count)
+        .map(({ count, skin }) => ({
+          id: skin.id,
+          name: skin.name,
+          description: skin.description,
+          pointsRequired: skin.pointsRequired,
+          bonusPoints: skin.bonusPoints,
+          usageCount: count,
+        }));
+      
+      res.json({
+        totalSkins: allSkins.length,
+        stats: sortedStats,
+      });
+    } catch (error) {
+      console.error("Error fetching skin stats:", error);
+      res.status(500).json({ message: "Failed to fetch skin stats" });
+    }
+  });
+
+  // Add new skin
+  app.post("/api/admin/skins", isAdmin, async (req, res) => {
+    try {
+      const { name, description, pointsRequired, imageUrl, bonusPoints } = req.body;
+      
+      if (!name || !imageUrl) {
+        return res.status(400).json({ message: "name and imageUrl are required" });
+      }
+      
+      const id = `custom_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+      
+      const newSkin = await storage.createSkin({
+        id,
+        name,
+        description: description || null,
+        pointsRequired: pointsRequired || 0,
+        imageUrl,
+        bonusPoints: bonusPoints || 0,
+      });
+      
+      res.json(newSkin);
+    } catch (error) {
+      console.error("Error adding skin:", error);
+      res.status(500).json({ message: "Failed to add skin" });
+    }
+  });
+
+  // Delete skin
+  app.delete("/api/admin/skins/:skinId", isAdmin, async (req, res) => {
+    try {
+      const { skinId } = req.params;
+      await storage.deleteSkin(skinId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting skin:", error);
+      res.status(500).json({ message: "Failed to delete skin" });
+    }
+  });
+
   // ========================================
   // End of Admin Dashboard Routes
   // ========================================

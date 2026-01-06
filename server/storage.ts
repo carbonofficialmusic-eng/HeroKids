@@ -36,6 +36,7 @@ import {
   type InsertPointsHistory,
   type TaskCompletion,
   type Skin,
+  type InsertSkin,
   type ChatMessage,
   type InsertChatMessage,
   type AchievementDefinition,
@@ -184,6 +185,7 @@ export interface IStorage {
   getFamilyMemberByUserId(userId: string): Promise<FamilyMember | undefined>;
   getFamilyMemberByJoinCode(joinCode: string): Promise<FamilyMember | undefined>;
   getFamilyMembersByFamily(familyName: string): Promise<FamilyMember[]>;
+  getAllFamilyMembers(): Promise<FamilyMember[]>;
   getFamilyMemberCount(familyName: string): Promise<number>;
   createFamilyMember(member: InsertFamilyMember): Promise<FamilyMember>;
   updateFamilyMember(id: string, updates: Partial<InsertFamilyMember>): Promise<FamilyMember>;
@@ -261,6 +263,8 @@ export interface IStorage {
 
   // Skin operations
   getSkins(): Promise<any[]>;
+  createSkin(skin: InsertSkin): Promise<Skin>;
+  deleteSkin(skinId: string): Promise<void>;
   updateFamilyMemberActiveSkin(memberId: string, options: { skinId: string | null; useCustomAvatar?: boolean }): Promise<void>;
   unlockSkin(memberId: string, skinId: string): Promise<void>;
   incrementRewardsRedeemed(memberId: string): Promise<number>;
@@ -431,6 +435,10 @@ export class DatabaseStorage implements IStorage {
       .from(familyMembers)
       .where(eq(familyMembers.familyName, familyName))
       .orderBy(desc(familyMembers.totalPoints));
+  }
+
+  async getAllFamilyMembers(): Promise<FamilyMember[]> {
+    return await db.select().from(familyMembers);
   }
 
   async getFamilyMemberCount(familyName: string): Promise<number> {
@@ -1726,6 +1734,15 @@ export class DatabaseStorage implements IStorage {
   // Skin operations
   async getSkins(): Promise<Skin[]> {
     return await db.select().from(skins).orderBy(skins.pointsRequired);
+  }
+
+  async createSkin(skinData: InsertSkin): Promise<Skin> {
+    const [skin] = await db.insert(skins).values(skinData).returning();
+    return skin;
+  }
+
+  async deleteSkin(skinId: string): Promise<void> {
+    await db.delete(skins).where(eq(skins.id, skinId));
   }
 
   async updateFamilyMemberActiveSkin(

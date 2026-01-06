@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Shield, 
@@ -22,9 +24,15 @@ import {
   Crown,
   ChevronRight,
   TrendingUp,
-  RefreshCw
+  RefreshCw,
+  MessageSquare,
+  Trash2,
+  Palette,
+  Send,
+  UserMinus
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/skins";
+import { queryClient } from "@/lib/queryClient";
 
 interface AdminStats {
   totalFamilies: number;
@@ -69,6 +77,20 @@ interface FamilyDetails {
   rewardCount: number;
 }
 
+interface SkinStat {
+  id: string;
+  name: string;
+  description: string | null;
+  pointsRequired: number;
+  bonusPoints: number;
+  usageCount: number;
+}
+
+interface SkinStats {
+  totalSkins: number;
+  stats: SkinStat[];
+}
+
 const TIER_LABELS: Record<string, string> = {
   free: "Free",
   family: "Family",
@@ -87,6 +109,8 @@ export default function AdminPage() {
   const [token, setToken] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
+  const [messageToSend, setMessageToSend] = useState("");
+  const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string; familyName: string } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -145,7 +169,7 @@ export default function AdminPage() {
     enabled: !!token,
   });
 
-  const { data: familyDetails, isLoading: detailsLoading } = useQuery<FamilyDetails>({
+  const { data: familyDetails, isLoading: detailsLoading, refetch: refetchDetails } = useQuery<FamilyDetails>({
     queryKey: ["/api/admin/families", selectedFamily],
     queryFn: async () => {
       const res = await fetch(`/api/admin/families/${encodeURIComponent(selectedFamily!)}`, {
@@ -155,6 +179,18 @@ export default function AdminPage() {
       return res.json();
     },
     enabled: !!token && !!selectedFamily,
+  });
+
+  const { data: skinStats, isLoading: skinsLoading, refetch: refetchSkins } = useQuery<SkinStats>({
+    queryKey: ["/api/admin/skins/stats"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/skins/stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch skin stats");
+      return res.json();
+    },
+    enabled: !!token,
   });
 
   const updateTierMutation = useMutation({
@@ -176,6 +212,70 @@ export default function AdminPage() {
     },
     onError: () => {
       toast({ title: "Failed to update tier", variant: "destructive" });
+    },
+  });
+
+  const sendMessageMutation = useMutation({
+    mutationFn: async ({ familyName, message }: { familyName: string; message: string }) => {
+      const res = await fetch(`/api/admin/families/${encodeURIComponent(familyName)}/message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message }),
+      });
+      if (!res.ok) throw new Error("Failed to send message");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Message sent to family" });
+      setMessageToSend("");
+    },
+    onError: () => {
+      toast({ title: "Failed to send message", variant: "destructive" });
+    },
+  });
+
+  const removeMemberMutation = useMutation({
+    mutationFn: async ({ familyName, memberId }: { familyName: string; memberId: string }) => {
+      const res = await fetch(`/api/admin/families/${encodeURIComponent(familyName)}/members/${memberId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to remove member");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Member removed from family" });
+      setMemberToRemove(null);
+      refetchDetails();
+      refetchFamilies();
+      refetchStats();
+    },
+    onError: (error: Error) => {
+      toast({ title: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteSkinMutation = useMutation({
+    mutationFn: async (skinId: string) => {
+      const res = await fetch(`/api/admin/skins/${skinId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to delete skin");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Skin deleted" });
+      refetchSkins();
+    },
+    onError: () => {
+      toast({ title: "Failed to delete skin", variant: "destructive" });
     },
   });
 
@@ -249,6 +349,7 @@ export default function AdminPage() {
               onClick={() => {
                 refetchStats();
                 refetchFamilies();
+                refetchSkins();
               }}
               data-testid="button-refresh-data"
             >
@@ -263,166 +364,251 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
-        {statsLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-4">
-                  <div className="h-4 bg-muted rounded w-1/2 mb-2" />
-                  <div className="h-8 bg-muted rounded" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : stats ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-                  <Home className="h-4 w-4" />
-                  Families
-                </div>
-                <p className="text-2xl font-bold" data-testid="text-total-families">{stats.totalFamilies}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-                  <Users className="h-4 w-4" />
-                  Members
-                </div>
-                <p className="text-2xl font-bold" data-testid="text-total-members">{stats.totalMembers}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-                  <ListTodo className="h-4 w-4" />
-                  Tasks
-                </div>
-                <p className="text-2xl font-bold" data-testid="text-total-tasks">{stats.totalTasks}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-                  <Gift className="h-4 w-4" />
-                  Rewards
-                </div>
-                <p className="text-2xl font-bold" data-testid="text-total-rewards">{stats.totalRewards}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-                  <Star className="h-4 w-4" />
-                  Points
-                </div>
-                <p className="text-2xl font-bold" data-testid="text-total-points">{stats.totalPointsEarned.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-                  <Crown className="h-4 w-4" />
-                  Paid
-                </div>
-                <p className="text-2xl font-bold" data-testid="text-paid-families">
-                  {(stats.tierCounts.family || 0) + (stats.tierCounts.family_plus || 0) + (stats.tierCounts.family_hero || 0)}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        ) : null}
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Subscription Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-4">
-              {stats && Object.entries(stats.tierCounts).map(([tier, count]) => (
-                <div key={tier} className="flex items-center gap-2">
-                  <Badge className={TIER_COLORS[tier]}>{TIER_LABELS[tier]}</Badge>
-                  <span className="font-semibold">{count}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Home className="h-5 w-5" />
+      <main className="container mx-auto px-4 py-6">
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsTrigger value="overview" data-testid="tab-overview">
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="families" data-testid="tab-families">
+              <Home className="h-4 w-4 mr-2" />
               Families
-            </CardTitle>
-            <CardDescription>
-              All registered families and their statistics
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {familiesLoading ? (
-              <div className="space-y-2">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-16 bg-muted rounded animate-pulse" />
+            </TabsTrigger>
+            <TabsTrigger value="skins" data-testid="tab-skins">
+              <Palette className="h-4 w-4 mr-2" />
+              Skins
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            {statsLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-4">
+                      <div className="h-4 bg-muted rounded w-1/2 mb-2" />
+                      <div className="h-8 bg-muted rounded" />
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            ) : families && families.length > 0 ? (
-              <div className="space-y-2">
-                {families.map((family) => (
-                  <div
-                    key={family.familyName}
-                    className="flex items-center justify-between p-4 border rounded-lg hover-elevate cursor-pointer"
-                    onClick={() => setSelectedFamily(family.familyName)}
-                    data-testid={`card-family-${family.familyName}`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <p className="font-semibold">{family.familyName}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Users className="h-3 w-3" />
-                          {family.memberCount} members
-                          <span className="text-xs">
-                            ({family.parentCount}P / {family.childCount}C)
-                          </span>
+            ) : stats ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                      <Home className="h-4 w-4" />
+                      Families
+                    </div>
+                    <p className="text-2xl font-bold" data-testid="text-total-families">{stats.totalFamilies}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                      <Users className="h-4 w-4" />
+                      Members
+                    </div>
+                    <p className="text-2xl font-bold" data-testid="text-total-members">{stats.totalMembers}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                      <ListTodo className="h-4 w-4" />
+                      Tasks
+                    </div>
+                    <p className="text-2xl font-bold" data-testid="text-total-tasks">{stats.totalTasks}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                      <Gift className="h-4 w-4" />
+                      Rewards
+                    </div>
+                    <p className="text-2xl font-bold" data-testid="text-total-rewards">{stats.totalRewards}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                      <Star className="h-4 w-4" />
+                      Points
+                    </div>
+                    <p className="text-2xl font-bold" data-testid="text-total-points">{stats.totalPointsEarned.toLocaleString()}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                      <Crown className="h-4 w-4" />
+                      Paid
+                    </div>
+                    <p className="text-2xl font-bold" data-testid="text-paid-families">
+                      {(stats.tierCounts.family || 0) + (stats.tierCounts.family_plus || 0) + (stats.tierCounts.family_hero || 0)}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Subscription Distribution
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-4">
+                  {stats && Object.entries(stats.tierCounts).map(([tier, count]) => (
+                    <div key={tier} className="flex items-center gap-2">
+                      <Badge className={TIER_COLORS[tier]}>{TIER_LABELS[tier]}</Badge>
+                      <span className="font-semibold">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="families" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Home className="h-5 w-5" />
+                  Families
+                </CardTitle>
+                <CardDescription>
+                  All registered families and their statistics
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {familiesLoading ? (
+                  <div className="space-y-2">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="h-16 bg-muted rounded animate-pulse" />
+                    ))}
+                  </div>
+                ) : families && families.length > 0 ? (
+                  <div className="space-y-2">
+                    {families.map((family) => (
+                      <div
+                        key={family.familyName}
+                        className="flex items-center justify-between p-4 border rounded-lg hover-elevate cursor-pointer"
+                        onClick={() => setSelectedFamily(family.familyName)}
+                        data-testid={`card-family-${family.familyName}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <p className="font-semibold">{family.familyName}</p>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Users className="h-3 w-3" />
+                              {family.memberCount} members
+                              <span className="text-xs">
+                                ({family.parentCount}P / {family.childCount}C)
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right text-sm">
+                            <p>{family.taskCount} tasks</p>
+                            <p className="text-muted-foreground">{family.rewardCount} rewards</p>
+                          </div>
+                          <Select
+                            value={family.subscriptionTier}
+                            onValueChange={(tier) => {
+                              updateTierMutation.mutate({ familyName: family.familyName, tier });
+                            }}
+                          >
+                            <SelectTrigger className="w-36" onClick={(e) => e.stopPropagation()}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="free">Free</SelectItem>
+                              <SelectItem value="family">Family (2€)</SelectItem>
+                              <SelectItem value="family_hero">Family Hero (12€)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
                         </div>
                       </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">No families registered yet</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="skins" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="h-5 w-5" />
+                  Skin Statistics
+                </CardTitle>
+                <CardDescription>
+                  Most popular character skins by usage
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {skinsLoading ? (
+                  <div className="space-y-2">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="h-12 bg-muted rounded animate-pulse" />
+                    ))}
+                  </div>
+                ) : skinStats ? (
+                  <div className="space-y-4">
+                    <div className="text-sm text-muted-foreground mb-4">
+                      Total skins: <span className="font-semibold">{skinStats.totalSkins}</span>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right text-sm">
-                        <p>{family.taskCount} tasks</p>
-                        <p className="text-muted-foreground">{family.rewardCount} rewards</p>
-                      </div>
-                      <Select
-                        value={family.subscriptionTier}
-                        onValueChange={(tier) => {
-                          updateTierMutation.mutate({ familyName: family.familyName, tier });
-                        }}
-                      >
-                        <SelectTrigger className="w-32" onClick={(e) => e.stopPropagation()}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="free">Free</SelectItem>
-                          <SelectItem value="family">Family (2€)</SelectItem>
-                          <SelectItem value="family_hero">Family Hero (12€)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    <div className="space-y-2">
+                      {skinStats.stats.slice(0, 20).map((skin, index) => (
+                        <div
+                          key={skin.id}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                          data-testid={`card-skin-${skin.id}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-muted-foreground w-6 text-right">#{index + 1}</span>
+                            <div>
+                              <p className="font-medium">{skin.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {skin.pointsRequired} pts required • {skin.bonusPoints} bonus pts
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <Badge variant={skin.usageCount > 0 ? "default" : "secondary"}>
+                              {skin.usageCount} users
+                            </Badge>
+                            {skin.id.startsWith('custom_') && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => deleteSkinMutation.mutate(skin.id)}
+                                disabled={deleteSkinMutation.isPending}
+                                data-testid={`button-delete-skin-${skin.id}`}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">No families registered yet</p>
-            )}
-          </CardContent>
-        </Card>
+                ) : null}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         <Dialog open={!!selectedFamily} onOpenChange={(open) => !open && setSelectedFamily(null)}>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -431,7 +617,7 @@ export default function AdminPage() {
                 <Eye className="h-5 w-5" />
                 {selectedFamily}
               </DialogTitle>
-              <DialogDescription>Family details and member overview</DialogDescription>
+              <DialogDescription>Family details and member management</DialogDescription>
             </DialogHeader>
 
             {detailsLoading ? (
@@ -466,6 +652,38 @@ export default function AdminPage() {
 
                 <div>
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    Send Message to Family
+                  </h3>
+                  <div className="flex gap-2">
+                    <Textarea
+                      placeholder="Write a message to this family..."
+                      value={messageToSend}
+                      onChange={(e) => setMessageToSend(e.target.value)}
+                      className="flex-1"
+                      data-testid="input-admin-message"
+                    />
+                    <Button
+                      onClick={() => {
+                        if (messageToSend.trim() && selectedFamily) {
+                          sendMessageMutation.mutate({ 
+                            familyName: selectedFamily, 
+                            message: messageToSend.trim() 
+                          });
+                        }
+                      }}
+                      disabled={!messageToSend.trim() || sendMessageMutation.isPending}
+                      data-testid="button-send-message"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <Users className="h-4 w-4" />
                     Members
                   </h3>
@@ -488,11 +706,25 @@ export default function AdminPage() {
                             </Badge>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-semibold">{member.totalPoints} pts</p>
-                          <p className="text-xs text-muted-foreground">
-                            Total earned: {member.totalEarned}
-                          </p>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="font-semibold">{member.totalPoints} pts</p>
+                            <p className="text-xs text-muted-foreground">
+                              Total earned: {member.totalEarned}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setMemberToRemove({ 
+                              id: member.id, 
+                              name: member.displayName, 
+                              familyName: selectedFamily! 
+                            })}
+                            data-testid={`button-remove-member-${member.id}`}
+                          >
+                            <UserMinus className="h-4 w-4 text-destructive" />
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -506,6 +738,38 @@ export default function AdminPage() {
                 )}
               </div>
             ) : null}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!memberToRemove} onOpenChange={(open) => !open && setMemberToRemove(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Remove Member</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to remove <strong>{memberToRemove?.name}</strong> from the family?
+                This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setMemberToRemove(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (memberToRemove) {
+                    removeMemberMutation.mutate({
+                      familyName: memberToRemove.familyName,
+                      memberId: memberToRemove.id,
+                    });
+                  }
+                }}
+                disabled={removeMemberMutation.isPending}
+                data-testid="button-confirm-remove"
+              >
+                {removeMemberMutation.isPending ? "Removing..." : "Remove"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </main>
