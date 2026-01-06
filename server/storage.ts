@@ -180,6 +180,7 @@ export interface IStorage {
   updateFamily(familyName: string, updates: Partial<InsertFamily>): Promise<Family>;
   updateFamilyTier(familyName: string, tier: "free" | "family" | "family_plus" | "family_hero"): Promise<void>;
   updateFamilySettings(familyName: string, settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "timezone" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>): Promise<void>;
+  deleteFamily(familyName: string): Promise<void>;
 
   // Family member operations
   getFamilyMember(id: string): Promise<FamilyMember | undefined>;
@@ -388,6 +389,69 @@ export class DatabaseStorage implements IStorage {
       .where(eq(families.familyName, familyName))
       .returning();
     return family;
+  }
+
+  async deleteFamily(familyName: string): Promise<void> {
+    // Delete all related data in the correct order to respect foreign key constraints
+    const members = await this.getFamilyMembersByFamily(familyName);
+    const memberIds = members.map(m => m.id);
+
+    if (memberIds.length > 0) {
+      // Delete star placements for all members
+      for (const memberId of memberIds) {
+        await db.delete(starPlacements).where(eq(starPlacements.memberId, memberId));
+      }
+
+      // Delete device sessions for all members
+      await db.delete(childDeviceSessions).where(inArray(childDeviceSessions.memberId, memberIds));
+
+      // Delete link codes for all members
+      await db.delete(deviceLinkCodes).where(inArray(deviceLinkCodes.memberId, memberIds));
+
+      // Delete achievement awards for all members
+      await db.delete(achievementAwards).where(inArray(achievementAwards.memberId, memberIds));
+
+      // Delete achievement members for all members
+      await db.delete(achievementMembers).where(inArray(achievementMembers.memberId, memberIds));
+
+      // Delete reward redemptions by member
+      await db.delete(rewardRedemptions).where(inArray(rewardRedemptions.memberId, memberIds));
+
+      // Delete task completions by member
+      await db.delete(taskCompletions).where(inArray(taskCompletions.memberId, memberIds));
+    }
+
+    // Delete goal contributions
+    const goalsForFamily = await this.getFamilyGoalsByFamily(familyName);
+    for (const goal of goalsForFamily) {
+      await db.delete(goalContributions).where(eq(goalContributions.goalId, goal.id));
+    }
+
+    // Delete family goals
+    await db.delete(familyGoals).where(eq(familyGoals.familyName, familyName));
+
+    // Delete chat messages
+    await db.delete(chatMessages).where(eq(chatMessages.familyName, familyName));
+
+    // Delete reward requests
+    await db.delete(rewardRequests).where(eq(rewardRequests.familyName, familyName));
+
+    // Delete achievement definitions
+    await db.delete(achievementDefinitions).where(eq(achievementDefinitions.familyName, familyName));
+
+    // Delete rewards
+    await db.delete(rewards).where(eq(rewards.familyName, familyName));
+
+    // Delete tasks
+    await db.delete(tasks).where(eq(tasks.familyName, familyName));
+
+    // Delete family members
+    await db.delete(familyMembers).where(eq(familyMembers.familyName, familyName));
+
+    // Finally delete the family
+    await db.delete(families).where(eq(families.familyName, familyName));
+
+    console.log(`Deleted family: ${familyName} and all related data`);
   }
 
   async getFamilyByJoinCode(joinCode: string): Promise<Family | undefined> {

@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Shield, 
@@ -146,6 +148,9 @@ export default function AdminPage() {
   const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string; familyName: string } | null>(null);
   const [memberToAddPoints, setMemberToAddPoints] = useState<{ id: string; name: string } | null>(null);
   const [pointsToAdd, setPointsToAdd] = useState("");
+  const [selectedFamilies, setSelectedFamilies] = useState<Set<string>>(new Set());
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -726,13 +731,27 @@ export default function AdminPage() {
           <TabsContent value="families" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Home className="h-5 w-5" />
-                  Families
-                </CardTitle>
-                <CardDescription>
-                  All registered families and their statistics
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Home className="h-5 w-5" />
+                      Families
+                    </CardTitle>
+                    <CardDescription>
+                      All registered families and their statistics
+                    </CardDescription>
+                  </div>
+                  {selectedFamilies.size > 0 && (
+                    <Button 
+                      variant="destructive" 
+                      onClick={() => setShowDeleteConfirm(true)}
+                      data-testid="button-delete-selected"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete {selectedFamilies.size} Familie{selectedFamilies.size > 1 ? 'n' : ''}
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 {familiesLoading ? (
@@ -743,15 +762,49 @@ export default function AdminPage() {
                   </div>
                 ) : families && families.length > 0 ? (
                   <div className="space-y-2">
+                    {/* Select All */}
+                    <div className="flex items-center gap-3 p-2 border-b mb-2">
+                      <Checkbox
+                        id="select-all"
+                        checked={selectedFamilies.size === families.length && families.length > 0}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedFamilies(new Set(families.map(f => f.familyName)));
+                          } else {
+                            setSelectedFamilies(new Set());
+                          }
+                        }}
+                        data-testid="checkbox-select-all"
+                      />
+                      <label htmlFor="select-all" className="text-sm text-muted-foreground cursor-pointer">
+                        Alle auswählen ({families.length})
+                      </label>
+                    </div>
                     {families.map((family) => (
                       <div
                         key={family.familyName}
-                        className="flex items-center justify-between p-4 border rounded-lg hover-elevate cursor-pointer"
-                        onClick={() => setSelectedFamily(family.familyName)}
+                        className="flex items-center justify-between p-4 border rounded-lg hover-elevate"
                         data-testid={`card-family-${family.familyName}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div>
+                          <Checkbox
+                            checked={selectedFamilies.has(family.familyName)}
+                            onCheckedChange={(checked) => {
+                              const newSet = new Set(selectedFamilies);
+                              if (checked) {
+                                newSet.add(family.familyName);
+                              } else {
+                                newSet.delete(family.familyName);
+                              }
+                              setSelectedFamilies(newSet);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            data-testid={`checkbox-family-${family.familyName}`}
+                          />
+                          <div 
+                            className="cursor-pointer"
+                            onClick={() => setSelectedFamily(family.familyName)}
+                          >
                             <p className="font-semibold">{family.familyName}</p>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Users className="h-3 w-3" />
@@ -782,7 +835,10 @@ export default function AdminPage() {
                               <SelectItem value="family_hero">Family Hero (12€)</SelectItem>
                             </SelectContent>
                           </Select>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                          <ChevronRight 
+                            className="h-5 w-5 text-muted-foreground cursor-pointer" 
+                            onClick={() => setSelectedFamily(family.familyName)}
+                          />
                         </div>
                       </div>
                     ))}
@@ -1279,6 +1335,81 @@ export default function AdminPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Families Confirmation Dialog */}
+        <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                <Trash2 className="h-5 w-5" />
+                {selectedFamilies.size} Familie{selectedFamilies.size > 1 ? 'n' : ''} löschen?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <p>Diese Aktion kann nicht rückgängig gemacht werden. Folgende Daten werden gelöscht:</p>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  <li>Alle Familienmitglieder und ihre Punkte</li>
+                  <li>Alle Aufgaben und Belohnungen</li>
+                  <li>Alle Chat-Nachrichten und Achievements</li>
+                  <li>Alle Stern-Platzierungen</li>
+                </ul>
+                <div className="mt-4 max-h-32 overflow-y-auto text-xs bg-muted p-2 rounded">
+                  {Array.from(selectedFamilies).join(", ")}
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Abbrechen</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={isDeleting}
+                onClick={async () => {
+                  setIsDeleting(true);
+                  try {
+                    const res = await fetch("/api/admin/delete-families", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${sessionStorage.getItem("adminToken") || token}`
+                      },
+                      body: JSON.stringify({ familyNames: Array.from(selectedFamilies) })
+                    });
+                    const result = await res.json();
+                    if (res.ok) {
+                      toast({
+                        title: "Familien gelöscht",
+                        description: `${result.deleted} Familie(n) erfolgreich gelöscht`
+                      });
+                      setSelectedFamilies(new Set());
+                      refetchFamilies();
+                      refetchStats();
+                    } else {
+                      throw new Error(result.message);
+                    }
+                  } catch (err: any) {
+                    toast({
+                      title: "Fehler beim Löschen",
+                      description: err.message || "Konnte Familien nicht löschen",
+                      variant: "destructive"
+                    });
+                  } finally {
+                    setIsDeleting(false);
+                    setShowDeleteConfirm(false);
+                  }
+                }}
+                data-testid="button-confirm-delete-families"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Löschen...
+                  </>
+                ) : (
+                  "Endgültig löschen"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );

@@ -5038,6 +5038,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete multiple families at once (for cleaning up test families)
+  app.post("/api/admin/delete-families", isAdmin, async (req, res) => {
+    try {
+      const { familyNames } = req.body;
+      
+      if (!familyNames || !Array.isArray(familyNames) || familyNames.length === 0) {
+        return res.status(400).json({ message: "No family names provided" });
+      }
+      
+      let deleted = 0;
+      const errors: string[] = [];
+      
+      for (const familyName of familyNames) {
+        try {
+          await storage.deleteFamily(familyName);
+          deleted++;
+        } catch (err: any) {
+          errors.push(`${familyName}: ${err.message}`);
+        }
+      }
+      
+      res.json({ 
+        message: `Deleted ${deleted} of ${familyNames.length} families`,
+        deleted,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    } catch (error: any) {
+      console.error("Error deleting families:", error);
+      res.status(500).json({ message: "Failed to delete families", error: error.message });
+    }
+  });
+
   // Reinitialize stars for all members with discovered skins (fix for test families)
   app.post("/api/admin/reinitialize-stars", isAdmin, async (req, res) => {
     try {
