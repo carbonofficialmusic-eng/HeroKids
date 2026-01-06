@@ -1929,7 +1929,13 @@ export class DatabaseStorage implements IStorage {
       await tx.delete(familyGoals)
         .where(eq(familyGoals.familyName, familyName));
 
-      // 13. Reset all family member stats to zero (including PIN codes)
+      // 13. Delete all star placements for family members (so they get redistributed)
+      for (const memberId of memberIds) {
+        await tx.delete(starPlacements)
+          .where(eq(starPlacements.memberId, memberId));
+      }
+
+      // 14. Reset all family member stats to zero (including PIN codes and starsFound)
       for (const memberId of memberIds) {
         await tx.update(familyMembers)
           .set({
@@ -1942,12 +1948,13 @@ export class DatabaseStorage implements IStorage {
             discoveredSkinIds: [],
             activeSkinId: null,
             pinCode: null,
+            starsFound: 0,
             updatedAt: new Date(),
           })
           .where(eq(familyMembers.id, memberId));
       }
 
-      // 14. Create default achievements using shared template (only Weekly Champion and Perfect Week enabled)
+      // 15. Create default achievements using shared template (only Weekly Champion and Perfect Week enabled)
       // Note: Default tasks removed - families now start fresh and parents create tasks in their language
       for (const template of DEFAULT_ACHIEVEMENT_TEMPLATES) {
         await tx.insert(achievementDefinitions).values({
