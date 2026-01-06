@@ -2864,7 +2864,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const isActive = member.activeSkinId === skin.id;
         
         // Check if skin can be unlocked based on position and points
-        const canDiscover = !isDiscovered && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length);
+        // Legacy skins cannot be discovered manually - they are unlocked via stars only
+        const canDiscover = !isDiscovered && !isLegacySkin(skin.id) && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length);
         
         // Get position for ordering (legacy skins have tier 14)
         const tier = isLegacySkin(skin.id) ? 14 : 1;
@@ -2931,6 +2932,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!skin) {
         return res.status(404).json({ message: "Skin not found" });
+      }
+      
+      // Legacy skins cannot be discovered manually - they are unlocked via stars only
+      if (isLegacySkin(skinId)) {
+        return res.status(403).json({ message: "Legacy skins are unlocked through star collection, not discovery" });
       }
       
       const discoveredSkinIds = member.discoveredSkinIds || [];
