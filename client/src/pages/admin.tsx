@@ -982,6 +982,54 @@ export default function AdminPage() {
                     <li>Select the exported JSON file - all families will be restored</li>
                   </ol>
                 </div>
+
+                <Separator />
+
+                {/* Star Reinitialization for Test Families */}
+                <div className="space-y-4 p-4 border rounded-lg border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Star className="h-4 w-4 text-amber-500" />
+                    Fix Stars for Test Families
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    For members who already discovered skins but have 0/32 stars, this will place 32 new stars on their discovered skin cards.
+                  </p>
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        const res = await fetch("/api/admin/reinitialize-stars", {
+                          method: "POST",
+                          headers: { 
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${sessionStorage.getItem("adminToken")}` 
+                          },
+                          body: JSON.stringify({})
+                        });
+                        const result = await res.json();
+                        if (res.ok) {
+                          toast({ 
+                            title: "Stars reinitialized", 
+                            description: `${result.results?.length || 0} members updated` 
+                          });
+                        } else {
+                          throw new Error(result.message);
+                        }
+                      } catch (err: any) {
+                        toast({ 
+                          title: "Failed", 
+                          description: err.message || "Could not reinitialize stars", 
+                          variant: "destructive" 
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    className="border-amber-500 text-amber-700 dark:text-amber-400"
+                    data-testid="button-reinitialize-stars"
+                  >
+                    <Star className="h-4 w-4 mr-2" />
+                    Reinitialize Stars for All Members
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
