@@ -704,8 +704,13 @@ export default function Settings() {
                     setLocalSkinCardCost(value[0]);
                   }}
                   onValueCommit={(value) => {
-                    updateSettingsMutation.mutate({ skinCardCost: value[0] });
-                    setLocalSkinCardCost(null);
+                    const newValue = value[0];
+                    setLocalSkinCardCost(newValue);
+                    updateSettingsMutation.mutate({ skinCardCost: newValue }, {
+                      onSuccess: () => {
+                        setLocalSkinCardCost(null);
+                      }
+                    });
                   }}
                   disabled={updateSettingsMutation.isPending}
                   className="w-full"
