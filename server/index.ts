@@ -7,8 +7,8 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { startPointsResetScheduler } from "./scheduler";
 import { db } from "./db";
-import { skins } from "../shared/schema";
-import { sql } from "drizzle-orm";
+import { skins, familyMembers, starPlacements } from "../shared/schema";
+import { sql, eq, and, notInArray } from "drizzle-orm";
 import Stripe from "stripe";
 
 const app = express();
@@ -569,6 +569,109 @@ async function forceReseedSkinsIfNeeded() {
   }
 }
 
+// One-time migration: Give starter skin to existing members and redistribute stars
+async function migrateExistingMembersForTestPhase() {
+  const STARTER_SKIN = "junior-champion";
+  const LEGACY_SKIN_IDS = [
+    "shield-blaze", "comet-dash", "wave-glider", "forest-guard",
+    "luna-beacon", "sunrise-spark", "bloom-guardian", "breeze-captain"
+  ];
+
+  try {
+    // Get all members
+    const allMembers = await db.select().from(familyMembers);
+    let membersUpdated = 0;
+    let starsRedistributed = 0;
+
+    for (const member of allMembers) {
+      const discoveredSkinIds = (member.discoveredSkinIds as string[]) || [];
+
+      // Case 1: Member has no discovered skins - give them the starter skin
+      if (discoveredSkinIds.length === 0) {
+        await db.update(familyMembers)
+          .set({ discoveredSkinIds: [STARTER_SKIN] })
+          .where(eq(familyMembers.id, member.id));
+        membersUpdated++;
+        continue;
+      }
+
+      // Case 2: Member has discovered skins but doesn't have the starter - add it
+      if (!discoveredSkinIds.includes(STARTER_SKIN)) {
+        await db.update(familyMembers)
+          .set({ discoveredSkinIds: [STARTER_SKIN, ...discoveredSkinIds] })
+          .where(eq(familyMembers.id, member.id));
+        membersUpdated++;
+      }
+
+      // Case 3: Check if stars need to be redistributed to undiscovered cards
+      const existingStars = await db.select().from(starPlacements)
+        .where(eq(starPlacements.memberId, member.id));
+      
+      // Get all standard skins (excluding starter and legacy)
+      const allSkins = await db.select({ id: skins.id }).from(skins);
+      const standardSkinIds = allSkins
+        .map(s => s.id)
+        .filter(id => !LEGACY_SKIN_IDS.includes(id) && id !== STARTER_SKIN);
+      
+      // Get undiscovered standard skins
+      const undiscoveredSkinIds = standardSkinIds.filter(
+        id => !discoveredSkinIds.includes(id)
+      );
+
+      // Check if any stars are on discovered skins (they need to be moved)
+      const starsOnDiscoveredSkins = existingStars.filter(
+        star => discoveredSkinIds.includes(star.skinId) || star.skinId === STARTER_SKIN
+      );
+
+      if (starsOnDiscoveredSkins.length > 0 && undiscoveredSkinIds.length > 0) {
+        // Delete all star placements and redistribute to undiscovered skins
+        await db.delete(starPlacements).where(eq(starPlacements.memberId, member.id));
+        
+        // Reset stars found counter
+        await db.update(familyMembers)
+          .set({ starsFound: 0 })
+          .where(eq(familyMembers.id, member.id));
+
+        // Randomly select up to 32 undiscovered skins for star placement
+        const shuffled = [...undiscoveredSkinIds].sort(() => Math.random() - 0.5);
+        const selectedPositions = shuffled.slice(0, Math.min(32, shuffled.length));
+
+        for (const skinId of selectedPositions) {
+          await db.insert(starPlacements).values({
+            memberId: member.id,
+            skinId,
+            found: false,
+          }).onConflictDoNothing();
+        }
+
+        starsRedistributed++;
+        log(`♻️ Redistributed ${selectedPositions.length} stars for ${member.displayName} to undiscovered cards`);
+      } else if (existingStars.length === 0) {
+        // No stars yet - initialize on undiscovered skins only
+        const shuffled = [...undiscoveredSkinIds].sort(() => Math.random() - 0.5);
+        const selectedPositions = shuffled.slice(0, Math.min(32, shuffled.length));
+
+        for (const skinId of selectedPositions) {
+          await db.insert(starPlacements).values({
+            memberId: member.id,
+            skinId,
+            found: false,
+          }).onConflictDoNothing();
+        }
+        starsRedistributed++;
+      }
+    }
+
+    if (membersUpdated > 0 || starsRedistributed > 0) {
+      log(`✅ Test phase migration: ${membersUpdated} members got starter skin, ${starsRedistributed} members got stars redistributed`);
+    } else {
+      log(`✅ Test phase migration: All members already have starter skin and correct star placement`);
+    }
+  } catch (error) {
+    console.error("❌ Error during test phase migration:", error);
+  }
+}
+
 (async () => {
   const server = await registerRoutes(app);
 
@@ -583,6 +686,9 @@ async function forceReseedSkinsIfNeeded() {
   
   // Add Bonus Adventure Pack + new Legacy skins
   await addBonusAdventurePackIfNeeded();
+
+  // One-time migration for existing testers (starter skin + star redistribution)
+  await migrateExistingMembersForTestPhase();
 
   // Start points reset scheduler
   startPointsResetScheduler();
