@@ -7,7 +7,7 @@ import { z } from "zod";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import Stripe from "stripe";
-import { getISOWeek, getISOWeekYear } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
@@ -3544,11 +3544,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family goal not found" });
       }
       
-      // Calculate current period identifier using ISO week calculation
+      // Get family timezone for correct period calculation
+      const family = await storage.getFamily(member.familyName);
+      const familyTimezone = family?.timezone || "Europe/Berlin";
+      
+      // Calculate current period identifier using family's timezone
       const now = new Date();
       const period = goal.contributionPeriod === "weekly"
-        ? `${getISOWeekYear(now)}-W${String(getISOWeek(now)).padStart(2, '0')}`
-        : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        ? formatInTimeZone(now, familyTimezone, "RRRR-'W'II")
+        : formatInTimeZone(now, familyTimezone, "yyyy-MM");
       
       const contributions = await storage.getGoalContributionsByGoalAndPeriod(id, period);
       
@@ -3773,11 +3777,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "This goal is no longer active" });
       }
       
-      // Calculate current period using ISO week calculation
+      // Get family timezone for correct period calculation
+      const family = await storage.getFamily(member.familyName);
+      const familyTimezone = family?.timezone || "Europe/Berlin";
+      
+      // Calculate current period using family's timezone
       const now = new Date();
       const period = goal.contributionPeriod === "weekly"
-        ? `${getISOWeekYear(now)}-W${String(getISOWeek(now)).padStart(2, '0')}`
-        : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        ? formatInTimeZone(now, familyTimezone, "RRRR-'W'II")
+        : formatInTimeZone(now, familyTimezone, "yyyy-MM");
       
       // Check if member has already contributed this period
       const existingContribution = await storage.getGoalContributionsByMemberAndGoal(id, member.id, period);
