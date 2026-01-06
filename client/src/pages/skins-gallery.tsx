@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest, ApiError } from "@/lib/queryClient";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -14,6 +14,66 @@ import { SKIN_IMAGES, SKIN_BACKGROUNDS } from "@/lib/skins";
 import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, POINTS_PER_SKIN } from "@shared/skin-config";
 import type { FamilyMember } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+
+// Custom hook for sticky sidebar on desktop
+function useStickyPreview(isDesktop: boolean) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [stickyStyle, setStickyStyle] = useState<React.CSSProperties>({});
+
+  useEffect(() => {
+    if (!isDesktop) {
+      setStickyStyle({});
+      return;
+    }
+
+    const handleScroll = () => {
+      if (!containerRef.current || !previewRef.current) return;
+      
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const previewHeight = previewRef.current.offsetHeight;
+      const topOffset = 16; // 1rem gap from top
+      const viewportHeight = window.innerHeight;
+      
+      // Calculate if we should fix the preview
+      if (containerRect.top < topOffset) {
+        // Container has scrolled past the top offset
+        const maxScroll = containerRect.height - previewHeight;
+        const currentScroll = topOffset - containerRect.top;
+        
+        if (currentScroll < maxScroll) {
+          // Fix the preview at the top
+          setStickyStyle({
+            position: 'fixed',
+            top: `${topOffset}px`,
+            width: `${previewRef.current.offsetWidth}px`,
+          });
+        } else {
+          // Pin to bottom of container
+          setStickyStyle({
+            position: 'absolute',
+            bottom: '0',
+            top: 'auto',
+          });
+        }
+      } else {
+        // Container hasn't scrolled yet
+        setStickyStyle({});
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+    handleScroll(); // Initial call
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [isDesktop]);
+
+  return { containerRef, previewRef, stickyStyle };
+}
 
 interface Skin {
   id: string;
@@ -35,6 +95,17 @@ export default function SkinsGallery() {
   const [selectedSkinId, setSelectedSkinId] = useState<string | null>(null);
   const [discoverDialogSkin, setDiscoverDialogSkin] = useState<Skin | null>(null);
   const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
+  
+  // Detect desktop for sticky behavior (lg breakpoint = 1024px)
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
+  
+  const { containerRef, previewRef, stickyStyle } = useStickyPreview(isDesktop);
 
   const { data: memberData, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
@@ -272,10 +343,11 @@ export default function SkinsGallery() {
           </div>
 
           {/* Main Layout: Preview Left + Grid Right */}
-          <div className="flex gap-4 flex-col lg:flex-row">
-            {/* Preview Panel - Left Side - Sticky on desktop, normal on mobile */}
-            <div className="lg:w-80 flex-shrink-0 self-start lg:sticky lg:top-4">
-              <Card className="bg-card/90 backdrop-blur-md p-4">
+          <div ref={containerRef} className="flex gap-4 flex-col lg:flex-row relative">
+            {/* Preview Panel - Left Side - JS-based sticky on desktop, normal on mobile */}
+            <div className="lg:w-80 flex-shrink-0">
+              <div ref={previewRef} style={stickyStyle}>
+                <Card className="bg-card/90 backdrop-blur-md p-4">
                 {/* Preview Image */}
                 <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-gradient-to-br from-muted to-card">
                   {previewSkin ? (
@@ -402,6 +474,7 @@ export default function SkinsGallery() {
                   </p>
                 </div>
               </Card>
+              </div>
             </div>
 
             {/* Skins Grid - Right Side */}
