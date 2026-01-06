@@ -3012,11 +3012,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Allow null to reset to default avatar, otherwise verify skin is discovered
+      // Allow null to reset to default avatar, otherwise verify skin is discovered or earned
       if (skinId !== null) {
         const discoveredSkinIds = member.discoveredSkinIds || [];
+        const earnedLegacySkinIds = member.earnedLegacySkinIds || [];
         
-        if (!discoveredSkinIds.includes(skinId)) {
+        // Check both discovered skins and earned legacy skins (from star collection)
+        if (!discoveredSkinIds.includes(skinId) && !earnedLegacySkinIds.includes(skinId)) {
           return res.status(403).json({ message: "Skin not discovered yet - discover it first!" });
         }
       }
