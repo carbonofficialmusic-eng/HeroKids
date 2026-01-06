@@ -29,7 +29,8 @@
       "9": "Okt",
       "10": "Nov",
       "11": "Dez"
-    }
+    },
+    "stars": "Sterne"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -364,7 +365,9 @@
     "mystery": "Entdecken um zu enthüllen!",
     "yourPhoto": "Dein Foto",
     "useYourPhoto": "Dein Foto verwenden",
-    "photoEquipped": "Dein Foto ausgewählt!"
+    "photoEquipped": "Dein Foto ausgewählt!",
+    "starFound": "Du hast einen Stern gefunden!",
+    "legacyUnlocked": "HeroKids Legacy Avatar freigeschaltet!"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

@@ -14,6 +14,7 @@ import { SKIN_IMAGES, SKIN_BACKGROUNDS } from "@/lib/skins";
 import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, POINTS_PER_SKIN } from "@shared/skin-config";
 import type { FamilyMember } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Custom hook for sticky sidebar on desktop
 function useStickyPreview(isDesktop: boolean) {
@@ -121,9 +122,15 @@ export default function SkinsGallery() {
     totalEarned: number;
     availableCards: number;
     unlockedTier: number;
+    starStats: { starsFound: number; totalStars: number; earnedLegacySkinIds: string[] };
+    starPlacements: Record<string, boolean>; // skinId -> found
   }>({
     queryKey: ["/api/skins"],
   });
+  
+  // Star animation state
+  const [showStarAnimation, setShowStarAnimation] = useState(false);
+  const [starAnimationData, setStarAnimationData] = useState<{ totalStars: number; legacySkinAwarded: string | null } | null>(null);
 
   const discoverSkinMutation = useMutation({
     mutationFn: async (skinId: string) => {
@@ -135,10 +142,30 @@ export default function SkinsGallery() {
       setPopupPosition(null);
       const skin = data?.skins.find(s => s.id === result.skinId);
       const skinName = skin?.id ? t(`skinNames.${skin.id}`) : "Skin";
-      setCelebration({
-        points: result.bonusPoints || 0,
-        message: `${skinName} ${t('skins.discovered')}!${result.bonusPoints ? ` +${result.bonusPoints} ${t('common.points')}!` : ""}`,
-      });
+      
+      // Check if a star was found - show star animation first
+      if (result.starFound) {
+        setStarAnimationData({
+          totalStars: result.totalStarsFound,
+          legacySkinAwarded: result.legacySkinAwarded,
+        });
+        setShowStarAnimation(true);
+        
+        // After star animation, show the regular celebration
+        setTimeout(() => {
+          setShowStarAnimation(false);
+          setCelebration({
+            points: result.bonusPoints || 0,
+            message: `${skinName} ${t('skins.discovered')}!${result.bonusPoints ? ` +${result.bonusPoints} ${t('common.points')}!` : ""}`,
+          });
+        }, 2500);
+      } else {
+        setCelebration({
+          points: result.bonusPoints || 0,
+          message: `${skinName} ${t('skins.discovered')}!${result.bonusPoints ? ` +${result.bonusPoints} ${t('common.points')}!` : ""}`,
+        });
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
@@ -229,12 +256,16 @@ export default function SkinsGallery() {
   const nextUnlockPoints = (discoveredCount + 1) * POINTS_PER_SKIN;
   const progressToNext = totalEarned % POINTS_PER_SKIN;
 
+  const starPlacements = data?.starPlacements || {};
+  const starStats = data?.starStats || { starsFound: 0, totalStars: 0, earnedLegacySkinIds: [] };
+
   const renderMiniCard = (skin: Skin, index: number) => {
     const isDiscovered = skin.isDiscovered;
     const canDiscover = skin.canDiscover;
     const isActive = skin.isActive;
     const isSelected = selectedSkinId === skin.id;
     const isLegacy = isLegacySkin(skin.id);
+    const hasFoundStar = starPlacements[skin.id] === true; // Star was found on this card
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
       // If it's an undiscovered skin that can be discovered, show the popup
@@ -305,6 +336,15 @@ export default function SkinsGallery() {
             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
           </div>
         )}
+        
+        {/* Mini-star indicator for discovered skins where a star was found */}
+        {isDiscovered && hasFoundStar && (
+          <div className="absolute bottom-0.5 right-0.5">
+            <div className="bg-yellow-400 rounded-full p-0.5 shadow-lg">
+              <Star className="h-2 w-2 text-yellow-900 fill-yellow-900" />
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -332,6 +372,14 @@ export default function SkinsGallery() {
                 <Trophy className="h-4 w-4 mr-1" />
                 {totalEarned} {t('common.points')}
               </Badge>
+              
+              {/* Star counter for children */}
+              {isChild && starStats.totalStars > 0 && (
+                <Badge variant="outline" className="text-sm font-bold whitespace-nowrap bg-yellow-100 text-yellow-800 border-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-300">
+                  <Star className="h-4 w-4 mr-1 fill-yellow-400" />
+                  {starStats.starsFound}/{starStats.totalStars}
+                </Badge>
+              )}
               
               {availableCards > 0 && (
                 <Badge className="text-base font-bold animate-pulse whitespace-nowrap">
@@ -590,6 +638,76 @@ export default function SkinsGallery() {
           onComplete={() => setCelebration(null)}
         />
       )}
+
+      {/* Star Found Animation */}
+      <AnimatePresence>
+        {showStarAnimation && starAnimationData && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="flex flex-col items-center"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ 
+                scale: [0, 1.5, 1],
+                rotate: [0, 360, 360],
+                y: [0, -50, -50, 0]
+              }}
+              transition={{
+                duration: 2,
+                times: [0, 0.4, 0.6, 1],
+                ease: "easeOut"
+              }}
+            >
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 15, -15, 0]
+                }}
+                transition={{
+                  duration: 0.5,
+                  repeat: 3,
+                  repeatType: "reverse"
+                }}
+              >
+                <Star className="h-32 w-32 text-yellow-400 fill-yellow-400 drop-shadow-2xl" />
+              </motion.div>
+              <motion.p
+                className="mt-6 text-3xl font-bold font-accent text-white drop-shadow-lg"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+              >
+                {t('skins.starFound', 'You found a Star!')}
+              </motion.p>
+              <motion.p
+                className="mt-2 text-xl text-yellow-300"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 }}
+              >
+                {starAnimationData.totalStars}/32 {t('common.stars', 'Stars')}
+              </motion.p>
+              {starAnimationData.legacySkinAwarded && (
+                <motion.div
+                  className="mt-4 bg-purple-500/80 rounded-lg px-4 py-2"
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.6 }}
+                >
+                  <p className="text-lg font-bold text-white flex items-center gap-2">
+                    <Crown className="h-5 w-5" />
+                    {t('skins.legacyUnlocked', 'HeroKids Legacy Avatar unlocked!')}
+                  </p>
+                </motion.div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

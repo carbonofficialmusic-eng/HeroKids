@@ -16,7 +16,8 @@
     "filter": "Filter",
     "select": "Select",
     "error": "Error",
-    "monthsShort": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    "monthsShort": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "stars": "Stars"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -341,7 +342,9 @@
     "mystery": "Discover to reveal!",
     "yourPhoto": "Your Photo",
     "useYourPhoto": "Use Your Photo",
-    "photoEquipped": "Your Photo Equipped!"
+    "photoEquipped": "Your Photo Equipped!",
+    "starFound": "You found a Star!",
+    "legacyUnlocked": "HeroKids Legacy Avatar unlocked!"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",
