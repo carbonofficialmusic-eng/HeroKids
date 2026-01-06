@@ -8,10 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users } from "lucide-react";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -83,6 +84,7 @@ export default function Settings() {
       timezone?: string;
       weeklyPrize?: string | null;
       monthlyPrize?: string | null;
+      skinCardCost?: number;
     }) => {
       return await apiRequest("PATCH", "/api/families/settings", settings);
     },
@@ -670,6 +672,48 @@ export default function Settings() {
                   </p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Motivation Settings - Skin Card Cost */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <CardTitle>{t('settings.motivationTitle')}</CardTitle>
+              </div>
+              <CardDescription>
+                {t('settings.motivationDesc')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-base">{t('settings.skinCardCost')}</Label>
+                  <span className="text-lg font-semibold text-primary" data-testid="text-skin-card-cost">
+                    {familyData?.skinCardCost ?? 60} {t('settings.points')}
+                  </span>
+                </div>
+                <Slider
+                  value={[familyData?.skinCardCost ?? 60]}
+                  min={40}
+                  max={80}
+                  step={5}
+                  onValueCommit={(value) => {
+                    updateSettingsMutation.mutate({ skinCardCost: value[0] });
+                  }}
+                  disabled={updateSettingsMutation.isPending}
+                  className="w-full"
+                  data-testid="slider-skin-card-cost"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>{t('settings.moreFun')}</span>
+                  <span>{t('settings.longerLasting')}</span>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t('settings.skinCardCostInfo')}
+              </p>
             </CardContent>
           </Card>
 

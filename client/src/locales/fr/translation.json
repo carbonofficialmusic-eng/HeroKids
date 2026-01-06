@@ -579,7 +579,14 @@
     "achievementsInfo": "Créez des jalons comme \"Premier à Terminer les Tâches Hebdomadaires\" ou \"Semaine Parfaite\" qui attribuent automatiquement des points bonus.",
     "configureAchievements": "Configurer les Jalons",
     "analyticsDesc": "Consultez les statistiques des tâches, les tendances de points et les progrès de la famille.",
-    "openAnalytics": "Ouvrir les Statistiques"
+    "openAnalytics": "Ouvrir les Statistiques",
+    "motivationTitle": "Motivation",
+    "motivationDesc": "Combien de points coûte une nouvelle carte de skin ?",
+    "skinCardCost": "Points par carte",
+    "skinCardCostInfo": "Coût plus bas = plus de motivation, mais les cartes s'épuisent plus vite. Coût plus élevé = les cartes durent plus longtemps, moins de récompenses immédiates.",
+    "moreFun": "Plus de plaisir",
+    "longerLasting": "Plus durable",
+    "points": "Points"
   },
   "subscription": {
     "free": "Free",

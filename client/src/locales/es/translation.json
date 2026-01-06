@@ -579,7 +579,14 @@
     "achievementsInfo": "Crea hitos como \"Primero en Terminar Tareas Semanales\" o \"Semana Perfecta\" que otorgan puntos de bonificación automáticamente.",
     "configureAchievements": "Configurar Hitos",
     "analyticsDesc": "Ver estadísticas de tareas, tendencias de puntos y progreso familiar.",
-    "openAnalytics": "Abrir Estadísticas"
+    "openAnalytics": "Abrir Estadísticas",
+    "motivationTitle": "Motivación",
+    "motivationDesc": "¿Cuántos puntos cuesta una nueva tarjeta de skin?",
+    "skinCardCost": "Puntos por tarjeta",
+    "skinCardCostInfo": "Menor costo = más motivación, pero las tarjetas se agotan más rápido. Mayor costo = las tarjetas duran más, menos recompensas inmediatas.",
+    "moreFun": "Más diversión",
+    "longerLasting": "Mayor duración",
+    "points": "Puntos"
   },
   "subscription": {
     "free": "Free",

@@ -610,7 +610,14 @@
     "achievementsInfo": "Set up milestones like \"First to Finish Weekly Tasks\" or \"Perfect Week\" that automatically award bonus points.",
     "configureAchievements": "Configure Milestones",
     "analyticsDesc": "View task statistics, points trends, and family progress.",
-    "openAnalytics": "Open Analytics"
+    "openAnalytics": "Open Analytics",
+    "motivationTitle": "Motivation",
+    "motivationDesc": "How many points does a new skin card cost?",
+    "skinCardCost": "Points per Card",
+    "skinCardCostInfo": "Lower cost = more motivation, but cards run out faster. Higher cost = cards last longer, fewer immediate rewards.",
+    "moreFun": "More Fun",
+    "longerLasting": "Longer Lasting",
+    "points": "Points"
   },
   "subscription": {
     "free": "Free",

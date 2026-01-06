@@ -633,7 +633,14 @@
     "achievementsInfo": "Erstelle Meilensteine wie \"Erster der wöchentlichen Aufgaben\" oder \"Perfekte Woche\", die automatisch Boni vergeben.",
     "configureAchievements": "Meilensteine konfigurieren",
     "analyticsDesc": "Aufgabenstatistiken, Punktetrends und Familienfortschritte ansehen.",
-    "openAnalytics": "Statistiken öffnen"
+    "openAnalytics": "Statistiken öffnen",
+    "motivationTitle": "Motivation",
+    "motivationDesc": "Wie viele Punkte kostet eine neue Skin-Karte?",
+    "skinCardCost": "Punkte pro Karte",
+    "skinCardCostInfo": "Niedrigere Kosten = mehr Motivation, aber Karten sind schneller aufgebraucht. Höhere Kosten = Karten halten länger, weniger sofortige Belohnungen.",
+    "moreFun": "Mehr Spaß",
+    "longerLasting": "Länger spannend",
+    "points": "Punkte"
   },
   "subscription": {
     "free": "Free",

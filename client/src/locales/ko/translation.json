@@ -583,7 +583,14 @@
     "achievementsInfo": "\"주간 과제 첫 번째 완료\" 또는 \"퍼펙트 위크\"와 같은 마일스톤을 만들어 자동으로 보너스 포인트를 부여합니다.",
     "configureAchievements": "마일스톤 구성",
     "analyticsDesc": "과제 통계, 포인트 추세, 가족 진행 상황 확인.",
-    "openAnalytics": "통계 열기"
+    "openAnalytics": "통계 열기",
+    "motivationTitle": "동기부여",
+    "motivationDesc": "새 스킨 카드에 필요한 포인트는?",
+    "skinCardCost": "카드당 포인트",
+    "skinCardCostInfo": "낮은 비용 = 동기부여 상승, 하지만 카드가 빨리 소진됩니다. 높은 비용 = 카드가 오래 지속, 즉각적인 보상은 적습니다.",
+    "moreFun": "더 재미있게",
+    "longerLasting": "더 오래 지속",
+    "points": "포인트"
   },
   "subscription": {
     "free": "무료",

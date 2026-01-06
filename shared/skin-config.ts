@@ -185,21 +185,23 @@ export function isLegacySkin(skinId: string): boolean {
 
 /**
  * Calculate how many skins can be unlocked with given points
- * Standard skins: 80 points each, user can choose ANY standard skin
- * Legacy skins: only available after 9100 points
+ * Standard skins: configurable points each (40-80, default 60), user can choose ANY standard skin
+ * Legacy skins: only available after threshold points
+ * @param totalEarned - Total points earned
+ * @param pointsPerSkin - Points required per skin (default 60, configurable 40-80)
  */
-export function calculateUnlockableSkins(totalEarned: number): number {
-  // Standard skins: 80 points each, max is all standard skins
+export function calculateUnlockableSkins(totalEarned: number, pointsPerSkin: number = POINTS_PER_SKIN): number {
+  // Standard skins: pointsPerSkin each, max is all standard skins
   const standardUnlocks = Math.min(
-    Math.floor(totalEarned / POINTS_PER_SKIN),
+    Math.floor(totalEarned / pointsPerSkin),
     MIXED_SKIN_ORDER.length
   );
   
-  // Legacy skins: available if points >= 9100
+  // Legacy skins: available if points >= threshold
   if (totalEarned >= LEGACY_UNLOCK_THRESHOLD) {
     const pointsAfterThreshold = totalEarned - LEGACY_UNLOCK_THRESHOLD;
     const legacyUnlocks = Math.min(
-      Math.floor(pointsAfterThreshold / POINTS_PER_SKIN) + 1,
+      Math.floor(pointsAfterThreshold / pointsPerSkin) + 1,
       LEGACY_SKIN_ORDER.length
     );
     return standardUnlocks + legacyUnlocks;
@@ -210,9 +212,12 @@ export function calculateUnlockableSkins(totalEarned: number): number {
 
 /**
  * Calculate available discovery cards (skins that can be unlocked)
+ * @param totalEarned - Total points earned
+ * @param discoveredCount - Number of skins already discovered
+ * @param pointsPerSkin - Points required per skin (default 60, configurable 40-80)
  */
-export function calculateAvailableCards(totalEarned: number, discoveredCount: number): number {
-  const maxUnlockable = calculateUnlockableSkins(totalEarned);
+export function calculateAvailableCards(totalEarned: number, discoveredCount: number, pointsPerSkin: number = POINTS_PER_SKIN): number {
+  const maxUnlockable = calculateUnlockableSkins(totalEarned, pointsPerSkin);
   const available = maxUnlockable - discoveredCount;
   return Math.max(0, available);
 }
@@ -220,14 +225,18 @@ export function calculateAvailableCards(totalEarned: number, discoveredCount: nu
 /**
  * Check if a specific skin can be unlocked
  * Standard skins: User can choose ANY standard skin if they have available cards
- * Legacy skins: Need 9100+ points AND available cards
+ * Legacy skins: Need threshold points AND available cards
+ * @param skinId - The skin ID to check
+ * @param totalEarned - Total points earned
+ * @param discoveredCount - Number of skins already discovered
+ * @param pointsPerSkin - Points required per skin (default 60, configurable 40-80)
  */
-export function canUnlockSkin(skinId: string, totalEarned: number, discoveredCount: number): boolean {
+export function canUnlockSkin(skinId: string, totalEarned: number, discoveredCount: number, pointsPerSkin: number = POINTS_PER_SKIN): boolean {
   const position = getSkinPosition(skinId);
   if (position === -1) return false;
   
   // Check if we have available cards
-  const availableCards = calculateAvailableCards(totalEarned, discoveredCount);
+  const availableCards = calculateAvailableCards(totalEarned, discoveredCount, pointsPerSkin);
   if (availableCards <= 0) return false;
   
   // Standard skins: user can choose ANY if they have available cards
@@ -245,13 +254,15 @@ export function canUnlockSkin(skinId: string, totalEarned: number, discoveredCou
 
 /**
  * Get progress toward next skin unlock
- * Shows progress for next discovery card (80 points each)
+ * Shows progress for next discovery card
+ * @param totalEarned - Total points earned
+ * @param pointsPerSkin - Points required per skin (default 60, configurable 40-80)
  */
-export function getCardProgress(totalEarned: number): { current: number; max: number } {
-  const remainder = totalEarned % POINTS_PER_SKIN;
+export function getCardProgress(totalEarned: number, pointsPerSkin: number = POINTS_PER_SKIN): { current: number; max: number } {
+  const remainder = totalEarned % pointsPerSkin;
   return {
     current: remainder,
-    max: POINTS_PER_SKIN,
+    max: pointsPerSkin,
   };
 }
 

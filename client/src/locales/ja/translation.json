@@ -579,7 +579,14 @@
     "achievementsInfo": "「週間タスク最初に終了」や「パーフェクトウィーク」などのマイルストーンを作成し、自動的にボーナスポイントを付与します。",
     "configureAchievements": "マイルストーンを設定",
     "analyticsDesc": "タスク統計、ポイントのトレンド、家族の進捗を確認。",
-    "openAnalytics": "統計を開く"
+    "openAnalytics": "統計を開く",
+    "motivationTitle": "モチベーション",
+    "motivationDesc": "新しいスキンカードに必要なポイント数は？",
+    "skinCardCost": "カードあたりのポイント",
+    "skinCardCostInfo": "低コスト = モチベーション向上、でもカードが早く終わります。高コスト = カードが長持ち、即時の報酬は少なめ。",
+    "moreFun": "楽しさアップ",
+    "longerLasting": "長持ち",
+    "points": "ポイント"
   },
   "subscription": {
     "free": "Free",

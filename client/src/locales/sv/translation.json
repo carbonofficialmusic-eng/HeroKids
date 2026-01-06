@@ -610,7 +610,14 @@
     "achievementsInfo": "Ställ in milstolpar som \"Första att slutföra veckans uppgifter\" eller \"Perfekt vecka\" som automatiskt ger bonuspoäng.",
     "configureAchievements": "Konfigurera Milstolpar",
     "analyticsDesc": "Visa uppgiftsstatistik, poängtrender och familjens framsteg.",
-    "openAnalytics": "Öppna statistik"
+    "openAnalytics": "Öppna statistik",
+    "motivationTitle": "Motivation",
+    "motivationDesc": "Hur många poäng kostar ett nytt skin-kort?",
+    "skinCardCost": "Poäng per kort",
+    "skinCardCostInfo": "Lägre kostnad = mer motivation, men korten tar slut snabbare. Högre kostnad = korten räcker längre, färre omedelbara belöningar.",
+    "moreFun": "Roligare",
+    "longerLasting": "Längre varaktighet",
+    "points": "Poäng"
   },
   "subscription": {
     "free": "Gratis",

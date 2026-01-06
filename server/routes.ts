@@ -422,6 +422,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     weeklyPrize: z.string().nullable().optional(),
     monthlyPrize: z.string().nullable().optional(),
     yearlyPrize: z.string().nullable().optional(),
+    skinCardCost: z.number().int().min(40).max(80).refine(val => val % 5 === 0, {
+      message: "skinCardCost must be a multiple of 5"
+    }).optional(),
   }).refine(data => 
     data.showLeaderboard !== undefined || 
     data.singleDeviceMode !== undefined ||
@@ -429,7 +432,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     data.timezone !== undefined ||
     data.weeklyPrize !== undefined ||
     data.monthlyPrize !== undefined ||
-    data.yearlyPrize !== undefined, {
+    data.yearlyPrize !== undefined ||
+    data.skinCardCost !== undefined, {
     message: "At least one setting must be provided"
   });
 
@@ -2852,12 +2856,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
+      // Get family to retrieve skinCardCost
+      const family = await storage.getFamily(member.familyName);
+      const skinCardCost = family?.skinCardCost ?? 60;
+      
       const allSkins = await storage.getSkins();
       const discoveredSkinIds = member.discoveredSkinIds || [];
       const earnedLegacySkinIds = member.earnedLegacySkinIds || [];
       
-      // Calculate available discovery cards using new linear system
-      const availableCards = calculateAvailableCards(member.totalEarned, discoveredSkinIds.length);
+      // Calculate available discovery cards using new linear system with family's skinCardCost
+      const availableCards = calculateAvailableCards(member.totalEarned, discoveredSkinIds.length, skinCardCost);
       
       // Enrich skins with discovery status for this member
       const skinsWithStatus = allSkins.map(skin => {
@@ -2868,9 +2876,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           : discoveredSkinIds.includes(skin.id);
         const isActive = member.activeSkinId === skin.id;
         
-        // Check if skin can be unlocked based on position and points
+        // Check if skin can be unlocked based on position and points (using family's skinCardCost)
         // Legacy skins cannot be discovered manually - they are unlocked via stars only
-        const canDiscover = !isDiscovered && !isLegacySkin(skin.id) && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length);
+        const canDiscover = !isDiscovered && !isLegacySkin(skin.id) && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length, skinCardCost);
         
         // Get position for ordering (legacy skins have tier 14)
         const tier = isLegacySkin(skin.id) ? 14 : 1;
@@ -2932,6 +2940,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
+      // Get family to retrieve skinCardCost
+      const family = await storage.getFamily(member.familyName);
+      const skinCardCost = family?.skinCardCost ?? 60;
+      
       const allSkins = await storage.getSkins();
       const skin = allSkins.find(s => s.id === skinId);
       
@@ -2951,8 +2963,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Skin already discovered" });
       }
       
-      // Check if skin can be unlocked using new position-based system
-      if (!canUnlockSkin(skinId, member.totalEarned, discoveredSkinIds.length)) {
+      // Check if skin can be unlocked using new position-based system with family's skinCardCost
+      if (!canUnlockSkin(skinId, member.totalEarned, discoveredSkinIds.length, skinCardCost)) {
         return res.status(403).json({ message: "Not enough points to unlock this skin" });
       }
       
@@ -2975,8 +2987,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         legacySkinAwarded: starResult.legacySkinAwarded,
       });
       
-      // Calculate remaining available cards after discovery
-      const remainingCards = calculateAvailableCards(member.totalEarned, updatedDiscoveredSkins.length);
+      // Calculate remaining available cards after discovery (using family's skinCardCost)
+      const remainingCards = calculateAvailableCards(member.totalEarned, updatedDiscoveredSkins.length, skinCardCost);
       
       res.json({ 
         message: "Skin discovered!", 

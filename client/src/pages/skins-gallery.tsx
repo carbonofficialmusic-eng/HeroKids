@@ -11,8 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { Link } from "wouter";
 import { SKIN_IMAGES, SKIN_BACKGROUNDS } from "@/lib/skins";
-import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, POINTS_PER_SKIN } from "@shared/skin-config";
-import type { FamilyMember } from "@shared/schema";
+import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD } from "@shared/skin-config";
+import type { FamilyMember, Family } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -111,6 +111,14 @@ export default function SkinsGallery() {
   const { data: memberData, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
   });
+
+  const { data: familyData } = useQuery<Family>({
+    queryKey: ["/api/families/settings"],
+    enabled: !!memberData,
+  });
+
+  // Use family's skinCardCost or default to 60
+  const pointsPerSkin = familyData?.skinCardCost ?? 60;
 
   useWebSocket(memberData?.familyName || null);
 
@@ -253,8 +261,8 @@ export default function SkinsGallery() {
 
   // Calculate next unlock
   const discoveredCount = skins.filter(s => s.isDiscovered).length;
-  const nextUnlockPoints = (discoveredCount + 1) * POINTS_PER_SKIN;
-  const progressToNext = totalEarned % POINTS_PER_SKIN;
+  const nextUnlockPoints = (discoveredCount + 1) * pointsPerSkin;
+  const progressToNext = totalEarned % pointsPerSkin;
 
   const starPlacements = data?.starPlacements || {};
   const starStats = data?.starStats || { starsFound: 0, totalStars: 0, earnedLegacySkinIds: [] };
@@ -514,11 +522,11 @@ export default function SkinsGallery() {
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-primary transition-all"
-                      style={{ width: `${(progressToNext / POINTS_PER_SKIN) * 100}%` }}
+                      style={{ width: `${(progressToNext / pointsPerSkin) * 100}%` }}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 text-center">
-                    {progressToNext} / {POINTS_PER_SKIN}
+                    {progressToNext} / {pointsPerSkin}
                   </p>
                 </div>
               </Card>

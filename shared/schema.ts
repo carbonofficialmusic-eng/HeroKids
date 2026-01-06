@@ -66,6 +66,7 @@ export const families = pgTable("families", {
   weeklyPrize: text("weekly_prize"), // Prize for weekly leaderboard winner
   monthlyPrize: text("monthly_prize"), // Prize for monthly leaderboard winner
   yearlyPrize: text("yearly_prize"), // Prize for yearly leaderboard winner
+  skinCardCost: integer("skin_card_cost").notNull().default(60), // Points needed to discover one skin card (40-80, step 5)
   lastDailyReset: timestamp("last_daily_reset"), // When daily tasks were last reset (null = never)
   lastWeeklyReset: timestamp("last_weekly_reset"), // When weekly points were last reset (null = never)
   lastMonthlyReset: timestamp("last_monthly_reset"), // When monthly points were last reset (null = never)

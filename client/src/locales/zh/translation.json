@@ -579,7 +579,14 @@
     "achievementsInfo": "创建'首先完成每周任务'或'完美周'等里程碑，自动奖励积分。",
     "configureAchievements": "配置里程碑",
     "analyticsDesc": "查看任务统计、积分趋势和家庭进度。",
-    "openAnalytics": "打开统计"
+    "openAnalytics": "打开统计",
+    "motivationTitle": "激励设置",
+    "motivationDesc": "一张新皮肤卡需要多少积分？",
+    "skinCardCost": "每张卡所需积分",
+    "skinCardCostInfo": "积分越低 = 动力越强，但卡片消耗更快。积分越高 = 卡片持续更久，即时奖励较少。",
+    "moreFun": "更有趣",
+    "longerLasting": "更持久",
+    "points": "积分"
   },
   "subscription": {
     "free": "Free",
