@@ -2854,13 +2854,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const allSkins = await storage.getSkins();
       const discoveredSkinIds = member.discoveredSkinIds || [];
+      const earnedLegacySkinIds = member.earnedLegacySkinIds || [];
       
       // Calculate available discovery cards using new linear system
       const availableCards = calculateAvailableCards(member.totalEarned, discoveredSkinIds.length);
       
       // Enrich skins with discovery status for this member
       const skinsWithStatus = allSkins.map(skin => {
-        const isDiscovered = discoveredSkinIds.includes(skin.id);
+        // Legacy skins are "discovered" if they're in earnedLegacySkinIds (via stars)
+        // Regular skins are "discovered" if they're in discoveredSkinIds (via manual discovery)
+        const isDiscovered = isLegacySkin(skin.id) 
+          ? earnedLegacySkinIds.includes(skin.id)
+          : discoveredSkinIds.includes(skin.id);
         const isActive = member.activeSkinId === skin.id;
         
         // Check if skin can be unlocked based on position and points
