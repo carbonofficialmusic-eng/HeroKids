@@ -811,6 +811,7 @@ export default function KidDashboard() {
     totalEarned?: number;
     weeklyPoints?: number;
     monthlyPoints?: number;
+    starsFound?: number;
   }>({
     queryKey: ["/api/device-link/session"],
     retry: false,
@@ -849,6 +850,8 @@ export default function KidDashboard() {
     avatarHistory: [],
     lastReadChatAt: null,
     excludeFromLeaderboard: false,
+    starsFound: deviceSession.starsFound || 0,
+    earnedLegacySkinIds: [],
     createdAt: null,
     updatedAt: null,
   } : undefined;
@@ -1191,7 +1194,7 @@ export default function KidDashboard() {
                     </AvatarFallback>
                   </Avatar>
                 </motion.div>
-                <div>
+                <div className="flex-1">
                   <h1 className="text-4xl font-bold mb-1" style={{ fontFamily: "Fredoka, sans-serif" }}>
                     {member.displayName}
                   </h1>
@@ -1206,6 +1209,18 @@ export default function KidDashboard() {
                       <span className="text-lg font-bold">{t("kidDashboard.dayStreak", { count: streak })}</span>
                     </div>
                   )}
+                </div>
+                {/* Star Counter */}
+                <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 px-4 py-2 rounded-xl border border-yellow-500/30">
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                  >
+                    <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+                  </motion.div>
+                  <span className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }} data-testid="text-stars-found">
+                    {member.starsFound || 0}/32
+                  </span>
                 </div>
               </div>
               <div className="bg-card/80 backdrop-blur-sm p-5 rounded-2xl border-2 border-primary/30 min-w-[260px]">
