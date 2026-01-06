@@ -272,10 +272,10 @@ export default function SkinsGallery() {
           </div>
 
           {/* Main Layout: Preview Left + Grid Right */}
-          <div className="flex gap-4 flex-col lg:flex-row">
-            {/* Preview Panel - Left Side */}
-            <div className="lg:w-80 flex-shrink-0">
-              <Card className="bg-card/90 backdrop-blur-md p-4 sticky top-4">
+          <div className="flex gap-4 flex-col lg:flex-row lg:items-start">
+            {/* Preview Panel - Left Side - Sticky on desktop, normal on mobile */}
+            <div className="lg:w-80 flex-shrink-0 lg:h-fit">
+              <Card className="bg-card/90 backdrop-blur-md p-4 lg:sticky lg:top-4">
                 {/* Preview Image */}
                 <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-gradient-to-br from-muted to-card">
                   {previewSkin ? (
