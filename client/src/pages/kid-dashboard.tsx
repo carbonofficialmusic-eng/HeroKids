@@ -1275,16 +1275,16 @@ export default function KidDashboard() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="p-4 bg-purple-500/5 backdrop-blur-sm border-2 border-purple-500/20 rounded-2xl">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-purple-500/20 flex-shrink-0">
-                        <Gift className="h-6 w-6 text-purple-500" />
+                  <Card className="p-5 bg-gradient-to-br from-purple-100/90 to-pink-100/90 dark:from-purple-900/40 dark:to-pink-900/40 backdrop-blur-md border-2 border-purple-400/40 dark:border-purple-500/30 rounded-2xl shadow-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-purple-500/30 dark:bg-purple-500/40 flex-shrink-0">
+                        <Gift className="h-7 w-7 text-purple-600 dark:text-purple-300" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-base truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                        <h3 className="font-bold text-lg text-purple-900 dark:text-purple-100 truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
                           {t(`achievements.title_${achievement.slug}`)}
                         </h3>
-                        <p className="text-sm text-purple-600 dark:text-purple-400 font-medium truncate">
+                        <p className="text-base text-purple-700 dark:text-purple-300 font-semibold truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
                           {achievement.rewardType === "custom" && achievement.customReward
                             ? achievement.customReward
                             : `+${achievement.bonusPoints} ${t("points")}`}
@@ -1292,8 +1292,8 @@ export default function KidDashboard() {
                       </div>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" data-testid={`button-info-${achievement.slug}`}>
-                            <Info className="h-4 w-4 text-muted-foreground" />
+                          <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0 bg-white/50 dark:bg-black/20" data-testid={`button-info-${achievement.slug}`}>
+                            <Info className="h-5 w-5 text-purple-600 dark:text-purple-300" />
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent side="left" className="max-w-[250px]">
