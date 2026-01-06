@@ -570,6 +570,7 @@ async function forceReseedSkinsIfNeeded() {
 }
 
 // One-time migration: Give starter skin to existing members and redistribute stars
+// This migration is idempotent - it only applies changes once per member
 async function migrateExistingMembersForTestPhase() {
   const STARTER_SKIN = "junior-champion";
   const LEGACY_SKIN_IDS = [
@@ -582,28 +583,29 @@ async function migrateExistingMembersForTestPhase() {
     const allMembers = await db.select().from(familyMembers);
     let membersUpdated = 0;
     let starsRedistributed = 0;
+    let alreadyMigrated = 0;
 
     for (const member of allMembers) {
-      const discoveredSkinIds = (member.discoveredSkinIds as string[]) || [];
+      let discoveredSkinIds = (member.discoveredSkinIds as string[]) || [];
+      let needsSkinUpdate = false;
 
-      // Case 1: Member has no discovered skins - give them the starter skin
+      // Step 1: Ensure member has the starter skin
       if (discoveredSkinIds.length === 0) {
-        await db.update(familyMembers)
-          .set({ discoveredSkinIds: [STARTER_SKIN] })
-          .where(eq(familyMembers.id, member.id));
-        membersUpdated++;
-        continue;
+        discoveredSkinIds = [STARTER_SKIN];
+        needsSkinUpdate = true;
+      } else if (!discoveredSkinIds.includes(STARTER_SKIN)) {
+        discoveredSkinIds = [STARTER_SKIN, ...discoveredSkinIds];
+        needsSkinUpdate = true;
       }
 
-      // Case 2: Member has discovered skins but doesn't have the starter - add it
-      if (!discoveredSkinIds.includes(STARTER_SKIN)) {
+      if (needsSkinUpdate) {
         await db.update(familyMembers)
-          .set({ discoveredSkinIds: [STARTER_SKIN, ...discoveredSkinIds] })
+          .set({ discoveredSkinIds })
           .where(eq(familyMembers.id, member.id));
         membersUpdated++;
       }
 
-      // Case 3: Check if stars need to be redistributed to undiscovered cards
+      // Step 2: Check star placements
       const existingStars = await db.select().from(starPlacements)
         .where(eq(starPlacements.memberId, member.id));
       
@@ -613,21 +615,23 @@ async function migrateExistingMembersForTestPhase() {
         .map(s => s.id)
         .filter(id => !LEGACY_SKIN_IDS.includes(id) && id !== STARTER_SKIN);
       
-      // Get undiscovered standard skins
+      // Get undiscovered standard skins (use updated discoveredSkinIds)
       const undiscoveredSkinIds = standardSkinIds.filter(
         id => !discoveredSkinIds.includes(id)
       );
 
-      // Check if any stars are on discovered skins (they need to be moved)
+      // Check if any unfound stars are on discovered skins or starter (they need to be moved)
       const starsOnDiscoveredSkins = existingStars.filter(
-        star => discoveredSkinIds.includes(star.skinId) || star.skinId === STARTER_SKIN
+        star => !star.found && (discoveredSkinIds.includes(star.skinId) || star.skinId === STARTER_SKIN)
       );
 
+      // Only redistribute if there are unfound stars on discovered/starter skins
+      // This ensures we don't touch members who already have correct star placement
       if (starsOnDiscoveredSkins.length > 0 && undiscoveredSkinIds.length > 0) {
         // Delete all star placements and redistribute to undiscovered skins
         await db.delete(starPlacements).where(eq(starPlacements.memberId, member.id));
         
-        // Reset stars found counter
+        // Reset stars found counter (since we're starting fresh)
         await db.update(familyMembers)
           .set({ starsFound: 0 })
           .where(eq(familyMembers.id, member.id));
@@ -646,8 +650,8 @@ async function migrateExistingMembersForTestPhase() {
 
         starsRedistributed++;
         log(`♻️ Redistributed ${selectedPositions.length} stars for ${member.displayName} to undiscovered cards`);
-      } else if (existingStars.length === 0) {
-        // No stars yet - initialize on undiscovered skins only
+      } else if (existingStars.length === 0 && undiscoveredSkinIds.length > 0) {
+        // No stars yet - initialize on undiscovered skins only (one-time)
         const shuffled = [...undiscoveredSkinIds].sort(() => Math.random() - 0.5);
         const selectedPositions = shuffled.slice(0, Math.min(32, shuffled.length));
 
@@ -659,13 +663,17 @@ async function migrateExistingMembersForTestPhase() {
           }).onConflictDoNothing();
         }
         starsRedistributed++;
+        log(`⭐ Initialized ${selectedPositions.length} stars for ${member.displayName}`);
+      } else {
+        // Member already has correct setup
+        alreadyMigrated++;
       }
     }
 
     if (membersUpdated > 0 || starsRedistributed > 0) {
-      log(`✅ Test phase migration: ${membersUpdated} members got starter skin, ${starsRedistributed} members got stars redistributed`);
+      log(`✅ Test phase migration: ${membersUpdated} members got starter skin, ${starsRedistributed} members got stars initialized/redistributed, ${alreadyMigrated} already migrated`);
     } else {
-      log(`✅ Test phase migration: All members already have starter skin and correct star placement`);
+      log(`✅ Test phase migration: All ${alreadyMigrated} members already migrated (skipped)`);
     }
   } catch (error) {
     console.error("❌ Error during test phase migration:", error);
