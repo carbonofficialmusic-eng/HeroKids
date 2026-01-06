@@ -4662,6 +4662,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get analytics data for charts
+  app.get("/api/admin/analytics", isAdmin, async (req, res) => {
+    try {
+      const allFamilies = await storage.getFamilies();
+      const allMembers = await storage.getAllFamilyMembers();
+      
+      // Get all task completions for activity data
+      const completionsByFamily: Record<string, number> = {};
+      for (const family of allFamilies) {
+        const completions = await storage.getTaskCompletionsByFamily(family.familyName);
+        completionsByFamily[family.familyName] = completions.length;
+      }
+      
+      // 1. New registrations per week (last 12 weeks)
+      const now = new Date();
+      const weeklyRegistrations: { week: string; count: number }[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - (i * 7) - now.getDay());
+        weekStart.setHours(0, 0, 0, 0);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 7);
+        
+        const count = allMembers.filter(m => {
+          const created = m.createdAt ? new Date(m.createdAt) : null;
+          return created && created >= weekStart && created < weekEnd;
+        }).length;
+        
+        const weekLabel = `KW${Math.ceil((weekStart.getTime() - new Date(weekStart.getFullYear(), 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1}`;
+        weeklyRegistrations.push({ week: weekLabel, count });
+      }
+      
+      // 2. New registrations per month (last 6 months)
+      const monthlyRegistrations: { month: string; count: number }[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+        
+        const count = allMembers.filter(m => {
+          const created = m.createdAt ? new Date(m.createdAt) : null;
+          return created && created >= monthStart && created < monthEnd;
+        }).length;
+        
+        const monthLabel = monthStart.toLocaleDateString('de-DE', { month: 'short', year: '2-digit' });
+        monthlyRegistrations.push({ month: monthLabel, count });
+      }
+      
+      // 3. Most active families (top 10 by completed tasks)
+      const activeFamilies = Object.entries(completionsByFamily)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10)
+        .map(([name, completions]) => ({ name, completions }));
+      
+      // 4. Average points per child
+      const children = allMembers.filter(m => m.role === 'child');
+      const avgPointsPerChild = children.length > 0 
+        ? Math.round(children.reduce((sum, c) => sum + c.totalEarned, 0) / children.length)
+        : 0;
+      
+      // Points distribution by role
+      const parents = allMembers.filter(m => m.role === 'parent');
+      const pointsByRole = [
+        { role: 'Kinder', avgPoints: avgPointsPerChild, count: children.length },
+        { role: 'Eltern', avgPoints: parents.length > 0 ? Math.round(parents.reduce((sum, p) => sum + p.totalEarned, 0) / parents.length) : 0, count: parents.length },
+      ];
+      
+      // 5. Current subscription tier distribution
+      const tierDistribution = [
+        { tier: 'Free', count: allFamilies.filter(f => f.subscriptionTier === 'free').length },
+        { tier: 'Family', count: allFamilies.filter(f => f.subscriptionTier === 'family').length },
+        { tier: 'Family+', count: allFamilies.filter(f => f.subscriptionTier === 'family_plus').length },
+        { tier: 'Hero', count: allFamilies.filter(f => f.subscriptionTier === 'family_hero').length },
+      ];
+      
+      res.json({
+        weeklyRegistrations,
+        monthlyRegistrations,
+        activeFamilies,
+        avgPointsPerChild,
+        pointsByRole,
+        tierDistribution,
+        totalChildren: children.length,
+        totalParents: parents.length,
+      });
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   // Get skin statistics
   app.get("/api/admin/skins/stats", isAdmin, async (req, res) => {
     try {

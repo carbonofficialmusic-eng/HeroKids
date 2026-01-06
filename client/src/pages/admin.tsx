@@ -29,10 +29,27 @@ import {
   Trash2,
   Palette,
   Send,
-  UserMinus
+  UserMinus,
+  BarChart3,
+  PieChart
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/skins";
 import { queryClient } from "@/lib/queryClient";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+} from "recharts";
 
 interface AdminStats {
   totalFamilies: number;
@@ -89,6 +106,17 @@ interface SkinStat {
 interface SkinStats {
   totalSkins: number;
   stats: SkinStat[];
+}
+
+interface AnalyticsData {
+  weeklyRegistrations: { week: string; count: number }[];
+  monthlyRegistrations: { month: string; count: number }[];
+  activeFamilies: { name: string; completions: number }[];
+  avgPointsPerChild: number;
+  pointsByRole: { role: string; avgPoints: number; count: number }[];
+  tierDistribution: { tier: string; count: number }[];
+  totalChildren: number;
+  totalParents: number;
 }
 
 const TIER_LABELS: Record<string, string> = {
@@ -192,6 +220,20 @@ export default function AdminPage() {
     },
     enabled: !!token,
   });
+
+  const { data: analytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useQuery<AnalyticsData>({
+    queryKey: ["/api/admin/analytics"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/analytics", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch analytics");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  const CHART_COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7c43", "#a855f7"];
 
   const updateTierMutation = useMutation({
     mutationFn: async ({ familyName, tier }: { familyName: string; tier: string }) => {
@@ -350,6 +392,7 @@ export default function AdminPage() {
                 refetchStats();
                 refetchFamilies();
                 refetchSkins();
+                refetchAnalytics();
               }}
               data-testid="button-refresh-data"
             >
@@ -366,10 +409,14 @@ export default function AdminPage() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-4 max-w-xl">
             <TabsTrigger value="overview" data-testid="tab-overview">
               <TrendingUp className="h-4 w-4 mr-2" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="analytics" data-testid="tab-analytics">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
             </TabsTrigger>
             <TabsTrigger value="families" data-testid="tab-families">
               <Home className="h-4 w-4 mr-2" />
@@ -472,6 +519,170 @@ export default function AdminPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            {analyticsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[...Array(4)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader>
+                      <div className="h-4 bg-muted rounded w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-64 bg-muted rounded" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : analytics ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Neue Registrierungen pro Woche
+                    </CardTitle>
+                    <CardDescription>Letzte 12 Wochen</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <LineChart data={analytics.weeklyRegistrations}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="week" fontSize={12} />
+                        <YAxis fontSize={12} />
+                        <Tooltip />
+                        <Line 
+                          type="monotone" 
+                          dataKey="count" 
+                          stroke="#8884d8" 
+                          strokeWidth={2}
+                          name="Neue Mitglieder"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      Neue Registrierungen pro Monat
+                    </CardTitle>
+                    <CardDescription>Letzte 6 Monate</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={analytics.monthlyRegistrations}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" fontSize={12} />
+                        <YAxis fontSize={12} />
+                        <Tooltip />
+                        <Bar dataKey="count" fill="#82ca9d" name="Neue Mitglieder" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ListTodo className="h-5 w-5" />
+                      Aktivste Familien
+                    </CardTitle>
+                    <CardDescription>Top 10 nach erledigten Aufgaben</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={analytics.activeFamilies} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" fontSize={12} />
+                        <YAxis dataKey="name" type="category" width={100} fontSize={11} />
+                        <Tooltip />
+                        <Bar dataKey="completions" fill="#ffc658" name="Erledigte Aufgaben" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Star className="h-5 w-5" />
+                      Durchschnittliche Punkte
+                    </CardTitle>
+                    <CardDescription>Nach Rolle (Kinder vs. Eltern)</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col gap-4">
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <p className="text-3xl font-bold text-primary">{analytics.avgPointsPerChild}</p>
+                        <p className="text-sm text-muted-foreground">Ø Punkte pro Kind</p>
+                      </div>
+                      <ResponsiveContainer width="100%" height={150}>
+                        <BarChart data={analytics.pointsByRole}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="role" fontSize={12} />
+                          <YAxis fontSize={12} />
+                          <Tooltip formatter={(value, name) => [value, name === "avgPoints" ? "Ø Punkte" : name]} />
+                          <Bar dataKey="avgPoints" fill="#a855f7" name="Ø Punkte" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="md:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Crown className="h-5 w-5" />
+                      Abo-Verteilung
+                    </CardTitle>
+                    <CardDescription>Aktuelle Verteilung der Abonnement-Tiers</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col md:flex-row gap-6 items-center">
+                      <ResponsiveContainer width="100%" height={250}>
+                        <RechartsPieChart>
+                          <Pie
+                            data={analytics.tierDistribution}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="count"
+                            nameKey="tier"
+                          >
+                            {analytics.tierDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend />
+                        </RechartsPieChart>
+                      </ResponsiveContainer>
+                      <div className="flex flex-col gap-2 min-w-[200px]">
+                        {analytics.tierDistribution.map((tier, index) => (
+                          <div key={tier.tier} className="flex items-center justify-between p-2 border rounded">
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} 
+                              />
+                              <span>{tier.tier}</span>
+                            </div>
+                            <Badge variant="secondary">{tier.count}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
           </TabsContent>
 
           <TabsContent value="families" className="space-y-6">

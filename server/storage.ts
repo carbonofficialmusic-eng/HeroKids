@@ -225,6 +225,7 @@ export interface IStorage {
   createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion>;
   hasActiveMemberCompletion(taskId: string, memberId: string, txClient?: any): Promise<boolean>;
   getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]>;
+  getTaskCompletionsByFamily(familyName: string): Promise<TaskCompletion[]>;
   getPendingCompletionsByFamily(familyName: string): Promise<any[]>;
   approveTaskCompletion(completionId: string, approvedBy: string): Promise<void>;
   rejectTaskCompletion(completionId: string, approvedBy: string, rejectionReason: string): Promise<void>;
@@ -1034,6 +1035,26 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(taskCompletions)
       .where(eq(taskCompletions.memberId, memberId))
+      .orderBy(desc(taskCompletions.completedAt));
+  }
+
+  async getTaskCompletionsByFamily(familyName: string): Promise<TaskCompletion[]> {
+    return await db
+      .select({
+        id: taskCompletions.id,
+        taskId: taskCompletions.taskId,
+        memberId: taskCompletions.memberId,
+        proofPhotoUrl: taskCompletions.proofPhotoUrl,
+        pointsEarned: taskCompletions.pointsEarned,
+        status: taskCompletions.status,
+        approvedBy: taskCompletions.approvedBy,
+        approvedAt: taskCompletions.approvedAt,
+        rejectionReason: taskCompletions.rejectionReason,
+        completedAt: taskCompletions.completedAt,
+      })
+      .from(taskCompletions)
+      .innerJoin(familyMembers, eq(taskCompletions.memberId, familyMembers.id))
+      .where(eq(familyMembers.familyName, familyName))
       .orderBy(desc(taskCompletions.completedAt));
   }
 
