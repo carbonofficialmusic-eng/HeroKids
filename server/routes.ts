@@ -2881,11 +2881,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🎨 Skins API: totalEarned=${member.totalEarned}, discovered=${discoveredSkinIds.length}, available=${availableCards}`);
       
+      // Initialize star placements for child members and get star data
+      let starStats = { starsFound: 0, totalStars: 0, earnedLegacySkinIds: [] as string[] };
+      let starPlacements: Record<string, boolean> = {};
+      
+      if (member.role === "child") {
+        await storage.initializeStarPlacements(member.id);
+        starStats = await storage.getMemberStarStats(member.id);
+        const placements = await storage.getStarPlacementsByMember(member.id);
+        for (const p of placements) {
+          starPlacements[p.skinId] = p.found;
+        }
+      }
+      
       res.json({
         skins: skinsWithStatus,
         totalEarned: member.totalEarned,
         availableCards,
         unlockedTier: 999, // Legacy compatibility - all skins are now position-based
+        starStats,
+        starPlacements, // { skinId: wasFound } - for mini-star indicators
       });
     } catch (error: any) {
       console.error("Error fetching skins:", error);
@@ -2950,12 +2965,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
       }
       
-      // Broadcast skin discovery to family
+      // Check for hidden star on this skin card
+      const starResult = await storage.markStarAsFound(member.id, skinId);
+      
+      // Broadcast skin discovery to family (with star info if found)
       broadcastToFamily(member.familyName, {
         type: "skin_discovered",
         memberId: member.id,
         skinId,
         bonusPoints,
+        starFound: starResult.wasStarFound,
+        totalStarsFound: starResult.totalStarsFound,
+        legacySkinAwarded: starResult.legacySkinAwarded,
       });
       
       // Calculate remaining available cards after discovery
@@ -2966,6 +2987,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         skinId,
         bonusPoints,
         availableCards: remainingCards,
+        starFound: starResult.wasStarFound,
+        totalStarsFound: starResult.totalStarsFound,
+        legacySkinAwarded: starResult.legacySkinAwarded,
       });
     } catch (error: any) {
       console.error("Error discovering skin:", error);
@@ -3020,6 +3044,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error selecting skin:", error);
       res.status(500).json({ message: "Failed to select skin" });
+    }
+  });
+
+  // Star Collection System routes
+  app.get("/api/stars", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Initialize star placements for child members if not already done
+      if (member.role === "child") {
+        await storage.initializeStarPlacements(member.id);
+      }
+      
+      const starStats = await storage.getMemberStarStats(member.id);
+      const starPlacements = await storage.getStarPlacementsByMember(member.id);
+      
+      // Create a map of skinId -> found status for discovered skins
+      const starMap: Record<string, boolean> = {};
+      for (const placement of starPlacements) {
+        starMap[placement.skinId] = placement.found;
+      }
+      
+      res.json({
+        starsFound: starStats.starsFound,
+        totalStars: starStats.totalStars,
+        earnedLegacySkinIds: starStats.earnedLegacySkinIds,
+        starPlacements: starMap, // { skinId: wasFound } - for showing mini-stars on found skin cards
+      });
+    } catch (error: any) {
+      console.error("Error fetching star stats:", error);
+      res.status(500).json({ message: "Failed to fetch star stats" });
+    }
+  });
+
+  app.post("/api/stars/initialize", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only initialize for child members
+      if (member.role !== "child") {
+        return res.status(403).json({ message: "Star collection is only for children" });
+      }
+      
+      await storage.initializeStarPlacements(member.id);
+      const starStats = await storage.getMemberStarStats(member.id);
+      
+      res.json({
+        message: "Star placements initialized",
+        starsFound: starStats.starsFound,
+        totalStars: starStats.totalStars,
+        earnedLegacySkinIds: starStats.earnedLegacySkinIds,
+      });
+    } catch (error: any) {
+      console.error("Error initializing stars:", error);
+      res.status(500).json({ message: "Failed to initialize stars" });
     }
   });
 

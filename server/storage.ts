@@ -57,6 +57,8 @@ import {
   type InsertDeviceLinkCode,
   type ChildDeviceSession,
   type InsertChildDeviceSession,
+  starPlacements,
+  type StarPlacement,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gt, sql, inArray } from "drizzle-orm";
@@ -307,6 +309,12 @@ export interface IStorage {
   getGoalContributionsByMemberAndGoal(goalId: string, memberId: string, period: string): Promise<GoalContribution | undefined>;
   updateGoalCurrentPoints(goalId: string, currentPoints: number): Promise<void>;
   completeGoal(goalId: string): Promise<void>;
+
+  // Star Placement operations (gamification: 32 stars per child, 4 stars = 1 HeroKids Legacy avatar)
+  getStarPlacementsByMember(memberId: string): Promise<StarPlacement[]>;
+  initializeStarPlacements(memberId: string): Promise<void>;
+  markStarAsFound(memberId: string, skinId: string): Promise<{ wasStarFound: boolean; totalStarsFound: number; legacySkinAwarded: string | null }>;
+  getMemberStarStats(memberId: string): Promise<{ starsFound: number; totalStars: number; earnedLegacySkinIds: string[] }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2505,6 +2513,138 @@ export class DatabaseStorage implements IStorage {
       }
     }
     return undefined;
+  }
+
+  // Star Placement operations
+  // HeroKids Legacy skin IDs (Tier 14) - unlocked by collecting 4 stars each (8 skins total)
+  private readonly LEGACY_SKIN_IDS = [
+    "shield-blaze",
+    "comet-dash", 
+    "wave-glider",
+    "forest-guard",
+    "luna-beacon",
+    "sunrise-spark",
+    "bloom-guardian",
+    "breeze-captain"
+  ];
+
+  async getStarPlacementsByMember(memberId: string): Promise<StarPlacement[]> {
+    return await db
+      .select()
+      .from(starPlacements)
+      .where(eq(starPlacements.memberId, memberId));
+  }
+
+  async initializeStarPlacements(memberId: string): Promise<void> {
+    // Get all standard (non-legacy) skins from database
+    const allSkins = await db.select({ id: skins.id }).from(skins);
+    const standardSkinIds = allSkins
+      .map(s => s.id)
+      .filter(id => !this.LEGACY_SKIN_IDS.includes(id));
+    
+    if (standardSkinIds.length < 32) {
+      console.warn(`Only ${standardSkinIds.length} standard skins available for star placement (need 32)`);
+    }
+
+    // Check if member already has star placements
+    const existing = await this.getStarPlacementsByMember(memberId);
+    if (existing.length > 0) {
+      return; // Already initialized
+    }
+
+    // Randomly select 32 unique positions from standard skins
+    const shuffled = [...standardSkinIds].sort(() => Math.random() - 0.5);
+    const selectedPositions = shuffled.slice(0, Math.min(32, shuffled.length));
+
+    // Insert star placements
+    for (const skinId of selectedPositions) {
+      await db.insert(starPlacements).values({
+        memberId,
+        skinId,
+        found: false,
+      }).onConflictDoNothing();
+    }
+  }
+
+  async markStarAsFound(memberId: string, skinId: string): Promise<{ wasStarFound: boolean; totalStarsFound: number; legacySkinAwarded: string | null }> {
+    // Check if there's a star at this position that hasn't been found
+    const [placement] = await db
+      .select()
+      .from(starPlacements)
+      .where(
+        and(
+          eq(starPlacements.memberId, memberId),
+          eq(starPlacements.skinId, skinId),
+          eq(starPlacements.found, false)
+        )
+      );
+
+    if (!placement) {
+      // No unfound star at this position
+      const member = await this.getFamilyMember(memberId);
+      return { 
+        wasStarFound: false, 
+        totalStarsFound: member?.starsFound || 0,
+        legacySkinAwarded: null
+      };
+    }
+
+    // Mark star as found
+    await db
+      .update(starPlacements)
+      .set({ found: true, foundAt: new Date() })
+      .where(eq(starPlacements.id, placement.id));
+
+    // Increment starsFound counter
+    await db
+      .update(familyMembers)
+      .set({ 
+        starsFound: sql`${familyMembers.starsFound} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(familyMembers.id, memberId));
+
+    // Get updated member data
+    const member = await this.getFamilyMember(memberId);
+    const newStarsFound = member?.starsFound || 1;
+    const earnedLegacySkinIds = member?.earnedLegacySkinIds || [];
+
+    // Check if a new Legacy skin should be awarded (every 4 stars)
+    const legacySkinsEarned = Math.floor(newStarsFound / 4);
+    const currentLegacyCount = earnedLegacySkinIds.length;
+
+    let legacySkinAwarded: string | null = null;
+
+    if (legacySkinsEarned > currentLegacyCount && currentLegacyCount < this.LEGACY_SKIN_IDS.length) {
+      // Award the next Legacy skin
+      legacySkinAwarded = this.LEGACY_SKIN_IDS[currentLegacyCount];
+      
+      // Add to earnedLegacySkinIds
+      await db
+        .update(familyMembers)
+        .set({
+          earnedLegacySkinIds: sql`array_append(${familyMembers.earnedLegacySkinIds}, ${legacySkinAwarded})`,
+          updatedAt: new Date()
+        })
+        .where(eq(familyMembers.id, memberId));
+    }
+
+    return {
+      wasStarFound: true,
+      totalStarsFound: newStarsFound,
+      legacySkinAwarded
+    };
+  }
+
+  async getMemberStarStats(memberId: string): Promise<{ starsFound: number; totalStars: number; earnedLegacySkinIds: string[] }> {
+    const member = await this.getFamilyMember(memberId);
+    const placements = await this.getStarPlacementsByMember(memberId);
+    
+    return {
+      starsFound: member?.starsFound || 0,
+      totalStars: placements.length,
+      earnedLegacySkinIds: member?.earnedLegacySkinIds || []
+    };
   }
 }
 
