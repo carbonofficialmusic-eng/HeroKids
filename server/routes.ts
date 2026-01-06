@@ -4428,6 +4428,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ========================================
   // End of Device Linking
   // ========================================
+
+  // ========================================
+  // Admin Dashboard Routes
+  // ========================================
+
+  // Admin authentication middleware
+  const isAdmin = (req: any, res: any, next: any) => {
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword) {
+      return res.status(500).json({ message: "Admin password not configured" });
+    }
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Admin authentication required" });
+    }
+
+    const token = authHeader.substring(7);
+    if (token !== adminPassword) {
+      return res.status(401).json({ message: "Invalid admin credentials" });
+    }
+
+    next();
+  };
+
+  // Admin login verification
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { password } = req.body;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+
+      if (!adminPassword) {
+        return res.status(500).json({ message: "Admin password not configured" });
+      }
+
+      if (password === adminPassword) {
+        res.json({ success: true, token: adminPassword });
+      } else {
+        res.status(401).json({ message: "Invalid admin password" });
+      }
+    } catch (error) {
+      console.error("Admin login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Get all families with member counts and stats
+  app.get("/api/admin/families", isAdmin, async (req, res) => {
+    try {
+      const allFamilies = await storage.getFamilies();
+      
+      // Get member counts for each family
+      const familiesWithStats = await Promise.all(
+        allFamilies.map(async (family) => {
+          const members = await storage.getFamilyMembersByFamily(family.familyName);
+          const tasks = await storage.getTasksByFamily(family.familyName);
+          const rewards = await storage.getRewardsByFamily(family.familyName);
+          
+          const parentCount = members.filter(m => m.role === "parent").length;
+          const childCount = members.filter(m => m.role === "child").length;
+          const totalPoints = members.reduce((sum, m) => sum + m.totalEarned, 0);
+          
+          return {
+            ...family,
+            memberCount: members.length,
+            parentCount,
+            childCount,
+            taskCount: tasks.length,
+            rewardCount: rewards.length,
+            totalPointsEarned: totalPoints,
+          };
+        })
+      );
+
+      res.json(familiesWithStats);
+    } catch (error) {
+      console.error("Error fetching admin families:", error);
+      res.status(500).json({ message: "Failed to fetch families" });
+    }
+  });
+
+  // Get single family details with all members
+  app.get("/api/admin/families/:familyName", isAdmin, async (req, res) => {
+    try {
+      const { familyName } = req.params;
+      const family = await storage.getFamily(familyName);
+
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+
+      const members = await storage.getFamilyMembersByFamily(familyName);
+      const tasks = await storage.getTasksByFamily(familyName);
+      const rewards = await storage.getRewardsByFamily(familyName);
+
+      res.json({
+        family,
+        members,
+        taskCount: tasks.length,
+        rewardCount: rewards.length,
+      });
+    } catch (error) {
+      console.error("Error fetching admin family details:", error);
+      res.status(500).json({ message: "Failed to fetch family details" });
+    }
+  });
+
+  // Get admin dashboard stats
+  app.get("/api/admin/stats", isAdmin, async (req, res) => {
+    try {
+      const allFamilies = await storage.getFamilies();
+      
+      let totalMembers = 0;
+      let totalTasks = 0;
+      let totalRewards = 0;
+      let totalPointsEarned = 0;
+      const tierCounts: Record<string, number> = {
+        free: 0,
+        family: 0,
+        family_plus: 0,
+        family_hero: 0,
+      };
+
+      for (const family of allFamilies) {
+        tierCounts[family.subscriptionTier] = (tierCounts[family.subscriptionTier] || 0) + 1;
+        const members = await storage.getFamilyMembersByFamily(family.familyName);
+        totalMembers += members.length;
+        totalPointsEarned += members.reduce((sum, m) => sum + m.totalEarned, 0);
+        const tasks = await storage.getTasksByFamily(family.familyName);
+        totalTasks += tasks.length;
+        const rewards = await storage.getRewardsByFamily(family.familyName);
+        totalRewards += rewards.length;
+      }
+
+      res.json({
+        totalFamilies: allFamilies.length,
+        totalMembers,
+        totalTasks,
+        totalRewards,
+        totalPointsEarned,
+        tierCounts,
+      });
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
+  // Update family subscription tier (admin override)
+  app.patch("/api/admin/families/:familyName/tier", isAdmin, async (req, res) => {
+    try {
+      const { familyName } = req.params;
+      const { tier } = req.body;
+
+      if (!["free", "family", "family_plus", "family_hero"].includes(tier)) {
+        return res.status(400).json({ message: "Invalid tier" });
+      }
+
+      await storage.updateFamilyTier(familyName, tier);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating family tier:", error);
+      res.status(500).json({ message: "Failed to update tier" });
+    }
+  });
+
+  // ========================================
+  // End of Admin Dashboard Routes
+  // ========================================
   
   const httpServer = createServer(app);
 
