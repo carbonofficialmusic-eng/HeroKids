@@ -50,6 +50,7 @@ export default function Settings() {
   const [newPin, setNewPin] = useState("");
   const [memberForDeviceLink, setMemberForDeviceLink] = useState<FamilyMember | null>(null);
   const [deviceLinkDialogOpen, setDeviceLinkDialogOpen] = useState(false);
+  const [localSkinCardCost, setLocalSkinCardCost] = useState<number | null>(null);
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -691,16 +692,20 @@ export default function Settings() {
                 <div className="flex items-center justify-between">
                   <Label className="text-base">{t('settings.skinCardCost')}</Label>
                   <span className="text-lg font-semibold text-primary" data-testid="text-skin-card-cost">
-                    {familyData?.skinCardCost ?? 60} {t('settings.points')}
+                    {localSkinCardCost ?? familyData?.skinCardCost ?? 60} {t('settings.points')}
                   </span>
                 </div>
                 <Slider
-                  value={[familyData?.skinCardCost ?? 60]}
+                  value={[localSkinCardCost ?? familyData?.skinCardCost ?? 60]}
                   min={40}
                   max={80}
                   step={5}
+                  onValueChange={(value) => {
+                    setLocalSkinCardCost(value[0]);
+                  }}
                   onValueCommit={(value) => {
                     updateSettingsMutation.mutate({ skinCardCost: value[0] });
+                    setLocalSkinCardCost(null);
                   }}
                   disabled={updateSettingsMutation.isPending}
                   className="w-full"
