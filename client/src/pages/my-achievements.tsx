@@ -101,15 +101,32 @@ export default function MyAchievements() {
   const activeAchievements = achievements
     .filter(a => a.isActive)
     .sort((a, b) => {
-      const order: Record<string, number> = {
-        "perfect_week": 0,
-        "first_weekly_finisher": 1,
+      // Primary sort by type
+      const typeOrder: Record<string, number> = {
+        "first_weekly_finisher": 0,
+        "perfect_week": 1,
         "weekly_leaderboard": 2,
         "task_streak": 3,
         "lifetime_milestone": 4,
       };
-      const orderDiff = (order[a.type] ?? 99) - (order[b.type] ?? 99);
+      const orderDiff = (typeOrder[a.type] ?? 99) - (typeOrder[b.type] ?? 99);
       if (orderDiff !== 0) return orderDiff;
+      
+      // For task_streak: sort by days ascending (7, 14, 30)
+      if (a.type === "task_streak" && b.type === "task_streak") {
+        const aDays = (a.config as any)?.days ?? 0;
+        const bDays = (b.config as any)?.days ?? 0;
+        return aDays - bDays;
+      }
+      
+      // For lifetime_milestone: sort by threshold ascending (500, 1000, 2000)
+      if (a.type === "lifetime_milestone" && b.type === "lifetime_milestone") {
+        const aThreshold = (a.config as any)?.threshold ?? 0;
+        const bThreshold = (b.config as any)?.threshold ?? 0;
+        return aThreshold - bThreshold;
+      }
+      
+      // Fallback: alphabetical by slug
       return a.slug.localeCompare(b.slug);
     });
 
