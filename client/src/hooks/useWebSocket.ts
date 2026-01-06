@@ -91,7 +91,7 @@ export function useWebSocket(familyName: string | null) {
               break;
 
             case "skin_discovered":
-              // Invalidate skins and family members (points changed if bonus awarded)
+              // Invalidate skins and family members (for star discovery updates)
               queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });

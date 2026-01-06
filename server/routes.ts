@@ -2962,18 +2962,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         discoveredSkinIds: updatedDiscoveredSkins,
       });
       
-      // Award bonus points if this skin has them
-      const bonusPoints = skin.bonusPoints || 0;
-      if (bonusPoints > 0) {
-        await storage.updateFamilyMemberPoints(
-          member.id,
-          member.totalEarned + bonusPoints,
-          member.totalPoints + bonusPoints,
-          member.weeklyPoints + bonusPoints,
-          member.monthlyPoints + bonusPoints
-        );
-      }
-      
       // Check for hidden star on this skin card
       const starResult = await storage.markStarAsFound(member.id, skinId);
       
@@ -2982,7 +2970,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: "skin_discovered",
         memberId: member.id,
         skinId,
-        bonusPoints,
         starFound: starResult.wasStarFound,
         totalStarsFound: starResult.totalStarsFound,
         legacySkinAwarded: starResult.legacySkinAwarded,
@@ -2994,7 +2981,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         message: "Skin discovered!", 
         skinId,
-        bonusPoints,
         availableCards: remainingCards,
         starFound: starResult.wasStarFound,
         totalStarsFound: starResult.totalStarsFound,
