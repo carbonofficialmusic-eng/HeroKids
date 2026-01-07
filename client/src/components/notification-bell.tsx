@@ -248,7 +248,10 @@ export function NotificationBell({ familyLanguage = "en", wsConnection }: Notifi
               <DropdownMenuItem
                 key={notification.id}
                 className={`flex gap-3 p-3 cursor-pointer ${!notification.isRead ? "bg-accent/30" : ""}`}
-                onClick={() => handleNotificationClick(notification)}
+                onSelect={(e) => {
+                  e.preventDefault();
+                  handleNotificationClick(notification);
+                }}
                 data-testid={`notification-item-${notification.id}`}
               >
                 <div className={`mt-0.5 ${!notification.isRead ? "text-primary" : "text-muted-foreground"}`}>
