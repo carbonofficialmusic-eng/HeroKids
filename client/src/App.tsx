@@ -32,6 +32,7 @@ import Admin from "@/pages/admin";
 interface FamilyMember {
   id: number;
   activeSkinId: string | null;
+  useThemeBackground: boolean;
 }
 
 function RedirectToLanding() {
@@ -51,7 +52,9 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
     enabled: isAuthenticated,
   });
 
-  const backgroundUrl = getBackgroundUrl(member?.activeSkinId);
+  // Only show background if useThemeBackground is true (defaults to true if undefined)
+  const shouldShowBackground = member?.useThemeBackground !== false;
+  const backgroundUrl = shouldShowBackground ? getBackgroundUrl(member?.activeSkinId) : undefined;
   
   const [currentBg, setCurrentBg] = useState<string | undefined>(backgroundUrl);
   const [previousBg, setPreviousBg] = useState<string | undefined>(undefined);
