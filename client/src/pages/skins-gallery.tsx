@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, Lock, Check, Trophy, ArrowLeft, User, Star, Sparkles, Crown, Camera } from "lucide-react";
+import { Loader2, Lock, Check, Trophy, ArrowLeft, User, Star, Sparkles, Crown, Camera, ImageOff, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { Link } from "wouter";
@@ -225,6 +225,31 @@ export default function SkinsGallery() {
       toast({
         title: t('common.error'),
         description,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Toggle background mutation
+  const toggleBackgroundMutation = useMutation({
+    mutationFn: async (useThemeBackground: boolean) => {
+      const res = await apiRequest("POST", "/api/skins/background", { useThemeBackground });
+      return await res.json();
+    },
+    onSuccess: (_, useThemeBackground) => {
+      toast({
+        title: useThemeBackground ? t('skins.backgroundEnabled') : t('skins.backgroundDisabled'),
+        description: useThemeBackground 
+          ? t('skins.backgroundEnabledDesc') 
+          : t('skins.backgroundDisabledDesc'),
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t('common.error'),
+        description: t('skins.failedToToggleBackground'),
         variant: "destructive",
       });
     },
@@ -531,6 +556,30 @@ export default function SkinsGallery() {
                       data-testid="button-clear-skin"
                     >
                       {t('skins.useDefault')}
+                    </Button>
+                  )}
+                  
+                  {/* Background toggle - only show when a skin is active */}
+                  {memberData?.activeSkinId && (
+                    <Button
+                      className="w-full"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleBackgroundMutation.mutate(!memberData.useThemeBackground)}
+                      disabled={toggleBackgroundMutation.isPending}
+                      data-testid="button-toggle-background"
+                    >
+                      {memberData.useThemeBackground !== false ? (
+                        <>
+                          <ImageOff className="h-4 w-4 mr-2" />
+                          {t('skins.hideBackground')}
+                        </>
+                      ) : (
+                        <>
+                          <Image className="h-4 w-4 mr-2" />
+                          {t('skins.showBackground')}
+                        </>
+                      )}
                     </Button>
                   )}
                 </div>
