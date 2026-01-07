@@ -848,6 +848,7 @@ export default function KidDashboard() {
     unlockedSkins: [],
     discoveredSkinIds: deviceSession.discoveredSkinIds || [],
     useCustomAvatar: deviceSession.useCustomAvatar || false,
+    useThemeBackground: true,
     avatarHistory: [],
     lastReadChatAt: null,
     excludeFromLeaderboard: false,

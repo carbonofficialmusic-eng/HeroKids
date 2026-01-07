@@ -546,19 +546,6 @@ export default function SkinsGallery() {
                     </Button>
                   )}
                   
-                  {/* Always show "Use Default" option when a skin is active */}
-                  {previewSkin && !isDefaultActive && (
-                    <Button
-                      className="w-full"
-                      variant="outline"
-                      onClick={() => selectSkinMutation.mutate(null)}
-                      disabled={selectSkinMutation.isPending}
-                      data-testid="button-clear-skin"
-                    >
-                      {t('skins.useDefault')}
-                    </Button>
-                  )}
-                  
                   {/* Background toggle - only show when a skin is active */}
                   {memberData?.activeSkinId && (
                     <Button
