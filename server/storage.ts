@@ -327,7 +327,7 @@ export interface IStorage {
   getNotificationsForMember(memberId: string, limit?: number): Promise<Notification[]>;
   getUnreadNotificationCountForMember(memberId: string): Promise<number>;
   createNotification(notification: InsertNotification): Promise<Notification>;
-  createNotificationForParents(familyName: string, notificationData: Omit<InsertNotification, 'targetMemberId'>): Promise<void>;
+  createNotificationForParents(familyName: string, notificationData: Omit<InsertNotification, 'targetMemberId'>, excludeMemberId?: string): Promise<void>;
   markNotificationAsRead(notificationId: string): Promise<void>;
   markAllNotificationsAsReadForMember(memberId: string): Promise<void>;
   deleteNotification(notificationId: string): Promise<void>;
@@ -3060,10 +3060,11 @@ export class DatabaseStorage implements IStorage {
     return notification;
   }
 
-  // Create notification for each parent in family
-  async createNotificationForParents(familyName: string, notificationData: Omit<InsertNotification, 'targetMemberId'>): Promise<void> {
+  // Create notification for each parent in family (optionally exclude a specific member)
+  async createNotificationForParents(familyName: string, notificationData: Omit<InsertNotification, 'targetMemberId'>, excludeMemberId?: string): Promise<void> {
     const parents = await this.getFamilyMembersByFamily(familyName);
-    const parentMembers = parents.filter(m => m.role === 'parent');
+    // Filter to only parents, and exclude the specified member (so you don't notify yourself)
+    const parentMembers = parents.filter(m => m.role === 'parent' && m.id !== excludeMemberId);
     
     for (const parent of parentMembers) {
       await db.insert(notifications).values({

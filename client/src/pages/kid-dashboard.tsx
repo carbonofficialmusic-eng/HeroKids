@@ -1148,7 +1148,7 @@ export default function KidDashboard() {
                 </Badge>
               </Link>
             )}
-            <NotificationBell familyLanguage="en" />
+            <NotificationBell familyLanguage="en" memberRole={member.role} />
             <ProfileMenu
               member={member}
               isParent={isParent}

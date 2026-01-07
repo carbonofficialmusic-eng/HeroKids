@@ -1785,7 +1785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pointsEarned: task.points,
         });
         
-        // Create notification for each parent
+        // Create notification for each parent (exclude self so you don't get notified about your own task)
         await storage.createNotificationForParents(member.familyName, {
           familyName: member.familyName,
           type: "task_pending",
@@ -1793,7 +1793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: `Waiting for approval (+${task.points} points)`,
           relatedTaskId: task.id,
           relatedMemberId: member.id,
-        });
+        }, member.id);
         
         // Broadcast notification update
         broadcastToFamily(member.familyName, { type: "notification_update" });
@@ -1807,7 +1807,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pointsEarned: task.points,
         });
         
-        // Create notification for each parent
+        // Create notification for each parent (exclude self so you don't get notified about your own task)
         await storage.createNotificationForParents(member.familyName, {
           familyName: member.familyName,
           type: "task_completed",
@@ -1815,7 +1815,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: `Task "${task.title}" completed`,
           relatedTaskId: task.id,
           relatedMemberId: member.id,
-        });
+        }, member.id);
         
         // Broadcast notification update
         broadcastToFamily(member.familyName, { type: "notification_update" });

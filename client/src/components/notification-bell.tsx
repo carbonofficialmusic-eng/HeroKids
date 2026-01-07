@@ -40,6 +40,7 @@ import { sv } from "date-fns/locale/sv";
 interface NotificationBellProps {
   familyLanguage?: string;
   wsConnection?: WebSocket | null;
+  memberRole?: "parent" | "child";
 }
 
 const localeMap: Record<string, typeof de> = {
@@ -58,7 +59,7 @@ const notificationIcons: Record<string, typeof Bell> = {
   member_joined: UserPlus,
 };
 
-export function NotificationBell({ familyLanguage = "en", wsConnection }: NotificationBellProps) {
+export function NotificationBell({ familyLanguage = "en", wsConnection, memberRole = "parent" }: NotificationBellProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -70,7 +71,8 @@ export function NotificationBell({ familyLanguage = "en", wsConnection }: Notifi
     switch (notification.type) {
       case "task_pending":
       case "task_completed":
-        return "/approvals";
+        // Only parents should go to /approvals - children go to dashboard
+        return memberRole === "parent" ? "/approvals" : "/dashboard";
       case "reward_redeemed":
       case "reward_sharing":
         return "/rewards-board";
