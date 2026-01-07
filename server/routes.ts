@@ -1933,6 +1933,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         approvedBy: member.displayName,
       });
       
+      // Create notification for the child who completed the task
+      await storage.createNotification({
+        familyName: member.familyName,
+        type: "task_approved",
+        title: `Task approved!`,
+        message: `"${task?.title || "Task"}" was approved. You earned ${completion.pointsEarned} points!`,
+        relatedMemberId: member.id,
+        relatedTaskId: completion.taskId,
+        targetMemberId: childMember.id,
+      });
+      
+      // Broadcast notification update to refresh child's bell
+      broadcastToFamily(member.familyName, {
+        type: 'notification_update',
+      });
+      
       // Process achievement events
       await achievementEngine.processEvent({
         type: "task_approved",
@@ -2006,6 +2022,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         memberId: childMember.id,
         rejectedBy: member.displayName,
         reason: reason || "Did not meet expectations",
+      });
+      
+      // Get the task for the notification message
+      const task = await storage.getTask(completion.taskId);
+      
+      // Create notification for the child who completed the task
+      await storage.createNotification({
+        familyName: member.familyName,
+        type: "task_rejected",
+        title: `Task needs revision`,
+        message: `"${task?.title || "Task"}" was not approved: ${reason || "Did not meet expectations"}`,
+        relatedMemberId: member.id,
+        relatedTaskId: completion.taskId,
+        targetMemberId: childMember.id,
+      });
+      
+      // Broadcast notification update to refresh child's bell
+      broadcastToFamily(member.familyName, {
+        type: 'notification_update',
       });
       
       // Process achievement events

@@ -54,6 +54,7 @@ import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, Family
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileMenu } from "@/components/profile-menu";
+import { NotificationBell } from "@/components/notification-bell";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
@@ -1147,6 +1148,7 @@ export default function KidDashboard() {
                 </Badge>
               </Link>
             )}
+            <NotificationBell familyLanguage="en" />
             <ProfileMenu
               member={member}
               isParent={isParent}

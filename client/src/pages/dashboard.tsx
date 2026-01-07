@@ -809,9 +809,7 @@ export default function Dashboard() {
               showAnimation
               data-testid="point-counter-total-earned"
             />
-            {isRealParent && (
-              <NotificationBell familyLanguage="en" />
-            )}
+            <NotificationBell familyLanguage="en" />
             <ProfileMenu
               member={member}
               isParent={isParent}
