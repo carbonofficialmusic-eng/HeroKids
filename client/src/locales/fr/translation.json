@@ -332,7 +332,8 @@
     "unlockAtPoints": "🔒 Déverrouiller avec {{points}} points totaux",
     "starFound": "Tu as trouvé une étoile !",
     "legacyUnlocked": "Avatar HeroKids Legacy débloqué !",
-    "unlockAtStars": "Déverrouillage à {{count}} étoiles"
+    "unlockAtStars": "Déverrouillage à {{count}} étoiles",
+    "unlockedWithStars": "Déverrouillé avec {{count}} étoiles"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

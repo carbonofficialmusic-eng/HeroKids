@@ -332,7 +332,8 @@
     "unlockAtPoints": "🔒 累计{{points}}积分解锁",
     "starFound": "你发现了一颗星！",
     "legacyUnlocked": "HeroKids Legacy头像已解锁！",
-    "unlockAtStars": "{{count}}颗星解锁"
+    "unlockAtStars": "{{count}}颗星解锁",
+    "unlockedWithStars": "已用{{count}}颗星解锁"
   },
   "skinNames": {
     "junior-champion": "少年冠军",

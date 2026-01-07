@@ -346,7 +346,8 @@
     "photoEquipped": "Ditt foto utrustat!",
     "starFound": "Du hittade en stjärna!",
     "legacyUnlocked": "HeroKids Legacy-avatar upplåst!",
-    "unlockAtStars": "Upplåsning vid {{count}} stjärnor"
+    "unlockAtStars": "Upplåsning vid {{count}} stjärnor",
+    "unlockedWithStars": "Upplåst med {{count}} stjärnor"
   },
   "skinNames": {
     "junior-champion": "Juniorchampion",

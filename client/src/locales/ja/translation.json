@@ -332,7 +332,8 @@
     "unlockAtPoints": "🔒 通算{{points}}ポイントでアンロック",
     "starFound": "星を見つけた！",
     "legacyUnlocked": "HeroKids Legacyアバター獲得！",
-    "unlockAtStars": "{{count}}個の星で解放"
+    "unlockAtStars": "{{count}}個の星で解放",
+    "unlockedWithStars": "{{count}}個の星で獲得済み"
   },
   "skinNames": {
     "junior-champion": "ジュニアチャンピオン",

@@ -336,7 +336,8 @@
     "unlockAtPoints": "🔒 총 {{points}} 포인트에서 잠금 해제",
     "starFound": "별을 찾았어요!",
     "legacyUnlocked": "HeroKids Legacy 아바타 획득!",
-    "unlockAtStars": "{{count}}개의 별에서 잠금 해제"
+    "unlockAtStars": "{{count}}개의 별에서 잠금 해제",
+    "unlockedWithStars": "{{count}}개의 별로 획득함"
   },
   "skinNames": {
     "junior-champion": "주니어 챔피언",

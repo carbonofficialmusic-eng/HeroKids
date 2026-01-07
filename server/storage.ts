@@ -2815,16 +2815,45 @@ export class DatabaseStorage implements IStorage {
     const placements = await this.getStarPlacementsByMember(memberId);
     
     // Count actual found stars from placements (not member counter which can be out of sync)
-    const actualStarsFound = placements.filter(p => p.found).length;
+    let actualStarsFound = placements.filter(p => p.found).length;
+    
+    const currentLegacySkinIds = member?.earnedLegacySkinIds || [];
+    const currentLegacyCount = currentLegacySkinIds.length;
+    
+    // LEGACY MIGRATION: If user has Legacy skins but 0 stars found, 
+    // they earned those skins before the star system existed.
+    // Retroactively mark stars as found based on their earned Legacy count.
+    if (actualStarsFound === 0 && currentLegacyCount > 0 && placements.length > 0) {
+      const starsToMark = currentLegacyCount * STARS_PER_LEGACY_AVATAR;
+      const unfoundPlacements = placements.filter(p => !p.found).slice(0, starsToMark);
+      
+      console.log(`Legacy migration for ${member?.displayName}: marking ${unfoundPlacements.length} stars as found (has ${currentLegacyCount} Legacy skins)`);
+      
+      for (const placement of unfoundPlacements) {
+        await db.update(starPlacements)
+          .set({ found: true })
+          .where(eq(starPlacements.id, placement.id));
+      }
+      
+      actualStarsFound = unfoundPlacements.length;
+      
+      // Update member's starsFound counter
+      await db.update(familyMembers)
+        .set({ starsFound: actualStarsFound, updatedAt: new Date() })
+        .where(eq(familyMembers.id, memberId));
+      
+      return {
+        starsFound: actualStarsFound,
+        totalStars: placements.length,
+        earnedLegacySkinIds: currentLegacySkinIds
+      };
+    }
     
     // Calculate how many legacy skins should be earned based on actual stars
     const expectedLegacyCount = Math.min(
       Math.floor(actualStarsFound / STARS_PER_LEGACY_AVATAR),
       this.LEGACY_SKIN_IDS.length
     );
-    
-    const currentLegacySkinIds = member?.earnedLegacySkinIds || [];
-    const currentLegacyCount = currentLegacySkinIds.length;
     
     // If member counter or legacy skins are out of sync, fix them
     const memberStarsFound = member?.starsFound || 0;

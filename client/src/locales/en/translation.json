@@ -346,7 +346,8 @@
     "photoEquipped": "Your Photo Equipped!",
     "starFound": "You found a Star!",
     "legacyUnlocked": "HeroKids Legacy Avatar unlocked!",
-    "unlockAtStars": "Unlock at {{count}} stars"
+    "unlockAtStars": "Unlock at {{count}} stars",
+    "unlockedWithStars": "Unlocked with {{count}} stars"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

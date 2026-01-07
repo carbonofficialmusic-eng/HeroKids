@@ -516,13 +516,24 @@ export default function SkinsGallery() {
                 
                 {/* Progress to next unlock */}
                 <div className="mt-4 pt-4 border-t">
-                  {previewSkin && isLegacySkin(previewSkin.id) && !previewSkin.isDiscovered ? (
-                    // Legacy skin - show star-based unlock requirement
+                  {previewSkin && isLegacySkin(previewSkin.id) ? (
+                    // Legacy skin - show star-based info
                     (() => {
                       const legacyIndex = LEGACY_SKIN_ORDER.indexOf(previewSkin.id);
                       const starsNeeded = (legacyIndex + 1) * STARS_PER_LEGACY_AVATAR;
                       const currentStars = starStats.starsFound;
                       const progressPercent = Math.min((currentStars / starsNeeded) * 100, 100);
+                      
+                      if (previewSkin.isDiscovered) {
+                        // Already unlocked - show how many stars were needed
+                        return (
+                          <p className="text-sm text-muted-foreground flex items-center gap-1 justify-center">
+                            <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                            {t('skins.unlockedWithStars', { count: starsNeeded })}
+                          </p>
+                        );
+                      }
+                      
                       return (
                         <>
                           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
