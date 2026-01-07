@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -60,9 +61,29 @@ const notificationIcons: Record<string, typeof Bell> = {
 export function NotificationBell({ familyLanguage = "en", wsConnection }: NotificationBellProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [open, setOpen] = useState(false);
 
   const locale = localeMap[familyLanguage] || localeMap.en;
+
+  const getNavigationRoute = (notification: Notification): string | null => {
+    switch (notification.type) {
+      case "task_pending":
+      case "task_completed":
+        return "/approvals";
+      case "task_approved":
+      case "task_rejected":
+        return "/dashboard";
+      case "reward_redeemed":
+        return "/rewards";
+      case "achievement_earned":
+        return "/achievements";
+      case "points_milestone":
+      case "member_joined":
+      default:
+        return "/dashboard";
+    }
+  };
 
   const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
@@ -133,6 +154,12 @@ export function NotificationBell({ familyLanguage = "en", wsConnection }: Notifi
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
       markAsReadMutation.mutate(notification.id);
+    }
+    
+    const route = getNavigationRoute(notification);
+    if (route) {
+      setOpen(false);
+      setLocation(route);
     }
   };
 
