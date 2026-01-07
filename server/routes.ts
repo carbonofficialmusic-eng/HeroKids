@@ -84,7 +84,7 @@ function rateLimit(maxRequests: number, windowMs: number) {
   };
 }
 
-// Helper function to get the current member from a request (supports Replit Auth, Device sessions, and Mobile JWT)
+// Helper function to get the current member from a request (supports Replit Auth, Device sessions, Mobile JWT, and Acting-As sessions)
 async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isDeviceSession: boolean; isMobileSession: boolean } | null> {
   // Mobile JWT session: member is directly available
   if (req.user?.authMethod === "mobile" && req.user?.member) {
@@ -94,6 +94,16 @@ async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isD
   // Device-linked session: member is directly available
   if (req.user?.authMethod === "device" && req.user?.member) {
     return { member: req.user.member, isDeviceSession: true, isMobileSession: false };
+  }
+  
+  // Check if acting as another member (single-device mode)
+  if (req.session?.actingAsMemberId) {
+    const actingAsMember = await storage.getFamilyMember(req.session.actingAsMemberId);
+    if (actingAsMember) {
+      return { member: actingAsMember, isDeviceSession: false, isMobileSession: false };
+    }
+    // If acting as member not found, clear the session and fall through
+    delete req.session.actingAsMemberId;
   }
   
   // Normal Replit Auth flow
