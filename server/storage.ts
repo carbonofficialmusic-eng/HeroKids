@@ -2605,7 +2605,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Star Placement operations
-  // HeroKids Legacy skin IDs (Tier 14) - unlocked by collecting 4 stars each (8 skins total)
+  // HeroKids Legacy skin IDs (Tier 14) - unlocked by collecting 4 stars each (12 skins total)
   private readonly LEGACY_SKIN_IDS = [
     "shield-blaze",
     "comet-dash", 
@@ -2614,7 +2614,11 @@ export class DatabaseStorage implements IStorage {
     "luna-beacon",
     "sunrise-spark",
     "bloom-guardian",
-    "breeze-captain"
+    "breeze-captain",
+    "storm-runner",
+    "star-guardian",
+    "thunder-bolt",
+    "heart-shield"
   ];
 
   async getStarPlacementsByMember(memberId: string): Promise<StarPlacement[]> {
@@ -2810,10 +2814,53 @@ export class DatabaseStorage implements IStorage {
     const member = await this.getFamilyMember(memberId);
     const placements = await this.getStarPlacementsByMember(memberId);
     
+    // Count actual found stars from placements (not member counter which can be out of sync)
+    const actualStarsFound = placements.filter(p => p.found).length;
+    
+    // Calculate how many legacy skins should be earned based on actual stars
+    const expectedLegacyCount = Math.min(
+      Math.floor(actualStarsFound / STARS_PER_LEGACY_AVATAR),
+      this.LEGACY_SKIN_IDS.length
+    );
+    
+    const currentLegacySkinIds = member?.earnedLegacySkinIds || [];
+    const currentLegacyCount = currentLegacySkinIds.length;
+    
+    // If member counter or legacy skins are out of sync, fix them
+    const memberStarsFound = member?.starsFound || 0;
+    const needsStarFix = memberStarsFound !== actualStarsFound;
+    const needsLegacyFix = currentLegacyCount < expectedLegacyCount;
+    
+    if ((needsStarFix || needsLegacyFix) && member) {
+      const updates: any = { updatedAt: new Date() };
+      
+      if (needsStarFix) {
+        console.log(`Fixing star count for ${member.displayName}: ${memberStarsFound} -> ${actualStarsFound}`);
+        updates.starsFound = actualStarsFound;
+      }
+      
+      if (needsLegacyFix) {
+        // Award missing legacy skins
+        const correctLegacySkinIds = this.LEGACY_SKIN_IDS.slice(0, expectedLegacyCount);
+        console.log(`Fixing legacy skins for ${member.displayName}: ${currentLegacyCount} -> ${expectedLegacyCount}`);
+        updates.earnedLegacySkinIds = correctLegacySkinIds;
+      }
+      
+      await db.update(familyMembers)
+        .set(updates)
+        .where(eq(familyMembers.id, memberId));
+      
+      return {
+        starsFound: actualStarsFound,
+        totalStars: placements.length,
+        earnedLegacySkinIds: needsLegacyFix ? this.LEGACY_SKIN_IDS.slice(0, expectedLegacyCount) : currentLegacySkinIds
+      };
+    }
+    
     return {
-      starsFound: member?.starsFound || 0,
+      starsFound: actualStarsFound,
       totalStars: placements.length,
-      earnedLegacySkinIds: member?.earnedLegacySkinIds || []
+      earnedLegacySkinIds: currentLegacySkinIds
     };
   }
 
