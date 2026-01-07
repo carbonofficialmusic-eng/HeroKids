@@ -2845,6 +2845,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Join the sharing
       const participant = await storage.joinRewardSharing(redemptionId, member.id);
       
+      // Get the reward for notification message
+      const reward = await storage.getRewardById(redemption.rewardId);
+      
+      // Create notification for the original owner (the child who started sharing)
+      await storage.createNotification({
+        familyName: member.familyName,
+        type: "reward_sharing",
+        title: `${member.displayName} macht bei deiner Belohnung mit!`,
+        message: reward ? `"${reward.title}"` : "Eine Belohnung wird geteilt",
+        relatedMemberId: member.id,
+        relatedRewardId: redemption.rewardId,
+        targetMemberId: redemption.memberId, // The original owner
+      });
+      
       // Broadcast to family
       broadcastToFamily(member.familyName, {
         type: "reward_sharing_joined",
@@ -2852,6 +2866,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         memberId: member.id,
         memberName: member.displayName,
       });
+      
+      // Broadcast notification update
+      broadcastToFamily(member.familyName, { type: "notification_update" });
       
       res.json({ 
         message: "You joined the shared reward!", 
