@@ -333,6 +333,7 @@ export interface IStorage {
   markAllNotificationsAsReadForMember(memberId: string): Promise<void>;
   deleteNotification(notificationId: string): Promise<void>;
   deleteAllNotificationsForMember(memberId: string): Promise<void>;
+  deleteNotificationsByTypeAndTask(familyName: string, type: string, taskId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3109,6 +3110,15 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAllNotificationsForMember(memberId: string): Promise<void> {
     await db.delete(notifications).where(eq(notifications.targetMemberId, memberId));
+  }
+
+  // Delete all notifications of a specific type for a specific task (used when task is approved/rejected)
+  async deleteNotificationsByTypeAndTask(familyName: string, type: string, taskId: string): Promise<void> {
+    await db.delete(notifications).where(and(
+      eq(notifications.familyName, familyName),
+      eq(notifications.type, type as any),
+      eq(notifications.relatedTaskId, taskId)
+    ));
   }
 }
 

@@ -2091,6 +2091,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mark completion as approved
       await storage.approveTaskCompletion(completionId, member.id);
       
+      // Delete all "task_pending" notifications for this task (so other parents don't see it anymore)
+      await storage.deleteNotificationsByTypeAndTask(member.familyName, "task_pending", completion.taskId);
+      
       // Get updated member data
       const updatedChild = await storage.getFamilyMember(childMember.id);
       
@@ -2184,6 +2187,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Mark completion as rejected
       await storage.rejectTaskCompletion(completionId, member.id, reason || "Did not meet expectations");
+      
+      // Delete all "task_pending" notifications for this task (so other parents don't see it anymore)
+      await storage.deleteNotificationsByTypeAndTask(member.familyName, "task_pending", completion.taskId);
       
       // Clear the task's nextAvailableDate so it becomes immediately available again
       // (For recurring tasks that were set to next recurrence date when completed)
