@@ -258,21 +258,13 @@ export default function MyRewards() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className={`p-5 bg-gradient-to-br ${
-                    redemption.status === "completed" 
-                      ? "from-green-500/20 to-emerald-500/20 border-green-500/30" 
-                      : "from-amber-500/20 to-yellow-500/20 border-amber-500/30"
-                  } border rounded-2xl`}>
+                  <Card className="p-5 bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-2xl">
                     <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-xl flex-shrink-0 ${
-                        redemption.status === "completed" 
-                          ? "bg-green-500/20" 
-                          : "bg-amber-500/20"
-                      }`}>
+                      <div className="p-3 rounded-xl flex-shrink-0 bg-green-500/20">
                         {redemption.status === "completed" ? (
                           <CheckCircle2 className="h-7 w-7 text-green-500" />
                         ) : (
-                          <Clock className="h-7 w-7 text-amber-500" />
+                          <Clock className="h-7 w-7 text-green-600" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0 space-y-2">
