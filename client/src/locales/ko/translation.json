@@ -337,7 +337,14 @@
     "starFound": "별을 찾았어요!",
     "legacyUnlocked": "HeroKids Legacy 아바타 획득!",
     "unlockAtStars": "{{count}}개의 별에서 잠금 해제",
-    "unlockedWithStars": "{{count}}개의 별로 획득함"
+    "unlockedWithStars": "{{count}}개의 별로 획득함",
+    "hideBackground": "배경 숨기기",
+    "showBackground": "배경 표시",
+    "backgroundEnabled": "배경 활성화됨",
+    "backgroundDisabled": "배경 비활성화됨",
+    "backgroundEnabledDesc": "스킨 배경이 이제 표시됩니다",
+    "backgroundDisabledDesc": "스킨 배경이 이제 숨겨졌습니다",
+    "failedToToggleBackground": "배경 전환에 실패했습니다"
   },
   "skinNames": {
     "junior-champion": "주니어 챔피언",

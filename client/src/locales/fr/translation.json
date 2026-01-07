@@ -333,7 +333,14 @@
     "starFound": "Tu as trouvé une étoile !",
     "legacyUnlocked": "Avatar HeroKids Legacy débloqué !",
     "unlockAtStars": "Déverrouillage à {{count}} étoiles",
-    "unlockedWithStars": "Déverrouillé avec {{count}} étoiles"
+    "unlockedWithStars": "Déverrouillé avec {{count}} étoiles",
+    "hideBackground": "Masquer le fond",
+    "showBackground": "Afficher le fond",
+    "backgroundEnabled": "Fond activé",
+    "backgroundDisabled": "Fond désactivé",
+    "backgroundEnabledDesc": "Le fond du skin est maintenant visible",
+    "backgroundDisabledDesc": "Le fond du skin est maintenant masqué",
+    "failedToToggleBackground": "Impossible de changer le fond"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

@@ -333,7 +333,14 @@
     "starFound": "你发现了一颗星！",
     "legacyUnlocked": "HeroKids Legacy头像已解锁！",
     "unlockAtStars": "{{count}}颗星解锁",
-    "unlockedWithStars": "已用{{count}}颗星解锁"
+    "unlockedWithStars": "已用{{count}}颗星解锁",
+    "hideBackground": "隐藏背景",
+    "showBackground": "显示背景",
+    "backgroundEnabled": "背景已启用",
+    "backgroundDisabled": "背景已禁用",
+    "backgroundEnabledDesc": "皮肤背景现在可见",
+    "backgroundDisabledDesc": "皮肤背景现在已隐藏",
+    "failedToToggleBackground": "无法切换背景"
   },
   "skinNames": {
     "junior-champion": "少年冠军",

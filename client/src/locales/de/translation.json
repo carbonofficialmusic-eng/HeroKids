@@ -370,7 +370,14 @@
     "starFound": "Du hast einen Stern gefunden!",
     "legacyUnlocked": "HeroKids Legacy Avatar freigeschaltet!",
     "unlockAtStars": "Freischaltung bei {{count}} Sternen",
-    "unlockedWithStars": "Freigeschaltet mit {{count}} Sternen"
+    "unlockedWithStars": "Freigeschaltet mit {{count}} Sternen",
+    "hideBackground": "Hintergrund ausblenden",
+    "showBackground": "Hintergrund anzeigen",
+    "backgroundEnabled": "Hintergrund aktiviert",
+    "backgroundDisabled": "Hintergrund deaktiviert",
+    "backgroundEnabledDesc": "Der Skin-Hintergrund ist jetzt sichtbar",
+    "backgroundDisabledDesc": "Der Skin-Hintergrund ist jetzt ausgeblendet",
+    "failedToToggleBackground": "Hintergrund konnte nicht umgeschaltet werden"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

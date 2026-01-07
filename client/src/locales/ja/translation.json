@@ -333,7 +333,14 @@
     "starFound": "星を見つけた！",
     "legacyUnlocked": "HeroKids Legacyアバター獲得！",
     "unlockAtStars": "{{count}}個の星で解放",
-    "unlockedWithStars": "{{count}}個の星で獲得済み"
+    "unlockedWithStars": "{{count}}個の星で獲得済み",
+    "hideBackground": "背景を隠す",
+    "showBackground": "背景を表示",
+    "backgroundEnabled": "背景が有効",
+    "backgroundDisabled": "背景が無効",
+    "backgroundEnabledDesc": "スキンの背景が表示されるようになりました",
+    "backgroundDisabledDesc": "スキンの背景が非表示になりました",
+    "failedToToggleBackground": "背景の切り替えに失敗しました"
   },
   "skinNames": {
     "junior-champion": "ジュニアチャンピオン",

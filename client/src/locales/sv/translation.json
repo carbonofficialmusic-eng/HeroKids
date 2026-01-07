@@ -347,7 +347,14 @@
     "starFound": "Du hittade en stjärna!",
     "legacyUnlocked": "HeroKids Legacy-avatar upplåst!",
     "unlockAtStars": "Upplåsning vid {{count}} stjärnor",
-    "unlockedWithStars": "Upplåst med {{count}} stjärnor"
+    "unlockedWithStars": "Upplåst med {{count}} stjärnor",
+    "hideBackground": "Dölj bakgrund",
+    "showBackground": "Visa bakgrund",
+    "backgroundEnabled": "Bakgrund aktiverad",
+    "backgroundDisabled": "Bakgrund inaktiverad",
+    "backgroundEnabledDesc": "Skinbakgrunden är nu synlig",
+    "backgroundDisabledDesc": "Skinbakgrunden är nu dold",
+    "failedToToggleBackground": "Kunde inte ändra bakgrund"
   },
   "skinNames": {
     "junior-champion": "Juniorchampion",

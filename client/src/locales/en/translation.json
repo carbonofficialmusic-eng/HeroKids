@@ -347,7 +347,14 @@
     "starFound": "You found a Star!",
     "legacyUnlocked": "HeroKids Legacy Avatar unlocked!",
     "unlockAtStars": "Unlock at {{count}} stars",
-    "unlockedWithStars": "Unlocked with {{count}} stars"
+    "unlockedWithStars": "Unlocked with {{count}} stars",
+    "hideBackground": "Hide Background",
+    "showBackground": "Show Background",
+    "backgroundEnabled": "Background Enabled",
+    "backgroundDisabled": "Background Disabled",
+    "backgroundEnabledDesc": "The skin background is now visible",
+    "backgroundDisabledDesc": "The skin background is now hidden",
+    "failedToToggleBackground": "Failed to toggle background"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",
