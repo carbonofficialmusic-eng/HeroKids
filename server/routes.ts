@@ -1785,8 +1785,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pointsEarned: task.points,
         });
         
-        // Create notification for parents
-        await storage.createNotification({
+        // Create notification for each parent
+        await storage.createNotificationForParents(member.familyName, {
           familyName: member.familyName,
           type: "task_pending",
           title: `${member.displayName} completed "${task.title}"`,
@@ -1807,8 +1807,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pointsEarned: task.points,
         });
         
-        // Create notification for parents
-        await storage.createNotification({
+        // Create notification for each parent
+        await storage.createNotificationForParents(member.familyName, {
           familyName: member.familyName,
           type: "task_completed",
           title: `${member.displayName} earned ${task.points} points`,
@@ -2294,8 +2294,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rewardDeactivated: reward.oneTimeOnly,
       });
       
-      // Create notification for parents
-      await storage.createNotification({
+      // Create notification for each parent
+      await storage.createNotificationForParents(member.familyName, {
         familyName: member.familyName,
         type: "reward_redeemed",
         title: `${member.displayName} redeemed a reward`,
@@ -2757,9 +2757,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Start sharing
       await storage.startRewardSharing(redemptionId);
       
-      // Create notification for parents about reward sharing offer
+      // Create notification for each parent about reward sharing offer
       const reward = await storage.getRewardById(redemption.rewardId);
-      await storage.createNotification({
+      await storage.createNotificationForParents(member.familyName, {
         familyName: member.familyName,
         type: "reward_sharing",
         title: `${member.displayName} offers a reward for sharing`,
@@ -4199,9 +4199,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ===== Notification Routes (for parents and children) =====
+  // ===== Notification Routes (member-based - each member has their own notifications) =====
   
-  // Get all notifications for the current member (parents get family-wide, children get personal)
+  // Get all notifications for the current member
   app.get("/api/notifications", isAuthenticated, async (req: any, res) => {
     try {
       const result = await getCurrentMemberFromRequest(req);
@@ -4215,12 +4215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const limit = req.query.limit ? parseInt(req.query.limit) : 50;
-      
-      // Parents get family-wide notifications (targetMemberId = null)
-      // Children get their personal notifications (targetMemberId = their id)
-      const notificationsList = member.role === "parent"
-        ? await storage.getNotificationsForParents(member.familyName, limit)
-        : await storage.getNotificationsForMember(member.id, limit);
+      const notificationsList = await storage.getNotificationsForMember(member.id, limit);
       
       res.json(notificationsList);
     } catch (error: any) {
@@ -4242,11 +4237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Parents get family-wide count, children get personal count
-      const count = member.role === "parent"
-        ? await storage.getUnreadNotificationCountForParents(member.familyName)
-        : await storage.getUnreadNotificationCountForMember(member.id);
-      
+      const count = await storage.getUnreadNotificationCountForMember(member.id);
       res.json({ count });
     } catch (error: any) {
       console.error("Error fetching unread notification count:", error);
@@ -4270,7 +4261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.markNotificationAsRead(id);
       
-      // Broadcast to update notification counts
+      // Broadcast to update notification counts (but each user still has their own count)
       broadcastToFamily(member.familyName, {
         type: 'notification_update',
       });
@@ -4282,7 +4273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mark all notifications as read
+  // Mark all notifications as read for current member
   app.patch("/api/notifications/read-all", isAuthenticated, async (req: any, res) => {
     try {
       const result = await getCurrentMemberFromRequest(req);
@@ -4295,12 +4286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Parents mark family-wide notifications, children mark their personal ones
-      if (member.role === "parent") {
-        await storage.markAllNotificationsAsReadForParents(member.familyName);
-      } else {
-        await storage.markAllNotificationsAsReadForMember(member.id);
-      }
+      await storage.markAllNotificationsAsReadForMember(member.id);
       
       // Broadcast to update notification counts
       broadcastToFamily(member.familyName, {
@@ -4336,7 +4322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete all notifications
+  // Delete all notifications for current member
   app.delete("/api/notifications", isAuthenticated, async (req: any, res) => {
     try {
       const result = await getCurrentMemberFromRequest(req);
@@ -4349,12 +4335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Parents delete family-wide notifications, children delete their personal ones
-      if (member.role === "parent") {
-        await storage.deleteAllNotificationsForParents(member.familyName);
-      } else {
-        await storage.deleteAllNotificationsForMember(member.id);
-      }
+      await storage.deleteAllNotificationsForMember(member.id);
       
       res.status(204).send();
     } catch (error: any) {

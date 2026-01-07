@@ -323,17 +323,14 @@ export interface IStorage {
   markStarAsFound(memberId: string, skinId: string): Promise<{ wasStarFound: boolean; totalStarsFound: number; legacySkinAwarded: string | null }>;
   getMemberStarStats(memberId: string): Promise<{ starsFound: number; totalStars: number; earnedLegacySkinIds: string[] }>;
 
-  // Notification operations (for parents and children)
-  getNotificationsForParents(familyName: string, limit?: number): Promise<Notification[]>;
+  // Notification operations (member-based - each member has their own notifications)
   getNotificationsForMember(memberId: string, limit?: number): Promise<Notification[]>;
-  getUnreadNotificationCountForParents(familyName: string): Promise<number>;
   getUnreadNotificationCountForMember(memberId: string): Promise<number>;
   createNotification(notification: InsertNotification): Promise<Notification>;
+  createNotificationForParents(familyName: string, notificationData: Omit<InsertNotification, 'targetMemberId'>): Promise<void>;
   markNotificationAsRead(notificationId: string): Promise<void>;
-  markAllNotificationsAsReadForParents(familyName: string): Promise<void>;
   markAllNotificationsAsReadForMember(memberId: string): Promise<void>;
   deleteNotification(notificationId: string): Promise<void>;
-  deleteAllNotificationsForParents(familyName: string): Promise<void>;
   deleteAllNotificationsForMember(memberId: string): Promise<void>;
 }
 
@@ -3034,19 +3031,7 @@ export class DatabaseStorage implements IStorage {
     return { imported, skipped };
   }
 
-  // Notification operations (for parents and children)
-  async getNotificationsForParents(familyName: string, limit: number = 50): Promise<Notification[]> {
-    return await db
-      .select()
-      .from(notifications)
-      .where(and(
-        eq(notifications.familyName, familyName),
-        isNull(notifications.targetMemberId)
-      ))
-      .orderBy(desc(notifications.createdAt))
-      .limit(limit);
-  }
-
+  // Notification operations (member-based - each member has their own notifications)
   async getNotificationsForMember(memberId: string, limit: number = 50): Promise<Notification[]> {
     return await db
       .select()
@@ -3054,18 +3039,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(notifications.targetMemberId, memberId))
       .orderBy(desc(notifications.createdAt))
       .limit(limit);
-  }
-
-  async getUnreadNotificationCountForParents(familyName: string): Promise<number> {
-    const result = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(notifications)
-      .where(and(
-        eq(notifications.familyName, familyName),
-        isNull(notifications.targetMemberId),
-        eq(notifications.isRead, false)
-      ));
-    return result[0]?.count ?? 0;
   }
 
   async getUnreadNotificationCountForMember(memberId: string): Promise<number> {
@@ -3087,21 +3060,24 @@ export class DatabaseStorage implements IStorage {
     return notification;
   }
 
+  // Create notification for each parent in family
+  async createNotificationForParents(familyName: string, notificationData: Omit<InsertNotification, 'targetMemberId'>): Promise<void> {
+    const parents = await this.getFamilyMembersByFamily(familyName);
+    const parentMembers = parents.filter(m => m.role === 'parent');
+    
+    for (const parent of parentMembers) {
+      await db.insert(notifications).values({
+        ...notificationData,
+        targetMemberId: parent.id,
+      });
+    }
+  }
+
   async markNotificationAsRead(notificationId: string): Promise<void> {
     await db
       .update(notifications)
       .set({ isRead: true })
       .where(eq(notifications.id, notificationId));
-  }
-
-  async markAllNotificationsAsReadForParents(familyName: string): Promise<void> {
-    await db
-      .update(notifications)
-      .set({ isRead: true })
-      .where(and(
-        eq(notifications.familyName, familyName),
-        isNull(notifications.targetMemberId)
-      ));
   }
 
   async markAllNotificationsAsReadForMember(memberId: string): Promise<void> {
@@ -3113,13 +3089,6 @@ export class DatabaseStorage implements IStorage {
 
   async deleteNotification(notificationId: string): Promise<void> {
     await db.delete(notifications).where(eq(notifications.id, notificationId));
-  }
-
-  async deleteAllNotificationsForParents(familyName: string): Promise<void> {
-    await db.delete(notifications).where(and(
-      eq(notifications.familyName, familyName),
-      isNull(notifications.targetMemberId)
-    ));
   }
 
   async deleteAllNotificationsForMember(memberId: string): Promise<void> {

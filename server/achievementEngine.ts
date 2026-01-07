@@ -10,7 +10,7 @@ export interface AchievementEvent {
   pointsEarned?: number;
 }
 
-// Helper to create achievement notifications (for parents and the child who earned it)
+// Helper to create achievement notifications (for each parent and the child who earned it)
 async function createAchievementNotification(
   familyName: string,
   memberName: string,
@@ -19,8 +19,8 @@ async function createAchievementNotification(
   memberId: string
 ): Promise<void> {
   try {
-    // Create notification for parents (family-wide, targetMemberId = null)
-    await storage.createNotification({
+    // Create notification for each parent
+    await storage.createNotificationForParents(familyName, {
       familyName,
       type: "achievement_earned",
       title: `${memberName} earned an achievement!`,
