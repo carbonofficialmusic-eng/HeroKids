@@ -2,7 +2,7 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { join } from "path";
+import { join, posix } from "path";
 import { z } from "zod";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
@@ -30,6 +30,59 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 // Track uploaded photos to prevent URL spoofing (now using Object Storage instead of multer)
 const uploadedPhotos = new Map<string, { memberId: string; taskId: string; timestamp: number }>();
+
+// Rate limiting for sensitive endpoints
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+}
+const rateLimitStore = new Map<string, RateLimitEntry>();
+
+// Clean up rate limit entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  Array.from(rateLimitStore.entries()).forEach(([key, entry]) => {
+    if (entry.resetTime < now) {
+      rateLimitStore.delete(key);
+    }
+  });
+}, 5 * 60 * 1000);
+
+/**
+ * Rate limiting middleware for sensitive endpoints
+ * @param maxRequests - Maximum requests allowed in the window
+ * @param windowMs - Time window in milliseconds
+ */
+function rateLimit(maxRequests: number, windowMs: number) {
+  return (req: any, res: any, next: any) => {
+    // Use IP + endpoint as key for rate limiting
+    const clientIp = req.ip || req.connection?.remoteAddress || 'unknown';
+    const key = `${clientIp}:${req.path}`;
+    const now = Date.now();
+    
+    let entry = rateLimitStore.get(key);
+    
+    if (!entry || entry.resetTime < now) {
+      // Create new entry or reset expired one
+      entry = { count: 1, resetTime: now + windowMs };
+      rateLimitStore.set(key, entry);
+      return next();
+    }
+    
+    entry.count++;
+    
+    if (entry.count > maxRequests) {
+      const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
+      res.set('Retry-After', String(retryAfter));
+      return res.status(429).json({ 
+        message: "Too many requests, please try again later",
+        retryAfter 
+      });
+    }
+    
+    next();
+  };
+}
 
 // Helper function to get the current member from a request (supports Replit Auth, Device sessions, and Mobile JWT)
 async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isDeviceSession: boolean; isMobileSession: boolean } | null> {
@@ -79,8 +132,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/objects/:objectPath(*)", isAuthenticated, async (req: any, res) => {
     const userId = req.user?.claims?.sub;
     const objectStorageService = new ObjectStorageService();
+    
+    // Security: Sanitize path to prevent directory traversal attacks
+    // Use decoded objectPath parameter and normalize to catch encoded traversal attempts
+    const rawObjectPath = req.params.objectPath;
+    
+    // Check for null bytes (common attack vector)
+    if (!rawObjectPath || rawObjectPath.includes('\0')) {
+      console.warn(`Blocked invalid object path: null byte or empty`);
+      return res.status(400).json({ message: "Invalid path" });
+    }
+    
+    // Normalize the path segment to resolve any ".." or "." sequences
+    // This handles URL-encoded attacks like %2e%2e which decode to ".."
+    const normalizedSegment = posix.normalize(rawObjectPath);
+    
+    // After normalization, reject if:
+    // 1. Path contains ".." (trying to escape)
+    // 2. Path starts with "/" (absolute path attempt)
+    // 3. Path starts with ".." (relative escape attempt)
+    if (normalizedSegment.includes('..') || 
+        normalizedSegment.startsWith('/') || 
+        normalizedSegment.startsWith('..')) {
+      console.warn(`Blocked directory traversal attempt: ${rawObjectPath} -> ${normalizedSegment}`);
+      return res.status(400).json({ message: "Invalid path" });
+    }
+    
+    // Construct the sanitized path using the NORMALIZED segment, not the raw input
+    const sanitizedPath = '/objects/' + normalizedSegment;
+    
     try {
-      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      const objectFile = await objectStorageService.getObjectEntityFile(sanitizedPath);
       const canAccess = await objectStorageService.canAccessObjectEntity({
         objectFile,
         userId,
@@ -152,7 +234,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================
 
   // Mobile login using device link code (same as web device linking, but returns JWT)
-  app.post("/api/mobile/auth/login", async (req, res) => {
+  // Rate limited: 5 attempts per minute to prevent brute force
+  app.post("/api/mobile/auth/login", rateLimit(5, 60 * 1000), async (req, res) => {
     try {
       const { code, deviceId } = req.body;
       
@@ -202,7 +285,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mobile login using PIN (for returning users in single-device mode)
-  app.post("/api/mobile/auth/login-pin", async (req, res) => {
+  // Rate limited: 5 attempts per minute to prevent brute force
+  app.post("/api/mobile/auth/login-pin", rateLimit(5, 60 * 1000), async (req, res) => {
     try {
       const { memberId, pin, deviceId } = req.body;
       
@@ -242,7 +326,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Refresh access token
-  app.post("/api/mobile/auth/refresh", async (req, res) => {
+  // Rate limited: 20 per minute (legitimate usage should be infrequent)
+  app.post("/api/mobile/auth/refresh", rateLimit(20, 60 * 1000), async (req, res) => {
     try {
       const { refreshToken, deviceId } = req.body;
       
@@ -4323,7 +4408,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Parent: Generate a link code for a child member
-  app.post("/api/device-link/generate-code", isAuthenticated, async (req: any, res) => {
+  // Rate limited: 10 per minute (code generation should be infrequent)
+  app.post("/api/device-link/generate-code", isAuthenticated, rateLimit(10, 60 * 1000), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const parentMember = await storage.getFamilyMemberByUserId(userId);
@@ -4396,7 +4482,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Public: Verify a link code and create device session (no auth required)
-  app.post("/api/device-link/verify-code", async (req: any, res) => {
+  // Rate limited: 5 per minute to prevent brute force code guessing
+  app.post("/api/device-link/verify-code", rateLimit(5, 60 * 1000), async (req: any, res) => {
     try {
       console.log("[Device-Link] Verify code request received:", { code: req.body?.code, deviceLabel: req.body?.deviceLabel });
       const { code, deviceLabel } = req.body;

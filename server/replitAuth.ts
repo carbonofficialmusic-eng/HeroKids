@@ -40,7 +40,7 @@ export function getSession() {
     cookie: {
       httpOnly: true,
       secure: true,
-      sameSite: 'none', // Required for cross-site navigation from Stripe checkout
+      sameSite: 'lax', // CSRF protection - 'lax' allows Stripe redirect while blocking cross-site POST attacks
       maxAge: sessionTtl,
     },
   });
