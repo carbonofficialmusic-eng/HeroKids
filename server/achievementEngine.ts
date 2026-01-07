@@ -10,6 +10,28 @@ export interface AchievementEvent {
   pointsEarned?: number;
 }
 
+// Helper to create achievement notifications
+async function createAchievementNotification(
+  familyName: string,
+  memberName: string,
+  achievementTitle: string,
+  bonusPoints: number,
+  memberId: string
+): Promise<void> {
+  try {
+    await storage.createNotification({
+      familyName,
+      type: "achievement_earned",
+      title: `${memberName} earned an achievement!`,
+      message: `"${achievementTitle}" (+${bonusPoints} points)`,
+      relatedMemberId: memberId,
+    });
+    broadcastToFamily(familyName, { type: "notification_update" });
+  } catch (error) {
+    console.error("Error creating achievement notification:", error);
+  }
+}
+
 export class AchievementEngine {
   async processEvent(event: AchievementEvent): Promise<void> {
     const definitions = await storage.getAchievementDefinitionsByFamily(event.familyName);
@@ -97,6 +119,15 @@ export class AchievementEngine {
           achievementTitle: definition.title,
           bonusPoints: definition.bonusPoints,
         });
+        
+        // Create notification for parents
+        await createAchievementNotification(
+          event.familyName,
+          member.displayName,
+          definition.title,
+          definition.bonusPoints,
+          event.memberId
+        );
       }
     } else {
       await storage.updateAchievementMember(achievementMember.id, {
@@ -135,6 +166,15 @@ export class AchievementEngine {
           achievementTitle: definition.title,
           bonusPoints: definition.bonusPoints,
         });
+        
+        // Create notification for parents
+        await createAchievementNotification(
+          event.familyName,
+          winner.displayName,
+          definition.title,
+          definition.bonusPoints,
+          winner.id
+        );
       }
     }
   }
@@ -165,6 +205,15 @@ export class AchievementEngine {
             achievementTitle: definition.title,
             bonusPoints: definition.bonusPoints,
           });
+          
+          // Create notification for parents
+          await createAchievementNotification(
+            event.familyName,
+            member.displayName,
+            definition.title,
+            definition.bonusPoints,
+            member.id
+          );
         }
       }
     }
@@ -197,6 +246,15 @@ export class AchievementEngine {
           achievementTitle: definition.title,
           bonusPoints: definition.bonusPoints,
         });
+        
+        // Create notification for parents
+        await createAchievementNotification(
+          event.familyName,
+          member.displayName,
+          definition.title,
+          definition.bonusPoints,
+          event.memberId
+        );
       }
     }
   }
@@ -252,6 +310,15 @@ export class AchievementEngine {
               achievementTitle: definition.title,
               bonusPoints: definition.bonusPoints,
             });
+            
+            // Create notification for parents
+            await createAchievementNotification(
+              event.familyName,
+              member.displayName,
+              definition.title,
+              definition.bonusPoints,
+              member.id
+            );
           }
         } else {
           if (achievementMember.lastStreakDate) {

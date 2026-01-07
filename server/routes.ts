@@ -1784,6 +1784,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           member: updatedMember,
           pointsEarned: task.points,
         });
+        
+        // Create notification for parents
+        await storage.createNotification({
+          familyName: member.familyName,
+          type: "task_pending",
+          title: `${member.displayName} completed "${task.title}"`,
+          message: `Waiting for approval (+${task.points} points)`,
+          relatedTaskId: task.id,
+          relatedMemberId: member.id,
+        });
+        
+        // Broadcast notification update
+        broadcastToFamily(member.familyName, { type: "notification_update" });
       } else {
         // Broadcast auto-approved completion
         broadcastToFamily(member.familyName, {
@@ -1793,6 +1806,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           member: updatedMember,
           pointsEarned: task.points,
         });
+        
+        // Create notification for parents
+        await storage.createNotification({
+          familyName: member.familyName,
+          type: "task_completed",
+          title: `${member.displayName} earned ${task.points} points`,
+          message: `Task "${task.title}" completed`,
+          relatedTaskId: task.id,
+          relatedMemberId: member.id,
+        });
+        
+        // Broadcast notification update
+        broadcastToFamily(member.familyName, { type: "notification_update" });
       }
       
       res.json({
@@ -2232,6 +2258,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         member: { ...member, totalPoints: newTotalPoints },
         rewardDeactivated: reward.oneTimeOnly,
       });
+      
+      // Create notification for parents
+      await storage.createNotification({
+        familyName: member.familyName,
+        type: "reward_redeemed",
+        title: `${member.displayName} redeemed a reward`,
+        message: `"${reward.title}" for ${reward.pointThreshold} points`,
+        relatedRewardId: reward.id,
+        relatedMemberId: member.id,
+      });
+      
+      // Broadcast notification update
+      broadcastToFamily(member.familyName, { type: "notification_update" });
       
       res.json({ 
         redemption: {
