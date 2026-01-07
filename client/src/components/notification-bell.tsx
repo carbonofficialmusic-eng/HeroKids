@@ -70,12 +70,11 @@ export function NotificationBell({ familyLanguage = "en", wsConnection }: Notifi
     switch (notification.type) {
       case "task_pending":
       case "task_completed":
+      case "reward_redeemed":
         return "/approvals";
       case "task_approved":
       case "task_rejected":
         return "/dashboard";
-      case "reward_redeemed":
-        return "/rewards";
       case "achievement_earned":
         return "/achievements";
       case "points_milestone":
