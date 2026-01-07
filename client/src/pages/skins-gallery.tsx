@@ -618,12 +618,12 @@ export default function SkinsGallery() {
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="flex flex-col items-center"
+              className="flex flex-col items-center px-4 max-w-[90vw]"
               initial={{ scale: 0, rotate: -180 }}
               animate={{ 
-                scale: [0, 1.5, 1],
+                scale: [0, 1.15, 1],
                 rotate: [0, 360, 360],
-                y: [0, -50, -50, 0]
+                y: [0, -20, -20, 0]
               }}
               transition={{
                 duration: 2,
@@ -633,8 +633,8 @@ export default function SkinsGallery() {
             >
               <motion.div
                 animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 15, -15, 0]
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 10, -10, 0]
                 }}
                 transition={{
                   duration: 0.5,
@@ -642,10 +642,10 @@ export default function SkinsGallery() {
                   repeatType: "reverse"
                 }}
               >
-                <Star className="h-32 w-32 text-yellow-400 fill-yellow-400 drop-shadow-2xl" />
+                <Star className="h-20 w-20 sm:h-24 sm:w-24 text-yellow-400 fill-yellow-400 drop-shadow-2xl" />
               </motion.div>
               <motion.p
-                className="mt-6 text-3xl font-bold font-accent text-white drop-shadow-lg"
+                className="mt-4 text-xl sm:text-2xl font-bold font-accent text-white drop-shadow-lg text-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
@@ -653,7 +653,7 @@ export default function SkinsGallery() {
                 {t('skins.starFound', 'You found a Star!')}
               </motion.p>
               <motion.p
-                className="mt-2 text-xl text-yellow-300"
+                className="mt-2 text-lg sm:text-xl text-yellow-300 text-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.2 }}
@@ -662,13 +662,13 @@ export default function SkinsGallery() {
               </motion.p>
               {starAnimationData.legacySkinAwarded && (
                 <motion.div
-                  className="mt-4 bg-purple-500/80 rounded-lg px-4 py-2"
+                  className="mt-3 bg-purple-500/80 rounded-lg px-3 py-2"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.6 }}
                 >
-                  <p className="text-lg font-bold text-white flex items-center gap-2">
-                    <Crown className="h-5 w-5" />
+                  <p className="text-sm sm:text-base font-bold text-white flex items-center gap-2 text-center">
+                    <Crown className="h-4 w-4 flex-shrink-0" />
                     {t('skins.legacyUnlocked', 'HeroKids Legacy Avatar unlocked!')}
                   </p>
                 </motion.div>
