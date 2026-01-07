@@ -1293,5 +1293,14 @@
     "errorDeleteGoal": "Ziel konnte nicht gelöscht werden",
     "weekFormat": "Woche {{week}}/{{year}}",
     "monthFormat": "{{month}} {{year}}"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty": "Noch keine Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "allMarkedRead": "Alle Benachrichtigungen als gelesen markiert",
+    "deleteAll": "Alle löschen",
+    "allDeleted": "Alle Benachrichtigungen gelöscht",
+    "confirmDeleteAll": "Alle Benachrichtigungen löschen?"
   }
 }

@@ -1233,5 +1233,14 @@
     "errorDeleteGoal": "无法删除目标",
     "weekFormat": "{{year}}年第{{week}}周",
     "monthFormat": "{{year}}年{{month}}"
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "暂无通知",
+    "markAllRead": "全部标为已读",
+    "allMarkedRead": "所有通知已标为已读",
+    "deleteAll": "删除全部",
+    "allDeleted": "所有通知已删除",
+    "confirmDeleteAll": "删除所有通知？"
   }
 }

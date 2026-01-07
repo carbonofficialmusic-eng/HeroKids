@@ -1233,5 +1233,14 @@
     "errorDeleteGoal": "Impossible de supprimer l'objectif",
     "weekFormat": "Semaine {{week}}/{{year}}",
     "monthFormat": "{{month}} {{year}}"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Pas encore de notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "allMarkedRead": "Toutes les notifications marquées comme lues",
+    "deleteAll": "Tout supprimer",
+    "allDeleted": "Toutes les notifications supprimées",
+    "confirmDeleteAll": "Supprimer toutes les notifications ?"
   }
 }

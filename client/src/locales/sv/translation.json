@@ -1264,5 +1264,14 @@
     "enterPin": "Ange PIN",
     "invalidPin": "Ogiltig PIN",
     "verify": "Verifiera"
+  },
+  "notifications": {
+    "title": "Aviseringar",
+    "empty": "Inga aviseringar ännu",
+    "markAllRead": "Markera alla som lästa",
+    "allMarkedRead": "Alla aviseringar markerade som lästa",
+    "deleteAll": "Ta bort alla",
+    "allDeleted": "Alla aviseringar borttagna",
+    "confirmDeleteAll": "Ta bort alla aviseringar?"
   }
 }

@@ -70,6 +70,7 @@ import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { ProfileMenu } from "@/components/profile-menu";
+import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -808,6 +809,9 @@ export default function Dashboard() {
               showAnimation
               data-testid="point-counter-total-earned"
             />
+            {isRealParent && (
+              <NotificationBell familyLanguage="en" />
+            )}
             <ProfileMenu
               member={member}
               isParent={isParent}

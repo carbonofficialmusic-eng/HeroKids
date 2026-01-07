@@ -1270,5 +1270,14 @@
     "errorDeleteGoal": "Could not delete goal",
     "weekFormat": "Week {{week}}/{{year}}",
     "monthFormat": "{{month}} {{year}}"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all as read",
+    "allMarkedRead": "All notifications marked as read",
+    "deleteAll": "Delete all",
+    "allDeleted": "All notifications deleted",
+    "confirmDeleteAll": "Delete all notifications?"
   }
 }

@@ -1233,5 +1233,14 @@
     "errorDeleteGoal": "No se pudo eliminar el objetivo",
     "weekFormat": "Semana {{week}}/{{year}}",
     "monthFormat": "{{month}} {{year}}"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Aún no hay notificaciones",
+    "markAllRead": "Marcar todo como leído",
+    "allMarkedRead": "Todas las notificaciones marcadas como leídas",
+    "deleteAll": "Eliminar todo",
+    "allDeleted": "Todas las notificaciones eliminadas",
+    "confirmDeleteAll": "¿Eliminar todas las notificaciones?"
   }
 }
