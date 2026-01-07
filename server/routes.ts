@@ -3035,11 +3035,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Update only the active skin, preserve the useCustomAvatar flag
+      // Update the active skin and enable theme background when selecting a new skin
       // If user has custom photo enabled, they keep seeing their photo while the skin background changes
       await storage.updateFamilyMemberActiveSkin(member.id, {
         skinId,
-        useCustomAvatar: undefined // Don't change the useCustomAvatar setting
+        useCustomAvatar: undefined, // Don't change the useCustomAvatar setting
+        useThemeBackground: skinId !== null ? true : undefined // Enable background when selecting a skin
       });
       
       // Broadcast skin change to family
@@ -3053,6 +3054,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error selecting skin:", error);
       res.status(500).json({ message: "Failed to select skin" });
+    }
+  });
+
+  // Toggle theme background (show/hide skin background)
+  app.post("/api/skins/background", isAuthenticated, async (req: any, res) => {
+    try {
+      const { useThemeBackground } = req.body;
+      
+      if (typeof useThemeBackground !== 'boolean') {
+        return res.status(400).json({ message: "useThemeBackground must be a boolean" });
+      }
+      
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      if (!result.isDeviceSession && req.session.actingAsMemberId) {
+        member = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      await storage.updateFamilyMemberThemeBackground(member.id, useThemeBackground);
+      
+      // Broadcast background change to family
+      broadcastToFamily(member.familyName, {
+        type: "background_changed",
+        memberId: member.id,
+        useThemeBackground,
+      });
+      
+      res.json({ message: useThemeBackground ? "Background enabled" : "Background disabled", useThemeBackground });
+    } catch (error: any) {
+      console.error("Error toggling background:", error);
+      res.status(500).json({ message: "Failed to toggle background" });
     }
   });
 

@@ -270,7 +270,8 @@ export interface IStorage {
   getSkins(): Promise<any[]>;
   createSkin(skin: InsertSkin): Promise<Skin>;
   deleteSkin(skinId: string): Promise<void>;
-  updateFamilyMemberActiveSkin(memberId: string, options: { skinId: string | null; useCustomAvatar?: boolean }): Promise<void>;
+  updateFamilyMemberActiveSkin(memberId: string, options: { skinId: string | null; useCustomAvatar?: boolean; useThemeBackground?: boolean }): Promise<void>;
+  updateFamilyMemberThemeBackground(memberId: string, useThemeBackground: boolean): Promise<void>;
   unlockSkin(memberId: string, skinId: string): Promise<void>;
   incrementRewardsRedeemed(memberId: string): Promise<number>;
 
@@ -1848,7 +1849,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateFamilyMemberActiveSkin(
     memberId: string, 
-    options: { skinId: string | null; useCustomAvatar?: boolean }
+    options: { skinId: string | null; useCustomAvatar?: boolean; useThemeBackground?: boolean }
   ): Promise<void> {
     const updateData: any = { 
       activeSkinId: options.skinId,
@@ -1859,9 +1860,20 @@ export class DatabaseStorage implements IStorage {
       updateData.useCustomAvatar = options.useCustomAvatar;
     }
     
+    if (options.useThemeBackground !== undefined) {
+      updateData.useThemeBackground = options.useThemeBackground;
+    }
+    
     await db
       .update(familyMembers)
       .set(updateData)
+      .where(eq(familyMembers.id, memberId));
+  }
+
+  async updateFamilyMemberThemeBackground(memberId: string, useThemeBackground: boolean): Promise<void> {
+    await db
+      .update(familyMembers)
+      .set({ useThemeBackground, updatedAt: new Date() })
       .where(eq(familyMembers.id, memberId));
   }
 
