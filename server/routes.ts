@@ -23,6 +23,159 @@ import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, 
 import { eq } from "drizzle-orm";
 import "./types";
 
+// Backend notification translations for all 8 supported languages
+const notificationTranslations: Record<string, Record<string, string>> = {
+  en: {
+    "task_pending.title": "{{name}} completed \"{{task}}\"",
+    "task_pending.message": "Waiting for approval (+{{points}} points)",
+    "task_completed.title": "{{name}} earned {{points}} points",
+    "task_completed.message": "Task \"{{task}}\" completed",
+    "task_approved.title": "Task approved!",
+    "task_approved.message": "\"{{task}}\" was approved. You earned {{points}} points!",
+    "task_rejected.title": "Task needs revision",
+    "task_rejected.message": "\"{{task}}\" was not approved: {{reason}}",
+    "reward_redeemed.title": "{{name}} redeemed a reward",
+    "reward_redeemed.message": "\"{{reward}}\" for {{points}} points",
+    "reward_sharing_offer.title": "{{name}} offers a reward for sharing",
+    "reward_sharing_offer.message": "\"{{reward}}\" is available to share",
+    "reward_sharing_join.title": "{{name}} joined your shared reward!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "default_reason": "Did not meet expectations",
+  },
+  de: {
+    "task_pending.title": "{{name}} hat \"{{task}}\" erledigt",
+    "task_pending.message": "Wartet auf Genehmigung (+{{points}} Punkte)",
+    "task_completed.title": "{{name}} hat {{points}} Punkte verdient",
+    "task_completed.message": "Aufgabe \"{{task}}\" erledigt",
+    "task_approved.title": "Aufgabe genehmigt!",
+    "task_approved.message": "\"{{task}}\" wurde genehmigt. Du hast {{points}} Punkte verdient!",
+    "task_rejected.title": "Aufgabe muss überarbeitet werden",
+    "task_rejected.message": "\"{{task}}\" wurde nicht genehmigt: {{reason}}",
+    "reward_redeemed.title": "{{name}} hat eine Belohnung eingelöst",
+    "reward_redeemed.message": "\"{{reward}}\" für {{points}} Punkte",
+    "reward_sharing_offer.title": "{{name}} bietet eine Belohnung zum Teilen an",
+    "reward_sharing_offer.message": "\"{{reward}}\" kann geteilt werden",
+    "reward_sharing_join.title": "{{name}} macht bei deiner Belohnung mit!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "default_reason": "Entspricht nicht den Erwartungen",
+  },
+  fr: {
+    "task_pending.title": "{{name}} a terminé \"{{task}}\"",
+    "task_pending.message": "En attente d'approbation (+{{points}} points)",
+    "task_completed.title": "{{name}} a gagné {{points}} points",
+    "task_completed.message": "Tâche \"{{task}}\" terminée",
+    "task_approved.title": "Tâche approuvée !",
+    "task_approved.message": "\"{{task}}\" a été approuvée. Tu as gagné {{points}} points !",
+    "task_rejected.title": "Tâche à réviser",
+    "task_rejected.message": "\"{{task}}\" n'a pas été approuvée : {{reason}}",
+    "reward_redeemed.title": "{{name}} a échangé une récompense",
+    "reward_redeemed.message": "\"{{reward}}\" pour {{points}} points",
+    "reward_sharing_offer.title": "{{name}} propose une récompense à partager",
+    "reward_sharing_offer.message": "\"{{reward}}\" est disponible au partage",
+    "reward_sharing_join.title": "{{name}} participe à ta récompense !",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "default_reason": "Ne répond pas aux attentes",
+  },
+  es: {
+    "task_pending.title": "{{name}} completó \"{{task}}\"",
+    "task_pending.message": "Esperando aprobación (+{{points}} puntos)",
+    "task_completed.title": "{{name}} ganó {{points}} puntos",
+    "task_completed.message": "Tarea \"{{task}}\" completada",
+    "task_approved.title": "¡Tarea aprobada!",
+    "task_approved.message": "\"{{task}}\" fue aprobada. ¡Ganaste {{points}} puntos!",
+    "task_rejected.title": "Tarea necesita revisión",
+    "task_rejected.message": "\"{{task}}\" no fue aprobada: {{reason}}",
+    "reward_redeemed.title": "{{name}} canjeó una recompensa",
+    "reward_redeemed.message": "\"{{reward}}\" por {{points}} puntos",
+    "reward_sharing_offer.title": "{{name}} ofrece una recompensa para compartir",
+    "reward_sharing_offer.message": "\"{{reward}}\" está disponible para compartir",
+    "reward_sharing_join.title": "¡{{name}} se unió a tu recompensa compartida!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "default_reason": "No cumple las expectativas",
+  },
+  ja: {
+    "task_pending.title": "{{name}}が「{{task}}」を完了しました",
+    "task_pending.message": "承認待ち (+{{points}}ポイント)",
+    "task_completed.title": "{{name}}が{{points}}ポイントを獲得しました",
+    "task_completed.message": "タスク「{{task}}」完了",
+    "task_approved.title": "タスクが承認されました！",
+    "task_approved.message": "「{{task}}」が承認されました。{{points}}ポイント獲得！",
+    "task_rejected.title": "タスクの修正が必要です",
+    "task_rejected.message": "「{{task}}」は承認されませんでした：{{reason}}",
+    "reward_redeemed.title": "{{name}}がご褒美を交換しました",
+    "reward_redeemed.message": "「{{reward}}」（{{points}}ポイント）",
+    "reward_sharing_offer.title": "{{name}}がご褒美を共有しています",
+    "reward_sharing_offer.message": "「{{reward}}」を共有できます",
+    "reward_sharing_join.title": "{{name}}があなたのご褒美に参加しました！",
+    "reward_sharing_join.message": "「{{reward}}」",
+    "default_reason": "期待に沿っていません",
+  },
+  zh: {
+    "task_pending.title": "{{name}}完成了「{{task}}」",
+    "task_pending.message": "等待批准 (+{{points}}积分)",
+    "task_completed.title": "{{name}}获得了{{points}}积分",
+    "task_completed.message": "任务「{{task}}」已完成",
+    "task_approved.title": "任务已批准！",
+    "task_approved.message": "「{{task}}」已批准。你获得了{{points}}积分！",
+    "task_rejected.title": "任务需要修改",
+    "task_rejected.message": "「{{task}}」未被批准：{{reason}}",
+    "reward_redeemed.title": "{{name}}兑换了奖励",
+    "reward_redeemed.message": "「{{reward}}」花费{{points}}积分",
+    "reward_sharing_offer.title": "{{name}}分享了一个奖励",
+    "reward_sharing_offer.message": "「{{reward}}」可以分享",
+    "reward_sharing_join.title": "{{name}}加入了你的共享奖励！",
+    "reward_sharing_join.message": "「{{reward}}」",
+    "default_reason": "未达到预期",
+  },
+  ko: {
+    "task_pending.title": "{{name}}이(가) \"{{task}}\"을(를) 완료했어요",
+    "task_pending.message": "승인 대기 중 (+{{points}}포인트)",
+    "task_completed.title": "{{name}}이(가) {{points}}포인트를 얻었어요",
+    "task_completed.message": "\"{{task}}\" 작업 완료",
+    "task_approved.title": "작업이 승인되었어요!",
+    "task_approved.message": "\"{{task}}\"이(가) 승인되었어요. {{points}}포인트 획득!",
+    "task_rejected.title": "작업 수정이 필요해요",
+    "task_rejected.message": "\"{{task}}\"이(가) 승인되지 않았어요: {{reason}}",
+    "reward_redeemed.title": "{{name}}이(가) 보상을 교환했어요",
+    "reward_redeemed.message": "\"{{reward}}\" ({{points}}포인트)",
+    "reward_sharing_offer.title": "{{name}}이(가) 보상을 공유해요",
+    "reward_sharing_offer.message": "\"{{reward}}\"을(를) 공유할 수 있어요",
+    "reward_sharing_join.title": "{{name}}이(가) 공유 보상에 참여했어요!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "default_reason": "기대에 미치지 못함",
+  },
+  sv: {
+    "task_pending.title": "{{name}} slutförde \"{{task}}\"",
+    "task_pending.message": "Väntar på godkännande (+{{points}} poäng)",
+    "task_completed.title": "{{name}} tjänade {{points}} poäng",
+    "task_completed.message": "Uppgift \"{{task}}\" slutförd",
+    "task_approved.title": "Uppgift godkänd!",
+    "task_approved.message": "\"{{task}}\" godkändes. Du tjänade {{points}} poäng!",
+    "task_rejected.title": "Uppgift behöver ändras",
+    "task_rejected.message": "\"{{task}}\" godkändes inte: {{reason}}",
+    "reward_redeemed.title": "{{name}} löste in en belöning",
+    "reward_redeemed.message": "\"{{reward}}\" för {{points}} poäng",
+    "reward_sharing_offer.title": "{{name}} erbjuder en belöning att dela",
+    "reward_sharing_offer.message": "\"{{reward}}\" finns att dela",
+    "reward_sharing_join.title": "{{name}} gick med i din delade belöning!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "default_reason": "Uppfyller inte förväntningarna",
+  },
+};
+
+// Helper function to translate notification text
+function translateNotification(lang: string, key: string, params: Record<string, string | number> = {}): string {
+  const translations = notificationTranslations[lang] || notificationTranslations.en;
+  let text = translations[key] || notificationTranslations.en[key] || key;
+  
+  // Replace all {{param}} placeholders
+  Object.entries(params).forEach(([param, value]) => {
+    text = text.replace(new RegExp(`\\{\\{${param}\\}\\}`, 'g'), String(value));
+  });
+  
+  return text;
+}
+
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-10-29.clover",
@@ -1795,12 +1948,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pointsEarned: task.points,
         });
         
+        // Get family language for translated notifications
+        const family = await storage.getFamily(member.familyName);
+        const lang = family?.language || "en";
+        
         // Create notification for each parent (exclude self so you don't get notified about your own task)
         await storage.createNotificationForParents(member.familyName, {
           familyName: member.familyName,
           type: "task_pending",
-          title: `${member.displayName} completed "${task.title}"`,
-          message: `Waiting for approval (+${task.points} points)`,
+          title: translateNotification(lang, "task_pending.title", { name: member.displayName, task: task.title }),
+          message: translateNotification(lang, "task_pending.message", { points: task.points }),
           relatedTaskId: task.id,
           relatedMemberId: member.id,
         }, member.id);
@@ -1817,12 +1974,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pointsEarned: task.points,
         });
         
+        // Get family language for translated notifications
+        const family = await storage.getFamily(member.familyName);
+        const lang = family?.language || "en";
+        
         // Create notification for each parent (exclude self so you don't get notified about your own task)
         await storage.createNotificationForParents(member.familyName, {
           familyName: member.familyName,
           type: "task_completed",
-          title: `${member.displayName} earned ${task.points} points`,
-          message: `Task "${task.title}" completed`,
+          title: translateNotification(lang, "task_completed.title", { name: member.displayName, points: task.points }),
+          message: translateNotification(lang, "task_completed.message", { task: task.title }),
           relatedTaskId: task.id,
           relatedMemberId: member.id,
         }, member.id);
@@ -1943,12 +2104,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         approvedBy: member.displayName,
       });
       
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      
       // Create notification for the child who completed the task
       await storage.createNotification({
         familyName: member.familyName,
         type: "task_approved",
-        title: `Task approved!`,
-        message: `"${task?.title || "Task"}" was approved. You earned ${completion.pointsEarned} points!`,
+        title: translateNotification(lang, "task_approved.title"),
+        message: translateNotification(lang, "task_approved.message", { task: task?.title || "Task", points: completion.pointsEarned }),
         relatedMemberId: member.id,
         relatedTaskId: completion.taskId,
         targetMemberId: childMember.id,
@@ -2037,12 +2202,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the task for the notification message
       const task = await storage.getTask(completion.taskId);
       
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      const defaultReason = translateNotification(lang, "default_reason");
+      
       // Create notification for the child who completed the task
       await storage.createNotification({
         familyName: member.familyName,
         type: "task_rejected",
-        title: `Task needs revision`,
-        message: `"${task?.title || "Task"}" was not approved: ${reason || "Did not meet expectations"}`,
+        title: translateNotification(lang, "task_rejected.title"),
+        message: translateNotification(lang, "task_rejected.message", { task: task?.title || "Task", reason: reason || defaultReason }),
         relatedMemberId: member.id,
         relatedTaskId: completion.taskId,
         targetMemberId: childMember.id,
@@ -2304,12 +2474,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rewardDeactivated: reward.oneTimeOnly,
       });
       
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      
       // Create notification for each parent
       await storage.createNotificationForParents(member.familyName, {
         familyName: member.familyName,
         type: "reward_redeemed",
-        title: `${member.displayName} redeemed a reward`,
-        message: `"${reward.title}" for ${reward.pointThreshold} points`,
+        title: translateNotification(lang, "reward_redeemed.title", { name: member.displayName }),
+        message: translateNotification(lang, "reward_redeemed.message", { reward: reward.title, points: reward.pointThreshold }),
         relatedRewardId: reward.id,
         relatedMemberId: member.id,
       });
@@ -2769,11 +2943,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create notification for each parent about reward sharing offer
       const reward = await storage.getRewardById(redemption.rewardId);
+      
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      
       await storage.createNotificationForParents(member.familyName, {
         familyName: member.familyName,
         type: "reward_sharing",
-        title: `${member.displayName} offers a reward for sharing`,
-        message: reward ? `"${reward.title}" is available to share` : "A reward is available to share",
+        title: translateNotification(lang, "reward_sharing_offer.title", { name: member.displayName }),
+        message: translateNotification(lang, "reward_sharing_offer.message", { reward: reward?.title || "" }),
         relatedMemberId: member.id,
         relatedRewardId: redemption.rewardId,
         isRead: false,
@@ -2858,12 +3037,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the reward for notification message
       const reward = await storage.getRewardById(redemption.rewardId);
       
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      
       // Create notification for the original owner (the child who started sharing)
       await storage.createNotification({
         familyName: member.familyName,
         type: "reward_sharing",
-        title: `${member.displayName} macht bei deiner Belohnung mit!`,
-        message: reward ? `"${reward.title}"` : "Eine Belohnung wird geteilt",
+        title: translateNotification(lang, "reward_sharing_join.title", { name: member.displayName }),
+        message: translateNotification(lang, "reward_sharing_join.message", { reward: reward?.title || "" }),
         relatedMemberId: member.id,
         relatedRewardId: redemption.rewardId,
         targetMemberId: redemption.memberId, // The original owner
