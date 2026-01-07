@@ -2948,15 +2948,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const family = await storage.getFamily(member.familyName);
       const lang = family?.language || "en";
       
-      await storage.createNotificationForParents(member.familyName, {
+      const sharingNotification = {
         familyName: member.familyName,
-        type: "reward_sharing",
+        type: "reward_sharing" as const,
         title: translateNotification(lang, "reward_sharing_offer.title", { name: member.displayName }),
         message: translateNotification(lang, "reward_sharing_offer.message", { reward: reward?.title || "" }),
         relatedMemberId: member.id,
         relatedRewardId: redemption.rewardId,
         isRead: false,
-      });
+      };
+      
+      // Notify parents about reward sharing offer
+      await storage.createNotificationForParents(member.familyName, sharingNotification);
+      
+      // Also notify siblings (other children) so they can join
+      await storage.createNotificationForSiblings(member.familyName, sharingNotification, member.id);
       
       // Broadcast to family
       broadcastToFamily(member.familyName, {
