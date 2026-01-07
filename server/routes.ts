@@ -3035,12 +3035,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Update the active skin and enable theme background when selecting a new skin
+      // Update the active skin - preserve the user's background preference
       // If user has custom photo enabled, they keep seeing their photo while the skin background changes
+      // Only enable background if it was never set before (null/undefined), otherwise respect user's choice
+      const shouldEnableBackground = skinId !== null && member.useThemeBackground == null ? true : undefined;
       await storage.updateFamilyMemberActiveSkin(member.id, {
         skinId,
         useCustomAvatar: undefined, // Don't change the useCustomAvatar setting
-        useThemeBackground: skinId !== null ? true : undefined // Enable background when selecting a skin
+        useThemeBackground: shouldEnableBackground // Only set if never explicitly configured
       });
       
       // Broadcast skin change to family

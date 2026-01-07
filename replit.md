@@ -13,7 +13,7 @@ Preferred communication style: Simple, everyday language.
 ### UI/UX Decisions
 - **Design System**: Custom CSS variables for theming (light/dark), playful typography (Nunito, Fredoka), gradient effects, elevation, and rounded corners.
 - **UI Components**: Radix UI primitives wrapped with shadcn/ui ("New York" style).
-- **Themed Backgrounds**: Dynamic backgrounds linked to active character skins with smooth transitions and frosted glass UI effects.
+- **Themed Backgrounds**: Dynamic backgrounds linked to active character skins with smooth transitions and frosted glass UI effects. Users can toggle backgrounds on/off independently from their avatar selection via a "Hide Background" button in the Skins Gallery. The preference persists across skin changes.
 - **Animations**: Framer Motion for smooth transitions, canvas-confetti for celebratory effects, and spring-based animations for UI elements, ensuring 60fps performance.
 
 ### Technical Implementations

@@ -52,8 +52,8 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
     enabled: isAuthenticated,
   });
 
-  // Only show background if useThemeBackground is true (defaults to true if undefined)
-  const shouldShowBackground = member?.useThemeBackground !== false;
+  // Only show background if useThemeBackground is true AND there's an active skin
+  const shouldShowBackground = member?.useThemeBackground !== false && !!member?.activeSkinId;
   const backgroundUrl = shouldShowBackground ? getBackgroundUrl(member?.activeSkinId) : undefined;
   
   const [currentBg, setCurrentBg] = useState<string | undefined>(backgroundUrl);
