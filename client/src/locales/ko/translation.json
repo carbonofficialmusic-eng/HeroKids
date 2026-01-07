@@ -335,7 +335,8 @@
     "pterosaurSky": "익룡의 하늘",
     "unlockAtPoints": "🔒 총 {{points}} 포인트에서 잠금 해제",
     "starFound": "별을 찾았어요!",
-    "legacyUnlocked": "HeroKids Legacy 아바타 획득!"
+    "legacyUnlocked": "HeroKids Legacy 아바타 획득!",
+    "unlockAtStars": "{{count}}개의 별에서 잠금 해제"
   },
   "skinNames": {
     "junior-champion": "주니어 챔피언",

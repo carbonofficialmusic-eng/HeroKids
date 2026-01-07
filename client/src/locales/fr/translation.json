@@ -331,7 +331,8 @@
     "pterosaurSky": "Ciel des Ptérosaures",
     "unlockAtPoints": "🔒 Déverrouiller avec {{points}} points totaux",
     "starFound": "Tu as trouvé une étoile !",
-    "legacyUnlocked": "Avatar HeroKids Legacy débloqué !"
+    "legacyUnlocked": "Avatar HeroKids Legacy débloqué !",
+    "unlockAtStars": "Déverrouillage à {{count}} étoiles"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

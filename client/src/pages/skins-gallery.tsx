@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { Link } from "wouter";
 import { SKIN_IMAGES, SKIN_BACKGROUNDS } from "@/lib/skins";
-import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, TOTAL_HIDDEN_STARS } from "@shared/skin-config";
+import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR, LEGACY_SKIN_ORDER } from "@shared/skin-config";
 import type { FamilyMember, Family } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
@@ -516,18 +516,48 @@ export default function SkinsGallery() {
                 
                 {/* Progress to next unlock */}
                 <div className="mt-4 pt-4 border-t">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {t('skins.nextUnlock')}: {nextUnlockPoints} {t('common.points')}
-                  </p>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary transition-all"
-                      style={{ width: `${(progressToNext / pointsPerSkin) * 100}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 text-center">
-                    {progressToNext} / {pointsPerSkin}
-                  </p>
+                  {previewSkin && isLegacySkin(previewSkin.id) && !previewSkin.isDiscovered ? (
+                    // Legacy skin - show star-based unlock requirement
+                    (() => {
+                      const legacyIndex = LEGACY_SKIN_ORDER.indexOf(previewSkin.id);
+                      const starsNeeded = (legacyIndex + 1) * STARS_PER_LEGACY_AVATAR;
+                      const currentStars = starStats.starsFound;
+                      const progressPercent = Math.min((currentStars / starsNeeded) * 100, 100);
+                      return (
+                        <>
+                          <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
+                            <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                            {t('skins.unlockAtStars', { count: starsNeeded })}
+                          </p>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-yellow-400 transition-all"
+                              style={{ width: `${progressPercent}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1 text-center">
+                            {currentStars} / {starsNeeded} {t('common.stars')}
+                          </p>
+                        </>
+                      );
+                    })()
+                  ) : (
+                    // Regular skin - show points-based progress
+                    <>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {t('skins.nextUnlock')}: {nextUnlockPoints} {t('common.points')}
+                      </p>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-primary transition-all"
+                          style={{ width: `${(progressToNext / pointsPerSkin) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 text-center">
+                        {progressToNext} / {pointsPerSkin}
+                      </p>
+                    </>
+                  )}
                 </div>
               </Card>
               </div>

@@ -368,7 +368,8 @@
     "useYourPhoto": "Dein Foto verwenden",
     "photoEquipped": "Dein Foto ausgewählt!",
     "starFound": "Du hast einen Stern gefunden!",
-    "legacyUnlocked": "HeroKids Legacy Avatar freigeschaltet!"
+    "legacyUnlocked": "HeroKids Legacy Avatar freigeschaltet!",
+    "unlockAtStars": "Freischaltung bei {{count}} Sternen"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

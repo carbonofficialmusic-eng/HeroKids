@@ -331,7 +331,8 @@
     "pterosaurSky": "翼竜の空",
     "unlockAtPoints": "🔒 通算{{points}}ポイントでアンロック",
     "starFound": "星を見つけた！",
-    "legacyUnlocked": "HeroKids Legacyアバター獲得！"
+    "legacyUnlocked": "HeroKids Legacyアバター獲得！",
+    "unlockAtStars": "{{count}}個の星で解放"
   },
   "skinNames": {
     "junior-champion": "ジュニアチャンピオン",
