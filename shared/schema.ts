@@ -776,7 +776,7 @@ export const notificationTypeEnum = pgEnum("notification_type", [
   "member_joined",       // New member joined the family
 ]);
 
-// Parent Notifications - Notifications for parents about family events
+// Notifications - For parents (family events) and children (personal events)
 export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
@@ -784,6 +784,7 @@ export const notifications = pgTable("notifications", {
   title: varchar("title", { length: 200 }).notNull(),
   message: text("message").notNull(),
   isRead: boolean("is_read").notNull().default(false),
+  targetMemberId: varchar("target_member_id").references(() => familyMembers.id, { onDelete: "cascade" }), // Who should see this notification (null = parents, specific ID = that child)
   relatedMemberId: varchar("related_member_id").references(() => familyMembers.id, { onDelete: "set null" }), // Member who triggered the notification
   relatedTaskId: varchar("related_task_id").references(() => tasks.id, { onDelete: "set null" }), // Related task (if applicable)
   relatedRewardId: varchar("related_reward_id").references(() => rewards.id, { onDelete: "set null" }), // Related reward (if applicable)
@@ -795,9 +796,15 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
     fields: [notifications.familyName],
     references: [families.familyName],
   }),
+  targetMember: one(familyMembers, {
+    fields: [notifications.targetMemberId],
+    references: [familyMembers.id],
+    relationName: "notificationTarget",
+  }),
   relatedMember: one(familyMembers, {
     fields: [notifications.relatedMemberId],
     references: [familyMembers.id],
+    relationName: "notificationRelated",
   }),
   relatedTask: one(tasks, {
     fields: [notifications.relatedTaskId],

@@ -4164,9 +4164,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ===== Notification Routes (for parents) =====
+  // ===== Notification Routes (for parents and children) =====
   
-  // Get all notifications for the current family (parents only)
+  // Get all notifications for the current member (parents get family-wide, children get personal)
   app.get("/api/notifications", isAuthenticated, async (req: any, res) => {
     try {
       const result = await getCurrentMemberFromRequest(req);
@@ -4179,13 +4179,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Only parents can view notifications
-      if (member.role !== "parent") {
-        return res.status(403).json({ message: "Only parents can view notifications" });
-      }
-      
       const limit = req.query.limit ? parseInt(req.query.limit) : 50;
-      const notificationsList = await storage.getNotificationsByFamily(member.familyName, limit);
+      
+      // Parents get family-wide notifications (targetMemberId = null)
+      // Children get their personal notifications (targetMemberId = their id)
+      const notificationsList = member.role === "parent"
+        ? await storage.getNotificationsForParents(member.familyName, limit)
+        : await storage.getNotificationsForMember(member.id, limit);
+      
       res.json(notificationsList);
     } catch (error: any) {
       console.error("Error fetching notifications:", error);
@@ -4193,7 +4194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get unread notification count for the current family (parents only)
+  // Get unread notification count for the current member
   app.get("/api/notifications/unread-count", isAuthenticated, async (req: any, res) => {
     try {
       const result = await getCurrentMemberFromRequest(req);
@@ -4206,12 +4207,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Only parents can view notifications
-      if (member.role !== "parent") {
-        return res.json({ count: 0 });
-      }
+      // Parents get family-wide count, children get personal count
+      const count = member.role === "parent"
+        ? await storage.getUnreadNotificationCountForParents(member.familyName)
+        : await storage.getUnreadNotificationCountForMember(member.id);
       
-      const count = await storage.getUnreadNotificationCount(member.familyName);
       res.json({ count });
     } catch (error: any) {
       console.error("Error fetching unread notification count:", error);
@@ -4233,14 +4233,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Only parents can manage notifications
-      if (member.role !== "parent") {
-        return res.status(403).json({ message: "Only parents can manage notifications" });
-      }
-      
       await storage.markNotificationAsRead(id);
       
-      // Broadcast to update other parents' notification counts
+      // Broadcast to update notification counts
       broadcastToFamily(member.familyName, {
         type: 'notification_update',
       });
@@ -4265,14 +4260,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Only parents can manage notifications
-      if (member.role !== "parent") {
-        return res.status(403).json({ message: "Only parents can manage notifications" });
+      // Parents mark family-wide notifications, children mark their personal ones
+      if (member.role === "parent") {
+        await storage.markAllNotificationsAsReadForParents(member.familyName);
+      } else {
+        await storage.markAllNotificationsAsReadForMember(member.id);
       }
       
-      await storage.markAllNotificationsAsRead(member.familyName);
-      
-      // Broadcast to other parents
+      // Broadcast to update notification counts
       broadcastToFamily(member.familyName, {
         type: 'notification_update',
       });
@@ -4298,11 +4293,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Only parents can delete notifications
-      if (member.role !== "parent") {
-        return res.status(403).json({ message: "Only parents can delete notifications" });
-      }
-      
       await storage.deleteNotification(id);
       res.status(204).send();
     } catch (error: any) {
@@ -4324,12 +4314,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Only parents can delete notifications
-      if (member.role !== "parent") {
-        return res.status(403).json({ message: "Only parents can delete notifications" });
+      // Parents delete family-wide notifications, children delete their personal ones
+      if (member.role === "parent") {
+        await storage.deleteAllNotificationsForParents(member.familyName);
+      } else {
+        await storage.deleteAllNotificationsForMember(member.id);
       }
       
-      await storage.deleteAllNotifications(member.familyName);
       res.status(204).send();
     } catch (error: any) {
       console.error("Error deleting all notifications:", error);

@@ -64,7 +64,7 @@ import {
   type InsertNotification,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gt, sql, inArray } from "drizzle-orm";
+import { eq, and, desc, gt, sql, inArray, isNull } from "drizzle-orm";
 import { startOfDay } from 'date-fns';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import bcrypt from 'bcrypt';
@@ -323,14 +323,18 @@ export interface IStorage {
   markStarAsFound(memberId: string, skinId: string): Promise<{ wasStarFound: boolean; totalStarsFound: number; legacySkinAwarded: string | null }>;
   getMemberStarStats(memberId: string): Promise<{ starsFound: number; totalStars: number; earnedLegacySkinIds: string[] }>;
 
-  // Notification operations (for parents)
-  getNotificationsByFamily(familyName: string, limit?: number): Promise<Notification[]>;
-  getUnreadNotificationCount(familyName: string): Promise<number>;
+  // Notification operations (for parents and children)
+  getNotificationsForParents(familyName: string, limit?: number): Promise<Notification[]>;
+  getNotificationsForMember(memberId: string, limit?: number): Promise<Notification[]>;
+  getUnreadNotificationCountForParents(familyName: string): Promise<number>;
+  getUnreadNotificationCountForMember(memberId: string): Promise<number>;
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(notificationId: string): Promise<void>;
-  markAllNotificationsAsRead(familyName: string): Promise<void>;
+  markAllNotificationsAsReadForParents(familyName: string): Promise<void>;
+  markAllNotificationsAsReadForMember(memberId: string): Promise<void>;
   deleteNotification(notificationId: string): Promise<void>;
-  deleteAllNotifications(familyName: string): Promise<void>;
+  deleteAllNotificationsForParents(familyName: string): Promise<void>;
+  deleteAllNotificationsForMember(memberId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3030,22 +3034,46 @@ export class DatabaseStorage implements IStorage {
     return { imported, skipped };
   }
 
-  // Notification operations (for parents)
-  async getNotificationsByFamily(familyName: string, limit: number = 50): Promise<Notification[]> {
+  // Notification operations (for parents and children)
+  async getNotificationsForParents(familyName: string, limit: number = 50): Promise<Notification[]> {
     return await db
       .select()
       .from(notifications)
-      .where(eq(notifications.familyName, familyName))
+      .where(and(
+        eq(notifications.familyName, familyName),
+        isNull(notifications.targetMemberId)
+      ))
       .orderBy(desc(notifications.createdAt))
       .limit(limit);
   }
 
-  async getUnreadNotificationCount(familyName: string): Promise<number> {
+  async getNotificationsForMember(memberId: string, limit: number = 50): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.targetMemberId, memberId))
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit);
+  }
+
+  async getUnreadNotificationCountForParents(familyName: string): Promise<number> {
     const result = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(notifications)
       .where(and(
         eq(notifications.familyName, familyName),
+        isNull(notifications.targetMemberId),
+        eq(notifications.isRead, false)
+      ));
+    return result[0]?.count ?? 0;
+  }
+
+  async getUnreadNotificationCountForMember(memberId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(notifications)
+      .where(and(
+        eq(notifications.targetMemberId, memberId),
         eq(notifications.isRead, false)
       ));
     return result[0]?.count ?? 0;
@@ -3066,19 +3094,36 @@ export class DatabaseStorage implements IStorage {
       .where(eq(notifications.id, notificationId));
   }
 
-  async markAllNotificationsAsRead(familyName: string): Promise<void> {
+  async markAllNotificationsAsReadForParents(familyName: string): Promise<void> {
     await db
       .update(notifications)
       .set({ isRead: true })
-      .where(eq(notifications.familyName, familyName));
+      .where(and(
+        eq(notifications.familyName, familyName),
+        isNull(notifications.targetMemberId)
+      ));
+  }
+
+  async markAllNotificationsAsReadForMember(memberId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.targetMemberId, memberId));
   }
 
   async deleteNotification(notificationId: string): Promise<void> {
     await db.delete(notifications).where(eq(notifications.id, notificationId));
   }
 
-  async deleteAllNotifications(familyName: string): Promise<void> {
-    await db.delete(notifications).where(eq(notifications.familyName, familyName));
+  async deleteAllNotificationsForParents(familyName: string): Promise<void> {
+    await db.delete(notifications).where(and(
+      eq(notifications.familyName, familyName),
+      isNull(notifications.targetMemberId)
+    ));
+  }
+
+  async deleteAllNotificationsForMember(memberId: string): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.targetMemberId, memberId));
   }
 }
 
