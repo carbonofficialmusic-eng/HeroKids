@@ -65,6 +65,7 @@ import { eq, and, desc, gt, sql, inArray } from "drizzle-orm";
 import { startOfDay } from 'date-fns';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import bcrypt from 'bcrypt';
+import { TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR } from "@shared/skin-config";
 
 /**
  * Default achievement templates - used by both seedDefaultAchievements and resetFamilyToFactory
@@ -311,7 +312,7 @@ export interface IStorage {
   updateGoalCurrentPoints(goalId: string, currentPoints: number): Promise<void>;
   completeGoal(goalId: string): Promise<void>;
 
-  // Star Placement operations (gamification: 32 stars per child, 4 stars = 1 HeroKids Legacy avatar)
+  // Star Placement operations (gamification: hidden stars per child, unlock HeroKids Legacy avatars)
   getStarPlacementsByMember(memberId: string): Promise<StarPlacement[]>;
   initializeStarPlacements(memberId: string): Promise<void>;
   reinitializeStarsOnDiscoveredSkins(memberId: string): Promise<{ placed: number }>;
@@ -2630,8 +2631,8 @@ export class DatabaseStorage implements IStorage {
       .map(s => s.id)
       .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID);
     
-    if (standardSkinIds.length < 32) {
-      console.warn(`Only ${standardSkinIds.length} standard skins available for star placement (need 32)`);
+    if (standardSkinIds.length < TOTAL_HIDDEN_STARS) {
+      console.warn(`Only ${standardSkinIds.length} standard skins available for star placement (need ${TOTAL_HIDDEN_STARS})`);
     }
 
     // Check if member already has star placements
@@ -2640,9 +2641,9 @@ export class DatabaseStorage implements IStorage {
       return; // Already initialized
     }
 
-    // Randomly select 32 unique positions from standard skins (excluding starter and legacy)
+    // Randomly select unique positions from standard skins (excluding starter and legacy)
     const shuffled = [...standardSkinIds].sort(() => Math.random() - 0.5);
-    const selectedPositions = shuffled.slice(0, Math.min(32, shuffled.length));
+    const selectedPositions = shuffled.slice(0, Math.min(TOTAL_HIDDEN_STARS, shuffled.length));
 
     // Insert star placements
     for (const skinId of selectedPositions) {
@@ -2680,7 +2681,7 @@ export class DatabaseStorage implements IStorage {
         !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID
       );
       const shuffled = [...allStandardIds].sort(() => Math.random() - 0.5);
-      const selectedPositions = shuffled.slice(0, Math.min(32, shuffled.length));
+      const selectedPositions = shuffled.slice(0, Math.min(TOTAL_HIDDEN_STARS, shuffled.length));
       
       for (const skinId of selectedPositions) {
         await db.insert(starPlacements).values({ memberId, skinId, found: false }).onConflictDoNothing();
@@ -2694,9 +2695,9 @@ export class DatabaseStorage implements IStorage {
     // Reset starsFound counter
     await db.update(familyMembers).set({ starsFound: 0 }).where(eq(familyMembers.id, memberId));
 
-    // Randomly select up to 32 discovered skins for star placement (excluding starter)
+    // Randomly select discovered skins for star placement (excluding starter)
     const shuffled = [...standardDiscoveredIds].sort(() => Math.random() - 0.5);
-    const selectedPositions = shuffled.slice(0, Math.min(32, shuffled.length));
+    const selectedPositions = shuffled.slice(0, Math.min(TOTAL_HIDDEN_STARS, shuffled.length));
 
     // Insert new star placements on discovered skins
     for (const skinId of selectedPositions) {
@@ -2754,8 +2755,8 @@ export class DatabaseStorage implements IStorage {
     const newStarsFound = member?.starsFound || 1;
     const earnedLegacySkinIds = member?.earnedLegacySkinIds || [];
 
-    // Check if a new Legacy skin should be awarded (every 4 stars)
-    const legacySkinsEarned = Math.floor(newStarsFound / 4);
+    // Check if a new Legacy skin should be awarded (every STARS_PER_LEGACY_AVATAR stars)
+    const legacySkinsEarned = Math.floor(newStarsFound / STARS_PER_LEGACY_AVATAR);
     const currentLegacyCount = earnedLegacySkinIds.length;
 
     let legacySkinAwarded: string | null = null;

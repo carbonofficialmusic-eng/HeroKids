@@ -106,7 +106,7 @@ export const familyMembers = pgTable("family_members", {
   rewardsRedeemed: integer("rewards_redeemed").notNull().default(0), // Counter for unlocking skins
   unlockedSkins: text("unlocked_skins").array().notNull().default(sql`ARRAY[]::text[]`), // Array of unlocked skin IDs (deprecated, use discoveredSkinIds)
   discoveredSkinIds: text("discovered_skin_ids").array().notNull().default(sql`ARRAY[]::text[]`), // Skins the member has chosen/discovered (Tekken-style system)
-  starsFound: integer("stars_found").notNull().default(0), // Number of hidden stars found (32 total, every 4 = 1 HeroKids Legacy avatar)
+  starsFound: integer("stars_found").notNull().default(0), // Number of hidden stars found (48 total, every 4 = 1 HeroKids Legacy avatar)
   earnedLegacySkinIds: text("earned_legacy_skin_ids").array().notNull().default(sql`ARRAY[]::text[]`), // HeroKids Legacy avatars earned through star collection
   activeSkinId: varchar("active_skin_id"), // Currently selected skin
   useCustomAvatar: boolean("use_custom_avatar").notNull().default(false), // Use custom avatar instead of skin avatar (background stays from skin)
@@ -734,7 +734,7 @@ export const insertMobileRefreshTokenSchema = createInsertSchema(mobileRefreshTo
 export type InsertMobileRefreshToken = z.infer<typeof insertMobileRefreshTokenSchema>;
 export type MobileRefreshToken = typeof mobileRefreshTokens.$inferSelect;
 
-// Star Placements - Hidden stars on skin cards for gamification (32 stars total, 4 stars = 1 HeroKids Legacy avatar)
+// Star Placements - Hidden stars on skin cards for gamification (48 stars total, 4 stars = 1 HeroKids Legacy avatar)
 export const starPlacements = pgTable("star_placements", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),

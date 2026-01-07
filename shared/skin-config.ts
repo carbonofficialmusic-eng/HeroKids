@@ -7,6 +7,12 @@
 export const POINTS_PER_SKIN = 80;
 export const LEGACY_UNLOCK_THRESHOLD = 9100; // Points needed to unlock Legacy skins
 
+// Star collection system: Hidden stars on standard skin cards
+// Finding stars unlocks HeroKids Legacy avatars
+export const TOTAL_HIDDEN_STARS = 48; // Total stars hidden across all standard skin cards
+export const STARS_PER_LEGACY_AVATAR = 4; // Stars needed to unlock each Legacy avatar
+// 48 stars / 4 per avatar = 12 HeroKids Legacy avatars
+
 /**
  * All regular skin IDs in mixed order (alternating between different themes)
  * This creates variety so children always have something interesting to unlock
