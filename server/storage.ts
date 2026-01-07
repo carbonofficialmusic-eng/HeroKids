@@ -2637,11 +2637,35 @@ export class DatabaseStorage implements IStorage {
 
     // Check if member already has star placements
     const existing = await this.getStarPlacementsByMember(memberId);
-    if (existing.length > 0) {
-      return; // Already initialized
+    
+    // If member has correct number of stars or more, skip initialization
+    if (existing.length >= TOTAL_HIDDEN_STARS) {
+      return; // Already fully initialized
+    }
+    
+    // If member has some stars but less than TOTAL_HIDDEN_STARS, add more
+    // This handles the migration from 32 to 48 stars
+    if (existing.length > 0 && existing.length < TOTAL_HIDDEN_STARS) {
+      const existingSkinIds = existing.map(p => p.skinId);
+      const availableSkinIds = standardSkinIds.filter(id => !existingSkinIds.includes(id));
+      const starsToAdd = TOTAL_HIDDEN_STARS - existing.length;
+      
+      console.log(`Upgrading member ${memberId} stars: ${existing.length} -> ${TOTAL_HIDDEN_STARS} (adding ${starsToAdd})`);
+      
+      const shuffled = [...availableSkinIds].sort(() => Math.random() - 0.5);
+      const newPositions = shuffled.slice(0, Math.min(starsToAdd, shuffled.length));
+      
+      for (const skinId of newPositions) {
+        await db.insert(starPlacements).values({
+          memberId,
+          skinId,
+          found: false,
+        }).onConflictDoNothing();
+      }
+      return;
     }
 
-    // Randomly select unique positions from standard skins (excluding starter and legacy)
+    // Fresh initialization - no existing placements
     const shuffled = [...standardSkinIds].sort(() => Math.random() - 0.5);
     const selectedPositions = shuffled.slice(0, Math.min(TOTAL_HIDDEN_STARS, shuffled.length));
 
