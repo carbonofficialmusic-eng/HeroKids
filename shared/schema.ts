@@ -762,3 +762,56 @@ export const insertStarPlacementSchema = createInsertSchema(starPlacements).omit
 
 export type InsertStarPlacement = z.infer<typeof insertStarPlacementSchema>;
 export type StarPlacement = typeof starPlacements.$inferSelect;
+
+// Notification Types
+export const notificationTypeEnum = pgEnum("notification_type", [
+  "task_completed",      // Child completed a task
+  "task_pending",        // Task waiting for approval
+  "task_approved",       // Parent approved a task
+  "task_rejected",       // Parent rejected a task
+  "reward_redeemed",     // Child redeemed a reward
+  "achievement_earned",  // Child earned an achievement
+  "points_milestone",    // Child reached a points milestone
+  "member_joined",       // New member joined the family
+]);
+
+// Parent Notifications - Notifications for parents about family events
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
+  type: notificationTypeEnum("type").notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  relatedMemberId: varchar("related_member_id").references(() => familyMembers.id, { onDelete: "set null" }), // Member who triggered the notification
+  relatedTaskId: varchar("related_task_id").references(() => tasks.id, { onDelete: "set null" }), // Related task (if applicable)
+  relatedRewardId: varchar("related_reward_id").references(() => rewards.id, { onDelete: "set null" }), // Related reward (if applicable)
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  family: one(families, {
+    fields: [notifications.familyName],
+    references: [families.familyName],
+  }),
+  relatedMember: one(familyMembers, {
+    fields: [notifications.relatedMemberId],
+    references: [familyMembers.id],
+  }),
+  relatedTask: one(tasks, {
+    fields: [notifications.relatedTaskId],
+    references: [tasks.id],
+  }),
+  relatedReward: one(rewards, {
+    fields: [notifications.relatedRewardId],
+    references: [rewards.id],
+  }),
+}));
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
