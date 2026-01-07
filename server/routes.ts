@@ -4239,6 +4239,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.markNotificationAsRead(id);
+      
+      // Broadcast to update other parents' notification counts
+      broadcastToFamily(member.familyName, {
+        type: 'notification_update',
+      });
+      
       res.json({ success: true });
     } catch (error: any) {
       console.error("Error marking notification as read:", error);
@@ -4268,7 +4274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Broadcast to other parents
       broadcastToFamily(member.familyName, {
-        type: 'notifications-read-all',
+        type: 'notification_update',
       });
       
       res.json({ success: true });

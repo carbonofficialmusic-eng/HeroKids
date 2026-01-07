@@ -199,6 +199,12 @@ export function useWebSocket(familyName: string | null) {
               }
               break;
 
+            case "notification_update":
+              // Invalidate notification queries for real-time updates
+              queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+              break;
+
             default:
               console.log("Unknown WebSocket message type:", data.type);
           }
