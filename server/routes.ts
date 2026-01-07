@@ -4108,6 +4108,173 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== Notification Routes (for parents) =====
+  
+  // Get all notifications for the current family (parents only)
+  app.get("/api/notifications", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can view notifications
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can view notifications" });
+      }
+      
+      const limit = req.query.limit ? parseInt(req.query.limit) : 50;
+      const notificationsList = await storage.getNotificationsByFamily(member.familyName, limit);
+      res.json(notificationsList);
+    } catch (error: any) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  // Get unread notification count for the current family (parents only)
+  app.get("/api/notifications/unread-count", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can view notifications
+      if (member.role !== "parent") {
+        return res.json({ count: 0 });
+      }
+      
+      const count = await storage.getUnreadNotificationCount(member.familyName);
+      res.json({ count });
+    } catch (error: any) {
+      console.error("Error fetching unread notification count:", error);
+      res.status(500).json({ message: "Failed to fetch notification count" });
+    }
+  });
+
+  // Mark a single notification as read
+  app.patch("/api/notifications/:id/read", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can manage notifications
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can manage notifications" });
+      }
+      
+      await storage.markNotificationAsRead(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  // Mark all notifications as read
+  app.patch("/api/notifications/read-all", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can manage notifications
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can manage notifications" });
+      }
+      
+      await storage.markAllNotificationsAsRead(member.familyName);
+      
+      // Broadcast to other parents
+      broadcastToFamily(member.familyName, {
+        type: 'notifications-read-all',
+      });
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  // Delete a single notification
+  app.delete("/api/notifications/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete notifications
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete notifications" });
+      }
+      
+      await storage.deleteNotification(id);
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ message: "Failed to delete notification" });
+    }
+  });
+
+  // Delete all notifications
+  app.delete("/api/notifications", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete notifications
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete notifications" });
+      }
+      
+      await storage.deleteAllNotifications(member.familyName);
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error deleting all notifications:", error);
+      res.status(500).json({ message: "Failed to delete all notifications" });
+    }
+  });
+
   // ===== Admin Tools =====
   
   // Reset family subscription to Free (parent only, for testing)

@@ -59,6 +59,9 @@ import {
   type InsertChildDeviceSession,
   starPlacements,
   type StarPlacement,
+  notifications,
+  type Notification,
+  type InsertNotification,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gt, sql, inArray } from "drizzle-orm";
@@ -319,6 +322,15 @@ export interface IStorage {
   reinitializeStarsOnDiscoveredSkins(memberId: string): Promise<{ placed: number }>;
   markStarAsFound(memberId: string, skinId: string): Promise<{ wasStarFound: boolean; totalStarsFound: number; legacySkinAwarded: string | null }>;
   getMemberStarStats(memberId: string): Promise<{ starsFound: number; totalStars: number; earnedLegacySkinIds: string[] }>;
+
+  // Notification operations (for parents)
+  getNotificationsByFamily(familyName: string, limit?: number): Promise<Notification[]>;
+  getUnreadNotificationCount(familyName: string): Promise<number>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(notificationId: string): Promise<void>;
+  markAllNotificationsAsRead(familyName: string): Promise<void>;
+  deleteNotification(notificationId: string): Promise<void>;
+  deleteAllNotifications(familyName: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3016,6 +3028,57 @@ export class DatabaseStorage implements IStorage {
     }
 
     return { imported, skipped };
+  }
+
+  // Notification operations (for parents)
+  async getNotificationsByFamily(familyName: string, limit: number = 50): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.familyName, familyName))
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit);
+  }
+
+  async getUnreadNotificationCount(familyName: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(notifications)
+      .where(and(
+        eq(notifications.familyName, familyName),
+        eq(notifications.isRead, false)
+      ));
+    return result[0]?.count ?? 0;
+  }
+
+  async createNotification(notificationData: InsertNotification): Promise<Notification> {
+    const [notification] = await db
+      .insert(notifications)
+      .values(notificationData)
+      .returning();
+    return notification;
+  }
+
+  async markNotificationAsRead(notificationId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.id, notificationId));
+  }
+
+  async markAllNotificationsAsRead(familyName: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.familyName, familyName));
+  }
+
+  async deleteNotification(notificationId: string): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.id, notificationId));
+  }
+
+  async deleteAllNotifications(familyName: string): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.familyName, familyName));
   }
 }
 
