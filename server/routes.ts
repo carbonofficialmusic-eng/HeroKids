@@ -2722,12 +2722,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Start sharing
       await storage.startRewardSharing(redemptionId);
       
+      // Create notification for parents about reward sharing offer
+      const reward = await storage.getRewardById(redemption.rewardId);
+      await storage.createNotification({
+        familyName: member.familyName,
+        type: "reward_sharing",
+        title: `${member.displayName} offers a reward for sharing`,
+        message: reward ? `"${reward.title}" is available to share` : "A reward is available to share",
+        relatedMemberId: member.id,
+        relatedRewardId: redemption.rewardId,
+        isRead: false,
+      });
+      
       // Broadcast to family
       broadcastToFamily(member.familyName, {
         type: "reward_sharing_started",
         redemptionId,
         memberId: member.id,
         memberName: member.displayName,
+      });
+      
+      // Also broadcast notification update
+      broadcastToFamily(member.familyName, {
+        type: "notification_update",
       });
       
       res.json({ message: "Reward sharing started!", redemptionId });

@@ -24,7 +24,8 @@ import {
   UserPlus,
   Check,
   CheckCheck,
-  Trash2
+  Trash2,
+  Share2
 } from "lucide-react";
 import type { Notification } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
@@ -52,6 +53,7 @@ const notificationIcons: Record<string, typeof Bell> = {
   task_approved: CheckCircle,
   task_rejected: Clock,
   reward_redeemed: Gift,
+  reward_sharing: Share2,
   achievement_earned: Trophy,
   points_milestone: Star,
   member_joined: UserPlus,
@@ -71,6 +73,7 @@ export function NotificationBell({ familyLanguage = "en", wsConnection }: Notifi
       case "task_completed":
         return "/approvals";
       case "reward_redeemed":
+      case "reward_sharing":
         return "/rewards-board";
       case "task_approved":
       case "task_rejected":
