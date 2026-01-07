@@ -141,10 +141,10 @@ import lunaBeaconImg from "@assets/generated_images/luna_beacon_girl_hero_avatar
 import sunriseSparkImg from "@assets/generated_images/sunrise_spark_girl_hero_avatar.png";
 import bloomGuardianImg from "@assets/generated_images/bloom_guardian_girl_hero_avatar.png";
 import breezeCaptainImg from "@assets/generated_images/breeze_captain_girl_hero_avatar.png";
-import stormRunnerImg from "@assets/generated_images/storm_runner_white_background_avatar.png";
-import starGuardianImg from "@assets/generated_images/star_guardian_white_background_avatar.png";
-import thunderBoltImg from "@assets/generated_images/thunder_bolt_white_background_avatar.png";
-import heartShieldImg from "@assets/generated_images/heart_shield_white_background_avatar.png";
+import stormRunnerImg from "@assets/generated_images/storm_runner_mint_coral_avatar.png";
+import starGuardianImg from "@assets/generated_images/star_guardian_mint_coral_avatar.png";
+import thunderBoltImg from "@assets/generated_images/thunder_bolt_mint_coral_avatar.png";
+import heartShieldImg from "@assets/generated_images/heart_shield_mint_coral_avatar.png";
 
 // Tier 15 - Bonus Adventure Pack (Mixed collection)
 import pirateCaptainImg from "@assets/generated_images/pirate_captain_kid_avatar.png";
