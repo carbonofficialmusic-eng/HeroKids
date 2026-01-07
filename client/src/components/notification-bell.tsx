@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { 
   Bell, 
@@ -152,14 +151,20 @@ export function NotificationBell({ familyLanguage = "en", wsConnection }: Notifi
   });
 
   const handleNotificationClick = (notification: Notification) => {
+    console.log("Notification clicked:", notification.type, notification.title);
+    
     if (!notification.isRead) {
       markAsReadMutation.mutate(notification.id);
     }
     
     const route = getNavigationRoute(notification);
+    console.log("Navigating to:", route);
+    
     if (route) {
       setOpen(false);
-      setLocation(route);
+      setTimeout(() => {
+        setLocation(route);
+      }, 100);
     }
   };
 
@@ -243,15 +248,12 @@ export function NotificationBell({ familyLanguage = "en", wsConnection }: Notifi
             {t("notifications.empty", "No notifications yet")}
           </div>
         ) : (
-          <ScrollArea className="max-h-[300px]">
+          <div className="max-h-[300px] overflow-y-auto">
             {notifications.slice(0, 20).map((notification) => (
-              <DropdownMenuItem
+              <div
                 key={notification.id}
-                className={`flex gap-3 p-3 cursor-pointer ${!notification.isRead ? "bg-accent/30" : ""}`}
-                onSelect={(e) => {
-                  e.preventDefault();
-                  handleNotificationClick(notification);
-                }}
+                className={`flex gap-3 p-3 cursor-pointer rounded-sm transition-colors hover:bg-accent ${!notification.isRead ? "bg-accent/30" : ""}`}
+                onClick={() => handleNotificationClick(notification)}
                 data-testid={`notification-item-${notification.id}`}
               >
                 <div className={`mt-0.5 ${!notification.isRead ? "text-primary" : "text-muted-foreground"}`}>
@@ -273,9 +275,9 @@ export function NotificationBell({ familyLanguage = "en", wsConnection }: Notifi
                     <div className="h-2 w-2 rounded-full bg-primary" />
                   </div>
                 )}
-              </DropdownMenuItem>
+              </div>
             ))}
-          </ScrollArea>
+          </div>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
