@@ -12,8 +12,9 @@ import {
   Coins,
   Users,
   Share2,
-  UserPlus,
   X,
+  Gift,
+  Sparkles,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -90,14 +91,14 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       toast({
-        title: "Teilen gestartet! 🎉",
-        description: "Deine Geschwister können jetzt mitmachen.",
+        title: t("myRewards.sharingStarted"),
+        description: t("myRewards.sharingStartedDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Teilen konnte nicht gestartet werden.",
+        title: t("myRewards.error"),
+        description: error.message || t("myRewards.sharingError"),
         variant: "destructive",
       });
     },
@@ -112,14 +113,14 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
-        title: "Du nimmst teil! 🎉",
-        description: "Du bist jetzt bei der geteilten Belohnung dabei.",
+        title: t("myRewards.joinedSharing"),
+        description: t("myRewards.joinedSharingDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Beitreten nicht möglich.",
+        title: t("myRewards.error"),
+        description: error.message || t("myRewards.joinError"),
         variant: "destructive",
       });
     },
@@ -135,8 +136,8 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
-        title: "Teilen abgeschlossen! ✓",
-        description: "Die Punkte wurden gleichmäßig aufgeteilt.",
+        title: t("myRewards.sharingFinalized"),
+        description: t("myRewards.sharingFinalizedDesc"),
       });
       confetti({
         particleCount: 100,
@@ -146,8 +147,8 @@ export default function MyRewards() {
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Teilen konnte nicht abgeschlossen werden.",
+        title: t("myRewards.error"),
+        description: error.message || t("myRewards.finalizeError"),
         variant: "destructive",
       });
     },
@@ -161,14 +162,14 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       toast({
-        title: "Teilen abgebrochen",
-        description: "Du kannst die Belohnung jetzt alleine einlösen.",
+        title: t("myRewards.sharingCancelled"),
+        description: t("myRewards.sharingCancelledDesc"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Fehler",
-        description: error.message || "Teilen konnte nicht abgebrochen werden.",
+        title: t("myRewards.error"),
+        description: error.message || t("myRewards.cancelError"),
         variant: "destructive",
       });
     },
@@ -188,130 +189,143 @@ export default function MyRewards() {
   if (!member) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-muted-foreground">Lädt...</div>
+        <div className="text-muted-foreground">{t("common.loading")}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b sticky top-0 z-40 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 py-3 flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild data-testid="button-back">
-            <Link href="/kid-dashboard">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          </Button>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-            Meine Belohnungen
+    <div className="min-h-screen p-4 pb-20">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="flex items-center gap-4">
+          <Link href={member?.role === "parent" ? "/" : "/kid-dashboard"}>
+            <button className="p-2 rounded-full bg-card/80 backdrop-blur-md" data-testid="button-back">
+              <ArrowLeft className="h-6 w-6" />
+            </button>
+          </Link>
+          <h1 className="text-2xl font-bold font-accent" style={{ fontFamily: "Fredoka, sans-serif" }}>
+            {t("myRewards.title")}
           </h1>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {myRedemptions.length === 0 ? (
-          <Card className="p-12 text-center bg-card/80 backdrop-blur-md rounded-2xl">
-            <Trophy className="h-20 w-20 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <p className="text-xl text-muted-foreground">Noch keine Belohnungen eingelöst</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Sammle Punkte und löse deine erste Belohnung ein!
-            </p>
-            <Button asChild className="mt-6" data-testid="button-go-back">
-              <Link href="/kid-dashboard">Zurück zum Dashboard</Link>
-            </Button>
-          </Card>
-        ) : (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-green-500/20">
-                  <Trophy className="h-7 w-7 text-green-500" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                    Alle meine Belohnungen
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {myRedemptions.length} {myRedemptions.length === 1 ? "Belohnung" : "Belohnungen"} eingelöst
-                  </p>
-                </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="p-6 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl">
+            <div className="flex items-center gap-4">
+              <div className="p-4 rounded-2xl bg-green-500/20">
+                <Trophy className="h-10 w-10 text-green-500" />
               </div>
+              <div>
+                <h2 className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                  {t("myRewards.allRewards")}
+                </h2>
+                <p className="text-muted-foreground">
+                  {t("myRewards.rewardsCount", { count: myRedemptions.length })}
+                </p>
+              </div>
+              <Sparkles className="h-6 w-6 text-green-500 ml-auto animate-pulse" />
             </div>
+          </Card>
+        </motion.div>
 
-            <div className="grid grid-cols-1 gap-3 w-full">
-              {myRedemptions.map((redemption, index) => {
-                const typed = redemption as RedemptionWithDetails;
-                const shared = sharedRewards.find(s => s.id === typed.id);
-                const participants = shared?.participants || [];
-                const isSharing = typed.sharingStatus === "sharing_active";
-                const isFinalized = typed.sharingStatus === "sharing_finalized";
-                const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared";
-                const canFinalize = isSharing && participants.length > 0;
-                const canCancelSharing = isSharing && participants.length === 0;
+        <div className="space-y-4">
+          {myRedemptions.length === 0 ? (
+            <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
+              <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-lg text-muted-foreground">{t("myRewards.noRewards")}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                {t("myRewards.collectPoints")}
+              </p>
+            </Card>
+          ) : (
+            myRedemptions.map((redemption, index) => {
+              const typed = redemption as RedemptionWithDetails;
+              const shared = sharedRewards.find(s => s.id === typed.id);
+              const participants = shared?.participants || [];
+              const isSharing = typed.sharingStatus === "sharing_active";
+              const isFinalized = typed.sharingStatus === "sharing_finalized";
+              const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared";
+              const canFinalize = isSharing && participants.length > 0;
+              const canCancelSharing = isSharing && participants.length === 0;
 
-                return (
-                  <motion.div
-                    key={redemption.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Card className="p-4 hover-elevate">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div className={`p-3 rounded-xl flex-shrink-0 ${
-                              redemption.status === "completed" 
-                                ? "bg-green-500/20" 
-                                : "bg-amber-500/20"
-                            }`}>
-                              {redemption.status === "completed" ? (
-                                <CheckCircle2 className="h-6 w-6 text-green-500" />
-                              ) : (
-                                <Clock className="h-6 w-6 text-amber-500" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                                {redemption.rewardTitle || "Belohnung"}
-                              </h3>
-                              <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground flex-wrap">
-                                <Coins className="h-3.5 w-3.5 flex-shrink-0" />
-                                <span className="whitespace-nowrap">{redemption.pointsSpent} Punkte</span>
-                                <span>•</span>
-                                <span className="whitespace-nowrap">{redemption.redeemedAt ? new Date(redemption.redeemedAt).toLocaleDateString("de-DE") : "-"}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex gap-1.5 flex-shrink-0">
-                            <Badge 
-                              variant={redemption.status === "completed" ? "default" : "secondary"}
-                              className="text-xs whitespace-nowrap"
-                              data-testid={`badge-status-${redemption.id}`}
-                            >
-                              {redemption.status === "completed" ? "✓ Erfüllt" : 
-                               redemption.status === "approved" ? "Warte" : 
-                               "Ausstehend"}
+              return (
+                <motion.div
+                  key={redemption.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className={`p-5 bg-gradient-to-br ${
+                    redemption.status === "completed" 
+                      ? "from-green-500/20 to-emerald-500/20 border-green-500/30" 
+                      : "from-amber-500/20 to-yellow-500/20 border-amber-500/30"
+                  } border rounded-2xl`}>
+                    <div className="flex items-start gap-4">
+                      <div className={`p-3 rounded-xl flex-shrink-0 ${
+                        redemption.status === "completed" 
+                          ? "bg-green-500/20" 
+                          : "bg-amber-500/20"
+                      }`}>
+                        {redemption.status === "completed" ? (
+                          <CheckCircle2 className="h-7 w-7 text-green-500" />
+                        ) : (
+                          <Clock className="h-7 w-7 text-amber-500" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                          {redemption.rewardTitle || t("myRewards.reward")}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                          <Coins className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span>{t("myRewards.pointsSpent", { count: redemption.pointsSpent })}</span>
+                          <span>•</span>
+                          <span>{redemption.redeemedAt ? new Date(redemption.redeemedAt).toLocaleDateString() : "-"}</span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge 
+                            variant={redemption.status === "completed" ? "default" : "secondary"}
+                            className="gap-1.5"
+                            data-testid={`badge-status-${redemption.id}`}
+                          >
+                            {redemption.status === "completed" ? (
+                              <>
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                {t("myRewards.fulfilled")}
+                              </>
+                            ) : redemption.status === "approved" ? (
+                              <>
+                                <Clock className="h-3.5 w-3.5" />
+                                {t("myRewards.waiting")}
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="h-3.5 w-3.5" />
+                                {t("myRewards.pending")}
+                              </>
+                            )}
+                          </Badge>
+                          {isSharing && (
+                            <Badge variant="secondary" className="gap-1.5">
+                              <Users className="h-3.5 w-3.5" />
+                              {t("myRewards.beingShared")}
                             </Badge>
-                            {isSharing && (
-                              <Badge variant="secondary" className="gap-1 text-xs">
-                                <Users className="h-3 w-3" />
-                                Wird geteilt
-                              </Badge>
-                            )}
-                            {isFinalized && (
-                              <Badge variant="outline" className="gap-1 text-xs">
-                                <CheckCircle2 className="h-3 w-3" />
-                                Geteilt
-                              </Badge>
-                            )}
-                          </div>
+                          )}
+                          {isFinalized && (
+                            <Badge variant="outline" className="gap-1.5">
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              {t("myRewards.shared")}
+                            </Badge>
+                          )}
                         </div>
 
                         {/* Participants */}
                         {participants.length > 0 && (
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-xs text-muted-foreground">Mit:</p>
+                          <div className="flex items-center gap-2 flex-wrap pt-1">
+                            <p className="text-xs text-muted-foreground">{t("myRewards.with")}:</p>
                             {participants.map(p => (
                               <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
                                 <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar, (p.member as any).updatedAt)} />
@@ -325,56 +339,56 @@ export default function MyRewards() {
 
                         {/* Sharing Actions */}
                         {(canShare || canFinalize || canCancelSharing) && (
-                          <div className="pt-2 border-t flex gap-2 flex-wrap">
+                          <div className="pt-2 flex gap-2 flex-wrap">
                             {canShare && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="flex-1 gap-1.5 text-xs"
+                                className="gap-1.5"
                                 onClick={() => startSharingMutation.mutate(typed.id)}
                                 disabled={startSharingMutation.isPending}
                                 data-testid={`button-share-${typed.id}`}
                               >
                                 <Share2 className="h-3.5 w-3.5" />
-                                Teilen
+                                {t("myRewards.share")}
                               </Button>
                             )}
                             {canCancelSharing && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="flex-1 gap-1.5 text-xs"
+                                className="gap-1.5"
                                 onClick={() => cancelSharingMutation.mutate(typed.id)}
                                 disabled={cancelSharingMutation.isPending}
                                 data-testid={`button-cancel-share-${typed.id}`}
                               >
                                 <X className="h-3.5 w-3.5" />
-                                Teilen abbrechen
+                                {t("myRewards.cancelSharing")}
                               </Button>
                             )}
                             {canFinalize && (
                               <Button
                                 size="sm"
                                 variant="default"
-                                className="flex-1 gap-1.5 text-xs"
+                                className="gap-1.5"
                                 onClick={() => finalizeSharingMutation.mutate(typed.id)}
                                 disabled={finalizeSharingMutation.isPending}
                                 data-testid={`button-finalize-${typed.id}`}
                               >
                                 <CheckCircle2 className="h-3.5 w-3.5" />
-                                Beenden
+                                {t("myRewards.finalize")}
                               </Button>
                             )}
                           </div>
                         )}
                       </div>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );
