@@ -572,16 +572,20 @@ export default function SkinsGallery() {
             setPopupPosition(null);
           }}
         >
-          <div
+          <motion.div
             className="absolute"
             style={{
               left: popupPosition.x,
               top: popupPosition.y,
               transform: 'translate(-50%, -100%)'
             }}
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
             <Button
               size="sm"
+              className="relative ring-2 ring-white/30 shadow-lg shadow-primary/40 animate-pulse"
               onClick={(e) => {
                 e.stopPropagation();
                 discoverDialogSkin && discoverSkinMutation.mutate(discoverDialogSkin.id);
@@ -596,7 +600,7 @@ export default function SkinsGallery() {
               )}
               {t('skins.discover')}
             </Button>
-          </div>
+          </motion.div>
         </div>
       )}
 
