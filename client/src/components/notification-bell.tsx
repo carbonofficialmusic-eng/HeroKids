@@ -71,7 +71,7 @@ export function NotificationBell({ familyLanguage = "en", wsConnection }: Notifi
       case "task_completed":
         return "/approvals";
       case "reward_redeemed":
-        return "/rewards";
+        return "/rewards-board";
       case "task_approved":
       case "task_rejected":
         return "/dashboard";
