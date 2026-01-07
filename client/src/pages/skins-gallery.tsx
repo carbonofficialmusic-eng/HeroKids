@@ -500,7 +500,7 @@ export default function SkinsGallery() {
                         {t('skins.locked')}
                       </Button>
                     )
-                  ) : memberData?.avatarUrl ? (
+                  ) : (
                     <Button
                       className="w-full"
                       variant={isDefaultActive ? "secondary" : "default"}
@@ -508,10 +508,31 @@ export default function SkinsGallery() {
                       disabled={isDefaultActive || selectSkinMutation.isPending}
                       data-testid="button-equip-default"
                     >
-                      <Camera className="h-4 w-4 mr-2" />
-                      {isDefaultActive ? t('skins.equipped') : t('skins.useYourPhoto')}
+                      {memberData?.avatarUrl ? (
+                        <>
+                          <Camera className="h-4 w-4 mr-2" />
+                          {isDefaultActive ? t('skins.equipped') : t('skins.useYourPhoto')}
+                        </>
+                      ) : (
+                        <>
+                          {isDefaultActive ? t('skins.equipped') : t('skins.useDefault')}
+                        </>
+                      )}
                     </Button>
-                  ) : null}
+                  )}
+                  
+                  {/* Always show "Use Default" option when a skin is active */}
+                  {previewSkin && !isDefaultActive && (
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() => selectSkinMutation.mutate(null)}
+                      disabled={selectSkinMutation.isPending}
+                      data-testid="button-clear-skin"
+                    >
+                      {t('skins.useDefault')}
+                    </Button>
+                  )}
                 </div>
                 
                 {/* Progress to next unlock */}
