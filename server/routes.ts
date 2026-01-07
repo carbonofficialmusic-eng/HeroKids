@@ -3035,11 +3035,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // When selecting a skin, always show the skin's default avatar
-      // When clearing (skinId = null), preserve the useCustomAvatar flag
+      // Update only the active skin, preserve the useCustomAvatar flag
+      // If user has custom photo enabled, they keep seeing their photo while the skin background changes
       await storage.updateFamilyMemberActiveSkin(member.id, {
         skinId,
-        useCustomAvatar: skinId !== null ? false : undefined
+        useCustomAvatar: undefined // Don't change the useCustomAvatar setting
       });
       
       // Broadcast skin change to family

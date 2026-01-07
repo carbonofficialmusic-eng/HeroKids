@@ -164,13 +164,13 @@ export default function SkinsGallery() {
           setShowStarAnimation(false);
           setCelebration({
             points: 0,
-            message: `${skinName} ${t('skins.discovered')}!`,
+            message: skinName,
           });
         }, 2500);
       } else {
         setCelebration({
           points: 0,
-          message: `${skinName} ${t('skins.discovered')}!`,
+          message: skinName,
         });
       }
       
