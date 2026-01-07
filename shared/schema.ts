@@ -110,6 +110,7 @@ export const familyMembers = pgTable("family_members", {
   earnedLegacySkinIds: text("earned_legacy_skin_ids").array().notNull().default(sql`ARRAY[]::text[]`), // HeroKids Legacy avatars earned through star collection
   activeSkinId: varchar("active_skin_id"), // Currently selected skin
   useCustomAvatar: boolean("use_custom_avatar").notNull().default(false), // Use custom avatar instead of skin avatar (background stays from skin)
+  useThemeBackground: boolean("use_theme_background").notNull().default(true), // Show themed background from active skin (can be disabled to keep avatar only)
   avatarHistory: jsonb("avatar_history").$type<string[]>().default(sql`'[]'::jsonb`), // Last 3 uploaded avatar URLs for quick selection
   lastReadChatAt: timestamp("last_read_chat_at"), // When member last viewed chat messages
   excludeFromLeaderboard: boolean("exclude_from_leaderboard").notNull().default(false), // Exclude member from leaderboard competition
