@@ -1252,6 +1252,8 @@
     "allMarkedRead": "모든 알림을 읽음으로 표시했어요",
     "deleteAll": "모두 삭제",
     "allDeleted": "모든 알림을 삭제했어요",
-    "confirmDeleteAll": "모든 알림을 삭제할까요?"
+    "confirmDeleteAll": "모든 알림을 삭제할까요?",
+    "deleteAllTitle": "모든 알림을 삭제할까요?",
+    "deleteAllDescription": "모든 알림이 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없어요."
   }
 }

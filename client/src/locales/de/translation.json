@@ -1301,6 +1301,8 @@
     "allMarkedRead": "Alle Benachrichtigungen als gelesen markiert",
     "deleteAll": "Alle löschen",
     "allDeleted": "Alle Benachrichtigungen gelöscht",
-    "confirmDeleteAll": "Alle Benachrichtigungen löschen?"
+    "confirmDeleteAll": "Alle Benachrichtigungen löschen?",
+    "deleteAllTitle": "Alle Benachrichtigungen löschen?",
+    "deleteAllDescription": "Alle Benachrichtigungen werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden."
   }
 }

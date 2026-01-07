@@ -12,6 +12,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { 
   Bell, 
@@ -64,6 +74,7 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [open, setOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const locale = localeMap[familyLanguage] || localeMap.en;
 
@@ -183,6 +194,7 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
   };
 
   return (
+    <>
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button
@@ -227,9 +239,7 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
                 className="h-6 w-6 text-destructive"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (confirm(t("notifications.confirmDeleteAll", "Delete all notifications?"))) {
-                    deleteAllMutation.mutate();
-                  }
+                  setDeleteDialogOpen(true);
                 }}
                 disabled={deleteAllMutation.isPending}
                 title={t("notifications.deleteAll", "Delete all")}
@@ -284,5 +294,34 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
         )}
       </DropdownMenuContent>
     </DropdownMenu>
+
+    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {t("notifications.deleteAllTitle", "Delete all notifications?")}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {t("notifications.deleteAllDescription", "This will permanently delete all your notifications. This action cannot be undone.")}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel data-testid="button-cancel-delete">
+            {t("common.cancel", "Cancel")}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              deleteAllMutation.mutate();
+              setDeleteDialogOpen(false);
+            }}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            data-testid="button-confirm-delete"
+          >
+            {t("common.delete", "Delete")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

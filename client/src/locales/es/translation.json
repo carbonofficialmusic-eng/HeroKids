@@ -1241,6 +1241,8 @@
     "allMarkedRead": "Todas las notificaciones marcadas como leídas",
     "deleteAll": "Eliminar todo",
     "allDeleted": "Todas las notificaciones eliminadas",
-    "confirmDeleteAll": "¿Eliminar todas las notificaciones?"
+    "confirmDeleteAll": "¿Eliminar todas las notificaciones?",
+    "deleteAllTitle": "¿Eliminar todas las notificaciones?",
+    "deleteAllDescription": "Todas las notificaciones se eliminarán permanentemente. Esta acción no se puede deshacer."
   }
 }

@@ -1241,6 +1241,8 @@
     "allMarkedRead": "Toutes les notifications marquées comme lues",
     "deleteAll": "Tout supprimer",
     "allDeleted": "Toutes les notifications supprimées",
-    "confirmDeleteAll": "Supprimer toutes les notifications ?"
+    "confirmDeleteAll": "Supprimer toutes les notifications ?",
+    "deleteAllTitle": "Supprimer toutes les notifications ?",
+    "deleteAllDescription": "Toutes les notifications seront définitivement supprimées. Cette action est irréversible."
   }
 }

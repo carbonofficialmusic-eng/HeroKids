@@ -1241,6 +1241,8 @@
     "allMarkedRead": "所有通知已标为已读",
     "deleteAll": "删除全部",
     "allDeleted": "所有通知已删除",
-    "confirmDeleteAll": "删除所有通知？"
+    "confirmDeleteAll": "删除所有通知？",
+    "deleteAllTitle": "删除所有通知？",
+    "deleteAllDescription": "所有通知将被永久删除。此操作无法撤销。"
   }
 }

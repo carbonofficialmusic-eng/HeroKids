@@ -1272,6 +1272,8 @@
     "allMarkedRead": "Alla aviseringar markerade som lästa",
     "deleteAll": "Ta bort alla",
     "allDeleted": "Alla aviseringar borttagna",
-    "confirmDeleteAll": "Ta bort alla aviseringar?"
+    "confirmDeleteAll": "Ta bort alla aviseringar?",
+    "deleteAllTitle": "Ta bort alla aviseringar?",
+    "deleteAllDescription": "Alla aviseringar kommer att raderas permanent. Denna åtgärd kan inte ångras."
   }
 }

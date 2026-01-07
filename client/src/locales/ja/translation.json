@@ -1241,6 +1241,8 @@
     "allMarkedRead": "すべての通知を既読にしました",
     "deleteAll": "すべて削除",
     "allDeleted": "すべての通知を削除しました",
-    "confirmDeleteAll": "すべての通知を削除しますか？"
+    "confirmDeleteAll": "すべての通知を削除しますか？",
+    "deleteAllTitle": "すべての通知を削除しますか？",
+    "deleteAllDescription": "すべての通知が完全に削除されます。この操作は元に戻せません。"
   }
 }

@@ -1278,6 +1278,8 @@
     "allMarkedRead": "All notifications marked as read",
     "deleteAll": "Delete all",
     "allDeleted": "All notifications deleted",
-    "confirmDeleteAll": "Delete all notifications?"
+    "confirmDeleteAll": "Delete all notifications?",
+    "deleteAllTitle": "Delete all notifications?",
+    "deleteAllDescription": "This will permanently delete all your notifications. This action cannot be undone."
   }
 }
