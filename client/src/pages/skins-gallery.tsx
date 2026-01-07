@@ -383,8 +383,8 @@ export default function SkinsGallery() {
               
               {/* Star counter for children */}
               {starStats.totalStars > 0 && (
-                <Badge variant="outline" className="text-sm font-bold whitespace-nowrap bg-yellow-100 text-yellow-800 border-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-300">
-                  <Star className="h-4 w-4 mr-1 fill-yellow-400" />
+                <Badge variant="outline" className="text-xs sm:text-sm font-bold whitespace-nowrap bg-yellow-100 text-yellow-800 border-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-300 px-1.5 sm:px-2.5">
+                  <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 fill-yellow-400" />
                   {starStats.starsFound}/{starStats.totalStars}
                 </Badge>
               )}
