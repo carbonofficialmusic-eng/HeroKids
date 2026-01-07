@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/skins";
 import { queryClient } from "@/lib/queryClient";
+import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import {
   BarChart,
   Bar,
@@ -1048,7 +1049,7 @@ export default function AdminPage() {
                     Fix Stars for Test Families
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    For members who already discovered skins but have 0/32 stars, this will place 32 new stars on their discovered skin cards.
+                    For members who already discovered skins but have 0/{TOTAL_HIDDEN_STARS} stars, this will place {TOTAL_HIDDEN_STARS} new stars on their discovered skin cards.
                   </p>
                   <Button 
                     onClick={async () => {

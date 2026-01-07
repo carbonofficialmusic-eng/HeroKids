@@ -61,6 +61,7 @@ import { RewardRequestDialog } from "@/components/reward-request-dialog";
 import { Leaderboard } from "@/components/leaderboard";
 import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature, type SubscriptionTier } from "@shared/tier-config";
+import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 // Extended Task type with metadata from API
@@ -1219,7 +1220,7 @@ export default function KidDashboard() {
                     <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
                   </motion.div>
                   <span className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }} data-testid="text-stars-found">
-                    {member.starsFound || 0}/32
+                    {member.starsFound || 0}/{TOTAL_HIDDEN_STARS}
                   </span>
                 </div>
               </div>

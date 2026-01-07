@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { Link } from "wouter";
 import { SKIN_IMAGES, SKIN_BACKGROUNDS } from "@/lib/skins";
-import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD } from "@shared/skin-config";
+import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import type { FamilyMember, Family } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
@@ -658,7 +658,7 @@ export default function SkinsGallery() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.2 }}
               >
-                {starAnimationData.totalStars}/32 {t('common.stars', 'Stars')}
+                {starAnimationData.totalStars}/{TOTAL_HIDDEN_STARS} {t('common.stars', 'Stars')}
               </motion.p>
               {starAnimationData.legacySkinAwarded && (
                 <motion.div
