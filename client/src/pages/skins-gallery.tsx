@@ -308,9 +308,9 @@ export default function SkinsGallery() {
         const cardCenterX = rect.left + rect.width / 2;
         
         // Clamp x position to keep button within viewport
-        // Button is ~100px wide, so half is ~50px, add 10px margin
-        const buttonHalfWidth = 60;
-        const margin = 10;
+        // Button is ~120px wide, so half is ~60px, add 20px margin for safety
+        const buttonHalfWidth = 80;
+        const margin = 20;
         const clampedX = Math.max(
           margin + buttonHalfWidth,
           Math.min(cardCenterX, viewportWidth - margin - buttonHalfWidth)
