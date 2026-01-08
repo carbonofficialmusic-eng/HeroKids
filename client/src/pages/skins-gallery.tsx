@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest, ApiError } from "@/lib/queryClient";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -95,7 +95,29 @@ export default function SkinsGallery() {
   const [celebration, setCelebration] = useState<{ points: number; message: string } | null>(null);
   const [selectedSkinId, setSelectedSkinId] = useState<string | null>(null);
   const [discoverDialogSkin, setDiscoverDialogSkin] = useState<Skin | null>(null);
+  const [popupAnchor, setPopupAnchor] = useState<{ cardCenterX: number; cardTop: number } | null>(null);
   const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
+  const popupRef = useRef<HTMLButtonElement>(null);
+  
+  // Measure popup and compute clamped position after render
+  useLayoutEffect(() => {
+    if (!popupAnchor || !popupRef.current) return;
+    
+    const buttonWidth = popupRef.current.offsetWidth;
+    const halfWidth = buttonWidth / 2;
+    const margin = 10;
+    const viewportWidth = window.innerWidth;
+    
+    // Clamp x to stay within viewport on both sides
+    const minX = margin + halfWidth;
+    const maxX = viewportWidth - margin - halfWidth;
+    const clampedX = Math.max(minX, Math.min(popupAnchor.cardCenterX, maxX));
+    
+    setPopupPosition({
+      x: clampedX,
+      y: popupAnchor.cardTop - 8
+    });
+  }, [popupAnchor]);
   
   // Detect desktop for sticky behavior (lg breakpoint = 1024px)
   const [isDesktop, setIsDesktop] = useState(false);
@@ -304,19 +326,12 @@ export default function SkinsGallery() {
       // If it's an undiscovered skin that can be discovered, show the popup
       if (canDiscover && !isDiscovered) {
         const rect = e.currentTarget.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
         const cardCenterX = rect.left + rect.width / 2;
         
-        // Only clamp on the RIGHT side to prevent overflow
-        // "Entdecken" button is ~130px wide, keep 10px margin from right edge
-        const buttonWidth = 130;
-        const rightMargin = 10;
-        const maxX = viewportWidth - rightMargin - buttonWidth / 2;
-        const clampedX = Math.min(cardCenterX, maxX);
-        
-        setPopupPosition({
-          x: clampedX,
-          y: rect.top - 8
+        // Store anchor point - actual clamping happens in useLayoutEffect after measuring
+        setPopupAnchor({
+          cardCenterX,
+          cardTop: rect.top
         });
         setDiscoverDialogSkin(skin);
       } else {
@@ -671,19 +686,20 @@ export default function SkinsGallery() {
       </div>
 
       {/* Discovery Popup - positioned near clicked card */}
-      {discoverDialogSkin && popupPosition && (
+      {discoverDialogSkin && popupAnchor && (
         <div 
           className="fixed inset-0 z-50"
           onClick={() => {
             setDiscoverDialogSkin(null);
+            setPopupAnchor(null);
             setPopupPosition(null);
           }}
         >
           <motion.div
             className="absolute"
             style={{
-              left: popupPosition.x,
-              top: popupPosition.y,
+              left: popupPosition?.x ?? popupAnchor.cardCenterX,
+              top: popupPosition?.y ?? (popupAnchor.cardTop - 8),
               transform: 'translate(-50%, -100%)'
             }}
             initial={{ opacity: 0, scale: 0.8, y: 10 }}
@@ -691,6 +707,7 @@ export default function SkinsGallery() {
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
             <Button
+              ref={popupRef}
               size="sm"
               className="relative ring-2 ring-white/30 shadow-lg shadow-primary/40 animate-pulse"
               onClick={(e) => {
