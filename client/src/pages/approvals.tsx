@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, XCircle, Clock, Star, ArrowLeft } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Star, ArrowLeft, Gift, Coins } from "lucide-react";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +29,59 @@ export default function Approvals() {
 
   const { data: pendingCompletions, isLoading } = useQuery({
     queryKey: ["/api/tasks/completions/pending"],
+  });
+
+  const { data: rewardRequests = [] } = useQuery<any[]>({
+    queryKey: ["/api/reward-requests"],
+  });
+
+  const { data: familyMembers = [] } = useQuery<any[]>({
+    queryKey: ["/api/family-members"],
+  });
+
+  const pendingRewardRequests = rewardRequests.filter((r: any) => r.status === "pending");
+
+  const approveRewardRequestMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      const res = await apiRequest("PATCH", `/api/reward-requests/${requestId}/approve`, {});
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
+      toast({
+        title: t("approvals.rewardRequestApproved"),
+        description: t("approvals.rewardRequestApprovedDesc"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("common.error"),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const declineRewardRequestMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      const res = await apiRequest("PATCH", `/api/reward-requests/${requestId}/decline`, {});
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      toast({
+        title: t("approvals.rewardRequestDeclined"),
+        description: t("approvals.rewardRequestDeclinedDesc"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("common.error"),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const approveMutation = useMutation({
@@ -143,8 +196,90 @@ export default function Approvals() {
         <div className="flex items-center gap-2 mb-6">
           <Clock className="w-6 h-6 text-primary" />
           <h1 className="text-3xl font-bold">{t("approvals.title")}</h1>
-          {completions.length > 0 && (
+          {(completions.length + pendingRewardRequests.length) > 0 && (
             <Badge className="ml-2" data-testid="badge-pending-count">
+              {completions.length + pendingRewardRequests.length}
+            </Badge>
+          )}
+        </div>
+
+        {/* Pending Reward Requests Section */}
+        {pendingRewardRequests.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Gift className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-bold">{t("approvals.rewardRequests")}</h2>
+              <Badge className="ml-2" data-testid="badge-reward-requests-count">
+                {pendingRewardRequests.length}
+              </Badge>
+            </div>
+            <div className="space-y-4">
+              {pendingRewardRequests.map((request: any) => {
+                const requester = familyMembers.find((m: any) => m.id === request.requestedBy);
+                return (
+                  <Card key={request.id} data-testid={`card-reward-request-${request.id}`}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          <Avatar className="w-10 h-10">
+                            <AvatarFallback style={{ backgroundColor: requester?.color }} className="text-white">
+                              {requester?.displayName?.[0] || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <CardTitle className="text-lg" data-testid={`text-reward-title-${request.id}`}>
+                              {request.title}
+                            </CardTitle>
+                            <CardDescription>
+                              {t("approvals.requestedBy", { name: requester?.displayName || t("common.unknown") })} • {formatDistanceToNow(new Date(request.createdAt), { locale: dateFnsLocales[i18n.language] || enUS, addSuffix: true })}
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <Coins className="w-3 h-3" />
+                          {request.pointThreshold} {t("common.points")}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {request.description && (
+                        <p className="text-muted-foreground mb-4">{request.description}</p>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => approveRewardRequestMutation.mutate(request.id)}
+                          disabled={approveRewardRequestMutation.isPending}
+                          className="flex-1"
+                          data-testid={`button-approve-reward-${request.id}`}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          {t("approvals.approveReward")}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => declineRewardRequestMutation.mutate(request.id)}
+                          disabled={declineRewardRequestMutation.isPending}
+                          className="flex-1"
+                          data-testid={`button-decline-reward-${request.id}`}
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          {t("approvals.declineReward")}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Pending Task Completions Section */}
+        <div className="flex items-center gap-2 mb-4">
+          <Clock className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-bold">{t("approvals.taskCompletions")}</h2>
+          {completions.length > 0 && (
+            <Badge className="ml-2" data-testid="badge-task-completions-count">
               {completions.length}
             </Badge>
           )}

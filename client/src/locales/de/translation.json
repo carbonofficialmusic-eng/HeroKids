@@ -824,7 +824,16 @@
     "toastRejectedDesc": "Das Kind wird über die Ablehnung benachrichtigt",
     "toastRejectionFailed": "Ablehnung fehlgeschlagen",
     "toastRejectionFailedDesc": "Aufgabenabschluss konnte nicht abgelehnt werden",
-    "defaultRejectionReason": "Entsprach nicht den Erwartungen"
+    "defaultRejectionReason": "Entsprach nicht den Erwartungen",
+    "rewardRequests": "Belohnungsanfragen",
+    "taskCompletions": "Aufgabenabschlüsse",
+    "requestedBy": "Angefordert von {{name}}",
+    "approveReward": "Genehmigen",
+    "declineReward": "Ablehnen",
+    "rewardRequestApproved": "Belohnungsanfrage genehmigt!",
+    "rewardRequestApprovedDesc": "Die Belohnung wurde zur Belohnungstafel hinzugefügt.",
+    "rewardRequestDeclined": "Belohnungsanfrage abgelehnt",
+    "rewardRequestDeclinedDesc": "Das Kind wird benachrichtigt."
   },
   "rewardsBoard": {
     "title": "Belohnungstafel",

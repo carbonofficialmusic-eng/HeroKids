@@ -801,7 +801,16 @@
     "toastRejectedDesc": "The child will be notified of the rejection",
     "toastRejectionFailed": "Rejection Failed",
     "toastRejectionFailedDesc": "Failed to reject task completion",
-    "defaultRejectionReason": "Did not meet expectations"
+    "defaultRejectionReason": "Did not meet expectations",
+    "rewardRequests": "Reward Requests",
+    "taskCompletions": "Task Completions",
+    "requestedBy": "Requested by {{name}}",
+    "approveReward": "Approve",
+    "declineReward": "Decline",
+    "rewardRequestApproved": "Reward Request Approved!",
+    "rewardRequestApprovedDesc": "The reward has been added to the rewards board.",
+    "rewardRequestDeclined": "Reward Request Declined",
+    "rewardRequestDeclinedDesc": "The child will be notified."
   },
   "rewardsBoard": {
     "title": "Rewards Board",
