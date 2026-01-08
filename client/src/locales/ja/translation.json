@@ -984,6 +984,7 @@
     "points": "ポイント",
     "plusPoints": "+{{count}}ポイント",
     "noSlotsLeft": "空き枠がありません",
+    "sharedWith": "一緒に：",
     "pointsToEarn": "獲得ポイント：",
     "needsApproval": "承認が必要",
     "needsPhoto": "写真が必要",

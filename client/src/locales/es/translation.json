@@ -984,6 +984,7 @@
     "points": "Puntos",
     "plusPoints": "+{{count}} Puntos",
     "noSlotsLeft": "No hay más espacios disponibles",
+    "sharedWith": "Junto con:",
     "pointsToEarn": "Puntos a ganar:",
     "needsApproval": "Necesita aprobación",
     "needsPhoto": "Foto requerida",

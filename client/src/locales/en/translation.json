@@ -1032,6 +1032,7 @@
     "points": "Points",
     "plusPoints": "+{{count}} Points",
     "noSlotsLeft": "No more slots available",
+    "sharedWith": "Together with:",
     "pointsToEarn": "Points to earn:",
     "needsApproval": "Needs approval",
     "needsPhoto": "Photo required",

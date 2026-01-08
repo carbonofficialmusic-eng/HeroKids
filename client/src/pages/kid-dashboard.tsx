@@ -571,6 +571,53 @@ function TaskCard({
             )}
           </div>
           
+          {/* Shared Task Info - Show teammates and description */}
+          {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && (
+            <div className="space-y-2 text-left">
+              {/* Teammates section */}
+              <div className="p-2 bg-primary/5 rounded-xl">
+                <p className="text-xs font-semibold text-muted-foreground mb-1.5">
+                  <Users className="h-3 w-3 inline mr-1" />
+                  {t("kidDashboard.sharedWith")}
+                </p>
+                <div className="flex flex-wrap justify-center gap-1">
+                  {task.sharedMemberCompletions.map((m) => (
+                    <Badge 
+                      key={m.memberId} 
+                      variant={m.hasCompleted ? "default" : "outline"}
+                      className="gap-1 text-xs"
+                    >
+                      <Avatar className="h-4 w-4">
+                        <AvatarImage src={getAvatarUrl(m.activeSkinId, m.avatarUrl, m.useCustomAvatar)} />
+                        <AvatarFallback 
+                          className="text-xs text-white font-bold"
+                          style={{ backgroundColor: m.color }}
+                        >
+                          {m.displayName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      {m.displayName}
+                      {m.hasCompleted && " ✓"}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("tasks.sharedProgress", {
+                    completed: task.sharedMemberCompletions.filter(m => m.hasCompleted).length,
+                    total: task.sharedMemberCompletions.length
+                  })}
+                </p>
+              </div>
+              
+              {/* Task description for shared tasks */}
+              {task.description && (
+                <p className="text-xs text-muted-foreground px-2 line-clamp-2">
+                  {task.description}
+                </p>
+              )}
+            </div>
+          )}
+
           {statusMessage ? (
             <div className="space-y-1">
               <Badge 

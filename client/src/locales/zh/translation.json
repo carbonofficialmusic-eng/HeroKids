@@ -984,6 +984,7 @@
     "points": "积分",
     "plusPoints": "+{{count}}积分",
     "noSlotsLeft": "没有更多名额",
+    "sharedWith": "和...一起：",
     "pointsToEarn": "可获得积分：",
     "needsApproval": "需要批准",
     "needsPhoto": "需要照片",

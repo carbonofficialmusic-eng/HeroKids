@@ -940,6 +940,7 @@
     "points": "포인트",
     "plusPoints": "+{{count}} 포인트",
     "noSlotsLeft": "더 이상 자리가 없어요",
+    "sharedWith": "함께 할 친구:",
     "pointsToEarn": "획득 포인트:",
     "needsApproval": "승인 필요",
     "needsPhoto": "사진 필요",
