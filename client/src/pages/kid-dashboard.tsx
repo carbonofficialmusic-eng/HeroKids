@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +50,25 @@ import {
   Share2,
   UserPlus,
   X,
+  AlertTriangle,
 } from "lucide-react";
+
+// Helper to determine due date status
+function getDueDateStatus(dueDate: Date | string | null): { status: "overdue" | "soon" | "normal" | null; daysUntil: number } {
+  if (!dueDate) return { status: null, daysUntil: 0 };
+  
+  const due = startOfDay(new Date(dueDate));
+  const today = startOfDay(new Date());
+  const daysUntil = differenceInDays(due, today);
+  
+  if (isPast(due) && daysUntil < 0) {
+    return { status: "overdue", daysUntil };
+  }
+  if (isToday(due) || isTomorrow(due)) {
+    return { status: "soon", daysUntil };
+  }
+  return { status: "normal", daysUntil };
+}
 import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -631,6 +650,44 @@ function TaskCard({
               )}
             </div>
           )}
+
+          {/* Due Date Display with kid-friendly warnings */}
+          {task.dueDate && (() => {
+            const { status, daysUntil } = getDueDateStatus(task.dueDate);
+            
+            if (status === "overdue") {
+              return (
+                <Badge 
+                  variant="destructive" 
+                  className="gap-1 text-xs rounded-xl"
+                  data-testid={`badge-overdue-${task.id}`}
+                >
+                  <AlertTriangle className="h-3 w-3" />
+                  {t('tasks.overdue')}
+                </Badge>
+              );
+            }
+            
+            if (status === "soon") {
+              return (
+                <Badge 
+                  variant="secondary" 
+                  className="gap-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 rounded-xl"
+                  data-testid={`badge-due-soon-${task.id}`}
+                >
+                  <Calendar className="h-3 w-3" />
+                  {daysUntil === 0 ? t('tasks.dueToday') : t('tasks.dueTomorrow')}
+                </Badge>
+              );
+            }
+            
+            return (
+              <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+                <Calendar className="h-3 w-3" />
+                <span>{format(new Date(task.dueDate), "MMM d")}</span>
+              </div>
+            );
+          })()}
 
           {statusMessage ? (
             <div className="space-y-1">
