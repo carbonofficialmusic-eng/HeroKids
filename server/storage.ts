@@ -2722,56 +2722,96 @@ export class DatabaseStorage implements IStorage {
     const existing = await this.getStarPlacementsByMember(memberId);
     const currentCount = existing.length;
     
-    // If already has 48 stars, nothing to fix
-    if (currentCount >= TOTAL_HIDDEN_STARS) {
-      return { 
-        totalPlacements: currentCount, 
-        added: 0, 
-        message: `${member.displayName} already has ${currentCount} stars (no fix needed)` 
-      };
+    // Get member's discovered skins
+    const discoveredSkinIds = member.discoveredSkinIds || [];
+    
+    // Step 1: Mark any unfound stars on discovered skins as "found"
+    let starsMarkedFound = 0;
+    for (const placement of existing) {
+      if (!placement.found && discoveredSkinIds.includes(placement.skinId)) {
+        await db.update(starPlacements)
+          .set({ found: true, foundAt: new Date() })
+          .where(eq(starPlacements.id, placement.id));
+        starsMarkedFound++;
+      }
+    }
+    
+    // Step 2: Recalculate actual starsFound from placements
+    const updatedPlacements = await this.getStarPlacementsByMember(memberId);
+    const actualStarsFound = updatedPlacements.filter(p => p.found).length;
+    
+    // Step 3: Update the member's starsFound counter if it's out of sync
+    if (member.starsFound !== actualStarsFound) {
+      await db.update(familyMembers)
+        .set({ starsFound: actualStarsFound, updatedAt: new Date() })
+        .where(eq(familyMembers.id, memberId));
+      console.log(`Synced starsFound for ${member.displayName}: ${member.starsFound} -> ${actualStarsFound}`);
+    }
+    
+    // Step 4: Check if Legacy skins need to be awarded based on actual stars found
+    const expectedLegacyCount = Math.floor(actualStarsFound / STARS_PER_LEGACY_AVATAR);
+    const currentLegacyCount = (member.earnedLegacySkinIds || []).length;
+    
+    if (expectedLegacyCount > currentLegacyCount) {
+      const newLegacySkins = this.LEGACY_SKIN_IDS.slice(0, expectedLegacyCount);
+      await db.update(familyMembers)
+        .set({ earnedLegacySkinIds: newLegacySkins, updatedAt: new Date() })
+        .where(eq(familyMembers.id, memberId));
+      console.log(`Awarded ${expectedLegacyCount - currentLegacyCount} Legacy skins to ${member.displayName}`);
+    }
+    
+    // Step 5: Add missing star placements if below 48
+    let starsAdded = 0;
+    if (currentCount < TOTAL_HIDDEN_STARS) {
+      // Get all standard (non-legacy, non-starter) skins from database
+      const allSkins = await db.select({ id: skins.id }).from(skins);
+      const standardSkinIds = allSkins
+        .map(s => s.id)
+        .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID);
+      
+      // Find skins that don't already have a star placement
+      const existingSkinIds = existing.map(p => p.skinId);
+      const availableSkinIds = standardSkinIds.filter(id => !existingSkinIds.includes(id));
+      
+      // Calculate how many stars to add
+      const starsToAdd = TOTAL_HIDDEN_STARS - currentCount;
+      
+      if (availableSkinIds.length > 0) {
+        // Randomly select new positions from available skins
+        const shuffled = [...availableSkinIds].sort(() => Math.random() - 0.5);
+        const newPositions = shuffled.slice(0, Math.min(starsToAdd, shuffled.length));
+        
+        // Insert new star placements - mark as found if skin is already discovered
+        for (const skinId of newPositions) {
+          const isDiscovered = discoveredSkinIds.includes(skinId);
+          await db.insert(starPlacements).values({
+            memberId,
+            skinId,
+            found: isDiscovered,
+            foundAt: isDiscovered ? new Date() : null,
+          }).onConflictDoNothing();
+          if (isDiscovered) starsMarkedFound++;
+        }
+        starsAdded = newPositions.length;
+      }
     }
 
-    // Get all standard (non-legacy, non-starter) skins from database
-    const allSkins = await db.select({ id: skins.id }).from(skins);
-    const standardSkinIds = allSkins
-      .map(s => s.id)
-      .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID);
+    const newTotal = currentCount + starsAdded;
+    const parts: string[] = [];
+    if (starsAdded > 0) parts.push(`${starsAdded} placements added`);
+    if (starsMarkedFound > 0) parts.push(`${starsMarkedFound} stars synced`);
+    if (member.starsFound !== actualStarsFound) parts.push(`counter fixed: ${member.starsFound} → ${actualStarsFound + starsMarkedFound}`);
     
-    // Find skins that don't already have a star placement
-    const existingSkinIds = existing.map(p => p.skinId);
-    const availableSkinIds = standardSkinIds.filter(id => !existingSkinIds.includes(id));
+    const message = parts.length > 0 
+      ? `Fixed ${member.displayName}: ${parts.join(', ')}`
+      : `${member.displayName} already has ${newTotal} stars, all synced`;
     
-    // Calculate how many stars to add
-    const starsToAdd = TOTAL_HIDDEN_STARS - currentCount;
-    
-    if (availableSkinIds.length === 0) {
-      return { 
-        totalPlacements: currentCount, 
-        added: 0, 
-        message: `No available skins to add stars for ${member.displayName}` 
-      };
-    }
-
-    // Randomly select new positions from available skins
-    const shuffled = [...availableSkinIds].sort(() => Math.random() - 0.5);
-    const newPositions = shuffled.slice(0, Math.min(starsToAdd, shuffled.length));
-    
-    // Insert new star placements
-    for (const skinId of newPositions) {
-      await db.insert(starPlacements).values({
-        memberId,
-        skinId,
-        found: false,
-      }).onConflictDoNothing();
-    }
-
-    const newTotal = currentCount + newPositions.length;
-    console.log(`Fixed stars for ${member.displayName}: ${currentCount} -> ${newTotal} (added ${newPositions.length})`);
+    console.log(message);
     
     return { 
       totalPlacements: newTotal, 
-      added: newPositions.length, 
-      message: `Fixed ${member.displayName}: added ${newPositions.length} stars (now ${newTotal} total)` 
+      added: starsAdded, 
+      message 
     };
   }
 
