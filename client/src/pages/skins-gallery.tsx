@@ -95,7 +95,7 @@ export default function SkinsGallery() {
   const [celebration, setCelebration] = useState<{ points: number; message: string } | null>(null);
   const [selectedSkinId, setSelectedSkinId] = useState<string | null>(null);
   const [discoverDialogSkin, setDiscoverDialogSkin] = useState<Skin | null>(null);
-  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
+  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number; isRightSide: boolean } | null>(null);
   
   // Detect desktop for sticky behavior (lg breakpoint = 1024px)
   const [isDesktop, setIsDesktop] = useState(false);
@@ -304,10 +304,17 @@ export default function SkinsGallery() {
       // If it's an undiscovered skin that can be discovered, show the popup
       if (canDiscover && !isDiscovered) {
         const rect = e.currentTarget.getBoundingClientRect();
-        // Position popup above the card, centered
+        const viewportWidth = window.innerWidth;
+        // Determine if card is on the right side of the screen (right 40% of viewport)
+        const cardCenterX = rect.left + rect.width / 2;
+        const isRightSide = cardCenterX > viewportWidth * 0.6;
+        
+        // Position popup above the card
+        // For right-side cards: align to right edge, for left-side: align to left edge
         setPopupPosition({
-          x: rect.left + rect.width / 2,
-          y: rect.top - 8
+          x: isRightSide ? rect.right : rect.left,
+          y: rect.top - 8,
+          isRightSide
         });
         setDiscoverDialogSkin(skin);
       } else {
@@ -675,10 +682,19 @@ export default function SkinsGallery() {
             style={{
               left: popupPosition.x,
               top: popupPosition.y,
-              transform: 'translate(-50%, -100%)'
+              // Right-side cards: align right edge, slide from right
+              // Left-side cards: align left edge, slide from left
+              transform: popupPosition.isRightSide 
+                ? 'translate(-100%, -100%)' 
+                : 'translate(0%, -100%)'
             }}
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
+            initial={{ 
+              opacity: 0, 
+              scale: 0.8, 
+              x: popupPosition.isRightSide ? 20 : -20,
+              y: 10 
+            }}
+            animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
             <Button
