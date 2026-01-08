@@ -706,24 +706,6 @@ export function TaskDialog({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="dueDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('tasks.dueDateOptional')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="date"
-                      {...field}
-                      data-testid="input-task-due-date"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="space-y-4">
               <div>
                 <FormLabel>{t('tasks.recurrenceType')}</FormLabel>
@@ -814,6 +796,30 @@ export function TaskDialog({
                 />
               )}
             </div>
+
+            {/* Due Date - Only shown for one-time tasks */}
+            {form.watch("recurrence") === "none" && recurrenceMode === "standard" && (
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('tasks.dueDateOptional')}</FormLabel>
+                    <FormDescription>
+                      {t('tasks.dueDateDesc')}
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                        data-testid="input-task-due-date"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}

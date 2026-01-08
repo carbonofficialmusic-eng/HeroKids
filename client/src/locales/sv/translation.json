@@ -146,6 +146,7 @@
     "pointsValue": "Poäng: {{value}}",
     "pointsQuestion": "Hur många poäng är denna uppgift värd?",
     "dueDateOptional": "Förfallodatum (Valfritt)",
+    "dueDateDesc": "När ska uppgiften vara klar?",
     "recurrenceType": "Upprepningstyp",
     "standardRecurrence": "Standard upprepning",
     "customDaysRecurrence": "Anpassade dagar",

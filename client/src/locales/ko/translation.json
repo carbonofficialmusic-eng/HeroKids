@@ -145,6 +145,7 @@
     "pointsValue": "포인트: {{value}}",
     "pointsQuestion": "이 과제는 몇 포인트의 가치가 있나요?",
     "dueDateOptional": "마감일 (선택사항)",
+    "dueDateDesc": "이 작업은 언제까지 완료해야 하나요?",
     "recurrenceType": "반복 유형",
     "standardRecurrence": "표준 반복",
     "customDaysRecurrence": "맞춤 일수",

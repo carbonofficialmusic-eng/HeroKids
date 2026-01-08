@@ -141,6 +141,7 @@
     "pointsValue": "Puntos: {{value}}",
     "pointsQuestion": "¿Cuántos puntos vale esta tarea?",
     "dueDateOptional": "Fecha Límite (Opcional)",
+    "dueDateDesc": "¿Cuándo debe completarse esta tarea?",
     "recurrenceType": "Tipo de Recurrencia",
     "standardRecurrence": "Recurrencia Estándar",
     "customDaysRecurrence": "Días Personalizados",

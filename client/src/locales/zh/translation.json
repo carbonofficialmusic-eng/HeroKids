@@ -141,6 +141,7 @@
     "pointsValue": "积分：{{value}}",
     "pointsQuestion": "这个任务值多少积分？",
     "dueDateOptional": "截止日期（可选）",
+    "dueDateDesc": "任务应该在什么时候完成？",
     "recurrenceType": "重复类型",
     "standardRecurrence": "标准重复",
     "customDaysRecurrence": "自定义天数",
