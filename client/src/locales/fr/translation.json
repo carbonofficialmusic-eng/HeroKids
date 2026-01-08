@@ -179,7 +179,15 @@
     "multiCompletionNotAvailable": "Non disponible",
     "multiCompletionNotAvailableDesc": "Vous avez besoin d'au moins 2 membres de famille pour créer des tâches à complétion multiple.",
     "multiCompletionDisabled": "Fonction désactivée",
-    "multiCompletionDisabledDesc": "La complétion multiple nécessite au moins 2 membres de famille."
+    "multiCompletionDisabledDesc": "La complétion multiple nécessite au moins 2 membres de famille.",
+    "sharedTaskLabel": "Tâche partagée",
+    "sharedTaskDesc": "Plusieurs enfants réalisent cette tâche ensemble et partagent les points.",
+    "sharedTaskDescDisabled": "Au moins 2 enfants requis pour les tâches partagées.",
+    "sharedTaskDescMutuallyExclusive": "Désactivez d'abord 'Plusieurs membres' ci-dessus.",
+    "selectMembers": "Sélectionner les enfants :",
+    "pointsSplit": "Chaque enfant reçoit {{points}} points (répartis entre {{count}} enfants)",
+    "selectAtLeastTwo": "Sélectionnez au moins 2 enfants pour une tâche partagée",
+    "sharedProgress": "{{completed}}/{{total}} terminé"
   },
   "taskTemplates": {
     "cleanRoom": {

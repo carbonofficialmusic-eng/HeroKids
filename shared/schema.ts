@@ -161,6 +161,8 @@ export const tasks = pgTable("tasks", {
   maxCompletions: integer("max_completions"), // Multi-completion mode: null = assignment-based, number = slot-based (e.g., 3 children can complete)
   completionCount: integer("completion_count").notNull().default(0), // Performance cache: approved completions count
   iconEmoji: varchar("icon_emoji").default("⭐"),
+  isSharedTask: boolean("is_shared_task").notNull().default(false), // Shared task: all members must complete together, points split equally
+  sharedMemberIds: text("shared_member_ids").array(), // Array of member IDs who must complete this shared task together
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

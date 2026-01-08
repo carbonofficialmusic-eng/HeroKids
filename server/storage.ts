@@ -234,6 +234,7 @@ export interface IStorage {
   hasActiveMemberCompletion(taskId: string, memberId: string, txClient?: any): Promise<boolean>;
   getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]>;
   getTaskCompletionsByFamily(familyName: string): Promise<TaskCompletion[]>;
+  getTaskCompletionsByTask(taskId: string): Promise<TaskCompletion[]>;
   getPendingCompletionsByFamily(familyName: string): Promise<any[]>;
   approveTaskCompletion(completionId: string, approvedBy: string): Promise<void>;
   rejectTaskCompletion(completionId: string, approvedBy: string, rejectionReason: string): Promise<void>;
@@ -1153,6 +1154,14 @@ export class DatabaseStorage implements IStorage {
       .from(taskCompletions)
       .innerJoin(familyMembers, eq(taskCompletions.memberId, familyMembers.id))
       .where(eq(familyMembers.familyName, familyName))
+      .orderBy(desc(taskCompletions.completedAt));
+  }
+
+  async getTaskCompletionsByTask(taskId: string): Promise<TaskCompletion[]> {
+    return await db
+      .select()
+      .from(taskCompletions)
+      .where(eq(taskCompletions.taskId, taskId))
       .orderBy(desc(taskCompletions.completedAt));
   }
 

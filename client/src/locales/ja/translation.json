@@ -179,7 +179,15 @@
     "multiCompletionNotAvailable": "利用不可",
     "multiCompletionNotAvailableDesc": "複数完了タスクを作成するには、少なくとも2人の家族メンバーが必要です。",
     "multiCompletionDisabled": "機能が無効",
-    "multiCompletionDisabledDesc": "複数完了には少なくとも2人の家族メンバーが必要です。"
+    "multiCompletionDisabledDesc": "複数完了には少なくとも2人の家族メンバーが必要です。",
+    "sharedTaskLabel": "共有タスク",
+    "sharedTaskDesc": "複数の子どもが一緒にこのタスクを完了し、ポイントを分け合います。",
+    "sharedTaskDescDisabled": "共有タスクには少なくとも2人の子どもが必要です。",
+    "sharedTaskDescMutuallyExclusive": "まず上の「複数メンバー」を無効にしてください。",
+    "selectMembers": "子どもを選択：",
+    "pointsSplit": "各子どもは{{points}}ポイントを獲得（{{count}}人で分割）",
+    "selectAtLeastTwo": "共有タスクには少なくとも2人の子どもを選択してください",
+    "sharedProgress": "{{completed}}/{{total}} 完了"
   },
   "taskTemplates": {
     "cleanRoom": {

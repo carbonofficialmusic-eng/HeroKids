@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Camera, CheckCircle, Zap, Star } from "lucide-react";
+import { Calendar, Camera, CheckCircle, Zap, Star, Users } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
 import { format } from "date-fns";
 import { getAvatarUrl } from "@/lib/skins";
@@ -23,6 +23,15 @@ interface TaskCardProps {
       memberColor: string;
       status: "pending" | "approved" | "rejected";
       completedAt: Date | null;
+    }>;
+    sharedMemberCompletions?: Array<{
+      memberId: string;
+      displayName: string;
+      avatarUrl: string | null;
+      activeSkinId: string | null;
+      useCustomAvatar: boolean;
+      color: string;
+      hasCompleted: boolean;
     }>;
   };
   assignedTo?: FamilyMember;
@@ -155,6 +164,43 @@ export function TaskCard({
                       {completion.memberDisplayName}
                       {completion.status === "pending" && " ⏳"}
                       {completion.status === "approved" && " ✓"}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Shared Task Progress */}
+            {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && (
+              <div className="mb-2" data-testid={`shared-progress-${task.id}`}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {t('tasks.sharedProgress', {
+                      completed: task.sharedMemberCompletions.filter(m => m.hasCompleted).length,
+                      total: task.sharedMemberCompletions.length
+                    })}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {task.sharedMemberCompletions.map((member) => (
+                    <Badge 
+                      key={member.memberId} 
+                      variant={member.hasCompleted ? "default" : "outline"}
+                      className="gap-1.5 text-xs"
+                      data-testid={`shared-member-${member.memberId}`}
+                    >
+                      <Avatar className="h-4 w-4">
+                        <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar)} />
+                        <AvatarFallback 
+                          className="text-xs text-white font-bold"
+                          style={{ backgroundColor: member.color }}
+                        >
+                          {member.displayName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      {member.displayName}
+                      {member.hasCompleted ? " ✓" : ""}
                     </Badge>
                   ))}
                 </div>

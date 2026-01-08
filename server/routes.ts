@@ -1424,6 +1424,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               }
               
+              // Shared tasks - check each shared member's completion status
+              if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+                const sharedMemberCompletions = await Promise.all(
+                  task.sharedMemberIds.map(async (memberId: string) => {
+                    const sharedMember = await storage.getFamilyMemberById(memberId);
+                    if (!sharedMember) return null;
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    return {
+                      memberId,
+                      displayName: sharedMember.displayName,
+                      avatarUrl: sharedMember.avatarUrl,
+                      activeSkinId: sharedMember.activeSkinId,
+                      useCustomAvatar: sharedMember.useCustomAvatar,
+                      color: sharedMember.color,
+                      hasCompleted: memberStatus === "approved" || memberStatus === "pending",
+                    };
+                  })
+                );
+                
+                const allCompleted = sharedMemberCompletions.filter(m => m?.hasCompleted).length === task.sharedMemberIds.length;
+                
+                return {
+                  ...task,
+                  remainingSlots: null,
+                  memberHasCompleted: allCompleted,
+                  memberCompletionStatus: allCompleted ? "approved" : completionStatus,
+                  completions: [],
+                  sharedMemberCompletions: sharedMemberCompletions.filter(Boolean),
+                };
+              }
+
               // Normal mode (maxCompletions == null) - Standard tasks: if ANYONE completes it, it's done for everyone
               // Use family-wide completion status for normal tasks
               const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
@@ -1504,6 +1535,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               }
               
+              // Shared tasks - check each shared member's completion status (parent view)
+              if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+                const sharedMemberCompletions = await Promise.all(
+                  task.sharedMemberIds.map(async (memberId: string) => {
+                    const sharedMember = await storage.getFamilyMemberById(memberId);
+                    if (!sharedMember) return null;
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    return {
+                      memberId,
+                      displayName: sharedMember.displayName,
+                      avatarUrl: sharedMember.avatarUrl,
+                      activeSkinId: sharedMember.activeSkinId,
+                      useCustomAvatar: sharedMember.useCustomAvatar,
+                      color: sharedMember.color,
+                      hasCompleted: memberStatus === "approved" || memberStatus === "pending",
+                    };
+                  })
+                );
+                
+                const allCompleted = sharedMemberCompletions.filter(m => m?.hasCompleted).length === task.sharedMemberIds.length;
+                
+                return {
+                  ...task,
+                  remainingSlots: null,
+                  memberHasCompleted: allCompleted,
+                  memberCompletionStatus: allCompleted ? "approved" : completionStatus,
+                  completions: [],
+                  sharedMemberCompletions: sharedMemberCompletions.filter(Boolean),
+                };
+              }
+
               // For non-multi-completion tasks - if ANYONE completes it, it's done for everyone
               const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
               const familyHasCompleted = familyCompletionStatus === "approved";
@@ -1871,6 +1933,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // For shared tasks, verify member is assigned and hasn't already completed
+      if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+        if (!task.sharedMemberIds.includes(member.id)) {
+          return res.status(403).json({ message: "Forbidden: You are not assigned to this shared task" });
+        }
+        
+        const hasAlreadyCompleted = await storage.hasActiveMemberCompletion(taskId, member.id);
+        if (hasAlreadyCompleted) {
+          return res.status(422).json({ message: "Validation failed: You have already completed your part of this task" });
+        }
+      }
+      
       // Validate photo proof
       if (task.requiresProof) {
         if (!proofPhotoUrl) {
@@ -1893,11 +1967,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         uploadedPhotos.delete(proofPhotoUrl);
       }
       
+      // Calculate points - for shared tasks, split equally among members
+      let pointsPerMember = task.points;
+      if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 1) {
+        pointsPerMember = Math.floor(task.points / task.sharedMemberIds.length);
+      }
+      
       // Create completion record (handles approval, points, and completionCount in transaction)
       const completion = await storage.createTaskCompletion({
         taskId: task.id,
         memberId: member.id,
-        pointsEarned: task.points,
+        pointsEarned: pointsPerMember,
         proofPhotoUrl: proofPhotoUrl || null,
       });
       
@@ -1960,10 +2040,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Update the task's nextAvailableDate - task stays visible but unavailable
           await storage.updateTaskNextAvailableDate(taskId, nextAvailableDate);
         }
-      } else if (task.maxCompletions === null) {
-        // Only non-recurring, non-multi-completion tasks are marked as completed immediately
+      } else if (task.maxCompletions === null && !task.isSharedTask) {
+        // Only non-recurring, non-multi-completion, non-shared tasks are marked as completed immediately
         // Multi-completion tasks manage their own status in _approveCompletionInternal
         await storage.updateTaskStatus(taskId, "completed");
+      } else if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+        // For shared tasks, check if all members have completed
+        const allCompletions = await storage.getTaskCompletionsByTask(taskId);
+        const completedMemberIds = allCompletions.map(c => c.memberId);
+        const allMembersCompleted = task.sharedMemberIds.every(id => completedMemberIds.includes(id));
+        
+        if (allMembersCompleted && task.recurrence === "none") {
+          // All members completed - mark task as completed (for non-recurring)
+          await storage.updateTaskStatus(taskId, "completed");
+        }
       }
       
       // Get updated member data

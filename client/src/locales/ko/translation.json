@@ -183,7 +183,15 @@
     "multiCompletionNotAvailable": "사용 불가",
     "multiCompletionNotAvailableDesc": "다중 완료 과제를 만들려면 최소 2명의 가족 구성원이 필요합니다.",
     "multiCompletionDisabled": "기능 비활성화됨",
-    "multiCompletionDisabledDesc": "다중 완료는 최소 2명의 가족 구성원이 필요합니다."
+    "multiCompletionDisabledDesc": "다중 완료는 최소 2명의 가족 구성원이 필요합니다.",
+    "sharedTaskLabel": "공유 과제",
+    "sharedTaskDesc": "여러 자녀가 함께 이 과제를 완료하고 포인트를 나눕니다.",
+    "sharedTaskDescDisabled": "공유 과제에는 최소 2명의 자녀가 필요합니다.",
+    "sharedTaskDescMutuallyExclusive": "먼저 위의 '다중 완료'를 비활성화하세요.",
+    "selectMembers": "자녀 선택:",
+    "pointsSplit": "각 자녀가 {{points}} 포인트를 받습니다 ({{count}}명이 분할)",
+    "selectAtLeastTwo": "공유 과제에는 최소 2명의 자녀를 선택하세요",
+    "sharedProgress": "{{completed}}/{{total}} 완료"
   },
   "taskTemplates": {
     "cleanRoom": {

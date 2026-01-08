@@ -54,6 +54,8 @@ const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
   recurrenceDays: z.number().int().min(1).max(365).optional(),
   maxCompletions: z.number().int().min(2).max(20).optional(),
+  isSharedTask: z.boolean().optional(),
+  sharedMemberIds: z.array(z.string()).optional(),
 });
 
 type TaskFormData = z.infer<typeof taskFormSchema>;
@@ -166,6 +168,14 @@ export function TaskDialog({
   // Local state for maxCompletions input (allows empty string during editing)
   const [maxCompletionsInput, setMaxCompletionsInput] = useState<string>("");
   
+  // State for shared task member selection
+  const [selectedSharedMembers, setSelectedSharedMembers] = useState<string[]>([]);
+  
+  // Filter only children for shared task selection
+  const childMembers = useMemo(() => {
+    return familyMembers.filter(m => m.role === 'child');
+  }, [familyMembers]);
+  
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
@@ -182,6 +192,8 @@ export function TaskDialog({
       requiresApproval: true,
       iconEmoji: "⭐",
       maxCompletions: undefined,
+      isSharedTask: false,
+      sharedMemberIds: [],
     },
   });
 
@@ -226,9 +238,13 @@ export function TaskDialog({
           requiresApproval: editingTask.requiresApproval ?? true,
           iconEmoji: editingTask.iconEmoji || "⭐",
           maxCompletions: clampedMaxCompletions,
+          isSharedTask: editingTask.isSharedTask || false,
+          sharedMemberIds: editingTask.sharedMemberIds || [],
         });
         // Sync local input state with field value
         setMaxCompletionsInput(clampedMaxCompletions !== undefined ? String(clampedMaxCompletions) : "");
+        // Sync shared members state
+        setSelectedSharedMembers(editingTask.sharedMemberIds || []);
       } else {
         setRecurrenceMode("standard");
         form.reset({
@@ -245,9 +261,13 @@ export function TaskDialog({
           requiresApproval: true,
           iconEmoji: "⭐",
           maxCompletions: undefined,
+          isSharedTask: false,
+          sharedMemberIds: [],
         });
         // Clear local input state for new task
         setMaxCompletionsInput("");
+        // Clear shared members state
+        setSelectedSharedMembers([]);
       }
     }
   }, [open, editingTask, familyName, createdBy, totalMemberCount]);
@@ -260,6 +280,16 @@ export function TaskDialog({
     } else {
       submitData.recurrence = "none";
     }
+    
+    // Handle shared task - sync selectedSharedMembers to form data
+    if (submitData.isSharedTask) {
+      submitData.sharedMemberIds = selectedSharedMembers;
+      // Clear maxCompletions when using shared task (they are mutually exclusive)
+      submitData.maxCompletions = undefined;
+    } else {
+      submitData.sharedMemberIds = [];
+    }
+    
     onSubmit(submitData);
   };
   
@@ -444,6 +474,91 @@ export function TaskDialog({
                         </div>
                       )}
                     </div>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+
+            {/* Shared Task Section */}
+            <FormField
+              control={form.control}
+              name="isSharedTask"
+              render={({ field }) => {
+                const isDisabled = childMembers.length < 2;
+                const isSharedEnabled = field.value === true;
+                const maxCompletionsValue = form.watch("maxCompletions");
+                const hasMaxCompletions = typeof maxCompletionsValue === 'number';
+                
+                return (
+                  <FormItem className="space-y-3">
+                    <FormLabel className={isDisabled || hasMaxCompletions ? "text-muted-foreground" : ""}>
+                      {t('tasks.sharedTaskLabel')}
+                    </FormLabel>
+                    <FormDescription>
+                      {isDisabled ? (
+                        `⚠️ ${t('tasks.sharedTaskDescDisabled')}`
+                      ) : hasMaxCompletions ? (
+                        `⚠️ ${t('tasks.sharedTaskDescMutuallyExclusive')}`
+                      ) : (
+                        t('tasks.sharedTaskDesc')
+                      )}
+                    </FormDescription>
+                    <div className="flex items-center gap-4">
+                      <Switch
+                        checked={isSharedEnabled}
+                        disabled={isDisabled || hasMaxCompletions}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          if (!checked) {
+                            setSelectedSharedMembers([]);
+                          }
+                        }}
+                        data-testid="toggle-shared-task"
+                      />
+                    </div>
+                    
+                    {/* Member Selection */}
+                    {isSharedEnabled && !isDisabled && (
+                      <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+                        <FormLabel className="text-sm">{t('tasks.selectMembers')}</FormLabel>
+                        <div className="flex flex-wrap gap-2">
+                          {childMembers.map((child) => {
+                            const isSelected = selectedSharedMembers.includes(child.id);
+                            return (
+                              <Badge
+                                key={child.id}
+                                variant={isSelected ? "default" : "outline"}
+                                className="cursor-pointer transition-all"
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setSelectedSharedMembers(prev => prev.filter(id => id !== child.id));
+                                  } else {
+                                    setSelectedSharedMembers(prev => [...prev, child.id]);
+                                  }
+                                }}
+                                data-testid={`badge-member-${child.id}`}
+                              >
+                                {child.displayName}
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                        {selectedSharedMembers.length >= 2 && (
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {t('tasks.pointsSplit', { 
+                              points: Math.floor((form.watch("points") || 10) / selectedSharedMembers.length),
+                              count: selectedSharedMembers.length
+                            })}
+                          </p>
+                        )}
+                        {selectedSharedMembers.length < 2 && (
+                          <p className="text-xs text-destructive mt-2">
+                            {t('tasks.selectAtLeastTwo')}
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>
                 );
