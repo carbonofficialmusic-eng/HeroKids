@@ -771,6 +771,7 @@ export const notificationTypeEnum = pgEnum("notification_type", [
   "task_rejected",       // Parent rejected a task
   "reward_redeemed",     // Child redeemed a reward
   "reward_request",      // Child requests a new reward
+  "reward_created",      // Parent created a new reward
   "reward_sharing",      // Child offers to share a reward
   "achievement_earned",  // Child earned an achievement
   "points_milestone",    // Child reached a points milestone

@@ -3092,6 +3092,19 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Create notification for all children in family
+  async createNotificationForAllChildren(familyName: string, notificationData: Omit<InsertNotification, 'targetMemberId'>): Promise<void> {
+    const members = await this.getFamilyMembersByFamily(familyName);
+    const children = members.filter(m => m.role === 'child');
+    
+    for (const child of children) {
+      await db.insert(notifications).values({
+        ...notificationData,
+        targetMemberId: child.id,
+      });
+    }
+  }
+
   async markNotificationAsRead(notificationId: string): Promise<void> {
     await db
       .update(notifications)

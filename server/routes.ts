@@ -42,6 +42,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_offer.message": "\"{{reward}}\" is available to share",
     "reward_sharing_join.title": "{{name}} joined your shared reward!",
     "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "New reward available!",
+    "reward_created.message": "\"{{reward}}\" for {{points}} points",
     "default_reason": "Did not meet expectations",
   },
   de: {
@@ -61,6 +63,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_offer.message": "\"{{reward}}\" kann geteilt werden",
     "reward_sharing_join.title": "{{name}} macht bei deiner Belohnung mit!",
     "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "Neue Belohnung verfügbar!",
+    "reward_created.message": "\"{{reward}}\" für {{points}} Punkte",
     "default_reason": "Entspricht nicht den Erwartungen",
   },
   fr: {
@@ -80,6 +84,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_offer.message": "\"{{reward}}\" est disponible au partage",
     "reward_sharing_join.title": "{{name}} participe à ta récompense !",
     "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "Nouvelle récompense disponible !",
+    "reward_created.message": "\"{{reward}}\" pour {{points}} points",
     "default_reason": "Ne répond pas aux attentes",
   },
   es: {
@@ -99,6 +105,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_offer.message": "\"{{reward}}\" está disponible para compartir",
     "reward_sharing_join.title": "¡{{name}} se unió a tu recompensa compartida!",
     "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "¡Nueva recompensa disponible!",
+    "reward_created.message": "\"{{reward}}\" por {{points}} puntos",
     "default_reason": "No cumple las expectativas",
   },
   ja: {
@@ -118,6 +126,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_offer.message": "「{{reward}}」を共有できます",
     "reward_sharing_join.title": "{{name}}があなたのご褒美に参加しました！",
     "reward_sharing_join.message": "「{{reward}}」",
+    "reward_created.title": "新しいご褒美が追加されました！",
+    "reward_created.message": "「{{reward}}」（{{points}}ポイント）",
     "default_reason": "期待に沿っていません",
   },
   zh: {
@@ -137,6 +147,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_offer.message": "「{{reward}}」可以分享",
     "reward_sharing_join.title": "{{name}}加入了你的共享奖励！",
     "reward_sharing_join.message": "「{{reward}}」",
+    "reward_created.title": "新奖励可用！",
+    "reward_created.message": "「{{reward}}」{{points}}积分",
     "default_reason": "未达到预期",
   },
   ko: {
@@ -156,6 +168,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_offer.message": "\"{{reward}}\"을(를) 공유할 수 있어요",
     "reward_sharing_join.title": "{{name}}이(가) 공유 보상에 참여했어요!",
     "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "새로운 보상 등록!",
+    "reward_created.message": "\"{{reward}}\" {{points}}포인트",
     "default_reason": "기대에 미치지 못함",
   },
   sv: {
@@ -175,6 +189,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_offer.message": "\"{{reward}}\" finns att dela",
     "reward_sharing_join.title": "{{name}} gick med i din delade belöning!",
     "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "Ny belöning tillgänglig!",
+    "reward_created.message": "\"{{reward}}\" för {{points}} poäng",
     "default_reason": "Uppfyller inte förväntningarna",
   },
 };
@@ -2301,6 +2317,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: "reward_created",
         reward,
       });
+      
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || 'en';
+      
+      // Notify all children about the new reward
+      await storage.createNotificationForAllChildren(member.familyName, {
+        familyName: member.familyName,
+        type: "reward_created",
+        title: translateNotification(lang, "reward_created.title", {}),
+        message: translateNotification(lang, "reward_created.message", { reward: reward.title, points: reward.pointThreshold }),
+        relatedRewardId: reward.id,
+      });
+      
+      // Broadcast notification update
+      broadcastToFamily(member.familyName, { type: "notification_update" });
       
       res.json(reward);
     } catch (error: any) {
