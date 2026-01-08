@@ -143,13 +143,16 @@ export function ProfileMenu({
           )}
           <span>{theme === "dark" ? t("settings.lightMode") : t("settings.darkMode")}</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => (window.location.href = "/api/logout")}
-          data-testid="menu-item-logout"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>{t("auth.logout")}</span>
-        </DropdownMenuItem>
+        {/* Only show logout for parents - children use "Switch Member" instead */}
+        {isParent && (
+          <DropdownMenuItem
+            onClick={() => (window.location.href = "/api/logout")}
+            data-testid="menu-item-logout"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>{t("auth.logout")}</span>
+          </DropdownMenuItem>
+        )}
         
         {/* Admin Section (separated at bottom) */}
         {isParent && (
