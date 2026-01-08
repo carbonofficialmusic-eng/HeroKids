@@ -295,7 +295,7 @@ export default function Approvals() {
                       {request.description && (
                         <p className="text-muted-foreground mb-4">{request.description}</p>
                       )}
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <Button
                           variant="outline"
                           onClick={() => handleEditRewardRequest(request)}
@@ -307,14 +307,13 @@ export default function Approvals() {
                         <Button
                           onClick={() => approveRewardRequestMutation.mutate(request.id)}
                           disabled={approveRewardRequestMutation.isPending}
-                          className="flex-1"
                           data-testid={`button-approve-reward-${request.id}`}
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
                           {t("approvals.approveReward")}
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="destructive"
                           onClick={() => declineRewardRequestMutation.mutate(request.id)}
                           disabled={declineRewardRequestMutation.isPending}
                           data-testid={`button-decline-reward-${request.id}`}
