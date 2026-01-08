@@ -64,6 +64,7 @@ const notificationIcons: Record<string, typeof Bell> = {
   task_rejected: Clock,
   reward_redeemed: Gift,
   reward_sharing: Share2,
+  reward_request: Gift,
   achievement_earned: Trophy,
   points_milestone: Star,
   member_joined: UserPlus,
@@ -79,23 +80,33 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
   const locale = localeMap[familyLanguage] || localeMap.en;
 
   const getNavigationRoute = (notification: Notification): string | null => {
+    // Children should always go to kid-dashboard pages
+    const childDashboard = "/kid-dashboard";
+    const parentDashboard = "/dashboard";
+    
     switch (notification.type) {
       case "task_pending":
       case "task_completed":
-        // Only parents should go to /approvals - children go to dashboard
-        return memberRole === "parent" ? "/approvals" : "/dashboard";
+        // Only parents should go to /approvals - children go to kid-dashboard
+        return memberRole === "parent" ? "/approvals" : childDashboard;
       case "reward_redeemed":
       case "reward_sharing":
-        return "/rewards-board";
+        // Parents go to rewards-board, children go to kid-dashboard (rewards section)
+        return memberRole === "parent" ? "/rewards-board" : childDashboard;
       case "task_approved":
       case "task_rejected":
-        return "/dashboard";
+        // Children see their task status on kid-dashboard
+        return memberRole === "parent" ? parentDashboard : childDashboard;
       case "achievement_earned":
-        return "/achievements";
+        // Parents have achievements page, children see it on kid-dashboard
+        return memberRole === "parent" ? "/achievements" : childDashboard;
+      case "reward_request":
+        // Parents go to approvals for reward requests, children go to kid-dashboard
+        return memberRole === "parent" ? "/approvals" : childDashboard;
       case "points_milestone":
       case "member_joined":
       default:
-        return "/dashboard";
+        return memberRole === "parent" ? parentDashboard : childDashboard;
     }
   };
 
