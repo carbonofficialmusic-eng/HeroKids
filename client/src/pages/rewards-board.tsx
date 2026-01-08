@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -109,6 +110,43 @@ export default function RewardsBoard() {
     enabled: !!member,
   });
 
+  // Track which participant counts we've already acknowledged to prevent repeated API calls
+  const acknowledgedParticipantsRef = useRef<string>("");
+
+  // Auto-acknowledge sharing notifications when user views their shared rewards with participants
+  // This removes "X joined your reward" notifications when the initiator sees the shared rewards section
+  useEffect(() => {
+    if (!member || !sharedRewards.length) return;
+    
+    // Find user's own shared rewards that have participants (excluding themselves)
+    const ownSharedWithParticipants = sharedRewards.filter(sr => 
+      sr.member.id === member.id && 
+      sr.participants && 
+      sr.participants.some(p => p.memberId !== member.id)
+    );
+    
+    if (ownSharedWithParticipants.length === 0) return;
+    
+    // Create a fingerprint of current participants to detect changes
+    const participantFingerprint = ownSharedWithParticipants
+      .map(sr => `${sr.id}:${sr.participants.map(p => p.memberId).sort().join(',')}`)
+      .sort()
+      .join('|');
+    
+    // Only acknowledge if participant state has changed
+    if (participantFingerprint === acknowledgedParticipantsRef.current) return;
+    acknowledgedParticipantsRef.current = participantFingerprint;
+    
+    // Acknowledge that they've seen who joined
+    apiRequest("POST", "/api/notifications/acknowledge-sharing", {})
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      })
+      .catch(() => {
+        // Ignore errors - notifications are not critical
+      });
+  }, [member, sharedRewards]);
+
   // Update redemption status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
@@ -181,11 +219,18 @@ export default function RewardsBoard() {
     mutationFn: async (redemptionId: string) => {
       return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/finalize`, {});
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Acknowledge sharing notifications (they've seen who joined)
+      try {
+        await apiRequest("POST", "/api/notifications/acknowledge-sharing", {});
+      } catch (e) {
+        // Ignore errors - notifications are not critical
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       toast({
         title: t("rewardsBoard.sharingFinalized"),
         description: t("rewardsBoard.sharingFinalizedDesc"),
@@ -205,9 +250,16 @@ export default function RewardsBoard() {
     mutationFn: async (redemptionId: string) => {
       return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/cancel-sharing`, {});
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Acknowledge sharing notifications (they've seen who joined)
+      try {
+        await apiRequest("POST", "/api/notifications/acknowledge-sharing", {});
+      } catch (e) {
+        // Ignore errors - notifications are not critical
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       toast({
         title: t("kidDashboard.sharingCancelled"),
         description: t("kidDashboard.canRedeemSolo"),
