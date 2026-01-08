@@ -94,8 +94,7 @@ export default function SkinsGallery() {
   const { t } = useTranslation();
   const [celebration, setCelebration] = useState<{ points: number; message: string } | null>(null);
   const [selectedSkinId, setSelectedSkinId] = useState<string | null>(null);
-  const [discoverDialogSkin, setDiscoverDialogSkin] = useState<Skin | null>(null);
-  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
+  const [discoverDialogSkinId, setDiscoverDialogSkinId] = useState<string | null>(null);
   
   // Detect desktop for sticky behavior (lg breakpoint = 1024px)
   const [isDesktop, setIsDesktop] = useState(false);
@@ -146,8 +145,7 @@ export default function SkinsGallery() {
       return await res.json();
     },
     onSuccess: (result) => {
-      setDiscoverDialogSkin(null); // Close the popup
-      setPopupPosition(null);
+      setDiscoverDialogSkinId(null); // Close the popup
       const skin = data?.skins.find(s => s.id === result.skinId);
       const skinName = skin?.id ? t(`skinNames.${skin.id}`) : "Skin";
       
@@ -303,26 +301,14 @@ export default function SkinsGallery() {
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
       // If it's an undiscovered skin that can be discovered, show the popup
       if (canDiscover && !isDiscovered) {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const cardCenterX = rect.left + rect.width / 2;
-        const viewportWidth = window.innerWidth;
-        
-        // Estimate button width (~140px) and clamp position to stay within viewport
-        const buttonHalfWidth = 70;
-        const margin = 16;
-        const minX = margin + buttonHalfWidth;
-        const maxX = viewportWidth - margin - buttonHalfWidth;
-        const clampedX = Math.max(minX, Math.min(cardCenterX, maxX));
-        
-        setPopupPosition({
-          x: clampedX,
-          y: rect.top - 8
-        });
-        setDiscoverDialogSkin(skin);
+        e.stopPropagation();
+        setDiscoverDialogSkinId(skin.id);
       } else {
         setSelectedSkinId(skin.id);
       }
     };
+    
+    const isShowingDiscoverButton = discoverDialogSkinId === skin.id;
 
     return (
       <div
@@ -330,14 +316,14 @@ export default function SkinsGallery() {
         onClick={handleClick}
         className={`
           relative cursor-pointer transition-all duration-200
-          rounded-md overflow-hidden border-2
+          rounded-md border-2
           ${isSelected ? "border-primary border-4 ring-4 ring-primary/60 scale-110 shadow-lg shadow-primary/30" : "border-transparent"}
           ${isActive ? "ring-4 ring-yellow-400 ring-offset-2" : ""}
           hover:scale-105 hover:border-primary/50
         `}
         data-testid={`mini-skin-${skin.id}`}
       >
-        <div className="aspect-square w-full relative">
+        <div className="aspect-square w-full relative overflow-hidden rounded-md">
           {isDiscovered ? (
             SKIN_IMAGES[skin.id] ? (
               <img
@@ -387,6 +373,36 @@ export default function SkinsGallery() {
             </div>
           </div>
         )}
+        
+        {/* Discover button - positioned above the card */}
+        <AnimatePresence>
+          {isShowingDiscoverButton && (
+            <motion.div
+              className="absolute -top-2 left-1/2 z-50"
+              style={{ transform: 'translate(-50%, -100%)' }}
+              initial={{ opacity: 0, scale: 0.8, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 10 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
+              <Button
+                size="sm"
+                className="relative ring-2 ring-white/30 shadow-lg shadow-primary/40 animate-pulse whitespace-nowrap"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  discoverSkinMutation.mutate(skin.id);
+                }}
+                disabled={discoverSkinMutation.isPending}
+                data-testid="button-discover-popup"
+              >
+                {discoverSkinMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                ) : null}
+                {t('skins.discover')}
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };
@@ -670,45 +686,12 @@ export default function SkinsGallery() {
         </div>
       </div>
 
-      {/* Discovery Popup - positioned near clicked card */}
-      {discoverDialogSkin && popupPosition && (
+      {/* Click-outside handler to dismiss discover button */}
+      {discoverDialogSkinId && (
         <div 
-          className="fixed inset-0 z-50"
-          onClick={() => {
-            setDiscoverDialogSkin(null);
-            setPopupPosition(null);
-          }}
-        >
-          <motion.div
-            className="absolute"
-            style={{
-              left: popupPosition.x,
-              top: popupPosition.y,
-              transform: 'translate(-50%, -100%)'
-            }}
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          >
-            <Button
-              size="sm"
-              className="relative ring-2 ring-white/30 shadow-lg shadow-primary/40 animate-pulse"
-              onClick={(e) => {
-                e.stopPropagation();
-                discoverDialogSkin && discoverSkinMutation.mutate(discoverDialogSkin.id);
-              }}
-              disabled={discoverSkinMutation.isPending}
-              data-testid="button-discover-popup"
-            >
-              {discoverSkinMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Sparkles className="h-4 w-4 mr-2" />
-              )}
-              {t('skins.discover')}
-            </Button>
-          </motion.div>
-        </div>
+          className="fixed inset-0 z-40"
+          onClick={() => setDiscoverDialogSkinId(null)}
+        />
       )}
 
       {celebration && (
