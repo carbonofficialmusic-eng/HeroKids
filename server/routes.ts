@@ -4089,7 +4089,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const goals = await storage.getFamilyGoalsByFamily(member.familyName);
-      res.json(goals);
+      
+      // Get family timezone for correct period calculation
+      const family = await storage.getFamily(member.familyName);
+      const familyTimezone = family?.timezone || "Europe/Berlin";
+      const now = new Date();
+      
+      // For each goal, fetch the contributions for the current period
+      const goalsWithContributions = await Promise.all(goals.map(async (goal) => {
+        const period = goal.contributionPeriod === "weekly"
+          ? formatInTimeZone(now, familyTimezone, "RRRR-'W'II")
+          : formatInTimeZone(now, familyTimezone, "yyyy-MM");
+        
+        const contributions = await storage.getGoalContributionsByGoalAndPeriod(goal.id, period);
+        
+        return {
+          ...goal,
+          contributions,
+          currentPeriod: period,
+        };
+      }));
+      
+      res.json(goalsWithContributions);
     } catch (error: any) {
       console.error("Error fetching family goals:", error);
       res.status(500).json({ message: "Failed to fetch family goals" });

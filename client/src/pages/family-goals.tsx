@@ -35,11 +35,11 @@ import { Link } from "wouter";
 import type { FamilyGoal, GoalContribution, FamilyMember } from "@shared/schema";
 import { FamilyGoalDialog } from "@/components/family-goal-dialog";
 
-interface GoalWithContributions {
-  goal: FamilyGoal;
+// Extended FamilyGoal type with contributions from API
+type FamilyGoalWithContributions = FamilyGoal & {
   contributions: GoalContribution[];
   currentPeriod: string;
-}
+};
 
 export default function FamilyGoals() {
   const { t } = useTranslation();
@@ -63,7 +63,7 @@ export default function FamilyGoals() {
     enabled: !!member,
   });
 
-  const { data: goals = [], isLoading } = useQuery<FamilyGoal[]>({
+  const { data: goals = [], isLoading } = useQuery<FamilyGoalWithContributions[]>({
     queryKey: ["/api/family-goals"],
     enabled: !!member,
   });
@@ -163,6 +163,28 @@ export default function FamilyGoals() {
     }
   };
 
+  // Calculate when the next contribution period starts
+  const getNextContributionDate = (contributionPeriod: "weekly" | "monthly") => {
+    const now = new Date();
+    if (contributionPeriod === "weekly") {
+      // Next Monday
+      const daysUntilMonday = (8 - now.getDay()) % 7 || 7;
+      const nextMonday = new Date(now);
+      nextMonday.setDate(now.getDate() + daysUntilMonday);
+      return nextMonday.toLocaleDateString();
+    } else {
+      // First day of next month
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      return nextMonth.toLocaleDateString();
+    }
+  };
+
+  // Check if current member has already contributed to a goal this period
+  const hasContributedThisPeriod = (goal: FamilyGoalWithContributions) => {
+    if (!member || !goal.contributions) return false;
+    return goal.contributions.some(c => c.memberId === member.id);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -233,8 +255,10 @@ export default function FamilyGoals() {
         <div className="space-y-6">
           {activeGoals.map((goal) => {
             const progress = calculateProgress(goal);
-            const currentPeriod = getCurrentPeriod(goal.contributionPeriod);
+            const currentPeriod = goal.currentPeriod || getCurrentPeriod(goal.contributionPeriod);
             const isCompleted = goal.currentPoints >= goal.targetPoints;
+            const alreadyContributed = hasContributedThisPeriod(goal);
+            const contributors = goal.contributions || [];
             
             return (
               <Card key={goal.id} className="overflow-hidden relative" data-testid={`card-goal-${goal.id}`}>
@@ -294,22 +318,58 @@ export default function FamilyGoals() {
                       <Progress value={progress} className="h-3" />
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t">
+                    {/* Contributors list - shows who has contributed this period */}
+                    {contributors.length > 0 && (
+                      <div className="flex items-center gap-2 pt-2">
+                        <span className="text-sm text-muted-foreground">{t("familyGoals.contributedThisPeriod")}:</span>
+                        <div className="flex -space-x-2">
+                          {contributors.map((contribution) => {
+                            const contributorMember = getMemberById(contribution.memberId);
+                            return (
+                              <Avatar 
+                                key={contribution.id} 
+                                className="h-7 w-7 border-2 border-background"
+                                title={contributorMember?.displayName}
+                              >
+                                <AvatarFallback 
+                                  className="text-white text-xs font-bold"
+                                  style={{ backgroundColor: contributorMember?.color || "#888" }}
+                                >
+                                  {contributorMember?.displayName?.charAt(0).toUpperCase() || "?"}
+                                </AvatarFallback>
+                              </Avatar>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t">
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">
                           {formatPeriod(currentPeriod, goal.contributionPeriod)}
                         </span>
                       </div>
+                      
                       {!isCompleted && member && (
-                        <Button
-                          onClick={() => contributeMutation.mutate(goal.id)}
-                          disabled={contributeMutation.isPending || member.totalPoints < goal.contributionAmount}
-                          data-testid={`button-contribute-${goal.id}`}
-                        >
-                          <TrendingUp className="h-4 w-4 mr-2" />
-                          {t("familyGoals.contributePoints", { amount: goal.contributionAmount })}
-                        </Button>
+                        alreadyContributed ? (
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/50 border border-border/50">
+                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <span className="text-sm text-muted-foreground">
+                              {t("familyGoals.nextContribution", { date: getNextContributionDate(goal.contributionPeriod) })}
+                            </span>
+                          </div>
+                        ) : (
+                          <Button
+                            onClick={() => contributeMutation.mutate(goal.id)}
+                            disabled={contributeMutation.isPending || member.totalPoints < goal.contributionAmount}
+                            data-testid={`button-contribute-${goal.id}`}
+                          >
+                            <TrendingUp className="h-4 w-4 mr-2" />
+                            {t("familyGoals.contributePoints", { amount: goal.contributionAmount })}
+                          </Button>
+                        )
                       )}
                     </div>
                   </div>
