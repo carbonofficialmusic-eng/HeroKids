@@ -2660,6 +2660,7 @@ export class DatabaseStorage implements IStorage {
   async initializeStarPlacements(memberId: string): Promise<void> {
     // Get all standard (non-legacy) skins from database, excluding the starter skin
     const allSkins = await db.select({ id: skins.id }).from(skins);
+    const allSkinIds = new Set(allSkins.map(s => s.id));
     const standardSkinIds = allSkins
       .map(s => s.id)
       .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID);
@@ -2671,19 +2672,36 @@ export class DatabaseStorage implements IStorage {
     // Check if member already has star placements
     const existing = await this.getStarPlacementsByMember(memberId);
     
-    // If member has correct number of stars or more, skip initialization
-    if (existing.length >= TOTAL_HIDDEN_STARS) {
+    // CRITICAL: Remove any invalid placements (Legacy skins, starter skin, or non-existent skins)
+    // These skins can never be "discovered" so stars on them are permanently unreachable
+    const invalidPlacements = existing.filter(p => 
+      this.LEGACY_SKIN_IDS.includes(p.skinId) || 
+      p.skinId === this.STARTER_SKIN_ID ||
+      !allSkinIds.has(p.skinId)
+    );
+    
+    if (invalidPlacements.length > 0) {
+      console.log(`Removing ${invalidPlacements.length} invalid star placements for member ${memberId} (Legacy/starter/orphaned skins)`);
+      for (const placement of invalidPlacements) {
+        await db.delete(starPlacements).where(eq(starPlacements.id, placement.id));
+      }
+    }
+    
+    // Re-fetch after cleanup
+    const validExisting = await this.getStarPlacementsByMember(memberId);
+    
+    // If member has correct number of valid stars, skip initialization
+    if (validExisting.length >= TOTAL_HIDDEN_STARS) {
       return; // Already fully initialized
     }
     
-    // If member has some stars but less than TOTAL_HIDDEN_STARS, add more
-    // This handles the migration from 32 to 48 stars
-    if (existing.length > 0 && existing.length < TOTAL_HIDDEN_STARS) {
-      const existingSkinIds = existing.map(p => p.skinId);
-      const availableSkinIds = standardSkinIds.filter(id => !existingSkinIds.includes(id));
-      const starsToAdd = TOTAL_HIDDEN_STARS - existing.length;
-      
-      console.log(`Upgrading member ${memberId} stars: ${existing.length} -> ${TOTAL_HIDDEN_STARS} (adding ${starsToAdd})`);
+    // Add more stars to reach TOTAL_HIDDEN_STARS
+    const existingSkinIds = validExisting.map(p => p.skinId);
+    const availableSkinIds = standardSkinIds.filter(id => !existingSkinIds.includes(id));
+    const starsToAdd = TOTAL_HIDDEN_STARS - validExisting.length;
+    
+    if (starsToAdd > 0 && availableSkinIds.length > 0) {
+      console.log(`Initializing/upgrading member ${memberId} stars: ${validExisting.length} -> ${TOTAL_HIDDEN_STARS} (adding ${starsToAdd})`);
       
       const shuffled = [...availableSkinIds].sort(() => Math.random() - 0.5);
       const newPositions = shuffled.slice(0, Math.min(starsToAdd, shuffled.length));
@@ -2695,20 +2713,6 @@ export class DatabaseStorage implements IStorage {
           found: false,
         }).onConflictDoNothing();
       }
-      return;
-    }
-
-    // Fresh initialization - no existing placements
-    const shuffled = [...standardSkinIds].sort(() => Math.random() - 0.5);
-    const selectedPositions = shuffled.slice(0, Math.min(TOTAL_HIDDEN_STARS, shuffled.length));
-
-    // Insert star placements
-    for (const skinId of selectedPositions) {
-      await db.insert(starPlacements).values({
-        memberId,
-        skinId,
-        found: false,
-      }).onConflictDoNothing();
     }
   }
 
@@ -2719,15 +2723,40 @@ export class DatabaseStorage implements IStorage {
       return { totalPlacements: 0, added: 0, message: "Member not found" };
     }
 
+    // Get all skins to validate placements
+    const allSkins = await db.select({ id: skins.id }).from(skins);
+    const allSkinIds = new Set(allSkins.map(s => s.id));
+    const standardSkinIds = allSkins
+      .map(s => s.id)
+      .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID);
+
     const existing = await this.getStarPlacementsByMember(memberId);
-    const currentCount = existing.length;
+    
+    // STEP 1: Remove invalid placements (Legacy skins, starter skin, or non-existent skins)
+    const invalidPlacements = existing.filter(p => 
+      this.LEGACY_SKIN_IDS.includes(p.skinId) || 
+      p.skinId === this.STARTER_SKIN_ID ||
+      !allSkinIds.has(p.skinId)
+    );
+    
+    let invalidRemoved = 0;
+    if (invalidPlacements.length > 0) {
+      console.log(`Removing ${invalidPlacements.length} invalid star placements for ${member.displayName} (Legacy/starter/orphaned skins)`);
+      for (const placement of invalidPlacements) {
+        await db.delete(starPlacements).where(eq(starPlacements.id, placement.id));
+      }
+      invalidRemoved = invalidPlacements.length;
+    }
+    
+    // Re-fetch valid placements after cleanup
+    const validExisting = await this.getStarPlacementsByMember(memberId);
     
     // Get member's discovered skins
     const discoveredSkinIds = member.discoveredSkinIds || [];
     
-    // Step 1: Mark any unfound stars on discovered skins as "found"
+    // STEP 2: Mark any unfound stars on discovered skins as "found"
     let starsMarkedFound = 0;
-    for (const placement of existing) {
+    for (const placement of validExisting) {
       if (!placement.found && discoveredSkinIds.includes(placement.skinId)) {
         await db.update(starPlacements)
           .set({ found: true, foundAt: new Date() })
@@ -2736,11 +2765,11 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    // Step 2: Recalculate actual starsFound from placements
+    // STEP 3: Recalculate actual starsFound from placements
     const updatedPlacements = await this.getStarPlacementsByMember(memberId);
     const actualStarsFound = updatedPlacements.filter(p => p.found).length;
     
-    // Step 3: Update the member's starsFound counter if it's out of sync
+    // STEP 4: Update the member's starsFound counter if it's out of sync
     if (member.starsFound !== actualStarsFound) {
       await db.update(familyMembers)
         .set({ starsFound: actualStarsFound, updatedAt: new Date() })
@@ -2748,7 +2777,7 @@ export class DatabaseStorage implements IStorage {
       console.log(`Synced starsFound for ${member.displayName}: ${member.starsFound} -> ${actualStarsFound}`);
     }
     
-    // Step 4: Check if Legacy skins need to be awarded based on actual stars found
+    // STEP 5: Check if Legacy skins need to be awarded based on actual stars found
     const expectedLegacyCount = Math.floor(actualStarsFound / STARS_PER_LEGACY_AVATAR);
     const currentLegacyCount = (member.earnedLegacySkinIds || []).length;
     
@@ -2760,21 +2789,17 @@ export class DatabaseStorage implements IStorage {
       console.log(`Awarded ${expectedLegacyCount - currentLegacyCount} Legacy skins to ${member.displayName}`);
     }
     
-    // Step 5: Add missing star placements if below 48
+    // STEP 6: Add missing star placements to reach 48 (only on valid standard skins)
     let starsAdded = 0;
-    if (currentCount < TOTAL_HIDDEN_STARS) {
-      // Get all standard (non-legacy, non-starter) skins from database
-      const allSkins = await db.select({ id: skins.id }).from(skins);
-      const standardSkinIds = allSkins
-        .map(s => s.id)
-        .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID);
-      
+    const currentValidCount = updatedPlacements.length;
+    
+    if (currentValidCount < TOTAL_HIDDEN_STARS) {
       // Find skins that don't already have a star placement
-      const existingSkinIds = existing.map(p => p.skinId);
+      const existingSkinIds = updatedPlacements.map(p => p.skinId);
       const availableSkinIds = standardSkinIds.filter(id => !existingSkinIds.includes(id));
       
       // Calculate how many stars to add
-      const starsToAdd = TOTAL_HIDDEN_STARS - currentCount;
+      const starsToAdd = TOTAL_HIDDEN_STARS - currentValidCount;
       
       if (availableSkinIds.length > 0) {
         // Randomly select new positions from available skins
@@ -2796,15 +2821,17 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    const newTotal = currentCount + starsAdded;
+    // Build message
+    const finalPlacements = await this.getStarPlacementsByMember(memberId);
+    const newTotal = finalPlacements.length;
     const parts: string[] = [];
-    if (starsAdded > 0) parts.push(`${starsAdded} placements added`);
-    if (starsMarkedFound > 0) parts.push(`${starsMarkedFound} stars synced`);
-    if (member.starsFound !== actualStarsFound) parts.push(`counter fixed: ${member.starsFound} → ${actualStarsFound + starsMarkedFound}`);
+    if (invalidRemoved > 0) parts.push(`${invalidRemoved} invalid removed`);
+    if (starsAdded > 0) parts.push(`${starsAdded} added`);
+    if (starsMarkedFound > 0) parts.push(`${starsMarkedFound} synced`);
     
     const message = parts.length > 0 
-      ? `Fixed ${member.displayName}: ${parts.join(', ')}`
-      : `${member.displayName} already has ${newTotal} stars, all synced`;
+      ? `Fixed ${member.displayName}: ${parts.join(', ')} (now ${newTotal}/48)`
+      : `${member.displayName}: ${newTotal}/48 stars, all valid`;
     
     console.log(message);
     
