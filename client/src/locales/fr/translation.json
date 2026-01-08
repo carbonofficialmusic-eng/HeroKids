@@ -130,6 +130,7 @@
     "overdue": "En retard",
     "dueToday": "À faire aujourd'hui",
     "dueTomorrow": "À faire demain",
+    "dueBy": "Au plus tard le {{date}}",
     "autoApproved": "Approuvée automatiquement",
     "updateDetails": "Mettez à jour les détails de cette tâche.",
     "setupNewTask": "Configurez une nouvelle tâche pour votre famille.",

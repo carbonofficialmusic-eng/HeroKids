@@ -271,7 +271,7 @@ export function TaskCard({
                 return (
                   <div className="flex items-center gap-1" data-testid={`text-task-due-${task.id}`}>
                     <Calendar className="h-3 w-3" />
-                    <span>{formattedDate}</span>
+                    <span>{t('tasks.dueBy', { date: formattedDate })}</span>
                   </div>
                 );
               })()}

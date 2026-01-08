@@ -135,6 +135,7 @@
     "overdue": "Overdue",
     "dueToday": "Due today",
     "dueTomorrow": "Due tomorrow",
+    "dueBy": "Due by {{date}}",
     "autoApproved": "Auto-approved",
     "participants": "Participants",
     "updateDetails": "Update the details for this task.",

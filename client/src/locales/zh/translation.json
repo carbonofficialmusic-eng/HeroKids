@@ -130,6 +130,7 @@
     "overdue": "已逾期",
     "dueToday": "今天到期",
     "dueTomorrow": "明天到期",
+    "dueBy": "最迟{{date}}",
     "autoApproved": "自动批准",
     "updateDetails": "更新此任务的详细信息。",
     "setupNewTask": "为你的家庭设置新任务。",

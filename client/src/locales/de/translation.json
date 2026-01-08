@@ -148,6 +148,7 @@
     "overdue": "Überfällig",
     "dueToday": "Heute fällig",
     "dueTomorrow": "Morgen fällig",
+    "dueBy": "Spätestens bis {{date}}",
     "autoApproved": "Automatisch genehmigt",
     "participants": "Teilnehmer",
     "updateDetails": "Aktualisiere die Details für diese Aufgabe.",

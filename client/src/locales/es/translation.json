@@ -130,6 +130,7 @@
     "overdue": "Atrasada",
     "dueToday": "Vence hoy",
     "dueTomorrow": "Vence mañana",
+    "dueBy": "A más tardar el {{date}}",
     "autoApproved": "Auto-aprobada",
     "updateDetails": "Actualiza los detalles de esta tarea.",
     "setupNewTask": "Configura una nueva tarea para que tu familia complete.",

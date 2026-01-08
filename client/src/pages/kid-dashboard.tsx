@@ -684,7 +684,7 @@ function TaskCard({
             return (
               <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
-                <span>{format(new Date(task.dueDate), "MMM d")}</span>
+                <span>{t('tasks.dueBy', { date: format(new Date(task.dueDate), "MMM d") })}</span>
               </div>
             );
           })()}

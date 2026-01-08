@@ -134,6 +134,7 @@
     "overdue": "Försenad",
     "dueToday": "Förfaller idag",
     "dueTomorrow": "Förfaller imorgon",
+    "dueBy": "Senast {{date}}",
     "autoApproved": "Automatiskt godkänd",
     "participants": "Deltagare",
     "updateDetails": "Uppdatera informationen för denna uppgift.",
