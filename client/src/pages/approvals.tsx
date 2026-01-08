@@ -265,7 +265,7 @@ export default function Approvals() {
             </div>
             <div className="space-y-4">
               {pendingRewardRequests.map((request: any) => {
-                const requester = familyMembers.find((m: any) => m.id === request.requestedBy);
+                const requester = request.requester;
                 return (
                   <Card key={request.id} data-testid={`card-reward-request-${request.id}`}>
                     <CardHeader>
