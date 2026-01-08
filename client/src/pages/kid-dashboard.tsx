@@ -663,7 +663,7 @@ function TaskCard({
                   data-testid={`badge-overdue-${task.id}`}
                 >
                   <AlertTriangle className="h-3 w-3" />
-                  {t('tasks.overdue')}
+                  {t('kidDashboard.overdueHurry')}
                 </Badge>
               );
             }
@@ -676,7 +676,7 @@ function TaskCard({
                   data-testid={`badge-due-soon-${task.id}`}
                 >
                   <Calendar className="h-3 w-3" />
-                  {daysUntil === 0 ? t('tasks.dueToday') : t('tasks.dueTomorrow')}
+                  {daysUntil === 0 ? t('kidDashboard.dueTodayHurry') : t('kidDashboard.dueTomorrowHurry')}
                 </Badge>
               );
             }

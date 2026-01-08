@@ -1033,6 +1033,9 @@
     "pts": "pts"
   },
   "kidDashboard": {
+    "overdueHurry": "Ups! Das ist überfällig!",
+    "dueTodayHurry": "Heute noch machen!",
+    "dueTomorrowHurry": "Morgen fällig!",
     "rewardRequested": "Belohnung angefordert!",
     "rewardRequestedDesc": "Deine Anfrage für \"{{title}}\" wartet auf Freigabe!",
     "error": "Fehler",

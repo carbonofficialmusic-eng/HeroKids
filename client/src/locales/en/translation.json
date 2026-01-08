@@ -1010,6 +1010,9 @@
     "pts": "pts"
   },
   "kidDashboard": {
+    "overdueHurry": "Oops! This is late!",
+    "dueTodayHurry": "Do it today!",
+    "dueTomorrowHurry": "Due tomorrow!",
     "rewardRequested": "Reward requested!",
     "rewardRequestedDesc": "Your request for \"{{title}}\" is waiting for approval!",
     "error": "Error",

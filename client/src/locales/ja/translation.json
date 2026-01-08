@@ -962,6 +962,9 @@
     "pts": "pts"
   },
   "kidDashboard": {
+    "overdueHurry": "あれ！遅れてるよ！",
+    "dueTodayHurry": "今日やろう！",
+    "dueTomorrowHurry": "明日までだよ！",
     "rewardRequested": "報酬をリクエストしました！",
     "rewardRequestedDesc": "「{{title}}」のリクエストは承認待ちです！",
     "error": "エラー",

@@ -918,6 +918,9 @@
     "ko": "한국어"
   },
   "kidDashboard": {
+    "overdueHurry": "앗! 늦었어요!",
+    "dueTodayHurry": "오늘 해요!",
+    "dueTomorrowHurry": "내일까지!",
     "rewardRequested": "보상 요청됨!",
     "rewardRequestedDesc": "\"{{title}}\" 요청이 승인을 기다리고 있습니다!",
     "error": "오류",

@@ -962,6 +962,9 @@
     "pts": "pts"
   },
   "kidDashboard": {
+    "overdueHurry": "哎呀！已经逾期了！",
+    "dueTodayHurry": "今天完成吧！",
+    "dueTomorrowHurry": "明天到期！",
     "rewardRequested": "奖励已请求！",
     "rewardRequestedDesc": "你的\"{{title}}\"请求正在等待批准！",
     "error": "错误",

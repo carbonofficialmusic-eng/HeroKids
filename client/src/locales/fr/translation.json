@@ -962,6 +962,9 @@
     "pts": "pts"
   },
   "kidDashboard": {
+    "overdueHurry": "Oups ! C'est en retard !",
+    "dueTodayHurry": "À faire aujourd'hui !",
+    "dueTomorrowHurry": "Pour demain !",
     "rewardRequested": "Récompense demandée !",
     "rewardRequestedDesc": "Ta demande pour \"{{title}}\" attend d'être approuvée !",
     "error": "Erreur",

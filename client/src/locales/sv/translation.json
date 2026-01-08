@@ -996,6 +996,9 @@
     "pts": "p"
   },
   "kidDashboard": {
+    "overdueHurry": "Oj! Det är försenat!",
+    "dueTodayHurry": "Gör det idag!",
+    "dueTomorrowHurry": "Klart imorgon!",
     "rewardRequested": "Belöning begärd!",
     "rewardRequestedDesc": "Din förfrågan om \"{{title}}\" väntar på godkännande!",
     "error": "Fel",
