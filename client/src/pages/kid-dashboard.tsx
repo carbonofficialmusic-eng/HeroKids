@@ -152,6 +152,22 @@ function getCurrentPeriod(period: "weekly" | "monthly"): string {
   }
 }
 
+// Helper: Get when the next contribution period starts
+function getNextContributionDate(contributionPeriod: "weekly" | "monthly"): string {
+  const now = new Date();
+  if (contributionPeriod === "weekly") {
+    // Next Monday
+    const daysUntilMonday = (8 - now.getDay()) % 7 || 7;
+    const nextMonday = new Date(now);
+    nextMonday.setDate(now.getDate() + daysUntilMonday);
+    return nextMonday.toLocaleDateString();
+  } else {
+    // First day of next month
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return nextMonth.toLocaleDateString();
+  }
+}
+
 // Helper: Get ISO week number
 function getWeekNumber(date: Date): number {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -1718,20 +1734,55 @@ export default function KidDashboard() {
                         <Progress value={progress} className="h-3" />
                       </div>
 
+                      {/* Contributors list - shows who has contributed this period */}
+                      {(goal as any).contributions && (goal as any).contributions.length > 0 && (
+                        <div className="flex items-center gap-2 pt-2">
+                          <span className="text-sm text-muted-foreground">{t("familyGoals.contributedThisPeriod")}:</span>
+                          <div className="flex -space-x-2">
+                            {(goal as any).contributions.map((contribution: any) => {
+                              const contributorMember = familyMembers.find(m => m.id === contribution.memberId);
+                              return (
+                                <Avatar 
+                                  key={contribution.id} 
+                                  className="h-7 w-7 border-2 border-background"
+                                  title={contributorMember?.displayName}
+                                >
+                                  <AvatarFallback 
+                                    className="text-white text-xs font-bold"
+                                    style={{ backgroundColor: contributorMember?.color || "#888" }}
+                                  >
+                                    {contributorMember?.displayName?.charAt(0).toUpperCase() || "?"}
+                                  </AvatarFallback>
+                                </Avatar>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-between pt-4 border-t">
                         <div className="text-sm text-muted-foreground">
                           {formatPeriod(currentPeriod, goal.contributionPeriod)}
                         </div>
                         {!isCompleted && member && (
-                          <Button
-                            onClick={() => contributeMutation.mutate(goal.id)}
-                            disabled={contributeMutation.isPending || member.totalPoints < goal.contributionAmount}
-                            data-testid={`button-contribute-${goal.id}`}
-                            className="font-bold"
-                          >
-                            <TrendingUp className="h-4 w-4 mr-2" />
-                            {t("kidDashboard.contributePoints", { count: goal.contributionAmount })}
-                          </Button>
+                          (goal as any).contributions?.some((c: any) => c.memberId === member.id) ? (
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400">
+                              <CheckCircle2 className="h-4 w-4" />
+                              <span className="text-sm font-bold">
+                                {t("familyGoals.nextContribution", { date: getNextContributionDate(goal.contributionPeriod) })}
+                              </span>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={() => contributeMutation.mutate(goal.id)}
+                              disabled={contributeMutation.isPending || member.totalPoints < goal.contributionAmount}
+                              data-testid={`button-contribute-${goal.id}`}
+                              className="font-bold rounded-xl"
+                            >
+                              <TrendingUp className="h-4 w-4 mr-2" />
+                              {t("kidDashboard.contributePoints", { count: goal.contributionAmount })}
+                            </Button>
+                          )
                         )}
                       </div>
                     </div>
