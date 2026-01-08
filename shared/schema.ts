@@ -823,3 +823,4 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+export type NotificationType = typeof notificationTypeEnum.enumValues[number];

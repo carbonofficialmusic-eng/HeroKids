@@ -4566,6 +4566,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Acknowledge sharing notifications - when initiator has seen the outcome (e.g., closed sharing dialog)
+  app.post("/api/notifications/acknowledge-sharing", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Delete all "reward_sharing" notifications targeted at this member
+      // (i.e., notifications about others joining their shared reward)
+      await storage.deleteNotificationsByTarget(member.familyName, "reward_sharing", member.id);
+      
+      // Broadcast to update notification count
+      broadcastToFamily(member.familyName, {
+        type: "notification_update",
+        memberId: member.id,
+      });
+      
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error acknowledging sharing notifications:", error);
+      res.status(500).json({ message: "Failed to acknowledge sharing notifications" });
+    }
+  });
+
   // ===== Admin Tools =====
   
   // Reset family subscription to Free (parent only, for testing)

@@ -62,6 +62,7 @@ import {
   notifications,
   type Notification,
   type InsertNotification,
+  type NotificationType,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gt, sql, inArray, isNull } from "drizzle-orm";
@@ -333,7 +334,8 @@ export interface IStorage {
   markAllNotificationsAsReadForMember(memberId: string): Promise<void>;
   deleteNotification(notificationId: string): Promise<void>;
   deleteAllNotificationsForMember(memberId: string): Promise<void>;
-  deleteNotificationsByTypeAndTask(familyName: string, type: string, taskId: string): Promise<void>;
+  deleteNotificationsByTypeAndTask(familyName: string, type: NotificationType, taskId: string): Promise<void>;
+  deleteNotificationsByTarget(familyName: string, type: NotificationType, targetMemberId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3113,11 +3115,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Delete all notifications of a specific type for a specific task (used when task is approved/rejected)
-  async deleteNotificationsByTypeAndTask(familyName: string, type: string, taskId: string): Promise<void> {
+  async deleteNotificationsByTypeAndTask(familyName: string, type: NotificationType, taskId: string): Promise<void> {
     await db.delete(notifications).where(and(
       eq(notifications.familyName, familyName),
-      eq(notifications.type, type as any),
+      eq(notifications.type, type),
       eq(notifications.relatedTaskId, taskId)
+    ));
+  }
+  
+  // Delete notifications of a specific type targeted at a specific member
+  async deleteNotificationsByTarget(familyName: string, type: NotificationType, targetMemberId: string): Promise<void> {
+    await db.delete(notifications).where(and(
+      eq(notifications.familyName, familyName),
+      eq(notifications.type, type),
+      eq(notifications.targetMemberId, targetMemberId)
     ));
   }
 }
