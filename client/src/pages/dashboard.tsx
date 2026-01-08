@@ -85,7 +85,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles, Info } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles, Info, ChevronRight } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -955,7 +955,7 @@ export default function Dashboard() {
                     <Link href="/rewards-board">
                       <Button variant="ghost" size="sm" className="gap-1">
                         {t("common.viewAll")}
-                        <ArrowLeft className="h-4 w-4 rotate-180" />
+                        <ChevronRight className="h-4 w-4" />
                       </Button>
                     </Link>
                   </div>
