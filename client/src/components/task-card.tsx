@@ -3,12 +3,29 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Calendar, Camera, CheckCircle, Zap, Star, Users, Lock } from "lucide-react";
+import { Calendar, Camera, CheckCircle, Zap, Star, Users, Lock, AlertTriangle } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
-import { format } from "date-fns";
+import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay } from "date-fns";
 import { getAvatarUrl } from "@/lib/skins";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+
+// Helper to determine due date status
+function getDueDateStatus(dueDate: Date | string | null): { status: "overdue" | "soon" | "normal" | null; daysUntil: number } {
+  if (!dueDate) return { status: null, daysUntil: 0 };
+  
+  const due = startOfDay(new Date(dueDate));
+  const today = startOfDay(new Date());
+  const daysUntil = differenceInDays(due, today);
+  
+  if (isPast(due) && daysUntil < 0) {
+    return { status: "overdue", daysUntil };
+  }
+  if (isToday(due) || isTomorrow(due)) {
+    return { status: "soon", daysUntil };
+  }
+  return { status: "normal", daysUntil };
+}
 
 interface TaskCardProps {
   task: Task & {
@@ -221,12 +238,43 @@ export function TaskCard({
             )}
 
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-              {task.dueDate && (
-                <div className="flex items-center gap-1" data-testid={`text-task-due-${task.id}`}>
-                  <Calendar className="h-3 w-3" />
-                  <span>{format(new Date(task.dueDate), "MMM d")}</span>
-                </div>
-              )}
+              {task.dueDate && (() => {
+                const { status, daysUntil } = getDueDateStatus(task.dueDate);
+                const formattedDate = format(new Date(task.dueDate), "MMM d");
+                
+                if (status === "overdue") {
+                  return (
+                    <Badge 
+                      variant="destructive" 
+                      className="gap-1 text-xs"
+                      data-testid={`badge-overdue-${task.id}`}
+                    >
+                      <AlertTriangle className="h-3 w-3" />
+                      {t('tasks.overdue')} ({formattedDate})
+                    </Badge>
+                  );
+                }
+                
+                if (status === "soon") {
+                  return (
+                    <Badge 
+                      variant="secondary" 
+                      className="gap-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                      data-testid={`badge-due-soon-${task.id}`}
+                    >
+                      <Calendar className="h-3 w-3" />
+                      {daysUntil === 0 ? t('tasks.dueToday') : t('tasks.dueTomorrow')}
+                    </Badge>
+                  );
+                }
+                
+                return (
+                  <div className="flex items-center gap-1" data-testid={`text-task-due-${task.id}`}>
+                    <Calendar className="h-3 w-3" />
+                    <span>{formattedDate}</span>
+                  </div>
+                );
+              })()}
               
               {task.requiresProof && (
                 <div className="flex items-center gap-1" data-testid={`icon-requires-proof-${task.id}`}>
