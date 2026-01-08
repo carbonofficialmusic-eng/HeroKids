@@ -1445,11 +1445,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 const allCompleted = sharedMemberCompletions.filter(m => m?.hasCompleted).length === task.sharedMemberIds.length;
                 
+                // For children: check if THIS member has completed (to grey out the card)
+                // Use the hasCompleted status from their entry in sharedMemberCompletions
+                const currentMemberCompletion = sharedMemberCompletions.find(m => m?.memberId === member.id);
+                const thisMemberHasCompleted = currentMemberCompletion?.hasCompleted || false;
+                
                 return {
                   ...task,
                   remainingSlots: null,
-                  memberHasCompleted: allCompleted,
-                  memberCompletionStatus: allCompleted ? "approved" : completionStatus,
+                  memberHasCompleted: thisMemberHasCompleted, // Grey out for THIS member if they completed
+                  memberCompletionStatus: thisMemberHasCompleted ? (allCompleted ? "approved" : "pending") : null,
                   completions: [],
                   sharedMemberCompletions: sharedMemberCompletions.filter(Boolean),
                 };
