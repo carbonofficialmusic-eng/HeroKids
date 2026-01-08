@@ -1624,15 +1624,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only parents can create tasks" });
       }
       
-      const parsed = insertTaskSchema.parse(req.body);
+      // Handle dueDate conversion BEFORE Zod parsing
+      const bodyData: any = { ...req.body };
+      if (bodyData.dueDate !== undefined) {
+        if (typeof bodyData.dueDate === 'string') {
+          if (bodyData.dueDate.trim() === '') {
+            bodyData.dueDate = null;
+          } else {
+            bodyData.dueDate = new Date(bodyData.dueDate);
+          }
+        }
+      }
       
-      // Parse dueDate if provided as string
-      const taskData = {
-        ...parsed,
-        dueDate: parsed.dueDate ? new Date(parsed.dueDate) : null,
-      };
+      const parsed = insertTaskSchema.parse(bodyData);
       
-      const task = await storage.createTask(taskData);
+      const task = await storage.createTask(parsed);
       
       // Broadcast new task to family
       broadcastToFamily(member.familyName, {
