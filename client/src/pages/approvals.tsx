@@ -6,10 +6,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, XCircle, Clock, Star, ArrowLeft, Gift, Coins } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Star, ArrowLeft, Gift, Coins, Pencil } from "lucide-react";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "date-fns";
 import { Locale } from "date-fns";
 import { de, enUS, fr, es, ja, zhCN, ko, sv } from "date-fns/locale";
@@ -26,6 +27,13 @@ export default function Approvals() {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedCompletion, setSelectedCompletion] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState("");
+  
+  // Edit reward request state
+  const [editRewardDialogOpen, setEditRewardDialogOpen] = useState(false);
+  const [editingRewardRequest, setEditingRewardRequest] = useState<any>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPoints, setEditPoints] = useState("");
 
   const { data: pendingCompletions, isLoading } = useQuery({
     queryKey: ["/api/tasks/completions/pending"],
@@ -83,6 +91,48 @@ export default function Approvals() {
       });
     },
   });
+
+  const updateRewardRequestMutation = useMutation({
+    mutationFn: async ({ requestId, title, description, pointThreshold }: { requestId: string; title: string; description: string; pointThreshold: number }) => {
+      const res = await apiRequest("PATCH", `/api/reward-requests/${requestId}`, { title, description, pointThreshold });
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      setEditRewardDialogOpen(false);
+      setEditingRewardRequest(null);
+      toast({
+        title: t("approvals.rewardRequestUpdated"),
+        description: t("approvals.rewardRequestUpdatedDesc"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("common.error"),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEditRewardRequest = (request: any) => {
+    setEditingRewardRequest(request);
+    setEditTitle(request.title);
+    setEditDescription(request.description || "");
+    setEditPoints(String(request.pointThreshold));
+    setEditRewardDialogOpen(true);
+  };
+
+  const handleSaveRewardRequest = () => {
+    if (editingRewardRequest && editTitle.trim() && editPoints) {
+      updateRewardRequestMutation.mutate({
+        requestId: editingRewardRequest.id,
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        pointThreshold: parseInt(editPoints, 10),
+      });
+    }
+  };
 
   const approveMutation = useMutation({
     mutationFn: async (completionId: string) => {
@@ -247,6 +297,14 @@ export default function Approvals() {
                       )}
                       <div className="flex gap-2">
                         <Button
+                          variant="outline"
+                          onClick={() => handleEditRewardRequest(request)}
+                          data-testid={`button-edit-reward-${request.id}`}
+                        >
+                          <Pencil className="w-4 h-4 mr-2" />
+                          {t("common.edit")}
+                        </Button>
+                        <Button
                           onClick={() => approveRewardRequestMutation.mutate(request.id)}
                           disabled={approveRewardRequestMutation.isPending}
                           className="flex-1"
@@ -259,7 +317,6 @@ export default function Approvals() {
                           variant="outline"
                           onClick={() => declineRewardRequestMutation.mutate(request.id)}
                           disabled={declineRewardRequestMutation.isPending}
-                          className="flex-1"
                           data-testid={`button-decline-reward-${request.id}`}
                         >
                           <XCircle className="w-4 h-4 mr-2" />
@@ -393,6 +450,62 @@ export default function Approvals() {
               data-testid="button-confirm-reject"
             >
               {rejectMutation.isPending ? t("approvals.rejecting") : t("approvals.rejectTask")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Reward Request Dialog */}
+      <Dialog open={editRewardDialogOpen} onOpenChange={setEditRewardDialogOpen}>
+        <DialogContent data-testid="dialog-edit-reward">
+          <DialogHeader>
+            <DialogTitle>{t("approvals.editRewardRequest")}</DialogTitle>
+            <DialogDescription>
+              {t("approvals.editRewardRequestDesc")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">{t("rewards.title")}</Label>
+              <Input
+                id="edit-title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                data-testid="input-edit-reward-title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">{t("rewards.description")}</Label>
+              <Textarea
+                id="edit-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={3}
+                data-testid="input-edit-reward-description"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-points">{t("rewards.pointThreshold")}</Label>
+              <Input
+                id="edit-points"
+                type="number"
+                min="1"
+                value={editPoints}
+                onChange={(e) => setEditPoints(e.target.value)}
+                data-testid="input-edit-reward-points"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditRewardDialogOpen(false)} data-testid="button-cancel-edit-reward">
+              {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={handleSaveRewardRequest}
+              disabled={updateRewardRequestMutation.isPending || !editTitle.trim() || !editPoints}
+              data-testid="button-save-edit-reward"
+            >
+              {updateRewardRequestMutation.isPending ? t("common.loading") : t("common.save")}
             </Button>
           </DialogFooter>
         </DialogContent>

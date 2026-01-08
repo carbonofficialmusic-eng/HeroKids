@@ -17,7 +17,8 @@
     "select": "Select",
     "error": "Error",
     "monthsShort": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    "stars": "Stars"
+    "stars": "Stars",
+    "unknown": "Unknown"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -810,7 +811,11 @@
     "rewardRequestApproved": "Reward Request Approved!",
     "rewardRequestApprovedDesc": "The reward has been added to the rewards board.",
     "rewardRequestDeclined": "Reward Request Declined",
-    "rewardRequestDeclinedDesc": "The child will be notified."
+    "rewardRequestDeclinedDesc": "The child will be notified.",
+    "editRewardRequest": "Edit Reward Request",
+    "editRewardRequestDesc": "Adjust title, description and point value before approval.",
+    "rewardRequestUpdated": "Reward Request Updated",
+    "rewardRequestUpdatedDesc": "The changes have been saved."
   },
   "rewardsBoard": {
     "title": "Rewards Board",

@@ -30,7 +30,8 @@
       "10": "Nov",
       "11": "Dez"
     },
-    "stars": "Sterne"
+    "stars": "Sterne",
+    "unknown": "Unbekannt"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -833,7 +834,11 @@
     "rewardRequestApproved": "Belohnungsanfrage genehmigt!",
     "rewardRequestApprovedDesc": "Die Belohnung wurde zur Belohnungstafel hinzugefügt.",
     "rewardRequestDeclined": "Belohnungsanfrage abgelehnt",
-    "rewardRequestDeclinedDesc": "Das Kind wird benachrichtigt."
+    "rewardRequestDeclinedDesc": "Das Kind wird benachrichtigt.",
+    "editRewardRequest": "Belohnungsanfrage bearbeiten",
+    "editRewardRequestDesc": "Titel, Beschreibung und Punktwert vor der Genehmigung anpassen.",
+    "rewardRequestUpdated": "Belohnungsanfrage aktualisiert",
+    "rewardRequestUpdatedDesc": "Die Änderungen wurden gespeichert."
   },
   "rewardsBoard": {
     "title": "Belohnungstafel",

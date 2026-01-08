@@ -870,9 +870,9 @@ export default function Dashboard() {
                       <span className="text-left flex-1">{t("dashboard.approvals")}</span>
                     </Button>
                   </Link>
-                  {pendingApprovalsData && pendingApprovalsData.count > 0 && (
+                  {((pendingApprovalsData?.count || 0) + rewardRequests.filter((r: any) => r.status === "pending").length) > 0 && (
                     <span className="absolute top-2 right-2 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold" data-testid="badge-pending-approvals">
-                      {pendingApprovalsData.count}
+                      {(pendingApprovalsData?.count || 0) + rewardRequests.filter((r: any) => r.status === "pending").length}
                     </span>
                   )}
                 </div>
