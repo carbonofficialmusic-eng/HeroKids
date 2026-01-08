@@ -70,6 +70,15 @@ interface TaskWithMeta extends Task {
   memberHasCompleted?: boolean;
   remainingSlots?: number | null;
   memberCompletionStatus?: "pending" | "approved" | "rejected" | null;
+  sharedMemberCompletions?: Array<{
+    memberId: string;
+    displayName: string;
+    avatarUrl: string | null;
+    activeSkinId: string | null;
+    useCustomAvatar: boolean;
+    color: string;
+    hasCompleted: boolean;
+  }>;
 }
 
 // Extended RewardRedemption type with sharing details
@@ -400,6 +409,15 @@ function TaskCard({
   const hasNoSlots = task.remainingSlots !== null && task.remainingSlots !== undefined && task.remainingSlots <= 0;
   const isInactive = task.status !== "active";
   
+  // Check if this is a shared task and current member is NOT assigned
+  const isSharedTaskNotAssigned = task.isSharedTask && 
+    task.sharedMemberIds && 
+    task.sharedMemberIds.length > 0 && 
+    !task.sharedMemberIds.includes(member.id);
+  
+  // Get assigned member names for message
+  const assignedMemberNames = task.sharedMemberCompletions?.map(m => m.displayName).join(' & ') || '';
+  
   // Fallback check: if memberHasCompleted is true but status is null, treat as completed
   // This handles edge cases where status might be missing due to data inconsistency
   const hasCompletedWithoutStatus = task.memberHasCompleted && neverAttempted;
@@ -408,8 +426,9 @@ function TaskCard({
   // 1. Never attempted (completionStatus === null AND !memberHasCompleted) OR rejected (can retry)
   // 2. Task status is active
   // 3. Has available slots (or no slot limit)
-  // NOT actionable if: pending, approved, has completion without status, inactive, or no slots
-  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots;
+  // 4. Is assigned to this member (for shared tasks)
+  // NOT actionable if: pending, approved, has completion without status, inactive, no slots, or not assigned to shared task
+  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned;
   
   const TaskIcon = getTaskIcon(task.title);
 
@@ -480,6 +499,9 @@ function TaskCard({
   } else if (isInactive) {
     statusMessage = t("kidDashboard.notAvailable");
     statusColor = "text-muted-foreground";
+  } else if (isSharedTaskNotAssigned) {
+    statusMessage = t("tasks.sharedTaskNotAssigned", { members: assignedMemberNames });
+    statusColor = "text-muted-foreground";
   }
 
   return (
@@ -494,6 +516,7 @@ function TaskCard({
           isApproved ? "opacity-70 border-green-500" :
           isPending ? "opacity-60 border-amber-500" :
           hasNoSlots ? "opacity-50 border-amber-500" :
+          isSharedTaskNotAssigned ? "opacity-50 border-muted" :
           "opacity-70 border-muted"
         }`}
         data-testid={`task-card-${task.id}`}

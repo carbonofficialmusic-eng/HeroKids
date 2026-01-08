@@ -216,7 +216,8 @@
     "selectMembers": "Wähle die Kinder aus:",
     "pointsSplit": "Jedes Kind erhält {{points}} Punkte (aufgeteilt auf {{count}} Kinder)",
     "selectAtLeastTwo": "Wähle mindestens 2 Kinder für eine gemeinsame Aufgabe",
-    "sharedProgress": "{{completed}}/{{total}} fertig"
+    "sharedProgress": "{{completed}}/{{total}} fertig",
+    "sharedTaskNotAssigned": "Nur {{members}} können diese Aufgabe erledigen"
   },
   "taskTemplates": {
     "cleanRoom": {

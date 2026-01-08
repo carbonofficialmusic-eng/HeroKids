@@ -186,6 +186,7 @@
     "pointsSplit": "Each child gets {{points}} points (split between {{count}} children)",
     "selectAtLeastTwo": "Select at least 2 children for a shared task",
     "sharedProgress": "{{completed}}/{{total}} done",
+    "sharedTaskNotAssigned": "Only {{members}} can complete this task",
     "completeTask": "Complete Task",
     "confirmCompletion": "Confirm task completion to earn your points!",
     "uploadPhotoProof": "Upload Photo Proof",

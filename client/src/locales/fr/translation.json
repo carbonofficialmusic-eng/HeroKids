@@ -187,7 +187,8 @@
     "selectMembers": "Sélectionner les enfants :",
     "pointsSplit": "Chaque enfant reçoit {{points}} points (répartis entre {{count}} enfants)",
     "selectAtLeastTwo": "Sélectionnez au moins 2 enfants pour une tâche partagée",
-    "sharedProgress": "{{completed}}/{{total}} terminé"
+    "sharedProgress": "{{completed}}/{{total}} terminé",
+    "sharedTaskNotAssigned": "Seul(e)s {{members}} peuvent effectuer cette tâche"
   },
   "taskTemplates": {
     "cleanRoom": {

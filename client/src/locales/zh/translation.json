@@ -180,6 +180,7 @@
     "pointsSplit": "每个孩子获得{{points}}积分（{{count}}个孩子平分）",
     "selectAtLeastTwo": "共享任务至少选择2个孩子",
     "sharedProgress": "{{completed}}/{{total}} 完成",
+    "sharedTaskNotAssigned": "只有{{members}}可以完成此任务",
     "completeTask": "完成任务",
     "confirmCompletion": "确认任务完成以赢取积分！",
     "uploadPhotoProof": "上传照片证明",

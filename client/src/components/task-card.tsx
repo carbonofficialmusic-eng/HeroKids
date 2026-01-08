@@ -2,7 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Camera, CheckCircle, Zap, Star, Users } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Calendar, Camera, CheckCircle, Zap, Star, Users, Lock } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
 import { format } from "date-fns";
 import { getAvatarUrl } from "@/lib/skins";
@@ -39,6 +40,7 @@ interface TaskCardProps {
   isCompleting?: boolean;
   showAssignee?: boolean;
   onClick?: (task: Task) => void;
+  currentMemberId?: string;
 }
 
 export function TaskCard({
@@ -48,6 +50,7 @@ export function TaskCard({
   isCompleting = false,
   showAssignee = true,
   onClick,
+  currentMemberId,
 }: TaskCardProps) {
   const { t } = useTranslation();
   // Check if task is currently unavailable (future nextAvailableDate)
@@ -55,6 +58,16 @@ export function TaskCard({
   
   // Check if this member has already completed this multi-completion task
   const isCompletedByMember = task.memberHasCompleted || false;
+  
+  // Check if this is a shared task and current member is NOT assigned
+  const isSharedTaskNotAssigned = task.isSharedTask && 
+    task.sharedMemberIds && 
+    task.sharedMemberIds.length > 0 && 
+    currentMemberId && 
+    !task.sharedMemberIds.includes(currentMemberId);
+  
+  // Get assigned member names for tooltip
+  const assignedMemberNames = task.sharedMemberCompletions?.map(m => m.displayName).join(' & ') || '';
   
   // Task should appear grayed out if it's unavailable OR completed by this member
   const isGrayedOut = isUnavailable || isCompletedByMember;
@@ -250,21 +263,41 @@ export function TaskCard({
 
           {/* Compact complete button on right */}
           {onComplete && (
-            <Button
-              size="icon"
-              variant={isGrayedOut ? "outline" : "default"}
-              className="flex-shrink-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!isGrayedOut) {
-                  onComplete(task.id);
-                }
-              }}
-              disabled={isCompleting || isGrayedOut}
-              data-testid={`button-complete-task-${task.id}`}
-            >
-              <CheckCircle className="h-5 w-5" />
-            </Button>
+            isSharedTaskNotAssigned ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="flex-shrink-0 opacity-50 cursor-not-allowed"
+                    onClick={(e) => e.stopPropagation()}
+                    disabled
+                    data-testid={`button-complete-task-${task.id}`}
+                  >
+                    <Lock className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('tasks.sharedTaskNotAssigned', { members: assignedMemberNames })}</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Button
+                size="icon"
+                variant={isGrayedOut ? "outline" : "default"}
+                className="flex-shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!isGrayedOut) {
+                    onComplete(task.id);
+                  }
+                }}
+                disabled={isCompleting || isGrayedOut}
+                data-testid={`button-complete-task-${task.id}`}
+              >
+                <CheckCircle className="h-5 w-5" />
+              </Button>
+            )
           )}
         </div>
       </Card>

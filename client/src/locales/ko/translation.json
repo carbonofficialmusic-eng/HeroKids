@@ -191,7 +191,8 @@
     "selectMembers": "자녀 선택:",
     "pointsSplit": "각 자녀가 {{points}} 포인트를 받습니다 ({{count}}명이 분할)",
     "selectAtLeastTwo": "공유 과제에는 최소 2명의 자녀를 선택하세요",
-    "sharedProgress": "{{completed}}/{{total}} 완료"
+    "sharedProgress": "{{completed}}/{{total}} 완료",
+    "sharedTaskNotAssigned": "{{members}}만 이 과제를 완료할 수 있습니다"
   },
   "taskTemplates": {
     "cleanRoom": {

@@ -972,6 +972,7 @@ export default function Dashboard() {
                           setCompletionDialogOpen(true);
                         }}
                         isCompleting={completeTaskMutation.isPending}
+                        currentMemberId={member?.id}
                       />
                       <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
@@ -1292,6 +1293,7 @@ export default function Dashboard() {
                         }}
                         isCompleting={completeTaskMutation.isPending}
                         showAssignee={false}
+                        currentMemberId={member?.id}
                       />
                     ))}
                   </div>

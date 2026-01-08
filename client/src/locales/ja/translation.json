@@ -187,7 +187,8 @@
     "selectMembers": "子どもを選択：",
     "pointsSplit": "各子どもは{{points}}ポイントを獲得（{{count}}人で分割）",
     "selectAtLeastTwo": "共有タスクには少なくとも2人の子どもを選択してください",
-    "sharedProgress": "{{completed}}/{{total}} 完了"
+    "sharedProgress": "{{completed}}/{{total}} 完了",
+    "sharedTaskNotAssigned": "{{members}}のみがこのタスクを完了できます"
   },
   "taskTemplates": {
     "cleanRoom": {

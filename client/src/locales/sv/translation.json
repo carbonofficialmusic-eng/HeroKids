@@ -185,6 +185,7 @@
     "pointsSplit": "Varje barn får {{points}} poäng (delat mellan {{count}} barn)",
     "selectAtLeastTwo": "Välj minst 2 barn för en delad uppgift",
     "sharedProgress": "{{completed}}/{{total}} klart",
+    "sharedTaskNotAssigned": "Endast {{members}} kan slutföra denna uppgift",
     "completeTask": "Slutför uppgift",
     "confirmCompletion": "Bekräfta att uppgiften är slutförd för att tjäna dina poäng!",
     "uploadPhotoProof": "Ladda upp fotobevis",
