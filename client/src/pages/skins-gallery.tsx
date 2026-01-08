@@ -686,13 +686,6 @@ export default function SkinsGallery() {
         </div>
       </div>
 
-      {/* Click-outside handler to dismiss discover button */}
-      {discoverDialogSkinId && (
-        <div 
-          className="fixed inset-0 z-40"
-          onClick={() => setDiscoverDialogSkinId(null)}
-        />
-      )}
 
       {celebration && (
         <SuccessCelebration
