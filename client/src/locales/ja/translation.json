@@ -1232,7 +1232,9 @@
     "goalDeletedDesc": "目標が削除され、すべてのポイントが返金されました。",
     "errorDeleteGoal": "目標を削除できませんでした",
     "weekFormat": "{{year}}年第{{week}}週",
-    "monthFormat": "{{year}}年{{month}}"
+    "monthFormat": "{{year}}年{{month}}",
+    "contributedThisPeriod": "貢献済み",
+    "nextContribution": "次回貢献は{{date}}"
   },
   "notifications": {
     "title": "通知",

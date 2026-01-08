@@ -1292,7 +1292,9 @@
     "goalDeletedDesc": "Das Ziel wurde gelöscht und alle eingezahlten Punkte wurden zurückerstattet.",
     "errorDeleteGoal": "Ziel konnte nicht gelöscht werden",
     "weekFormat": "Woche {{week}}/{{year}}",
-    "monthFormat": "{{month}} {{year}}"
+    "monthFormat": "{{month}} {{year}}",
+    "contributedThisPeriod": "Beigetragen",
+    "nextContribution": "Nächster Beitrag am {{date}}"
   },
   "notifications": {
     "title": "Benachrichtigungen",

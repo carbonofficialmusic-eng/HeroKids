@@ -1223,7 +1223,9 @@
     "goalDeletedDesc": "Målet raderades och alla poäng återbetalades.",
     "errorDeleteGoal": "Kunde inte radera målet",
     "weekFormat": "Vecka {{week}}/{{year}}",
-    "monthFormat": "{{month}} {{year}}"
+    "monthFormat": "{{month}} {{year}}",
+    "contributedThisPeriod": "Har bidragit",
+    "nextContribution": "Nästa bidrag {{date}}"
   },
   "linkDevice": {
     "title": "Länka enhet",

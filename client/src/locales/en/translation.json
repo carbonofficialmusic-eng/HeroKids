@@ -1269,7 +1269,9 @@
     "goalDeletedDesc": "The goal was deleted and all contributed points were refunded.",
     "errorDeleteGoal": "Could not delete goal",
     "weekFormat": "Week {{week}}/{{year}}",
-    "monthFormat": "{{month}} {{year}}"
+    "monthFormat": "{{month}} {{year}}",
+    "contributedThisPeriod": "Contributed",
+    "nextContribution": "Next contribution on {{date}}"
   },
   "notifications": {
     "title": "Notifications",

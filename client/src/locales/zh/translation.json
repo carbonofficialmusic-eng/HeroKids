@@ -1232,7 +1232,9 @@
     "goalDeletedDesc": "目标已删除，所有积分已退还。",
     "errorDeleteGoal": "无法删除目标",
     "weekFormat": "{{year}}年第{{week}}周",
-    "monthFormat": "{{year}}年{{month}}"
+    "monthFormat": "{{year}}年{{month}}",
+    "contributedThisPeriod": "已贡献",
+    "nextContribution": "下次贡献于{{date}}"
   },
   "notifications": {
     "title": "通知",

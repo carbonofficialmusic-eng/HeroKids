@@ -1243,7 +1243,9 @@
     "goalDeletedDesc": "목표가 삭제되고 모든 포인트가 환불되었어요.",
     "errorDeleteGoal": "목표를 삭제할 수 없었어요",
     "weekFormat": "{{year}}년 {{week}}주차",
-    "monthFormat": "{{year}}년 {{month}}"
+    "monthFormat": "{{year}}년 {{month}}",
+    "contributedThisPeriod": "기여 완료",
+    "nextContribution": "다음 기여 {{date}}"
   },
   "notifications": {
     "title": "알림",

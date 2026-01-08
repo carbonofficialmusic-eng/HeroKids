@@ -1232,7 +1232,9 @@
     "goalDeletedDesc": "L'objectif a été supprimé et tous les points ont été remboursés.",
     "errorDeleteGoal": "Impossible de supprimer l'objectif",
     "weekFormat": "Semaine {{week}}/{{year}}",
-    "monthFormat": "{{month}} {{year}}"
+    "monthFormat": "{{month}} {{year}}",
+    "contributedThisPeriod": "Ont contribué",
+    "nextContribution": "Prochaine contribution le {{date}}"
   },
   "notifications": {
     "title": "Notifications",
