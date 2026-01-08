@@ -1207,7 +1207,7 @@ export default function KidDashboard() {
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Avatar className="h-20 w-20 shadow-lg" style={{ borderWidth: "4px", borderStyle: "solid", borderColor: member.color }}>
+                  <Avatar className="h-20 w-20 border-4 border-primary shadow-lg">
                     <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} />
                     <AvatarFallback style={{ backgroundColor: member.color }} className="text-3xl font-bold text-white">
                       {member.displayName[0]}
