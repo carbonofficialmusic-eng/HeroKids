@@ -320,7 +320,7 @@ export interface IStorage {
   // Star Placement operations (gamification: hidden stars per child, unlock HeroKids Legacy avatars)
   getStarPlacementsByMember(memberId: string): Promise<StarPlacement[]>;
   initializeStarPlacements(memberId: string): Promise<void>;
-  reinitializeStarsOnDiscoveredSkins(memberId: string): Promise<{ placed: number }>;
+  fixMemberStars(memberId: string): Promise<{ totalPlacements: number; added: number; message: string }>;
   markStarAsFound(memberId: string, skinId: string): Promise<{ wasStarFound: boolean; totalStarsFound: number; legacySkinAwarded: string | null }>;
   getMemberStarStats(memberId: string): Promise<{ starsFound: number; totalStars: number; earnedLegacySkinIds: string[] }>;
 
@@ -2712,52 +2712,52 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async reinitializeStarsOnDiscoveredSkins(memberId: string): Promise<{ placed: number }> {
-    // Get member's discovered skins
+  async fixMemberStars(memberId: string): Promise<{ totalPlacements: number; added: number; message: string }> {
+    // Get member and their current star placements
     const member = await this.getFamilyMember(memberId);
     if (!member) {
-      return { placed: 0 };
+      return { totalPlacements: 0, added: 0, message: "Member not found" };
     }
 
-    const discoveredSkinIds = member.discoveredSkinIds || [];
+    const existing = await this.getStarPlacementsByMember(memberId);
+    const currentCount = existing.length;
     
-    // Filter out Legacy skins and starter skin - stars can only be on non-starter standard skins
-    const standardDiscoveredIds = discoveredSkinIds.filter(id => 
-      !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID
-    );
-    
-    if (standardDiscoveredIds.length === 0) {
-      console.log(`Member ${memberId} has no discovered standard skins (besides starter) - using all standard skins`);
-      // Fall back to normal initialization if no discovered skins
-      await db.delete(starPlacements).where(eq(starPlacements.memberId, memberId));
-      await db.update(familyMembers).set({ starsFound: 0 }).where(eq(familyMembers.id, memberId));
-      
-      // Reset and use normal initialization (excluding starter and legacy)
-      const allSkins = await db.select({ id: skins.id }).from(skins);
-      const allStandardIds = allSkins.map(s => s.id).filter(id => 
-        !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID
-      );
-      const shuffled = [...allStandardIds].sort(() => Math.random() - 0.5);
-      const selectedPositions = shuffled.slice(0, Math.min(TOTAL_HIDDEN_STARS, shuffled.length));
-      
-      for (const skinId of selectedPositions) {
-        await db.insert(starPlacements).values({ memberId, skinId, found: false }).onConflictDoNothing();
-      }
-      return { placed: selectedPositions.length };
+    // If already has 48 stars, nothing to fix
+    if (currentCount >= TOTAL_HIDDEN_STARS) {
+      return { 
+        totalPlacements: currentCount, 
+        added: 0, 
+        message: `${member.displayName} already has ${currentCount} stars (no fix needed)` 
+      };
     }
 
-    // Delete existing star placements
-    await db.delete(starPlacements).where(eq(starPlacements.memberId, memberId));
+    // Get all standard (non-legacy, non-starter) skins from database
+    const allSkins = await db.select({ id: skins.id }).from(skins);
+    const standardSkinIds = allSkins
+      .map(s => s.id)
+      .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID);
     
-    // Reset starsFound counter
-    await db.update(familyMembers).set({ starsFound: 0 }).where(eq(familyMembers.id, memberId));
+    // Find skins that don't already have a star placement
+    const existingSkinIds = existing.map(p => p.skinId);
+    const availableSkinIds = standardSkinIds.filter(id => !existingSkinIds.includes(id));
+    
+    // Calculate how many stars to add
+    const starsToAdd = TOTAL_HIDDEN_STARS - currentCount;
+    
+    if (availableSkinIds.length === 0) {
+      return { 
+        totalPlacements: currentCount, 
+        added: 0, 
+        message: `No available skins to add stars for ${member.displayName}` 
+      };
+    }
 
-    // Randomly select discovered skins for star placement (excluding starter)
-    const shuffled = [...standardDiscoveredIds].sort(() => Math.random() - 0.5);
-    const selectedPositions = shuffled.slice(0, Math.min(TOTAL_HIDDEN_STARS, shuffled.length));
-
-    // Insert new star placements on discovered skins
-    for (const skinId of selectedPositions) {
+    // Randomly select new positions from available skins
+    const shuffled = [...availableSkinIds].sort(() => Math.random() - 0.5);
+    const newPositions = shuffled.slice(0, Math.min(starsToAdd, shuffled.length));
+    
+    // Insert new star placements
+    for (const skinId of newPositions) {
       await db.insert(starPlacements).values({
         memberId,
         skinId,
@@ -2765,8 +2765,14 @@ export class DatabaseStorage implements IStorage {
       }).onConflictDoNothing();
     }
 
-    console.log(`Reinitialized ${selectedPositions.length} stars for member ${member.displayName} on discovered skins`);
-    return { placed: selectedPositions.length };
+    const newTotal = currentCount + newPositions.length;
+    console.log(`Fixed stars for ${member.displayName}: ${currentCount} -> ${newTotal} (added ${newPositions.length})`);
+    
+    return { 
+      totalPlacements: newTotal, 
+      added: newPositions.length, 
+      message: `Fixed ${member.displayName}: added ${newPositions.length} stars (now ${newTotal} total)` 
+    };
   }
 
   async markStarAsFound(memberId: string, skinId: string): Promise<{ wasStarFound: boolean; totalStarsFound: number; legacySkinAwarded: string | null }> {

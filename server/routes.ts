@@ -5772,43 +5772,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Reinitialize stars for all members with discovered skins (fix for test families)
-  app.post("/api/admin/reinitialize-stars", isAdmin, async (req, res) => {
+  // Fix stars for a single member (add missing stars to reach 48 total)
+  app.post("/api/admin/fix-stars/:memberId", isAdmin, async (req, res) => {
     try {
-      const { familyName } = req.body;
+      const { memberId } = req.params;
       
-      // Get all members (optionally filtered by family)
-      let members;
-      if (familyName) {
-        members = await storage.getFamilyMembersByFamily(familyName);
-      } else {
-        // Get all members from all families
-        const allFamilies = await storage.getFamilies();
-        members = [];
-        for (const family of allFamilies) {
-          const familyMembers = await storage.getFamilyMembersByFamily(family.familyName);
-          members.push(...familyMembers);
-        }
-      }
+      const result = await storage.fixMemberStars(memberId);
       
-      const results: Array<{ memberId: string; name: string; placed: number }> = [];
-      
-      for (const member of members) {
-        const discoveredCount = member.discoveredSkinIds?.length || 0;
-        // Only reinitialize if member has discovered skins
-        if (discoveredCount > 0) {
-          const result = await storage.reinitializeStarsOnDiscoveredSkins(member.id);
-          results.push({ memberId: member.id, name: member.displayName, placed: result.placed });
-        }
-      }
-      
-      res.json({ 
-        message: `Reinitialized stars for ${results.length} members`, 
-        results 
-      });
+      res.json(result);
     } catch (error: any) {
-      console.error("Error reinitializing stars:", error);
-      res.status(500).json({ message: "Failed to reinitialize stars", error: error.message });
+      console.error("Error fixing member stars:", error);
+      res.status(500).json({ message: "Failed to fix stars", error: error.message });
     }
   });
   

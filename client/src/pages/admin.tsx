@@ -361,6 +361,23 @@ export default function AdminPage() {
     },
   });
 
+  const fixStarsMutation = useMutation({
+    mutationFn: async (memberId: string) => {
+      const res = await fetch(`/api/admin/fix-stars/${memberId}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fix stars");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: data.message });
+    },
+    onError: () => {
+      toast({ title: "Failed to fix stars", variant: "destructive" });
+    },
+  });
+
   if (!token) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
@@ -1203,8 +1220,19 @@ export default function AdminPage() {
                               name: member.displayName 
                             })}
                             data-testid={`button-add-points-${member.id}`}
+                            title="Add points"
                           >
                             <Plus className="h-4 w-4 text-green-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => fixStarsMutation.mutate(member.id)}
+                            disabled={fixStarsMutation.isPending}
+                            data-testid={`button-fix-stars-${member.id}`}
+                            title="Fix missing stars (add to 48)"
+                          >
+                            <Star className="h-4 w-4 text-yellow-500" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -1215,6 +1243,7 @@ export default function AdminPage() {
                               familyName: selectedFamily! 
                             })}
                             data-testid={`button-remove-member-${member.id}`}
+                            title="Remove member"
                           >
                             <UserMinus className="h-4 w-4 text-destructive" />
                           </Button>
