@@ -171,9 +171,9 @@ export function TaskDialog({
   // State for shared task member selection
   const [selectedSharedMembers, setSelectedSharedMembers] = useState<string[]>([]);
   
-  // Filter only children for shared task selection
-  const childMembers = useMemo(() => {
-    return familyMembers.filter(m => m.role === 'child');
+  // All family members can be assigned to shared tasks (parents and children)
+  const allMembers = useMemo(() => {
+    return familyMembers;
   }, [familyMembers]);
   
   const form = useForm<TaskFormData>({
@@ -485,7 +485,7 @@ export function TaskDialog({
               control={form.control}
               name="isSharedTask"
               render={({ field }) => {
-                const isDisabled = childMembers.length < 2;
+                const isDisabled = allMembers.length < 2;
                 const isSharedEnabled = field.value === true;
                 const maxCompletionsValue = form.watch("maxCompletions");
                 const hasMaxCompletions = typeof maxCompletionsValue === 'number';
@@ -523,23 +523,23 @@ export function TaskDialog({
                       <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
                         <FormLabel className="text-sm">{t('tasks.selectMembers')}</FormLabel>
                         <div className="flex flex-wrap gap-2">
-                          {childMembers.map((child) => {
-                            const isSelected = selectedSharedMembers.includes(child.id);
+                          {allMembers.map((member) => {
+                            const isSelected = selectedSharedMembers.includes(member.id);
                             return (
                               <Badge
-                                key={child.id}
+                                key={member.id}
                                 variant={isSelected ? "default" : "outline"}
                                 className="cursor-pointer transition-all"
                                 onClick={() => {
                                   if (isSelected) {
-                                    setSelectedSharedMembers(prev => prev.filter(id => id !== child.id));
+                                    setSelectedSharedMembers(prev => prev.filter(id => id !== member.id));
                                   } else {
-                                    setSelectedSharedMembers(prev => [...prev, child.id]);
+                                    setSelectedSharedMembers(prev => [...prev, member.id]);
                                   }
                                 }}
-                                data-testid={`badge-member-${child.id}`}
+                                data-testid={`badge-member-${member.id}`}
                               >
-                                {child.displayName}
+                                {member.displayName}
                               </Badge>
                             );
                           })}
