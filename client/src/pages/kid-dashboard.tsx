@@ -415,6 +415,12 @@ function TaskCard({
     task.sharedMemberIds.length > 0 && 
     !task.sharedMemberIds.includes(member.id);
   
+  // Check if all shared task members have completed (for recurring shared tasks graying)
+  const allSharedMembersCompleted = task.isSharedTask && 
+    task.sharedMemberCompletions && 
+    task.sharedMemberCompletions.length > 0 &&
+    task.sharedMemberCompletions.every((m: { hasCompleted: boolean }) => m.hasCompleted);
+  
   // Get assigned member names for message
   const assignedMemberNames = task.sharedMemberCompletions?.map(m => m.displayName).join(' & ') || '';
   
@@ -427,8 +433,9 @@ function TaskCard({
   // 2. Task status is active
   // 3. Has available slots (or no slot limit)
   // 4. Is assigned to this member (for shared tasks)
-  // NOT actionable if: pending, approved, has completion without status, inactive, no slots, or not assigned to shared task
-  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned;
+  // 5. For shared tasks: not all members have completed yet
+  // NOT actionable if: pending, approved, has completion without status, inactive, no slots, not assigned to shared task, or all shared members completed
+  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned && !allSharedMembersCompleted;
   
   const TaskIcon = getTaskIcon(task.title);
 
@@ -502,6 +509,9 @@ function TaskCard({
   } else if (isSharedTaskNotAssigned) {
     statusMessage = t("tasks.sharedTaskNotAssigned", { members: assignedMemberNames });
     statusColor = "text-muted-foreground";
+  } else if (allSharedMembersCompleted) {
+    statusMessage = t("kidDashboard.sharedTaskCompleted");
+    statusColor = "text-green-600 dark:text-green-400";
   }
 
   return (
@@ -517,6 +527,7 @@ function TaskCard({
           isPending ? "opacity-60 border-amber-500" :
           hasNoSlots ? "opacity-50 border-amber-500" :
           isSharedTaskNotAssigned ? "opacity-50 border-muted" :
+          allSharedMembersCompleted ? "opacity-60 border-green-500" :
           "opacity-70 border-muted"
         }`}
         data-testid={`task-card-${task.id}`}
@@ -528,6 +539,7 @@ function TaskCard({
             isPending ? "bg-amber-500/20" :
             isRejected ? "bg-blue-500/20" :
             hasNoSlots ? "bg-amber-500/20" :
+            allSharedMembersCompleted ? "bg-green-500/20" :
             "bg-primary/10"
           }`}>
             {completeMutation.isPending ? (
@@ -536,6 +548,8 @@ function TaskCard({
               <CheckCircle2 className="h-12 w-12 text-green-500" />
             ) : isPending ? (
               <CheckCircle2 className="h-12 w-12 text-amber-500" />
+            ) : allSharedMembersCompleted ? (
+              <CheckCircle2 className="h-12 w-12 text-green-500" />
             ) : (
               <TaskIcon className="h-12 w-12 text-primary" />
             )}
@@ -1181,7 +1195,7 @@ export default function KidDashboard() {
       return Math.abs(currentPoints - a.pointThreshold) - Math.abs(currentPoints - b.pointThreshold);
     });
 
-  // Filter tasks: different logic for multi-completion vs normal tasks
+  // Filter tasks: different logic for multi-completion vs normal vs shared tasks
   const myTasks = tasks.filter(t => {
     // Multi-Completion Tasks
     if (t.maxCompletions !== null) {
@@ -1192,6 +1206,33 @@ export default function KidDashboard() {
       // One-time Multi-Tasks: Hide when ALL slots are filled (remainingSlots <= 0)
       return t.remainingSlots === null || t.remainingSlots === undefined || t.remainingSlots > 0;
     }
+    
+    // Shared Tasks: Special visibility logic
+    if (t.isSharedTask && t.sharedMemberCompletions && t.sharedMemberCompletions.length > 0) {
+      const allMembersCompleted = t.sharedMemberCompletions.every((m: { hasCompleted: boolean }) => m.hasCompleted);
+      
+      // Recurring Shared Tasks: Always show (grayed out when all completed)
+      if (t.recurrence !== "none") {
+        return true;
+      }
+      
+      // One-time Shared Tasks: 
+      // - Show until ALL members completed
+      // - If requires approval: show until approved (memberCompletionStatus === "approved" only when allCompleted and no pending approval)
+      if (!allMembersCompleted) {
+        return true; // Still waiting for some members
+      }
+      
+      // All members completed - check if requires approval
+      if (t.requiresApproval) {
+        // Hide only when explicitly approved by parent
+        return t.memberCompletionStatus !== "approved";
+      }
+      
+      // No approval needed and all completed - hide the task
+      return false;
+    }
+    
     // Normal one-time tasks: Hide when member (or family) has completed
     return !t.memberHasCompleted || t.recurrence !== "none";
   });
