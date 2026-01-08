@@ -95,6 +95,7 @@ export default function SkinsGallery() {
   const [celebration, setCelebration] = useState<{ points: number; message: string } | null>(null);
   const [selectedSkinId, setSelectedSkinId] = useState<string | null>(null);
   const [discoverDialogSkinId, setDiscoverDialogSkinId] = useState<string | null>(null);
+  const [equipDialogSkinId, setEquipDialogSkinId] = useState<string | null>(null);
   
   // Detect desktop for sticky behavior (lg breakpoint = 1024px)
   const [isDesktop, setIsDesktop] = useState(false);
@@ -195,6 +196,7 @@ export default function SkinsGallery() {
       return await res.json();
     },
     onSuccess: (_, skinId) => {
+      setEquipDialogSkinId(null); // Close the popup
       if (skinId === null) {
         setCelebration({
           points: 0,
@@ -303,12 +305,22 @@ export default function SkinsGallery() {
       if (canDiscover && !isDiscovered) {
         e.stopPropagation();
         setDiscoverDialogSkinId(skin.id);
+        setEquipDialogSkinId(null);
+      } else if (isDiscovered && !isActive) {
+        // Discovered but not equipped - show equip button
+        e.stopPropagation();
+        setEquipDialogSkinId(skin.id);
+        setDiscoverDialogSkinId(null);
       } else {
+        // Already active or not discoverable - just select for preview
         setSelectedSkinId(skin.id);
+        setEquipDialogSkinId(null);
+        setDiscoverDialogSkinId(null);
       }
     };
     
     const isShowingDiscoverButton = discoverDialogSkinId === skin.id;
+    const isShowingEquipButton = equipDialogSkinId === skin.id;
 
     return (
       <div
@@ -399,6 +411,37 @@ export default function SkinsGallery() {
                   <Loader2 className="h-3 w-3 animate-spin mr-1" />
                 ) : null}
                 {t('skins.discover')}
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {/* Equip button - Absolute overlay centered on card */}
+        <AnimatePresence>
+          {isShowingEquipButton && (
+            <motion.div
+              className="absolute inset-0 z-50 flex items-center justify-center p-1 bg-black/40 rounded-md"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button
+                size="sm"
+                variant="secondary"
+                className="w-full h-auto py-2 text-[10px] sm:text-xs font-bold ring-2 ring-white/30 shadow-lg whitespace-normal text-center leading-tight"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  selectSkinMutation.mutate(skin.id);
+                }}
+                disabled={selectSkinMutation.isPending}
+                data-testid="button-equip-popup"
+              >
+                {selectSkinMutation.isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                ) : null}
+                {t('skins.equip')}
               </Button>
             </motion.div>
           )}
