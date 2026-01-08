@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X } from "lucide-react";
+import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus } from "lucide-react";
 import { format } from "date-fns";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Link } from "wouter";
 import { getAvatarUrl } from "@/lib/skins";
 import { useTranslation } from "react-i18next";
+import { RewardRequestDialog } from "@/components/reward-request-dialog";
 
 type FamilyMember = {
   id: string;
@@ -77,6 +78,18 @@ type SharedReward = RedemptionWithDetails & {
   }>;
 };
 
+type RewardRequest = {
+  id: string;
+  familyName: string;
+  requestedBy: string;
+  title: string;
+  description: string | null;
+  pointThreshold: number;
+  status: "pending" | "approved" | "declined";
+  createdAt: string;
+  updatedAt: string;
+};
+
 export default function RewardsBoard() {
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -109,6 +122,22 @@ export default function RewardsBoard() {
     queryKey: ["/api/rewards/shared"],
     enabled: !!member,
   });
+
+  // Fetch all family members
+  const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
+    queryKey: ["/api/family-members"],
+    enabled: !!member,
+  });
+
+  // Fetch reward requests (parent only)
+  const { data: rewardRequests = [] } = useQuery<RewardRequest[]>({
+    queryKey: ["/api/reward-requests"],
+    enabled: !!member && isRealParent,
+  });
+
+  // Dialog states for reward request editing
+  const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
+  const [requestToEdit, setRequestToEdit] = useState<RewardRequest | null>(null);
 
   // Track which participant counts we've already acknowledged to prevent repeated API calls
   const acknowledgedParticipantsRef = useRef<string>("");
@@ -300,6 +329,72 @@ export default function RewardsBoard() {
     },
   });
 
+  // Approve reward request
+  const approveRewardRequestMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      return await apiRequest("PATCH", `/api/reward-requests/${requestId}/approve`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
+      toast({
+        title: t("rewards.approved"),
+        description: t("rewards.approvedDesc"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("common.error"),
+        description: error.message || t("rewards.approveError"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Decline reward request
+  const declineRewardRequestMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      return await apiRequest("PATCH", `/api/reward-requests/${requestId}/decline`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      toast({
+        title: t("rewards.declined"),
+        description: t("rewards.declinedDesc"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("common.error"),
+        description: error.message || t("rewards.declineError"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update reward request
+  const updateRewardRequestMutation = useMutation({
+    mutationFn: async ({ requestId, data }: { requestId: string; data: any }) => {
+      return await apiRequest("PATCH", `/api/reward-requests/${requestId}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
+      setRequestRewardDialogOpen(false);
+      setRequestToEdit(null);
+      toast({
+        title: t("rewards.updated"),
+        description: t("rewards.updatedDesc"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("common.error"),
+        description: error.message || t("rewards.updateError"),
+        variant: "destructive",
+      });
+    },
+  });
+
   // Filter redemptions based on role
   // Also exclude redemptions that are actively being shared (they appear in the shared rewards section)
   const displayRedemptions = (isParent 
@@ -377,6 +472,84 @@ export default function RewardsBoard() {
             </div>
           </div>
         </div>
+
+        {/* Pending Reward Requests Section (Parents only) */}
+        {isRealParent && rewardRequests.filter(r => r.status === "pending").length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <MessageSquarePlus className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-accent font-bold">{t("dashboard.pendingRewardRequests")}</h2>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {rewardRequests
+                .filter(r => r.status === "pending")
+                .map((request) => {
+                  const requester = familyMembers.find(m => m.id === request.requestedBy) as FamilyMember & { activeSkinId?: string; useCustomAvatar?: boolean; updatedAt?: string };
+                  return (
+                    <Card key={request.id} className="p-6" data-testid={`card-request-${request.id}`}>
+                      <div className="flex items-start gap-3 mb-4">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={getAvatarUrl(requester?.activeSkinId, requester?.avatarUrl, requester?.useCustomAvatar, requester?.updatedAt)} />
+                          <AvatarFallback style={{ backgroundColor: requester?.color }} className="text-white">
+                            {requester?.displayName[0] || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="font-bold">{request.title}</h3>
+                            <Badge variant="secondary">
+                              {request.pointThreshold} pts
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-1">
+                            {t("dashboard.requestedBy", { name: requester?.displayName || 'Unknown' })}
+                          </p>
+                          {request.description && (
+                            <p className="text-sm text-muted-foreground">
+                              {request.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button
+                          onClick={() => {
+                            setRequestToEdit(request);
+                            setRequestRewardDialogOpen(true);
+                          }}
+                          variant="outline"
+                          size="sm"
+                          data-testid={`button-edit-request-${request.id}`}
+                        >
+                          <Pencil className="h-4 w-4 mr-1" />
+                          {t("common.edit")}
+                        </Button>
+                        <Button
+                          onClick={() => approveRewardRequestMutation.mutate(request.id)}
+                          disabled={approveRewardRequestMutation.isPending || declineRewardRequestMutation.isPending}
+                          size="sm"
+                          data-testid={`button-approve-request-${request.id}`}
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          {t("rewards.approve")}
+                        </Button>
+                        <Button
+                          onClick={() => declineRewardRequestMutation.mutate(request.id)}
+                          disabled={approveRewardRequestMutation.isPending || declineRewardRequestMutation.isPending}
+                          variant="outline"
+                          size="sm"
+                          data-testid={`button-decline-request-${request.id}`}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          {t("dashboard.decline")}
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })}
+            </div>
+          </div>
+        )}
 
       {/* Shared Rewards Section */}
       {sharedRewards.length > 0 && (
@@ -684,6 +857,22 @@ export default function RewardsBoard() {
         </div>
       )}
       </div>
+
+      {/* Reward Request Dialog for editing */}
+      <RewardRequestDialog
+        open={requestRewardDialogOpen}
+        onOpenChange={(open) => {
+          setRequestRewardDialogOpen(open);
+          if (!open) setRequestToEdit(null);
+        }}
+        rewardRequest={requestToEdit}
+        onSubmit={(data) => {
+          if (requestToEdit) {
+            updateRewardRequestMutation.mutate({ requestId: requestToEdit.id, data });
+          }
+        }}
+        isSubmitting={updateRewardRequestMutation.isPending}
+      />
     </div>
   );
 }
