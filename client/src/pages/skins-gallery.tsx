@@ -374,20 +374,19 @@ export default function SkinsGallery() {
           </div>
         )}
         
-        {/* Discover button - positioned above the card */}
+        {/* Discover button - Absolute overlay centered on card */}
         <AnimatePresence>
           {isShowingDiscoverButton && (
             <motion.div
-              className="absolute -top-2 left-1/2 z-50"
-              style={{ transform: 'translate(-50%, -100%)' }}
-              initial={{ opacity: 0, scale: 0.8, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: 10 }}
+              className="absolute inset-0 z-50 flex items-center justify-center p-1"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
               <Button
                 size="sm"
-                className="relative ring-2 ring-white/30 shadow-lg shadow-primary/40 animate-pulse whitespace-nowrap"
+                className="w-full h-auto py-2 text-[10px] sm:text-xs font-bold ring-2 ring-white/30 shadow-lg shadow-primary/40 animate-pulse whitespace-normal text-center leading-tight"
                 onClick={(e) => {
                   e.stopPropagation();
                   discoverSkinMutation.mutate(skin.id);
@@ -396,7 +395,7 @@ export default function SkinsGallery() {
                 data-testid="button-discover-popup"
               >
                 {discoverSkinMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
                 ) : null}
                 {t('skins.discover')}
               </Button>
