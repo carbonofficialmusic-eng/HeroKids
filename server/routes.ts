@@ -36,6 +36,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "task_rejected.message": "\"{{task}}\" was not approved: {{reason}}",
     "reward_redeemed.title": "{{name}} redeemed a reward",
     "reward_redeemed.message": "\"{{reward}}\" for {{points}} points",
+    "reward_request.title": "{{name}} requests a reward",
+    "reward_request.message": "\"{{reward}}\" ({{points}} points)",
     "reward_sharing_offer.title": "{{name}} offers a reward for sharing",
     "reward_sharing_offer.message": "\"{{reward}}\" is available to share",
     "reward_sharing_join.title": "{{name}} joined your shared reward!",
@@ -53,6 +55,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "task_rejected.message": "\"{{task}}\" wurde nicht genehmigt: {{reason}}",
     "reward_redeemed.title": "{{name}} hat eine Belohnung eingelöst",
     "reward_redeemed.message": "\"{{reward}}\" für {{points}} Punkte",
+    "reward_request.title": "{{name}} wünscht sich eine Belohnung",
+    "reward_request.message": "\"{{reward}}\" ({{points}} Punkte)",
     "reward_sharing_offer.title": "{{name}} bietet eine Belohnung zum Teilen an",
     "reward_sharing_offer.message": "\"{{reward}}\" kann geteilt werden",
     "reward_sharing_join.title": "{{name}} macht bei deiner Belohnung mit!",
@@ -70,6 +74,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "task_rejected.message": "\"{{task}}\" n'a pas été approuvée : {{reason}}",
     "reward_redeemed.title": "{{name}} a échangé une récompense",
     "reward_redeemed.message": "\"{{reward}}\" pour {{points}} points",
+    "reward_request.title": "{{name}} souhaite une récompense",
+    "reward_request.message": "\"{{reward}}\" ({{points}} points)",
     "reward_sharing_offer.title": "{{name}} propose une récompense à partager",
     "reward_sharing_offer.message": "\"{{reward}}\" est disponible au partage",
     "reward_sharing_join.title": "{{name}} participe à ta récompense !",
@@ -87,6 +93,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "task_rejected.message": "\"{{task}}\" no fue aprobada: {{reason}}",
     "reward_redeemed.title": "{{name}} canjeó una recompensa",
     "reward_redeemed.message": "\"{{reward}}\" por {{points}} puntos",
+    "reward_request.title": "{{name}} desea una recompensa",
+    "reward_request.message": "\"{{reward}}\" ({{points}} puntos)",
     "reward_sharing_offer.title": "{{name}} ofrece una recompensa para compartir",
     "reward_sharing_offer.message": "\"{{reward}}\" está disponible para compartir",
     "reward_sharing_join.title": "¡{{name}} se unió a tu recompensa compartida!",
@@ -104,6 +112,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "task_rejected.message": "「{{task}}」は承認されませんでした：{{reason}}",
     "reward_redeemed.title": "{{name}}がご褒美を交換しました",
     "reward_redeemed.message": "「{{reward}}」（{{points}}ポイント）",
+    "reward_request.title": "{{name}}がご褒美をリクエストしました",
+    "reward_request.message": "「{{reward}}」（{{points}}ポイント）",
     "reward_sharing_offer.title": "{{name}}がご褒美を共有しています",
     "reward_sharing_offer.message": "「{{reward}}」を共有できます",
     "reward_sharing_join.title": "{{name}}があなたのご褒美に参加しました！",
@@ -121,6 +131,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "task_rejected.message": "「{{task}}」未被批准：{{reason}}",
     "reward_redeemed.title": "{{name}}兑换了奖励",
     "reward_redeemed.message": "「{{reward}}」花费{{points}}积分",
+    "reward_request.title": "{{name}}请求了一个奖励",
+    "reward_request.message": "「{{reward}}」（{{points}}积分）",
     "reward_sharing_offer.title": "{{name}}分享了一个奖励",
     "reward_sharing_offer.message": "「{{reward}}」可以分享",
     "reward_sharing_join.title": "{{name}}加入了你的共享奖励！",
@@ -138,6 +150,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "task_rejected.message": "\"{{task}}\"이(가) 승인되지 않았어요: {{reason}}",
     "reward_redeemed.title": "{{name}}이(가) 보상을 교환했어요",
     "reward_redeemed.message": "\"{{reward}}\" ({{points}}포인트)",
+    "reward_request.title": "{{name}}이(가) 보상을 요청해요",
+    "reward_request.message": "\"{{reward}}\" ({{points}}포인트)",
     "reward_sharing_offer.title": "{{name}}이(가) 보상을 공유해요",
     "reward_sharing_offer.message": "\"{{reward}}\"을(를) 공유할 수 있어요",
     "reward_sharing_join.title": "{{name}}이(가) 공유 보상에 참여했어요!",
@@ -155,6 +169,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "task_rejected.message": "\"{{task}}\" godkändes inte: {{reason}}",
     "reward_redeemed.title": "{{name}} löste in en belöning",
     "reward_redeemed.message": "\"{{reward}}\" för {{points}} poäng",
+    "reward_request.title": "{{name}} önskar en belöning",
+    "reward_request.message": "\"{{reward}}\" ({{points}} poäng)",
     "reward_sharing_offer.title": "{{name}} erbjuder en belöning att dela",
     "reward_sharing_offer.message": "\"{{reward}}\" finns att dela",
     "reward_sharing_join.title": "{{name}} gick med i din delade belöning!",
@@ -2745,6 +2761,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           color: member.color,
         },
       });
+      
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      
+      // Create notification for each parent
+      await storage.createNotificationForParents(member.familyName, {
+        familyName: member.familyName,
+        type: "reward_request",
+        title: translateNotification(lang, "reward_request.title", { name: member.displayName }),
+        message: translateNotification(lang, "reward_request.message", { reward: title, points: pointThreshold }),
+        relatedMemberId: member.id,
+      });
+      
+      // Broadcast notification update
+      broadcastToFamily(member.familyName, { type: "notification_update" });
       
       res.status(201).json(request);
     } catch (error: any) {
