@@ -307,14 +307,12 @@ export default function SkinsGallery() {
         const viewportWidth = window.innerWidth;
         const cardCenterX = rect.left + rect.width / 2;
         
-        // Clamp x position to keep button within viewport
-        // "Entdecken" button is ~130px wide, half is ~65px, add 30px margin for mobile safety
-        const buttonHalfWidth = 100;
-        const margin = 30;
-        const clampedX = Math.max(
-          margin + buttonHalfWidth,
-          Math.min(cardCenterX, viewportWidth - margin - buttonHalfWidth)
-        );
+        // Only clamp on the RIGHT side to prevent overflow
+        // "Entdecken" button is ~130px wide, keep 10px margin from right edge
+        const buttonWidth = 130;
+        const rightMargin = 10;
+        const maxX = viewportWidth - rightMargin - buttonWidth / 2;
+        const clampedX = Math.min(cardCenterX, maxX);
         
         setPopupPosition({
           x: clampedX,
