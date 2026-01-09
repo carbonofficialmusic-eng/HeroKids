@@ -167,6 +167,8 @@
     "customDaysDesc": "设置任务重复的自定义天数",
     "repeatSchedule": "重复计划",
     "oneTime": "一次性",
+    "immediate": "即时重复",
+    "immediateDesc": "可随时重复。始终需要家长批准。",
     "daily": "每天",
     "weekly": "每周",
     "monthly": "每月",

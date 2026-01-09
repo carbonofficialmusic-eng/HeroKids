@@ -573,6 +573,7 @@ export function TaskDialog({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">{t('tasks.oneTime')}</SelectItem>
+                          <SelectItem value="immediate">{t('tasks.immediate')}</SelectItem>
                           <SelectItem value="daily">{t('tasks.daily')}</SelectItem>
                           <SelectItem value="weekly">{t('tasks.weekly')}</SelectItem>
                           <SelectItem value="monthly">{t('tasks.monthly')}</SelectItem>
@@ -639,23 +640,36 @@ export function TaskDialog({
             <FormField
               control={form.control}
               name="requiresApproval"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">{t('tasks.parentApproval')}</FormLabel>
-                    <FormDescription>
-                      {t('tasks.parentApprovalDesc')}
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      data-testid="switch-requires-approval"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const recurrence = form.watch("recurrence");
+                const isImmediate = recurrence === "immediate";
+                
+                // Force approval on for immediate recurrence tasks
+                if (isImmediate && !field.value) {
+                  field.onChange(true);
+                }
+                
+                return (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">{t('tasks.parentApproval')}</FormLabel>
+                      <FormDescription>
+                        {isImmediate 
+                          ? t('tasks.immediateDesc')
+                          : t('tasks.parentApprovalDesc')}
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={isImmediate ? true : field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isImmediate}
+                        data-testid="switch-requires-approval"
+                      />
+                    </FormControl>
+                  </FormItem>
+                );
+              }}
             />
 
             <div className="flex gap-3">

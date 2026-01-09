@@ -173,6 +173,8 @@
     "customDaysDesc": "Set a custom number of days for the task to repeat",
     "repeatSchedule": "Repeat Schedule",
     "oneTime": "One-time",
+    "immediate": "Immediate Repeat",
+    "immediateDesc": "Can be repeated anytime. ALWAYS requires parent approval.",
     "daily": "Daily",
     "weekly": "Weekly",
     "monthly": "Monthly",

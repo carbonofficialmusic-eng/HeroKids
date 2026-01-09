@@ -167,6 +167,8 @@
     "customDaysDesc": "Establece un número personalizado de días para que la tarea se repita",
     "repeatSchedule": "Programa de Repetición",
     "oneTime": "Una vez",
+    "immediate": "Repetición inmediata",
+    "immediateDesc": "Se puede repetir en cualquier momento. SIEMPRE requiere aprobación de los padres.",
     "daily": "Diaria",
     "weekly": "Semanal",
     "monthly": "Mensual",

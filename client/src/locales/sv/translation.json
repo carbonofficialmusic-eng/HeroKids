@@ -172,6 +172,8 @@
     "customDaysDesc": "Ange ett anpassat antal dagar för uppgiften att upprepas",
     "repeatSchedule": "Upprepningsschema",
     "oneTime": "Engångs",
+    "immediate": "Direkt upprepning",
+    "immediateDesc": "Kan upprepas när som helst. Kräver ALLTID föräldragodkännande.",
     "daily": "Dagligen",
     "weekly": "Veckovis",
     "monthly": "Månadsvis",

@@ -167,6 +167,8 @@
     "customDaysDesc": "Définissez un nombre de jours personnalisé pour la répétition de la tâche",
     "repeatSchedule": "Programme de répétition",
     "oneTime": "Une fois",
+    "immediate": "Répétition immédiate",
+    "immediateDesc": "Peut être répétée à tout moment. Nécessite TOUJOURS l'approbation parentale.",
     "daily": "Quotidien",
     "weekly": "Hebdomadaire",
     "monthly": "Mensuel",

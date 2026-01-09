@@ -186,6 +186,8 @@
     "customDaysDesc": "Lege eine benutzerdefinierte Anzahl von Tagen für die Wiederholung fest",
     "repeatSchedule": "Wiederholungsplan",
     "oneTime": "Einmalig",
+    "immediate": "Direkte Wiederholung",
+    "immediateDesc": "Kann jederzeit wiederholt werden. Erfordert IMMER elterliche Genehmigung.",
     "daily": "Täglich",
     "weekly": "Wöchentlich",
     "monthly": "Monatlich",

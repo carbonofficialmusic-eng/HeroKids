@@ -171,6 +171,8 @@
     "customDaysDesc": "과제가 반복될 맞춤 일수 설정",
     "repeatSchedule": "반복 일정",
     "oneTime": "1회",
+    "immediate": "즉시 반복",
+    "immediateDesc": "언제든지 반복 가능. 항상 부모 승인이 필요합니다.",
     "daily": "매일",
     "weekly": "매주",
     "monthly": "매월",
