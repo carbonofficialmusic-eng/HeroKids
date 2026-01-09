@@ -161,8 +161,12 @@ function Router() {
     <BackgroundWrapper>
       <Switch>
         <Route path="/" component={AutoRedirect} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/kid-dashboard" component={KidDashboard} />
+        <Route path="/dashboard">
+          <Dashboard key="dashboard" />
+        </Route>
+        <Route path="/kid-dashboard">
+          <KidDashboard key="kid-dashboard" />
+        </Route>
         <Route path="/kid-dashboard-old" component={KidDashboardOld} />
         <Route path="/my-rewards" component={MyRewards} />
         <Route path="/my-achievements" component={MyAchievements} />
