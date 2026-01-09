@@ -125,6 +125,9 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  // Use location-based key to force complete remount when navigating between dashboards
+  const [location] = useLocation();
+  const dashboardKey = `dashboard-${location}`;
 
   // Show nothing while loading to prevent 404 flash
   if (isLoading) {
@@ -157,10 +160,6 @@ function Router() {
     );
   }
 
-  // Use location-based key to force complete remount when navigating between dashboards
-  const [location] = useLocation();
-  const dashboardKey = `dashboard-${location}`;
-  
   return (
     <BackgroundWrapper>
       <Switch>
