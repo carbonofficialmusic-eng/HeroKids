@@ -1611,17 +1611,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       useCustomAvatar: sharedMember.useCustomAvatar,
                       color: sharedMember.color,
                       hasCompleted: memberStatus === "approved" || memberStatus === "pending",
+                      hasSubmitted: memberStatus === "approved" || memberStatus === "pending",
+                      status: memberStatus,
                     };
                   })
                 );
                 
                 const allCompleted = sharedMemberCompletions.filter(m => m?.hasCompleted).length === task.sharedMemberIds.length;
                 
+                // Check if THIS parent is assigned and has already submitted
+                const isThisParentAssigned = task.sharedMemberIds.includes(member.id);
+                const thisParentCompletion = sharedMemberCompletions.find(m => m?.memberId === member.id);
+                const thisParentHasSubmitted = thisParentCompletion?.hasSubmitted || false;
+                
+                // Grey out if: (a) ALL completed OR (b) this parent is assigned AND has already submitted
+                const shouldGreyOut = allCompleted || (isThisParentAssigned && thisParentHasSubmitted);
+                
                 return {
                   ...task,
                   remainingSlots: null,
-                  memberHasCompleted: allCompleted,
-                  memberCompletionStatus: allCompleted ? "approved" : completionStatus,
+                  memberHasCompleted: shouldGreyOut,
+                  memberCompletionStatus: thisParentCompletion?.status || (allCompleted ? "approved" : completionStatus),
                   completions: [],
                   sharedMemberCompletions: sharedMemberCompletions.filter(Boolean),
                 };
@@ -1655,11 +1665,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 // allCompleted only when ALL have approved status (not just pending)
                 const allCompleted = validCompletions.filter(m => m?.hasCompleted).length === assignedMemberIds.length;
                 
+                // Check if THIS parent is assigned and has already submitted
+                const isThisParentAssigned = assignedMemberIds.includes(member.id);
+                const thisParentCompletion = validCompletions.find(m => m?.memberId === member.id);
+                const thisParentHasSubmitted = thisParentCompletion?.hasSubmitted || false;
+                
+                // Grey out if: (a) ALL completed OR (b) this parent is assigned AND has already submitted
+                const shouldGreyOut = allCompleted || (isThisParentAssigned && thisParentHasSubmitted);
+                
                 return {
                   ...task,
                   remainingSlots: null,
-                  memberHasCompleted: allCompleted, // For parents: true when ALL assigned members have approved
-                  memberCompletionStatus: allCompleted ? "approved" : null,
+                  memberHasCompleted: shouldGreyOut,
+                  memberCompletionStatus: thisParentCompletion?.status || (allCompleted ? "approved" : null),
                   completions: [],
                   assignedMemberCompletions: validCompletions, // Include for UI to show who completed
                 };
