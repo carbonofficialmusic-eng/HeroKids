@@ -557,11 +557,12 @@ function TaskCard({
 
   return (
     <motion.div
-      whileHover={{ scale: isActionable ? 1.05 : 1, rotate: isActionable ? 2 : 0 }}
-      whileTap={{ scale: isActionable ? 0.95 : 1 }}
+      whileHover={{ scale: isActionable ? 1.02 : 1 }}
+      whileTap={{ scale: isActionable ? 0.98 : 1 }}
+      className="min-w-0"
     >
       <Card
-        className={`p-4 transition-all bg-card/80 backdrop-blur-md border-2 rounded-2xl ${
+        className={`p-4 transition-all bg-card/80 backdrop-blur-md border-2 rounded-2xl min-w-0 w-full ${
           isActionable && !isRejected ? "cursor-pointer border-border hover:border-primary" : 
           isActionable && isRejected ? "cursor-pointer border-blue-500 hover:border-blue-600" :
           isApproved ? "opacity-70 border-green-500" :
@@ -1555,7 +1556,7 @@ export default function KidDashboard() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-6 pb-[calc(8rem+env(safe-area-inset-bottom))]">
+      <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-6 pb-[calc(8rem+env(safe-area-inset-bottom))] overflow-hidden">
         {/* HeroKids Logo */}
         <div className="flex justify-center">
           <motion.img 
@@ -2104,13 +2105,14 @@ export default function KidDashboard() {
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="p-4 pt-0 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="p-4 pt-0 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-hidden">
                         {categoryTasks.map((task, index) => (
                           <motion.div
                             key={task.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
+                            className="min-w-0"
                           >
                             <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} />
                           </motion.div>
@@ -2122,13 +2124,14 @@ export default function KidDashboard() {
               ))}
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-hidden">
               {filteredKidTasks.map((task, index) => (
                 <motion.div
                   key={task.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
+                  className="min-w-0"
                 >
                   <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} />
                 </motion.div>
