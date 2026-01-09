@@ -168,6 +168,7 @@
     "standardRecurrence": "표준 반복",
     "customDaysRecurrence": "맞춤 일수",
     "standardRecurrenceDesc": "미리 설정된 간격 중 선택 (1회, 매일, 매주, 매월, 매년)",
+    "immediateRecurrenceDesc": "항상 사용 가능하며 하루에 여러 번 완료할 수 있습니다. 항상 부모 승인이 필요합니다.",
     "customDaysDesc": "과제가 반복될 맞춤 일수 설정",
     "repeatSchedule": "반복 일정",
     "oneTime": "1회",

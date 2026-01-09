@@ -164,6 +164,7 @@
     "standardRecurrence": "标准重复",
     "customDaysRecurrence": "自定义天数",
     "standardRecurrenceDesc": "从预设间隔中选择（一次性、每天、每周、每月、每年）",
+    "immediateRecurrenceDesc": "始终可用，一天内可多次完成。始终需要家长批准。",
     "customDaysDesc": "设置任务重复的自定义天数",
     "repeatSchedule": "重复计划",
     "oneTime": "一次性",

@@ -164,6 +164,7 @@
     "standardRecurrence": "Recurrencia Estándar",
     "customDaysRecurrence": "Días Personalizados",
     "standardRecurrenceDesc": "Elige entre intervalos predefinidos (una vez, diario, semanal, mensual, anual)",
+    "immediateRecurrenceDesc": "Siempre disponible y se puede completar varias veces al día. SIEMPRE requiere aprobación de los padres.",
     "customDaysDesc": "Establece un número personalizado de días para que la tarea se repita",
     "repeatSchedule": "Programa de Repetición",
     "oneTime": "Una vez",

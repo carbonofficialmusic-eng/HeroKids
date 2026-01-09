@@ -164,6 +164,7 @@
     "standardRecurrence": "Répétition standard",
     "customDaysRecurrence": "Jours personnalisés",
     "standardRecurrenceDesc": "Choisissez parmi des intervalles prédéfinis (unique, quotidien, hebdomadaire, mensuel, annuel)",
+    "immediateRecurrenceDesc": "Toujours disponible et peut être effectuée plusieurs fois par jour. Nécessite TOUJOURS l'approbation parentale.",
     "customDaysDesc": "Définissez un nombre de jours personnalisé pour la répétition de la tâche",
     "repeatSchedule": "Programme de répétition",
     "oneTime": "Une fois",

@@ -169,6 +169,7 @@
     "standardRecurrence": "Standard upprepning",
     "customDaysRecurrence": "Anpassade dagar",
     "standardRecurrenceDesc": "Välj från förinställda intervall (engångs, dagligen, veckovis, månadsvis, årligen)",
+    "immediateRecurrenceDesc": "Alltid tillgänglig och kan slutföras flera gånger om dagen. Kräver ALLTID föräldragodkännande.",
     "customDaysDesc": "Ange ett anpassat antal dagar för uppgiften att upprepas",
     "repeatSchedule": "Upprepningsschema",
     "oneTime": "Engångs",

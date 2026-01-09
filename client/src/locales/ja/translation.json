@@ -164,6 +164,7 @@
     "standardRecurrence": "標準の繰り返し",
     "customDaysRecurrence": "カスタム日数",
     "standardRecurrenceDesc": "プリセット間隔から選択（1回のみ、毎日、毎週、毎月、毎年）",
+    "immediateRecurrenceDesc": "常に利用可能で、1日に何度でも完了できます。常に親の承認が必要です。",
     "customDaysDesc": "タスクを繰り返すカスタム日数を設定",
     "repeatSchedule": "繰り返しスケジュール",
     "oneTime": "1回のみ",

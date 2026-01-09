@@ -147,7 +147,7 @@ export function TaskDialog({
   ];
   
   // Track which recurrence mode is selected
-  const [recurrenceMode, setRecurrenceMode] = useState<"standard" | "custom">("standard");
+  const [recurrenceMode, setRecurrenceMode] = useState<"standard" | "custom" | "immediate">("standard");
   
   // State for assigned member selection
   const [selectedSharedMembers, setSelectedSharedMembers] = useState<string[]>([]);
@@ -182,7 +182,9 @@ export function TaskDialog({
     if (open) {
       if (editingTask) {
         // Determine mode based on which field has a value
-        if (editingTask.recurrenceDays) {
+        if (editingTask.recurrence === "immediate") {
+          setRecurrenceMode("immediate");
+        } else if (editingTask.recurrenceDays) {
           setRecurrenceMode("custom");
         } else {
           setRecurrenceMode("standard");
@@ -233,7 +235,11 @@ export function TaskDialog({
   const handleSubmit = (data: TaskFormData) => {
     // Create a copy and clear the field that's not being used based on mode
     const submitData = { ...data };
-    if (recurrenceMode === "standard") {
+    if (recurrenceMode === "immediate") {
+      submitData.recurrence = "immediate";
+      submitData.recurrenceDays = undefined;
+      submitData.requiresApproval = true; // Always requires approval
+    } else if (recurrenceMode === "standard") {
       submitData.recurrenceDays = undefined;
     } else {
       submitData.recurrence = "none";
@@ -257,10 +263,14 @@ export function TaskDialog({
     onSubmit(submitData);
   };
   
-  const handleRecurrenceModeChange = (mode: "standard" | "custom") => {
+  const handleRecurrenceModeChange = (mode: "standard" | "custom" | "immediate") => {
     setRecurrenceMode(mode);
-    // Clear the opposite field when switching modes
-    if (mode === "standard") {
+    // Clear fields and set appropriate values when switching modes
+    if (mode === "immediate") {
+      form.setValue("recurrence", "immediate");
+      form.setValue("recurrenceDays", undefined);
+      form.setValue("requiresApproval", true); // Always requires approval
+    } else if (mode === "standard") {
       form.setValue("recurrenceDays", undefined);
       form.setValue("recurrence", "none");
     } else {
@@ -529,7 +539,7 @@ export function TaskDialog({
                 <RadioGroup
                   value={recurrenceMode}
                   onValueChange={handleRecurrenceModeChange}
-                  className="grid grid-cols-2 gap-4 mt-2"
+                  className="grid grid-cols-3 gap-3 mt-2"
                   data-testid="radio-recurrence-mode"
                 >
                   <div className="flex items-center space-x-2">
@@ -539,6 +549,15 @@ export function TaskDialog({
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                     >
                       {t('tasks.standardRecurrence')}
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="immediate" id="immediate-mode" data-testid="radio-immediate" />
+                    <label
+                      htmlFor="immediate-mode"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      {t('tasks.immediate')}
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -552,9 +571,9 @@ export function TaskDialog({
                   </div>
                 </RadioGroup>
                 <p className="text-sm text-muted-foreground mt-2">
-                  {recurrenceMode === "standard" 
-                    ? t('tasks.standardRecurrenceDesc')
-                    : t('tasks.customDaysDesc')}
+                  {recurrenceMode === "standard" && t('tasks.standardRecurrenceDesc')}
+                  {recurrenceMode === "immediate" && t('tasks.immediateRecurrenceDesc')}
+                  {recurrenceMode === "custom" && t('tasks.customDaysDesc')}
                 </p>
               </div>
 
@@ -567,31 +586,11 @@ export function TaskDialog({
                       <FormLabel>{t('tasks.repeatSchedule')}</FormLabel>
                       <div className="space-y-3">
                         {/* Main recurrence options as tiles */}
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-5 gap-2">
                           {[
                             { value: "none", label: t('tasks.oneTime') },
-                            { value: "immediate", label: t('tasks.immediate') },
                             { value: "daily", label: t('tasks.daily') },
                             { value: "weekly", label: t('tasks.weekly') },
-                          ].map((option) => (
-                            <button
-                              key={option.value}
-                              type="button"
-                              onClick={() => field.onChange(option.value)}
-                              className={`px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
-                                field.value === option.value
-                                  ? "bg-primary text-primary-foreground border-primary"
-                                  : "bg-background hover-elevate border-input"
-                              }`}
-                              data-testid={`btn-recurrence-${option.value}`}
-                            >
-                              {option.label}
-                            </button>
-                          ))}
-                        </div>
-                        {/* Secondary options */}
-                        <div className="grid grid-cols-2 gap-2">
-                          {[
                             { value: "monthly", label: t('tasks.monthly') },
                             { value: "yearly", label: t('tasks.yearly') },
                           ].map((option) => (
@@ -599,7 +598,7 @@ export function TaskDialog({
                               key={option.value}
                               type="button"
                               onClick={() => field.onChange(option.value)}
-                              className={`px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
+                              className={`px-2 py-2 text-xs font-medium rounded-md border transition-colors ${
                                 field.value === option.value
                                   ? "bg-primary text-primary-foreground border-primary"
                                   : "bg-background hover-elevate border-input"
@@ -613,7 +612,6 @@ export function TaskDialog({
                         {/* Dynamic description based on selection */}
                         <p className="text-sm text-muted-foreground">
                           {field.value === "none" && t('tasks.recurrenceDescNone')}
-                          {field.value === "immediate" && t('tasks.recurrenceDescImmediate')}
                           {field.value === "daily" && t('tasks.recurrenceDescDaily')}
                           {field.value === "weekly" && t('tasks.recurrenceDescWeekly')}
                           {field.value === "monthly" && t('tasks.recurrenceDescMonthly')}

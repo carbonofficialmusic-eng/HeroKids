@@ -170,6 +170,7 @@
     "standardRecurrence": "Standard Recurrence",
     "customDaysRecurrence": "Custom Days",
     "standardRecurrenceDesc": "Choose from preset intervals (one-time, daily, weekly, monthly, yearly)",
+    "immediateRecurrenceDesc": "Always available and can be completed multiple times a day. ALWAYS requires parent approval.",
     "customDaysDesc": "Set a custom number of days for the task to repeat",
     "repeatSchedule": "Repeat Schedule",
     "oneTime": "One-time",
