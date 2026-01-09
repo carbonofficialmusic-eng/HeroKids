@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Camera, CheckCircle, Zap, Star, Users, Lock } from "lucide-react";
+import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { format, isToday, isTomorrow, type Locale } from "date-fns";
+import { de, enUS, fr, es, ja, ko, sv, zhCN } from "date-fns/locale";
 
 
 interface TaskCardProps {
@@ -52,9 +54,27 @@ export function TaskCard({
   onClick,
   currentMemberId,
 }: TaskCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  
+  // Get locale for date formatting
+  const getDateLocale = () => {
+    const localeMap: Record<string, Locale> = {
+      de, en: enUS, fr, es, ja, ko, sv, zh: zhCN
+    };
+    return localeMap[i18n.language] || enUS;
+  };
+  
   // Check if task is currently unavailable (future nextAvailableDate)
   const isUnavailable = !!(task.nextAvailableDate && new Date(task.nextAvailableDate) > new Date());
+  
+  // Format next available date for display
+  const getNextAvailableText = () => {
+    if (!task.nextAvailableDate || !isUnavailable) return null;
+    const nextDate = new Date(task.nextAvailableDate);
+    if (isToday(nextDate)) return t('tasks.availableToday');
+    if (isTomorrow(nextDate)) return t('tasks.availableTomorrow');
+    return t('tasks.availableOn', { date: format(nextDate, 'EEEE', { locale: getDateLocale() }) });
+  };
   
   // Check if this member has already completed this multi-completion task
   const isCompletedByMember = task.memberHasCompleted || false;
@@ -126,9 +146,17 @@ export function TaskCard({
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                  className="flex items-center gap-1"
                 >
                   <CheckCircle className="h-5 w-5 text-green-500 shrink-0" data-testid={`icon-done-${task.id}`} />
                 </motion.div>
+              )}
+              {/* Show next available date for custom recurring tasks */}
+              {isUnavailable && getNextAvailableText() && (
+                <Badge variant="outline" className="text-xs shrink-0 gap-1" data-testid={`badge-next-available-${task.id}`}>
+                  <Calendar className="h-3 w-3" />
+                  {getNextAvailableText()}
+                </Badge>
               )}
               {/* Multi-Completion Counter Badge */}
               {task.maxCompletions !== null && task.maxCompletions !== undefined && (
