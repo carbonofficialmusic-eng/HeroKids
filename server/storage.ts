@@ -1375,15 +1375,49 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(tasks.id, task.id));
     } else {
-      // Normal mode (no maxCompletions): Set one-time tasks to "completed" immediately
+      // Normal mode (no maxCompletions): Check for multi-assignment before setting completed
       // Recurring tasks remain "active" to allow future completions
       if (!isRecurring) {
-        await tx.update(tasks)
-          .set({
-            status: 'completed',
-            updatedAt: new Date()
-          })
-          .where(eq(tasks.id, task.id));
+        // Check if this task is assigned to multiple members via taskAssignments table
+        const assignments = await tx
+          .select({ memberId: taskAssignments.memberId })
+          .from(taskAssignments)
+          .where(eq(taskAssignments.taskId, task.id));
+        const assignedMemberIds = assignments.map((a: { memberId: string }) => a.memberId);
+        
+        if (assignedMemberIds.length > 1) {
+          // Multi-assignment task: Only mark completed when ALL assigned members have approved completions
+          const allCompletions = await tx
+            .select({ memberId: taskCompletions.memberId, status: taskCompletions.status })
+            .from(taskCompletions)
+            .where(
+              and(
+                eq(taskCompletions.taskId, task.id),
+                eq(taskCompletions.status, 'approved')
+              )
+            );
+          
+          const approvedMemberIds = allCompletions.map((c: { memberId: string }) => c.memberId);
+          const allMembersApproved = assignedMemberIds.every((id: string) => approvedMemberIds.includes(id));
+          
+          if (allMembersApproved) {
+            await tx.update(tasks)
+              .set({
+                status: 'completed',
+                updatedAt: new Date()
+              })
+              .where(eq(tasks.id, task.id));
+          }
+          // If not all members approved, task stays "active"
+        } else {
+          // Single or no assignment: Set to completed immediately
+          await tx.update(tasks)
+            .set({
+              status: 'completed',
+              updatedAt: new Date()
+            })
+            .where(eq(tasks.id, task.id));
+        }
       }
     }
     
