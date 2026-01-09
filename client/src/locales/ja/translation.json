@@ -207,7 +207,20 @@
     "pointsSplit": "各子どもは{{points}}ポイントを獲得（{{count}}人で分割）",
     "selectAtLeastTwo": "共有タスクには少なくとも2人の子どもを選択してください",
     "sharedProgress": "{{completed}}/{{total}} 完了",
-    "sharedTaskNotAssigned": "{{members}}のみがこのタスクを完了できます"
+    "sharedTaskNotAssigned": "{{members}}のみがこのタスクを完了できます",
+    "assignedToLabel": "担当者",
+    "assignedToDesc": "このタスクを完了する子どもを選択してください。全員の場合は空のままにしてください。",
+    "assignmentAllChildren": "すべての子どもがこのタスクを完了できます",
+    "assignmentExclusive": "{{name}}だけがこのタスクを見て完了できます",
+    "assignmentShared": "{{count}}人の子どもがこのタスクを分担します（各{{points}}ポイント）",
+    "noChildrenToAssign": "まだ家族に子どもがいません",
+    "emojiCategory": {
+      "household": "家事",
+      "school": "学校・学習",
+      "selfCare": "セルフケア",
+      "pets": "ペット・植物",
+      "other": "その他"
+    }
   },
   "taskTemplates": {
     "cleanRoom": {

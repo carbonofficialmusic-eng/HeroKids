@@ -207,7 +207,20 @@
     "pointsSplit": "Chaque enfant reçoit {{points}} points (répartis entre {{count}} enfants)",
     "selectAtLeastTwo": "Sélectionnez au moins 2 enfants pour une tâche partagée",
     "sharedProgress": "{{completed}}/{{total}} terminé",
-    "sharedTaskNotAssigned": "Seul(e)s {{members}} peuvent effectuer cette tâche"
+    "sharedTaskNotAssigned": "Seul(e)s {{members}} peuvent effectuer cette tâche",
+    "assignedToLabel": "Attribuer à",
+    "assignedToDesc": "Sélectionnez quels enfants doivent effectuer cette tâche. Laissez vide pour tous les enfants.",
+    "assignmentAllChildren": "Tous les enfants peuvent effectuer cette tâche",
+    "assignmentExclusive": "Seul(e) {{name}} peut voir et effectuer cette tâche",
+    "assignmentShared": "{{count}} enfants partagent cette tâche ({{points}} points chacun)",
+    "noChildrenToAssign": "Pas encore d'enfants dans la famille",
+    "emojiCategory": {
+      "household": "Ménage",
+      "school": "École & Apprentissage",
+      "selfCare": "Soins personnels",
+      "pets": "Animaux & Plantes",
+      "other": "Autre"
+    }
   },
   "taskTemplates": {
     "cleanRoom": {

@@ -70,7 +70,29 @@ interface TaskDialogProps {
   familyMembers?: FamilyMember[];
 }
 
-const taskIcons = ["⭐", "🧹", "🍽️", "🗑️", "🧺", "🛁", "🌱", "📚", "🐕", "🚗"];
+// Emoji categories for task icons
+const emojiCategories = {
+  household: {
+    label: "tasks.emojiCategory.household",
+    emojis: ["🧹", "🍽️", "🗑️", "🧺", "🛁", "🧼", "🪣", "🧽", "🚗", "🛒"]
+  },
+  school: {
+    label: "tasks.emojiCategory.school",
+    emojis: ["📚", "✏️", "📝", "📖", "🎒", "✍️", "📓", "🎓", "💻", "🎨"]
+  },
+  selfCare: {
+    label: "tasks.emojiCategory.selfCare",
+    emojis: ["🦷", "🚿", "💇", "🛏️", "👕", "👟", "🧴", "💪", "🧘", "😴"]
+  },
+  pets: {
+    label: "tasks.emojiCategory.pets",
+    emojis: ["🐕", "🐈", "🐾", "🌱", "🌿", "🌷", "🐟", "🐢", "🐹", "🦜"]
+  },
+  other: {
+    label: "tasks.emojiCategory.other",
+    emojis: ["⭐", "🎯", "🏆", "💎", "🎁", "❤️", "🌈", "⚡", "🔔", "✨"]
+  }
+};
 
 export function TaskDialog({
   open,
@@ -164,10 +186,7 @@ export function TaskDialog({
   // Track which recurrence mode is selected
   const [recurrenceMode, setRecurrenceMode] = useState<"standard" | "custom">("standard");
   
-  // Local state for maxCompletions input (allows empty string during editing)
-  const [maxCompletionsInput, setMaxCompletionsInput] = useState<string>("");
-  
-  // State for shared task member selection
+  // State for assigned member selection
   const [selectedSharedMembers, setSelectedSharedMembers] = useState<string[]>([]);
   
   // All family members can be assigned to shared tasks (parents and children)
@@ -206,18 +225,6 @@ export function TaskDialog({
           setRecurrenceMode("standard");
         }
         
-        // Clamp maxCompletions to current family size to handle edge case where family shrunk
-        let clampedMaxCompletions = editingTask.maxCompletions || undefined;
-        if (clampedMaxCompletions !== undefined) {
-          // If family shrunk below 2 members, disable multi-completion feature
-          if (totalMemberCount < 2) {
-            clampedMaxCompletions = undefined;
-          } else {
-            // Otherwise, clamp to valid range [2, totalMemberCount]
-            clampedMaxCompletions = Math.max(2, Math.min(clampedMaxCompletions, totalMemberCount));
-          }
-        }
-        
         form.reset({
           familyName: editingTask.familyName,
           createdBy: editingTask.createdBy,
@@ -230,13 +237,11 @@ export function TaskDialog({
           requiresProof: editingTask.requiresProof,
           requiresApproval: editingTask.requiresApproval ?? true,
           iconEmoji: editingTask.iconEmoji || "⭐",
-          maxCompletions: clampedMaxCompletions,
+          maxCompletions: undefined,
           isSharedTask: editingTask.isSharedTask || false,
           sharedMemberIds: editingTask.sharedMemberIds || [],
         });
-        // Sync local input state with field value
-        setMaxCompletionsInput(clampedMaxCompletions !== undefined ? String(clampedMaxCompletions) : "");
-        // Sync shared members state
+        // Sync assigned members state
         setSelectedSharedMembers(editingTask.sharedMemberIds || []);
       } else {
         setRecurrenceMode("standard");
@@ -256,9 +261,7 @@ export function TaskDialog({
           isSharedTask: false,
           sharedMemberIds: [],
         });
-        // Clear local input state for new task
-        setMaxCompletionsInput("");
-        // Clear shared members state
+        // Clear assigned members state
         setSelectedSharedMembers([]);
       }
     }
@@ -273,14 +276,20 @@ export function TaskDialog({
       submitData.recurrence = "none";
     }
     
-    // Handle shared task - sync selectedSharedMembers to form data
-    if (submitData.isSharedTask) {
+    // Handle task assignment
+    // - No members selected: all children can complete (isSharedTask = false)
+    // - 1 member selected: exclusive task for that child (isSharedTask = true, but single member)
+    // - 2+ members selected: shared task with split points (isSharedTask = true)
+    if (selectedSharedMembers.length > 0) {
+      submitData.isSharedTask = true;
       submitData.sharedMemberIds = selectedSharedMembers;
-      // Clear maxCompletions when using shared task (they are mutually exclusive)
-      submitData.maxCompletions = undefined;
     } else {
+      submitData.isSharedTask = false;
       submitData.sharedMemberIds = [];
     }
+    
+    // Clear maxCompletions as it's no longer used
+    submitData.maxCompletions = undefined;
     
     onSubmit(submitData);
   };
@@ -360,202 +369,6 @@ export function TaskDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="maxCompletions"
-              render={({ field }) => {
-                const isDisabled = totalMemberCount < 2;
-                
-                return (
-                  <FormItem className="space-y-3">
-                    <FormLabel className={isDisabled ? "text-muted-foreground" : ""}>
-                      {t('tasks.multiCompletionLabel')}
-                    </FormLabel>
-                    <FormDescription>
-                      {isDisabled ? (
-                        `⚠️ ${t('tasks.multiCompletionDescDisabled')}`
-                      ) : (
-                        t('tasks.multiCompletionDesc', { max: totalMemberCount })
-                      )}
-                    </FormDescription>
-                    <div className="flex items-center gap-4">
-                      <Switch
-                        checked={typeof field.value === 'number'}
-                        disabled={isDisabled}
-                        onCheckedChange={(checked) => {
-                          // Prevent enabling if less than 2 family members
-                          if (checked && totalMemberCount < 2) {
-                            toast({
-                              title: t('tasks.multiCompletionNotAvailable'),
-                              description: t('tasks.multiCompletionNotAvailableDesc'),
-                              variant: "destructive",
-                            });
-                            return;
-                          }
-                          
-                          // When enabling: set to totalMemberCount (or 2 minimum)
-                          // When disabling: clear the value to undefined
-                          if (checked) {
-                            if (totalMemberCount < 2) {
-                              field.onChange(undefined);
-                              setMaxCompletionsInput("");
-                              toast({
-                                title: t('tasks.multiCompletionDisabled'),
-                                description: t('tasks.multiCompletionDisabledDesc'),
-                                variant: "destructive",
-                              });
-                            } else {
-                              // Set to totalMemberCount as default
-                              field.onChange(totalMemberCount);
-                              setMaxCompletionsInput(String(totalMemberCount));
-                            }
-                          } else {
-                            field.onChange(undefined);
-                            setMaxCompletionsInput("");
-                          }
-                        }}
-                        data-testid="toggle-multi-completion"
-                      />
-                      {typeof field.value === 'number' && !isDisabled && (
-                        <div className="flex items-center gap-2">
-                          <FormLabel className="text-sm">{t('tasks.multiCompletionTimes')}</FormLabel>
-                          <Input
-                            type="number"
-                            min={2}
-                            max={totalMemberCount}
-                            value={maxCompletionsInput}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              // Update local state (allows empty string)
-                              setMaxCompletionsInput(val);
-                              
-                              // Update field value for form validation
-                              if (val === '') {
-                                // Don't update field.value during typing, only on blur
-                                return;
-                              }
-                              const numVal = parseInt(val);
-                              if (!isNaN(numVal)) {
-                                // Update field value without clamping
-                                field.onChange(numVal);
-                              }
-                            }}
-                            onBlur={() => {
-                              // Clamp to valid range when user finishes editing
-                              if (maxCompletionsInput === '') {
-                                // If empty, reset to minimum
-                                field.onChange(2);
-                                setMaxCompletionsInput("2");
-                                return;
-                              }
-                              const numVal = parseInt(maxCompletionsInput);
-                              if (!isNaN(numVal)) {
-                                const clamped = Math.max(2, Math.min(numVal, totalMemberCount));
-                                field.onChange(clamped);
-                                setMaxCompletionsInput(String(clamped));
-                              } else {
-                                // Invalid input, reset to minimum
-                                field.onChange(2);
-                                setMaxCompletionsInput("2");
-                              }
-                            }}
-                            onFocus={(e) => e.target.select()} // Auto-select on focus for easy editing
-                            className="w-20"
-                            data-testid="input-max-completions"
-                          />
-                        </div>
-                      )}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-
-            {/* Shared Task Section */}
-            <FormField
-              control={form.control}
-              name="isSharedTask"
-              render={({ field }) => {
-                const isDisabled = allMembers.length < 2;
-                const isSharedEnabled = field.value === true;
-                const maxCompletionsValue = form.watch("maxCompletions");
-                const hasMaxCompletions = typeof maxCompletionsValue === 'number';
-                
-                return (
-                  <FormItem className="space-y-3">
-                    <FormLabel className={isDisabled || hasMaxCompletions ? "text-muted-foreground" : ""}>
-                      {t('tasks.sharedTaskLabel')}
-                    </FormLabel>
-                    <FormDescription>
-                      {isDisabled ? (
-                        `⚠️ ${t('tasks.sharedTaskDescDisabled')}`
-                      ) : hasMaxCompletions ? (
-                        `⚠️ ${t('tasks.sharedTaskDescMutuallyExclusive')}`
-                      ) : (
-                        t('tasks.sharedTaskDesc')
-                      )}
-                    </FormDescription>
-                    <div className="flex items-center gap-4">
-                      <Switch
-                        checked={isSharedEnabled}
-                        disabled={isDisabled || hasMaxCompletions}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked);
-                          if (!checked) {
-                            setSelectedSharedMembers([]);
-                          }
-                        }}
-                        data-testid="toggle-shared-task"
-                      />
-                    </div>
-                    
-                    {/* Member Selection */}
-                    {isSharedEnabled && !isDisabled && (
-                      <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
-                        <FormLabel className="text-sm">{t('tasks.selectMembers')}</FormLabel>
-                        <div className="flex flex-wrap gap-2">
-                          {allMembers.map((member) => {
-                            const isSelected = selectedSharedMembers.includes(member.id);
-                            return (
-                              <Badge
-                                key={member.id}
-                                variant={isSelected ? "default" : "outline"}
-                                className="cursor-pointer transition-all"
-                                onClick={() => {
-                                  if (isSelected) {
-                                    setSelectedSharedMembers(prev => prev.filter(id => id !== member.id));
-                                  } else {
-                                    setSelectedSharedMembers(prev => [...prev, member.id]);
-                                  }
-                                }}
-                                data-testid={`badge-member-${member.id}`}
-                              >
-                                {member.displayName}
-                              </Badge>
-                            );
-                          })}
-                        </div>
-                        {selectedSharedMembers.length >= 2 && (
-                          <p className="text-xs text-muted-foreground mt-2">
-                            {t('tasks.pointsSplit', { 
-                              points: Math.floor((form.watch("points") || 10) / selectedSharedMembers.length),
-                              count: selectedSharedMembers.length
-                            })}
-                          </p>
-                        )}
-                        {selectedSharedMembers.length < 2 && (
-                          <p className="text-xs text-destructive mt-2">
-                            {t('tasks.selectAtLeastTwo')}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
 
             {/* Quick Templates Section - Only show when creating */}
             {!editingTask && (
@@ -614,18 +427,28 @@ export function TaskDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('tasks.taskIcon')}</FormLabel>
-                  <div className="grid grid-cols-5 gap-2">
-                    {taskIcons.map((icon) => (
-                      <Button
-                        key={icon}
-                        type="button"
-                        variant={field.value === icon ? "default" : "outline"}
-                        className="h-12 text-2xl"
-                        onClick={() => field.onChange(icon)}
-                        data-testid={`button-icon-${icon}`}
-                      >
-                        {icon}
-                      </Button>
+                  <div className="space-y-3">
+                    {Object.entries(emojiCategories).map(([categoryKey, category]) => (
+                      <div key={categoryKey} className="space-y-1.5">
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {t(category.label)}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {category.emojis.map((icon) => (
+                            <Button
+                              key={icon}
+                              type="button"
+                              variant={field.value === icon ? "default" : "outline"}
+                              size="icon"
+                              className="h-9 w-9 text-lg"
+                              onClick={() => field.onChange(icon)}
+                              data-testid={`button-icon-${icon}`}
+                            >
+                              {icon}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
                   <FormMessage />
@@ -696,6 +519,92 @@ export function TaskDialog({
                   <FormMessage />
                 </FormItem>
               )}
+            />
+
+            {/* Task Assignment Section */}
+            <FormField
+              control={form.control}
+              name="isSharedTask"
+              render={({ field }) => {
+                const childMembers = allMembers.filter(m => m.role === "child");
+                const hasChildren = childMembers.length > 0;
+                const assignedCount = selectedSharedMembers.length;
+                const currentPoints = form.watch("points") || 10;
+                
+                // Determine assignment type for display
+                const getAssignmentInfo = () => {
+                  if (assignedCount === 0) {
+                    return { type: "all", description: t('tasks.assignmentAllChildren') };
+                  } else if (assignedCount === 1) {
+                    const member = childMembers.find(m => selectedSharedMembers.includes(m.id));
+                    return { 
+                      type: "exclusive", 
+                      description: t('tasks.assignmentExclusive', { name: member?.displayName || '' })
+                    };
+                  } else {
+                    const splitPoints = Math.floor(currentPoints / assignedCount);
+                    return { 
+                      type: "shared", 
+                      description: t('tasks.assignmentShared', { count: assignedCount, points: splitPoints })
+                    };
+                  }
+                };
+                
+                const assignmentInfo = getAssignmentInfo();
+                
+                return (
+                  <FormItem className="space-y-3">
+                    <FormLabel>{t('tasks.assignedToLabel')}</FormLabel>
+                    <FormDescription>
+                      {t('tasks.assignedToDesc')}
+                    </FormDescription>
+                    
+                    {hasChildren ? (
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap gap-2">
+                          {childMembers.map((member) => {
+                            const isSelected = selectedSharedMembers.includes(member.id);
+                            return (
+                              <Badge
+                                key={member.id}
+                                variant={isSelected ? "default" : "outline"}
+                                className="cursor-pointer transition-all py-1.5 px-3"
+                                onClick={() => {
+                                  let newSelection: string[];
+                                  if (isSelected) {
+                                    newSelection = selectedSharedMembers.filter(id => id !== member.id);
+                                  } else {
+                                    newSelection = [...selectedSharedMembers, member.id];
+                                  }
+                                  setSelectedSharedMembers(newSelection);
+                                  // isSharedTask=true only for 2+ members (shared points)
+                                  // 0 = all children, 1 = exclusive (but still uses sharedMemberIds)
+                                  field.onChange(newSelection.length >= 2);
+                                }}
+                                data-testid={`badge-assign-${member.id}`}
+                              >
+                                {member.displayName}
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                        
+                        {/* Assignment status info */}
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                          <p className="text-sm">
+                            {assignmentInfo.description}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        {t('tasks.noChildrenToAssign')}
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <div className="space-y-4">

@@ -5,6 +5,45 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { FamilySetup } from "@/components/family-setup";
+import { PointCounter } from "@/components/point-counter";
+import { TaskCard } from "@/components/task-card";
+import { Leaderboard } from "@/components/leaderboard";
+import { TaskDialog } from "@/components/task-dialog";
+import { RewardDialog } from "@/components/reward-dialog";
+import { RewardRequestDialog } from "@/components/reward-request-dialog";
+import { EditMemberDialog } from "@/components/edit-member-dialog";
+import { SwitchMemberDialog } from "@/components/switch-member-dialog";
+import { TaskCompletionDialog } from "@/components/task-completion-dialog";
+import { SuccessCelebration } from "@/components/success-celebration";
+import { ProfileMenu } from "@/components/profile-menu";
+import { NotificationBell } from "@/components/notification-bell";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
+import type { FamilyMember, Task, Reward, RewardRequest } from "@shared/schema";
+import { getAvatarUrl } from "@/lib/skins";
+import { hasFeature } from "@shared/tier-config";
+import type { SubscriptionTier } from "@shared/tier-config";
+import { celebrateTaskCompletion } from "@/lib/confetti";
+import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 // Custom hook for sticky sidebar on desktop
 function useStickyPanel(isDesktop: boolean) {
@@ -59,45 +98,6 @@ function useStickyPanel(isDesktop: boolean) {
 
   return { containerRef, panelRef, stickyStyle };
 }
-import { PointCounter } from "@/components/point-counter";
-import { TaskCard } from "@/components/task-card";
-import { Leaderboard } from "@/components/leaderboard";
-import { TaskDialog } from "@/components/task-dialog";
-import { RewardDialog } from "@/components/reward-dialog";
-import { RewardRequestDialog } from "@/components/reward-request-dialog";
-import { EditMemberDialog } from "@/components/edit-member-dialog";
-import { SwitchMemberDialog } from "@/components/switch-member-dialog";
-import { TaskCompletionDialog } from "@/components/task-completion-dialog";
-import { SuccessCelebration } from "@/components/success-celebration";
-import { ProfileMenu } from "@/components/profile-menu";
-import { NotificationBell } from "@/components/notification-bell";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
-import type { FamilyMember, Task, Reward, RewardRequest } from "@shared/schema";
-import { getAvatarUrl } from "@/lib/skins";
-import { hasFeature } from "@shared/tier-config";
-import type { SubscriptionTier } from "@shared/tier-config";
-import { celebrateTaskCompletion } from "@/lib/confetti";
-import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -811,30 +811,19 @@ export default function Dashboard() {
     return emojis[category] || "⭐";
   };
 
-  // Filter tasks by date range
+  // Filter tasks by date range (based on recurrence type)
   const filterTasksByDate = (taskList: typeof activeTasks) => {
-    const today = startOfDay(new Date());
-    const weekEnd = addDays(today, 7);
-    
     return taskList.filter(task => {
       if (taskFilter === "all") return true;
       
-      if (!task.dueDate) {
-        // Tasks without due date show in "all" only, or always if recurring
-        return task.recurrence !== "none";
-      }
-      
-      const dueDate = typeof task.dueDate === "string" 
-        ? parseISO(task.dueDate) 
-        : task.dueDate;
-      const dueDateStart = startOfDay(dueDate);
-      
+      // For "today" filter, show only daily recurring tasks or one-time tasks
       if (taskFilter === "today") {
-        return dueDateStart.getTime() === today.getTime();
+        return task.recurrence === "daily" || task.recurrence === "none";
       }
       
+      // For "week" filter, show daily and weekly recurring tasks
       if (taskFilter === "week") {
-        return dueDateStart >= today && dueDateStart <= weekEnd;
+        return task.recurrence === "daily" || task.recurrence === "weekly" || task.recurrence === "none";
       }
       
       return true;

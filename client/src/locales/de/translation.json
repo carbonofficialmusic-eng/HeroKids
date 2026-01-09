@@ -236,7 +236,20 @@
     "pointsSplit": "Jedes Kind erhält {{points}} Punkte (aufgeteilt auf {{count}} Kinder)",
     "selectAtLeastTwo": "Wähle mindestens 2 Kinder für eine gemeinsame Aufgabe",
     "sharedProgress": "{{completed}}/{{total}} fertig",
-    "sharedTaskNotAssigned": "Nur {{members}} können diese Aufgabe erledigen"
+    "sharedTaskNotAssigned": "Nur {{members}} können diese Aufgabe erledigen",
+    "assignedToLabel": "Zuweisen an",
+    "assignedToDesc": "Wähle, welche Kinder diese Aufgabe erledigen sollen. Leer lassen für alle Kinder.",
+    "assignmentAllChildren": "Alle Kinder können diese Aufgabe erledigen",
+    "assignmentExclusive": "Nur {{name}} kann diese Aufgabe sehen und erledigen",
+    "assignmentShared": "{{count}} Kinder teilen sich diese Aufgabe (je {{points}} Punkte)",
+    "noChildrenToAssign": "Noch keine Kinder in der Familie",
+    "emojiCategory": {
+      "household": "Haushalt",
+      "school": "Schule & Lernen",
+      "selfCare": "Selbstpflege",
+      "pets": "Haustiere & Pflanzen",
+      "other": "Sonstiges"
+    }
   },
   "taskTemplates": {
     "cleanRoom": {
