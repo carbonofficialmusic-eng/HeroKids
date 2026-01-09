@@ -2167,30 +2167,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const assignedMemberIds = await storage.getTaskAssignmentsByTask(taskId);
         
         if (assignedMemberIds.length > 1) {
-          // Task assigned to multiple members - check if ALL have completed
+          // Task assigned to multiple members - check if ALL have APPROVED completions
           const allCompletions = await storage.getTaskCompletionsByTask(taskId);
-          const completedMemberIds = allCompletions.map(c => c.memberId);
-          const allMembersCompleted = assignedMemberIds.every(id => completedMemberIds.includes(id));
+          // Only count APPROVED completions for multi-assignment tasks
+          const approvedCompletions = allCompletions.filter(c => c.status === "approved");
+          const approvedMemberIds = approvedCompletions.map(c => c.memberId);
+          const allMembersApproved = assignedMemberIds.every(id => approvedMemberIds.includes(id));
           
-          if (allMembersCompleted && task.recurrence === "none") {
-            // All assigned members completed - mark task as completed (for non-recurring)
+          if (allMembersApproved && task.recurrence === "none") {
+            // All assigned members have APPROVED completions - mark task as completed
             await storage.updateTaskStatus(taskId, "completed");
           }
-          // If not all completed, task stays active for remaining members
+          // If not all approved, task stays active (greyed out for submitted members)
         } else if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
           // Legacy shared task logic (using sharedMemberIds field)
           const allCompletions = await storage.getTaskCompletionsByTask(taskId);
-          const completedMemberIds = allCompletions.map(c => c.memberId);
-          const allMembersCompleted = task.sharedMemberIds.every(id => completedMemberIds.includes(id));
+          // Only count APPROVED completions for shared tasks
+          const approvedCompletions = allCompletions.filter(c => c.status === "approved");
+          const approvedMemberIds = approvedCompletions.map(c => c.memberId);
+          const allMembersApproved = task.sharedMemberIds.every(id => approvedMemberIds.includes(id));
           
-          if (allMembersCompleted && task.recurrence === "none") {
+          if (allMembersApproved && task.recurrence === "none") {
             await storage.updateTaskStatus(taskId, "completed");
           }
+          // If not all approved, task stays active (greyed out for submitted members)
         } else {
-          // Single assignment or no assignments - mark as completed immediately
-          if (task.recurrence === "none") {
+          // Single assignment or no assignments - mark as completed immediately (unless requires approval)
+          if (task.recurrence === "none" && !task.requiresApproval) {
             await storage.updateTaskStatus(taskId, "completed");
           }
+          // If requiresApproval, task status will be set to "completed" in _approveCompletionInternal
         }
       }
       
