@@ -763,13 +763,12 @@ function TaskCard({
           })()}
 
           {statusMessage ? (
-            <div className="space-y-1">
-              <Badge 
-                variant="secondary"
-                className={`text-sm px-3 py-1 rounded-xl ${statusColor}`}
+            <div className="space-y-1 w-full">
+              <div 
+                className={`text-sm px-3 py-1.5 rounded-xl text-center whitespace-normal break-words bg-secondary ${statusColor}`}
               >
                 {statusMessage}
-              </Badge>
+              </div>
               <p className="text-sm font-bold text-muted-foreground">
                 {task.points} {t("kidDashboard.points")}
               </p>
