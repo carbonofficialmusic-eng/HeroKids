@@ -1378,12 +1378,19 @@ export class DatabaseStorage implements IStorage {
       // Normal mode (no maxCompletions): Check for multi-assignment before setting completed
       // Recurring tasks remain "active" to allow future completions
       if (!isRecurring) {
-        // Check if this task is assigned to multiple members via taskAssignments table
+        // Check for multi-assignment via EITHER:
+        // 1. taskAssignments table (new style)
+        // 2. sharedMemberIds array (legacy style with isSharedTask=true)
         const assignments = await tx
           .select({ memberId: taskAssignments.memberId })
           .from(taskAssignments)
           .where(eq(taskAssignments.taskId, task.id));
-        const assignedMemberIds = assignments.map((a: { memberId: string }) => a.memberId);
+        let assignedMemberIds = assignments.map((a: { memberId: string }) => a.memberId);
+        
+        // If no taskAssignments, check for legacy sharedMemberIds
+        if (assignedMemberIds.length === 0 && task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+          assignedMemberIds = task.sharedMemberIds;
+        }
         
         if (assignedMemberIds.length > 1) {
           // Multi-assignment task: Only mark completed when ALL assigned members have approved completions
