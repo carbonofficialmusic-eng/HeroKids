@@ -7,7 +7,9 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay } from "date-fns";
+import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -801,6 +803,8 @@ export default function KidDashboard() {
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("week");
+  const [kidTaskFilter, setKidTaskFilter] = useState<"today" | "week" | "all">("all");
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   // Auto-refresh tasks at midnight when daily tasks reset
   useMidnightRefresh();
@@ -1293,6 +1297,118 @@ export default function KidDashboard() {
     // Normal one-time tasks: Hide when member (or family) has completed
     return !t.memberHasCompleted || t.recurrence !== "none";
   });
+
+  // Task categorization helpers for kid dashboard
+  const getTaskCategory = (iconEmoji: string | null): string => {
+    const emoji = iconEmoji || "⭐";
+    const householdIcons = ["🧹", "🍽️", "🗑️", "🧺", "🛁", "🧼", "🪣", "🧽"];
+    const schoolIcons = ["📚", "✏️", "📝", "📖", "🎒", "✍️", "📓", "🎓"];
+    const selfCareIcons = ["🦷", "🚿", "💇", "🛏️", "👕", "👟", "🧴"];
+    const petIcons = ["🐕", "🐈", "🐾", "🌱", "🌿", "🌷", "🐟", "🐢"];
+    
+    if (householdIcons.includes(emoji)) return "household";
+    if (schoolIcons.includes(emoji)) return "school";
+    if (selfCareIcons.includes(emoji)) return "selfCare";
+    if (petIcons.includes(emoji)) return "pets";
+    return "other";
+  };
+
+  const getCategoryLabel = (category: string): string => {
+    const labels: Record<string, string> = {
+      household: t("dashboard.categoryHousehold"),
+      school: t("dashboard.categorySchool"),
+      selfCare: t("dashboard.categorySelfCare"),
+      pets: t("dashboard.categoryPets"),
+      other: t("dashboard.categoryOther"),
+    };
+    return labels[category] || category;
+  };
+
+  const getCategoryEmoji = (category: string): string => {
+    const emojis: Record<string, string> = {
+      household: "🏠",
+      school: "📚",
+      selfCare: "🧼",
+      pets: "🐾",
+      other: "⭐",
+    };
+    return emojis[category] || "⭐";
+  };
+
+  // Filter tasks by date range for kid dashboard
+  const filterKidTasksByDate = (taskList: typeof myTasks) => {
+    const today = startOfDay(new Date());
+    const weekEnd = addDays(today, 7);
+    
+    return taskList.filter(task => {
+      if (kidTaskFilter === "all") return true;
+      
+      // Recurring tasks always appear in all filters
+      if (task.recurrence !== "none") {
+        return true;
+      }
+      
+      // One-time tasks without due date only show in "all"
+      if (!task.dueDate) {
+        return false;
+      }
+      
+      const dueDate = typeof task.dueDate === "string" 
+        ? parseISO(task.dueDate) 
+        : task.dueDate;
+      const dueDateStart = startOfDay(dueDate);
+      
+      if (kidTaskFilter === "today") {
+        return dueDateStart.getTime() === today.getTime();
+      }
+      
+      if (kidTaskFilter === "week") {
+        return dueDateStart >= today && dueDateStart <= weekEnd;
+      }
+      
+      return true;
+    });
+  };
+
+  // Group tasks by category
+  const groupKidTasksByCategory = (taskList: typeof myTasks) => {
+    const groups: Record<string, typeof myTasks> = {};
+    
+    taskList.forEach(task => {
+      const category = getTaskCategory(task.iconEmoji);
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(task);
+    });
+    
+    const categoryOrder = ["household", "school", "selfCare", "pets", "other"];
+    const sortedGroups: Record<string, typeof myTasks> = {};
+    
+    categoryOrder.forEach(cat => {
+      if (groups[cat] && groups[cat].length > 0) {
+        sortedGroups[cat] = groups[cat];
+      }
+    });
+    
+    return sortedGroups;
+  };
+
+  const filteredKidTasks = filterKidTasksByDate(myTasks);
+  const groupedKidTasks = groupKidTasksByCategory(filteredKidTasks);
+  const hasMultipleCategories = Object.keys(groupedKidTasks).length > 1;
+
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
 
   return (
     <div className="min-h-screen pb-20">
@@ -1807,24 +1923,116 @@ export default function KidDashboard() {
 
         {/* Tasks Section */}
         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
-              <Star className="h-8 w-8 text-white" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
+                <Star className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                {t("kidDashboard.tasks")}
+              </h2>
             </div>
-            <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              {t("kidDashboard.tasks")}
-            </h2>
+            
+            {/* Kid-friendly filter tabs */}
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={kidTaskFilter === "today" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setKidTaskFilter("today")}
+                className="rounded-full gap-1.5"
+                data-testid="button-kid-filter-today"
+              >
+                <Calendar className="h-4 w-4" />
+                {t("kidDashboard.filterToday")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "week" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setKidTaskFilter("week")}
+                className="rounded-full gap-1.5"
+                data-testid="button-kid-filter-week"
+              >
+                <Calendar className="h-4 w-4" />
+                {t("kidDashboard.filterThisWeek")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setKidTaskFilter("all")}
+                className="rounded-full gap-1.5"
+                data-testid="button-kid-filter-all"
+              >
+                <Star className="h-4 w-4" />
+                {t("kidDashboard.filterAll")}
+              </Button>
+            </div>
           </div>
 
-          {myTasks.length === 0 ? (
+          {filteredKidTasks.length === 0 ? (
             <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
               <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-green-500" />
-              <p className="text-lg font-bold text-green-500">{t("kidDashboard.noTasksYet")}</p>
-              <p className="text-sm text-muted-foreground mt-2">{t("kidDashboard.askParentsTasks")}</p>
+              {myTasks.length === 0 ? (
+                <>
+                  <p className="text-lg font-bold text-green-500">{t("kidDashboard.noTasksYet")}</p>
+                  <p className="text-sm text-muted-foreground mt-2">{t("kidDashboard.askParentsTasks")}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg font-bold text-muted-foreground">{t("kidDashboard.noTasksForFilter")}</p>
+                  <Button 
+                    variant="outline" 
+                    className="mt-4 rounded-full"
+                    onClick={() => setKidTaskFilter("all")}
+                  >
+                    {t("kidDashboard.showAllTasks")}
+                  </Button>
+                </>
+              )}
             </Card>
+          ) : hasMultipleCategories ? (
+            <div className="space-y-4">
+              {Object.entries(groupedKidTasks).map(([category, categoryTasks]) => (
+                <Collapsible
+                  key={category}
+                  open={!collapsedCategories.has(category)}
+                  onOpenChange={() => toggleCategory(category)}
+                >
+                  <Card className="bg-card/60 backdrop-blur-md rounded-2xl overflow-hidden">
+                    <CollapsibleTrigger asChild>
+                      <div className="p-4 flex items-center justify-between cursor-pointer hover-elevate transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{getCategoryEmoji(category)}</span>
+                          <span className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                            {getCategoryLabel(category)}
+                          </span>
+                          <Badge variant="secondary" className="rounded-full">
+                            {categoryTasks.length}
+                          </Badge>
+                        </div>
+                        <ChevronDown className={`h-5 w-5 transition-transform ${!collapsedCategories.has(category) ? "rotate-180" : ""}`} />
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="p-4 pt-0 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {categoryTasks.map((task, index) => (
+                          <motion.div
+                            key={task.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                          >
+                            <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
+              ))}
+            </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {myTasks.map((task, index) => (
+              {filteredKidTasks.map((task, index) => (
                 <motion.div
                   key={task.id}
                   initial={{ opacity: 0, y: 20 }}

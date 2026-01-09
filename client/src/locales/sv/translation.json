@@ -95,7 +95,21 @@
     "subscription_activated": "Prenumeration aktiverad!",
     "subscription_activated_desc": "Din prenumeration har aktiverats. Njut av dina nya funktioner!",
     "specialPrizes": "Milstolpar",
-    "viewAll": "Visa alla →"
+    "viewAll": "Visa alla →",
+    "filterToday": "Idag",
+    "filterThisWeek": "Denna vecka",
+    "filterAll": "Alla",
+    "filterCompleted": "Avslutade",
+    "noTasksToday": "Inga uppgifter idag",
+    "noTasksThisWeek": "Inga uppgifter denna vecka",
+    "categoryHousehold": "Hushåll",
+    "categorySchool": "Skola & Lärande",
+    "categorySelfCare": "Egenvård",
+    "categoryPets": "Husdjur & Växter",
+    "categoryOther": "Övriga",
+    "tasksInCategory": "{{count}} uppgift(er)",
+    "expandAll": "Expandera alla",
+    "collapseAll": "Minimera alla"
   },
   "tasks": {
     "title": "Uppgifter",
@@ -1084,7 +1098,15 @@
     "parentsSuggest": "Föreslå för dina föräldrar att skapa ett familjemål!",
     "goalProgress": "{{current}} / {{target}} poäng",
     "howItWorks": "Hur Milstolpar fungerar",
-    "howItWorksDesc": "Milstolpar upptäcks och delas ut automatiskt när barn når specifika mål. Bonuspoäng läggs till omedelbart med ett firandemeddelande."
+    "howItWorksDesc": "Milstolpar upptäcks och delas ut automatiskt när barn når specifika mål. Bonuspoäng läggs till omedelbart med ett firandemeddelande.",
+    "tasks": "Uppgifter",
+    "noTasksYet": "Inga uppgifter ännu!",
+    "askParentsTasks": "Be dina föräldrar skapa uppgifter åt dig.",
+    "filterToday": "Idag",
+    "filterThisWeek": "Denna vecka",
+    "filterAll": "Alla uppgifter",
+    "noTasksForFilter": "Inga uppgifter för denna tid!",
+    "showAllTasks": "Visa alla uppgifter"
   },
   "achievements": {
     "title": "Milstolpar",

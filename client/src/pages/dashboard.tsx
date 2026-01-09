@@ -85,7 +85,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles, Info, ChevronRight } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -119,6 +121,13 @@ export default function Dashboard() {
   const [childActiveTab, setChildActiveTab] = useState<string>("active");
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("month");
   const [subscriptionProcessing, setSubscriptionProcessing] = useState(false);
+  const [taskFilter, setTaskFilter] = useState<"today" | "week" | "all">(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("herokids_task_filter") as "today" | "week" | "all") || "all";
+    }
+    return "all";
+  });
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [debugTapCount, setDebugTapCount] = useState(0);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
   const debugTapTimeout = useState<NodeJS.Timeout | null>(null);
@@ -765,6 +774,120 @@ export default function Dashboard() {
   );
   const activeRewards = rewards.filter((r) => r.isActive);
 
+  // Task filter and grouping helpers
+  const getTaskCategory = (iconEmoji: string | null): string => {
+    const emoji = iconEmoji || "⭐";
+    const householdIcons = ["🧹", "🍽️", "🗑️", "🧺", "🛁", "🧼", "🪣", "🧽"];
+    const schoolIcons = ["📚", "✏️", "📝", "📖", "🎒", "✍️", "📓", "🎓"];
+    const selfCareIcons = ["🦷", "🚿", "💇", "🛏️", "👕", "👟", "🧴"];
+    const petIcons = ["🐕", "🐈", "🐾", "🌱", "🌿", "🌷", "🐟", "🐢"];
+    
+    if (householdIcons.includes(emoji)) return "household";
+    if (schoolIcons.includes(emoji)) return "school";
+    if (selfCareIcons.includes(emoji)) return "selfCare";
+    if (petIcons.includes(emoji)) return "pets";
+    return "other";
+  };
+
+  const getCategoryLabel = (category: string): string => {
+    const labels: Record<string, string> = {
+      household: t("dashboard.categoryHousehold"),
+      school: t("dashboard.categorySchool"),
+      selfCare: t("dashboard.categorySelfCare"),
+      pets: t("dashboard.categoryPets"),
+      other: t("dashboard.categoryOther"),
+    };
+    return labels[category] || category;
+  };
+
+  const getCategoryEmoji = (category: string): string => {
+    const emojis: Record<string, string> = {
+      household: "🏠",
+      school: "📚",
+      selfCare: "🧼",
+      pets: "🐾",
+      other: "⭐",
+    };
+    return emojis[category] || "⭐";
+  };
+
+  // Filter tasks by date range
+  const filterTasksByDate = (taskList: typeof activeTasks) => {
+    const today = startOfDay(new Date());
+    const weekEnd = addDays(today, 7);
+    
+    return taskList.filter(task => {
+      if (taskFilter === "all") return true;
+      
+      if (!task.dueDate) {
+        // Tasks without due date show in "all" only, or always if recurring
+        return task.recurrence !== "none";
+      }
+      
+      const dueDate = typeof task.dueDate === "string" 
+        ? parseISO(task.dueDate) 
+        : task.dueDate;
+      const dueDateStart = startOfDay(dueDate);
+      
+      if (taskFilter === "today") {
+        return dueDateStart.getTime() === today.getTime();
+      }
+      
+      if (taskFilter === "week") {
+        return dueDateStart >= today && dueDateStart <= weekEnd;
+      }
+      
+      return true;
+    });
+  };
+
+  // Group tasks by category
+  const groupTasksByCategory = (taskList: typeof activeTasks) => {
+    const groups: Record<string, typeof activeTasks> = {};
+    
+    taskList.forEach(task => {
+      const category = getTaskCategory(task.iconEmoji);
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(task);
+    });
+    
+    // Sort categories: household, school, selfCare, pets, other
+    const categoryOrder = ["household", "school", "selfCare", "pets", "other"];
+    const sortedGroups: Record<string, typeof activeTasks> = {};
+    
+    categoryOrder.forEach(cat => {
+      if (groups[cat] && groups[cat].length > 0) {
+        sortedGroups[cat] = groups[cat];
+      }
+    });
+    
+    return sortedGroups;
+  };
+
+  const filteredTasks = filterTasksByDate(activeTasks);
+  const groupedTasks = groupTasksByCategory(filteredTasks);
+  const hasMultipleCategories = Object.keys(groupedTasks).length > 1;
+
+  // Toggle category collapse
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
+
+  // Persist filter selection
+  useEffect(() => {
+    localStorage.setItem("herokids_task_filter", taskFilter);
+  }, [taskFilter]);
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -944,6 +1067,47 @@ export default function Dashboard() {
                 </Button>
               </div>
 
+              {/* Task Filter Tabs */}
+              {activeTasks.length > 0 && (
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex bg-muted rounded-lg p-1 gap-1">
+                    <Button
+                      variant={taskFilter === "today" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setTaskFilter("today")}
+                      className="text-xs px-3"
+                      data-testid="button-filter-today"
+                    >
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {t("dashboard.filterToday")}
+                    </Button>
+                    <Button
+                      variant={taskFilter === "week" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setTaskFilter("week")}
+                      className="text-xs px-3"
+                      data-testid="button-filter-week"
+                    >
+                      {t("dashboard.filterThisWeek")}
+                    </Button>
+                    <Button
+                      variant={taskFilter === "all" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setTaskFilter("all")}
+                      className="text-xs px-3"
+                      data-testid="button-filter-all"
+                    >
+                      {t("dashboard.filterAll")}
+                    </Button>
+                  </div>
+                  {filteredTasks.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {filteredTasks.length}
+                    </Badge>
+                  )}
+                </div>
+              )}
+
               {activeTasks.length === 0 ? (
                 <Card className="p-12 text-center">
                   <Star className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -959,9 +1123,102 @@ export default function Dashboard() {
                     {t("dashboard.createTask")}
                   </Button>
                 </Card>
+              ) : filteredTasks.length === 0 ? (
+                <Card className="p-8 text-center">
+                  <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                  <h3 className="text-lg font-bold font-accent mb-2">
+                    {taskFilter === "today" ? t("dashboard.noTasksToday") : t("dashboard.noTasksThisWeek")}
+                  </h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setTaskFilter("all")}
+                    data-testid="button-show-all-tasks"
+                  >
+                    {t("dashboard.filterAll")} ({activeTasks.length})
+                  </Button>
+                </Card>
+              ) : hasMultipleCategories ? (
+                <div className="space-y-3">
+                  {Object.entries(groupedTasks).map(([category, categoryTasks]) => (
+                    <Collapsible
+                      key={category}
+                      open={!collapsedCategories.has(category)}
+                      onOpenChange={() => toggleCategory(category)}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-between p-3 h-auto hover-elevate"
+                          data-testid={`button-category-${category}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{getCategoryEmoji(category)}</span>
+                            <span className="font-semibold">{getCategoryLabel(category)}</span>
+                            <Badge variant="secondary" className="text-xs">
+                              {categoryTasks.length}
+                            </Badge>
+                          </div>
+                          <ChevronDown 
+                            className={`h-4 w-4 transition-transform ${
+                              collapsedCategories.has(category) ? "-rotate-90" : ""
+                            }`} 
+                          />
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-2">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          {categoryTasks.map((task) => (
+                            <div key={task.id} className="relative group min-h-[140px] min-w-0">
+                              <TaskCard
+                                task={task}
+                                showAssignee
+                                onClick={handleTaskClick}
+                                onComplete={() => {
+                                  setTaskToComplete(task);
+                                  setCompletionDialogOpen(true);
+                                }}
+                                isCompleting={completeTaskMutation.isPending}
+                                currentMemberId={member?.id}
+                              />
+                              <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedTask(task);
+                                    setTaskDialogOpen(true);
+                                  }}
+                                  data-testid={`button-edit-task-${task.id}`}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteTaskMutation.mutate(task.id);
+                                  }}
+                                  disabled={deleteTaskMutation.isPending}
+                                  data-testid={`button-delete-task-${task.id}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ))}
+                </div>
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
-                  {activeTasks.map((task) => (
+                  {filteredTasks.map((task) => (
                     <div key={task.id} className="relative group min-h-[140px] min-w-0">
                       <TaskCard
                         task={task}
