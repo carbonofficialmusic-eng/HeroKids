@@ -157,22 +157,32 @@ function Router() {
     );
   }
 
+  // Use location-based key to force complete remount when navigating between dashboards
+  const [location] = useLocation();
+  const dashboardKey = `dashboard-${location}`;
+  
   return (
     <BackgroundWrapper>
       <Switch>
         <Route path="/" component={AutoRedirect} />
         <Route path="/dashboard">
-          <Dashboard key="dashboard" />
+          <Dashboard key={dashboardKey} />
         </Route>
         <Route path="/kid-dashboard">
-          <KidDashboard key="kid-dashboard" />
+          <KidDashboard key={dashboardKey} />
         </Route>
         <Route path="/kid-dashboard-old" component={KidDashboardOld} />
         <Route path="/my-rewards" component={MyRewards} />
         <Route path="/my-achievements" component={MyAchievements} />
-        <Route path="/tasks" component={Dashboard} />
-        <Route path="/rewards" component={Dashboard} />
-        <Route path="/leaderboard" component={Dashboard} />
+        <Route path="/tasks">
+          <Dashboard key={dashboardKey} />
+        </Route>
+        <Route path="/rewards">
+          <Dashboard key={dashboardKey} />
+        </Route>
+        <Route path="/leaderboard">
+          <Dashboard key={dashboardKey} />
+        </Route>
         <Route path="/skins" component={SkinsGallery} />
         <Route path="/pricing" component={Pricing} />
         <Route path="/analytics" component={Analytics} />
