@@ -901,7 +901,7 @@ export class DatabaseStorage implements IStorage {
   async hasActiveMemberCompletion(taskId: string, memberId: string, txClient?: any): Promise<boolean> {
     const client = txClient || db;
     
-    // Get task info to check if it's a daily recurring task
+    // Get task info to check if it's a daily recurring task or immediate task
     const [task] = await client
       .select({
         recurrence: tasks.recurrence,
@@ -911,6 +911,22 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tasks.id, taskId));
     
     if (!task) return false;
+    
+    // For IMMEDIATE tasks: Only block if there's a PENDING completion
+    // After approval, the task should be immediately available again
+    if (task.recurrence === 'immediate') {
+      const [result] = await client
+        .select({ count: sql<number>`count(*)` })
+        .from(taskCompletions)
+        .where(
+          and(
+            eq(taskCompletions.taskId, taskId),
+            eq(taskCompletions.memberId, memberId),
+            eq(taskCompletions.status, "pending") // Only pending blocks immediate tasks
+          )
+        );
+      return Number(result?.count || 0) > 0;
+    }
     
     // For daily recurring tasks, only check completions from TODAY (in family timezone)
     if (task.recurrence === 'daily') {
@@ -955,7 +971,7 @@ export class DatabaseStorage implements IStorage {
   async getMemberCompletionStatus(taskId: string, memberId: string, txClient?: any): Promise<"pending" | "approved" | "rejected" | null> {
     const client = txClient || db;
     
-    // Get task info to check if it's a daily recurring task
+    // Get task info to check if it's a daily recurring task or immediate task
     const [task] = await client
       .select({
         recurrence: tasks.recurrence,
@@ -965,6 +981,24 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tasks.id, taskId));
     
     if (!task) return null;
+    
+    // For IMMEDIATE tasks: Only return "pending" if there's a pending completion
+    // After approval, return null so task appears available again
+    if (task.recurrence === 'immediate') {
+      const [pendingCompletion] = await client
+        .select({ status: taskCompletions.status })
+        .from(taskCompletions)
+        .where(
+          and(
+            eq(taskCompletions.taskId, taskId),
+            eq(taskCompletions.memberId, memberId),
+            eq(taskCompletions.status, "pending")
+          )
+        )
+        .limit(1);
+      
+      return pendingCompletion?.status || null;
+    }
     
     // For daily recurring tasks, only check completions from TODAY (in family timezone)
     if (task.recurrence === 'daily') {
