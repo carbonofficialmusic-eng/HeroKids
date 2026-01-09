@@ -1624,19 +1624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only parents can create tasks" });
       }
       
-      // Handle dueDate conversion BEFORE Zod parsing
-      const bodyData: any = { ...req.body };
-      if (bodyData.dueDate !== undefined) {
-        if (typeof bodyData.dueDate === 'string') {
-          if (bodyData.dueDate.trim() === '') {
-            bodyData.dueDate = null;
-          } else {
-            bodyData.dueDate = new Date(bodyData.dueDate);
-          }
-        }
-      }
-      
-      const parsed = insertTaskSchema.parse(bodyData);
+      const parsed = insertTaskSchema.parse(req.body);
       
       const task = await storage.createTask(parsed);
       
@@ -1678,20 +1666,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot update tasks from other families" });
       }
 
-      // Handle dueDate conversion BEFORE Zod parsing
-      const bodyData: any = { ...req.body };
-      if (bodyData.dueDate !== undefined) {
-        if (typeof bodyData.dueDate === 'string') {
-          if (bodyData.dueDate.trim() === '') {
-            bodyData.dueDate = null;
-          } else {
-            bodyData.dueDate = new Date(bodyData.dueDate);
-          }
-        }
-      }
-      
       // Parse and update the task
-      const parsed = insertTaskSchema.partial().parse(bodyData);
+      const parsed = insertTaskSchema.partial().parse(req.body);
       const updatedTask = await storage.updateTask(taskId, parsed);
 
       // Broadcast task update to family

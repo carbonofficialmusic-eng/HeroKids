@@ -51,7 +51,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 const taskFormSchema = insertTaskSchema.extend({
-  dueDate: z.string().optional(),
   recurrenceDays: z.number().int().min(1).max(365).optional(),
   maxCompletions: z.number().int().min(2).max(20).optional(),
   isSharedTask: z.boolean().optional(),
@@ -184,7 +183,6 @@ export function TaskDialog({
       title: "",
       description: "",
       points: 10,
-      dueDate: "",
       recurrence: "none",
       recurrenceDays: undefined,
       status: "active",
@@ -226,11 +224,6 @@ export function TaskDialog({
           title: editingTask.title,
           description: editingTask.description || "",
           points: editingTask.points,
-          dueDate: editingTask.dueDate 
-            ? (editingTask.dueDate instanceof Date 
-                ? editingTask.dueDate.toISOString().split('T')[0] 
-                : editingTask.dueDate)
-            : "",
           recurrence: editingTask.recurrence,
           recurrenceDays: editingTask.recurrenceDays || undefined,
           status: editingTask.status,
@@ -253,7 +246,6 @@ export function TaskDialog({
           title: "",
           description: "",
           points: 10,
-          dueDate: "",
           recurrence: "none",
           recurrenceDays: undefined,
           status: "active",
@@ -796,30 +788,6 @@ export function TaskDialog({
                 />
               )}
             </div>
-
-            {/* Due Date - Only shown for one-time tasks */}
-            {form.watch("recurrence") === "none" && recurrenceMode === "standard" && (
-              <FormField
-                control={form.control}
-                name="dueDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('tasks.dueDateOptional')}</FormLabel>
-                    <FormDescription>
-                      {t('tasks.dueDateDesc')}
-                    </FormDescription>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        data-testid="input-task-due-date"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
 
             <FormField
               control={form.control}
