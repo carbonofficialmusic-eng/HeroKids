@@ -235,13 +235,21 @@
       "title": "Städa ditt rum",
       "description": "Plocka upp leksaker, bädda sängen, organisera skrivbordet"
     },
-    "dishes": {
-      "title": "Diska",
-      "description": "Diska och torka alla tallrikar, rengör diskbänken"
-    },
     "homework": {
       "title": "Gör läxorna",
       "description": "Slutför alla läxor för idag"
+    },
+    "brushTeeth": {
+      "title": "Borsta tänderna",
+      "description": "Borsta tänderna morgon och kväll"
+    },
+    "helpOut": {
+      "title": "Hjälpa till",
+      "description": "Hjälpa till med en hushållssyssla"
+    },
+    "dishes": {
+      "title": "Diska",
+      "description": "Diska och torka alla tallrikar, rengör diskbänken"
     },
     "trash": {
       "title": "Ta ut soporna",

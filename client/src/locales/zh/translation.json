@@ -230,13 +230,21 @@
       "title": "整理房间",
       "description": "收拾玩具、整理床铺、整理书桌"
     },
-    "dishes": {
-      "title": "洗碗",
-      "description": "洗碗并擦干，清洁水槽"
-    },
     "homework": {
       "title": "完成作业",
       "description": "完成今天布置的所有作业"
+    },
+    "brushTeeth": {
+      "title": "刷牙",
+      "description": "早晚认真刷牙"
+    },
+    "helpOut": {
+      "title": "帮忙",
+      "description": "帮忙做家务"
+    },
+    "dishes": {
+      "title": "洗碗",
+      "description": "洗碗并擦干，清洁水槽"
     },
     "trash": {
       "title": "倒垃圾",

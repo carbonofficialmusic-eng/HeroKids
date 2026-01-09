@@ -236,13 +236,21 @@
       "title": "Clean Your Room",
       "description": "Pick up toys, make bed, organize desk"
     },
-    "dishes": {
-      "title": "Do the Dishes",
-      "description": "Wash and dry all dishes, clean the sink"
-    },
     "homework": {
       "title": "Complete Homework",
       "description": "Finish all assigned homework for today"
+    },
+    "brushTeeth": {
+      "title": "Brush Teeth",
+      "description": "Brush teeth thoroughly morning and evening"
+    },
+    "helpOut": {
+      "title": "Help Out",
+      "description": "Help with a household task"
+    },
+    "dishes": {
+      "title": "Do the Dishes",
+      "description": "Wash and dry all dishes, clean the sink"
     },
     "trash": {
       "title": "Take Out Trash",

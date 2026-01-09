@@ -230,13 +230,21 @@
       "title": "部屋を片付ける",
       "description": "おもちゃを片付け、ベッドを整え、机を整理"
     },
-    "dishes": {
-      "title": "食器洗い",
-      "description": "すべての食器を洗って乾かし、シンクを掃除"
-    },
     "homework": {
       "title": "宿題を終わらせる",
       "description": "今日の宿題をすべて終わらせる"
+    },
+    "brushTeeth": {
+      "title": "歯磨き",
+      "description": "朝と夜にしっかり歯を磨く"
+    },
+    "helpOut": {
+      "title": "お手伝い",
+      "description": "家事を手伝う"
+    },
+    "dishes": {
+      "title": "食器洗い",
+      "description": "すべての食器を洗って乾かし、シンクを掃除"
     },
     "trash": {
       "title": "ゴミ出し",

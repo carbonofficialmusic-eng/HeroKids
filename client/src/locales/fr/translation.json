@@ -230,13 +230,21 @@
       "title": "Range ta chambre",
       "description": "Ramasse les jouets, fais le lit, range le bureau"
     },
-    "dishes": {
-      "title": "Faire la vaisselle",
-      "description": "Laver et sécher toute la vaisselle, nettoyer l'évier"
-    },
     "homework": {
       "title": "Faire les devoirs",
       "description": "Terminer tous les devoirs assignés pour aujourd'hui"
+    },
+    "brushTeeth": {
+      "title": "Brosser les dents",
+      "description": "Brosser les dents matin et soir"
+    },
+    "helpOut": {
+      "title": "Aider",
+      "description": "Aider avec une tâche ménagère"
+    },
+    "dishes": {
+      "title": "Faire la vaisselle",
+      "description": "Laver et sécher toute la vaisselle, nettoyer l'évier"
     },
     "trash": {
       "title": "Sortir les poubelles",

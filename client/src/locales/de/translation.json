@@ -259,13 +259,21 @@
       "title": "Zimmer aufräumen",
       "description": "Spielzeug wegräumen, Bett machen, Schreibtisch aufräumen"
     },
-    "dishes": {
-      "title": "Abwaschen",
-      "description": "Geschirr spülen und abtrocknen, Spüle reinigen"
-    },
     "homework": {
       "title": "Hausaufgaben machen",
       "description": "Alle Hausaufgaben für heute erledigen"
+    },
+    "brushTeeth": {
+      "title": "Zähne putzen",
+      "description": "Morgens und abends gründlich Zähne putzen"
+    },
+    "helpOut": {
+      "title": "Helfen",
+      "description": "Bei einer Aufgabe im Haushalt helfen"
+    },
+    "dishes": {
+      "title": "Abwaschen",
+      "description": "Geschirr spülen und abtrocknen, Spüle reinigen"
     },
     "trash": {
       "title": "Müll rausbringen",

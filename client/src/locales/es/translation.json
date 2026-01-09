@@ -230,13 +230,21 @@
       "title": "Ordena tu habitación",
       "description": "Recoge los juguetes, haz la cama, organiza el escritorio"
     },
-    "dishes": {
-      "title": "Lavar los platos",
-      "description": "Lavar y secar todos los platos, limpiar el fregadero"
-    },
     "homework": {
       "title": "Hacer los deberes",
       "description": "Terminar todos los deberes asignados para hoy"
+    },
+    "brushTeeth": {
+      "title": "Cepillar los dientes",
+      "description": "Cepillar los dientes por la mañana y por la noche"
+    },
+    "helpOut": {
+      "title": "Ayudar",
+      "description": "Ayudar con una tarea del hogar"
+    },
+    "dishes": {
+      "title": "Lavar los platos",
+      "description": "Lavar y secar todos los platos, limpiar el fregadero"
     },
     "trash": {
       "title": "Sacar la basura",
