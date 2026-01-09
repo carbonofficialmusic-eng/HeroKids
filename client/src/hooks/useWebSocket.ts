@@ -41,9 +41,10 @@ export function useWebSocket(familyName: string | null) {
             case "task_completion_pending":
             case "task_completion_approved":
             case "task_completion_rejected":
-              // Invalidate tasks, pending count, family members, and skins (points changed = new skins unlockable)
+              // Invalidate tasks, pending count, pending completions list, family members, and skins
               queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
               queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] }); // Approvals list
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
               queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
