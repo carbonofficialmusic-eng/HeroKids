@@ -338,6 +338,11 @@ export default function Dashboard() {
     }
   }, [familyData?.showLeaderboard, childActiveTab]);
 
+  // Persist filter selection (must be before early returns to follow hooks rules)
+  useEffect(() => {
+    localStorage.setItem("herokids_task_filter", taskFilter);
+  }, [taskFilter]);
+
   // Setup family member
   const setupMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -868,11 +873,6 @@ export default function Dashboard() {
       return newSet;
     });
   };
-
-  // Persist filter selection
-  useEffect(() => {
-    localStorage.setItem("herokids_task_filter", taskFilter);
-  }, [taskFilter]);
 
   return (
     <div className="min-h-screen">
