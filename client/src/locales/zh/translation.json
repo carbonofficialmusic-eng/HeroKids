@@ -202,10 +202,13 @@
     "sharedTaskNotAssigned": "只有{{members}}可以完成此任务",
     "assignedToLabel": "分配给",
     "assignedToDesc": "选择哪些孩子应该完成此任务。留空表示所有孩子。",
+    "assignedToDescAll": "选择哪些家庭成员应该完成此任务。留空表示所有人。",
     "assignmentAllChildren": "所有孩子都可以完成此任务",
     "assignmentExclusive": "只有{{name}}可以看到并完成此任务",
     "assignmentShared": "{{count}}个孩子将分担此任务（每人{{points}}积分）",
     "noChildrenToAssign": "家庭中还没有孩子",
+    "noMembersToAssign": "还没有家庭成员",
+    "category": "类别",
     "emojiCategory": {
       "household": "家务",
       "school": "学校与学习",

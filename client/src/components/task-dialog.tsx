@@ -70,27 +70,23 @@ interface TaskDialogProps {
   familyMembers?: FamilyMember[];
 }
 
-// Emoji categories for task icons
+// Emoji categories for task icons (4 categories, 3 emojis each)
 const emojiCategories = {
   household: {
     label: "tasks.emojiCategory.household",
-    emojis: ["🧹", "🍽️", "🗑️", "🧺", "🛁", "🧼", "🪣", "🧽", "🚗", "🛒"]
+    emojis: ["🧹", "🍽️", "🧺"]
   },
   school: {
     label: "tasks.emojiCategory.school",
-    emojis: ["📚", "✏️", "📝", "📖", "🎒", "✍️", "📓", "🎓", "💻", "🎨"]
+    emojis: ["📚", "✏️", "🎒"]
   },
   selfCare: {
     label: "tasks.emojiCategory.selfCare",
-    emojis: ["🦷", "🚿", "💇", "🛏️", "👕", "👟", "🧴", "💪", "🧘", "😴"]
-  },
-  pets: {
-    label: "tasks.emojiCategory.pets",
-    emojis: ["🐕", "🐈", "🐾", "🌱", "🌿", "🌷", "🐟", "🐢", "🐹", "🦜"]
+    emojis: ["🦷", "🛏️", "👕"]
   },
   other: {
     label: "tasks.emojiCategory.other",
-    emojis: ["⭐", "🎯", "🏆", "💎", "🎁", "❤️", "🌈", "⚡", "🔔", "✨"]
+    emojis: ["⭐", "🎯", "🏆"]
   }
 };
 
@@ -114,7 +110,7 @@ export function TaskDialog({
     return familyMembers.length;
   }, [familyMembers]);
   
-  // Predefined task templates for common chores
+  // Predefined task templates (4 popular templates in 2x2 grid)
   const taskTemplates = [
     {
       id: "clean-room",
@@ -147,39 +143,6 @@ export function TaskDialog({
       points: 15,
       iconEmoji: "🗑️",
       requiresProof: false,
-    },
-    {
-      id: "laundry",
-      title: t('taskTemplates.laundry.title'),
-      description: t('taskTemplates.laundry.description'),
-      points: 35,
-      iconEmoji: "🧺",
-      requiresProof: false,
-    },
-    {
-      id: "school-work",
-      title: t('taskTemplates.schoolWork.title'),
-      description: t('taskTemplates.schoolWork.description'),
-      points: 20,
-      iconEmoji: "✏️",
-      requiresProof: false,
-    },
-    {
-      id: "vacuum",
-      title: t('taskTemplates.vacuum.title'),
-      description: t('taskTemplates.vacuum.description'),
-      points: 30,
-      iconEmoji: "🧹",
-      requiresProof: true,
-    },
-    {
-      id: "dentist",
-      title: t('taskTemplates.dentist.title'),
-      description: t('taskTemplates.dentist.description'),
-      points: 200,
-      iconEmoji: "🦷",
-      requiresProof: false,
-      recurrence: "yearly" as const,
     },
   ];
   
@@ -312,12 +275,6 @@ export function TaskDialog({
     form.setValue("points", template.points);
     form.setValue("iconEmoji", template.iconEmoji);
     form.setValue("requiresProof", template.requiresProof);
-    
-    // Apply recurrence if template has it
-    if ('recurrence' in template && template.recurrence) {
-      form.setValue("recurrence", template.recurrence);
-      setRecurrenceMode("standard");
-    }
   };
 
   // Manual task reset mutation
@@ -382,28 +339,22 @@ export function TaskDialog({
                 </div>
               </div>
               
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  <h3 className="font-semibold">{t('tasks.quickTemplates')}</h3>
-                  <Badge variant="secondary">{t('tasks.popular')}</Badge>
+                  <h3 className="font-semibold text-sm">{t('tasks.quickTemplates')}</h3>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-1.5">
                   {taskTemplates.map((template) => (
                     <Card
                       key={template.id}
-                      className="p-3 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                      className="p-2 cursor-pointer hover-elevate active-elevate-2 transition-all"
                       onClick={() => applyTemplate(template)}
                       data-testid={`template-${template.id}`}
                     >
-                      <div className="flex items-start gap-2">
-                        <span className="text-2xl">{template.iconEmoji}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm truncate">{template.title}</div>
-                          <div className="text-xs text-muted-foreground flex items-center gap-1">
-                            <span>{template.points} {t('tasks.pts')}</span>
-                          </div>
-                        </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-lg">{template.iconEmoji}</span>
+                        <span className="font-medium text-xs truncate">{template.title}</span>
                       </div>
                     </Card>
                   ))}
@@ -426,21 +377,21 @@ export function TaskDialog({
               name="iconEmoji"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('tasks.taskIcon')}</FormLabel>
-                  <div className="space-y-3">
+                  <FormLabel>{t('tasks.category')}</FormLabel>
+                  <div className="grid grid-cols-4 gap-3">
                     {Object.entries(emojiCategories).map(([categoryKey, category]) => (
-                      <div key={categoryKey} className="space-y-1.5">
-                        <p className="text-xs text-muted-foreground font-medium">
+                      <div key={categoryKey} className="space-y-1">
+                        <p className="text-xs text-muted-foreground font-medium text-center">
                           {t(category.label)}
                         </p>
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex justify-center gap-1">
                           {category.emojis.map((icon) => (
                             <Button
                               key={icon}
                               type="button"
                               variant={field.value === icon ? "default" : "outline"}
                               size="icon"
-                              className="h-9 w-9 text-lg"
+                              className="h-8 w-8 text-base"
                               onClick={() => field.onChange(icon)}
                               data-testid={`button-icon-${icon}`}
                             >
@@ -526,79 +477,44 @@ export function TaskDialog({
               control={form.control}
               name="isSharedTask"
               render={({ field }) => {
-                const childMembers = allMembers.filter(m => m.role === "child");
-                const hasChildren = childMembers.length > 0;
-                const assignedCount = selectedSharedMembers.length;
-                const currentPoints = form.watch("points") || 10;
-                
-                // Determine assignment type for display
-                const getAssignmentInfo = () => {
-                  if (assignedCount === 0) {
-                    return { type: "all", description: t('tasks.assignmentAllChildren') };
-                  } else if (assignedCount === 1) {
-                    const member = childMembers.find(m => selectedSharedMembers.includes(m.id));
-                    return { 
-                      type: "exclusive", 
-                      description: t('tasks.assignmentExclusive', { name: member?.displayName || '' })
-                    };
-                  } else {
-                    const splitPoints = Math.floor(currentPoints / assignedCount);
-                    return { 
-                      type: "shared", 
-                      description: t('tasks.assignmentShared', { count: assignedCount, points: splitPoints })
-                    };
-                  }
-                };
-                
-                const assignmentInfo = getAssignmentInfo();
+                const hasMembers = allMembers.length > 0;
                 
                 return (
                   <FormItem className="space-y-3">
                     <FormLabel>{t('tasks.assignedToLabel')}</FormLabel>
                     <FormDescription>
-                      {t('tasks.assignedToDesc')}
+                      {t('tasks.assignedToDescAll')}
                     </FormDescription>
                     
-                    {hasChildren ? (
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap gap-2">
-                          {childMembers.map((member) => {
-                            const isSelected = selectedSharedMembers.includes(member.id);
-                            return (
-                              <Badge
-                                key={member.id}
-                                variant={isSelected ? "default" : "outline"}
-                                className="cursor-pointer transition-all py-1.5 px-3"
-                                onClick={() => {
-                                  let newSelection: string[];
-                                  if (isSelected) {
-                                    newSelection = selectedSharedMembers.filter(id => id !== member.id);
-                                  } else {
-                                    newSelection = [...selectedSharedMembers, member.id];
-                                  }
-                                  setSelectedSharedMembers(newSelection);
-                                  // isSharedTask=true only for 2+ members (shared points)
-                                  // 0 = all children, 1 = exclusive (but still uses sharedMemberIds)
-                                  field.onChange(newSelection.length >= 2);
-                                }}
-                                data-testid={`badge-assign-${member.id}`}
-                              >
-                                {member.displayName}
-                              </Badge>
-                            );
-                          })}
-                        </div>
-                        
-                        {/* Assignment status info */}
-                        <div className="p-3 bg-muted/50 rounded-lg">
-                          <p className="text-sm">
-                            {assignmentInfo.description}
-                          </p>
-                        </div>
+                    {hasMembers ? (
+                      <div className="flex flex-wrap gap-2">
+                        {allMembers.map((member) => {
+                          const isSelected = selectedSharedMembers.includes(member.id);
+                          return (
+                            <Badge
+                              key={member.id}
+                              variant={isSelected ? "default" : "outline"}
+                              className="cursor-pointer transition-all py-1.5 px-3"
+                              onClick={() => {
+                                let newSelection: string[];
+                                if (isSelected) {
+                                  newSelection = selectedSharedMembers.filter(id => id !== member.id);
+                                } else {
+                                  newSelection = [...selectedSharedMembers, member.id];
+                                }
+                                setSelectedSharedMembers(newSelection);
+                                field.onChange(newSelection.length > 0);
+                              }}
+                              data-testid={`badge-assign-${member.id}`}
+                            >
+                              {member.displayName}
+                            </Badge>
+                          );
+                        })}
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground">
-                        {t('tasks.noChildrenToAssign')}
+                        {t('tasks.noMembersToAssign')}
                       </p>
                     )}
                     <FormMessage />

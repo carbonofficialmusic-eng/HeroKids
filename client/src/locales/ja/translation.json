@@ -210,10 +210,13 @@
     "sharedTaskNotAssigned": "{{members}}のみがこのタスクを完了できます",
     "assignedToLabel": "担当者",
     "assignedToDesc": "このタスクを完了する子どもを選択してください。全員の場合は空のままにしてください。",
+    "assignedToDescAll": "このタスクを完了する家族メンバーを選択してください。全員の場合は空のままに。",
     "assignmentAllChildren": "すべての子どもがこのタスクを完了できます",
     "assignmentExclusive": "{{name}}だけがこのタスクを見て完了できます",
     "assignmentShared": "{{count}}人の子どもがこのタスクを分担します（各{{points}}ポイント）",
     "noChildrenToAssign": "まだ家族に子どもがいません",
+    "noMembersToAssign": "まだ家族メンバーがいません",
+    "category": "カテゴリ",
     "emojiCategory": {
       "household": "家事",
       "school": "学校・学習",

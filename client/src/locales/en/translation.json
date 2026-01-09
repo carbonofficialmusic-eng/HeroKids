@@ -208,10 +208,13 @@
     "sharedTaskNotAssigned": "Only {{members}} can complete this task",
     "assignedToLabel": "Assign To",
     "assignedToDesc": "Select which children should complete this task. Leave empty for all children.",
+    "assignedToDescAll": "Select which family members should complete this task. Leave empty for all.",
     "assignmentAllChildren": "All children can complete this task",
     "assignmentExclusive": "Only {{name}} can see and complete this task",
     "assignmentShared": "{{count}} children will share this task ({{points}} points each)",
     "noChildrenToAssign": "No children in the family yet",
+    "noMembersToAssign": "No family members yet",
+    "category": "Category",
     "emojiCategory": {
       "household": "Household",
       "school": "School & Learning",

@@ -239,10 +239,13 @@
     "sharedTaskNotAssigned": "Nur {{members}} können diese Aufgabe erledigen",
     "assignedToLabel": "Zuweisen an",
     "assignedToDesc": "Wähle, welche Kinder diese Aufgabe erledigen sollen. Leer lassen für alle Kinder.",
+    "assignedToDescAll": "Wähle, welche Familienmitglieder diese Aufgabe erledigen sollen. Leer lassen für alle.",
     "assignmentAllChildren": "Alle Kinder können diese Aufgabe erledigen",
     "assignmentExclusive": "Nur {{name}} kann diese Aufgabe sehen und erledigen",
     "assignmentShared": "{{count}} Kinder teilen sich diese Aufgabe (je {{points}} Punkte)",
     "noChildrenToAssign": "Noch keine Kinder in der Familie",
+    "noMembersToAssign": "Noch keine Familienmitglieder",
+    "category": "Kategorie",
     "emojiCategory": {
       "household": "Haushalt",
       "school": "Schule & Lernen",

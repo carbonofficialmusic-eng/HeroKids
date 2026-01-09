@@ -207,10 +207,13 @@
     "sharedTaskNotAssigned": "Endast {{members}} kan slutföra denna uppgift",
     "assignedToLabel": "Tilldela till",
     "assignedToDesc": "Välj vilka barn som ska slutföra denna uppgift. Lämna tomt för alla barn.",
+    "assignedToDescAll": "Välj vilka familjemedlemmar som ska slutföra denna uppgift. Lämna tomt för alla.",
     "assignmentAllChildren": "Alla barn kan slutföra denna uppgift",
     "assignmentExclusive": "Endast {{name}} kan se och slutföra denna uppgift",
     "assignmentShared": "{{count}} barn delar på denna uppgift ({{points}} poäng var)",
     "noChildrenToAssign": "Inga barn i familjen ännu",
+    "noMembersToAssign": "Inga familjemedlemmar ännu",
+    "category": "Kategori",
     "emojiCategory": {
       "household": "Hushåll",
       "school": "Skola & Lärande",

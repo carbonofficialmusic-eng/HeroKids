@@ -210,10 +210,13 @@
     "sharedTaskNotAssigned": "Solo {{members}} pueden completar esta tarea",
     "assignedToLabel": "Asignar a",
     "assignedToDesc": "Selecciona qué niños deben completar esta tarea. Deja vacío para todos los niños.",
+    "assignedToDescAll": "Selecciona qué miembros de la familia deben completar esta tarea. Deja vacío para todos.",
     "assignmentAllChildren": "Todos los niños pueden completar esta tarea",
     "assignmentExclusive": "Solo {{name}} puede ver y completar esta tarea",
     "assignmentShared": "{{count}} niños compartirán esta tarea ({{points}} puntos cada uno)",
     "noChildrenToAssign": "Aún no hay niños en la familia",
+    "noMembersToAssign": "Aún no hay miembros de la familia",
+    "category": "Categoría",
     "emojiCategory": {
       "household": "Hogar",
       "school": "Escuela y Aprendizaje",
