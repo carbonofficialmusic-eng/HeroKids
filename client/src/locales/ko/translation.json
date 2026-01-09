@@ -153,6 +153,7 @@
     "availableToday": "오늘 이용 가능",
     "availableTomorrow": "내일",
     "availableOn": "{{date}}에 다시",
+    "availableOnDate": "{{date}}에 다시",
     "updateDetails": "이 과제의 세부 정보를 업데이트합니다.",
     "setupNewTask": "가족이 완료할 새 과제를 설정합니다.",
     "popular": "인기",

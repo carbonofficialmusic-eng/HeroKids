@@ -149,6 +149,7 @@
     "availableToday": "今日から利用可能",
     "availableTomorrow": "明日から",
     "availableOn": "{{date}}から再開",
+    "availableOnDate": "{{date}}から再開",
     "updateDetails": "このタスクの詳細を更新します。",
     "setupNewTask": "家族が完了する新しいタスクを設定します。",
     "popular": "人気",

@@ -167,6 +167,7 @@
     "availableToday": "Heute wieder",
     "availableTomorrow": "Morgen wieder",
     "availableOn": "Wieder am {{date}}",
+    "availableOnDate": "Wieder am {{date}}",
     "participants": "Teilnehmer",
     "updateDetails": "Aktualisiere die Details für diese Aufgabe.",
     "setupNewTask": "Richte eine neue Aufgabe für deine Familie ein.",

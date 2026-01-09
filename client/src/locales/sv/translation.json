@@ -153,6 +153,7 @@
     "availableToday": "Tillgänglig idag",
     "availableTomorrow": "Imorgon",
     "availableOn": "Tillbaka på {{date}}",
+    "availableOnDate": "Tillbaka den {{date}}",
     "participants": "Deltagare",
     "updateDetails": "Uppdatera informationen för denna uppgift.",
     "setupNewTask": "Skapa en ny uppgift för din familj att slutföra.",

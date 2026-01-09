@@ -149,6 +149,7 @@
     "availableToday": "今天可用",
     "availableTomorrow": "明天",
     "availableOn": "{{date}}再次可用",
+    "availableOnDate": "{{date}}再次可用",
     "updateDetails": "更新此任务的详细信息。",
     "setupNewTask": "为你的家庭设置新任务。",
     "popular": "热门",

@@ -8,7 +8,7 @@ import type { Task, FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { format, isToday, isTomorrow, type Locale } from "date-fns";
+import { format, isToday, isTomorrow, differenceInDays, type Locale } from "date-fns";
 import { de, enUS, fr, es, ja, ko, sv, zhCN } from "date-fns/locale";
 
 
@@ -71,9 +71,16 @@ export function TaskCard({
   const getNextAvailableText = () => {
     if (!task.nextAvailableDate || !isUnavailable) return null;
     const nextDate = new Date(task.nextAvailableDate);
+    const today = new Date();
     if (isToday(nextDate)) return t('tasks.availableToday');
     if (isTomorrow(nextDate)) return t('tasks.availableTomorrow');
-    return t('tasks.availableOn', { date: format(nextDate, 'EEEE', { locale: getDateLocale() }) });
+    const daysUntil = differenceInDays(nextDate, today);
+    // Show weekday name for within 7 days, full date for longer periods
+    if (daysUntil <= 7) {
+      return t('tasks.availableOn', { date: format(nextDate, 'EEEE', { locale: getDateLocale() }) });
+    }
+    // For longer periods, show full date (e.g., "10. März" or "March 10")
+    return t('tasks.availableOnDate', { date: format(nextDate, 'd. MMMM', { locale: getDateLocale() }) });
   };
   
   // Check if this member has already completed this multi-completion task

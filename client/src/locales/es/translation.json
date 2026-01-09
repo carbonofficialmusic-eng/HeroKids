@@ -149,6 +149,7 @@
     "availableToday": "Disponible hoy",
     "availableTomorrow": "Mañana",
     "availableOn": "Vuelve el {{date}}",
+    "availableOnDate": "Vuelve el {{date}}",
     "updateDetails": "Actualiza los detalles de esta tarea.",
     "setupNewTask": "Configura una nueva tarea para que tu familia complete.",
     "popular": "Popular",
