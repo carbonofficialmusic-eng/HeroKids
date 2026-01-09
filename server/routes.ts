@@ -1392,9 +1392,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             try {
               // Get completion status for this member
               const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
-              // Only "approved" counts as truly completed for filtering purposes
-              // "pending" and "rejected" should still be shown to children
-              const hasCompleted = completionStatus === "approved";
+              
+              // For IMMEDIATE tasks: "pending" means task is blocked (waiting for approval)
+              // After approval, getMemberCompletionStatus returns null, so task becomes available again
+              // For other tasks: "approved" means task is completed
+              const hasCompleted = task.recurrence === "immediate" 
+                ? completionStatus === "pending"  // Immediate: blocked while pending
+                : completionStatus === "approved"; // Others: completed when approved
               
               // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
               if (task.maxCompletions !== null) {
@@ -1463,12 +1467,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Normal mode (maxCompletions == null) - Standard tasks: if ANYONE completes it, it's done for everyone
               // Use family-wide completion status for normal tasks
               const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
-              const familyHasCompleted = familyCompletionStatus === "approved";
+              // For IMMEDIATE tasks: "pending" means blocked, null means available
+              // For other tasks: "approved" means completed
+              const familyHasCompleted = task.recurrence === "immediate"
+                ? familyCompletionStatus === "pending"
+                : familyCompletionStatus === "approved";
               
               return {
                 ...task,
                 remainingSlots: null,
-                memberHasCompleted: familyHasCompleted, // True if ANY family member completed
+                memberHasCompleted: familyHasCompleted, // True if blocked/completed
                 memberCompletionStatus: familyCompletionStatus, // Family-wide status
                 completions: [], // No participants for non-multi tasks
               };
@@ -1511,8 +1519,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             try {
               // Get completion status for this member
               const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
-              // Only "approved" counts as truly completed
-              const hasCompleted = completionStatus === "approved";
+              
+              // For IMMEDIATE tasks: "pending" means task is blocked (waiting for approval)
+              // After approval, getMemberCompletionStatus returns null, so task becomes available again
+              // For other tasks: "approved" means task is completed
+              const hasCompleted = task.recurrence === "immediate" 
+                ? completionStatus === "pending"  // Immediate: blocked while pending
+                : completionStatus === "approved"; // Others: completed when approved
               
               // For multi-completion tasks, check if parent has already completed it
               if (task.maxCompletions !== null) {
@@ -1573,12 +1586,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               // For non-multi-completion tasks - if ANYONE completes it, it's done for everyone
               const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
-              const familyHasCompleted = familyCompletionStatus === "approved";
+              // For IMMEDIATE tasks: "pending" means blocked, null means available
+              // For other tasks: "approved" means completed
+              const familyHasCompleted = task.recurrence === "immediate"
+                ? familyCompletionStatus === "pending"
+                : familyCompletionStatus === "approved";
               
               return {
                 ...task,
                 remainingSlots: null,
-                memberHasCompleted: familyHasCompleted, // True if ANY family member completed
+                memberHasCompleted: familyHasCompleted, // True if blocked/completed
                 memberCompletionStatus: familyCompletionStatus, // Family-wide status
                 completions: [], // No participants for non-multi tasks
               };

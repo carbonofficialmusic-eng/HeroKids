@@ -1052,6 +1052,7 @@ export class DatabaseStorage implements IStorage {
    * For normal tasks (maxCompletions == null): Check if ANYONE in the family has completed the task.
    * Returns the most favorable status (approved > pending > rejected > null).
    * For daily tasks, only checks today's completions.
+   * For immediate tasks, only returns "pending" (approved completions don't block).
    */
   async getTaskCompletionStatusForFamily(taskId: string, txClient?: any): Promise<"pending" | "approved" | "rejected" | null> {
     const client = txClient || db;
@@ -1066,6 +1067,21 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tasks.id, taskId));
     
     if (!task) return null;
+    
+    // For IMMEDIATE tasks: Only return "pending" if there are pending completions
+    // After approval, return null so task appears available again
+    if (task.recurrence === 'immediate') {
+      const [pendingResult] = await client
+        .select({ count: sql<number>`count(*)` })
+        .from(taskCompletions)
+        .where(
+          and(
+            eq(taskCompletions.taskId, taskId),
+            eq(taskCompletions.status, "pending")
+          )
+        );
+      return Number(pendingResult?.count || 0) > 0 ? "pending" : null;
+    }
     
     // For daily recurring tasks, only check completions from TODAY (in family timezone)
     if (task.recurrence === 'daily') {
