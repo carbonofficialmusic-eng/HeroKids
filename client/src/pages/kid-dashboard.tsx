@@ -1144,9 +1144,9 @@ export default function KidDashboard() {
     onSuccess: (data: any) => {
       // Clear entire query cache before navigation to prevent stale data issues
       queryClient.clear();
-      setSwitchMemberDialogOpen(false);
       
-      // Navigate based on the new member's role
+      // Navigate immediately - dialog will be gone when new page loads
+      // Don't close dialog first to avoid animation flash during navigation
       if (data?.member?.role === "child") {
         window.location.href = "/kid-dashboard";
       } else if (data?.member?.role === "parent") {

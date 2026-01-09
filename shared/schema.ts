@@ -162,6 +162,7 @@ export const tasks = pgTable("tasks", {
   iconEmoji: varchar("icon_emoji").default("⭐"),
   isSharedTask: boolean("is_shared_task").notNull().default(false), // Shared task: all members must complete together, points split equally
   sharedMemberIds: text("shared_member_ids").array(), // Array of member IDs who must complete this shared task together
+  dueDate: varchar("due_date"), // Optional due date for one-time tasks (YYYY-MM-DD format)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
