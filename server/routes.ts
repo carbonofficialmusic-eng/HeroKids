@@ -1464,7 +1464,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 };
               }
 
-              // Normal mode (maxCompletions == null) - Standard tasks: if ANYONE completes it, it's done for everyone
+              // Check if task is assigned to specific members
+              const assignedMemberIds = await storage.getTaskAssignmentsByTask(task.id);
+              
+              if (assignedMemberIds.length > 1) {
+                // Multi-assignment task: Each assigned member completes independently, gets full points
+                // Box grays out for members who submitted (pending/approved), stays active for others
+                const assignedMemberCompletions = await Promise.all(
+                  assignedMemberIds.map(async (memberId: string) => {
+                    const assignedMember = await storage.getFamilyMemberById(memberId);
+                    if (!assignedMember) return null;
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    return {
+                      memberId,
+                      displayName: assignedMember.displayName,
+                      avatarUrl: assignedMember.avatarUrl,
+                      activeSkinId: assignedMember.activeSkinId,
+                      useCustomAvatar: assignedMember.useCustomAvatar,
+                      color: assignedMember.color,
+                      hasCompleted: memberStatus === "approved", // Only approved counts as completed
+                      hasSubmitted: memberStatus === "approved" || memberStatus === "pending", // For UI graying
+                      status: memberStatus,
+                    };
+                  })
+                );
+                
+                const validCompletions = assignedMemberCompletions.filter(Boolean);
+                // allCompleted only when ALL have approved status (not just pending)
+                const allCompleted = validCompletions.filter(m => m?.hasCompleted).length === assignedMemberIds.length;
+                
+                // For children: check if THIS member has submitted (to grey out the card while pending/approved)
+                const currentMemberCompletion = validCompletions.find(m => m?.memberId === member.id);
+                const thisMemberHasSubmitted = currentMemberCompletion?.hasSubmitted || false;
+                
+                return {
+                  ...task,
+                  remainingSlots: null,
+                  memberHasCompleted: thisMemberHasSubmitted, // Grey out for THIS member if they submitted
+                  memberCompletionStatus: currentMemberCompletion?.status || null,
+                  completions: [],
+                  assignedMemberCompletions: validCompletions, // Include for UI to show who completed
+                };
+              }
+              
+              // Normal mode (maxCompletions == null, single/no assignment) - if ANYONE completes it, it's done for everyone
               // Use family-wide completion status for normal tasks
               const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
               // For IMMEDIATE tasks: "pending" means blocked, null means available
@@ -1584,6 +1627,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 };
               }
 
+              // Check if task is assigned to specific members (parent view)
+              const assignedMemberIds = await storage.getTaskAssignmentsByTask(task.id);
+              
+              if (assignedMemberIds.length > 1) {
+                // Multi-assignment task: Show parent the status of each assigned member
+                const assignedMemberCompletions = await Promise.all(
+                  assignedMemberIds.map(async (memberId: string) => {
+                    const assignedMember = await storage.getFamilyMemberById(memberId);
+                    if (!assignedMember) return null;
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    return {
+                      memberId,
+                      displayName: assignedMember.displayName,
+                      avatarUrl: assignedMember.avatarUrl,
+                      activeSkinId: assignedMember.activeSkinId,
+                      useCustomAvatar: assignedMember.useCustomAvatar,
+                      color: assignedMember.color,
+                      hasCompleted: memberStatus === "approved", // Only approved counts as completed
+                      hasSubmitted: memberStatus === "approved" || memberStatus === "pending", // For UI display
+                      status: memberStatus,
+                    };
+                  })
+                );
+                
+                const validCompletions = assignedMemberCompletions.filter(Boolean);
+                // allCompleted only when ALL have approved status (not just pending)
+                const allCompleted = validCompletions.filter(m => m?.hasCompleted).length === assignedMemberIds.length;
+                
+                return {
+                  ...task,
+                  remainingSlots: null,
+                  memberHasCompleted: allCompleted, // For parents: true when ALL assigned members have approved
+                  memberCompletionStatus: allCompleted ? "approved" : null,
+                  completions: [],
+                  assignedMemberCompletions: validCompletions, // Include for UI to show who completed
+                };
+              }
+              
               // For non-multi-completion tasks - if ANYONE completes it, it's done for everyone
               const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
               // For IMMEDIATE tasks: "pending" means blocked, null means available
@@ -1982,11 +2063,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         uploadedPhotos.delete(proofPhotoUrl);
       }
       
-      // Calculate points - for shared tasks, split equally among members
-      let pointsPerMember = task.points;
-      if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 1) {
-        pointsPerMember = Math.floor(task.points / task.sharedMemberIds.length);
-      }
+      // Each member gets FULL points (no splitting - this was changed from shared task behavior)
+      // The isSharedTask feature now just means multiple specific members can each complete and each get full points
+      const pointsPerMember = task.points;
       
       // Create completion record (handles approval, points, and completionCount in transaction)
       const completion = await storage.createTaskCompletion({
@@ -2062,19 +2141,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await storage.updateTaskNextAvailableDate(taskId, nextAvailableDate);
           }
         }
-      } else if (task.maxCompletions === null && !task.isSharedTask) {
-        // Only non-recurring, non-multi-completion, non-shared tasks are marked as completed immediately
-        // Multi-completion tasks manage their own status in _approveCompletionInternal
-        await storage.updateTaskStatus(taskId, "completed");
-      } else if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
-        // For shared tasks, check if all members have completed
-        const allCompletions = await storage.getTaskCompletionsByTask(taskId);
-        const completedMemberIds = allCompletions.map(c => c.memberId);
-        const allMembersCompleted = task.sharedMemberIds.every(id => completedMemberIds.includes(id));
+      } else if (task.maxCompletions === null) {
+        // Check if task is assigned to specific members
+        const assignedMemberIds = await storage.getTaskAssignmentsByTask(taskId);
         
-        if (allMembersCompleted && task.recurrence === "none") {
-          // All members completed - mark task as completed (for non-recurring)
-          await storage.updateTaskStatus(taskId, "completed");
+        if (assignedMemberIds.length > 1) {
+          // Task assigned to multiple members - check if ALL have completed
+          const allCompletions = await storage.getTaskCompletionsByTask(taskId);
+          const completedMemberIds = allCompletions.map(c => c.memberId);
+          const allMembersCompleted = assignedMemberIds.every(id => completedMemberIds.includes(id));
+          
+          if (allMembersCompleted && task.recurrence === "none") {
+            // All assigned members completed - mark task as completed (for non-recurring)
+            await storage.updateTaskStatus(taskId, "completed");
+          }
+          // If not all completed, task stays active for remaining members
+        } else if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+          // Legacy shared task logic (using sharedMemberIds field)
+          const allCompletions = await storage.getTaskCompletionsByTask(taskId);
+          const completedMemberIds = allCompletions.map(c => c.memberId);
+          const allMembersCompleted = task.sharedMemberIds.every(id => completedMemberIds.includes(id));
+          
+          if (allMembersCompleted && task.recurrence === "none") {
+            await storage.updateTaskStatus(taskId, "completed");
+          }
+        } else {
+          // Single assignment or no assignments - mark as completed immediately
+          if (task.recurrence === "none") {
+            await storage.updateTaskStatus(taskId, "completed");
+          }
         }
       }
       

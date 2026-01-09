@@ -36,6 +36,17 @@ interface TaskCardProps {
       color: string;
       hasCompleted: boolean;
     }>;
+    assignedMemberCompletions?: Array<{
+      memberId: string;
+      displayName: string;
+      avatarUrl: string | null;
+      activeSkinId: string | null;
+      useCustomAvatar: boolean;
+      color: string;
+      hasCompleted: boolean; // true only when approved
+      hasSubmitted: boolean; // true when pending or approved (for UI graying)
+      status: "pending" | "approved" | "rejected" | null;
+    }>;
   };
   assignedTo?: FamilyMember;
   onComplete?: (taskId: string) => void;
@@ -93,8 +104,9 @@ export function TaskCard({
     currentMemberId && 
     !task.sharedMemberIds.includes(currentMemberId);
   
-  // Get assigned member names for tooltip
-  const assignedMemberNames = task.sharedMemberCompletions?.map(m => m.displayName).join(' & ') || '';
+  // Get assigned member names for tooltip (prefer assignedMemberCompletions over legacy sharedMemberCompletions)
+  const assignedMemberNames = task.assignedMemberCompletions?.map(m => m.displayName).join(' & ') || 
+    task.sharedMemberCompletions?.map(m => m.displayName).join(' & ') || '';
   
   // Task should appear grayed out if it's unavailable OR completed by this member
   const isGrayedOut = isUnavailable || isCompletedByMember;
@@ -218,8 +230,48 @@ export function TaskCard({
               </div>
             )}
 
-            {/* Shared Task Progress */}
-            {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && (
+            {/* Multi-Assignment Task Progress (new style - uses taskAssignments) */}
+            {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1 && (
+              <div className="mb-2" data-testid={`assigned-progress-${task.id}`}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {t('tasks.sharedProgress', {
+                      completed: task.assignedMemberCompletions.filter(m => m.hasCompleted).length,
+                      total: task.assignedMemberCompletions.length
+                    })}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {task.assignedMemberCompletions.map((member) => {
+                    const hasSubmitted = member.hasSubmitted ?? (member.status !== null);
+                    return (
+                      <Badge 
+                        key={member.memberId} 
+                        variant={hasSubmitted ? "default" : "outline"}
+                        className="gap-1.5 text-xs"
+                        data-testid={`assigned-member-${member.memberId}`}
+                      >
+                        <Avatar className="h-4 w-4">
+                          <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar)} />
+                          <AvatarFallback 
+                            className="text-xs text-white font-bold"
+                            style={{ backgroundColor: member.color }}
+                          >
+                            {member.displayName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        {member.displayName}
+                        {member.status === "approved" ? " ✓" : member.status === "pending" ? " ⏳" : ""}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Legacy Shared Task Progress (uses sharedMemberIds field) */}
+            {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && !task.assignedMemberCompletions && (
               <div className="mb-2" data-testid={`shared-progress-${task.id}`}>
                 <div className="flex items-center gap-2 mb-1.5">
                   <Users className="h-3.5 w-3.5 text-muted-foreground" />

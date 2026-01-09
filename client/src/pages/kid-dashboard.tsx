@@ -100,6 +100,17 @@ interface TaskWithMeta extends Task {
     color: string;
     hasCompleted: boolean;
   }>;
+  assignedMemberCompletions?: Array<{
+    memberId: string;
+    displayName: string;
+    avatarUrl: string | null;
+    activeSkinId: string | null;
+    useCustomAvatar: boolean;
+    color: string;
+    hasCompleted: boolean; // true only when approved
+    hasSubmitted: boolean; // true when pending or approved (for UI graying)
+    status: "pending" | "approved" | "rejected" | null;
+  }>;
 }
 
 // Extended RewardRedemption type with sharing details
@@ -436,14 +447,23 @@ function TaskCard({
     task.sharedMemberIds.length > 0 && 
     !task.sharedMemberIds.includes(member.id);
   
-  // Check if all shared task members have completed (for recurring shared tasks graying)
+  // Check if all assigned members have completed (for multi-assignment tasks)
+  const allAssignedMembersCompleted = task.assignedMemberCompletions && 
+    task.assignedMemberCompletions.length > 1 &&
+    task.assignedMemberCompletions.every((m: { hasCompleted: boolean }) => m.hasCompleted);
+  
+  // Check if all shared task members have completed (for recurring shared tasks graying) - legacy
   const allSharedMembersCompleted = task.isSharedTask && 
     task.sharedMemberCompletions && 
     task.sharedMemberCompletions.length > 0 &&
     task.sharedMemberCompletions.every((m: { hasCompleted: boolean }) => m.hasCompleted);
   
-  // Get assigned member names for message
-  const assignedMemberNames = task.sharedMemberCompletions?.map(m => m.displayName).join(' & ') || '';
+  // Combined check for all members completed (new or legacy)
+  const allMembersCompleted = allAssignedMembersCompleted || allSharedMembersCompleted;
+  
+  // Get assigned member names for message (prefer new style over legacy)
+  const assignedMemberNames = task.assignedMemberCompletions?.map(m => m.displayName).join(' & ') || 
+    task.sharedMemberCompletions?.map(m => m.displayName).join(' & ') || '';
   
   // Fallback check: if memberHasCompleted is true but status is null, treat as completed
   // This handles edge cases where status might be missing due to data inconsistency
@@ -454,9 +474,9 @@ function TaskCard({
   // 2. Task status is active
   // 3. Has available slots (or no slot limit)
   // 4. Is assigned to this member (for shared tasks)
-  // 5. For shared tasks: not all members have completed yet
-  // NOT actionable if: pending, approved, has completion without status, inactive, no slots, not assigned to shared task, or all shared members completed
-  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned && !allSharedMembersCompleted;
+  // 5. Not all assigned members have completed yet
+  // NOT actionable if: pending, approved, has completion without status, inactive, no slots, not assigned to shared task, or all members completed
+  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned && !allMembersCompleted;
   
   const TaskIcon = getTaskIcon(task.title);
 
@@ -606,8 +626,58 @@ function TaskCard({
             )}
           </div>
           
-          {/* Shared Task Info - Show teammates and description */}
-          {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && (
+          {/* Multi-Assignment Task Info - Show teammates who need to complete (new style) */}
+          {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1 && (
+            <div className="space-y-2 text-left">
+              {/* Teammates section */}
+              <div className="p-2 bg-primary/5 rounded-xl">
+                <p className="text-xs font-semibold text-muted-foreground mb-1.5">
+                  <Users className="h-3 w-3 inline mr-1" />
+                  {t("kidDashboard.sharedWith")}
+                </p>
+                <div className="flex flex-wrap justify-center gap-1">
+                  {task.assignedMemberCompletions.map((m) => {
+                    const hasSubmitted = m.hasSubmitted ?? (m.status !== null);
+                    return (
+                      <Badge 
+                        key={m.memberId} 
+                        variant={hasSubmitted ? "default" : "outline"}
+                        className="gap-1 text-xs"
+                      >
+                        <Avatar className="h-4 w-4">
+                          <AvatarImage src={getAvatarUrl(m.activeSkinId, m.avatarUrl, m.useCustomAvatar)} />
+                          <AvatarFallback 
+                            className="text-xs text-white font-bold"
+                            style={{ backgroundColor: m.color }}
+                          >
+                            {m.displayName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        {m.displayName}
+                        {m.status === "approved" ? " ✓" : m.status === "pending" ? " ⏳" : ""}
+                      </Badge>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("tasks.sharedProgress", {
+                    completed: task.assignedMemberCompletions.filter(m => m.hasCompleted).length,
+                    total: task.assignedMemberCompletions.length
+                  })}
+                </p>
+              </div>
+              
+              {/* Task description */}
+              {task.description && (
+                <p className="text-xs text-muted-foreground px-2 line-clamp-2">
+                  {task.description}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Legacy Shared Task Info - Show teammates and description (using sharedMemberIds) */}
+          {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && !task.assignedMemberCompletions && (
             <div className="space-y-2 text-left">
               {/* Teammates section */}
               <div className="p-2 bg-primary/5 rounded-xl">
@@ -1255,9 +1325,9 @@ export default function KidDashboard() {
       return Math.abs(currentPoints - a.pointThreshold) - Math.abs(currentPoints - b.pointThreshold);
     });
 
-  // Filter tasks: different logic for multi-completion vs normal vs shared tasks
+  // Filter tasks: different logic for multi-completion vs multi-assignment vs normal tasks
   const myTasks = tasks.filter(t => {
-    // Multi-Completion Tasks
+    // Multi-Completion Tasks (slot-based)
     if (t.maxCompletions !== null) {
       // Recurring Multi-Tasks: Always show (grayed out when all slots filled)
       if (t.recurrence !== "none") {
@@ -1267,7 +1337,29 @@ export default function KidDashboard() {
       return t.remainingSlots === null || t.remainingSlots === undefined || t.remainingSlots > 0;
     }
     
-    // Shared Tasks: Special visibility logic
+    // Multi-Assignment Tasks (new style - using taskAssignments, each member gets full points)
+    if (t.assignedMemberCompletions && t.assignedMemberCompletions.length > 1) {
+      const allMembersCompleted = t.assignedMemberCompletions.every((m: { hasCompleted: boolean }) => m.hasCompleted);
+      
+      // Recurring: Always show (grayed out when all completed)
+      if (t.recurrence !== "none") {
+        return true;
+      }
+      
+      // One-time: Show until ALL assigned members completed
+      if (!allMembersCompleted) {
+        return true;
+      }
+      
+      // All members completed - check if requires approval
+      if (t.requiresApproval) {
+        return t.memberCompletionStatus !== "approved";
+      }
+      
+      return false;
+    }
+    
+    // Legacy Shared Tasks (using sharedMemberIds): Special visibility logic
     if (t.isSharedTask && t.sharedMemberCompletions && t.sharedMemberCompletions.length > 0) {
       const allMembersCompleted = t.sharedMemberCompletions.every((m: { hasCompleted: boolean }) => m.hasCompleted);
       
