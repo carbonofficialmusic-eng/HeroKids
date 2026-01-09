@@ -565,21 +565,61 @@ export function TaskDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t('tasks.repeatSchedule')}</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger data-testid="select-task-recurrence">
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">{t('tasks.oneTime')}</SelectItem>
-                          <SelectItem value="immediate">{t('tasks.immediate')}</SelectItem>
-                          <SelectItem value="daily">{t('tasks.daily')}</SelectItem>
-                          <SelectItem value="weekly">{t('tasks.weekly')}</SelectItem>
-                          <SelectItem value="monthly">{t('tasks.monthly')}</SelectItem>
-                          <SelectItem value="yearly">{t('tasks.yearly')}</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-3">
+                        {/* Main recurrence options as tiles */}
+                        <div className="grid grid-cols-4 gap-2">
+                          {[
+                            { value: "none", label: t('tasks.oneTime') },
+                            { value: "immediate", label: t('tasks.immediate') },
+                            { value: "daily", label: t('tasks.daily') },
+                            { value: "weekly", label: t('tasks.weekly') },
+                          ].map((option) => (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => field.onChange(option.value)}
+                              className={`px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
+                                field.value === option.value
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background hover-elevate border-input"
+                              }`}
+                              data-testid={`btn-recurrence-${option.value}`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
+                        {/* Secondary options */}
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { value: "monthly", label: t('tasks.monthly') },
+                            { value: "yearly", label: t('tasks.yearly') },
+                          ].map((option) => (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => field.onChange(option.value)}
+                              className={`px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
+                                field.value === option.value
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background hover-elevate border-input"
+                              }`}
+                              data-testid={`btn-recurrence-${option.value}`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
+                        {/* Dynamic description based on selection */}
+                        <p className="text-sm text-muted-foreground">
+                          {field.value === "none" && t('tasks.recurrenceDescNone')}
+                          {field.value === "immediate" && t('tasks.recurrenceDescImmediate')}
+                          {field.value === "daily" && t('tasks.recurrenceDescDaily')}
+                          {field.value === "weekly" && t('tasks.recurrenceDescWeekly')}
+                          {field.value === "monthly" && t('tasks.recurrenceDescMonthly')}
+                          {field.value === "yearly" && t('tasks.recurrenceDescYearly')}
+                        </p>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
