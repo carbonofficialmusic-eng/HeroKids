@@ -820,14 +820,14 @@ export default function Dashboard() {
     return taskList.filter(task => {
       if (taskFilter === "all") return true;
       
-      // For "today" filter, show only daily recurring tasks or one-time tasks
+      // For "today" filter, show daily, immediate (can be done multiple times per day), or one-time tasks
       if (taskFilter === "today") {
-        return task.recurrence === "daily" || task.recurrence === "none";
+        return task.recurrence === "daily" || task.recurrence === "immediate" || task.recurrence === "none";
       }
       
-      // For "week" filter, show daily and weekly recurring tasks
+      // For "week" filter, show daily, immediate, weekly recurring tasks, or one-time tasks
       if (taskFilter === "week") {
-        return task.recurrence === "daily" || task.recurrence === "weekly" || task.recurrence === "none";
+        return task.recurrence === "daily" || task.recurrence === "immediate" || task.recurrence === "weekly" || task.recurrence === "none";
       }
       
       return true;
