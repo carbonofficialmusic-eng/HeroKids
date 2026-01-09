@@ -409,11 +409,13 @@ export default function Dashboard() {
       return await response.json();
     },
     onSuccess: (data: any) => {
-      // Clear entire query cache before navigation to prevent stale data issues
-      queryClient.clear();
+      // Invalidate member-related queries but keep auth data intact
+      // This prevents the FamilySetup flash during navigation
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       
       // Navigate immediately - dialog will be gone when new page loads
-      // Don't close dialog first to avoid animation flash during navigation
       if (data?.member?.role === "child") {
         window.location.href = "/kid-dashboard";
       } else if (data?.member?.role === "parent") {
