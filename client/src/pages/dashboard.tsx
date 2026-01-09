@@ -130,7 +130,7 @@ export default function Dashboard() {
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [debugTapCount, setDebugTapCount] = useState(0);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
-  const debugTapTimeout = useState<NodeJS.Timeout | null>(null);
+  const debugTapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Detect desktop for sticky sidebar (lg breakpoint = 1024px)
   const [isDesktop, setIsDesktop] = useState(false);
@@ -154,8 +154,8 @@ export default function Dashboard() {
       return newCount;
     });
     // Reset tap count after 2 seconds of no taps
-    if (debugTapTimeout[0]) clearTimeout(debugTapTimeout[0]);
-    debugTapTimeout[0] = setTimeout(() => setDebugTapCount(0), 2000);
+    if (debugTapTimeoutRef.current) clearTimeout(debugTapTimeoutRef.current);
+    debugTapTimeoutRef.current = setTimeout(() => setDebugTapCount(0), 2000);
   };
 
   // Check for subscription=success in URL and verify checkout session
