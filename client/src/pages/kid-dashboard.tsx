@@ -1142,11 +1142,8 @@ export default function KidDashboard() {
       return await response.json();
     },
     onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
+      // Clear entire query cache before navigation to prevent stale data issues
+      queryClient.clear();
       setSwitchMemberDialogOpen(false);
       
       // Navigate based on the new member's role
