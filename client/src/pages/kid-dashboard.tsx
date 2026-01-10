@@ -1605,18 +1605,20 @@ export default function KidDashboard() {
                     </div>
                   )}
                 </div>
-                {/* Star Counter */}
-                <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 px-4 py-2 rounded-xl border border-yellow-500/30">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                  >
-                    <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-                  </motion.div>
-                  <span className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }} data-testid="text-stars-found">
-                    {member.starsFound || 0}/{TOTAL_HIDDEN_STARS}
-                  </span>
-                </div>
+                {/* Star Counter - Links to Skins Gallery */}
+                <Link href="/skins">
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 px-4 py-2 rounded-xl border border-yellow-500/30 cursor-pointer hover:from-yellow-500/30 hover:to-orange-500/30 transition-colors" data-testid="link-stars-to-skins">
+                    <motion.div
+                      animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+                      transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                    >
+                      <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+                    </motion.div>
+                    <span className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }} data-testid="text-stars-found">
+                      {member.starsFound || 0}/{TOTAL_HIDDEN_STARS}
+                    </span>
+                  </div>
+                </Link>
               </div>
               <div className="bg-card/80 backdrop-blur-sm p-5 rounded-2xl border-2 border-primary/30 min-w-[260px]">
                 <p className="text-sm text-muted-foreground mb-3 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
