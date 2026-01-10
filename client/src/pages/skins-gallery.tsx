@@ -285,8 +285,10 @@ export default function SkinsGallery() {
   const previewSkin = selectedSkin || (memberData?.activeSkinId ? skins.find(s => s.id === memberData.activeSkinId) : null);
 
   // Calculate next unlock
+  // Note: First skin (junior-champion) is given for free, so it doesn't count towards paid unlocks
+  // discoveredCount includes the free starter skin, so we use discoveredCount * pointsPerSkin
   const discoveredCount = skins.filter(s => s.isDiscovered).length;
-  const nextUnlockPoints = (discoveredCount + 1) * pointsPerSkin;
+  const nextUnlockPoints = discoveredCount * pointsPerSkin;
   const progressToNext = totalEarned % pointsPerSkin;
 
   const starPlacements = data?.starPlacements || {};
