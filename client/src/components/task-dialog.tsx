@@ -466,10 +466,10 @@ export function TaskDialog({
                   <FormLabel>{t('tasks.pointsValue', { value: field.value })}</FormLabel>
                   <FormControl>
                     <Slider
-                      min={10}
-                      max={500}
+                      min={5}
+                      max={400}
                       step={5}
-                      value={[field.value || 10]}
+                      value={[field.value || 5]}
                       onValueChange={(vals) => field.onChange(vals[0])}
                       data-testid="slider-task-points"
                     />
