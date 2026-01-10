@@ -193,13 +193,15 @@ export function isLegacySkin(skinId: string): boolean {
  * Calculate how many skins can be unlocked with given points
  * Standard skins: configurable points each (40-80, default 60), user can choose ANY standard skin
  * Legacy skins: only available after threshold points
+ * Note: First skin (junior-champion) is given for FREE, so we add +1 to the calculation
  * @param totalEarned - Total points earned
  * @param pointsPerSkin - Points required per skin (default 60, configurable 40-80)
  */
 export function calculateUnlockableSkins(totalEarned: number, pointsPerSkin: number = POINTS_PER_SKIN): number {
   // Standard skins: pointsPerSkin each, max is all standard skins
+  // +1 because the first skin (junior-champion) is given for free
   const standardUnlocks = Math.min(
-    Math.floor(totalEarned / pointsPerSkin),
+    Math.floor(totalEarned / pointsPerSkin) + 1,
     MIXED_SKIN_ORDER.length
   );
   
