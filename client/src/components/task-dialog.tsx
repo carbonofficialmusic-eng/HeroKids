@@ -388,20 +388,20 @@ export function TaskDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('tasks.category')}</FormLabel>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {Object.entries(emojiCategories).map(([categoryKey, category]) => (
-                      <div key={categoryKey} className="space-y-1">
-                        <p className="text-xs text-muted-foreground font-medium text-center">
+                      <div key={categoryKey} className="space-y-1.5">
+                        <p className="text-xs text-muted-foreground font-medium text-center min-h-[2rem] flex items-center justify-center">
                           {t(category.label)}
                         </p>
-                        <div className="flex justify-center gap-1">
+                        <div className="flex justify-center gap-1.5">
                           {category.emojis.map((icon) => (
                             <Button
                               key={icon}
                               type="button"
                               variant={field.value === icon ? "default" : "outline"}
                               size="icon"
-                              className="h-8 w-8 text-base"
+                              className="h-9 w-9 text-lg"
                               onClick={() => field.onChange(icon)}
                               data-testid={`button-icon-${icon}`}
                             >
