@@ -2320,7 +2320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(422).json({ message: "Task completion is not pending" });
       }
       
-      // Get the child member to update their points
+      // Get the child member to verify they exist and are in the same family
       const childMember = await storage.getFamilyMember(completion.memberId);
       if (!childMember) {
         return res.status(404).json({ message: "Child member not found" });
@@ -2331,30 +2331,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot approve completions from another family" });
       }
       
-      // Award points to the child
-      const newTotalEarned = childMember.totalEarned + completion.pointsEarned;
-      const newTotalPoints = childMember.totalPoints + completion.pointsEarned;
-      const newWeeklyPoints = childMember.weeklyPoints + completion.pointsEarned;
-      const newMonthlyPoints = childMember.monthlyPoints + completion.pointsEarned;
-      
-      await storage.updateFamilyMemberPoints(
-        childMember.id,
-        newTotalEarned,
-        newTotalPoints,
-        newWeeklyPoints,
-        newMonthlyPoints
-      );
-      
-      // Add to points history
+      // Get task for notifications
       const task = await storage.getTask(completion.taskId);
-      await storage.addPointsHistory({
-        memberId: childMember.id,
-        points: completion.pointsEarned,
-        reason: `Approved: ${task?.title || "Task"}`,
-        taskId: completion.taskId,
-      });
       
-      // Mark completion as approved
+      // Mark completion as approved - this also awards points via _approveCompletionInternal
+      // DO NOT add points manually here as it would cause double counting
       await storage.approveTaskCompletion(completionId, member.id);
       
       // Delete all "task_pending" notifications for this task (so other parents don't see it anymore)
