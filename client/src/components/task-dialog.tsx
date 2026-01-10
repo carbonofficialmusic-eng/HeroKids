@@ -539,7 +539,7 @@ export function TaskDialog({
                 <RadioGroup
                   value={recurrenceMode}
                   onValueChange={handleRecurrenceModeChange}
-                  className="grid grid-cols-3 gap-3 mt-2"
+                  className="flex flex-wrap gap-x-4 gap-y-2 mt-2"
                   data-testid="radio-recurrence-mode"
                 >
                   <div className="flex items-center space-x-2">
@@ -586,7 +586,7 @@ export function TaskDialog({
                       <FormLabel>{t('tasks.repeatSchedule')}</FormLabel>
                       <div className="space-y-3">
                         {/* Main recurrence options as tiles */}
-                        <div className="grid grid-cols-5 gap-2">
+                        <div className="flex flex-wrap gap-2">
                           {[
                             { value: "none", label: t('tasks.oneTime') },
                             { value: "daily", label: t('tasks.daily') },
