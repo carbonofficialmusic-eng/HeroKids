@@ -7,8 +7,7 @@ import { z } from "zod";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import Stripe from "stripe";
-import { formatInTimeZone, toZonedTime, fromZonedTime } from "date-fns-tz";
-import { startOfWeek, addWeeks, startOfMonth, addMonths, setHours, setMinutes, setSeconds, setMilliseconds } from "date-fns";
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
@@ -2145,31 +2144,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   break;
                 case "weekly":
                   // Calendar-based: Next Monday 00:00 in family timezone
-                  // 1. Convert current UTC time to family timezone
-                  const nowInFamilyTzWeekly = toZonedTime(now, familyTimezone);
-                  // 2. Find start of current week (Monday) and add 1 week
-                  const nextMondayLocal = addWeeks(startOfWeek(nowInFamilyTzWeekly, { weekStartsOn: 1 }), 1);
-                  // 3. Set to midnight
-                  const nextMondayMidnight = setMilliseconds(setSeconds(setMinutes(setHours(nextMondayLocal, 0), 0), 0), 0);
-                  // 4. Convert back to UTC for storage
-                  nextAvailableDate = fromZonedTime(nextMondayMidnight, familyTimezone);
+                  // Get current day of week directly in family timezone (1=Mon, 7=Sun in 'i' format)
+                  const familyDayOfWeek = parseInt(formatInTimeZone(now, familyTimezone, 'i'), 10);
+                  // Days until next Monday: if Monday(1), add 7; otherwise 8 - dayOfWeek
+                  const daysToNextMonday = familyDayOfWeek === 1 ? 7 : (8 - familyDayOfWeek);
+                  // Get current date in family timezone and add days
+                  const familyDateParts = formatInTimeZone(now, familyTimezone, 'yyyy-MM-dd').split('-').map(Number);
+                  const nextMondayCalc = new Date(Date.UTC(familyDateParts[0], familyDateParts[1] - 1, familyDateParts[2] + daysToNextMonday));
+                  const nextMondayStr = `${nextMondayCalc.getUTCFullYear()}-${String(nextMondayCalc.getUTCMonth() + 1).padStart(2, '0')}-${String(nextMondayCalc.getUTCDate()).padStart(2, '0')} 00:00:00`;
+                  nextAvailableDate = fromZonedTime(nextMondayStr, familyTimezone);
                   break;
                 case "monthly":
                   // Calendar-based: 1st of next month 00:00 in family timezone
-                  // 1. Convert current UTC time to family timezone
-                  const nowInFamilyTzMonthly = toZonedTime(now, familyTimezone);
-                  // 2. Find start of current month and add 1 month
-                  const firstOfNextMonthLocal = addMonths(startOfMonth(nowInFamilyTzMonthly), 1);
-                  // 3. Set to midnight
-                  const firstOfNextMonthMidnight = setMilliseconds(setSeconds(setMinutes(setHours(firstOfNextMonthLocal, 0), 0), 0), 0);
-                  // 4. Convert back to UTC for storage
-                  nextAvailableDate = fromZonedTime(firstOfNextMonthMidnight, familyTimezone);
+                  // Get current year and month in family timezone
+                  const monthlyDateStr = formatInTimeZone(now, familyTimezone, 'yyyy-MM');
+                  const [mYear, mMonth] = monthlyDateStr.split('-').map(Number);
+                  // Calculate next month (handle year rollover)
+                  const nextMonth = mMonth === 12 ? 1 : mMonth + 1;
+                  const nextMonthYear = mMonth === 12 ? mYear + 1 : mYear;
+                  nextAvailableDate = fromZonedTime(`${nextMonthYear}-${String(nextMonth).padStart(2, '0')}-01 00:00:00`, familyTimezone);
                   break;
                 case "yearly":
-                  // Set to midnight of same date next year
-                  nextAvailableDate = new Date(now);
-                  nextAvailableDate.setFullYear(nextAvailableDate.getFullYear() + 1);
-                  nextAvailableDate.setHours(0, 0, 0, 0);
+                  // Calendar-based: 1st of January next year 00:00 in family timezone
+                  // Get current year in family timezone using formatInTimeZone
+                  const currentYearStr = formatInTimeZone(now, familyTimezone, 'yyyy');
+                  const nextYearNum = parseInt(currentYearStr, 10) + 1;
+                  // Construct Jan 1 midnight directly as string and pass to fromZonedTime
+                  // fromZonedTime can accept a string directly, interpreting it in the target timezone
+                  nextAvailableDate = fromZonedTime(`${nextYearNum}-01-01 00:00:00`, familyTimezone);
                   break;
                 default:
                   // Default to midnight tomorrow
