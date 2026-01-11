@@ -1513,10 +1513,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Use family-wide completion status for normal tasks
               const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
               // For IMMEDIATE tasks: "pending" means blocked, null means available
+              // For one-time tasks with approval: "pending" or "approved" means grayed out
               // For other tasks: "approved" means completed
               const familyHasCompleted = task.recurrence === "immediate"
                 ? familyCompletionStatus === "pending"
-                : familyCompletionStatus === "approved";
+                : task.recurrence === "none" && task.requiresApproval
+                  ? (familyCompletionStatus === "pending" || familyCompletionStatus === "approved")
+                  : familyCompletionStatus === "approved";
               
               return {
                 ...task,
@@ -1689,10 +1692,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // For non-multi-completion tasks - if ANYONE completes it, it's done for everyone
               const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
               // For IMMEDIATE tasks: "pending" means blocked, null means available
+              // For one-time tasks with approval: "pending" or "approved" means grayed out
               // For other tasks: "approved" means completed
               const familyHasCompleted = task.recurrence === "immediate"
                 ? familyCompletionStatus === "pending"
-                : familyCompletionStatus === "approved";
+                : task.recurrence === "none" && task.requiresApproval
+                  ? (familyCompletionStatus === "pending" || familyCompletionStatus === "approved")
+                  : familyCompletionStatus === "approved";
               
               return {
                 ...task,
