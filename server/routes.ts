@@ -7,7 +7,8 @@ import { z } from "zod";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import Stripe from "stripe";
-import { formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone, toZonedTime, fromZonedTime } from "date-fns-tz";
+import { startOfWeek, addWeeks, startOfMonth, addMonths, setHours, setMinutes, setSeconds, setMilliseconds } from "date-fns";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
@@ -2124,6 +2125,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const now = new Date();
             let nextAvailableDate: Date;
             
+            // Get family timezone for calendar-based resets
+            const family = await storage.getFamily(task.familyName);
+            const familyTimezone = family?.timezone || "Europe/Berlin";
+            
             if (task.recurrenceDays) {
               // Custom days interval - set to midnight of the target day
               nextAvailableDate = new Date(now);
@@ -2139,16 +2144,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   nextAvailableDate.setHours(0, 0, 0, 0);
                   break;
                 case "weekly":
-                  // Set to midnight 7 days from now
-                  nextAvailableDate = new Date(now);
-                  nextAvailableDate.setDate(nextAvailableDate.getDate() + 7);
-                  nextAvailableDate.setHours(0, 0, 0, 0);
+                  // Calendar-based: Next Monday 00:00 in family timezone
+                  // 1. Convert current UTC time to family timezone
+                  const nowInFamilyTzWeekly = toZonedTime(now, familyTimezone);
+                  // 2. Find start of current week (Monday) and add 1 week
+                  const nextMondayLocal = addWeeks(startOfWeek(nowInFamilyTzWeekly, { weekStartsOn: 1 }), 1);
+                  // 3. Set to midnight
+                  const nextMondayMidnight = setMilliseconds(setSeconds(setMinutes(setHours(nextMondayLocal, 0), 0), 0), 0);
+                  // 4. Convert back to UTC for storage
+                  nextAvailableDate = fromZonedTime(nextMondayMidnight, familyTimezone);
                   break;
                 case "monthly":
-                  // Set to midnight of same date next month
-                  nextAvailableDate = new Date(now);
-                  nextAvailableDate.setMonth(nextAvailableDate.getMonth() + 1);
-                  nextAvailableDate.setHours(0, 0, 0, 0);
+                  // Calendar-based: 1st of next month 00:00 in family timezone
+                  // 1. Convert current UTC time to family timezone
+                  const nowInFamilyTzMonthly = toZonedTime(now, familyTimezone);
+                  // 2. Find start of current month and add 1 month
+                  const firstOfNextMonthLocal = addMonths(startOfMonth(nowInFamilyTzMonthly), 1);
+                  // 3. Set to midnight
+                  const firstOfNextMonthMidnight = setMilliseconds(setSeconds(setMinutes(setHours(firstOfNextMonthLocal, 0), 0), 0), 0);
+                  // 4. Convert back to UTC for storage
+                  nextAvailableDate = fromZonedTime(firstOfNextMonthMidnight, familyTimezone);
                   break;
                 case "yearly":
                   // Set to midnight of same date next year
