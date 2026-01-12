@@ -1461,6 +1461,32 @@ export default function KidDashboard() {
     });
   };
 
+  // Sort tasks by type: regular < multi-assignment < shared, then by due date and title
+  const sortKidTasksWithinCategory = (taskList: typeof myTasks) => {
+    return [...taskList].sort((a, b) => {
+      // Task type priority: 0 = regular, 1 = multi-assignment, 2 = shared
+      const getTaskTypePriority = (task: typeof myTasks[0]) => {
+        if (task.isSharedTask) return 2;
+        // Multi-assignment tasks have assignedMemberCompletions array with > 1 members
+        if ((task as any).assignedMemberCompletions && (task as any).assignedMemberCompletions.length > 1) return 1;
+        return 0;
+      };
+      
+      const priorityA = getTaskTypePriority(a);
+      const priorityB = getTaskTypePriority(b);
+      
+      if (priorityA !== priorityB) return priorityA - priorityB;
+      
+      // Secondary sort by due date (tasks with due dates first, then by date)
+      const dueDateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+      const dueDateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+      if (dueDateA !== dueDateB) return dueDateA - dueDateB;
+      
+      // Tertiary sort by title
+      return a.title.localeCompare(b.title);
+    });
+  };
+
   // Group tasks by category
   const groupKidTasksByCategory = (taskList: typeof myTasks) => {
     const groups: Record<string, typeof myTasks> = {};
@@ -1478,7 +1504,8 @@ export default function KidDashboard() {
     
     categoryOrder.forEach(cat => {
       if (groups[cat] && groups[cat].length > 0) {
-        sortedGroups[cat] = groups[cat];
+        // Sort tasks within each category
+        sortedGroups[cat] = sortKidTasksWithinCategory(groups[cat]);
       }
     });
     
