@@ -1513,7 +1513,7 @@ export default function KidDashboard() {
                 {member.displayName[0]}
               </AvatarFallback>
             </Avatar>
-            <div className="min-w-0">
+            <div className="min-w-0 hidden sm:block">
               <div className="text-sm text-muted-foreground truncate">{member.familyName}</div>
               <div className="font-semibold truncate" data-testid="text-user-name">
                 {member.displayName}
