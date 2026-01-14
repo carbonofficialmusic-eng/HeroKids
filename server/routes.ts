@@ -2129,18 +2129,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const familyTimezone = family?.timezone || "Europe/Berlin";
             
             if (task.recurrenceDays) {
-              // Custom days interval - set to midnight of the target day
-              nextAvailableDate = new Date(now);
-              nextAvailableDate.setDate(nextAvailableDate.getDate() + task.recurrenceDays);
-              nextAvailableDate.setHours(0, 0, 0, 0);
+              // Custom days interval - set to midnight of the target day in family timezone
+              // Get current date in family timezone and add the specified days
+              const currentDateStr = formatInTimeZone(now, familyTimezone, 'yyyy-MM-dd');
+              const [cYear, cMonth, cDay] = currentDateStr.split('-').map(Number);
+              // Calculate target date by adding recurrenceDays
+              const targetDate = new Date(Date.UTC(cYear, cMonth - 1, cDay + task.recurrenceDays));
+              const targetDateStr = `${targetDate.getUTCFullYear()}-${String(targetDate.getUTCMonth() + 1).padStart(2, '0')}-${String(targetDate.getUTCDate()).padStart(2, '0')} 00:00:00`;
+              nextAvailableDate = fromZonedTime(targetDateStr, familyTimezone);
             } else {
               // Standard recurrence (daily/weekly/monthly)
               switch (task.recurrence) {
                 case "daily":
-                  // Set to midnight of the next calendar day
-                  nextAvailableDate = new Date(now);
-                  nextAvailableDate.setDate(nextAvailableDate.getDate() + 1);
-                  nextAvailableDate.setHours(0, 0, 0, 0);
+                  // Calendar-based: Next day 00:00 in family timezone
+                  const dailyDateStr = formatInTimeZone(now, familyTimezone, 'yyyy-MM-dd');
+                  const [dYear, dMonth, dDay] = dailyDateStr.split('-').map(Number);
+                  const nextDayCalc = new Date(Date.UTC(dYear, dMonth - 1, dDay + 1));
+                  const nextDayStr = `${nextDayCalc.getUTCFullYear()}-${String(nextDayCalc.getUTCMonth() + 1).padStart(2, '0')}-${String(nextDayCalc.getUTCDate()).padStart(2, '0')} 00:00:00`;
+                  nextAvailableDate = fromZonedTime(nextDayStr, familyTimezone);
                   break;
                 case "weekly":
                   // Calendar-based: Next Monday 00:00 in family timezone
@@ -2174,10 +2180,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   nextAvailableDate = fromZonedTime(`${nextYearNum}-01-01 00:00:00`, familyTimezone);
                   break;
                 default:
-                  // Default to midnight tomorrow
-                  nextAvailableDate = new Date(now);
-                  nextAvailableDate.setDate(nextAvailableDate.getDate() + 1);
-                  nextAvailableDate.setHours(0, 0, 0, 0);
+                  // Default to midnight tomorrow in family timezone
+                  const defDateStr = formatInTimeZone(now, familyTimezone, 'yyyy-MM-dd');
+                  const [defYear, defMonth, defDay] = defDateStr.split('-').map(Number);
+                  const defNextDay = new Date(Date.UTC(defYear, defMonth - 1, defDay + 1));
+                  const defNextDayStr = `${defNextDay.getUTCFullYear()}-${String(defNextDay.getUTCMonth() + 1).padStart(2, '0')}-${String(defNextDay.getUTCDate()).padStart(2, '0')} 00:00:00`;
+                  nextAvailableDate = fromZonedTime(defNextDayStr, familyTimezone);
               }
             }
             
