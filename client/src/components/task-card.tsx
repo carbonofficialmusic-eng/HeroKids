@@ -170,13 +170,6 @@ export function TaskCard({
                   <CheckCircle className="h-5 w-5 text-green-500 shrink-0" data-testid={`icon-done-${task.id}`} />
                 </motion.div>
               )}
-              {/* Show next available date for custom recurring tasks */}
-              {isUnavailable && getNextAvailableText() && (
-                <Badge variant="outline" className="text-xs shrink-0 gap-1" data-testid={`badge-next-available-${task.id}`}>
-                  <Calendar className="h-3 w-3" />
-                  {getNextAvailableText()}
-                </Badge>
-              )}
               {/* Multi-Completion Counter Badge */}
               {task.maxCompletions !== null && task.maxCompletions !== undefined && (
                 <Badge 
@@ -188,6 +181,16 @@ export function TaskCard({
                 </Badge>
               )}
             </div>
+            
+            {/* Show next available date for recurring tasks - separate line so title stays visible */}
+            {isUnavailable && getNextAvailableText() && (
+              <div className="mb-1">
+                <Badge variant="outline" className="text-xs gap-1" data-testid={`badge-next-available-${task.id}`}>
+                  <Calendar className="h-3 w-3" />
+                  {getNextAvailableText()}
+                </Badge>
+              </div>
+            )}
             
             {task.description && (
               <p
