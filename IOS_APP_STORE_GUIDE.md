@@ -117,13 +117,13 @@ Stelle sicher, dass die Bundle ID korrekt ist:
 ### Auf Simulator testen:
 
 1. Wähle einen Simulator (z.B. "iPhone 15")
-2. Klicke auf ▶️ (Run)
+2. Klicke auf den Play-Button (Run)
 
 ### Auf echtem Gerät testen:
 
 1. Verbinde dein iPhone via USB
 2. Wähle dein Gerät als Target
-3. Klicke auf ▶️ (Run)
+3. Klicke auf den Play-Button (Run)
 4. Beim ersten Mal: Vertraue dem Entwickler auf deinem iPhone (Einstellungen → Allgemein → VPN & Geräteverwaltung)
 
 ## Schritt 6: Archive für App Store erstellen
@@ -163,26 +163,56 @@ HeroKids macht Haushaltsaufgaben zum Abenteuer!
 Verwandle alltägliche Aufgaben in spannende Missionen für deine Kinder. Mit Punkten, Belohnungen und Leaderboards lernen Kinder spielerisch Verantwortung.
 
 FUNKTIONEN:
-★ Aufgaben erstellen und verwalten
-★ Punkte und Belohnungen System
-★ Familien-Leaderboard
-★ Über 100 freischaltbare Charakter-Skins
-★ Echtzeit-Synchronisation für die ganze Familie
-★ Kindgerechtes Dashboard ab 6 Jahren
-★ Mehrsprachig (8 Sprachen)
+- Aufgaben erstellen und verwalten
+- Punkte und Belohnungen System
+- Familien-Leaderboard
+- Ueber 100 freischaltbare Charakter-Skins
+- Echtzeit-Synchronisation fuer die ganze Familie
+- Kindgerechtes Dashboard ab 6 Jahren
+- Mehrsprachig (8 Sprachen)
 
-PERFEKT FÜR FAMILIEN:
-• Eltern erstellen Aufgaben und Belohnungen
-• Kinder erledigen Aufgaben und sammeln Punkte
-• Gemeinsame Erfolge feiern
+PERFEKT FUER FAMILIEN:
+- Eltern erstellen Aufgaben und Belohnungen
+- Kinder erledigen Aufgaben und sammeln Punkte
+- Gemeinsame Erfolge feiern
 
 Starte jetzt und mach deine Kinder zu echten Helden!
 ```
 
-#### Keywords:
+#### Keywords (Deutsch):
 
 ```
 Kinder,Aufgaben,Familie,Belohnungen,Haushalt,Gamification,Eltern,Hausarbeit,Motivation,Punkte
+```
+
+#### Description (English):
+
+```
+HeroKids turns household chores into adventures!
+
+Transform everyday tasks into exciting missions for your kids. With points, rewards, and leaderboards, children learn responsibility through play.
+
+FEATURES:
+- Create and manage tasks
+- Points and rewards system
+- Family leaderboard
+- Over 100 unlockable character skins
+- Real-time sync for the whole family
+- Kid-friendly dashboard for ages 6+
+- Multilingual support (8 languages)
+
+PERFECT FOR FAMILIES:
+- Parents create tasks and rewards
+- Kids complete tasks and earn points
+- Celebrate achievements together
+
+Start now and turn your kids into real heroes!
+```
+
+#### Keywords (English):
+
+```
+kids,chores,family,rewards,household,gamification,parents,tasks,motivation,points
 ```
 
 ### 7.3 Screenshots
@@ -203,7 +233,11 @@ Bei der Altersfreigabe-Fragebogen:
 
 ### 7.5 Datenschutzerklärung
 
-Du brauchst eine URL zu deiner Datenschutzerklärung. Erstelle eine Seite auf deiner Website oder nutze einen Generator.
+Die Datenschutzseite ist bereits in der App integriert:
+
+**Privacy Policy URL:** `https://DEINE-APP-URL.replit.app/privacy`
+
+Ersetze `DEINE-APP-URL` mit deiner tatsächlichen Replit-URL.
 
 ## Schritt 8: Review einreichen
 

@@ -28,6 +28,7 @@ import MyRewards from "@/pages/my-rewards";
 import MyAchievements from "@/pages/my-achievements";
 import LinkDevice from "@/pages/link-device";
 import Admin from "@/pages/admin";
+import Privacy from "@/pages/privacy";
 
 interface FamilyMember {
   id: number;
@@ -150,6 +151,7 @@ function Router() {
           <Route path="/link-device" component={LinkDevice} />
           <Route path="/kid-dashboard" component={KidDashboard} />
           <Route path="/pricing" component={Pricing} />
+          <Route path="/privacy" component={Privacy} />
           <Route path="/admin" component={Admin} />
           <Route path="/dashboard">
             <RedirectToLanding />
@@ -201,6 +203,7 @@ function Router() {
         </Route>
         <Route path="/family-goals" component={FamilyGoals} />
         <Route path="/link-device" component={LinkDevice} />
+        <Route path="/privacy" component={Privacy} />
         <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>
