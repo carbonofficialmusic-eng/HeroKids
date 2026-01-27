@@ -5237,9 +5237,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No active subscription found" });
       }
 
-      const baseUrl = process.env.REPLIT_DEPLOYMENT 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN || req.get('host')}`
-        : `http://${req.get('host')}`;
+      // Use the actual host from the request - works for both dev and production
+      const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+      const baseUrl = `${protocol}://${req.get('host')}`;
 
       // Create a portal session
       const session = await stripe.billingPortal.sessions.create({
