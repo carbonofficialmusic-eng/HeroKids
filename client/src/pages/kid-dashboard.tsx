@@ -1694,7 +1694,7 @@ export default function KidDashboard() {
                 <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
                   <Trophy className="h-7 w-7 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                <h2 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                   {t("kidDashboard.specialPrizes")}
                 </h2>
                 <Sparkles className="h-5 w-5 text-purple-500 animate-pulse" />
@@ -1760,7 +1760,7 @@ export default function KidDashboard() {
               <div className="p-3 rounded-2xl bg-blue-500/20">
                 <Users className="h-7 w-7 text-blue-500" />
               </div>
-              <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+              <h2 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.joinableRewards")}
               </h2>
             </div>
@@ -1868,7 +1868,7 @@ export default function KidDashboard() {
             <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl">
               <Trophy className="h-8 w-8 text-white" />
             </div>
-            <h2 className="text-4xl font-bold" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 8px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3)" }}>
+            <h2 className="text-4xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
               {t("kidDashboard.rewards")}
             </h2>
             <Sparkles className="h-6 w-6 text-amber-500 animate-pulse" />
@@ -1904,7 +1904,7 @@ export default function KidDashboard() {
                 <div className="p-3 rounded-2xl bg-green-500/20">
                   <CheckCircle2 className="h-7 w-7 text-green-500" />
                 </div>
-                <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 8px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3)" }}>
+                <h2 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                   {t("kidDashboard.myRewards")}
                 </h2>
               </div>
@@ -2049,7 +2049,7 @@ export default function KidDashboard() {
               <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
                 <Star className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 8px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3)" }}>
+              <h2 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.tasks")}
               </h2>
             </div>
@@ -2176,7 +2176,7 @@ export default function KidDashboard() {
               <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl">
                 <Target className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-4xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+              <h2 className="text-4xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.familyGoals")}
               </h2>
             </div>
@@ -2299,7 +2299,7 @@ export default function KidDashboard() {
               <div className="p-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl">
                 <Trophy className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-4xl font-bold" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 8px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3)" }}>
+              <h2 className="text-4xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.leaderboard")}
               </h2>
             </div>
