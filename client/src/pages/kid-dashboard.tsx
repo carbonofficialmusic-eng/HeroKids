@@ -1054,11 +1054,12 @@ export default function KidDashboard() {
   const isDeviceAuthenticated = deviceSession?.authenticated === true;
   const hasAnyAuth = !!authUser || isDeviceAuthenticated;
 
-  // For Replit Auth users, fetch member from API
-  // For Device Session users, we already have member data in deviceSession
+  // For both Replit Auth and Device Session users, fetch fresh member from API
+  // This ensures we always have up-to-date points data
   const { data: memberFromApi, isLoading: memberApiLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
-    enabled: !!authUser, // Only fetch via API for Replit Auth users
+    enabled: !!authUser || isDeviceAuthenticated, // Fetch for both auth types
+    staleTime: 0, // Always refetch to get latest points
   });
 
   // Build member object from device session if available
@@ -1090,9 +1091,9 @@ export default function KidDashboard() {
     updatedAt: null,
   } : undefined;
 
-  // Use API member for Replit Auth, device session member for Device Link
+  // Use API member (fresh data) with fallback to device session data
   const member = memberFromApi || memberFromDeviceSession;
-  const memberLoading = authUser ? memberApiLoading : deviceSessionLoading;
+  const memberLoading = memberApiLoading || deviceSessionLoading;
 
   // WebSocket connection for real-time updates
   useWebSocket(member?.familyName || null);

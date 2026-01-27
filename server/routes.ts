@@ -806,8 +806,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         delete req.session.actingAsMemberId;
       }
       
-      // Device-linked session: member is directly available
+      // Device-linked session: fetch fresh data from DB (session member may be stale)
       if (req.user.authMethod === "device" && req.user.member) {
+        const freshMember = await storage.getFamilyMemberById(req.user.member.id);
+        if (freshMember) {
+          return res.json(freshMember);
+        }
         return res.json(req.user.member);
       }
       
@@ -5419,6 +5423,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Check if current request has a valid child device session
   app.get("/api/device-link/session", async (req: any, res) => {
+    // Prevent browser caching - always fetch fresh data
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    
     try {
       const token = req.cookies?.child_device_token;
       console.log("[Device-Link] Session check - token present:", !!token, "cookies:", Object.keys(req.cookies || {}));
