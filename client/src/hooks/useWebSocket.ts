@@ -47,6 +47,7 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] }); // Approvals list
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] }); // For device-linked users
               queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
               break;
 
@@ -66,6 +67,7 @@ export function useWebSocket(familyName: string | null) {
               // Invalidate family members (points changed) and reward redemptions
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] }); // For device-linked users
               queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
               queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
               break;
@@ -76,6 +78,7 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/real"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] }); // For device-linked users
               break;
 
             case "settings_updated":
@@ -216,6 +219,7 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] }); // For device-linked users
               break;
 
             default:
