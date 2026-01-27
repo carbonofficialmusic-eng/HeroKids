@@ -1175,11 +1175,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/family-members/:memberId", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { memberId } = req.params;
       
-      // Get current member to verify permissions
-      const currentMember = await storage.getFamilyMemberByUserId(userId);
+      // Get current member to verify permissions - support device sessions
+      let currentMember;
+      if (req.user.authMethod === "device" && req.user.member) {
+        currentMember = req.user.member;
+      } else if (req.user.authMethod === "mobile" && req.user.member) {
+        currentMember = req.user.member;
+      } else {
+        const userId = req.user.claims.sub;
+        currentMember = await storage.getFamilyMemberByUserId(userId);
+      }
       
       if (!currentMember) {
         return res.status(404).json({ message: "Family member not found" });
