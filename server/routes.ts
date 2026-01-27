@@ -2689,7 +2689,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      let member = result.member;
+      // IMPORTANT: Always fetch fresh member data from DB for point calculations
+      // The session member data might be stale (especially for device-linked sessions)
+      let member = await storage.getFamilyMemberById(result.member.id);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
       
       // For Replit Auth, also check if acting as another member
       if (!result.isDeviceSession && req.session?.actingAsMemberId) {
@@ -2699,13 +2704,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      console.log('   Member found:', member ? `${member.displayName} (${member.id})` : 'null');
-      console.log('   Member role:', member?.role);
-      
-      if (!member) {
-        console.log('   ❌ Member not found');
-        return res.status(404).json({ message: "Family member not found" });
-      }
+      console.log('   Member found:', member.displayName, '(', member.id, ')');
+      console.log('   Member role:', member.role);
+      console.log('   Member totalPoints (fresh from DB):', member.totalPoints);
       
       console.log('   Fetching rewards for family:', member.familyName);
       // Get the reward
