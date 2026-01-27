@@ -158,7 +158,11 @@ export function RewardRequestDialog({
                       min="1"
                       placeholder="50"
                       {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      value={field.value === 0 ? "" : field.value}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? 0 : parseInt(val) || 0);
+                      }}
                       data-testid="input-request-points"
                     />
                   </FormControl>
