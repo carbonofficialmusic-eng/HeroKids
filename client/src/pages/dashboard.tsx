@@ -1082,6 +1082,33 @@ export default function Dashboard() {
                 </Button>
               </div>
 
+              {/* Star Collection Progress - moved here for visibility */}
+              {starData && starData.totalStars > 0 && (
+                <Card className="p-4 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/30">
+                  <Link href="/skins">
+                    <div className="flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-yellow-500/20">
+                          <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-sm">{t("skins.starCollection")}</h3>
+                          <p className="text-xs text-muted-foreground">
+                            {starData.earnedLegacySkinIds.length}/8 Legacy Avatars
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-2xl font-bold text-yellow-500" data-testid="text-parent-stars">
+                          {starData.starsFound}/{starData.totalStars}
+                        </span>
+                        <p className="text-xs text-muted-foreground">{t("common.stars")}</p>
+                      </div>
+                    </div>
+                  </Link>
+                </Card>
+              )}
+
               {/* Task Filter Tabs */}
               {activeTasks.length > 0 && (
                 <div className="flex items-center gap-2 mb-4">
@@ -1373,33 +1400,6 @@ export default function Dashboard() {
             {/* Sidebar - sticky on desktop */}
             <div className="relative">
               <div ref={panelRef} style={stickyStyle} className="space-y-6">
-              {/* Star Collection Progress */}
-              {starData && starData.totalStars > 0 && (
-                <Card className="p-4 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/30">
-                  <Link href="/skins">
-                    <div className="flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-yellow-500/20">
-                          <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-sm">{t("skins.starCollection")}</h3>
-                          <p className="text-xs text-muted-foreground">
-                            {starData.earnedLegacySkinIds.length}/8 Legacy Avatars
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-2xl font-bold text-yellow-500" data-testid="text-parent-stars">
-                          {starData.starsFound}/{starData.totalStars}
-                        </span>
-                        <p className="text-xs text-muted-foreground">{t("common.stars")}</p>
-                      </div>
-                    </div>
-                  </Link>
-                </Card>
-              )}
-
               {/* Special Achievement Rewards Section */}
               {specialRewards.length > 0 && (
                 <div className="space-y-3">
