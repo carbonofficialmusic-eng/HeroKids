@@ -104,6 +104,65 @@ app.post("/api/stripe-webhook",
           break;
         }
         
+        case "customer.subscription.deleted": {
+          // Subscription was cancelled
+          const subscription = event.data.object as Stripe.Subscription;
+          const customerId = subscription.customer as string;
+          
+          console.log("Subscription Cancelled:", {
+            subscriptionId: subscription.id,
+            customerId,
+          });
+          
+          const { eq } = await import("drizzle-orm");
+          const { families } = await import("../shared/schema");
+          
+          // Find family by billingCustomerId and reset to free tier
+          await db.update(families)
+            .set({
+              subscriptionTier: "free",
+              subscriptionStatus: "canceled",
+              billingSubscriptionId: null,
+            })
+            .where(eq(families.billingCustomerId, customerId));
+          
+          console.log(`Subscription cancelled for customer: ${customerId}`);
+          break;
+        }
+        
+        case "customer.subscription.updated": {
+          // Subscription was updated (e.g., tier change, payment failure)
+          const subscription = event.data.object as Stripe.Subscription;
+          const customerId = subscription.customer as string;
+          
+          console.log("Subscription Updated:", {
+            subscriptionId: subscription.id,
+            customerId,
+            status: subscription.status,
+          });
+          
+          const { eq } = await import("drizzle-orm");
+          const { families } = await import("../shared/schema");
+          
+          // Update subscription status
+          if (subscription.status === "past_due") {
+            await db.update(families)
+              .set({
+                subscriptionStatus: "past_due",
+              })
+              .where(eq(families.billingCustomerId, customerId));
+            console.log(`Subscription status updated to ${subscription.status} for customer: ${customerId}`);
+          } else if (subscription.status === "active") {
+            await db.update(families)
+              .set({
+                subscriptionStatus: "active",
+              })
+              .where(eq(families.billingCustomerId, customerId));
+            console.log(`Subscription reactivated for customer: ${customerId}`);
+          }
+          break;
+        }
+        
         default:
           console.log(`ℹ️ Unhandled webhook event type: ${event.type}`);
       }

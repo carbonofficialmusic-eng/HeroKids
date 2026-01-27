@@ -12,7 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles } from "lucide-react";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -277,6 +277,28 @@ export default function Settings() {
       toast({
         title: t('errors.somethingWrong'),
         description: t('settings.errorSetPin'),
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Manage subscription (open Stripe portal)
+  const manageSubscriptionMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/create-portal-session", {});
+      return await response.json();
+    },
+    onSuccess: (data: { url: string }) => {
+      window.location.href = data.url;
+    },
+    onError: (error: any) => {
+      const description = error instanceof ApiError && error.data?.message
+        ? error.data.message
+        : t('settings.errorManageSubscription');
+      
+      toast({
+        title: t('errors.somethingWrong'),
+        description,
         variant: "destructive",
       });
     },
@@ -983,6 +1005,48 @@ export default function Settings() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Subscription Management - only show if family has active paid subscription */}
+          {familyData?.billingCustomerId && familyData.subscriptionTier !== 'free' && familyData.subscriptionStatus === 'active' && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-primary" />
+                  <CardTitle>{t('settings.subscriptionTitle')}</CardTitle>
+                </div>
+                <CardDescription>
+                  {t('settings.subscriptionDesc')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <span className="text-sm font-medium">{t('settings.currentPlan')}</span>
+                    <Badge variant="secondary">
+                      {familyData.subscriptionTier === 'family' && 'Family'}
+                      {familyData.subscriptionTier === 'family_plus' && 'Family+'}
+                      {familyData.subscriptionTier === 'family_hero' && 'Family Hero'}
+                    </Badge>
+                  </div>
+                  <Button 
+                    onClick={() => manageSubscriptionMutation.mutate()}
+                    disabled={manageSubscriptionMutation.isPending}
+                    data-testid="button-manage-subscription"
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    {manageSubscriptionMutation.isPending 
+                      ? t('common.loading') 
+                      : t('settings.manageSubscription')}
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    {t('settings.subscriptionPortalNote')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Factory Reset Settings */}
           <Card className="border-destructive/50">

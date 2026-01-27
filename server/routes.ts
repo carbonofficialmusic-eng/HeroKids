@@ -5205,6 +5205,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // NOTE: Stripe webhook is now handled in server/index.ts with express.raw() middleware
   
+  // Create Stripe Customer Portal Session (for managing/cancelling subscriptions)
+  app.post("/api/create-portal-session", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      // Only parents can manage subscriptions
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can manage subscriptions" });
+      }
+
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+
+      // Check if family has a Stripe customer ID
+      if (!family.billingCustomerId) {
+        return res.status(400).json({ message: "No active subscription found" });
+      }
+
+      const baseUrl = process.env.REPLIT_DEPLOYMENT 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN || req.get('host')}`
+        : `http://${req.get('host')}`;
+
+      // Create a portal session
+      const session = await stripe.billingPortal.sessions.create({
+        customer: family.billingCustomerId,
+        return_url: `${baseUrl}/settings`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("Error creating portal session:", error);
+      res.status(500).json({ message: error.message || "Failed to create portal session" });
+    }
+  });
+  
   // ========================================
   // Device Linking - Allow children to link their account to a new device
   // ========================================
