@@ -206,6 +206,18 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
               break;
 
+            case "reward_sharing_started":
+            case "reward_sharing_joined":
+            case "reward_sharing_finalized":
+            case "reward_sharing_cancelled":
+              // Invalidate shared rewards and redemptions for real-time updates
+              queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+              break;
+
             default:
               console.log("Unknown WebSocket message type:", data.type);
           }
