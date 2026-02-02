@@ -402,7 +402,7 @@ export const insertRewardSharingParticipantSchema = createInsertSchema(rewardSha
 export type InsertRewardSharingParticipant = z.infer<typeof insertRewardSharingParticipantSchema>;
 export type RewardSharingParticipant = typeof rewardSharingParticipants.$inferSelect;
 
-// Chat Messages - Family chat messages (Family+ and Family Hero tier)
+// Chat Messages - Family chat messages (Family+ and Enterprise tier)
 export const chatMessages = pgTable("chat_messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),

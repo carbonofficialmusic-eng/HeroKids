@@ -3937,7 +3937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat endpoints (Family+ and Family Hero tier) - supports Device Sessions
+  // Chat endpoints (Family+ and Enterprise tier) - supports Device Sessions
   app.get("/api/chat", isAuthenticated, async (req: any, res) => {
     try {
       // Support both Replit Auth and Device Sessions

@@ -5,7 +5,7 @@
  * NEW 3-Tier Structure (January 2026):
  * - Free: Basic features for small families
  * - Family: Full premium features for growing families
- * - Family Hero: Unlimited everything + future features
+ * - Enterprise: Unlimited everything + future features (for institutions)
  */
 
 export type SubscriptionTier = "free" | "family" | "family_hero";
@@ -122,7 +122,7 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
   },
   family_hero: {
     id: "family_hero",
-    name: "Family Hero",
+    name: "Enterprise",
     price: 12,
     maxMembers: 999, // Effectively unlimited
     features: {

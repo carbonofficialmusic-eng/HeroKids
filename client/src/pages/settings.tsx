@@ -1025,7 +1025,7 @@ export default function Settings() {
                     <Badge variant="secondary">
                       {familyData.subscriptionTier === 'family' && 'Family'}
                       {familyData.subscriptionTier === 'family_plus' && 'Family+'}
-                      {familyData.subscriptionTier === 'family_hero' && 'Family Hero'}
+                      {familyData.subscriptionTier === 'family_hero' && 'Enterprise'}
                     </Badge>
                   </div>
                   <Button 

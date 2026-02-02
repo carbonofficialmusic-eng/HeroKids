@@ -131,7 +131,7 @@ const TIER_LABELS: Record<string, string> = {
   free: "Free",
   family: "Family",
   family_plus: "Family+",
-  family_hero: "Family Hero",
+  family_hero: "Enterprise",
 };
 
 const TIER_COLORS: Record<string, string> = {
@@ -850,7 +850,7 @@ export default function AdminPage() {
                             <SelectContent>
                               <SelectItem value="free">Free</SelectItem>
                               <SelectItem value="family">Family (2€)</SelectItem>
-                              <SelectItem value="family_hero">Family Hero (12€)</SelectItem>
+                              <SelectItem value="family_hero">Enterprise (12€)</SelectItem>
                             </SelectContent>
                           </Select>
                           <ChevronRight 

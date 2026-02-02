@@ -36,7 +36,7 @@ const TIERS = (t: (key: string, options?: any) => any) => [
   },
   {
     id: "family_hero",
-    name: "Family Hero",
+    name: "Enterprise",
     icon: Crown,
     memberLimit: 999,
     price: "€12",

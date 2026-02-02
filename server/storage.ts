@@ -299,7 +299,7 @@ export interface IStorage {
   getAchievementAwardsByFamily(familyName: string): Promise<Array<AchievementAward & { achievementDefinition: AchievementDefinition; member: FamilyMember }>>;
   getAchievementAwardsByMember(memberId: string): Promise<Array<AchievementAward & { achievementDefinition: AchievementDefinition }>>;
 
-  // Chat operations (Family+ and Family Hero tier)
+  // Chat operations (Family+ and Enterprise tier)
   getChatMessages(familyName: string, limit?: number): Promise<any[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   updateLastReadChatAt(memberId: string): Promise<void>;
