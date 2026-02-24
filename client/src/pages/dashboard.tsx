@@ -815,19 +815,42 @@ export default function Dashboard() {
     return emojis[category] || "⭐";
   };
 
-  // Filter tasks by date range (based on recurrence type)
+  // Filter tasks by date range (based on recurrence type and dueDate)
   const filterTasksByDate = (taskList: typeof activeTasks) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     return taskList.filter(task => {
       if (taskFilter === "all") return true;
       
-      // For "today" filter, show daily, immediate (can be done multiple times per day), or one-time tasks
       if (taskFilter === "today") {
-        return task.recurrence === "daily" || task.recurrence === "immediate" || task.recurrence === "none";
+        if (task.recurrence === "daily" || task.recurrence === "immediate") return true;
+        if (task.recurrence === "none") {
+          if (task.dueDate) {
+            const dateStr = String(task.dueDate).substring(0, 10);
+            const due = new Date(dateStr + "T00:00:00");
+            return due.getFullYear() === today.getFullYear() && 
+                   due.getMonth() === today.getMonth() && 
+                   due.getDate() === today.getDate();
+          }
+          return true;
+        }
+        return false;
       }
       
-      // For "week" filter, show daily, immediate, weekly recurring tasks, or one-time tasks
       if (taskFilter === "week") {
-        return task.recurrence === "daily" || task.recurrence === "immediate" || task.recurrence === "weekly" || task.recurrence === "none";
+        if (task.recurrence === "daily" || task.recurrence === "immediate" || task.recurrence === "weekly") return true;
+        if (task.recurrence === "none") {
+          if (task.dueDate) {
+            const dateStr = String(task.dueDate).substring(0, 10);
+            const due = new Date(dateStr + "T00:00:00");
+            const weekEnd = new Date(today);
+            weekEnd.setDate(weekEnd.getDate() + 7);
+            return due >= today && due < weekEnd;
+          }
+          return true;
+        }
+        return false;
       }
       
       return true;

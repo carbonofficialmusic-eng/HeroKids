@@ -672,9 +672,17 @@ export function TaskDialog({
                 render={({ field }) => {
                   const langKey = i18n.language.split(/[-_]/)[0];
                   const currentLocale = dateFnsLocales[langKey] || enUS;
-                  const selectedDate = field.value
-                    ? parse(field.value, "yyyy-MM-dd", new Date())
-                    : undefined;
+                  const rawValue = field.value;
+                  let selectedDate: Date | undefined;
+                  if (rawValue && typeof rawValue === "string" && rawValue.trim() !== "") {
+                    try {
+                      const dateStr = rawValue.substring(0, 10);
+                      selectedDate = parse(dateStr, "yyyy-MM-dd", new Date());
+                      if (isNaN(selectedDate.getTime())) selectedDate = undefined;
+                    } catch {
+                      selectedDate = undefined;
+                    }
+                  }
 
                   return (
                     <FormItem>
@@ -685,7 +693,7 @@ export function TaskDialog({
                             <Button
                               variant="outline"
                               className={`w-full justify-start text-left font-normal ${
-                                !field.value ? "text-muted-foreground" : ""
+                                !selectedDate ? "text-muted-foreground" : ""
                               }`}
                               data-testid="button-due-date"
                             >
@@ -707,14 +715,14 @@ export function TaskDialog({
                                 field.onChange(undefined);
                               }
                             }}
-                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                            defaultMonth={selectedDate || new Date()}
                             locale={currentLocale}
                             initialFocus
                             data-testid="calendar-due-date"
                           />
                         </PopoverContent>
                       </Popover>
-                      {field.value && (
+                      {selectedDate && (
                         <Button
                           type="button"
                           variant="ghost"

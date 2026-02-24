@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar } from "lucide-react";
+import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { format, isToday, isTomorrow, differenceInDays, type Locale } from "date-fns";
+import { format, isToday, isTomorrow, isPast, differenceInDays, parse, type Locale } from "date-fns";
 import { de, enUS, fr, es, ja, ko, sv, zhCN } from "date-fns/locale";
 
 
@@ -191,6 +191,36 @@ export function TaskCard({
                 </Badge>
               </div>
             )}
+
+            {/* Due date display for one-time tasks */}
+            {task.dueDate && task.recurrence === "none" && (() => {
+              const dateStr = typeof task.dueDate === "string" ? task.dueDate.substring(0, 10) : String(task.dueDate).substring(0, 10);
+              const dueDate = parse(dateStr, "yyyy-MM-dd", new Date());
+              if (isNaN(dueDate.getTime())) return null;
+              const locale = getDateLocale();
+              const dueDateIsToday = isToday(dueDate);
+              const dueDateIsTomorrow = isTomorrow(dueDate);
+              const dueDateIsPast = isPast(new Date(dateStr + "T23:59:59"));
+              
+              let colorClass = "text-muted-foreground";
+              if (dueDateIsPast && !dueDateIsToday) colorClass = "text-destructive";
+              else if (dueDateIsToday) colorClass = "text-amber-600 dark:text-amber-400";
+
+              return (
+                <div className="mb-1">
+                  <Badge variant="outline" className={`text-xs gap-1 ${colorClass}`} data-testid={`badge-due-date-${task.id}`}>
+                    <CalendarDays className="h-3 w-3" />
+                    {dueDateIsPast && !dueDateIsToday
+                      ? t('kidDashboard.overdueHurry')
+                      : dueDateIsToday
+                        ? t('kidDashboard.dueTodayHurry')
+                        : dueDateIsTomorrow
+                          ? t('kidDashboard.dueTomorrowHurry')
+                          : format(dueDate, "EEEE, d. MMM", { locale })}
+                  </Badge>
+                </div>
+              );
+            })()}
             
             {task.description && (
               <p
