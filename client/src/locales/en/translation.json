@@ -170,6 +170,8 @@
     "pointsQuestion": "How many points is this task worth?",
     "dueDateOptional": "Due Date (Optional)",
     "dueDateDesc": "When should this task be completed by?",
+    "noDueDate": "No date selected",
+    "clearDueDate": "Clear date",
     "recurrenceType": "Recurrence Type",
     "standardRecurrence": "Standard Recurrence",
     "customDaysRecurrence": "Custom Days",

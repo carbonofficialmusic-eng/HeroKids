@@ -164,6 +164,8 @@
     "pointsQuestion": "このタスクは何ポイントですか？",
     "dueDateOptional": "期限（任意）",
     "dueDateDesc": "いつまでに完了すべきですか？",
+    "noDueDate": "日付未選択",
+    "clearDueDate": "日付をクリア",
     "recurrenceType": "繰り返しタイプ",
     "standardRecurrence": "標準の繰り返し",
     "customDaysRecurrence": "カスタム日数",

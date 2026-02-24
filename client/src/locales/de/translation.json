@@ -183,6 +183,8 @@
     "pointsQuestion": "Wie viele Punkte ist diese Aufgabe wert?",
     "dueDateOptional": "Fälligkeitsdatum (Optional)",
     "dueDateDesc": "Bis wann soll die Aufgabe erledigt sein?",
+    "noDueDate": "Kein Datum ausgewählt",
+    "clearDueDate": "Datum entfernen",
     "recurrenceType": "Wiederholungstyp",
     "standardRecurrence": "Standard-Wiederholung",
     "customDaysRecurrence": "Benutzerdefinierte Tage",

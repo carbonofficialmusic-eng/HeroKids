@@ -164,6 +164,8 @@
     "pointsQuestion": "Combien de points vaut cette tâche ?",
     "dueDateOptional": "Date limite (facultatif)",
     "dueDateDesc": "Quand cette tâche doit-elle être terminée ?",
+    "noDueDate": "Aucune date sélectionnée",
+    "clearDueDate": "Effacer la date",
     "recurrenceType": "Type de répétition",
     "standardRecurrence": "Répétition standard",
     "customDaysRecurrence": "Jours personnalisés",

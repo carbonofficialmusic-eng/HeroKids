@@ -46,15 +46,24 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Sparkles, RotateCcw } from "lucide-react";
+import { Sparkles, RotateCcw, CalendarIcon, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format, parse, type Locale } from "date-fns";
+import { de, enUS, fr, es, ja, zhCN, ko, sv } from "date-fns/locale";
+
+const dateFnsLocales: Record<string, Locale> = {
+  de, en: enUS, fr, es, ja, zh: zhCN, ko, sv,
+};
 
 const taskFormSchema = insertTaskSchema.extend({
   recurrenceDays: z.number().int().min(1).max(365).optional(),
   maxCompletions: z.number().int().min(2).max(20).optional(),
   isSharedTask: z.boolean().optional(),
   sharedMemberIds: z.array(z.string()).optional(),
+  dueDate: z.string().optional().nullable(),
 });
 
 type TaskFormData = z.infer<typeof taskFormSchema>;
@@ -100,7 +109,7 @@ export function TaskDialog({
   editingTask,
   familyMembers = [],
 }: TaskDialogProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showResetDialog, setShowResetDialog] = useState(false);
@@ -174,6 +183,7 @@ export function TaskDialog({
       maxCompletions: undefined,
       isSharedTask: false,
       sharedMemberIds: [],
+      dueDate: undefined,
     },
   });
 
@@ -205,6 +215,7 @@ export function TaskDialog({
           maxCompletions: undefined,
           isSharedTask: editingTask.isSharedTask || false,
           sharedMemberIds: editingTask.sharedMemberIds || [],
+          dueDate: editingTask.dueDate || undefined,
         });
         // Sync assigned members state
         setSelectedSharedMembers(editingTask.sharedMemberIds || []);
@@ -225,6 +236,7 @@ export function TaskDialog({
           maxCompletions: undefined,
           isSharedTask: false,
           sharedMemberIds: [],
+          dueDate: undefined,
         });
         // Clear assigned members state
         setSelectedSharedMembers([]);
@@ -233,22 +245,22 @@ export function TaskDialog({
   }, [open, editingTask, familyName, createdBy, totalMemberCount]);
 
   const handleSubmit = (data: TaskFormData) => {
-    // Create a copy and clear the field that's not being used based on mode
     const submitData = { ...data };
     if (recurrenceMode === "immediate") {
       submitData.recurrence = "immediate";
       submitData.recurrenceDays = undefined;
-      submitData.requiresApproval = true; // Always requires approval
+      submitData.requiresApproval = true;
+      submitData.dueDate = undefined;
     } else if (recurrenceMode === "standard") {
       submitData.recurrenceDays = undefined;
+      if (submitData.recurrence !== "none") {
+        submitData.dueDate = undefined;
+      }
     } else {
       submitData.recurrence = "none";
+      submitData.dueDate = undefined;
     }
     
-    // Handle task assignment
-    // - No members selected: all children can complete (isSharedTask = false)
-    // - 1 member selected: exclusive task for that child (isSharedTask = true, but single member)
-    // - 2+ members selected: shared task with split points (isSharedTask = true)
     if (selectedSharedMembers.length > 0) {
       submitData.isSharedTask = true;
       submitData.sharedMemberIds = selectedSharedMembers;
@@ -257,7 +269,6 @@ export function TaskDialog({
       submitData.sharedMemberIds = [];
     }
     
-    // Clear maxCompletions as it's no longer used
     submitData.maxCompletions = undefined;
     
     onSubmit(submitData);
@@ -265,17 +276,18 @@ export function TaskDialog({
   
   const handleRecurrenceModeChange = (mode: "standard" | "custom" | "immediate") => {
     setRecurrenceMode(mode);
-    // Clear fields and set appropriate values when switching modes
     if (mode === "immediate") {
       form.setValue("recurrence", "immediate");
       form.setValue("recurrenceDays", undefined);
-      form.setValue("requiresApproval", true); // Always requires approval
+      form.setValue("requiresApproval", true);
+      form.setValue("dueDate", undefined);
     } else if (mode === "standard") {
       form.setValue("recurrenceDays", undefined);
       form.setValue("recurrence", "none");
     } else {
       form.setValue("recurrence", "none");
       form.setValue("recurrenceDays", undefined);
+      form.setValue("dueDate", undefined);
     }
   };
 
@@ -652,6 +664,78 @@ export function TaskDialog({
                 />
               )}
             </div>
+
+            {recurrenceMode === "standard" && form.watch("recurrence") === "none" && (
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => {
+                  const langKey = i18n.language.split(/[-_]/)[0];
+                  const currentLocale = dateFnsLocales[langKey] || enUS;
+                  const selectedDate = field.value
+                    ? parse(field.value, "yyyy-MM-dd", new Date())
+                    : undefined;
+
+                  return (
+                    <FormItem>
+                      <FormLabel>{t('tasks.dueDateOptional')}</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={`w-full justify-start text-left font-normal ${
+                                !field.value ? "text-muted-foreground" : ""
+                              }`}
+                              data-testid="button-due-date"
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {selectedDate
+                                ? format(selectedDate, "EEEE, d. MMMM yyyy", { locale: currentLocale })
+                                : t('tasks.noDueDate')}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={(date) => {
+                              if (date) {
+                                field.onChange(format(date, "yyyy-MM-dd"));
+                              } else {
+                                field.onChange(undefined);
+                              }
+                            }}
+                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                            locale={currentLocale}
+                            initialFocus
+                            data-testid="calendar-due-date"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {field.value && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="mt-1"
+                          onClick={() => field.onChange(undefined)}
+                          data-testid="button-clear-due-date"
+                        >
+                          <X className="mr-1 h-3 w-3" />
+                          {t('tasks.clearDueDate')}
+                        </Button>
+                      )}
+                      <FormDescription>
+                        {t('tasks.dueDateDesc')}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            )}
 
             <FormField
               control={form.control}
