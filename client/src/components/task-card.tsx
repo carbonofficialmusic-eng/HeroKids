@@ -108,8 +108,29 @@ export function TaskCard({
   const assignedMemberNames = task.assignedMemberCompletions?.map(m => m.displayName).join(' & ') || 
     task.sharedMemberCompletions?.map(m => m.displayName).join(' & ') || '';
   
-  // Task should appear grayed out if it's unavailable OR completed by this member
-  const isGrayedOut = isUnavailable || isCompletedByMember;
+  // Due date availability logic for one-time tasks
+  const dueDateInfo = (() => {
+    if (!task.dueDate || task.recurrence !== "none") return { notYet: false, expired: false, isLate: false, daysPast: 0 };
+    const dateStr = String(task.dueDate).substring(0, 10);
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    if (dateStr > todayStr) return { notYet: true, expired: false, isLate: false, daysPast: 0 };
+    
+    const dueMs = new Date(dateStr + "T00:00:00").getTime();
+    const todayMs = new Date(todayStr + "T00:00:00").getTime();
+    const daysPast = Math.floor((todayMs - dueMs) / (1000 * 60 * 60 * 24));
+    
+    return {
+      notYet: false,
+      expired: daysPast > 3,
+      isLate: daysPast >= 1 && daysPast <= 3,
+      daysPast,
+    };
+  })();
+  
+  // Task should appear grayed out if it's unavailable OR completed by this member OR due date not yet reached OR expired
+  const isGrayedOut = isUnavailable || isCompletedByMember || dueDateInfo.notYet || dueDateInfo.expired;
   
   return (
     <motion.div
@@ -200,23 +221,31 @@ export function TaskCard({
               const locale = getDateLocale();
               const dueDateIsToday = isToday(dueDate);
               const dueDateIsTomorrow = isTomorrow(dueDate);
-              const dueDateIsPast = isPast(new Date(dateStr + "T23:59:59"));
               
               let colorClass = "text-muted-foreground";
-              if (dueDateIsPast && !dueDateIsToday) colorClass = "text-destructive";
-              else if (dueDateIsToday) colorClass = "text-amber-600 dark:text-amber-400";
+              let badgeText = format(dueDate, "EEEE, d. MMM", { locale });
+              
+              if (dueDateInfo.expired) {
+                colorClass = "text-destructive";
+                badgeText = t('tasks.dueDateExpired');
+              } else if (dueDateInfo.isLate) {
+                colorClass = "text-amber-600 dark:text-amber-400";
+                badgeText = t('tasks.dueDateLate', { days: dueDateInfo.daysPast });
+              } else if (dueDateIsToday) {
+                colorClass = "text-amber-600 dark:text-amber-400";
+                badgeText = t('kidDashboard.dueTodayHurry');
+              } else if (dueDateInfo.notYet) {
+                colorClass = "text-muted-foreground";
+                badgeText = t('tasks.dueDateNotYet', { date: format(dueDate, "EEEE, d. MMM", { locale }) });
+              } else if (dueDateIsTomorrow) {
+                badgeText = t('kidDashboard.dueTomorrowHurry');
+              }
 
               return (
                 <div className="mb-1">
                   <Badge variant="outline" className={`text-xs gap-1 ${colorClass}`} data-testid={`badge-due-date-${task.id}`}>
                     <CalendarDays className="h-3 w-3" />
-                    {dueDateIsPast && !dueDateIsToday
-                      ? t('kidDashboard.overdueHurry')
-                      : dueDateIsToday
-                        ? t('kidDashboard.dueTodayHurry')
-                        : dueDateIsTomorrow
-                          ? t('kidDashboard.dueTomorrowHurry')
-                          : format(dueDate, "EEEE, d. MMM", { locale })}
+                    {badgeText}
                   </Badge>
                 </div>
               );
@@ -392,6 +421,26 @@ export function TaskCard({
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{t('tasks.sharedTaskNotAssigned', { members: assignedMemberNames })}</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (dueDateInfo.notYet || dueDateInfo.expired) ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="flex-shrink-0 opacity-50 cursor-not-allowed"
+                    onClick={(e) => e.stopPropagation()}
+                    disabled
+                    data-testid={`button-complete-task-${task.id}`}
+                  >
+                    <Lock className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{dueDateInfo.notYet 
+                    ? t('tasks.dueDateNotYetTooltip') 
+                    : t('tasks.dueDateExpiredTooltip')}</p>
                 </TooltipContent>
               </Tooltip>
             ) : (

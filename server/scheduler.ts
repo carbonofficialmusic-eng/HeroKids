@@ -145,6 +145,7 @@ async function checkAndResetFamily(family: Family) {
     if (isNearMidnight || isSafeForLateReset) {
       console.log(`⏰ Running daily reset for family "${family.familyName}" at ${familyTimeString} (${familyTimezone}) [Day ${current.day} vs stored ${lastDailyPeriod}]`);
       await resetDailyTasksForFamily(family.familyName);
+      await expireOverdueTasks(family.familyName, familyTimezone);
       await runDailyAchievementCheckForFamily(family.familyName);
       await storage.updateFamily(family.familyName, { 
         lastDailyReset: now,
@@ -155,6 +156,47 @@ async function checkAndResetFamily(family: Family) {
     } else {
       console.log(`⏭️  Waiting for safe reset time for family "${family.familyName}" (current hour: ${current.hour}, will reset at 02:00 or later)`);
     }
+  }
+}
+
+async function expireOverdueTasks(familyName: string, familyTimezone: string) {
+  try {
+    const todayStr = formatInTimeZone(new Date(), familyTimezone, "yyyy-MM-dd");
+    const allTasks = await storage.getTasksByFamily(familyName);
+    
+    const expiredTasks = allTasks.filter(task => {
+      if (!task.dueDate || task.recurrence !== "none" || task.status !== "active") return false;
+      const dueDateStr = String(task.dueDate).substring(0, 10);
+      const dueMs = new Date(dueDateStr + "T00:00:00").getTime();
+      const todayMs = new Date(todayStr + "T00:00:00").getTime();
+      const daysPastDue = Math.floor((todayMs - dueMs) / (1000 * 60 * 60 * 24));
+      return daysPastDue > 3;
+    });
+    
+    if (expiredTasks.length === 0) return;
+    
+    const family = await storage.getFamily(familyName);
+    const lang = family?.language || "en";
+    
+    const { translateNotification } = await import("./routes");
+    
+    for (const task of expiredTasks) {
+      await storage.updateTaskStatus(task.id, "completed");
+      
+      await storage.createNotificationForParents(familyName, {
+        familyName,
+        type: "task_expired",
+        title: translateNotification(lang, "task_expired.title"),
+        message: translateNotification(lang, "task_expired.message", { task: task.title }),
+        relatedTaskId: task.id,
+      });
+      
+      console.log(`⏰ Expired task "${task.title}" for family "${familyName}" (due: ${String(task.dueDate).substring(0, 10)})`);
+    }
+    
+    console.log(`✅ ${expiredTasks.length} overdue task(s) expired for family "${familyName}"`);
+  } catch (error) {
+    console.error(`Error expiring overdue tasks for family "${familyName}":`, error);
   }
 }
 

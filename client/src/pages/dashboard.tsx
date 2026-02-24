@@ -508,6 +508,23 @@ export default function Dashboard() {
         description: data.message || t("toast.awaitingApproval"),
       });
     },
+    onError: (error: any) => {
+      const errorCode = error?.data?.code;
+      let title = t("toast.error");
+      let description = error.message || t("toast.taskError");
+      
+      if (errorCode === "TASK_NOT_YET_AVAILABLE") {
+        title = t("tasks.dueDateNotYetTooltip");
+      } else if (errorCode === "TASK_DEADLINE_EXPIRED") {
+        title = t("tasks.dueDateExpiredTooltip");
+      }
+      
+      toast({
+        variant: "destructive",
+        title,
+        description,
+      });
+    },
   });
 
   // Create reward

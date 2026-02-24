@@ -44,6 +44,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "New reward available!",
     "reward_created.message": "\"{{reward}}\" for {{points}} points",
+    "task_expired.title": "Task not completed",
+    "task_expired.message": "\"{{task}}\" was not completed in time",
     "default_reason": "Did not meet expectations",
   },
   de: {
@@ -65,6 +67,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "Neue Belohnung verfügbar!",
     "reward_created.message": "\"{{reward}}\" für {{points}} Punkte",
+    "task_expired.title": "Aufgabe nicht erledigt",
+    "task_expired.message": "\"{{task}}\" wurde nicht rechtzeitig erledigt",
     "default_reason": "Entspricht nicht den Erwartungen",
   },
   fr: {
@@ -86,6 +90,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "Nouvelle récompense disponible !",
     "reward_created.message": "\"{{reward}}\" pour {{points}} points",
+    "task_expired.title": "Tâche non terminée",
+    "task_expired.message": "\"{{task}}\" n'a pas été terminée à temps",
     "default_reason": "Ne répond pas aux attentes",
   },
   es: {
@@ -107,6 +113,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "¡Nueva recompensa disponible!",
     "reward_created.message": "\"{{reward}}\" por {{points}} puntos",
+    "task_expired.title": "Tarea no completada",
+    "task_expired.message": "\"{{task}}\" no se completó a tiempo",
     "default_reason": "No cumple las expectativas",
   },
   ja: {
@@ -128,6 +136,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "「{{reward}}」",
     "reward_created.title": "新しいご褒美が追加されました！",
     "reward_created.message": "「{{reward}}」（{{points}}ポイント）",
+    "task_expired.title": "タスク未完了",
+    "task_expired.message": "「{{task}}」は期限内に完了しませんでした",
     "default_reason": "期待に沿っていません",
   },
   zh: {
@@ -149,6 +159,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "「{{reward}}」",
     "reward_created.title": "新奖励可用！",
     "reward_created.message": "「{{reward}}」{{points}}积分",
+    "task_expired.title": "任务未完成",
+    "task_expired.message": "「{{task}}」未在规定时间内完成",
     "default_reason": "未达到预期",
   },
   ko: {
@@ -170,6 +182,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "새로운 보상 등록!",
     "reward_created.message": "\"{{reward}}\" {{points}}포인트",
+    "task_expired.title": "작업 미완료",
+    "task_expired.message": "\"{{task}}\"이(가) 기한 내에 완료되지 않았어요",
     "default_reason": "기대에 미치지 못함",
   },
   sv: {
@@ -191,12 +205,14 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "Ny belöning tillgänglig!",
     "reward_created.message": "\"{{reward}}\" för {{points}} poäng",
+    "task_expired.title": "Uppgift inte slutförd",
+    "task_expired.message": "\"{{task}}\" slutfördes inte i tid",
     "default_reason": "Uppfyller inte förväntningarna",
   },
 };
 
 // Helper function to translate notification text
-function translateNotification(lang: string, key: string, params: Record<string, string | number> = {}): string {
+export function translateNotification(lang: string, key: string, params: Record<string, string | number> = {}): string {
   const translations = notificationTranslations[lang] || notificationTranslations.en;
   let text = translations[key] || notificationTranslations.en[key] || key;
   
@@ -2057,6 +2073,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (task.status !== "active") {
         return res.status(422).json({ message: "Validation failed: Task is not active" });
+      }
+      
+      // Due date validation for one-time tasks with a due date
+      if (task.dueDate && task.recurrence === "none") {
+        const dueDateStr = String(task.dueDate).substring(0, 10);
+        const family = await storage.getFamily(member.familyName);
+        const familyTimezone = family?.timezone || "Europe/Berlin";
+        const { formatInTimeZone } = await import("date-fns-tz");
+        const todayStr = formatInTimeZone(new Date(), familyTimezone, "yyyy-MM-dd");
+        
+        if (dueDateStr > todayStr) {
+          return res.status(422).json({ 
+            message: "Validation failed: Task not yet available",
+            code: "TASK_NOT_YET_AVAILABLE",
+            dueDate: dueDateStr
+          });
+        }
+        
+        // Calculate days past due date
+        const dueMs = new Date(dueDateStr + "T00:00:00").getTime();
+        const todayMs = new Date(todayStr + "T00:00:00").getTime();
+        const daysPastDue = Math.floor((todayMs - dueMs) / (1000 * 60 * 60 * 24));
+        
+        if (daysPastDue > 3) {
+          return res.status(422).json({ 
+            message: "Validation failed: Task deadline has expired",
+            code: "TASK_DEADLINE_EXPIRED",
+            dueDate: dueDateStr
+          });
+        }
       }
       
       // For multi-completion tasks, prevent the same member from completing twice

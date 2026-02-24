@@ -441,6 +441,27 @@ function TaskCard({
   const hasNoSlots = task.remainingSlots !== null && task.remainingSlots !== undefined && task.remainingSlots <= 0;
   const isInactive = task.status !== "active";
   
+  // Due date availability logic for one-time tasks
+  const dueDateInfo = (() => {
+    if (!task.dueDate || task.recurrence !== "none") return { notYet: false, expired: false, isLate: false, daysPast: 0 };
+    const dateStr = String(task.dueDate).substring(0, 10);
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    if (dateStr > todayStr) return { notYet: true, expired: false, isLate: false, daysPast: 0 };
+    
+    const dueMs = new Date(dateStr + "T00:00:00").getTime();
+    const todayMs = new Date(todayStr + "T00:00:00").getTime();
+    const daysPast = Math.floor((todayMs - dueMs) / (1000 * 60 * 60 * 24));
+    
+    return {
+      notYet: false,
+      expired: daysPast > 3,
+      isLate: daysPast >= 1 && daysPast <= 3,
+      daysPast,
+    };
+  })();
+  
   // Check if this is a shared task and current member is NOT assigned
   const isSharedTaskNotAssigned = task.isSharedTask && 
     task.sharedMemberIds && 
@@ -475,8 +496,8 @@ function TaskCard({
   // 3. Has available slots (or no slot limit)
   // 4. Is assigned to this member (for shared tasks)
   // 5. Not all assigned members have completed yet
-  // NOT actionable if: pending, approved, has completion without status, inactive, no slots, not assigned to shared task, or all members completed
-  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned && !allMembersCompleted;
+  // NOT actionable if: pending, approved, has completion without status, inactive, no slots, not assigned to shared task, all members completed, due date not yet reached, or due date expired
+  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned && !allMembersCompleted && !dueDateInfo.notYet && !dueDateInfo.expired;
   
   const TaskIcon = getTaskIcon(task.title);
 
@@ -553,6 +574,15 @@ function TaskCard({
   } else if (allSharedMembersCompleted) {
     statusMessage = t("kidDashboard.sharedTaskCompleted");
     statusColor = "text-green-600 dark:text-green-400";
+  } else if (dueDateInfo.notYet) {
+    statusMessage = t("tasks.dueDateNotYetTooltip");
+    statusColor = "text-muted-foreground";
+  } else if (dueDateInfo.expired) {
+    statusMessage = t("tasks.dueDateExpiredTooltip");
+    statusColor = "text-destructive";
+  } else if (dueDateInfo.isLate) {
+    statusMessage = t("tasks.dueDateLate", { days: dueDateInfo.daysPast });
+    statusColor = "text-amber-600 dark:text-amber-400";
   }
 
   return (
@@ -570,6 +600,8 @@ function TaskCard({
           hasNoSlots ? "opacity-50 border-amber-500" :
           isSharedTaskNotAssigned ? "opacity-50 border-muted" :
           allSharedMembersCompleted ? "opacity-60 border-green-500" :
+          dueDateInfo.notYet ? "opacity-50 border-muted" :
+          dueDateInfo.expired ? "opacity-40 border-destructive" :
           "opacity-70 border-muted"
         }`}
         data-testid={`task-card-${task.id}`}
