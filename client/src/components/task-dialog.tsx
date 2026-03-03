@@ -686,7 +686,7 @@ export function TaskDialog({
 
                   return (
                     <FormItem>
-                      <FormLabel>{t('tasks.dueDateOptional')}</FormLabel>
+                      <FormLabel>{t('tasks.dueDateDesc')}</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -735,9 +735,6 @@ export function TaskDialog({
                           {t('tasks.clearDueDate')}
                         </Button>
                       )}
-                      <FormDescription>
-                        {t('tasks.dueDateDesc')}
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   );
