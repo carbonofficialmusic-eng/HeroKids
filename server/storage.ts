@@ -971,11 +971,13 @@ export class DatabaseStorage implements IStorage {
   async getMemberCompletionStatus(taskId: string, memberId: string, txClient?: any): Promise<"pending" | "approved" | "rejected" | null> {
     const client = txClient || db;
     
-    // Get task info to check if it's a daily recurring task or immediate task
+    // Get task info including nextAvailableDate for period-aware completion checks
     const [task] = await client
       .select({
         recurrence: tasks.recurrence,
-        familyName: tasks.familyName
+        recurrenceDays: tasks.recurrenceDays,
+        familyName: tasks.familyName,
+        nextAvailableDate: tasks.nextAvailableDate,
       })
       .from(tasks)
       .where(eq(tasks.id, taskId));
@@ -1031,7 +1033,55 @@ export class DatabaseStorage implements IStorage {
       return todayCompletion?.status || null;
     }
     
-    // For non-daily tasks, use the original logic (latest completion)
+    // For weekly/monthly/yearly/custom recurring tasks: use nextAvailableDate to determine
+    // whether we are in a new period. Old completions from previous periods must be ignored.
+    const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
+    if (isRecurring) {
+      const now = new Date();
+      const nextDate = task.nextAvailableDate ? new Date(task.nextAvailableDate) : null;
+      
+      if (!nextDate) {
+        // Task has never been completed — no completion status
+        return null;
+      }
+      
+      if (nextDate > now) {
+        // nextAvailableDate is in the future: task is locked for this period
+        // Return the most recent completion (which caused the lock)
+        const [completion] = await client
+          .select({ status: taskCompletions.status })
+          .from(taskCompletions)
+          .where(
+            and(
+              eq(taskCompletions.taskId, taskId),
+              eq(taskCompletions.memberId, memberId),
+              inArray(taskCompletions.status, ["pending", "approved", "rejected"])
+            )
+          )
+          .orderBy(desc(taskCompletions.completedAt))
+          .limit(1);
+        return completion?.status || null;
+      }
+      
+      // nextAvailableDate has passed — we are in a new period.
+      // Only count completions that happened AFTER nextAvailableDate (i.e. this new period).
+      const [recentCompletion] = await client
+        .select({ status: taskCompletions.status })
+        .from(taskCompletions)
+        .where(
+          and(
+            eq(taskCompletions.taskId, taskId),
+            eq(taskCompletions.memberId, memberId),
+            inArray(taskCompletions.status, ["pending", "approved", "rejected"]),
+            sql`${taskCompletions.completedAt} >= ${nextDate}`
+          )
+        )
+        .orderBy(desc(taskCompletions.completedAt))
+        .limit(1);
+      return recentCompletion?.status || null;
+    }
+    
+    // For one-time tasks (recurrence = 'none', no recurrenceDays): use the latest completion
     const [completion] = await client
       .select({ status: taskCompletions.status })
       .from(taskCompletions)
@@ -1057,11 +1107,13 @@ export class DatabaseStorage implements IStorage {
   async getTaskCompletionStatusForFamily(taskId: string, txClient?: any): Promise<"pending" | "approved" | "rejected" | null> {
     const client = txClient || db;
     
-    // Get task info
+    // Get task info including nextAvailableDate for period-aware completion checks
     const [task] = await client
       .select({
         recurrence: tasks.recurrence,
-        familyName: tasks.familyName
+        recurrenceDays: tasks.recurrenceDays,
+        familyName: tasks.familyName,
+        nextAvailableDate: tasks.nextAvailableDate,
       })
       .from(tasks)
       .where(eq(tasks.id, taskId));
@@ -1120,7 +1172,54 @@ export class DatabaseStorage implements IStorage {
       return null;
     }
     
-    // For non-daily tasks: check if anyone has completed it
+    // For weekly/monthly/yearly/custom recurring tasks: use nextAvailableDate to determine period
+    const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
+    if (isRecurring) {
+      const now = new Date();
+      const nextDate = task.nextAvailableDate ? new Date(task.nextAvailableDate) : null;
+      
+      if (!nextDate) {
+        // Task has never been completed — no completion status
+        return null;
+      }
+      
+      if (nextDate > now) {
+        // nextAvailableDate is in the future: task is locked, show current period's completions
+        const completions = await client
+          .select({ status: taskCompletions.status })
+          .from(taskCompletions)
+          .where(
+            and(
+              eq(taskCompletions.taskId, taskId),
+              inArray(taskCompletions.status, ["pending", "approved", "rejected"])
+            )
+          )
+          .orderBy(desc(taskCompletions.completedAt));
+        if (completions.some((c: { status: string }) => c.status === "approved")) return "approved";
+        if (completions.some((c: { status: string }) => c.status === "pending")) return "pending";
+        if (completions.some((c: { status: string }) => c.status === "rejected")) return "rejected";
+        return null;
+      }
+      
+      // nextAvailableDate has passed — new period started. Only count completions after that date.
+      const completions = await client
+        .select({ status: taskCompletions.status })
+        .from(taskCompletions)
+        .where(
+          and(
+            eq(taskCompletions.taskId, taskId),
+            inArray(taskCompletions.status, ["pending", "approved", "rejected"]),
+            sql`${taskCompletions.completedAt} >= ${nextDate}`
+          )
+        )
+        .orderBy(desc(taskCompletions.completedAt));
+      if (completions.some((c: { status: string }) => c.status === "approved")) return "approved";
+      if (completions.some((c: { status: string }) => c.status === "pending")) return "pending";
+      if (completions.some((c: { status: string }) => c.status === "rejected")) return "rejected";
+      return null;
+    }
+    
+    // For one-time tasks (recurrence = 'none', no recurrenceDays): check all completions
     const completions = await client
       .select({ status: taskCompletions.status })
       .from(taskCompletions)
