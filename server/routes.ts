@@ -1003,6 +1003,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const members = await storage.getFamilyMembersByFamily(result.member.familyName);
+      
+      // Compute over-limit members based on tier
+      const family = await storage.getFamily(result.member.familyName);
+      if (family) {
+        const maxMembers = getMaxMembers(family.subscriptionTier as any);
+        // Sort by createdAt ascending (oldest = most important = stays active)
+        const sorted = [...members].sort((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return aTime - bTime;
+        });
+        const overLimitIds = new Set(sorted.slice(maxMembers).map(m => m.id));
+        const membersWithLimit = members.map(m => ({
+          ...m,
+          isOverLimit: overLimitIds.has(m.id),
+        }));
+        return res.json(membersWithLimit);
+      }
+      
       res.json(members);
     } catch (error) {
       console.error("Error fetching family members:", error);
@@ -2060,6 +2079,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Check if member is over the tier limit (downgrade overflow)
+      const memberFamily = await storage.getFamily(member.familyName);
+      if (memberFamily) {
+        const maxMembers = getMaxMembers(memberFamily.subscriptionTier as any);
+        const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+        const sorted = [...allMembers].sort((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return aTime - bTime;
+        });
+        const overLimitIds = new Set(sorted.slice(maxMembers).map(m => m.id));
+        if (overLimitIds.has(member.id)) {
+          return res.status(403).json({ message: "MEMBER_OVER_LIMIT" });
+        }
       }
       
       const task = await storage.getTask(taskId);

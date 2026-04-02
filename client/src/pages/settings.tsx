@@ -12,10 +12,11 @@ import { Slider } from "@/components/ui/slider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink } from "lucide-react";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { getMaxMembers } from "@shared/tier-config";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { FamilyMember, Family } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
+
+type FamilyMemberWithLimit = FamilyMember & { isOverLimit?: boolean };
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -71,7 +74,7 @@ export default function Settings() {
   });
 
   // Fetch all family members
-  const { data: familyMembers, isLoading: membersLoading } = useQuery<FamilyMember[]>({
+  const { data: familyMembers, isLoading: membersLoading } = useQuery<FamilyMemberWithLimit[]>({
     queryKey: ["/api/family-members"],
     enabled: !!member,
   });
@@ -470,6 +473,17 @@ export default function Settings() {
                 </div>
               )}
               
+              {/* Over-limit warning banner */}
+              {familyMembers && familyMembers.some(m => m.isOverLimit) && (
+                <div className="flex items-start gap-3 p-3 rounded-lg border border-amber-500/40 bg-amber-50 dark:bg-amber-950/30">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                  <div className="text-sm">
+                    <p className="font-semibold text-amber-800 dark:text-amber-300">{t('settings.overLimitTitle')}</p>
+                    <p className="text-amber-700 dark:text-amber-400 mt-0.5">{t('settings.overLimitDesc', { count: familyMembers.filter(m => m.isOverLimit).length })}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Members List */}
               {membersLoading ? (
                 <div className="text-center py-4 text-muted-foreground">
@@ -479,26 +493,33 @@ export default function Settings() {
                 <div className="space-y-2">
                   {familyMembers.map((familyMember) => {
                     const isCurrentUser = familyMember.id === member?.id;
+                    const isOverLimit = familyMember.isOverLimit === true;
                     return (
                       <div
                         key={familyMember.id}
-                        className="flex items-center justify-between p-3 rounded-lg border bg-card hover-elevate"
+                        className={`flex items-center justify-between p-3 rounded-lg border bg-card ${isOverLimit ? 'opacity-50 border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10' : 'hover-elevate'}`}
                         data-testid={`member-item-${familyMember.id}`}
                       >
                         <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
+                          <Avatar className={`h-10 w-10 ${isOverLimit ? 'grayscale' : ''}`}>
                             <AvatarImage src={getAvatarUrl(familyMember.activeSkinId, familyMember.avatarUrl, familyMember.useCustomAvatar, familyMember.updatedAt)} alt={familyMember.displayName} />
                             <AvatarFallback style={{ backgroundColor: familyMember.color }}>
                               {familyMember.displayName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-medium" data-testid={`member-name-${familyMember.id}`}>
                                 {familyMember.displayName}
                               </span>
                               {isCurrentUser && (
                                 <Badge variant="secondary" className="text-xs">{t('settings.you')}</Badge>
+                              )}
+                              {isOverLimit && (
+                                <Badge variant="outline" className="text-xs border-amber-500 text-amber-700 dark:text-amber-400 gap-1">
+                                  <UserX className="h-3 w-3" />
+                                  {t('settings.deactivated')}
+                                </Badge>
                               )}
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -509,7 +530,7 @@ export default function Settings() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {familyMember.role === "child" && (
+                          {!isOverLimit && familyMember.role === "child" && (
                             <Button
                               variant="ghost"
                               size="icon"
@@ -523,18 +544,20 @@ export default function Settings() {
                               <Smartphone className="h-4 w-4" />
                             </Button>
                           )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setMemberToEdit(familyMember);
-                              setEditMemberDialogOpen(true);
-                            }}
-                            disabled={editMemberMutation.isPending}
-                            data-testid={`button-edit-member-${familyMember.id}`}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
+                          {!isOverLimit && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setMemberToEdit(familyMember);
+                                setEditMemberDialogOpen(true);
+                              }}
+                              disabled={editMemberMutation.isPending}
+                              data-testid={`button-edit-member-${familyMember.id}`}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          )}
                           {!isCurrentUser && (
                             <Button
                               variant="ghost"
@@ -542,8 +565,9 @@ export default function Settings() {
                               onClick={() => setMemberToDelete(familyMember)}
                               disabled={deleteMemberMutation.isPending}
                               data-testid={`button-delete-member-${familyMember.id}`}
+                              title={isOverLimit ? t('settings.removeMemberButton') : undefined}
                             >
-                              <Trash2 className="h-4 w-4 text-destructive" />
+                              <Trash2 className={`h-4 w-4 ${isOverLimit ? 'text-amber-600' : 'text-destructive'}`} />
                             </Button>
                           )}
                         </div>
