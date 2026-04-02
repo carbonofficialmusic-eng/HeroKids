@@ -5,13 +5,13 @@ outputs = []
 id = "Wl6Zh0Fhfdu9HDlySH8Mb"
 uri = "file://attached_assets/generated_images/nemicolopterus_white_bg.png"
 type = "image"
-title = "nemicolopterus pterosaur white bg"
+title = "generated_image"
 
 [[generated]]
 id = "1HKSlZ3p2lW6_49pcQPhh"
 uri = "file://attached_assets/generated_images/nemicolopterus_forest_canopy_scene.png"
 type = "image"
-title = "prehistoric forest canopy background"
+title = "generated_image"
 
 [[generated]]
 id = "PV_T49jv1YC8C8yLkY685"
