@@ -345,6 +345,8 @@ export default function SkinsGallery() {
                 src={SKIN_IMAGES[skin.id]}
                 alt={t(`skinNames.${skin.id}`)}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
             ) : (
               <div className="w-full h-full bg-muted flex items-center justify-center">
@@ -510,12 +512,15 @@ export default function SkinsGallery() {
                             src={SKIN_BACKGROUNDS[previewSkin.id]}
                             alt=""
                             className="absolute inset-0 w-full h-full object-cover opacity-50"
+                            decoding="async"
                           />
                         )}
                         <img
                           src={SKIN_IMAGES[previewSkin.id]}
                           alt={t(`skinNames.${previewSkin.id}`)}
                           className="relative w-full h-full object-contain p-4"
+                          decoding="async"
+                          fetchPriority="high"
                         />
                         {previewSkin.isActive && (
                           <div className="absolute top-2 right-2">

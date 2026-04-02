@@ -159,6 +159,8 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
                         src={SKIN_IMAGES[skin.id]}
                         alt={skin.name}
                         className="h-12 w-12 rounded-lg object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </Button>
                   ))}
