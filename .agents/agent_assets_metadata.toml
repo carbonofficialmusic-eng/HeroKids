@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "Wl6Zh0Fhfdu9HDlySH8Mb"
+uri = "file://attached_assets/generated_images/nemicolopterus_white_bg.png"
+type = "image"
+title = "nemicolopterus pterosaur white bg"
+
+[[generated]]
+id = "1HKSlZ3p2lW6_49pcQPhh"
+uri = "file://attached_assets/generated_images/nemicolopterus_forest_canopy_scene.png"
+type = "image"
+title = "prehistoric forest canopy background"
+
+[[generated]]
+id = "PV_T49jv1YC8C8yLkY685"
+uri = "file://attached_assets/generated_images/skater_kid_adventure_avatar.png"
+type = "image"
+title = "skater kid adventure avatar"
+
+[[generated]]
+id = "bOV66GD57tfKRGPJP9hDt"
+uri = "file://attached_assets/generated_images/skater_kid_skatepark_scene.png"
+type = "image"
+title = "skatepark urban background"

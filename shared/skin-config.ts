@@ -136,6 +136,8 @@ export const MIXED_SKIN_ORDER: string[] = [
   "wizard-kid",           // Adventure
   "rock-star",            // Adventure
   "detective-kid",        // Adventure
+  "nemicolopterus",       // Pterosaur
+  "skater-kid",           // Adventure
 ];
 
 /**

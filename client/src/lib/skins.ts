@@ -131,6 +131,7 @@ import dimorphodonImg from "@assets/generated_images/dimorphodon_white_bg.png";
 import tapejaraImg from "@assets/generated_images/tapejara_white_bg.png";
 import anhangueraImg from "@assets/generated_images/anhanguera_white_bg.png";
 import dsungaripterusImg from "@assets/generated_images/dsungaripterus_white_bg.png";
+import nemicolopterusImg from "@assets/generated_images/nemicolopterus_white_bg.png";
 
 // Tier 14 - HeroKids Legacy (Logo-style superhero collection - 4 boys, 4 girls)
 import shieldBlazeImg from "@assets/generated_images/shield_blaze_boy_hero_avatar.png";
@@ -151,12 +152,14 @@ import pirateCaptainImg from "@assets/generated_images/pirate_captain_kid_avatar
 import wizardKidImg from "@assets/generated_images/wizard_kid_avatar.png";
 import rockStarImg from "@assets/generated_images/rock_star_kid_avatar.png";
 import detectiveKidImg from "@assets/generated_images/detective_kid_avatar.png";
+import skaterKidImg from "@assets/generated_images/skater_kid_adventure_avatar.png";
 
 // Bonus Adventure Pack backgrounds
 import rockConcertStageBg from "@assets/generated_images/rock_concert_stage_background.png";
 import pirateShipDeckBg from "@assets/generated_images/pirate_ship_deck_background.png";
 import wizardTowerBg from "@assets/generated_images/wizard_tower_magical_background.png";
 import detectiveOfficeBg from "@assets/generated_images/detective_mystery_office_background.png";
+import skaterKidBg from "@assets/generated_images/skater_kid_skatepark_scene.png";
 
 // New Legacy skin backgrounds (cel-shaded vector style like Comet Dash)
 import legacyStormRunnerBg from "@assets/generated_images/storm_runner_cel-shaded_coastal_highway.png";
@@ -295,6 +298,7 @@ import dimorphodonBg from "@assets/generated_images/dimorphodon_jungle_cliff.png
 import tapejaraBg from "@assets/generated_images/tapejara_tropical_coast.png";
 import anhangueraBg from "@assets/generated_images/anhanguera_ocean_hunting.png";
 import dsungaripterusBg from "@assets/generated_images/dsungaripterus_rocky_shore.png";
+import nemicolopterusBg from "@assets/generated_images/nemicolopterus_forest_canopy_scene.png";
 
 // Tier 14 backgrounds - HeroKids Legacy
 import shieldBlazeBg from "@assets/generated_images/shield_blaze_city_protection_background.png";
@@ -437,6 +441,7 @@ export const SKIN_IMAGES: Record<string, string> = {
   "tapejara": tapejaraImg,
   "anhanguera": anhangueraImg,
   "dsungaripterus": dsungaripterusImg,
+  "nemicolopterus": nemicolopterusImg,
   
   // Tier 14 - HeroKids Legacy (Logo-style)
   "shield-blaze": shieldBlazeImg,
@@ -457,6 +462,7 @@ export const SKIN_IMAGES: Record<string, string> = {
   "wizard-kid": wizardKidImg,
   "rock-star": rockStarImg,
   "detective-kid": detectiveKidImg,
+  "skater-kid": skaterKidImg,
 };
 
 // Themed background mappings for new HeroKids themed skins
@@ -590,6 +596,7 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "tapejara": tapejaraBg,
   "anhanguera": anhangueraBg,
   "dsungaripterus": dsungaripterusBg,
+  "nemicolopterus": nemicolopterusBg,
   
   // Tier 14 - HeroKids Legacy (Logo-style backgrounds)
   "shield-blaze": shieldBlazeBg,
@@ -610,6 +617,7 @@ export const SKIN_BACKGROUNDS: Record<string, string> = {
   "wizard-kid": wizardTowerBg,
   "rock-star": rockConcertStageBg,
   "detective-kid": detectiveOfficeBg,
+  "skater-kid": skaterKidBg,
 };
 
 // Helper to add cache-busting parameter to /objects/ URLs

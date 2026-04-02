@@ -456,6 +456,32 @@ async function addBonusAdventurePackIfNeeded() {
   }
 }
 
+// Add Nemicolopterus (Pterosaur) and Skater Kid (Adventure) to complete the last row
+async function addNemicolopterusAndSkaterKidIfNeeded() {
+  try {
+    const existing = await db.select().from(skins).where(
+      sql`${skins.id} = 'nemicolopterus'`
+    );
+
+    if (existing.length > 0) {
+      log("✅ Nemicolopterus & Skater Kid skins already exist");
+      return;
+    }
+
+    log("🌱 Adding Nemicolopterus & Skater Kid skins (2 new skins)...");
+
+    const NEW_SKINS = [
+      { id: "nemicolopterus", name: "Nemicolopterus", description: "Tiny tree-dwelling pterosaur, the smallest known pterosaur!", imageUrl: "🦅", pointsRequired: 7300, bonusPoints: 0 },
+      { id: "skater-kid", name: "Skater Kid", description: "Cool skateboarder pulling off awesome tricks at the park!", imageUrl: "🛹", pointsRequired: 7360, bonusPoints: 0 },
+    ];
+
+    await db.insert(skins).values(NEW_SKINS);
+    log("✅ Successfully added Nemicolopterus & Skater Kid skins!");
+  } catch (error) {
+    console.error("❌ Error adding new skins:", error);
+  }
+}
+
 // Force reseed all skins if new skin collections don't exist
 // This is a one-time migration that will run on next app start (both dev and production)
 async function forceReseedSkinsIfNeeded() {
@@ -753,6 +779,9 @@ async function migrateExistingMembersForTestPhase() {
   
   // Add Bonus Adventure Pack + new Legacy skins
   await addBonusAdventurePackIfNeeded();
+
+  // Add Nemicolopterus & Skater Kid to complete the last row
+  await addNemicolopterusAndSkaterKidIfNeeded();
 
   // One-time migration for existing testers (starter skin + star redistribution)
   await migrateExistingMembersForTestPhase();
