@@ -16,7 +16,7 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, childDeviceSessions } from "@shared/schema";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, childDeviceSessions, users } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD } from "@shared/skin-config";
@@ -5814,6 +5814,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error removing member:", error);
       res.status(500).json({ message: "Failed to remove member" });
+    }
+  });
+
+  // Temporary: delete a user by Replit user ID
+  app.delete("/api/admin/users/:replitUserId", isAdmin, async (req, res) => {
+    try {
+      const { replitUserId } = req.params;
+      await db.delete(users).where(eq(users.id, replitUserId));
+      res.json({ success: true, deleted: replitUserId });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
     }
   });
 
