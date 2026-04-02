@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2, Lock, Check, Trophy, ArrowLeft, User, Star, Sparkles, Crown, Camera, ImageOff, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { SuccessCelebration } from "@/components/success-celebration";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { SKIN_IMAGES, SKIN_BACKGROUNDS } from "@/lib/skins";
 import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR, LEGACY_SKIN_ORDER } from "@shared/skin-config";
 import type { FamilyMember, Family } from "@shared/schema";
@@ -92,6 +93,7 @@ interface Skin {
 export default function SkinsGallery() {
   const { toast } = useToast();
   const { t } = useTranslation();
+  const [, navigate] = useLocation();
   const [celebration, setCelebration] = useState<{ points: number; message: string } | null>(null);
   const [selectedSkinId, setSelectedSkinId] = useState<string | null>(null);
   const [discoverDialogSkinId, setDiscoverDialogSkinId] = useState<string | null>(null);
@@ -130,6 +132,8 @@ export default function SkinsGallery() {
     totalEarned: number;
     availableCards: number;
     unlockedTier: number;
+    maxSkins: number;
+    tierLimitReached: boolean;
     starStats: { starsFound: number; totalStars: number; earnedLegacySkinIds: string[] };
     starPlacements: Record<string, boolean>; // skinId -> found
   }>({
@@ -178,6 +182,20 @@ export default function SkinsGallery() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
     },
     onError: (error: any) => {
+      if (error instanceof ApiError && error.data?.code === "SKIN_LIMIT_REACHED") {
+        const { maxSkins, currentSkins } = error.data;
+        toast({
+          title: t('skins.skinLimitReached'),
+          description: t('skins.skinLimitDesc', { count: currentSkins, max: maxSkins }),
+          variant: "destructive",
+          action: (
+            <ToastAction altText={t('skins.skinLimitUpgrade')} onClick={() => navigate("/pricing")}>
+              {t('skins.skinLimitUpgrade')}
+            </ToastAction>
+          ),
+        });
+        return;
+      }
       const description = error instanceof ApiError && error.data?.message
         ? error.data.message
         : t('skins.failedToDiscover');
@@ -266,6 +284,8 @@ export default function SkinsGallery() {
   const skins = data?.skins || [];
   const totalEarned = Number(data?.totalEarned) || 0;
   const availableCards = data?.availableCards || 0;
+  const maxSkins = data?.maxSkins ?? 999;
+  const tierLimitReached = data?.tierLimitReached ?? false;
   const isDefaultActive = memberData?.activeSkinId === null || memberData?.activeSkinId === undefined;
   
   // Get skins in the new mixed order
@@ -495,6 +515,23 @@ export default function SkinsGallery() {
               )}
             </div>
           </div>
+
+          {/* Tier limit banner — shown when Free plan skin cap is reached */}
+          {tierLimitReached && maxSkins < 999 && (
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-4 py-3 mb-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <p className="text-sm text-amber-800 dark:text-amber-300 font-medium">
+                  {t('skins.skinLimitDesc', { count: maxSkins, max: maxSkins })}
+                </p>
+              </div>
+              <Link href="/pricing">
+                <Button size="sm" variant="outline" className="shrink-0 border-amber-400 text-amber-800 dark:text-amber-300 dark:border-amber-600">
+                  {t('skins.skinLimitUpgrade')}
+                </Button>
+              </Link>
+            </div>
+          )}
 
           {/* Main Layout: Preview Left + Grid Right */}
           <div ref={containerRef} className="flex gap-4 flex-col lg:flex-row relative">

@@ -3622,9 +3622,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      // Get family to retrieve skinCardCost
+      // Get family to retrieve skinCardCost and subscription tier
       const family = await storage.getFamily(member.familyName);
       const skinCardCost = family?.skinCardCost ?? 60;
+      const maxSkins = getMaxSkins(family?.subscriptionTier ?? "free");
       
       const allSkins = await storage.getSkins();
       const discoveredSkinIds = member.discoveredSkinIds || [];
@@ -3632,6 +3633,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Calculate available discovery cards using new linear system with family's skinCardCost
       const availableCards = calculateAvailableCards(member.totalEarned, discoveredSkinIds.length, skinCardCost);
+      
+      // Whether the tier's skin limit has been reached
+      const tierLimitReached = discoveredSkinIds.length >= maxSkins;
       
       // Enrich skins with discovery status for this member
       const skinsWithStatus = allSkins.map(skin => {
@@ -3642,9 +3646,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           : discoveredSkinIds.includes(skin.id);
         const isActive = member.activeSkinId === skin.id;
         
-        // Check if skin can be unlocked based on position and points (using family's skinCardCost)
+        // Check if skin can be unlocked based on position, points, AND tier limit
         // Legacy skins cannot be discovered manually - they are unlocked via stars only
-        const canDiscover = !isDiscovered && !isLegacySkin(skin.id) && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length, skinCardCost);
+        const canDiscover = !isDiscovered && !isLegacySkin(skin.id) && !tierLimitReached && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length, skinCardCost);
         
         // Get position for ordering (legacy skins have tier 14)
         const tier = isLegacySkin(skin.id) ? 14 : 1;
@@ -3659,7 +3663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       });
       
-      console.log(`🎨 Skins API: totalEarned=${member.totalEarned}, discovered=${discoveredSkinIds.length}, available=${availableCards}`);
+      console.log(`🎨 Skins API: totalEarned=${member.totalEarned}, discovered=${discoveredSkinIds.length}, available=${availableCards}, maxSkins=${maxSkins}, tierLimitReached=${tierLimitReached}`);
       
       // Initialize star placements for all members and get star data
       let starStats = { starsFound: 0, totalStars: 0, earnedLegacySkinIds: [] as string[] };
@@ -3677,6 +3681,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalEarned: member.totalEarned,
         availableCards,
         unlockedTier: 999, // Legacy compatibility - all skins are now position-based
+        maxSkins,
+        tierLimitReached,
         starStats,
         starPlacements, // { skinId: wasFound } - for mini-star indicators
       });
@@ -3727,6 +3733,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if already discovered
       if (discoveredSkinIds.includes(skinId)) {
         return res.status(400).json({ message: "Skin already discovered" });
+      }
+      
+      // Check tier skin limit — Free tier allows only maxSkins unlocks
+      const maxSkins = getMaxSkins(family?.subscriptionTier ?? "free");
+      if (discoveredSkinIds.length >= maxSkins) {
+        return res.status(403).json({ 
+          message: "Skin limit reached for your subscription tier",
+          code: "SKIN_LIMIT_REACHED",
+          maxSkins,
+          currentSkins: discoveredSkinIds.length,
+        });
       }
       
       // Check if skin can be unlocked using new position-based system with family's skinCardCost
