@@ -944,6 +944,7 @@
     "beingShared": "Being shared",
     "sharedPointsPerPerson": "Shared ({{count}} pts each)",
     "offerToShare": "Offer to Share",
+    "sharingRequiresFamilyTier": "Reward sharing is available from the Family plan",
     "sharedWith": "Shared with"
   },
   "analytics": {

@@ -896,6 +896,7 @@
     "beingShared": "En cours de partage",
     "sharedPointsPerPerson": "Partagé ({{count}} pts chacun)",
     "offerToShare": "Proposer de partager",
+    "sharingRequiresFamilyTier": "Le partage de récompenses est disponible à partir du plan Family",
     "sharedWith": "Partagé avec"
   },
   "analytics": {

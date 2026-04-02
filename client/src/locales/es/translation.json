@@ -896,6 +896,7 @@
     "beingShared": "Compartiéndose",
     "sharedPointsPerPerson": "Compartido ({{count}} pts c/u)",
     "offerToShare": "Ofrecer para compartir",
+    "sharingRequiresFamilyTier": "Compartir recompensas está disponible desde el plan Family",
     "sharedWith": "Compartido con"
   },
   "analytics": {

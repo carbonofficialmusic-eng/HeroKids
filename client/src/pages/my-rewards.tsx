@@ -82,6 +82,12 @@ export default function MyRewards() {
     enabled: !!member,
   });
 
+  const { data: familyData } = useQuery<{ subscriptionTier: string }>({
+    queryKey: ["/api/families/current"],
+    enabled: !!member,
+  });
+  const canUseSharedRewards = familyData?.subscriptionTier === "family" || familyData?.subscriptionTier === "enterprise";
+
   // Mutations for reward sharing
   const startSharingMutation = useMutation({
     mutationFn: async (redemptionId: string) => {
@@ -247,7 +253,7 @@ export default function MyRewards() {
               const participants = shared?.participants || [];
               const isSharing = typed.sharingStatus === "sharing_active";
               const isFinalized = typed.sharingStatus === "sharing_finalized";
-              const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared";
+              const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && canUseSharedRewards;
               const canFinalize = isSharing && participants.length > 0;
               const canCancelSharing = isSharing && participants.length === 0;
 

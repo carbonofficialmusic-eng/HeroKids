@@ -896,6 +896,7 @@
     "beingShared": "シェア中",
     "sharedPointsPerPerson": "シェア済み (各{{count}}ポイント)",
     "offerToShare": "シェアする",
+    "sharingRequiresFamilyTier": "報酬の共有はファミリープラン以上で利用できます",
     "sharedWith": "シェア相手"
   },
   "analytics": {

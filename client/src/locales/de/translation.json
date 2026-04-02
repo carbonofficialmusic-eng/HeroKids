@@ -967,6 +967,7 @@
     "beingShared": "Wird geteilt",
     "sharedPointsPerPerson": "Geteilt ({{count}} Punkte pro Person)",
     "offerToShare": "Zum Teilen anbieten",
+    "sharingRequiresFamilyTier": "Belohnungen teilen ist ab dem Family-Abo verfügbar",
     "sharedWith": "Geteilt mit"
   },
   "analytics": {

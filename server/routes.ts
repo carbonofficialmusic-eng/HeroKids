@@ -3295,6 +3295,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
       }
+
+      // Check tier — shared rewards require Family subscription
+      const family = await storage.getFamily(member.familyName);
+      if (!hasFeature(family?.subscriptionTier ?? "free", "sharedRewards")) {
+        return res.status(403).json({
+          message: "Shared rewards require a Family subscription",
+          code: "FEATURE_NOT_AVAILABLE",
+        });
+      }
       
       // Get the redemption
       const redemption = await storage.getRewardRedemption(redemptionId);
@@ -3318,8 +3327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create notification for each parent about reward sharing offer
       const reward = await storage.getRewardById(redemption.rewardId);
       
-      // Get family language for translated notifications
-      const family = await storage.getFamily(member.familyName);
+      // Family already fetched above for tier check
       const lang = family?.language || "en";
       
       const sharingNotification = {
@@ -3381,6 +3389,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Check tier — shared rewards require Family subscription
+      const joinFamily = await storage.getFamily(member.familyName);
+      if (!hasFeature(joinFamily?.subscriptionTier ?? "free", "sharedRewards")) {
+        return res.status(403).json({
+          message: "Shared rewards require a Family subscription",
+          code: "FEATURE_NOT_AVAILABLE",
+        });
       }
       
       // Get the redemption

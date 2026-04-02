@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus } from "lucide-react";
+import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus, Lock } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Link } from "wouter";
@@ -128,6 +129,13 @@ export default function RewardsBoard() {
     queryKey: ["/api/family-members"],
     enabled: !!member,
   });
+
+  // Fetch family data for tier check
+  const { data: familyData } = useQuery<{ subscriptionTier: string }>({
+    queryKey: ["/api/families/current"],
+    enabled: !!member,
+  });
+  const canUseSharedRewards = familyData?.subscriptionTier === "family" || familyData?.subscriptionTier === "enterprise";
 
   // Fetch reward requests (parent only)
   const { data: rewardRequests = [] } = useQuery<RewardRequest[]>({
@@ -808,17 +816,42 @@ export default function RewardsBoard() {
                  redemption.sharingStatus === "not_shared" && 
                  redemption.status !== "completed" && (
                   <div className="flex gap-2 pt-2 border-t">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-2"
-                      onClick={() => startSharingMutation.mutate(redemption.id)}
-                      disabled={startSharingMutation.isPending}
-                      data-testid={`button-share-${redemption.id}`}
-                    >
-                      <Share2 className="h-4 w-4" />
-                      {t("rewardsBoard.offerToShare")}
-                    </Button>
+                    {canUseSharedRewards ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-2"
+                        onClick={() => startSharingMutation.mutate(redemption.id)}
+                        disabled={startSharingMutation.isPending}
+                        data-testid={`button-share-${redemption.id}`}
+                      >
+                        <Share2 className="h-4 w-4" />
+                        {t("rewardsBoard.offerToShare")}
+                      </Button>
+                    ) : (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-2 opacity-50 cursor-not-allowed"
+                              disabled
+                              data-testid={`button-share-locked-${redemption.id}`}
+                            >
+                              <Lock className="h-4 w-4" />
+                              {t("rewardsBoard.offerToShare")}
+                            </Button>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="flex flex-col gap-1">
+                          <span>{t("rewardsBoard.sharingRequiresFamilyTier", "Reward sharing requires the Family subscription")}</span>
+                          <Link href="/pricing" className="text-xs underline text-primary">
+                            {t("common.upgrade", "Upgrade")}
+                          </Link>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                   </div>
                 )}
 

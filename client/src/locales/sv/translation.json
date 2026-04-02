@@ -930,6 +930,7 @@
     "beingShared": "Delas",
     "sharedPointsPerPerson": "Delad ({{count}} poäng var)",
     "offerToShare": "Erbjud att dela",
+    "sharingRequiresFamilyTier": "Delning av belöningar kräver Family-prenumerationen",
     "sharedWith": "Delad med"
   },
   "analytics": {

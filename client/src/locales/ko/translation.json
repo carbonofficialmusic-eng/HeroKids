@@ -926,6 +926,7 @@
     "beingShared": "공유 중",
     "sharedPointsPerPerson": "공유됨 (각 {{count}} 포인트)",
     "offerToShare": "공유 제안하기",
+    "sharingRequiresFamilyTier": "보상 공유는 Family 플랜부터 이용 가능합니다",
     "sharedWith": "공유 대상"
   },
   "analytics": {
