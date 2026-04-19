@@ -65,7 +65,7 @@ import {
   type NotificationType,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gt, sql, inArray, isNull } from "drizzle-orm";
+import { eq, and, desc, gt, lt, sql, inArray, isNull, isNotNull } from "drizzle-orm";
 import { startOfDay } from 'date-fns';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import bcrypt from 'bcrypt';
@@ -235,6 +235,8 @@ export interface IStorage {
   getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]>;
   getTaskCompletionsByFamily(familyName: string): Promise<TaskCompletion[]>;
   getTaskCompletionsByTask(taskId: string): Promise<TaskCompletion[]>;
+  getCompletionsWithOldProofPhotos(daysOld: number): Promise<TaskCompletion[]>;
+  clearCompletionProofPhoto(completionId: string): Promise<void>;
   getPendingCompletionsByFamily(familyName: string): Promise<any[]>;
   approveTaskCompletion(completionId: string, approvedBy: string): Promise<void>;
   rejectTaskCompletion(completionId: string, approvedBy: string, rejectionReason: string): Promise<void>;
@@ -1312,6 +1314,27 @@ export class DatabaseStorage implements IStorage {
       .from(taskCompletions)
       .where(eq(taskCompletions.taskId, taskId))
       .orderBy(desc(taskCompletions.completedAt));
+  }
+
+  async getCompletionsWithOldProofPhotos(daysOld: number): Promise<TaskCompletion[]> {
+    const cutoff = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
+    return await db
+      .select()
+      .from(taskCompletions)
+      .where(
+        and(
+          isNotNull(taskCompletions.proofPhotoUrl),
+          inArray(taskCompletions.status, ["approved", "rejected"]),
+          lt(taskCompletions.completedAt, cutoff)
+        )
+      );
+  }
+
+  async clearCompletionProofPhoto(completionId: string): Promise<void> {
+    await db
+      .update(taskCompletions)
+      .set({ proofPhotoUrl: null })
+      .where(eq(taskCompletions.id, completionId));
   }
 
   async getTaskCompletion(completionId: string): Promise<TaskCompletion | undefined> {

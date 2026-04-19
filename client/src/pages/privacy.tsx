@@ -53,7 +53,7 @@ export default function Privacy() {
 
               <h3 className="text-lg font-medium mt-4 mb-2">Photos</h3>
               <ul className="list-disc pl-6 space-y-1">
-                <li>Task proof photos (when uploaded by users)</li>
+                <li>Task proof photos (when uploaded by users) — automatically deleted after 30 days</li>
                 <li>Profile avatars (when uploaded)</li>
               </ul>
             </section>

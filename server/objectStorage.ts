@@ -207,6 +207,31 @@ export class ObjectStorageService {
     return `/objects/${entityId}`;
   }
 
+  // Deletes an object entity from storage given its normalized /objects/... path.
+  async deleteObjectEntity(objectPath: string): Promise<boolean> {
+    try {
+      if (!objectPath.startsWith("/objects/")) {
+        return false;
+      }
+      const entityId = objectPath.slice("/objects/".length);
+      let entityDir = this.getPrivateObjectDir();
+      if (!entityDir.endsWith("/")) {
+        entityDir = `${entityDir}/`;
+      }
+      const fullPath = `${entityDir}${entityId}`;
+      const { bucketName, objectName } = parseObjectPath(fullPath);
+      const bucket = objectStorageClient.bucket(bucketName);
+      const file = bucket.file(objectName);
+      const [exists] = await file.exists();
+      if (!exists) return false;
+      await file.delete();
+      return true;
+    } catch (error) {
+      console.error(`Error deleting object ${objectPath}:`, error);
+      return false;
+    }
+  }
+
   // Tries to set the ACL policy for the object entity and return the normalized path.
   async trySetObjectEntityAclPolicy(
     rawPath: string,
@@ -239,6 +264,8 @@ export class ObjectStorageService {
     });
   }
 }
+
+export const objectStorageService = new ObjectStorageService();
 
 function parseObjectPath(path: string): {
   bucketName: string;

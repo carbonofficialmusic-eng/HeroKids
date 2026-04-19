@@ -2,6 +2,9 @@ import { storage } from "./storage";
 import { achievementEngine } from "./achievementEngine";
 import type { Family } from "@shared/schema";
 import { formatInTimeZone } from "date-fns-tz";
+import { objectStorageService } from "./objectStorage";
+
+const PROOF_PHOTO_RETENTION_DAYS = 30;
 
 export function startPointsResetScheduler() {
   const startTime = new Date();
@@ -13,6 +16,16 @@ export function startPointsResetScheduler() {
   setInterval(async () => {
     await checkAndResetPoints();
   }, 5 * 60 * 1000); // Check every 5 minutes
+
+  // Run proof photo cleanup once per day (every 24 hours)
+  setInterval(async () => {
+    await cleanupOldProofPhotos();
+  }, 24 * 60 * 60 * 1000);
+
+  // Also run once shortly after startup (after 2 minutes delay)
+  setTimeout(async () => {
+    await cleanupOldProofPhotos();
+  }, 2 * 60 * 1000);
 }
 
 async function checkAndResetPoints() {
@@ -247,5 +260,40 @@ async function resetMonthlyPointsForFamily(familyName: string) {
     console.log(`✅ Monthly points reset for family "${familyName}"`);
   } catch (error) {
     console.error(`Error resetting monthly points for family "${familyName}":`, error);
+  }
+}
+
+async function cleanupOldProofPhotos() {
+  try {
+    const oldCompletions = await storage.getCompletionsWithOldProofPhotos(PROOF_PHOTO_RETENTION_DAYS);
+    if (oldCompletions.length === 0) {
+      console.log(`🗑️  Proof photo cleanup: no photos older than ${PROOF_PHOTO_RETENTION_DAYS} days found`);
+      return;
+    }
+
+    let deleted = 0;
+    let failed = 0;
+
+    for (const completion of oldCompletions) {
+      if (!completion.proofPhotoUrl) continue;
+      try {
+        const success = await objectStorageService.deleteObjectEntity(completion.proofPhotoUrl);
+        if (success) {
+          await storage.clearCompletionProofPhoto(completion.id);
+          deleted++;
+        } else {
+          // File already gone from storage — still clear the DB reference
+          await storage.clearCompletionProofPhoto(completion.id);
+          deleted++;
+        }
+      } catch (err) {
+        console.error(`Failed to delete proof photo for completion ${completion.id}:`, err);
+        failed++;
+      }
+    }
+
+    console.log(`🗑️  Proof photo cleanup complete: ${deleted} photo(s) deleted, ${failed} failed (retention: ${PROOF_PHOTO_RETENTION_DAYS} days)`);
+  } catch (error) {
+    console.error("Error during proof photo cleanup:", error);
   }
 }
