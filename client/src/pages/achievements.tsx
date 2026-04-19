@@ -315,8 +315,19 @@ export default function Achievements() {
                 "task_streak": 4,
               };
               const typeDiff = (order[a.type] ?? 99) - (order[b.type] ?? 99);
-              // Use slug as tie-breaker for stable ordering
               if (typeDiff !== 0) return typeDiff;
+              // For lifetime_milestone: sort by threshold ascending (500, 1000, 2000)
+              if (a.type === "lifetime_milestone" && b.type === "lifetime_milestone") {
+                const aThreshold = (a.config as any)?.threshold ?? 0;
+                const bThreshold = (b.config as any)?.threshold ?? 0;
+                return aThreshold - bThreshold;
+              }
+              // For task_streak: sort by days ascending (7, 14, 30)
+              if (a.type === "task_streak" && b.type === "task_streak") {
+                const aDays = (a.config as any)?.days ?? 0;
+                const bDays = (b.config as any)?.days ?? 0;
+                return aDays - bDays;
+              }
               return a.slug.localeCompare(b.slug);
             }).map((achievement) => (
               <Card 
