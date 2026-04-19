@@ -722,6 +722,105 @@ export default function Settings() {
             </CardContent>
           </Card>
 
+          {/* Single Device Mode */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Key className="h-5 w-5 text-primary" />
+                <CardTitle>{t('settings.singleDeviceTitle')}</CardTitle>
+              </div>
+              <CardDescription>
+                {t('settings.singleDeviceDesc')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="single-device-mode" className="text-base">
+                    {t('settings.singleDeviceMode')}
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {familyData?.singleDeviceMode 
+                      ? t('settings.singleDeviceModeEnabled')
+                      : t('settings.singleDeviceModeDisabled')}
+                  </p>
+                </div>
+                <Switch
+                  id="single-device-mode"
+                  checked={familyData?.singleDeviceMode ?? false}
+                  onCheckedChange={handleToggleSingleDeviceMode}
+                  disabled={updateSettingsMutation.isPending}
+                  data-testid="switch-single-device-mode"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* PIN Code Management - only shown when single device mode is enabled */}
+          {familyData?.singleDeviceMode && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Key className="h-5 w-5 text-primary" />
+                  <CardTitle>{t('settings.parentPinCodesTitle')}</CardTitle>
+                </div>
+                <CardDescription>
+                  {t('settings.parentPinCodesDesc')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {membersLoading ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    {t('settings.loadingMembers')}
+                  </div>
+                ) : familyMembers && familyMembers.length > 0 ? (
+                  <div className="space-y-3">
+                    {familyMembers
+                      .filter((m) => m.role === "parent")
+                      .map((parent) => (
+                        <div
+                          key={parent.id}
+                          className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                          data-testid={`pin-management-${parent.id}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={getAvatarUrl(parent.activeSkinId, parent.avatarUrl, parent.useCustomAvatar)} alt={parent.displayName} />
+                              <AvatarFallback style={{ backgroundColor: parent.color }}>
+                                {parent.displayName.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">{parent.displayName}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {parent.pinCode ? t('settings.pinSet') : t('settings.noPin')}
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setMemberForPinSetting(parent);
+                              setPinDialogOpen(true);
+                            }}
+                            data-testid={`button-set-pin-${parent.id}`}
+                          >
+                            <Key className="h-4 w-4 mr-2" />
+                            {parent.pinCode ? t('settings.changePin') : t('settings.setPin')}
+                          </Button>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground">
+                    {t('settings.noMembersYet')}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Motivation Settings - Skin Card Cost */}
           <Card>
             <CardHeader>
@@ -907,105 +1006,6 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Single Device Mode */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Key className="h-5 w-5 text-primary" />
-                <CardTitle>{t('settings.singleDeviceTitle')}</CardTitle>
-              </div>
-              <CardDescription>
-                {t('settings.singleDeviceDesc')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="single-device-mode" className="text-base">
-                    {t('settings.singleDeviceMode')}
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    {familyData?.singleDeviceMode 
-                      ? t('settings.singleDeviceModeEnabled')
-                      : t('settings.singleDeviceModeDisabled')}
-                  </p>
-                </div>
-                <Switch
-                  id="single-device-mode"
-                  checked={familyData?.singleDeviceMode ?? false}
-                  onCheckedChange={handleToggleSingleDeviceMode}
-                  disabled={updateSettingsMutation.isPending}
-                  data-testid="switch-single-device-mode"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* PIN Code Management - only shown when single device mode is enabled */}
-          {familyData?.singleDeviceMode && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Key className="h-5 w-5 text-primary" />
-                  <CardTitle>{t('settings.parentPinCodesTitle')}</CardTitle>
-                </div>
-                <CardDescription>
-                  {t('settings.parentPinCodesDesc')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {membersLoading ? (
-                  <div className="text-center py-4 text-muted-foreground">
-                    {t('settings.loadingMembers')}
-                  </div>
-                ) : familyMembers && familyMembers.length > 0 ? (
-                  <div className="space-y-3">
-                    {familyMembers
-                      .filter((m) => m.role === "parent")
-                      .map((parent) => (
-                        <div
-                          key={parent.id}
-                          className="flex items-center justify-between p-3 rounded-lg border bg-card"
-                          data-testid={`pin-management-${parent.id}`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={getAvatarUrl(parent.activeSkinId, parent.avatarUrl, parent.useCustomAvatar)} alt={parent.displayName} />
-                              <AvatarFallback style={{ backgroundColor: parent.color }}>
-                                {parent.displayName.slice(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium">{parent.displayName}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {parent.pinCode ? t('settings.pinSet') : t('settings.noPin')}
-                              </div>
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setMemberForPinSetting(parent);
-                              setPinDialogOpen(true);
-                            }}
-                            data-testid={`button-set-pin-${parent.id}`}
-                          >
-                            <Key className="h-4 w-4 mr-2" />
-                            {parent.pinCode ? t('settings.changePin') : t('settings.setPin')}
-                          </Button>
-                        </div>
-                      ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4 text-muted-foreground">
-                    {t('settings.noMembersYet')}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
 
           {/* Analytics */}
           <Card>
