@@ -163,7 +163,7 @@
     "pointsValue": "Points : {{value}}",
     "pointsQuestion": "Combien de points vaut cette tâche ?",
     "dueDateOptional": "Date limite (facultatif)",
-    "dueDateDesc": "Quand cette tâche doit-elle être terminée ?",
+    "dueDateDesc": "Fixer une échéance",
     "noDueDate": "Aucune date sélectionnée",
     "clearDueDate": "Effacer la date",
     "dueDateNotYet": "Disponible le {{date}}",

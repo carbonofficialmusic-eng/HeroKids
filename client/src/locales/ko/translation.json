@@ -167,7 +167,7 @@
     "pointsValue": "포인트: {{value}}",
     "pointsQuestion": "이 과제는 몇 포인트의 가치가 있나요?",
     "dueDateOptional": "마감일 (선택사항)",
-    "dueDateDesc": "이 작업은 언제까지 완료해야 하나요?",
+    "dueDateDesc": "마감일 설정",
     "noDueDate": "날짜가 선택되지 않음",
     "clearDueDate": "날짜 지우기",
     "dueDateNotYet": "{{date}}에 이용 가능",

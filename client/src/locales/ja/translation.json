@@ -163,7 +163,7 @@
     "pointsValue": "ポイント: {{value}}",
     "pointsQuestion": "このタスクは何ポイントですか？",
     "dueDateOptional": "期限（任意）",
-    "dueDateDesc": "いつまでに完了すべきですか？",
+    "dueDateDesc": "期限を設定する",
     "noDueDate": "日付未選択",
     "clearDueDate": "日付をクリア",
     "dueDateNotYet": "{{date}}から利用可能",

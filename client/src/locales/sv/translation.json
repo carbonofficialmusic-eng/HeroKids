@@ -168,7 +168,7 @@
     "pointsValue": "Poäng: {{value}}",
     "pointsQuestion": "Hur många poäng är denna uppgift värd?",
     "dueDateOptional": "Förfallodatum (Valfritt)",
-    "dueDateDesc": "När ska uppgiften vara klar?",
+    "dueDateDesc": "Ange en deadline",
     "noDueDate": "Inget datum valt",
     "clearDueDate": "Rensa datum",
     "dueDateNotYet": "Tillgänglig den {{date}}",

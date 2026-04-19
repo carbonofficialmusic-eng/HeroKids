@@ -169,7 +169,7 @@
     "pointsValue": "Points: {{value}}",
     "pointsQuestion": "How many points is this task worth?",
     "dueDateOptional": "Due Date (Optional)",
-    "dueDateDesc": "When should this task be completed by?",
+    "dueDateDesc": "Set a deadline",
     "noDueDate": "No date selected",
     "clearDueDate": "Clear date",
     "dueDateNotYet": "Available on {{date}}",

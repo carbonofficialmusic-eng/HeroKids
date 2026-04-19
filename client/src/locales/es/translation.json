@@ -163,7 +163,7 @@
     "pointsValue": "Puntos: {{value}}",
     "pointsQuestion": "¿Cuántos puntos vale esta tarea?",
     "dueDateOptional": "Fecha Límite (Opcional)",
-    "dueDateDesc": "¿Cuándo debe completarse esta tarea?",
+    "dueDateDesc": "Establecer un plazo",
     "noDueDate": "Sin fecha seleccionada",
     "clearDueDate": "Borrar fecha",
     "dueDateNotYet": "Disponible el {{date}}",

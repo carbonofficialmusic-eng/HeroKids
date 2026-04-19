@@ -163,7 +163,7 @@
     "pointsValue": "积分：{{value}}",
     "pointsQuestion": "这个任务值多少积分？",
     "dueDateOptional": "截止日期（可选）",
-    "dueDateDesc": "任务应该在什么时候完成？",
+    "dueDateDesc": "设置截止日期",
     "noDueDate": "未选择日期",
     "clearDueDate": "清除日期",
     "dueDateNotYet": "{{date}}可用",

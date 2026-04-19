@@ -182,7 +182,7 @@
     "pointsValue": "Punkte: {{value}}",
     "pointsQuestion": "Wie viele Punkte ist diese Aufgabe wert?",
     "dueDateOptional": "Fälligkeitsdatum (Optional)",
-    "dueDateDesc": "Wann soll die Aufgabe erledigt werden?",
+    "dueDateDesc": "Termin festlegen",
     "noDueDate": "Kein Datum ausgewählt",
     "clearDueDate": "Datum entfernen",
     "dueDateNotYet": "Verfügbar am {{date}}",
