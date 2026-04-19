@@ -239,6 +239,7 @@
     "assignmentShared": "{{count}}명의 자녀가 이 과제를 나눕니다 (각 {{points}}포인트)",
     "noChildrenToAssign": "아직 가족에 자녀가 없습니다",
     "noMembersToAssign": "아직 가족 구성원이 없습니다",
+    "assignmentLockedDesc": "특정 구성원에게 과제를 할당하려면 Family로 업그레이드하세요.",
     "category": "카테고리",
     "emojiCategory": {
       "household": "가사",
@@ -1296,7 +1297,7 @@
       "최대 6명의 가족 구성원",
       "Free의 모든 기능",
       "과제 사진 증명",
-      "멀티 과제 기능",
+      "특정 구성원에게 과제 할당",
       "가족 목표",
       "공유 보상",
       "가족 채팅",

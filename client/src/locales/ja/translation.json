@@ -235,6 +235,7 @@
     "assignmentShared": "{{count}}人の子どもがこのタスクを分担します（各{{points}}ポイント）",
     "noChildrenToAssign": "まだ家族に子どもがいません",
     "noMembersToAssign": "まだ家族メンバーがいません",
+    "assignmentLockedDesc": "特定のメンバーにタスクを割り当てるにはFamilyにアップグレードしてください。",
     "category": "カテゴリ",
     "emojiCategory": {
       "household": "家事",
@@ -976,7 +977,7 @@
       "最大6名の家族メンバー",
       "Freeプランのすべて",
       "タスクの写真証明",
-      "マルチタスク機能",
+      "特定のメンバーへのタスク割り当て",
       "家族の目標",
       "報酬の共有",
       "ファミリーチャット",

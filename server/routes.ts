@@ -1797,6 +1797,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const parsed = insertTaskSchema.parse(req.body);
       
+      // Gate: task assignment to specific members requires Family tier or higher
+      if (parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) {
+        const family = await storage.getFamily(member.familyName);
+        if (!family || family.subscriptionTier === "free") {
+          return res.status(403).json({
+            message: "Task assignment requires Family subscription or higher",
+            code: "TIER_REQUIRED",
+          });
+        }
+      }
+      
       // Force requiresApproval for immediate recurrence tasks (prevents point farming)
       if (parsed.recurrence === "immediate") {
         parsed.requiresApproval = true;
@@ -1844,6 +1855,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Parse and update the task
       const parsed = insertTaskSchema.partial().parse(req.body);
+      
+      // Gate: task assignment to specific members requires Family tier or higher
+      if (parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) {
+        const family = await storage.getFamily(member.familyName);
+        if (!family || family.subscriptionTier === "free") {
+          return res.status(403).json({
+            message: "Task assignment requires Family subscription or higher",
+            code: "TIER_REQUIRED",
+          });
+        }
+      }
       
       // Force requiresApproval for immediate recurrence tasks (prevents point farming)
       if (parsed.recurrence === "immediate") {

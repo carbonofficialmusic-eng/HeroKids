@@ -227,6 +227,7 @@
     "assignmentShared": "{{count}}个孩子将分担此任务（每人{{points}}积分）",
     "noChildrenToAssign": "家庭中还没有孩子",
     "noMembersToAssign": "还没有家庭成员",
+    "assignmentLockedDesc": "升级到Family以将任务分配给特定成员。",
     "category": "类别",
     "emojiCategory": {
       "household": "家务",
@@ -976,7 +977,7 @@
       "最多6名家庭成员",
       "Free套餐的所有功能",
       "任务照片证明",
-      "多任务功能",
+      "将任务分配给特定成员",
       "家庭目标",
       "共享奖励",
       "家庭聊天",

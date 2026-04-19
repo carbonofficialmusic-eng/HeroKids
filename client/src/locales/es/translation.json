@@ -235,6 +235,7 @@
     "assignmentShared": "{{count}} niños compartirán esta tarea ({{points}} puntos cada uno)",
     "noChildrenToAssign": "Aún no hay niños en la familia",
     "noMembersToAssign": "Aún no hay miembros de la familia",
+    "assignmentLockedDesc": "Actualiza a Family para asignar tareas a miembros específicos.",
     "category": "Categoría",
     "emojiCategory": {
       "household": "Hogar",
@@ -976,7 +977,7 @@
       "Hasta 6 miembros de la familia",
       "Todo de Free",
       "Prueba fotográfica para tareas",
-      "Función multi-tarea",
+      "Asignar tareas a miembros específicos",
       "Objetivos familiares",
       "Recompensas compartidas",
       "Chat familiar",

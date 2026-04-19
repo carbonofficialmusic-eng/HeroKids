@@ -46,7 +46,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Sparkles, RotateCcw, CalendarIcon, X } from "lucide-react";
+import { Sparkles, RotateCcw, CalendarIcon, X, Lock } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Calendar } from "@/components/ui/calendar";
@@ -77,6 +77,7 @@ interface TaskDialogProps {
   createdBy: string;
   editingTask?: Task | null;
   familyMembers?: FamilyMember[];
+  subscriptionTier?: string;
 }
 
 // Emoji categories for task icons (4 categories, 3 emojis each)
@@ -108,7 +109,9 @@ export function TaskDialog({
   createdBy,
   editingTask,
   familyMembers = [],
+  subscriptionTier = "free",
 }: TaskDialogProps) {
+  const canAssignMembers = subscriptionTier !== "free";
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -503,12 +506,25 @@ export function TaskDialog({
                 
                 return (
                   <FormItem className="space-y-3">
-                    <FormLabel>{t('tasks.assignedToLabel')}</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <FormLabel>{t('tasks.assignedToLabel')}</FormLabel>
+                      {!canAssignMembers && (
+                        <Badge variant="secondary" className="text-xs gap-1">
+                          <Lock className="w-3 h-3" />
+                          Family
+                        </Badge>
+                      )}
+                    </div>
                     <FormDescription>
                       {t('tasks.assignedToDescAll')}
                     </FormDescription>
                     
-                    {hasMembers ? (
+                    {!canAssignMembers ? (
+                      <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground flex items-center gap-2">
+                        <Lock className="w-4 h-4 shrink-0" />
+                        <span>{t('tasks.assignmentLockedDesc', 'Upgrade to Family to assign tasks to specific members.')}</span>
+                      </div>
+                    ) : hasMembers ? (
                       <div className="flex flex-wrap gap-2">
                         {allMembers.map((member) => {
                           const isSelected = selectedSharedMembers.includes(member.id);

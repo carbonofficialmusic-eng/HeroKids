@@ -232,6 +232,7 @@
     "assignmentShared": "{{count}} barn delar på denna uppgift ({{points}} poäng var)",
     "noChildrenToAssign": "Inga barn i familjen ännu",
     "noMembersToAssign": "Inga familjemedlemmar ännu",
+    "assignmentLockedDesc": "Uppgradera till Family för att tilldela uppgifter till specifika medlemmar.",
     "category": "Kategori",
     "emojiCategory": {
       "household": "Hushåll",
@@ -1010,7 +1011,7 @@
       "Upp till 6 familjemedlemmar",
       "Allt i Gratis",
       "Fotobevis för uppgifter",
-      "Fleruppgiftsfunktion",
+      "Tilldela uppgifter till specifika medlemmar",
       "Familjemål",
       "Delade belöningar",
       "Familjechatt",

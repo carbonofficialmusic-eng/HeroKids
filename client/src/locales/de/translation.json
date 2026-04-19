@@ -264,6 +264,7 @@
     "assignmentShared": "{{count}} Kinder teilen sich diese Aufgabe (je {{points}} Punkte)",
     "noChildrenToAssign": "Noch keine Kinder in der Familie",
     "noMembersToAssign": "Noch keine Familienmitglieder",
+    "assignmentLockedDesc": "Upgrade auf Family, um Aufgaben bestimmten Mitgliedern zuzuweisen.",
     "category": "Kategorie",
     "emojiCategory": {
       "household": "Haushalt",
@@ -1047,7 +1048,7 @@
       "Bis zu 6 Familienmitglieder",
       "Alles aus Free",
       "Foto-Nachweis für Aufgaben",
-      "Multi-Task Funktion",
+      "Aufgaben bestimmten Personen zuweisen",
       "Familienziele",
       "Belohnungen teilen",
       "Familien-Chat",

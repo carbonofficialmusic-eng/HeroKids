@@ -233,6 +233,7 @@
     "assignmentShared": "{{count}} children will share this task ({{points}} points each)",
     "noChildrenToAssign": "No children in the family yet",
     "noMembersToAssign": "No family members yet",
+    "assignmentLockedDesc": "Upgrade to Family to assign tasks to specific members.",
     "category": "Category",
     "emojiCategory": {
       "household": "Household",
@@ -1024,7 +1025,7 @@
       "Up to 6 family members",
       "Everything in Free",
       "Photo proof for tasks",
-      "Multi-task feature",
+      "Assign tasks to specific members",
       "Family goals",
       "Shared rewards",
       "Family chat",

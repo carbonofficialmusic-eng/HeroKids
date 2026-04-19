@@ -235,6 +235,7 @@
     "assignmentShared": "{{count}} enfants partagent cette tâche ({{points}} points chacun)",
     "noChildrenToAssign": "Pas encore d'enfants dans la famille",
     "noMembersToAssign": "Pas encore de membres de famille",
+    "assignmentLockedDesc": "Passez à Family pour assigner des tâches à des membres spécifiques.",
     "category": "Catégorie",
     "emojiCategory": {
       "household": "Ménage",
@@ -976,7 +977,7 @@
       "Jusqu'à 6 membres de la famille",
       "Tout de la formule Free",
       "Preuve photo pour les tâches",
-      "Fonction multi-tâches",
+      "Assigner des tâches à des membres spécifiques",
       "Objectifs familiaux",
       "Récompenses partagées",
       "Chat familial",
