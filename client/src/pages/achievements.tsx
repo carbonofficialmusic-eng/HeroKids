@@ -306,17 +306,27 @@ export default function Achievements() {
             ) : (
               <div className="space-y-4">
             {[...achievements].sort((a, b) => {
-              // Custom sort order: perfect_week and weekly_leaderboard first
-              const order: Record<string, number> = {
+              const typeOrder: Record<string, number> = {
                 "perfect_week": 0,
                 "weekly_leaderboard": 1,
                 "first_weekly_finisher": 2,
                 "lifetime_milestone": 3,
                 "task_streak": 4,
               };
-              const typeDiff = (order[a.type] ?? 99) - (order[b.type] ?? 99);
-              // Use slug as tie-breaker for stable ordering
+              const typeDiff = (typeOrder[a.type] ?? 99) - (typeOrder[b.type] ?? 99);
               if (typeDiff !== 0) return typeDiff;
+              // For lifetime_milestone: sort by threshold ascending (500, 1000, 2000)
+              if (a.type === "lifetime_milestone" && b.type === "lifetime_milestone") {
+                const aThreshold = (a.config as any)?.threshold ?? 0;
+                const bThreshold = (b.config as any)?.threshold ?? 0;
+                return aThreshold - bThreshold;
+              }
+              // For task_streak: sort by days ascending (7, 14, 30)
+              if (a.type === "task_streak" && b.type === "task_streak") {
+                const aDays = (a.config as any)?.days ?? 0;
+                const bDays = (b.config as any)?.days ?? 0;
+                return aDays - bDays;
+              }
               return a.slug.localeCompare(b.slug);
             }).map((achievement) => (
               <Card 
