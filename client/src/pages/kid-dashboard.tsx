@@ -1567,12 +1567,18 @@ export default function KidDashboard() {
       <header className="border-b sticky top-0 backdrop-blur-md z-40 bg-background/80">
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <Avatar className="h-10 w-10 flex-shrink-0" style={{ borderWidth: "3px", borderStyle: "solid", borderColor: member.color }}>
-              <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} />
-              <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
-                {member.displayName[0]}
-              </AvatarFallback>
-            </Avatar>
+            <button
+              onClick={() => { setMemberToEdit(member); setEditMemberDialogOpen(true); }}
+              className="flex-shrink-0 rounded-full cursor-pointer hover-elevate"
+              data-testid="button-avatar-edit-profile"
+            >
+              <Avatar className="h-10 w-10" style={{ borderWidth: "3px", borderStyle: "solid", borderColor: member.color }}>
+                <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} />
+                <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
+                  {member.displayName[0]}
+                </AvatarFallback>
+              </Avatar>
+            </button>
             <div className="min-w-0 hidden sm:block">
               <div className="text-sm text-muted-foreground truncate">{member.familyName}</div>
               <div className="font-semibold truncate" data-testid="text-user-name">
