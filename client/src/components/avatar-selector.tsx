@@ -2,7 +2,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
 import { Check, Upload, X } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 interface AvatarSelectorProps {
@@ -28,6 +28,11 @@ export function AvatarSelector({
   const [previewUrl, setPreviewUrl] = useState<string | null>(uploadedAvatarUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastProcessedFileRef = useRef<string | null>(null);
+
+  // Sync previewUrl when a history avatar is selected externally
+  useEffect(() => {
+    setPreviewUrl(uploadedAvatarUrl || null);
+  }, [uploadedAvatarUrl]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

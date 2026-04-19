@@ -301,7 +301,7 @@ export function EditMemberDialog({
               </div>
             )}
 
-            {member.activeSkinId && (member as any).avatarHistory && (member as any).avatarHistory.length > 0 && (
+            {(member as any).avatarHistory && (member as any).avatarHistory.length > 0 && (
               <div className="space-y-2" data-testid="recent-avatars-section">
                 <FormLabel>{t('memberDialogs.recentAvatars')}</FormLabel>
                 <div className="flex gap-2">
