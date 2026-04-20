@@ -42,6 +42,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import type { FamilyMember, Task, Reward, RewardRequest } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
+import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import { hasFeature } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { celebrateTaskCompletion } from "@/lib/confetti";
@@ -981,8 +982,8 @@ export default function Dashboard() {
           <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6 min-w-0">
-              {/* Logo and Stats Section */}
-              <div className="text-center">
+              {/* Logo and Profile Section */}
+              <div>
                 <div className="mb-4 flex justify-center">
                   <img 
                     src={logoUrl} 
@@ -992,19 +993,48 @@ export default function Dashboard() {
                     onClick={handleDebugTap}
                   />
                 </div>
-                <div className="space-y-3 mb-4">
-                  <p className={`text-sm font-bold ${member?.activeSkinId ? 'text-glow-white' : ''}`}>
-                    {t("dashboard.availablePoints")}: {member.totalPoints}
-                  </p>
-                  <h1 className={`text-4xl font-black font-accent ${member?.activeSkinId ? 'text-glow-white' : ''}`} data-testid="text-page-title">
-                    {t("dashboard.hi", { name: member.displayName })}
-                  </h1>
-                  <p className={`text-lg font-semibold ${member?.activeSkinId ? 'text-glow-white' : ''}`}>
-                    {t("dashboard.manageFamily")}
-                  </p>
-                  <p className={`text-sm font-bold ${member?.activeSkinId ? 'text-glow-white' : ''}`}>
-                    {t("dashboard.weeklyPoints")}: {member.weeklyPoints}
-                  </p>
+                <div className="flex items-center justify-between flex-wrap gap-5">
+                  {/* Left: Avatar + Star counter */}
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => { setMemberToEdit(member); setEditMemberDialogOpen(true); }}
+                      className="flex-shrink-0 rounded-full cursor-pointer hover-elevate"
+                      data-testid="button-avatar-profile-large"
+                    >
+                      <Avatar className="h-16 w-16" style={{ borderWidth: "3px", borderStyle: "solid", borderColor: member.color }}>
+                        <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} />
+                        <AvatarFallback style={{ backgroundColor: member.color }} className="text-2xl font-bold text-white">
+                          {member.displayName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                    <Link href="/skins" data-testid="link-stars-to-skins-parent">
+                      <div className="flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate">
+                        <Star className="h-5 w-5 fill-muted-foreground text-muted-foreground" />
+                        <span className="text-base font-semibold" data-testid="text-parent-stars">
+                          {starData?.starsFound || member.starsFound || 0}/{TOTAL_HIDDEN_STARS}
+                        </span>
+                      </div>
+                    </Link>
+                  </div>
+                  {/* Right: Points box */}
+                  <div className="bg-card/80 p-4 rounded-2xl border min-w-[220px]">
+                    <p className="text-xs text-muted-foreground mb-2 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
+                    <div className="space-y-2">
+                      <div className="text-center pb-2 border-b border-border">
+                        <p className="text-xs text-muted-foreground mb-0.5">{t("kidDashboard.totalEarned")}</p>
+                        <div className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }} data-testid="text-parent-total-earned">
+                          {member.totalEarned.toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm text-muted-foreground">{t("kidDashboard.available")}</span>
+                        <span className="text-lg font-bold" data-testid="text-parent-available">
+                          {member.totalPoints.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
