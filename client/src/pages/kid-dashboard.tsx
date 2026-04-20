@@ -1622,7 +1622,7 @@ export default function KidDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="p-7 bg-transparent border-transparent shadow-none rounded-3xl">
+          <div className="p-7">
             <div className="flex items-center justify-between flex-wrap gap-5">
               <div className="flex items-center gap-5">
                 <motion.div
@@ -1697,7 +1697,7 @@ export default function KidDashboard() {
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
         </motion.div>
 
         {/* Special Achievement Rewards Section */}
