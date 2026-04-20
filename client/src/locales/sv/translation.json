@@ -994,6 +994,7 @@
     "questionsDesc": "Alla planer inkluderar obegränsade uppgifter, poängspårning och realtidsuppdateringar. Uppgradera eller nedgradera när som helst. Avsluta när du vill, inga frågor ställda.",
     "paymentInfo": "Betalningar behandlas säkert av Stripe. Din prenumeration förnyas automatiskt varje månad.",
     "manageOnWeb": "Prenumerationer hanteras på herokids.app.",
+    "cancelToSettings": "Avsluta prenumeration → Inställningar",
     "toastPermissionDenied": "Åtkomst nekad",
     "toastOnlyParents": "Endast föräldrar kan hantera prenumerationer",
     "toastCheckoutError": "Utcheckningsfel",

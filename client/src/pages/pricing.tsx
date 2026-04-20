@@ -240,7 +240,7 @@ export default function Pricing() {
                     {isCurrentTier && tier.id !== "free" && (
                       <Link href="/settings" data-testid={`link-cancel-${tier.id}`}>
                         <span className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                          Abo kündigen → Einstellungen
+                          {t("pricing.cancelToSettings")}
                         </span>
                       </Link>
                     )}

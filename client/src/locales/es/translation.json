@@ -960,6 +960,7 @@
     "questionsDesc": "Todos los planes incluyen tareas ilimitadas, seguimiento de puntos y actualizaciones en tiempo real. Actualiza o reduce tu plan en cualquier momento. Cancela cuando quieras, sin preguntas.",
     "paymentInfo": "Los pagos se procesan de forma segura por Stripe. Tu suscripción se renovará automáticamente cada mes.",
     "manageOnWeb": "Las suscripciones se gestionan en herokids.app.",
+    "cancelToSettings": "Cancelar suscripción → Configuración",
     "toastPermissionDenied": "Permiso Denegado",
     "toastOnlyParents": "Solo los padres pueden gestionar suscripciones",
     "toastCheckoutError": "Error de Pago",

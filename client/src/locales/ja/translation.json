@@ -960,6 +960,7 @@
     "questionsDesc": "すべてのプランには、無制限のタスク、ポイント追跡、リアルタイム更新が含まれます。いつでもアップグレードまたはダウングレードできます。質問なしでいつでもキャンセルできます。",
     "paymentInfo": "支払いはStripeによって安全に処理されます。サブスクリプションは毎月自動的に更新されます。",
     "manageOnWeb": "サブスクリプションはherokids.appで管理されます。",
+    "cancelToSettings": "サブスクリプションをキャンセル → 設定",
     "toastPermissionDenied": "権限が拒否されました",
     "toastOnlyParents": "サブスクリプションの管理は保護者のみ可能です",
     "toastCheckoutError": "チェックアウトエラー",

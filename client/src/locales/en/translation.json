@@ -1008,6 +1008,7 @@
     "questionsDesc": "All plans include unlimited tasks, points tracking, and real-time updates. Upgrade or downgrade anytime. Cancel whenever you want, no questions asked.",
     "paymentInfo": "Payments are securely processed by Stripe. Your subscription will renew automatically each month.",
     "manageOnWeb": "Subscriptions are managed at herokids.app.",
+    "cancelToSettings": "Cancel subscription → Settings",
     "toastPermissionDenied": "Permission Denied",
     "toastOnlyParents": "Only parents can manage subscriptions",
     "toastCheckoutError": "Checkout Error",
