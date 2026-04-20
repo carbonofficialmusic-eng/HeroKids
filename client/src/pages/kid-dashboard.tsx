@@ -1475,7 +1475,16 @@ export default function KidDashboard() {
     return taskList.filter(task => {
       if (kidTaskFilter === "all") return true;
       
-      // Recurring tasks always appear in all filters
+      // Weekdays tasks: only show in "today" on Mon-Fri, always in "week" and "all"
+      if (task.recurrence === "weekdays") {
+        if (kidTaskFilter === "today") {
+          const dow = new Date().getDay();
+          return dow !== 0 && dow !== 6;
+        }
+        return true;
+      }
+
+      // Other recurring tasks always appear in all filters
       if (task.recurrence !== "none") {
         return true;
       }
