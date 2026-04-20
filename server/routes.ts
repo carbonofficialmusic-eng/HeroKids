@@ -1448,6 +1448,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
               if (task.maxCompletions !== null) {
+                // If task also has shared/assigned targeting, apply membership filter
+                if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+                  if (!task.sharedMemberIds.includes(member.id)) return null;
+                } else {
+                  const mcAssignedIds = await storage.getTaskAssignmentsByTask(task.id);
+                  if (mcAssignedIds.length > 0 && !mcAssignedIds.includes(member.id)) return null;
+                }
                 // Get active completions to show participants
                 try {
                   const completions = await storage.getActiveCompletionsByTask(task.id);
