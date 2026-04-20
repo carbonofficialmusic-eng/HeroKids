@@ -1667,7 +1667,7 @@ export default function KidDashboard() {
                   </div>
                 </Link>
               </div>
-              <div className="bg-card/80 backdrop-blur-sm p-5 rounded-2xl border-2 border-primary/30 min-w-[260px]">
+              <div className="bg-card/80 p-5 rounded-2xl border-2 border-primary/30 min-w-[260px]">
                 <p className="text-sm text-muted-foreground mb-3 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
                 <div className="space-y-3">
                   {/* Total Earned - Prominent Display */}
