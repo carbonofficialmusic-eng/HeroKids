@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
+import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -1468,48 +1469,8 @@ export default function KidDashboard() {
   };
 
   // Filter tasks by date range for kid dashboard
-  const filterKidTasksByDate = (taskList: typeof myTasks) => {
-    const today = startOfDay(new Date());
-    const weekEnd = addDays(today, 7);
-    
-    return taskList.filter(task => {
-      if (kidTaskFilter === "all") return true;
-      
-      // Weekdays tasks: only show in "today" on Mon-Fri, always in "week" and "all"
-      if (task.recurrence === "weekdays") {
-        if (kidTaskFilter === "today") {
-          const dow = new Date().getDay();
-          return dow !== 0 && dow !== 6;
-        }
-        return true;
-      }
-
-      // Other recurring tasks always appear in all filters
-      if (task.recurrence !== "none") {
-        return true;
-      }
-      
-      // One-time tasks without due date only show in "all"
-      if (!task.dueDate) {
-        return false;
-      }
-      
-      const dueDate = typeof task.dueDate === "string" 
-        ? parseISO(task.dueDate) 
-        : task.dueDate;
-      const dueDateStart = startOfDay(dueDate);
-      
-      if (kidTaskFilter === "today") {
-        return dueDateStart.getTime() === today.getTime();
-      }
-      
-      if (kidTaskFilter === "week") {
-        return dueDateStart >= today && dueDateStart <= weekEnd;
-      }
-      
-      return true;
-    });
-  };
+  const filterKidTasksByDate = (taskList: typeof myTasks) =>
+    filterKidTasksByDateUtil(taskList, kidTaskFilter);
 
   // Sort tasks by type: regular < multi-assignment < shared, then by due date and title
   const sortKidTasksWithinCategory = (taskList: typeof myTasks) => {

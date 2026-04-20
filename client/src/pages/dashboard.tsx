@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -833,50 +834,8 @@ export default function Dashboard() {
   };
 
   // Filter tasks by date range (based on recurrence type and dueDate)
-  const filterTasksByDate = (taskList: typeof activeTasks) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    return taskList.filter(task => {
-      if (taskFilter === "all") return true;
-      
-      if (taskFilter === "today") {
-        if (task.recurrence === "daily" || task.recurrence === "immediate") return true;
-        if (task.recurrence === "weekdays") {
-          const dow = today.getDay();
-          return dow !== 0 && dow !== 6; // Weekdays tasks only appear on Mon-Fri in "today" filter
-        }
-        if (task.recurrence === "none") {
-          if (task.dueDate) {
-            const dateStr = String(task.dueDate).substring(0, 10);
-            const due = new Date(dateStr + "T00:00:00");
-            return due.getFullYear() === today.getFullYear() && 
-                   due.getMonth() === today.getMonth() && 
-                   due.getDate() === today.getDate();
-          }
-          return true;
-        }
-        return false;
-      }
-      
-      if (taskFilter === "week") {
-        if (task.recurrence === "daily" || task.recurrence === "immediate" || task.recurrence === "weekly" || task.recurrence === "weekdays") return true;
-        if (task.recurrence === "none") {
-          if (task.dueDate) {
-            const dateStr = String(task.dueDate).substring(0, 10);
-            const due = new Date(dateStr + "T00:00:00");
-            const weekEnd = new Date(today);
-            weekEnd.setDate(weekEnd.getDate() + 7);
-            return due >= today && due < weekEnd;
-          }
-          return true;
-        }
-        return false;
-      }
-      
-      return true;
-    });
-  };
+  const filterTasksByDate = (taskList: typeof activeTasks) =>
+    filterTasksByDateUtil(taskList, taskFilter);
 
   // Sort tasks by type: regular < multi-assignment < shared, then by due date and title
   const sortTasksWithinCategory = (taskList: typeof activeTasks) => {
