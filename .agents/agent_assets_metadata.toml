@@ -24,3 +24,9 @@ id = "bOV66GD57tfKRGPJP9hDt"
 uri = "file://attached_assets/generated_images/skater_kid_skatepark_scene.png"
 type = "image"
 title = "skatepark urban background"
+
+[[generated]]
+id = "mbmZNUVFcperjl8Z7BhfX"
+uri = "file://attached_assets/generated_images/city_skyline_hero_signal.png"
+type = "image"
+title = "city skyline hero background no text"
