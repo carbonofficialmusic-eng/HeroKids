@@ -617,7 +617,8 @@ export function TaskDialog({
                         <div className="flex flex-wrap gap-2">
                           {[
                             { value: "none", label: t('tasks.oneTime') },
-                            { value: "daily", label: t('tasks.daily') },
+                            { value: "daily", label: t('tasks.recurrenceDaily') },
+                            { value: "weekdays", label: t('tasks.recurrenceWeekdays') },
                             { value: "weekly", label: t('tasks.weekly') },
                             { value: "monthly", label: t('tasks.monthly') },
                             { value: "yearly", label: t('tasks.yearly') },
@@ -641,6 +642,7 @@ export function TaskDialog({
                         <p className="text-sm text-muted-foreground">
                           {field.value === "none" && t('tasks.recurrenceDescNone')}
                           {field.value === "daily" && t('tasks.recurrenceDescDaily')}
+                          {field.value === "weekdays" && t('tasks.recurrenceDescWeekdays')}
                           {field.value === "weekly" && t('tasks.recurrenceDescWeekly')}
                           {field.value === "monthly" && t('tasks.recurrenceDescMonthly')}
                           {field.value === "yearly" && t('tasks.recurrenceDescYearly')}

@@ -7,7 +7,7 @@ import { z } from "zod";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import Stripe from "stripe";
-import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
+import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
@@ -2162,6 +2162,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // For weekdays tasks, block completion on weekends
+      if (task.recurrence === "weekdays") {
+        const taskFamily = await storage.getFamily(member.familyName);
+        const taskFamilyTimezone = taskFamily?.timezone || "Europe/Berlin";
+        const { toZonedTime } = await import("date-fns-tz");
+        const localNow = toZonedTime(new Date(), taskFamilyTimezone);
+        const dow = localNow.getDay(); // 0=Sun, 6=Sat
+        if (dow === 0 || dow === 6) {
+          return res.status(422).json({ 
+            message: "Validation failed: This task is only available on weekdays (Mon–Fri)",
+            code: "TASK_WEEKEND_UNAVAILABLE"
+          });
+        }
+      }
+
       // For multi-completion tasks, prevent the same member from completing twice
       if (task.maxCompletions !== null && task.maxCompletions > 1) {
         const hasAlreadyCompleted = await storage.hasActiveMemberCompletion(taskId, member.id);
@@ -2252,7 +2267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const targetDateStr = `${targetDate.getUTCFullYear()}-${String(targetDate.getUTCMonth() + 1).padStart(2, '0')}-${String(targetDate.getUTCDate()).padStart(2, '0')} 00:00:00`;
               nextAvailableDate = fromZonedTime(targetDateStr, familyTimezone);
             } else {
-              // Standard recurrence (daily/weekly/monthly)
+              // Standard recurrence (daily/weekdays/weekly/monthly)
               switch (task.recurrence) {
                 case "daily":
                   // Calendar-based: Next day 00:00 in family timezone
@@ -2262,6 +2277,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   const nextDayStr = `${nextDayCalc.getUTCFullYear()}-${String(nextDayCalc.getUTCMonth() + 1).padStart(2, '0')}-${String(nextDayCalc.getUTCDate()).padStart(2, '0')} 00:00:00`;
                   nextAvailableDate = fromZonedTime(nextDayStr, familyTimezone);
                   break;
+                case "weekdays": {
+                  // Calendar-based: Next weekday (Mon–Fri) 00:00 in family timezone
+                  // On Friday (5), skip weekend (+3 days to Monday); otherwise +1 day
+                  const wdDateStr = formatInTimeZone(now, familyTimezone, 'yyyy-MM-dd');
+                  const [wYear, wMonth, wDay] = wdDateStr.split('-').map(Number);
+                  const currentDow = toZonedTime(now, familyTimezone).getDay(); // 0=Sun,1=Mon..5=Fri,6=Sat
+                  const daysUntilNextWeekday = currentDow === 5 ? 3 : currentDow === 6 ? 2 : 1;
+                  const nextWdCalc = new Date(Date.UTC(wYear, wMonth - 1, wDay + daysUntilNextWeekday));
+                  const nextWdStr = `${nextWdCalc.getUTCFullYear()}-${String(nextWdCalc.getUTCMonth() + 1).padStart(2, '0')}-${String(nextWdCalc.getUTCDate()).padStart(2, '0')} 00:00:00`;
+                  nextAvailableDate = fromZonedTime(nextWdStr, familyTimezone);
+                  break;
+                }
                 case "weekly":
                   // Calendar-based: Next Monday 00:00 in family timezone
                   // Get current day of week directly in family timezone (1=Mon, 7=Sun in 'i' format)

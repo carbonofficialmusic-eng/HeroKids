@@ -842,6 +842,10 @@ export default function Dashboard() {
       
       if (taskFilter === "today") {
         if (task.recurrence === "daily" || task.recurrence === "immediate") return true;
+        if (task.recurrence === "weekdays") {
+          const dow = today.getDay();
+          return dow !== 0 && dow !== 6; // Only show on Mon-Fri
+        }
         if (task.recurrence === "none") {
           if (task.dueDate) {
             const dateStr = String(task.dueDate).substring(0, 10);
@@ -856,7 +860,7 @@ export default function Dashboard() {
       }
       
       if (taskFilter === "week") {
-        if (task.recurrence === "daily" || task.recurrence === "immediate" || task.recurrence === "weekly") return true;
+        if (task.recurrence === "daily" || task.recurrence === "immediate" || task.recurrence === "weekly" || task.recurrence === "weekdays") return true;
         if (task.recurrence === "none") {
           if (task.dueDate) {
             const dateStr = String(task.dueDate).substring(0, 10);

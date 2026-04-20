@@ -675,21 +675,28 @@ export class DatabaseStorage implements IStorage {
       const startOfDayLocal = startOfDay(familyNow); // Midnight in family's TZ
       const startOfDayUTC = fromZonedTime(startOfDayLocal, familyTimezone); // Convert to UTC
       
-      // Lock all daily tasks for this family to prevent concurrent modifications
-      const dailyTasks = await tx
+      // Determine if today is a weekday (1=Mon … 5=Fri, 6=Sat, 7=Sun in ISO weekday)
+      const isoWeekday = familyNow.getDay(); // 0=Sun, 1=Mon … 6=Sat
+      const isWeekday = isoWeekday >= 1 && isoWeekday <= 5;
+      
+      // Lock all daily + weekdays tasks for this family to prevent concurrent modifications
+      // Weekdays tasks are only reset Mon–Fri; on weekends they are left unchanged
+      const tasksToReset = await tx
         .select()
         .from(tasks)
         .where(
           and(
             eq(tasks.familyName, familyName),
-            eq(tasks.recurrence, "daily")
+            isWeekday
+              ? sql`${tasks.recurrence} IN ('daily', 'weekdays')`
+              : eq(tasks.recurrence, "daily")
           )
         )
         .for('update'); // Row-level write lock prevents concurrent task updates
       
       // Delete ONLY completions from previous days (preserve today's completions)
-      if (dailyTasks.length > 0) {
-        const taskIds = dailyTasks.map(t => t.id);
+      if (tasksToReset.length > 0) {
+        const taskIds = tasksToReset.map(t => t.id);
         
         await tx
           .delete(taskCompletions)
@@ -702,7 +709,7 @@ export class DatabaseStorage implements IStorage {
         
         // For each task, recompute completion_count from remaining completions
         // This includes any completions from today that were preserved
-        for (const task of dailyTasks) {
+        for (const task of tasksToReset) {
           const remainingCompletions = await tx
             .select({ count: sql<number>`count(*)` })
             .from(taskCompletions)
@@ -930,8 +937,8 @@ export class DatabaseStorage implements IStorage {
       return Number(result?.count || 0) > 0;
     }
     
-    // For daily recurring tasks, only check completions from TODAY (in family timezone)
-    if (task.recurrence === 'daily') {
+    // For daily/weekdays recurring tasks, only check completions from TODAY (in family timezone)
+    if (task.recurrence === 'daily' || task.recurrence === 'weekdays') {
       // Get family timezone
       const [family] = await client
         .select({ timezone: families.timezone })
@@ -1004,8 +1011,8 @@ export class DatabaseStorage implements IStorage {
       return pendingCompletion?.status || null;
     }
     
-    // For daily recurring tasks, only check completions from TODAY (in family timezone)
-    if (task.recurrence === 'daily') {
+    // For daily/weekdays recurring tasks, only check completions from TODAY (in family timezone)
+    if (task.recurrence === 'daily' || task.recurrence === 'weekdays') {
       // Get family timezone
       const [family] = await client
         .select({ timezone: families.timezone })
@@ -1137,8 +1144,8 @@ export class DatabaseStorage implements IStorage {
       return Number(pendingResult?.count || 0) > 0 ? "pending" : null;
     }
     
-    // For daily recurring tasks, only check completions from TODAY (in family timezone)
-    if (task.recurrence === 'daily') {
+    // For daily/weekdays recurring tasks, only check completions from TODAY (in family timezone)
+    if (task.recurrence === 'daily' || task.recurrence === 'weekdays') {
       // Get family timezone
       const [family] = await client
         .select({ timezone: families.timezone })
@@ -1386,8 +1393,8 @@ export class DatabaseStorage implements IStorage {
     
     if (!task) return [];
     
-    // For daily recurring tasks, only get completions from TODAY (in family timezone)
-    if (task.recurrence === 'daily') {
+    // For daily/weekdays recurring tasks, only get completions from TODAY (in family timezone)
+    if (task.recurrence === 'daily' || task.recurrence === 'weekdays') {
       // Get family timezone
       const [family] = await db
         .select({ timezone: families.timezone })

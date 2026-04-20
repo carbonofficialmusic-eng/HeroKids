@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays } from "lucide-react";
+import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Moon } from "lucide-react";
 import type { Task, FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { motion } from "framer-motion";
@@ -78,6 +78,10 @@ export function TaskCard({
   // Check if task is currently unavailable (future nextAvailableDate)
   const isUnavailable = !!(task.nextAvailableDate && new Date(task.nextAvailableDate) > new Date());
   
+  // Check if this is a weekdays-only task that's unavailable on weekends (Sat=6, Sun=0)
+  const todayDow = new Date().getDay();
+  const isWeekendUnavailable = task.recurrence === 'weekdays' && (todayDow === 0 || todayDow === 6) && !isUnavailable;
+  
   // Format next available date for display
   const getNextAvailableText = () => {
     if (!task.nextAvailableDate || !isUnavailable) return null;
@@ -129,8 +133,8 @@ export function TaskCard({
     };
   })();
   
-  // Task should appear grayed out if it's unavailable OR completed by this member OR due date not yet reached OR expired
-  const isGrayedOut = isUnavailable || isCompletedByMember || dueDateInfo.notYet || dueDateInfo.expired;
+  // Task should appear grayed out if it's unavailable OR completed by this member OR due date not yet reached OR expired OR weekend-only unavailable
+  const isGrayedOut = isUnavailable || isCompletedByMember || dueDateInfo.notYet || dueDateInfo.expired || isWeekendUnavailable;
   
   return (
     <motion.div
@@ -188,7 +192,10 @@ export function TaskCard({
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                   className="flex items-center gap-1"
                 >
-                  <CheckCircle className="h-5 w-5 text-green-500 shrink-0" data-testid={`icon-done-${task.id}`} />
+                  {isWeekendUnavailable
+                    ? <Moon className="h-5 w-5 text-muted-foreground shrink-0" data-testid={`icon-weekend-${task.id}`} />
+                    : <CheckCircle className="h-5 w-5 text-green-500 shrink-0" data-testid={`icon-done-${task.id}`} />
+                  }
                 </motion.div>
               )}
               {/* Multi-Completion Counter Badge */}
@@ -209,6 +216,14 @@ export function TaskCard({
                 <Badge variant="outline" className="text-xs gap-1" data-testid={`badge-next-available-${task.id}`}>
                   <Calendar className="h-3 w-3" />
                   {getNextAvailableText()}
+                </Badge>
+              </div>
+            )}
+            {isWeekendUnavailable && (
+              <div className="mb-1">
+                <Badge variant="outline" className="text-xs gap-1 text-muted-foreground" data-testid={`badge-weekend-${task.id}`}>
+                  <Moon className="h-3 w-3" />
+                  {t('tasks.weekendUnavailable')}
                 </Badge>
               </div>
             )}

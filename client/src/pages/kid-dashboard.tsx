@@ -490,14 +490,18 @@ function TaskCard({
   // This handles edge cases where status might be missing due to data inconsistency
   const hasCompletedWithoutStatus = task.memberHasCompleted && neverAttempted;
   
+  // Check if this is a weekdays task that is unavailable on weekends (Sat=6, Sun=0)
+  const todayDow = new Date().getDay();
+  const isWeekendUnavailable = task.recurrence === 'weekdays' && (todayDow === 0 || todayDow === 6);
+
   // Task is actionable ONLY if:
   // 1. Never attempted (completionStatus === null AND !memberHasCompleted) OR rejected (can retry)
   // 2. Task status is active
   // 3. Has available slots (or no slot limit)
   // 4. Is assigned to this member (for shared tasks)
   // 5. Not all assigned members have completed yet
-  // NOT actionable if: pending, approved, has completion without status, inactive, no slots, not assigned to shared task, all members completed, due date not yet reached, or due date expired
-  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned && !allMembersCompleted && !dueDateInfo.notYet && !dueDateInfo.expired;
+  // NOT actionable if: pending, approved, has completion without status, inactive, no slots, not assigned to shared task, all members completed, due date not yet reached, due date expired, or weekday-only task on a weekend
+  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned && !allMembersCompleted && !dueDateInfo.notYet && !dueDateInfo.expired && !isWeekendUnavailable;
   
   const TaskIcon = getTaskIcon(task.title);
 
@@ -580,6 +584,9 @@ function TaskCard({
   } else if (dueDateInfo.expired) {
     statusMessage = t("tasks.dueDateExpiredTooltip");
     statusColor = "text-destructive";
+  } else if (isWeekendUnavailable) {
+    statusMessage = t("tasks.weekendUnavailable");
+    statusColor = "text-muted-foreground";
   } else if (dueDateInfo.isLate) {
     statusMessage = t("tasks.dueDateLate", { days: dueDateInfo.daysPast });
     statusColor = "text-amber-600 dark:text-amber-400";
@@ -602,6 +609,7 @@ function TaskCard({
           allSharedMembersCompleted ? "opacity-60 border-green-500" :
           dueDateInfo.notYet ? "opacity-50 border-muted" :
           dueDateInfo.expired ? "opacity-40 border-destructive" :
+          isWeekendUnavailable ? "opacity-50 border-muted" :
           "opacity-70 border-muted"
         }`}
         data-testid={`task-card-${task.id}`}
