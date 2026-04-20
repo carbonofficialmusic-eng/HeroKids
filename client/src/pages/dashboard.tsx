@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { FamilySetup } from "@/components/family-setup";
-import { PointCounter } from "@/components/point-counter";
 import { TaskCard } from "@/components/task-card";
 import { Leaderboard } from "@/components/leaderboard";
 import { TaskDialog } from "@/components/task-dialog";
@@ -926,8 +925,8 @@ export default function Dashboard() {
                 </AvatarFallback>
               </Avatar>
             </button>
-            <div className="min-w-0 hidden sm:block">
-              <div className="text-sm text-muted-foreground truncate">{member.familyName}</div>
+            <div className="min-w-0">
+              <div className="text-sm text-muted-foreground truncate hidden sm:block">{member.familyName}</div>
               <div className="font-semibold truncate" data-testid="text-user-name">
                 {member.displayName}
               </div>
@@ -954,12 +953,6 @@ export default function Dashboard() {
               );
               return isNativePlatform() ? badge : <Link href="/pricing">{badge}</Link>;
             })()}
-            <PointCounter
-              points={member.totalEarned}
-              size="compact"
-              showAnimation
-              data-testid="point-counter-total-earned"
-            />
             <NotificationBell familyLanguage="en" memberRole={member.role} />
             <ProfileMenu
               member={member}
@@ -1123,33 +1116,6 @@ export default function Dashboard() {
                   <span className="text-left flex-1">{t("dashboard.addReward")}</span>
                 </Button>
               </div>
-
-              {/* Star Collection Progress - moved here for visibility */}
-              {starData && starData.totalStars > 0 && (
-                <Card className="p-4 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/30">
-                  <Link href="/skins">
-                    <div className="flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-yellow-500/20">
-                          <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-sm">{t("skins.starCollection")}</h3>
-                          <p className="text-xs text-muted-foreground">
-                            {starData.earnedLegacySkinIds.length}/8 Legacy Avatars
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-2xl font-bold text-yellow-500" data-testid="text-parent-stars">
-                          {starData.starsFound}/{starData.totalStars}
-                        </span>
-                        <p className="text-xs text-muted-foreground">{t("common.stars")}</p>
-                      </div>
-                    </div>
-                  </Link>
-                </Card>
-              )}
 
               {/* Task Filter Tabs */}
               {activeTasks.length > 0 && (
