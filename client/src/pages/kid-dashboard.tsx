@@ -1546,18 +1546,14 @@ export default function KidDashboard() {
       <header className="border-b sticky top-0 backdrop-blur-md z-40 bg-background/80">
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <button
-              onClick={() => { setMemberToEdit(member); setEditMemberDialogOpen(true); }}
-              className="flex-shrink-0 rounded-full cursor-pointer hover-elevate"
-              data-testid="button-avatar-edit-profile"
-            >
+            <div className="flex-shrink-0" data-testid="avatar-header-kid">
               <Avatar className="h-10 w-10" style={{ borderWidth: "3px", borderStyle: "solid", borderColor: member.color }}>
                 <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} />
                 <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
                   {member.displayName[0]}
                 </AvatarFallback>
               </Avatar>
-            </button>
+            </div>
             <div className="min-w-0">
               <div className="text-sm text-muted-foreground truncate hidden sm:block">{member.familyName}</div>
               <div className="font-semibold truncate" data-testid="text-user-name">
@@ -1625,9 +1621,10 @@ export default function KidDashboard() {
           <div className="py-4">
             <div className="flex items-center justify-between flex-wrap gap-5">
               <div className="flex items-center gap-5">
-                <motion.div
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
+                  onClick={() => { setMemberToEdit(member); setEditMemberDialogOpen(true); }}
+                  className="flex-shrink-0 rounded-full cursor-pointer hover-elevate"
+                  data-testid="button-avatar-profile-large-kid"
                 >
                   <Avatar className="h-20 w-20 border-4 border-primary shadow-lg">
                     <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} />
@@ -1635,7 +1632,7 @@ export default function KidDashboard() {
                       {member.displayName[0]}
                     </AvatarFallback>
                   </Avatar>
-                </motion.div>
+                </button>
                 {streak > 0 && (
                   <div className="flex items-center gap-2">
                     <motion.div
