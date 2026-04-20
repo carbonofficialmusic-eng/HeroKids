@@ -1622,55 +1622,53 @@ export default function KidDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="px-4 py-5">
+          <div className="py-4">
             <div className="flex items-center justify-between flex-wrap gap-5">
-              {/* Left: Avatar + streak + star counter */}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => { setMemberToEdit(member); setEditMemberDialogOpen(true); }}
-                  className="flex-shrink-0 rounded-full cursor-pointer hover-elevate"
-                  data-testid="button-avatar-profile-large"
+              <div className="flex items-center gap-5">
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <Avatar className="h-16 w-16" style={{ borderWidth: "3px", borderStyle: "solid", borderColor: member.color }}>
+                  <Avatar className="h-20 w-20 border-4 border-primary shadow-lg">
                     <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} />
-                    <AvatarFallback style={{ backgroundColor: member.color }} className="text-2xl font-bold text-white">
+                    <AvatarFallback style={{ backgroundColor: member.color }} className="text-3xl font-bold text-white">
                       {member.displayName[0]}
                     </AvatarFallback>
                   </Avatar>
-                </button>
+                </motion.div>
                 {streak > 0 && (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     <motion.div
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ repeat: Infinity, duration: 1.5 }}
                     >
-                      <Flame className="h-5 w-5 text-orange-500" />
+                      <Flame className="h-6 w-6 text-orange-500" />
                     </motion.div>
-                    <span className="text-sm font-bold">{t("kidDashboard.dayStreak", { count: streak })}</span>
+                    <span className="text-base font-bold">{t("kidDashboard.dayStreak", { count: streak })}</span>
                   </div>
                 )}
+                {/* Star Counter - Links to Skins Gallery */}
                 <Link href="/skins">
-                  <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/60 to-orange-500/60 px-3 py-1.5 rounded-xl border border-yellow-500/70 cursor-pointer hover:from-yellow-500/75 hover:to-orange-500/75 transition-colors" data-testid="link-stars-to-skins">
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/60 to-orange-500/60 px-4 py-2 rounded-xl border border-yellow-500/70 cursor-pointer hover:from-yellow-500/75 hover:to-orange-500/75 transition-colors" data-testid="link-stars-to-skins">
                     <motion.div
                       animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
                       transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                     >
-                      <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
                     </motion.div>
-                    <span className="text-base font-bold" style={{ fontFamily: "Fredoka, sans-serif" }} data-testid="text-stars-found">
+                    <span className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }} data-testid="text-stars-found">
                       {member.starsFound ?? 0}/{TOTAL_HIDDEN_STARS}
                     </span>
                   </div>
                 </Link>
               </div>
-              {/* Right: Points box */}
-              <div className="bg-card/80 p-4 rounded-2xl border min-w-[220px]">
-                <p className="text-xs text-muted-foreground mb-2 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
-                <div className="space-y-2">
-                  <div className="text-center pb-2 border-b border-border">
-                    <p className="text-xs text-muted-foreground mb-0.5">{t("kidDashboard.totalEarned")}</p>
+              <div className="bg-card/80 p-5 rounded-2xl border-2 border-primary/30 min-w-[260px]">
+                <p className="text-sm text-muted-foreground mb-3 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
+                <div className="space-y-3">
+                  <div className="text-center pb-3 border-b border-border">
+                    <p className="text-xs text-muted-foreground mb-1">{t("kidDashboard.totalEarned")}</p>
                     <motion.div
-                      className="text-3xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
+                      className="text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
                       animate={{ scale: [1, 1.05, 1] }}
                       transition={{ repeat: Infinity, duration: 2 }}
                       style={{ fontFamily: "Fredoka, sans-serif" }}
@@ -1679,12 +1677,12 @@ export default function KidDashboard() {
                       {member.totalEarned.toLocaleString()}
                     </motion.div>
                   </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                       <Coins className="h-4 w-4 text-green-500" />
                       <span className="font-semibold text-sm">{t("kidDashboard.available")}</span>
                     </div>
-                    <span className="text-lg font-bold text-green-600 dark:text-green-400" data-testid="text-total-points">
+                    <span className="text-xl font-bold text-green-600 dark:text-green-400" data-testid="text-total-points">
                       {member.totalPoints.toLocaleString()}
                     </span>
                   </div>
