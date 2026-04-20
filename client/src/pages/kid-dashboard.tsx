@@ -1558,8 +1558,8 @@ export default function KidDashboard() {
                 </AvatarFallback>
               </Avatar>
             </button>
-            <div className="min-w-0 hidden sm:block">
-              <div className="text-sm text-muted-foreground truncate">{member.familyName}</div>
+            <div className="min-w-0">
+              <div className="text-sm text-muted-foreground truncate hidden sm:block">{member.familyName}</div>
               <div className="font-semibold truncate" data-testid="text-user-name">
                 {member.displayName}
               </div>
@@ -1636,22 +1636,17 @@ export default function KidDashboard() {
                     </AvatarFallback>
                   </Avatar>
                 </motion.div>
-                <div className="flex-1">
-                  <h1 className="text-4xl font-bold mb-1" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                    {member.displayName}
-                  </h1>
-                  {streak > 0 && (
-                    <div className="flex items-center gap-3 mt-2">
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ repeat: Infinity, duration: 1.5 }}
-                      >
-                        <Flame className="h-7 w-7 text-orange-500" />
-                      </motion.div>
-                      <span className="text-lg font-bold">{t("kidDashboard.dayStreak", { count: streak })}</span>
-                    </div>
-                  )}
-                </div>
+                {streak > 0 && (
+                  <div className="flex items-center gap-2">
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ repeat: Infinity, duration: 1.5 }}
+                    >
+                      <Flame className="h-6 w-6 text-orange-500" />
+                    </motion.div>
+                    <span className="text-base font-bold">{t("kidDashboard.dayStreak", { count: streak })}</span>
+                  </div>
+                )}
                 {/* Star Counter - Links to Skins Gallery */}
                 <Link href="/skins">
                   <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/60 to-orange-500/60 px-4 py-2 rounded-xl border border-yellow-500/70 cursor-pointer hover:from-yellow-500/75 hover:to-orange-500/75 transition-colors" data-testid="link-stars-to-skins">
