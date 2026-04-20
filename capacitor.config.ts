@@ -5,6 +5,11 @@ const config: CapacitorConfig = {
   appName: 'HeroKids',
   webDir: 'dist/public',
   server: {
+    // TESTMODUS: App lädt direkt von herokids.app (kein lokaler Build nötig).
+    // Für App-Store-Release: Diese beiden Zeilen auskommentieren,
+    // dann `npm run build && npx cap sync` ausführen.
+    url: 'https://herokids.app',
+    allowNavigation: ['herokids.app'],
     androidScheme: 'https',
     iosScheme: 'https',
   },
