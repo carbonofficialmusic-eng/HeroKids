@@ -720,7 +720,7 @@ function TaskCard({
           )}
 
           {/* Legacy Shared Task Info - Show teammates and description (using sharedMemberIds) */}
-          {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && !task.assignedMemberCompletions && (
+          {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 1 && !task.assignedMemberCompletions && (
             <div className="space-y-2 text-left">
               {/* Teammates section */}
               <div className="p-2 bg-primary/5 rounded-xl">

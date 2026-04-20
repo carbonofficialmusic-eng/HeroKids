@@ -1476,6 +1476,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Shared tasks - check each shared member's completion status
               if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+                // Only show shared tasks to members who are part of the shared group
+                if (!task.sharedMemberIds.includes(member.id)) {
+                  return null;
+                }
                 const sharedMemberCompletions = await Promise.all(
                   task.sharedMemberIds.map(async (memberId: string) => {
                     const sharedMember = await storage.getFamilyMemberById(memberId);
@@ -1515,6 +1519,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Check if task is assigned to specific members
               const assignedMemberIds = await storage.getTaskAssignmentsByTask(task.id);
               
+              // If task has any explicit assignments, hide it from non-assigned children
+              if (assignedMemberIds.length > 0 && !assignedMemberIds.includes(member.id)) {
+                return null;
+              }
+
               if (assignedMemberIds.length > 1) {
                 // Multi-assignment task: Each assigned member completes independently, gets full points
                 // Box grays out for members who submitted (pending/approved), stays active for others
@@ -1599,6 +1608,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // 4. Active tasks: Always show
         const filteredTasks = resolvedTasks.filter(
           (task) => 
+            task !== null &&
             task.status !== "archived" && // Hide archived
             !(task.status === "completed" && task.recurrence === "none") // Hide one-time completed tasks
         );
