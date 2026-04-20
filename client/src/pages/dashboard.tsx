@@ -842,10 +842,7 @@ export default function Dashboard() {
       
       if (taskFilter === "today") {
         if (task.recurrence === "daily" || task.recurrence === "immediate") return true;
-        if (task.recurrence === "weekdays") {
-          const dow = today.getDay();
-          return dow !== 0 && dow !== 6; // Only show on Mon-Fri
-        }
+        if (task.recurrence === "weekdays") return true; // Always show in "today" (task-card handles weekend graying)
         if (task.recurrence === "none") {
           if (task.dueDate) {
             const dateStr = String(task.dueDate).substring(0, 10);
