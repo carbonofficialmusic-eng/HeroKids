@@ -1622,7 +1622,7 @@ export default function KidDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="p-7 bg-gradient-to-br from-primary/10 via-card/80 to-purple-500/10 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-xl">
+          <Card className="p-7 bg-transparent border-transparent shadow-none rounded-3xl">
             <div className="flex items-center justify-between flex-wrap gap-5">
               <div className="flex items-center gap-5">
                 <motion.div
