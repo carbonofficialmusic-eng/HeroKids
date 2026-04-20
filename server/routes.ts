@@ -2510,6 +2510,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // DO NOT add points manually here as it would cause double counting
       await storage.approveTaskCompletion(completionId, member.id);
       
+      // Delete proof photo now that the decision is made - it's no longer needed
+      if (completion.proofPhotoUrl) {
+        const objectStorageService = new ObjectStorageService();
+        objectStorageService.deleteObjectEntity(completion.proofPhotoUrl).catch((err: any) => {
+          console.error("Failed to delete proof photo after approval:", err);
+        });
+      }
+      
       // Delete all "task_pending" notifications for this task (so other parents don't see it anymore)
       await storage.deleteNotificationsByTypeAndTask(member.familyName, "task_pending", completion.taskId);
       
@@ -2606,6 +2614,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Mark completion as rejected
       await storage.rejectTaskCompletion(completionId, member.id, reason || "Did not meet expectations");
+      
+      // Delete proof photo now that the decision is made - it's no longer needed
+      if (completion.proofPhotoUrl) {
+        const objectStorageService = new ObjectStorageService();
+        objectStorageService.deleteObjectEntity(completion.proofPhotoUrl).catch((err: any) => {
+          console.error("Failed to delete proof photo after rejection:", err);
+        });
+      }
       
       // Delete all "task_pending" notifications for this task (so other parents don't see it anymore)
       await storage.deleteNotificationsByTypeAndTask(member.familyName, "task_pending", completion.taskId);
