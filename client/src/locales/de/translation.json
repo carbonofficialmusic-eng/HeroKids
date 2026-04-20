@@ -1030,6 +1030,7 @@
     "questionsTitle": "Fragen?",
     "questionsDesc": "Alle Pläne beinhalten unbegrenzte Aufgaben, Punkteverfolgung und Echtzeit-Updates. Jederzeit upgraden oder downgraden. Jederzeit kündbar, keine Fragen gestellt.",
     "paymentInfo": "Zahlungen werden sicher über Stripe verarbeitet. Dein Abonnement verlängert sich jeden Monat automatisch.",
+    "manageOnWeb": "Abonnements werden auf herokids.app verwaltet.",
     "toastPermissionDenied": "Zugriff verweigert",
     "toastOnlyParents": "Nur Eltern können Abonnements verwalten",
     "toastCheckoutError": "Checkout-Fehler",

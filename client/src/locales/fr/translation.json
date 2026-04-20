@@ -959,6 +959,7 @@
     "questionsTitle": "Questions ?",
     "questionsDesc": "Toutes les formules incluent des tâches illimitées, le suivi des points et des mises à jour en temps réel. Passez à un niveau supérieur ou inférieur à tout moment. Annulez quand vous voulez, sans questions posées.",
     "paymentInfo": "Les paiements sont traités en toute sécurité par Stripe. Votre abonnement se renouvellera automatiquement chaque mois.",
+    "manageOnWeb": "Les abonnements sont gérés sur herokids.app.",
     "toastPermissionDenied": "Permission Refusée",
     "toastOnlyParents": "Seuls les parents peuvent gérer les abonnements",
     "toastCheckoutError": "Erreur de Paiement",

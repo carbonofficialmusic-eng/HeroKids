@@ -959,6 +959,7 @@
     "questionsTitle": "有问题？",
     "questionsDesc": "所有套餐包括无限任务、积分跟踪和实时更新。随时升级或降级。随时取消，不问问题。",
     "paymentInfo": "付款由Stripe安全处理。您的订阅将每月自动续订。",
+    "manageOnWeb": "订阅在herokids.app上管理。",
     "toastPermissionDenied": "权限被拒绝",
     "toastOnlyParents": "只有家长可以管理订阅",
     "toastCheckoutError": "结账错误",

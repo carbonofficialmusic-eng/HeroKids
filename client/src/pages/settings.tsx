@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { isNativePlatform } from "@/lib/platform";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -1052,21 +1053,25 @@ export default function Settings() {
                       {familyData.subscriptionTier === 'family_hero' && 'Enterprise'}
                     </Badge>
                   </div>
-                  <Button 
-                    onClick={() => manageSubscriptionMutation.mutate()}
-                    disabled={manageSubscriptionMutation.isPending}
-                    data-testid="button-manage-subscription"
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    {manageSubscriptionMutation.isPending 
-                      ? t('common.loading') 
-                      : t('settings.manageSubscription')}
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    {t('settings.subscriptionPortalNote')}
-                  </p>
+                  {!isNativePlatform() && (
+                    <>
+                      <Button 
+                        onClick={() => manageSubscriptionMutation.mutate()}
+                        disabled={manageSubscriptionMutation.isPending}
+                        data-testid="button-manage-subscription"
+                        className="w-full"
+                        variant="outline"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        {manageSubscriptionMutation.isPending 
+                          ? t('common.loading') 
+                          : t('settings.manageSubscription')}
+                      </Button>
+                      <p className="text-xs text-muted-foreground text-center">
+                        {t('settings.subscriptionPortalNote')}
+                      </p>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>

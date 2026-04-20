@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
+import { isNativePlatform } from "@/lib/platform";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -932,24 +933,26 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
-            {familyData && (
-              <Link href="/pricing">
+            {familyData && (() => {
+              const tierLabel = familyData.subscriptionTier === "free"
+                ? t("subscription.free")
+                : familyData.subscriptionTier === "family"
+                ? t("subscription.family")
+                : familyData.subscriptionTier === "family_plus"
+                ? t("subscription.familyPlus")
+                : t("subscription.familyHero");
+              const badge = (
                 <Badge
                   variant="secondary"
-                  className="cursor-pointer hover-elevate"
+                  className={!isNativePlatform() ? "cursor-pointer hover-elevate" : ""}
                   data-testid="badge-current-tier"
                 >
                   <Crown className="h-3 w-3 mr-1" />
-                  {familyData.subscriptionTier === "free"
-                    ? t("subscription.free")
-                    : familyData.subscriptionTier === "family"
-                    ? t("subscription.family")
-                    : familyData.subscriptionTier === "family_plus"
-                    ? t("subscription.familyPlus")
-                    : t("subscription.familyHero")}
+                  {tierLabel}
                 </Badge>
-              </Link>
-            )}
+              );
+              return isNativePlatform() ? badge : <Link href="/pricing">{badge}</Link>;
+            })()}
             <PointCounter
               points={member.totalEarned}
               size="compact"

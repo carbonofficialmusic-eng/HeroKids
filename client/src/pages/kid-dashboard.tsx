@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { isNativePlatform } from "@/lib/platform";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -1565,24 +1566,26 @@ export default function KidDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
-            {familyData && (
-              <Link href="/pricing">
+            {familyData && (() => {
+              const tierLabel = familyData.subscriptionTier === "free"
+                ? t("subscription.free")
+                : familyData.subscriptionTier === "family"
+                ? t("subscription.family")
+                : familyData.subscriptionTier === "family_plus"
+                ? t("subscription.familyPlus")
+                : t("subscription.familyHero");
+              const badge = (
                 <Badge
                   variant="secondary"
-                  className="cursor-pointer hover-elevate"
+                  className={!isNativePlatform() ? "cursor-pointer hover-elevate" : ""}
                   data-testid="badge-current-tier"
                 >
                   <Crown className="h-3 w-3 mr-1" />
-                  {familyData.subscriptionTier === "free"
-                    ? t("subscription.free")
-                    : familyData.subscriptionTier === "family"
-                    ? t("subscription.family")
-                    : familyData.subscriptionTier === "family_plus"
-                    ? t("subscription.familyPlus")
-                    : t("subscription.familyHero")}
+                  {tierLabel}
                 </Badge>
-              </Link>
-            )}
+              );
+              return isNativePlatform() ? badge : <Link href="/pricing">{badge}</Link>;
+            })()}
             <NotificationBell familyLanguage="en" memberRole={member.role} />
             <ProfileMenu
               member={member}

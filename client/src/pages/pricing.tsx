@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { isNativePlatform } from "@/lib/platform";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -210,26 +211,32 @@ export default function Pricing() {
                   ))}
                 </ul>
 
-                <Button
-                  className="w-full"
-                  variant={tier.popular ? "default" : "outline"}
-                  disabled={tier.id === "free" || isCurrentTier || !isParent || isProcessing}
-                  onClick={() => handleUpgrade(tier.id)}
-                  data-testid={`button-select-${tier.id}`}
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {t("pricing.processing")}
-                    </>
-                  ) : tier.id === "free" ? (
-                    t("pricing.currentPlan")
-                  ) : isCurrentTier ? (
-                    t("pricing.currentPlan")
-                  ) : (
-                    t("pricing.choosePlan", { name: tier.name })
-                  )}
-                </Button>
+                {isNativePlatform() ? (
+                  <p className="text-xs text-muted-foreground text-center py-2">
+                    {t("pricing.manageOnWeb")}
+                  </p>
+                ) : (
+                  <Button
+                    className="w-full"
+                    variant={tier.popular ? "default" : "outline"}
+                    disabled={tier.id === "free" || isCurrentTier || !isParent || isProcessing}
+                    onClick={() => handleUpgrade(tier.id)}
+                    data-testid={`button-select-${tier.id}`}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        {t("pricing.processing")}
+                      </>
+                    ) : tier.id === "free" ? (
+                      t("pricing.currentPlan")
+                    ) : isCurrentTier ? (
+                      t("pricing.currentPlan")
+                    ) : (
+                      t("pricing.choosePlan", { name: tier.name })
+                    )}
+                  </Button>
+                )}
               </Card>
             );
           })}
