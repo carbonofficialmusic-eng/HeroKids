@@ -617,27 +617,68 @@ export function TaskDialog({
                         <div className="flex flex-wrap gap-2">
                           {[
                             { value: "none", label: t('tasks.oneTime') },
-                            { value: "daily", label: t('tasks.recurrenceDaily') },
-                            { value: "weekdays", label: t('tasks.recurrenceWeekdays') },
+                            { value: "daily", label: t('tasks.recurrenceDailyBtn') },
                             { value: "weekly", label: t('tasks.weekly') },
                             { value: "monthly", label: t('tasks.monthly') },
                             { value: "yearly", label: t('tasks.yearly') },
-                          ].map((option) => (
+                          ].map((option) => {
+                            const isActive = option.value === "daily"
+                              ? (field.value === "daily" || field.value === "weekdays")
+                              : field.value === option.value;
+                            return (
+                              <button
+                                key={option.value}
+                                type="button"
+                                onClick={() => {
+                                  if (option.value === "daily") {
+                                    if (field.value !== "daily" && field.value !== "weekdays") {
+                                      field.onChange("daily");
+                                    }
+                                  } else {
+                                    field.onChange(option.value);
+                                  }
+                                }}
+                                className={`px-2 py-2 text-xs font-medium rounded-md border transition-colors ${
+                                  isActive
+                                    ? "bg-primary text-primary-foreground border-primary"
+                                    : "bg-background hover-elevate border-input"
+                                }`}
+                                data-testid={`btn-recurrence-${option.value}`}
+                              >
+                                {option.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {/* Sub-options when Täglich is selected */}
+                        {(field.value === "daily" || field.value === "weekdays") && (
+                          <div className="flex gap-2 pl-1">
                             <button
-                              key={option.value}
                               type="button"
-                              onClick={() => field.onChange(option.value)}
-                              className={`px-2 py-2 text-xs font-medium rounded-md border transition-colors ${
-                                field.value === option.value
-                                  ? "bg-primary text-primary-foreground border-primary"
+                              onClick={() => field.onChange("daily")}
+                              className={`px-2 py-1.5 text-xs font-medium rounded-md border transition-colors ${
+                                field.value === "daily"
+                                  ? "bg-primary/20 text-primary border-primary/50"
                                   : "bg-background hover-elevate border-input"
                               }`}
-                              data-testid={`btn-recurrence-${option.value}`}
+                              data-testid="btn-recurrence-sub-daily"
                             >
-                              {option.label}
+                              {t('tasks.dailySubAllDays')}
                             </button>
-                          ))}
-                        </div>
+                            <button
+                              type="button"
+                              onClick={() => field.onChange("weekdays")}
+                              className={`px-2 py-1.5 text-xs font-medium rounded-md border transition-colors ${
+                                field.value === "weekdays"
+                                  ? "bg-primary/20 text-primary border-primary/50"
+                                  : "bg-background hover-elevate border-input"
+                              }`}
+                              data-testid="btn-recurrence-sub-weekdays"
+                            >
+                              {t('tasks.dailySubWeekdays')}
+                            </button>
+                          </div>
+                        )}
                         {/* Dynamic description based on selection */}
                         <p className="text-sm text-muted-foreground">
                           {field.value === "none" && t('tasks.recurrenceDescNone')}
