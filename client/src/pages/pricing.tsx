@@ -216,26 +216,35 @@ export default function Pricing() {
                     {t("pricing.manageOnWeb")}
                   </p>
                 ) : (
-                  <Button
-                    className="w-full"
-                    variant={tier.popular ? "default" : "outline"}
-                    disabled={tier.id === "free" || isCurrentTier || !isParent || isProcessing}
-                    onClick={() => handleUpgrade(tier.id)}
-                    data-testid={`button-select-${tier.id}`}
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {t("pricing.processing")}
-                      </>
-                    ) : tier.id === "free" ? (
-                      t("pricing.currentPlan")
-                    ) : isCurrentTier ? (
-                      t("pricing.currentPlan")
-                    ) : (
-                      t("pricing.choosePlan", { name: tier.name })
+                  <div className="flex flex-col items-center gap-2">
+                    <Button
+                      className="w-full"
+                      variant={tier.popular ? "default" : "outline"}
+                      disabled={tier.id === "free" || isCurrentTier || !isParent || isProcessing}
+                      onClick={() => handleUpgrade(tier.id)}
+                      data-testid={`button-select-${tier.id}`}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {t("pricing.processing")}
+                        </>
+                      ) : tier.id === "free" ? (
+                        t("pricing.currentPlan")
+                      ) : isCurrentTier ? (
+                        t("pricing.currentPlan")
+                      ) : (
+                        t("pricing.choosePlan", { name: tier.name })
+                      )}
+                    </Button>
+                    {isCurrentTier && tier.id !== "free" && (
+                      <Link href="/settings" data-testid={`link-cancel-${tier.id}`}>
+                        <span className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                          Abo kündigen → Einstellungen
+                        </span>
+                      </Link>
                     )}
-                  </Button>
+                  </div>
                 )}
               </Card>
             );
