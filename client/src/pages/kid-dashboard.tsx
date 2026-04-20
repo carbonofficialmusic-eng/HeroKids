@@ -1654,7 +1654,7 @@ export default function KidDashboard() {
                 </div>
                 {/* Star Counter - Links to Skins Gallery */}
                 <Link href="/skins">
-                  <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 px-4 py-2 rounded-xl border border-yellow-500/30 cursor-pointer hover:from-yellow-500/30 hover:to-orange-500/30 transition-colors" data-testid="link-stars-to-skins">
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/60 to-orange-500/60 px-4 py-2 rounded-xl border border-yellow-500/70 cursor-pointer hover:from-yellow-500/75 hover:to-orange-500/75 transition-colors" data-testid="link-stars-to-skins">
                     <motion.div
                       animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
                       transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
