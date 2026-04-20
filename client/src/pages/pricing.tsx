@@ -237,7 +237,7 @@ export default function Pricing() {
                         t("pricing.choosePlan", { name: tier.name })
                       )}
                     </Button>
-                    {isCurrentTier && tier.id !== "free" && (
+                    {isCurrentTier && tier.id !== "free" && isParent && (
                       <Link href="/settings" data-testid={`link-cancel-${tier.id}`}>
                         <span className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                           {t("pricing.cancelToSettings")}
