@@ -18,7 +18,7 @@ Preferred communication style: Simple, everyday language.
 - **Backend**: Express.js with TypeScript (Node.js), RESTful API.
 - **Real-time Updates**: WebSocket server using "family rooms" for live synchronization.
 - **Authentication**: First-party email/password auth using bcrypt password hashes, Passport sessions, PostgreSQL session storage, email verification, password reset tokens, and mobile JWT/device-token compatibility. Legacy `/api/login` and `/api/callback` redirect to `/`.
-- **Email Delivery**: Transactional email abstraction supports Resend or SendGrid via environment variables, with explicit failures when no provider is configured.
+- **Email Delivery**: Transactional email abstraction supports Resend or SendGrid via environment variables, with explicit failures when no provider is configured. Resend connection was suggested and dismissed on 2026-04-21; use `RESEND_API_KEY` or `SENDGRID_API_KEY` secrets plus optional `EMAIL_FROM` when the user is ready.
 - **File Uploads**: Replit Object Storage (Google Cloud Storage backend) with presigned URL-based client-side uploads.
 - **Subscription Tiers**: 3-tier model (Free, Family, Enterprise) with feature unlocks enforced by backend middleware.
 - **Gamification Features**: Monthly leaderboards, unlockable character skins across various themed collections (122 total skins), a star collection system for unlocking special avatars, and an achievements system with flexible reward types.
