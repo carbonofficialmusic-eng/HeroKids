@@ -197,6 +197,16 @@ describe("admin email health UI", () => {
     }>;
     taskCount: number;
     rewardCount: number;
+    accountLinkRepairHistory?: Array<{
+      id: string;
+      memberId: string;
+      memberDisplayName: string;
+      action: string;
+      oldAccountEmail: string | null;
+      newAccountEmail: string | null;
+      repairedBy: string | null;
+      repairedAt: string;
+    }>;
   };
 
   const setupFetchMock = () => {
@@ -251,6 +261,17 @@ describe("admin email health UI", () => {
             action: "link",
             email: "sonoastudio@me.com",
           });
+          if (!body.detachExisting && adminFamilyDetails.members.some((member) => member.userId === "user-sonoastudio")) {
+            return jsonResponse({
+              message: "This account is already linked to Diego. Unlink it there first or confirm moving it.",
+              existingMember: {
+                id: "member-diego",
+                displayName: "Diego",
+                familyName: "Hero Family",
+                role: "child",
+              },
+            }, 409);
+          }
           adminFamilyDetails = {
             ...adminFamilyDetails,
             members: adminFamilyDetails.members.map((member) =>
@@ -270,6 +291,30 @@ describe("admin email health UI", () => {
                   }
                 : member,
             ),
+            accountLinkRepairHistory: body.detachExisting
+              ? [
+                  {
+                    id: "repair-move-detach",
+                    memberId: "member-diego",
+                    memberDisplayName: "Diego",
+                    action: "move_detach",
+                    oldAccountEmail: "sonoastudio@me.com",
+                    newAccountEmail: null,
+                    repairedBy: "Admin",
+                    repairedAt: "2026-04-21T00:00:00.000Z",
+                  },
+                  {
+                    id: "repair-move-link",
+                    memberId: "member-riewert",
+                    memberDisplayName: "Riewert",
+                    action: "move_link",
+                    oldAccountEmail: null,
+                    newAccountEmail: "sonoastudio@me.com",
+                    repairedBy: "Admin",
+                    repairedAt: "2026-04-21T00:01:00.000Z",
+                  },
+                ]
+              : adminFamilyDetails.accountLinkRepairHistory,
           };
           return jsonResponse({ success: true, message: "Account linked to member" });
         }
@@ -370,6 +415,7 @@ describe("admin email health UI", () => {
       ],
       taskCount: 0,
       rewardCount: 0,
+      accountLinkRepairHistory: [],
     };
     setupFetchMock();
   });
@@ -463,5 +509,47 @@ describe("admin email health UI", () => {
     await waitFor(() => {
       expect(screen.getByTestId("badge-account-email-member-riewert").textContent).toContain("sonoastudio@me.com");
     });
+  });
+
+  it("asks admins to confirm moving an already linked account", async () => {
+    const user = userEvent.setup();
+    adminFamilyDetails = {
+      ...adminFamilyDetails,
+      members: adminFamilyDetails.members.map((member) =>
+        member.id === "member-diego"
+          ? {
+              ...member,
+              userId: "user-sonoastudio",
+              account: {
+                email: "sonoastudio@me.com",
+                firstName: "Riewert",
+                lastName: null,
+                isEmailVerified: true,
+                isDisabled: false,
+                lastLoginAt: null,
+                createdAt: "2026-04-21T00:00:00.000Z",
+              },
+            }
+          : member,
+      ),
+    };
+    renderAdmin();
+
+    await user.click(await screen.findByTestId("tab-families"));
+    await user.click(await screen.findByText("Hero Family"));
+    await user.click(screen.getByTestId("button-link-account-member-riewert"));
+    await user.type(await screen.findByTestId("input-link-account-email"), "sonoastudio@me.com");
+    await user.click(screen.getByTestId("button-confirm-link-account"));
+
+    expect((await screen.findByTestId("text-account-move-warning")).textContent).toContain("currently linked to Diego");
+    expect(screen.getByTestId("text-account-move-target").textContent).toContain("link it to Riewert");
+
+    await user.click(screen.getByTestId("button-confirm-move-account"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("badge-account-email-member-riewert").textContent).toContain("sonoastudio@me.com");
+    });
+    expect(screen.getByTestId("list-account-link-repair-history").textContent).toContain("Moved away");
+    expect(screen.getByTestId("list-account-link-repair-history").textContent).toContain("Moved here");
   });
 });

@@ -131,6 +131,23 @@ interface AccountLinkRepairEntry {
   repairedAt: string;
 }
 
+interface ExistingLinkedMember {
+  id: string;
+  displayName: string;
+  familyName: string;
+  role: string;
+}
+
+class AccountLinkConflictError extends Error {
+  existingMember: ExistingLinkedMember;
+
+  constructor(message: string, existingMember: ExistingLinkedMember) {
+    super(message);
+    this.name = "AccountLinkConflictError";
+    this.existingMember = existingMember;
+  }
+}
+
 interface SkinStat {
   id: string;
   name: string;
@@ -240,6 +257,13 @@ export default function AdminPage() {
   const [memberToAddPoints, setMemberToAddPoints] = useState<{ id: string; name: string } | null>(null);
   const [memberToLinkAccount, setMemberToLinkAccount] = useState<{ id: string; name: string; familyName: string } | null>(null);
   const [accountEmailToLink, setAccountEmailToLink] = useState("");
+  const [accountMoveConfirmation, setAccountMoveConfirmation] = useState<{
+    familyName: string;
+    memberId: string;
+    memberName: string;
+    email: string;
+    existingMember: ExistingLinkedMember;
+  } | null>(null);
   const [adminActor, setAdminActor] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("admin_actor") : null) || "Admin");
   const [pointsToAdd, setPointsToAdd] = useState("");
   const [selectedFamilies, setSelectedFamilies] = useState<Set<string>>(new Set());
@@ -482,6 +506,7 @@ export default function AdminPage() {
       email,
       detachExisting,
       adminActor,
+      memberName,
     }: {
       familyName: string;
       memberId: string;
@@ -489,6 +514,7 @@ export default function AdminPage() {
       email?: string;
       detachExisting?: boolean;
       adminActor?: string;
+      memberName?: string;
     }) => {
       const res = await fetch(`/api/admin/families/${encodeURIComponent(familyName)}/members/${memberId}/account`, {
         method: "PATCH",
@@ -499,16 +525,32 @@ export default function AdminPage() {
         body: JSON.stringify({ action, email, detachExisting, adminActor }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update account link");
+      if (!res.ok) {
+        if (res.status === 409 && data.existingMember && action === "link" && !detachExisting) {
+          throw new AccountLinkConflictError(data.message || "Account is already linked to another member", data.existingMember);
+        }
+        throw new Error(data.message || "Failed to update account link");
+      }
       return data;
     },
     onSuccess: (data) => {
       toast({ title: data.message || "Account link updated" });
       setMemberToLinkAccount(null);
       setAccountEmailToLink("");
+      setAccountMoveConfirmation(null);
       refetchDetails();
     },
-    onError: (error: Error) => {
+    onError: (error: Error, variables) => {
+      if (error instanceof AccountLinkConflictError) {
+        setAccountMoveConfirmation({
+          familyName: variables.familyName,
+          memberId: variables.memberId,
+          memberName: variables.memberName || memberToLinkAccount?.name || "this member",
+          email: variables.email || accountEmailToLink.trim(),
+          existingMember: error.existingMember,
+        });
+        return;
+      }
       toast({ title: error.message, variant: "destructive" });
     },
   });
@@ -1891,12 +1933,12 @@ export default function AdminPage() {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={!!memberToLinkAccount} onOpenChange={(open) => { if (!open) { setMemberToLinkAccount(null); setAccountEmailToLink(""); } }}>
+        <Dialog open={!!memberToLinkAccount} onOpenChange={(open) => { if (!open) { setMemberToLinkAccount(null); setAccountEmailToLink(""); setAccountMoveConfirmation(null); } }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Link account</DialogTitle>
               <DialogDescription>
-                Link an existing login account to <strong>{memberToLinkAccount?.name}</strong>. If that account is already linked to another member, unlink it there first.
+                Link an existing login account to <strong>{memberToLinkAccount?.name}</strong>. If that account is already linked to another member, you will be asked to confirm moving it.
               </DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-3">
@@ -1924,6 +1966,7 @@ export default function AdminPage() {
                       action: "link",
                       email: accountEmailToLink.trim(),
                       adminActor,
+                      memberName: memberToLinkAccount.name,
                     });
                   }
                 }}
@@ -1935,6 +1978,53 @@ export default function AdminPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!accountMoveConfirmation} onOpenChange={(open) => !open && setAccountMoveConfirmation(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Move linked account?</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-3">
+                <span className="block" data-testid="text-account-move-warning">
+                  The account <strong>{accountMoveConfirmation?.email}</strong> is currently linked to{" "}
+                  <strong>{accountMoveConfirmation?.existingMember.displayName}</strong>
+                  {" "}in {accountMoveConfirmation?.existingMember.familyName}.
+                </span>
+                <span className="block" data-testid="text-account-move-target">
+                  Confirming will detach it from that member and link it to{" "}
+                  <strong>{accountMoveConfirmation?.memberName}</strong>. Both repair history entries will be recorded.
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                disabled={updateMemberAccountMutation.isPending}
+                data-testid="button-cancel-move-account"
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                disabled={updateMemberAccountMutation.isPending || !accountMoveConfirmation}
+                onClick={(event) => {
+                  event.preventDefault();
+                  if (accountMoveConfirmation) {
+                    updateMemberAccountMutation.mutate({
+                      familyName: accountMoveConfirmation.familyName,
+                      memberId: accountMoveConfirmation.memberId,
+                      action: "link",
+                      email: accountMoveConfirmation.email,
+                      detachExisting: true,
+                      adminActor,
+                      memberName: accountMoveConfirmation.memberName,
+                    });
+                  }
+                }}
+                data-testid="button-confirm-move-account"
+              >
+                {updateMemberAccountMutation.isPending ? "Moving..." : "Move account"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <Dialog open={!!memberToRemove} onOpenChange={(open) => !open && setMemberToRemove(null)}>
           <DialogContent>
