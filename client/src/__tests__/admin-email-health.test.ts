@@ -55,6 +55,16 @@ const healthyEmailStatus = {
   issues: [],
 };
 
+type TestEmailHealthStatus = typeof healthyEmailStatus & {
+  status: "healthy" | "warning" | "unhealthy";
+  configured: boolean;
+  provider: string | null;
+  credentialSource: string | null;
+  baseUrl: string | null;
+  linksUseExpectedDomain: boolean;
+  issues: string[];
+};
+
 const jsonResponse = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
@@ -150,7 +160,7 @@ describe("admin email health routes", () => {
 });
 
 describe("admin email health UI", () => {
-  let currentEmailStatus: typeof healthyEmailStatus;
+  let currentEmailStatus: TestEmailHealthStatus;
 
   const setupFetchMock = () => {
     vi.stubGlobal(
@@ -269,5 +279,25 @@ describe("admin email health UI", () => {
         body: JSON.stringify({ recipient: "owner@example.com" }),
       }),
     );
+  });
+
+  it("shows a prominent monitoring alert when transactional email becomes unhealthy", async () => {
+    currentEmailStatus = {
+      ...healthyEmailStatus,
+      status: "unhealthy",
+      configured: false,
+      provider: null,
+      credentialSource: null,
+      baseUrl: null,
+      linksUseExpectedDomain: false,
+      issues: ["Resend credentials are missing."],
+    };
+
+    renderAdmin();
+
+    expect((await screen.findByTestId("alert-email-health-monitoring")).textContent).toContain("Transactional email needs attention");
+    expect(screen.getByTestId("text-email-health-alert-status").textContent).toContain("Status: Not ready");
+    expect(screen.getByTestId("text-email-health-alert-issue").textContent).toContain("Resend credentials are missing.");
+    expect(screen.getByTestId("button-refresh-email-health-alert")).toBeTruthy();
   });
 });

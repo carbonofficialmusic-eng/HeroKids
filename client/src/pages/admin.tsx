@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -189,6 +190,7 @@ export default function AdminPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [emailTestRecipient, setEmailTestRecipient] = useState("");
+  const lastEmailAlertKeyRef = useRef<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -293,6 +295,8 @@ export default function AdminPage() {
       return res.json();
     },
     enabled: !!token,
+    refetchInterval: 5 * 60 * 1000,
+    refetchIntervalInBackground: true,
   });
 
   const CHART_COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7c43", "#a855f7"];
@@ -461,6 +465,28 @@ export default function AdminPage() {
 
   const emailStatusLabel = emailHealth?.status === "healthy" ? "Ready" : emailHealth?.status === "warning" ? "Needs test" : "Not ready";
   const EmailStatusIcon = emailHealth?.status === "healthy" ? CheckCircle2 : emailHealth?.status === "warning" ? AlertTriangle : XCircle;
+  const emailHealthAlertIssue =
+    emailHealth?.issues[0] ||
+    (emailHealth?.status === "warning" ? "Run a test email to confirm delivery before launch." : "Check the transactional email provider and launch domain settings.");
+
+  useEffect(() => {
+    if (!emailHealth || emailHealth.status === "healthy") {
+      lastEmailAlertKeyRef.current = null;
+      return;
+    }
+
+    const alertKey = `${emailHealth.status}:${emailHealthAlertIssue}`;
+    if (lastEmailAlertKeyRef.current === alertKey) {
+      return;
+    }
+
+    lastEmailAlertKeyRef.current = alertKey;
+    toast({
+      title: "Email readiness needs attention",
+      description: emailHealthAlertIssue,
+      variant: emailHealth.status === "unhealthy" ? "destructive" : undefined,
+    });
+  }, [emailHealth, emailHealthAlertIssue, toast]);
 
   if (!token) {
     return (
@@ -550,6 +576,33 @@ export default function AdminPage() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
+        {emailHealth && emailHealth.status !== "healthy" && (
+          <Alert
+            variant={emailHealth.status === "unhealthy" ? "destructive" : "default"}
+            className="mb-6"
+            data-testid="alert-email-health-monitoring"
+          >
+            <EmailStatusIcon className="h-4 w-4" />
+            <AlertTitle>Transactional email needs attention</AlertTitle>
+            <AlertDescription>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <p data-testid="text-email-health-alert-status">Status: {emailStatusLabel}</p>
+                  <p data-testid="text-email-health-alert-issue">{emailHealthAlertIssue}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => refetchEmailHealth()}
+                  data-testid="button-refresh-email-health-alert"
+                >
+                  Refresh email status
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-6 max-w-3xl">
             <TabsTrigger value="overview" data-testid="tab-overview">
