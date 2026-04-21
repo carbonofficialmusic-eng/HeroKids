@@ -19,7 +19,8 @@ Preferred communication style: Simple, everyday language.
 - **Real-time Updates**: WebSocket server using "family rooms" for live synchronization.
 - **Authentication**: First-party email/password auth using bcrypt password hashes, Passport sessions, PostgreSQL session storage, email verification, password reset tokens, database-backed login rate limiting, deterministic case-insensitive email lookup, and mobile JWT/device-token compatibility. Verified account emails are protected by a normalized unique database index. Legacy `/api/login` and `/api/callback` redirect to `/`.
 - **Account Setup Flow**: Successful registration redirects to `/setup` with a highlighted first-step banner and prefilled display/family-name suggestions. The first profile is enforced as a parent, while existing authenticated family members continue to route to dashboards by role.
-- **Email Delivery**: Transactional email abstraction supports Resend through the Replit connection, or `RESEND_API_KEY`/`SENDGRID_API_KEY` secrets as fallback. Resend was connected on 2026-04-21 and `EMAIL_FROM` can be used to override the default `HeroKids <no-reply@herokids.app>` sender. Auth email links use trusted configured origins (`APP_BASE_URL`, `PUBLIC_APP_URL`, or `REPLIT_DOMAINS`) instead of request host headers.
+- **Email Delivery**: Transactional email abstraction supports Resend through the Replit connection, or `RESEND_API_KEY`/`SENDGRID_API_KEY` secrets as fallback. Resend was connected on 2026-04-21 and `EMAIL_FROM` can be used to override the default `HeroKids <no-reply@herokids.app>` sender. Auth email links use trusted configured origins (`APP_BASE_URL`, `PUBLIC_APP_URL`, or `REPLIT_DOMAINS`) instead of request host headers. Production environment variables now set `APP_BASE_URL=https://herokids.app` and `EMAIL_FROM=HeroKids <noreply@herokids.app>`.
+- **Email Domain Test Status**: On 2026-04-21, registration and forgot-password send attempts reached Resend but failed because Resend reported: `The herokids.app domain is not verified. Please, add and verify your domain on https://resend.com/domains`. Retest after DNS/domain verification is complete.
 - **File Uploads**: Replit Object Storage (Google Cloud Storage backend) with presigned URL-based client-side uploads.
 - **Subscription Tiers**: 3-tier model (Free, Family, Enterprise) with feature unlocks enforced by backend middleware.
 - **Gamification Features**: Monthly leaderboards, unlockable character skins across various themed collections (122 total skins), a star collection system for unlocking special avatars, and an achievements system with flexible reward types.
@@ -50,4 +51,4 @@ Preferred communication style: Simple, everyday language.
 -   **Fonts**: Google Fonts (Nunito, Fredoka).
 -   **UI Libraries**: Radix UI, shadcn/ui, Tailwind CSS, lucide-react.
 -   **Build & Development**: Vite, esbuild, tsx.
--   **Validation**: Zod (with Drizzle-Zod integration).
+-   **Validation**: Zod with Drizzle-Zod integration.
