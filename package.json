@@ -128,7 +128,10 @@
     "tailwindcss": "^3.4.19",
     "tsx": "^4.20.6",
     "typescript": "5.6.3",
-    "vite": "^5.4.20"
+    "vite": "^5.4.20",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "jsdom": "^29.0.2"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
