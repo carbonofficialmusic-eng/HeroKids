@@ -795,6 +795,36 @@ export const insertStarPlacementSchema = createInsertSchema(starPlacements).omit
 export type InsertStarPlacement = z.infer<typeof insertStarPlacementSchema>;
 export type StarPlacement = typeof starPlacements.$inferSelect;
 
+export const emailReadinessChecks = pgTable("email_readiness_checks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  checkType: varchar("check_type", { length: 32 }).notNull(),
+  status: varchar("status", { length: 16 }).notNull(),
+  configured: boolean("configured").notNull(),
+  provider: varchar("provider", { length: 64 }),
+  credentialSource: varchar("credential_source", { length: 64 }),
+  fromAddress: varchar("from_address", { length: 320 }).notNull(),
+  baseUrl: varchar("base_url", { length: 512 }),
+  expectedProductionBaseUrl: varchar("expected_production_base_url", { length: 512 }).notNull(),
+  linksUseExpectedDomain: boolean("links_use_expected_domain").notNull(),
+  productionLinksUseExpectedDomain: boolean("production_links_use_expected_domain").notNull(),
+  testAttempted: boolean("test_attempted").notNull().default(false),
+  testSucceeded: boolean("test_succeeded").notNull().default(false),
+  testRecipient: varchar("test_recipient", { length: 320 }),
+  issueSummary: text("issue_summary"),
+  issues: text("issues").array().notNull().default(sql`ARRAY[]::text[]`),
+  checkedAt: timestamp("checked_at").defaultNow(),
+}, (table) => [
+  index("email_readiness_checks_checked_at_idx").on(table.checkedAt),
+]);
+
+export const insertEmailReadinessCheckSchema = createInsertSchema(emailReadinessChecks).omit({
+  id: true,
+  checkedAt: true,
+});
+
+export type InsertEmailReadinessCheck = z.infer<typeof insertEmailReadinessCheckSchema>;
+export type EmailReadinessCheck = typeof emailReadinessChecks.$inferSelect;
+
 // Notification Types
 export const notificationTypeEnum = pgEnum("notification_type", [
   "task_completed",      // Child completed a task

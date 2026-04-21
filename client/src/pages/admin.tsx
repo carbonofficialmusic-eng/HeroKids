@@ -164,6 +164,26 @@ interface EmailHealthResult {
   issues: string[];
 }
 
+interface EmailReadinessCheck {
+  id: string;
+  checkType: "readiness_check" | "test_send";
+  status: "healthy" | "warning" | "unhealthy";
+  configured: boolean;
+  provider: string | null;
+  credentialSource: string | null;
+  fromAddress: string;
+  baseUrl: string | null;
+  expectedProductionBaseUrl: string;
+  linksUseExpectedDomain: boolean;
+  productionLinksUseExpectedDomain: boolean;
+  testAttempted: boolean;
+  testSucceeded: boolean;
+  testRecipient: string | null;
+  issueSummary: string | null;
+  issues: string[];
+  checkedAt: string;
+}
+
 const TIER_LABELS: Record<string, string> = {
   free: "Free",
   family: "Family",
@@ -177,6 +197,17 @@ const TIER_COLORS: Record<string, string> = {
   family_plus: "bg-purple-500",
   family_hero: "bg-amber-500",
 };
+
+function formatEmailCheckTime(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function getEmailCheckLabel(check: EmailReadinessCheck) {
+  return check.checkType === "test_send" ? "Test send" : "Readiness check";
+}
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(null);
@@ -298,6 +329,24 @@ export default function AdminPage() {
     refetchInterval: 5 * 60 * 1000,
     refetchIntervalInBackground: true,
   });
+
+  const { data: emailHistory, isLoading: emailHistoryLoading, refetch: refetchEmailHistory } = useQuery<EmailReadinessCheck[]>({
+    queryKey: ["/api/admin/email-health/history"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/email-health/history", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch email health history");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  useEffect(() => {
+    if (token && emailHealth) {
+      refetchEmailHistory();
+    }
+  }, [token, emailHealth, refetchEmailHistory]);
 
   const CHART_COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7c43", "#a855f7"];
 
@@ -447,6 +496,8 @@ export default function AdminPage() {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["/api/admin/email-health"], data);
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email-health/history"] });
+      refetchEmailHistory();
       if (data.testSend.succeeded) {
         toast({ title: "Test email sent", description: `Delivered to ${data.testSend.recipient}` });
         setEmailTestRecipient("");
@@ -561,6 +612,7 @@ export default function AdminPage() {
                 refetchSkins();
                 refetchAnalytics();
                 refetchEmailHealth();
+                refetchEmailHistory();
               }}
               data-testid="button-refresh-data"
             >
@@ -889,6 +941,96 @@ export default function AdminPage() {
                   </>
                 ) : (
                   <p className="text-sm text-muted-foreground">Email status is unavailable.</p>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    Recent Email Checks
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => refetchEmailHistory()}
+                    data-testid="button-refresh-email-history"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh history
+                  </Button>
+                </CardTitle>
+                <CardDescription>Saved readiness checks and real test-send results without provider secrets.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {emailHistoryLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, index) => (
+                      <div key={index} className="h-20 rounded-md bg-muted animate-pulse" />
+                    ))}
+                  </div>
+                ) : emailHistory && emailHistory.length > 0 ? (
+                  <div className="space-y-3" data-testid="list-email-check-history">
+                    {emailHistory.map((check) => {
+                      const CheckIcon = check.status === "healthy" ? CheckCircle2 : check.status === "warning" ? AlertTriangle : XCircle;
+                      const resultText = check.testAttempted
+                        ? check.testSucceeded
+                          ? "Test send succeeded"
+                          : "Test send failed"
+                        : check.status === "healthy"
+                          ? "Ready"
+                          : check.status === "warning"
+                            ? "Needs test"
+                            : "Not ready";
+
+                      return (
+                        <div
+                          key={check.id}
+                          className="rounded-md bg-muted/50 p-4"
+                          data-testid={`card-email-check-${check.id}`}
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="font-semibold" data-testid={`text-email-check-type-${check.id}`}>{getEmailCheckLabel(check)}</p>
+                                <Badge
+                                  variant={check.status === "healthy" ? "default" : check.status === "warning" ? "secondary" : "destructive"}
+                                  data-testid={`badge-email-check-status-${check.id}`}
+                                >
+                                  <CheckIcon className="h-3 w-3 mr-1" />
+                                  {resultText}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground" data-testid={`text-email-check-time-${check.id}`}>
+                                {formatEmailCheckTime(check.checkedAt)}
+                              </p>
+                            </div>
+                            <div className="text-sm text-muted-foreground text-left md:text-right">
+                              <p data-testid={`text-email-check-provider-${check.id}`}>{check.provider || "No provider"}</p>
+                              {check.testRecipient && (
+                                <p className="break-all" data-testid={`text-email-check-recipient-${check.id}`}>To {check.testRecipient}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="mt-3 grid grid-cols-1 gap-2 text-sm md:grid-cols-3">
+                            <p data-testid={`text-email-check-configured-${check.id}`}>Configured: {check.configured ? "Yes" : "No"}</p>
+                            <p data-testid={`text-email-check-domain-${check.id}`}>Launch domain: {check.linksUseExpectedDomain ? "Matched" : "Needs attention"}</p>
+                            <p data-testid={`text-email-check-production-domain-${check.id}`}>Production links: {check.productionLinksUseExpectedDomain ? "Ready" : "Needs attention"}</p>
+                          </div>
+                          {check.issueSummary && (
+                            <p className="mt-3 text-sm text-destructive" data-testid={`text-email-check-issue-${check.id}`}>
+                              {check.issueSummary}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground" data-testid="text-email-history-empty">
+                    No saved readiness checks yet. Refresh the email status or send a test email to create the first record.
+                  </p>
                 )}
               </CardContent>
             </Card>

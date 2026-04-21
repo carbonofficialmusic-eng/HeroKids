@@ -61,9 +61,12 @@ import {
   starPlacements,
   type StarPlacement,
   notifications,
+  emailReadinessChecks,
   type Notification,
   type InsertNotification,
   type NotificationType,
+  type EmailReadinessCheck,
+  type InsertEmailReadinessCheck,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gt, lt, sql, inArray, isNull, isNotNull } from "drizzle-orm";
@@ -347,6 +350,9 @@ export interface IStorage {
   deleteAllNotificationsForMember(memberId: string): Promise<void>;
   deleteNotificationsByTypeAndTask(familyName: string, type: NotificationType, taskId: string): Promise<void>;
   deleteNotificationsByTarget(familyName: string, type: NotificationType, targetMemberId: string): Promise<void>;
+
+  createEmailReadinessCheck(check: InsertEmailReadinessCheck): Promise<EmailReadinessCheck>;
+  getRecentEmailReadinessChecks(limit?: number): Promise<EmailReadinessCheck[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3530,6 +3536,31 @@ export class DatabaseStorage implements IStorage {
       eq(notifications.type, type),
       eq(notifications.targetMemberId, targetMemberId)
     ));
+  }
+
+  async createEmailReadinessCheck(checkData: InsertEmailReadinessCheck): Promise<EmailReadinessCheck> {
+    const [check] = await db
+      .insert(emailReadinessChecks)
+      .values(checkData)
+      .returning();
+    await db.execute(sql`
+      DELETE FROM email_readiness_checks
+      WHERE id IN (
+        SELECT id FROM email_readiness_checks
+        ORDER BY checked_at DESC
+        OFFSET 100
+      )
+    `);
+    return check;
+  }
+
+  async getRecentEmailReadinessChecks(limit = 10): Promise<EmailReadinessCheck[]> {
+    const safeLimit = Math.min(Math.max(limit, 1), 25);
+    return await db
+      .select()
+      .from(emailReadinessChecks)
+      .orderBy(desc(emailReadinessChecks.checkedAt))
+      .limit(safeLimit);
   }
 }
 

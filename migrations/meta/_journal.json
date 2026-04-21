@@ -29,6 +29,13 @@
       "when": 1776794200000,
       "tag": "0003_auth_rate_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776801360000,
+      "tag": "0004_email_readiness_checks",
+      "breakpoints": true
     }
   ]
 }
