@@ -36,7 +36,13 @@
     "welcome": "欢迎来到 HeroKids！",
     "selectFamily": "选择您的家庭",
     "createFamily": "创建新家庭",
-    "joinFamily": "加入家庭"
+    "joinFamily": "加入家庭",
+    "resendVerification": "重新发送验证邮件",
+    "resendingVerification": "正在发送...",
+    "verificationEmailSent": "验证邮件已发送",
+    "checkInboxAndSpam": "请检查收件箱和垃圾邮件文件夹。",
+    "verificationEmailFailed": "无法发送验证邮件",
+    "tryAgainLater": "请稍后再试。"
   },
   "avatarSelector": {
     "chooseYourAvatar": "选择你的头像",

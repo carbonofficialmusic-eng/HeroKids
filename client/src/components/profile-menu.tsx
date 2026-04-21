@@ -44,7 +44,7 @@ export function ProfileMenu({
   const [open, setOpen] = useState(false);
 
   const getErrorMessage = (error: unknown) => {
-    return error instanceof Error ? error.message : "Bitte versuche es später noch einmal.";
+    return error instanceof Error ? error.message : t("auth.tryAgainLater");
   };
 
   const resendVerificationMutation = useMutation({
@@ -54,13 +54,13 @@ export function ProfileMenu({
     },
     onSuccess: (data) => {
       toast({
-        title: "Bestätigungsmail gesendet",
-        description: data.message || "Bitte prüfe deinen Posteingang und den Spam-Ordner.",
+        title: t("auth.verificationEmailSent"),
+        description: data.message || t("auth.checkInboxAndSpam"),
       });
     },
     onError: (error: unknown) => {
       toast({
-        title: "Bestätigung konnte nicht gesendet werden",
+        title: t("auth.verificationEmailFailed"),
         description: getErrorMessage(error),
         variant: "destructive",
       });
@@ -116,7 +116,7 @@ export function ProfileMenu({
               ) : (
                 <MailCheck className="mr-2 h-4 w-4" />
               )}
-              <span>{resendVerificationMutation.isPending ? "Wird gesendet..." : "Bestätigungsmail erneut senden"}</span>
+              <span>{resendVerificationMutation.isPending ? t("auth.resendingVerification") : t("auth.resendVerification")}</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>

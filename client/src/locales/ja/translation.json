@@ -36,7 +36,13 @@
     "welcome": "HeroKidsへようこそ！",
     "selectFamily": "家族を選択",
     "createFamily": "新しい家族を作成",
-    "joinFamily": "家族に参加"
+    "joinFamily": "家族に参加",
+    "resendVerification": "確認メールを再送信",
+    "resendingVerification": "送信中...",
+    "verificationEmailSent": "確認メールを送信しました",
+    "checkInboxAndSpam": "受信トレイと迷惑メールフォルダーを確認してください。",
+    "verificationEmailFailed": "確認メールを送信できませんでした",
+    "tryAgainLater": "後でもう一度お試しください。"
   },
   "avatarSelector": {
     "chooseYourAvatar": "アバターを選ぶ",

@@ -36,7 +36,13 @@
     "welcome": "HeroKids에 오신 것을 환영합니다!",
     "selectFamily": "가족 선택",
     "createFamily": "새 가족 만들기",
-    "joinFamily": "가족 참여하기"
+    "joinFamily": "가족 참여하기",
+    "resendVerification": "인증 이메일 다시 보내기",
+    "resendingVerification": "보내는 중...",
+    "verificationEmailSent": "인증 이메일을 보냈습니다",
+    "checkInboxAndSpam": "받은편지함과 스팸 폴더를 확인하세요.",
+    "verificationEmailFailed": "인증 이메일을 보낼 수 없습니다",
+    "tryAgainLater": "나중에 다시 시도하세요."
   },
   "avatarSelector": {
     "chooseYourAvatar": "아바타 선택",

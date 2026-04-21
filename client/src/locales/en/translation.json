@@ -37,7 +37,13 @@
     "welcome": "Welcome to HeroKids!",
     "selectFamily": "Select Your Family",
     "createFamily": "Create New Family",
-    "joinFamily": "Join a Family"
+    "joinFamily": "Join a Family",
+    "resendVerification": "Resend verification email",
+    "resendingVerification": "Sending...",
+    "verificationEmailSent": "Verification email sent",
+    "checkInboxAndSpam": "Please check your inbox and spam folder.",
+    "verificationEmailFailed": "Verification email could not be sent",
+    "tryAgainLater": "Please try again later."
   },
   "avatarSelector": {
     "chooseYourAvatar": "Choose Your Avatar",

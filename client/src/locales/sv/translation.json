@@ -36,7 +36,13 @@
     "welcome": "Välkommen till HeroKids!",
     "selectFamily": "Välj din familj",
     "createFamily": "Skapa ny familj",
-    "joinFamily": "Gå med i en familj"
+    "joinFamily": "Gå med i en familj",
+    "resendVerification": "Skicka verifieringsmejl igen",
+    "resendingVerification": "Skickar...",
+    "verificationEmailSent": "Verifieringsmejl skickat",
+    "checkInboxAndSpam": "Kontrollera din inkorg och skräppostmapp.",
+    "verificationEmailFailed": "Verifieringsmejlet kunde inte skickas",
+    "tryAgainLater": "Försök igen senare."
   },
   "avatarSelector": {
     "chooseYourAvatar": "Välj din avatar",
