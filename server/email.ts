@@ -65,6 +65,15 @@ async function getResendCredentials() {
   return getResendConnectorCredentials();
 }
 
+export async function isTransactionalEmailConfigured() {
+  if (process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY) {
+    return true;
+  }
+
+  const credentials = await getResendConnectorCredentials();
+  return Boolean(credentials?.apiKey);
+}
+
 async function sendWithResend(input: EmailInput) {
   const credentials = await getResendCredentials();
   if (!credentials?.apiKey) {

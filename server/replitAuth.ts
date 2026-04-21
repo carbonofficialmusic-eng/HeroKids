@@ -7,7 +7,7 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
 import { verifyAccessToken } from "./mobileAuth";
-import { EmailProviderNotConfiguredError, sendPasswordResetEmail, sendVerificationEmail } from "./email";
+import { EmailProviderNotConfiguredError, isTransactionalEmailConfigured, sendPasswordResetEmail, sendVerificationEmail } from "./email";
 
 const registerSchema = z.object({
   email: z.string().email().max(320),
@@ -255,6 +255,14 @@ export async function setupAuth(app: Express) {
     try {
       const parsed = forgotPasswordSchema.parse(req.body);
       const email = normalizeEmail(parsed.email);
+      const canSendEmail = await isTransactionalEmailConfigured();
+
+      if (!canSendEmail) {
+        return res.status(503).json({
+          message: "E-Mail-Versand ist noch nicht verbunden. Bitte richte Resend oder SendGrid ein, bevor Passwort-Reset-E-Mails verschickt werden können.",
+        });
+      }
+
       const user = await storage.getUserByEmail(email);
 
       if (!user) {
@@ -272,8 +280,9 @@ export async function setupAuth(app: Express) {
         await sendPasswordResetEmail(email, user.firstName, resetUrl);
       } catch (error) {
         if (error instanceof EmailProviderNotConfiguredError) {
-          console.warn("Password reset email skipped:", error.message);
-          return res.json({ message: "Falls ein Konto existiert, senden wir dir eine E-Mail." });
+          return res.status(503).json({
+            message: "E-Mail-Versand ist noch nicht verbunden. Bitte richte Resend oder SendGrid ein, bevor Passwort-Reset-E-Mails verschickt werden können.",
+          });
         }
         throw error;
       }
