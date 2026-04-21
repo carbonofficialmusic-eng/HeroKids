@@ -782,6 +782,8 @@ export default function Dashboard() {
         onComplete={(data) => setupMutation.mutate(data)}
         onJoin={(data) => joinFamilyMutation.mutate(data)}
         isSubmitting={setupMutation.isPending || joinFamilyMutation.isPending}
+        initialDisplayName={[user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.email?.split("@")[0] || ""}
+        initialFamilyName={user?.lastName ? `Familie ${user.lastName}` : user?.firstName ? `${user.firstName}s Familie` : ""}
       />
     );
   }

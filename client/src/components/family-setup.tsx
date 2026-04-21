@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,9 +22,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AvatarSelector } from "./avatar-selector";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
-import { Users, UserPlus, Smartphone } from "lucide-react";
+import { CheckCircle, Users, UserPlus, Smartphone } from "lucide-react";
 import { Link } from "wouter";
 
 const createFamilySchema = z.object({
@@ -46,20 +47,23 @@ interface FamilySetupProps {
   onComplete: (data: FamilyMemberForm & { avatarUrl: string; color: string }) => void;
   onJoin: (data: JoinFamilyForm & { avatarUrl: string; color: string }) => void;
   isSubmitting?: boolean;
+  initialDisplayName?: string;
+  initialFamilyName?: string;
 }
 
-export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: FamilySetupProps) {
+export function FamilySetup({ onComplete, onJoin, isSubmitting = false, initialDisplayName = "", initialFamilyName = "" }: FamilySetupProps) {
   const { t } = useTranslation();
   const [selectedAvatar, setSelectedAvatar] = useState(avatarAssets[0].url);
   const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
   const [uploadedAvatarFile, setUploadedAvatarFile] = useState<File | null>(null);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
+  const [showRegistrationIntro, setShowRegistrationIntro] = useState(false);
 
   const createForm = useForm<CreateFamilyForm>({
     resolver: zodResolver(createFamilySchema),
     defaultValues: {
-      familyName: "",
-      displayName: "",
+      familyName: initialFamilyName,
+      displayName: initialDisplayName,
       role: "parent",
     },
   });
@@ -68,9 +72,30 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
     resolver: zodResolver(joinFamilySchema),
     defaultValues: {
       joinCode: "",
-      displayName: "",
+      displayName: initialDisplayName,
     },
   });
+
+  useEffect(() => {
+    if (sessionStorage.getItem("herokids_registration_complete") === "true") {
+      setShowRegistrationIntro(true);
+      sessionStorage.removeItem("herokids_registration_complete");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (initialDisplayName || initialFamilyName) {
+      createForm.reset({
+        familyName: initialFamilyName,
+        displayName: initialDisplayName,
+        role: createForm.getValues("role") || "parent",
+      });
+      joinForm.reset({
+        joinCode: joinForm.getValues("joinCode") || "",
+        displayName: initialDisplayName,
+      });
+    }
+  }, [initialDisplayName, initialFamilyName, createForm, joinForm]);
 
   const handleCustomUpload = (file: File) => {
     setUploadedAvatarFile(file);
@@ -166,6 +191,28 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false }: Family
           <p className="text-muted-foreground" data-testid="text-setup-subtitle">
             {t('familySetup.setupProfile')}
           </p>
+        </div>
+
+        {showRegistrationIntro && (
+          <Alert className="mb-6" data-testid="status-registration-next-step">
+            <CheckCircle className="h-4 w-4" />
+            <AlertTitle>Konto erstellt. Jetzt noch Familie einrichten.</AlertTitle>
+            <AlertDescription>
+              Wir haben deinen Namen schon eingetragen. Lege jetzt deine Familie an oder tritt einer bestehenden Familie mit Einladungscode bei.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="mb-6 grid gap-3 rounded-md bg-muted/60 p-4 text-sm text-muted-foreground" data-testid="panel-setup-steps">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold text-foreground">Schritt 1</span>
+            <span>Konto erstellen</span>
+            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold text-foreground">Schritt 2</span>
+            <span>Familie und dein Profil einrichten</span>
+          </div>
         </div>
 
         <Tabs defaultValue="create" className="w-full">

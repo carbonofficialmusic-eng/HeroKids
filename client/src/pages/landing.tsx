@@ -119,6 +119,7 @@ function AuthPanel() {
           description: "Wir haben dir eine Bestätigungsmail gesendet.",
         });
       }
+      sessionStorage.setItem("herokids_registration_complete", "true");
       await finishAuth(result.user);
     } catch (error: any) {
       setFormMessage(error.message || "Registrierung fehlgeschlagen.");

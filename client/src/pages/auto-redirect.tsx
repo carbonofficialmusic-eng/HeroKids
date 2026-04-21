@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { FamilySetup } from "@/components/family-setup";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface FamilyMember {
   id: string;
@@ -13,6 +14,7 @@ interface FamilyMember {
 export default function AutoRedirect() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const { data: member, isLoading, isError } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
@@ -88,6 +90,8 @@ export default function AutoRedirect() {
         onComplete={(data) => createFamilyMutation.mutate(data)}
         onJoin={(data) => joinFamilyMutation.mutate(data)}
         isSubmitting={createFamilyMutation.isPending || joinFamilyMutation.isPending}
+        initialDisplayName={[user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.email?.split("@")[0] || ""}
+        initialFamilyName={user?.lastName ? `Familie ${user.lastName}` : user?.firstName ? `${user.firstName}s Familie` : ""}
       />
     );
   }
