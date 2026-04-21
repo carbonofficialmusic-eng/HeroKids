@@ -14,13 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AvatarSelector } from "./avatar-selector";
@@ -31,7 +24,6 @@ import { Link } from "wouter";
 const createFamilySchema = z.object({
   familyName: z.string().min(1, "Family name is required"),
   displayName: z.string().min(1, "Display name is required"),
-  role: z.enum(["parent", "child"]),
 });
 
 const joinFamilySchema = z.object({
@@ -41,7 +33,7 @@ const joinFamilySchema = z.object({
 
 type CreateFamilyForm = z.infer<typeof createFamilySchema>;
 type JoinFamilyForm = z.infer<typeof joinFamilySchema>;
-type FamilyMemberForm = CreateFamilyForm;
+type FamilyMemberForm = CreateFamilyForm & { role: "parent" };
 
 interface FamilySetupProps {
   onComplete: (data: FamilyMemberForm & { avatarUrl: string; color: string }) => void;
@@ -51,7 +43,13 @@ interface FamilySetupProps {
   initialFamilyName?: string;
 }
 
-export function FamilySetup({ onComplete, onJoin, isSubmitting = false, initialDisplayName = "", initialFamilyName = "" }: FamilySetupProps) {
+export function FamilySetup({
+  onComplete,
+  onJoin,
+  isSubmitting = false,
+  initialDisplayName = "",
+  initialFamilyName = "",
+}: FamilySetupProps) {
   const { t } = useTranslation();
   const [selectedAvatar, setSelectedAvatar] = useState(avatarAssets[0].url);
   const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
@@ -64,7 +62,6 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false, initialD
     defaultValues: {
       familyName: initialFamilyName,
       displayName: initialDisplayName,
-      role: "parent",
     },
   });
 
@@ -84,18 +81,18 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false, initialD
   }, []);
 
   useEffect(() => {
-    if (initialDisplayName || initialFamilyName) {
-      createForm.reset({
-        familyName: initialFamilyName,
-        displayName: initialDisplayName,
-        role: createForm.getValues("role") || "parent",
-      });
-      joinForm.reset({
-        joinCode: joinForm.getValues("joinCode") || "",
-        displayName: initialDisplayName,
-      });
+    if (initialFamilyName && !createForm.getValues("familyName")) {
+      createForm.setValue("familyName", initialFamilyName);
     }
-  }, [initialDisplayName, initialFamilyName, createForm, joinForm]);
+    if (initialDisplayName) {
+      if (!createForm.getValues("displayName")) {
+        createForm.setValue("displayName", initialDisplayName);
+      }
+      if (!joinForm.getValues("displayName")) {
+        joinForm.setValue("displayName", initialDisplayName);
+      }
+    }
+  }, [createForm, initialDisplayName, initialFamilyName, joinForm]);
 
   const handleCustomUpload = (file: File) => {
     setUploadedAvatarFile(file);
@@ -164,6 +161,7 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false, initialD
     const finalAvatarUrl = await uploadAvatar();
     onComplete({
       ...data,
+      role: "parent",
       avatarUrl: finalAvatarUrl,
       color: selectedColor,
     });
@@ -266,27 +264,10 @@ export function FamilySetup({ onComplete, onJoin, isSubmitting = false, initialD
                   )}
                 />
 
-                <FormField
-                  control={createForm.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('familySetup.yourRole')}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger data-testid="select-role">
-                            <SelectValue placeholder={t('familySetup.selectYourRole')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="parent" data-testid="option-role-parent">{t('settings.parent')}</SelectItem>
-                          <SelectItem value="child" data-testid="option-role-child">{t('settings.child')}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="rounded-md bg-muted/50 p-4" data-testid="status-parent-profile">
+                  <p className="text-sm font-semibold">{t('familySetup.yourRole')}: {t('settings.parent')}</p>
+                  <p className="text-sm text-muted-foreground">{t('familySetup.parentProfileHint')}</p>
+                </div>
 
                 <AvatarSelector
                   selectedAvatar={selectedAvatar}

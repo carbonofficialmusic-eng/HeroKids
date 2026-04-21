@@ -76,10 +76,10 @@ function AuthPanel() {
     }
   }, [resetToken]);
 
-  const finishAuth = async (user: unknown) => {
+  const finishAuth = async (user: unknown, redirectPath = "/") => {
     queryClient.setQueryData(["/api/auth/user"], user);
     await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-    setLocation("/");
+    setLocation(redirectPath);
   };
 
   const onLogin = async (data: LoginForm) => {
@@ -120,7 +120,7 @@ function AuthPanel() {
         });
       }
       sessionStorage.setItem("herokids_registration_complete", "true");
-      await finishAuth(result.user);
+      await finishAuth(result.user, "/setup");
     } catch (error: any) {
       setFormMessage(error.message || "Registrierung fehlgeschlagen.");
     } finally {

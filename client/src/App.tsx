@@ -148,6 +148,9 @@ function Router() {
       <BackgroundWrapper>
         <Switch>
           <Route path="/" component={Landing} />
+          <Route path="/setup">
+            <RedirectToLanding />
+          </Route>
           <Route path="/link-device" component={LinkDevice} />
           <Route path="/kid-dashboard" component={KidDashboard} />
           <Route path="/pricing" component={Pricing} />
@@ -166,6 +169,7 @@ function Router() {
     <BackgroundWrapper>
       <Switch>
         <Route path="/" component={AutoRedirect} />
+        <Route path="/setup" component={AutoRedirect} />
         <Route path="/dashboard">
           <Dashboard key={dashboardKey} />
         </Route>
