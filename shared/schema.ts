@@ -8,6 +8,7 @@ import {
   boolean,
   timestamp,
   index,
+  uniqueIndex,
   jsonb,
   pgEnum,
   unique,
@@ -53,7 +54,11 @@ export const users = pgTable("users", {
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  uniqueIndex("users_verified_email_lower_unique")
+    .on(sql`lower(${table.email})`)
+    .where(sql`${table.email} IS NOT NULL AND ${table.isEmailVerified} = true`),
+]);
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;

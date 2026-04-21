@@ -231,7 +231,8 @@ export async function setupAuth(app: Express) {
         await sendPasswordResetEmail(email, user.firstName, resetUrl);
       } catch (error) {
         if (error instanceof EmailProviderNotConfiguredError) {
-          return res.status(503).json({ message: error.message });
+          console.warn("Password reset email skipped:", error.message);
+          return res.json({ message: "Falls ein Konto existiert, senden wir dir eine E-Mail." });
         }
         throw error;
       }
