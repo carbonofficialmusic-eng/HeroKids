@@ -38,7 +38,11 @@ import {
   Database,
   Download,
   Upload,
-  Loader2
+  Loader2,
+  Mail,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/skins";
 import { queryClient } from "@/lib/queryClient";
@@ -137,6 +141,28 @@ interface AnalyticsData {
   totalParents: number;
 }
 
+interface EmailHealthResult {
+  status: "healthy" | "warning" | "unhealthy";
+  configured: boolean;
+  provider: string | null;
+  credentialSource: string | null;
+  fromAddress: string;
+  baseUrl: string | null;
+  linksUseExpectedDomain: boolean;
+  productionLinksUseExpectedDomain: boolean;
+  expectedProductionBaseUrl: string;
+  verificationUrlSample: string | null;
+  passwordResetUrlSample: string | null;
+  testSend: {
+    attempted: boolean;
+    succeeded: boolean;
+    recipient?: string;
+    provider?: string;
+    issue?: string;
+  };
+  issues: string[];
+}
+
 const TIER_LABELS: Record<string, string> = {
   free: "Free",
   family: "Family",
@@ -162,6 +188,7 @@ export default function AdminPage() {
   const [selectedFamilies, setSelectedFamilies] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [emailTestRecipient, setEmailTestRecipient] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -251,6 +278,18 @@ export default function AdminPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch analytics");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  const { data: emailHealth, isLoading: emailHealthLoading, refetch: refetchEmailHealth } = useQuery<EmailHealthResult>({
+    queryKey: ["/api/admin/email-health"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/email-health", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch email health");
       return res.json();
     },
     enabled: !!token,
@@ -388,6 +427,41 @@ export default function AdminPage() {
     },
   });
 
+  const sendEmailHealthTestMutation = useMutation({
+    mutationFn: async (recipient: string) => {
+      const res = await fetch("/api/admin/email-health/test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ recipient }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to send test email");
+      return data as EmailHealthResult;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/admin/email-health"], data);
+      if (data.testSend.succeeded) {
+        toast({ title: "Test email sent", description: `Delivered to ${data.testSend.recipient}` });
+        setEmailTestRecipient("");
+      } else {
+        toast({
+          title: "Test email failed",
+          description: data.testSend.issue || data.issues[0] || "The email provider rejected the test send.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error: Error) => {
+      toast({ title: "Test email failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const emailStatusLabel = emailHealth?.status === "healthy" ? "Ready" : emailHealth?.status === "warning" ? "Needs test" : "Not ready";
+  const EmailStatusIcon = emailHealth?.status === "healthy" ? CheckCircle2 : emailHealth?.status === "warning" ? AlertTriangle : XCircle;
+
   if (!token) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
@@ -460,6 +534,7 @@ export default function AdminPage() {
                 refetchFamilies();
                 refetchSkins();
                 refetchAnalytics();
+                refetchEmailHealth();
               }}
               data-testid="button-refresh-data"
             >
@@ -476,7 +551,7 @@ export default function AdminPage() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-6 max-w-3xl">
             <TabsTrigger value="overview" data-testid="tab-overview">
               <TrendingUp className="h-4 w-4 mr-2" />
               Overview
@@ -492,6 +567,10 @@ export default function AdminPage() {
             <TabsTrigger value="skins" data-testid="tab-skins">
               <Palette className="h-4 w-4 mr-2" />
               Skins
+            </TabsTrigger>
+            <TabsTrigger value="email" data-testid="tab-email">
+              <Mail className="h-4 w-4 mr-2" />
+              Email
             </TabsTrigger>
             <TabsTrigger value="migration" data-testid="tab-migration">
               <Database className="h-4 w-4 mr-2" />
@@ -588,6 +667,176 @@ export default function AdminPage() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    Email Launch Readiness
+                  </span>
+                  {emailHealth && (
+                    <Badge
+                      variant={emailHealth.status === "healthy" ? "default" : emailHealth.status === "warning" ? "secondary" : "destructive"}
+                      data-testid="badge-email-health-status"
+                    >
+                      {emailStatusLabel}
+                    </Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>Transactional account emails and launch links</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {emailHealthLoading ? (
+                  <div className="h-20 bg-muted rounded animate-pulse" />
+                ) : emailHealth ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Provider</p>
+                      <p className="font-semibold" data-testid="text-email-provider">{emailHealth.provider || "Not configured"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Sender</p>
+                      <p className="font-semibold break-all" data-testid="text-email-sender">{emailHealth.fromAddress}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Link domain</p>
+                      <p className="font-semibold" data-testid="text-email-link-domain">
+                        {emailHealth.linksUseExpectedDomain ? "Matches launch domain" : "Needs attention"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Email status is unavailable.</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="email" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    Transactional Email Status
+                  </span>
+                  {emailHealth && (
+                    <Badge
+                      variant={emailHealth.status === "healthy" ? "default" : emailHealth.status === "warning" ? "secondary" : "destructive"}
+                      data-testid="badge-email-status-detail"
+                    >
+                      <EmailStatusIcon className="h-3 w-3 mr-1" />
+                      {emailStatusLabel}
+                    </Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>Confirm provider setup, launch link domains, and test real delivery.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {emailHealthLoading ? (
+                  <div className="space-y-3">
+                    <div className="h-6 bg-muted rounded w-1/3 animate-pulse" />
+                    <div className="h-24 bg-muted rounded animate-pulse" />
+                  </div>
+                ) : emailHealth ? (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <p className="text-sm text-muted-foreground">Provider</p>
+                        <p className="font-semibold capitalize" data-testid="text-email-detail-provider">{emailHealth.provider || "Not configured"}</p>
+                        <p className="text-xs text-muted-foreground" data-testid="text-email-credential-source">
+                          {emailHealth.credentialSource === "replit_connection" ? "Connected provider" : emailHealth.credentialSource === "environment_secret" ? "Environment secret" : "No credentials"}
+                        </p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <p className="text-sm text-muted-foreground">Sender address</p>
+                        <p className="font-semibold break-all" data-testid="text-email-detail-sender">{emailHealth.fromAddress}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <p className="text-sm text-muted-foreground">Configured</p>
+                        <p className="font-semibold" data-testid="text-email-configured">{emailHealth.configured ? "Yes" : "No"}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <p className="text-sm text-muted-foreground">Last test send</p>
+                        <p className="font-semibold" data-testid="text-email-last-test">
+                          {emailHealth.testSend.attempted ? (emailHealth.testSend.succeeded ? "Succeeded" : "Failed") : "Not run"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="font-semibold">Launch link domain</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-lg bg-muted/50">
+                          <p className="text-sm text-muted-foreground">Expected production URL</p>
+                          <p className="font-semibold break-all" data-testid="text-email-expected-domain">{emailHealth.expectedProductionBaseUrl}</p>
+                        </div>
+                        <div className="p-4 rounded-lg bg-muted/50">
+                          <p className="text-sm text-muted-foreground">Current email base URL</p>
+                          <p className="font-semibold break-all" data-testid="text-email-current-domain">{emailHealth.baseUrl || "Unavailable"}</p>
+                        </div>
+                      </div>
+                      <Badge
+                        variant={emailHealth.linksUseExpectedDomain ? "default" : "destructive"}
+                        data-testid="badge-email-domain-status"
+                      >
+                        {emailHealth.linksUseExpectedDomain ? "Links use the expected launch domain" : "Links do not match the expected launch domain"}
+                      </Badge>
+                    </div>
+
+                    {emailHealth.issues.length > 0 && (
+                      <div className="space-y-2 p-4 rounded-lg bg-destructive/10 text-destructive" data-testid="status-email-issues">
+                        <h3 className="font-semibold">Issues to resolve</h3>
+                        <ul className="list-disc list-inside space-y-1 text-sm">
+                          {emailHealth.issues.map((issue, index) => (
+                            <li key={`${issue}-${index}`} data-testid={`text-email-issue-${index}`}>{issue}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      <h3 className="font-semibold">Send test email</h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Input
+                          type="email"
+                          placeholder="recipient@example.com"
+                          value={emailTestRecipient}
+                          onChange={(e) => setEmailTestRecipient(e.target.value)}
+                          className="max-w-sm"
+                          data-testid="input-email-test-recipient"
+                        />
+                        <Button
+                          onClick={() => sendEmailHealthTestMutation.mutate(emailTestRecipient.trim())}
+                          disabled={!emailTestRecipient.trim() || sendEmailHealthTestMutation.isPending}
+                          data-testid="button-send-email-health-test"
+                        >
+                          {sendEmailHealthTestMutation.isPending ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4 mr-2" />
+                              Send test
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      {emailHealth.testSend.attempted && (
+                        <p className="text-sm text-muted-foreground" data-testid="text-email-test-result">
+                          Test to {emailHealth.testSend.recipient}: {emailHealth.testSend.succeeded ? "succeeded" : emailHealth.testSend.issue || "failed"}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Email status is unavailable.</p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

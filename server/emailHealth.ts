@@ -6,6 +6,7 @@ type EmailHealthStatus = "healthy" | "warning" | "unhealthy";
 type EmailHealthOptions = {
   testRecipient?: string;
   expectedProductionBaseUrl?: string;
+  includeMissingTestRecipientIssue?: boolean;
 };
 
 export type EmailHealthResult = {
@@ -15,6 +16,7 @@ export type EmailHealthResult = {
   credentialSource: string | null;
   fromAddress: string;
   baseUrl: string | null;
+  linksUseExpectedDomain: boolean;
   productionLinksUseExpectedDomain: boolean;
   expectedProductionBaseUrl: string;
   verificationUrlSample: string | null;
@@ -40,17 +42,18 @@ export async function checkTransactionalEmailHealth(options: EmailHealthOptions 
   let baseUrl: string | null = null;
   let verificationUrlSample: string | null = null;
   let passwordResetUrlSample: string | null = null;
+  let linksUseExpectedDomain = false;
   let productionLinksUseExpectedDomain = false;
 
   try {
     baseUrl = getAccountEmailBaseUrl();
     verificationUrlSample = createEmailVerificationUrl("health-check-verification-token");
     passwordResetUrlSample = createPasswordResetUrl("health-check-reset-token");
-    productionLinksUseExpectedDomain =
-      process.env.NODE_ENV !== "production" ||
-      (baseUrl === expectedProductionBaseUrl &&
-        verificationUrlSample.startsWith(`${expectedProductionBaseUrl}/`) &&
-        passwordResetUrlSample.startsWith(`${expectedProductionBaseUrl}/`));
+    linksUseExpectedDomain =
+      baseUrl === expectedProductionBaseUrl &&
+      verificationUrlSample.startsWith(`${expectedProductionBaseUrl}/`) &&
+      passwordResetUrlSample.startsWith(`${expectedProductionBaseUrl}/`);
+    productionLinksUseExpectedDomain = process.env.NODE_ENV !== "production" || linksUseExpectedDomain;
 
     if (process.env.NODE_ENV === "production" && !productionLinksUseExpectedDomain) {
       issues.push(`Production email links must use ${expectedProductionBaseUrl}. Current base URL is ${baseUrl}.`);
@@ -70,6 +73,7 @@ export async function checkTransactionalEmailHealth(options: EmailHealthOptions 
     credentialSource: configuration.credentialSource,
     fromAddress: configuration.fromAddress,
     baseUrl,
+    linksUseExpectedDomain,
     productionLinksUseExpectedDomain,
     expectedProductionBaseUrl,
     verificationUrlSample,
@@ -82,8 +86,10 @@ export async function checkTransactionalEmailHealth(options: EmailHealthOptions 
   };
 
   if (!options.testRecipient) {
-    result.testSend.issue = "No test recipient was provided. Set EMAIL_HEALTH_TEST_RECIPIENT or pass --send-to to test real delivery.";
-    result.issues.push(result.testSend.issue);
+    if (options.includeMissingTestRecipientIssue !== false) {
+      result.testSend.issue = "No test recipient was provided. Set EMAIL_HEALTH_TEST_RECIPIENT or pass --send-to to test real delivery.";
+      result.issues.push(result.testSend.issue);
+    }
     result.status = result.configured && result.productionLinksUseExpectedDomain ? "warning" : "unhealthy";
     return result;
   }
