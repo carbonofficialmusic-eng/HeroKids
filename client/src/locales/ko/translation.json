@@ -42,7 +42,11 @@
     "verificationEmailSent": "인증 이메일을 보냈습니다",
     "checkInboxAndSpam": "받은편지함과 스팸 폴더를 확인하세요.",
     "verificationEmailFailed": "인증 이메일을 보낼 수 없습니다",
-    "tryAgainLater": "나중에 다시 시도하세요."
+    "tryAgainLater": "나중에 다시 시도하세요.",
+    "emailVerifiedTitle": "이메일 인증 완료",
+    "emailVerifiedDescription": "HeroKids 계정이 인증되었습니다.",
+    "verificationFailedTitle": "인증 실패",
+    "verificationFailedDescription": "링크가 잘못되었거나 만료되었습니다."
   },
   "avatarSelector": {
     "chooseYourAvatar": "아바타 선택",

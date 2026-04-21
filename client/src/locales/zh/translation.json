@@ -42,7 +42,11 @@
     "verificationEmailSent": "验证邮件已发送",
     "checkInboxAndSpam": "请检查收件箱和垃圾邮件文件夹。",
     "verificationEmailFailed": "无法发送验证邮件",
-    "tryAgainLater": "请稍后再试。"
+    "tryAgainLater": "请稍后再试。",
+    "emailVerifiedTitle": "邮箱已验证",
+    "emailVerifiedDescription": "你的 HeroKids 账户现已验证。",
+    "verificationFailedTitle": "验证失败",
+    "verificationFailedDescription": "链接无效或已过期。"
   },
   "avatarSelector": {
     "chooseYourAvatar": "选择你的头像",

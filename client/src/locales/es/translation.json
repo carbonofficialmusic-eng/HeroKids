@@ -42,7 +42,11 @@
     "verificationEmailSent": "Correo de verificación enviado",
     "checkInboxAndSpam": "Revisa tu bandeja de entrada y la carpeta de spam.",
     "verificationEmailFailed": "No se pudo enviar el correo de verificación",
-    "tryAgainLater": "Inténtalo de nuevo más tarde."
+    "tryAgainLater": "Inténtalo de nuevo más tarde.",
+    "emailVerifiedTitle": "Correo verificado",
+    "emailVerifiedDescription": "Tu cuenta de HeroKids ya está verificada.",
+    "verificationFailedTitle": "La verificación falló",
+    "verificationFailedDescription": "El enlace no es válido o ha caducado."
   },
   "avatarSelector": {
     "chooseYourAvatar": "Elige tu avatar",

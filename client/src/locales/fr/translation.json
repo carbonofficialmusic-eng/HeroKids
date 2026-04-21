@@ -42,7 +42,11 @@
     "verificationEmailSent": "E-mail de vérification envoyé",
     "checkInboxAndSpam": "Vérifiez votre boîte de réception et le dossier spam.",
     "verificationEmailFailed": "L’e-mail de vérification n’a pas pu être envoyé",
-    "tryAgainLater": "Veuillez réessayer plus tard."
+    "tryAgainLater": "Veuillez réessayer plus tard.",
+    "emailVerifiedTitle": "E-mail vérifié",
+    "emailVerifiedDescription": "Votre compte HeroKids est maintenant vérifié.",
+    "verificationFailedTitle": "Vérification échouée",
+    "verificationFailedDescription": "Le lien est invalide ou a expiré."
   },
   "avatarSelector": {
     "chooseYourAvatar": "Choisissez votre avatar",

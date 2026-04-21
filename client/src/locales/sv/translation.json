@@ -42,7 +42,11 @@
     "verificationEmailSent": "Verifieringsmejl skickat",
     "checkInboxAndSpam": "Kontrollera din inkorg och skräppostmapp.",
     "verificationEmailFailed": "Verifieringsmejlet kunde inte skickas",
-    "tryAgainLater": "Försök igen senare."
+    "tryAgainLater": "Försök igen senare.",
+    "emailVerifiedTitle": "E-post verifierad",
+    "emailVerifiedDescription": "Ditt HeroKids-konto är nu verifierat.",
+    "verificationFailedTitle": "Verifieringen misslyckades",
+    "verificationFailedDescription": "Länken är ogiltig eller har gått ut."
   },
   "avatarSelector": {
     "chooseYourAvatar": "Välj din avatar",

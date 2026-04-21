@@ -42,7 +42,11 @@
     "verificationEmailSent": "確認メールを送信しました",
     "checkInboxAndSpam": "受信トレイと迷惑メールフォルダーを確認してください。",
     "verificationEmailFailed": "確認メールを送信できませんでした",
-    "tryAgainLater": "後でもう一度お試しください。"
+    "tryAgainLater": "後でもう一度お試しください。",
+    "emailVerifiedTitle": "メールを確認しました",
+    "emailVerifiedDescription": "HeroKidsアカウントが確認されました。",
+    "verificationFailedTitle": "確認に失敗しました",
+    "verificationFailedDescription": "リンクが無効または期限切れです。"
   },
   "avatarSelector": {
     "chooseYourAvatar": "アバターを選ぶ",

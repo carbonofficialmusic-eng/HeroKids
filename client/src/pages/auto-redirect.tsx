@@ -72,11 +72,11 @@ export default function AutoRedirect() {
     const verified = urlParams.get("verified");
 
     if (verified === "success") {
-      toast({ title: "E-Mail bestätigt", description: "Dein HeroKids-Konto ist jetzt bestätigt." });
+      toast({ title: t("auth.emailVerifiedTitle"), description: t("auth.emailVerifiedDescription") });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       window.history.replaceState({}, "", "/");
     } else if (verified === "invalid") {
-      toast({ title: "Bestätigung fehlgeschlagen", description: "Der Link ist ungültig oder abgelaufen.", variant: "destructive" });
+      toast({ title: t("auth.verificationFailedTitle"), description: t("auth.verificationFailedDescription"), variant: "destructive" });
       window.history.replaceState({}, "", "/");
     }
   }, [toast]);
