@@ -8,6 +8,7 @@ import bcrypt from "bcrypt";
 import { storage } from "./storage";
 import { verifyAccessToken } from "./mobileAuth";
 import { EmailProviderNotConfiguredError, isTransactionalEmailConfigured, sendPasswordResetEmail, sendVerificationEmail } from "./email";
+import { createEmailVerificationUrl, createPasswordResetUrl } from "./authLinks";
 
 const registerSchema = z.object({
   email: z.string().email().max(320),
@@ -61,23 +62,6 @@ function createToken() {
   return crypto.randomBytes(32).toString("hex");
 }
 
-function getBaseUrl() {
-  const configuredUrl = process.env.APP_BASE_URL || process.env.PUBLIC_APP_URL;
-  if (configuredUrl) {
-    return configuredUrl.replace(/\/$/, "");
-  }
-
-  if (process.env.REPLIT_DOMAINS) {
-    return `https://${process.env.REPLIT_DOMAINS.split(",")[0]}`;
-  }
-
-  if (process.env.NODE_ENV === "development") {
-    return "http://localhost:5000";
-  }
-
-  throw new Error("APP_BASE_URL must be configured for account email links");
-}
-
 function createSessionUser(userId: string) {
   return {
     claims: { sub: userId },
@@ -108,7 +92,7 @@ function loginAsync(req: any, user: any) {
 }
 
 async function trySendVerificationEmail(user: any, token: string) {
-  const verificationUrl = `${getBaseUrl()}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
+  const verificationUrl = createEmailVerificationUrl(token);
   return sendVerificationEmail(user.email, user.firstName, verificationUrl);
 }
 
@@ -253,7 +237,7 @@ export async function setupAuth(app: Express) {
         passwordResetTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
       });
 
-      const resetUrl = `${getBaseUrl()}/?reset_token=${encodeURIComponent(resetToken)}`;
+      const resetUrl = createPasswordResetUrl(resetToken);
       try {
         await sendPasswordResetEmail(email, user.firstName, resetUrl);
       } catch (error) {

@@ -15,6 +15,14 @@ type EmailInput = {
 
 const fromAddress = process.env.EMAIL_FROM || "HeroKids <no-reply@herokids.app>";
 
+export type TransactionalEmailConfiguration = {
+  configured: boolean;
+  provider: "resend" | "sendgrid" | null;
+  credentialSource: "replit_connection" | "environment_secret" | null;
+  fromAddress: string;
+  issue?: string;
+};
+
 async function getResendConnectorCredentials() {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
@@ -66,12 +74,88 @@ async function getResendCredentials() {
 }
 
 export async function isTransactionalEmailConfigured() {
-  if (process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY) {
-    return true;
+  const configuration = await getTransactionalEmailConfiguration();
+  return configuration.configured;
+}
+
+export function explainEmailProviderError(error: unknown) {
+  const rawMessage = error instanceof Error ? error.message : String(error);
+  const sanitized = rawMessage
+    .replace(/Bearer\s+[A-Za-z0-9._\-]+/gi, "Bearer [redacted]")
+    .replace(/api[_-]?key["']?\s*[:=]\s*["']?[^"',\s]+/gi, "api_key=[redacted]")
+    .slice(0, 500);
+
+  if (/domain is not verified|domain.*not verified|verify your domain/i.test(sanitized)) {
+    return "The email provider rejected the sender domain. Verify herokids.app and its required DNS records in the email provider dashboard before launch.";
   }
 
-  const credentials = await getResendConnectorCredentials();
-  return Boolean(credentials?.apiKey);
+  if (/401|403|unauthorized|forbidden|invalid api key|permission/i.test(sanitized)) {
+    return "The email provider credentials were rejected or do not have permission to complete this check. Reconnect the provider or update the email API key.";
+  }
+
+  if (/sender|from address|from_email|from email/i.test(sanitized)) {
+    return "The sender address is not accepted by the email provider. Confirm EMAIL_FROM matches an approved sender for the verified domain.";
+  }
+
+  if (/rate limit|too many requests/i.test(sanitized)) {
+    return "The email provider rate-limited the check. Try again later or review provider limits.";
+  }
+
+  if (/ENOTFOUND|ECONNREFUSED|ETIMEDOUT|fetch failed|network/i.test(sanitized)) {
+    return "The email provider could not be reached. Check network/provider availability and try again.";
+  }
+
+  return `The email provider rejected the check: ${sanitized}`;
+}
+
+export async function getTransactionalEmailConfiguration(): Promise<TransactionalEmailConfiguration> {
+  if (process.env.RESEND_API_KEY) {
+    return {
+      configured: true,
+      provider: "resend",
+      credentialSource: "environment_secret",
+      fromAddress,
+    };
+  }
+
+  if (process.env.REPLIT_CONNECTORS_HOSTNAME) {
+    try {
+      const credentials = await getResendConnectorCredentials();
+      if (credentials?.apiKey) {
+        return {
+          configured: true,
+          provider: "resend",
+          credentialSource: "replit_connection",
+          fromAddress: credentials.fromEmail || fromAddress,
+        };
+      }
+    } catch (error) {
+      return {
+        configured: false,
+        provider: "resend",
+        credentialSource: "replit_connection",
+        fromAddress,
+        issue: explainEmailProviderError(error),
+      };
+    }
+  }
+
+  if (process.env.SENDGRID_API_KEY) {
+    return {
+      configured: true,
+      provider: "sendgrid",
+      credentialSource: "environment_secret",
+      fromAddress,
+    };
+  }
+
+  return {
+    configured: false,
+    provider: null,
+    credentialSource: null,
+    fromAddress,
+    issue: "No transactional email provider is configured. Connect Resend or SendGrid and use an approved sender address.",
+  };
 }
 
 async function sendWithResend(input: EmailInput) {
@@ -80,7 +164,6 @@ async function sendWithResend(input: EmailInput) {
     throw new EmailProviderNotConfiguredError();
   }
 
-  // Uses the Replit Resend connection when RESEND_API_KEY is not set.
   const resend = new Resend(credentials.apiKey);
   const result = await resend.emails.send({
     from: credentials.fromEmail || fromAddress,
