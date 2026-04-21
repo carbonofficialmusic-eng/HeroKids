@@ -116,8 +116,14 @@ function parseFromAddress(value: string) {
 
 export async function sendTransactionalEmail(input: EmailInput) {
   if (process.env.RESEND_API_KEY || process.env.REPLIT_CONNECTORS_HOSTNAME) {
-    await sendWithResend(input);
-    return { provider: "resend" };
+    try {
+      await sendWithResend(input);
+      return { provider: "resend" };
+    } catch (error) {
+      if (!(error instanceof EmailProviderNotConfiguredError)) {
+        throw error;
+      }
+    }
   }
 
   if (process.env.SENDGRID_API_KEY) {
