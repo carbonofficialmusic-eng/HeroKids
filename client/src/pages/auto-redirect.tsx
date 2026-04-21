@@ -68,6 +68,20 @@ export default function AutoRedirect() {
   });
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const verified = urlParams.get("verified");
+
+    if (verified === "success") {
+      toast({ title: "E-Mail bestätigt", description: "Dein HeroKids-Konto ist jetzt bestätigt." });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      window.history.replaceState({}, "", "/");
+    } else if (verified === "invalid") {
+      toast({ title: "Bestätigung fehlgeschlagen", description: "Der Link ist ungültig oder abgelaufen.", variant: "destructive" });
+      window.history.replaceState({}, "", "/");
+    }
+  }, [toast]);
+
+  useEffect(() => {
     if (!isLoading && member) {
       if (member.role === "parent") {
         setLocation("/dashboard");

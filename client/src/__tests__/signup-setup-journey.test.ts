@@ -12,6 +12,7 @@ type MockUser = {
   email: string;
   firstName: string;
   lastName: string | null;
+  isEmailVerified?: boolean;
 };
 
 type MockMember = {
@@ -70,6 +71,7 @@ describe("sign-up setup journey", () => {
   let currentUser: MockUser | null;
   let currentMember: MockMember | null;
   let createdFamilyPayload: CreatedFamilyPayload | null;
+  let authUserRequestCount: number;
 
   const setupFetchMock = () => {
     vi.stubGlobal(
@@ -80,6 +82,13 @@ describe("sign-up setup journey", () => {
         const method = init?.method || "GET";
 
         if (path === "/api/auth/user" && method === "GET") {
+          authUserRequestCount += 1;
+          if (currentUser && window.location.search.includes("verified=success") && authUserRequestCount > 1) {
+            currentUser = {
+              ...currentUser,
+              isEmailVerified: true,
+            };
+          }
           return currentUser
             ? jsonResponse(currentUser)
             : jsonResponse({ message: "Unauthorized" }, 401);
@@ -196,6 +205,7 @@ describe("sign-up setup journey", () => {
     currentUser = null;
     currentMember = null;
     createdFamilyPayload = null;
+    authUserRequestCount = 0;
     queryClient.clear();
     sessionStorage.clear();
     localStorage.clear();
@@ -274,5 +284,45 @@ describe("sign-up setup journey", () => {
     await waitFor(() => expect(window.location.pathname).toBe("/dashboard"));
     expect((await screen.findByTestId("text-user-name")).textContent).toContain("Grace Hopper");
     expect(screen.queryByTestId("text-setup-title")).toBeNull();
+  });
+
+  it("refreshes the authenticated user after a successful verification link redirect", async () => {
+    const user = userEvent.setup();
+    currentUser = {
+      id: "user-verified-parent",
+      email: "verified.parent@example.com",
+      firstName: "Verified",
+      lastName: "Parent",
+      isEmailVerified: false,
+    };
+    currentMember = {
+      id: "member-verified-parent",
+      userId: currentUser.id,
+      familyName: "Verified Family",
+      displayName: "Verified Parent",
+      role: "parent",
+      avatarUrl: "/avatars/default.png",
+      color: "#8B5CF6",
+      totalEarned: 0,
+      totalPoints: 0,
+      weeklyPoints: 0,
+      monthlyPoints: 0,
+      rewardsRedeemed: 0,
+      starsFound: 0,
+      activeSkinId: null,
+      useCustomAvatar: false,
+      useThemeBackground: false,
+      discoveredSkinIds: [],
+      earnedLegacySkinIds: [],
+      updatedAt: "2026-04-21T00:00:00.000Z",
+    };
+    window.history.replaceState({}, "", "/?verified=success");
+
+    render(createElement(App));
+
+    await waitFor(() => expect(authUserRequestCount).toBeGreaterThan(1));
+    await waitFor(() => expect(window.location.pathname).toBe("/dashboard"));
+    await user.click(await screen.findByTestId("button-profile-menu"));
+    expect(screen.queryByTestId("menu-item-resend-verification")).toBeNull();
   });
 });
