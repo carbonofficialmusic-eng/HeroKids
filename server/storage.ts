@@ -62,11 +62,14 @@ import {
   type StarPlacement,
   notifications,
   emailReadinessChecks,
+  accountLinkRepairHistory,
   type Notification,
   type InsertNotification,
   type NotificationType,
   type EmailReadinessCheck,
   type InsertEmailReadinessCheck,
+  type AccountLinkRepairHistory,
+  type InsertAccountLinkRepairHistory,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gt, lt, sql, inArray, isNull, isNotNull } from "drizzle-orm";
@@ -210,6 +213,8 @@ export interface IStorage {
   updateFamilyMember(id: string, updates: Partial<InsertFamilyMember>): Promise<FamilyMember>;
   linkUserToFamilyMember(id: string, userId: string, updates: { displayName: string; avatarUrl: string; color: string }): Promise<FamilyMember>;
   unlinkUserFromFamilyMember(id: string): Promise<FamilyMember>;
+  createAccountLinkRepairHistory(history: InsertAccountLinkRepairHistory): Promise<AccountLinkRepairHistory>;
+  getRecentAccountLinkRepairHistoryByFamily(familyName: string, limit?: number): Promise<AccountLinkRepairHistory[]>;
   deleteFamilyMember(id: string): Promise<void>;
   updateFamilyMemberPoints(
     id: string,
@@ -656,6 +661,24 @@ export class DatabaseStorage implements IStorage {
     }
 
     return member;
+  }
+
+  async createAccountLinkRepairHistory(historyData: InsertAccountLinkRepairHistory): Promise<AccountLinkRepairHistory> {
+    const [history] = await db
+      .insert(accountLinkRepairHistory)
+      .values(historyData)
+      .returning();
+    return history;
+  }
+
+  async getRecentAccountLinkRepairHistoryByFamily(familyName: string, limit = 10): Promise<AccountLinkRepairHistory[]> {
+    const safeLimit = Math.min(Math.max(limit, 1), 25);
+    return await db
+      .select()
+      .from(accountLinkRepairHistory)
+      .where(eq(accountLinkRepairHistory.familyName, familyName))
+      .orderBy(desc(accountLinkRepairHistory.repairedAt))
+      .limit(safeLimit);
   }
 
   async getFamilyMembersByFamily(familyName: string): Promise<FamilyMember[]> {

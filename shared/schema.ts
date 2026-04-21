@@ -173,6 +173,30 @@ export const insertFamilyMemberSchema = createInsertSchema(familyMembers).omit({
 export type InsertFamilyMember = z.infer<typeof insertFamilyMemberSchema>;
 export type FamilyMember = typeof familyMembers.$inferSelect;
 
+export const accountLinkRepairHistory = pgTable("account_link_repair_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
+  memberId: varchar("member_id").references(() => familyMembers.id, { onDelete: "set null" }),
+  memberDisplayName: varchar("member_display_name").notNull(),
+  action: varchar("action", { length: 32 }).notNull(),
+  oldAccountId: varchar("old_account_id").references(() => users.id, { onDelete: "set null" }),
+  oldAccountEmail: varchar("old_account_email", { length: 320 }),
+  newAccountId: varchar("new_account_id").references(() => users.id, { onDelete: "set null" }),
+  newAccountEmail: varchar("new_account_email", { length: 320 }),
+  repairedAt: timestamp("repaired_at").defaultNow(),
+}, (table) => [
+  index("account_link_repair_history_family_repaired_idx").on(table.familyName, table.repairedAt),
+  index("account_link_repair_history_member_idx").on(table.memberId),
+]);
+
+export const insertAccountLinkRepairHistorySchema = createInsertSchema(accountLinkRepairHistory).omit({
+  id: true,
+  repairedAt: true,
+});
+
+export type InsertAccountLinkRepairHistory = z.infer<typeof insertAccountLinkRepairHistorySchema>;
+export type AccountLinkRepairHistory = typeof accountLinkRepairHistory.$inferSelect;
+
 // Tasks - Chore/task definitions
 export const tasks = pgTable("tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

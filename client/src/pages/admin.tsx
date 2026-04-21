@@ -117,6 +117,17 @@ interface FamilyDetails {
   members: FamilyMember[];
   taskCount: number;
   rewardCount: number;
+  accountLinkRepairHistory: AccountLinkRepairEntry[];
+}
+
+interface AccountLinkRepairEntry {
+  id: string;
+  memberId?: string | null;
+  memberDisplayName: string;
+  action: "link" | "unlink" | "move_detach" | "move_link" | string;
+  oldAccountEmail?: string | null;
+  newAccountEmail?: string | null;
+  repairedAt: string;
 }
 
 interface SkinStat {
@@ -209,6 +220,14 @@ function formatEmailCheckTime(value: string) {
 
 function getEmailCheckLabel(check: EmailReadinessCheck) {
   return check.checkType === "test_send" ? "Test send" : "Readiness check";
+}
+
+function getAccountLinkRepairActionLabel(action: string) {
+  if (action === "link") return "Linked";
+  if (action === "unlink") return "Unlinked";
+  if (action === "move_detach") return "Moved away";
+  if (action === "move_link") return "Moved here";
+  return action;
 }
 
 export default function AdminPage() {
@@ -1795,6 +1814,49 @@ export default function AdminPage() {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4" />
+                    Recent Account-Link Repairs
+                  </h3>
+                  {(familyDetails.accountLinkRepairHistory || []).length > 0 ? (
+                    <div className="space-y-2" data-testid="list-account-link-repair-history">
+                      {(familyDetails.accountLinkRepairHistory || []).map((entry) => (
+                        <div
+                          key={entry.id}
+                          className="rounded-md bg-muted/50 p-3"
+                          data-testid={`card-account-link-repair-${entry.id}`}
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <Badge variant="outline" data-testid={`badge-account-link-action-${entry.id}`}>
+                                  {getAccountLinkRepairActionLabel(entry.action)}
+                                </Badge>
+                                <p className="font-medium" data-testid={`text-account-link-member-${entry.id}`}>
+                                  {entry.memberDisplayName}
+                                </p>
+                              </div>
+                              <p className="text-sm text-muted-foreground break-all" data-testid={`text-account-link-accounts-${entry.id}`}>
+                                Old: {entry.oldAccountEmail || "None"} · New: {entry.newAccountEmail || "None"}
+                              </p>
+                            </div>
+                            <p className="text-sm text-muted-foreground" data-testid={`text-account-link-time-${entry.id}`}>
+                              {formatEmailCheckTime(entry.repairedAt)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground" data-testid="text-account-link-history-empty">
+                      No account-link repairs recorded yet.
+                    </p>
+                  )}
                 </div>
 
                 {familyDetails.family.language && (

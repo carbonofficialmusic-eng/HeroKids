@@ -5961,12 +5961,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       const tasks = await storage.getTasksByFamily(familyName);
       const rewards = await storage.getRewardsByFamily(familyName);
+      const accountLinkRepairHistory = (await storage.getRecentAccountLinkRepairHistoryByFamily(familyName, 10)).map((entry) => ({
+        id: entry.id,
+        memberId: entry.memberId,
+        memberDisplayName: entry.memberDisplayName,
+        action: entry.action,
+        oldAccountEmail: entry.oldAccountEmail,
+        newAccountEmail: entry.newAccountEmail,
+        repairedAt: entry.repairedAt,
+      }));
 
       res.json({
         family,
         members: membersWithAccounts,
         taskCount: tasks.length,
         rewardCount: rewards.length,
+        accountLinkRepairHistory,
       });
     } catch (error) {
       console.error("Error fetching admin family details:", error);

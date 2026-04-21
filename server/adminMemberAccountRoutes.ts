@@ -37,7 +37,20 @@ export function registerAdminMemberAccountRoutes(app: Express, isAdmin: RequestH
       }
 
       if (parsed.action === "unlink") {
+        const oldAccount = member.userId ? await storage.getUser(member.userId) : null;
         const updatedMember = member.userId ? await storage.unlinkUserFromFamilyMember(member.id) : member;
+        if (member.userId) {
+          await storage.createAccountLinkRepairHistory({
+            familyName,
+            memberId: member.id,
+            memberDisplayName: member.displayName,
+            action: "unlink",
+            oldAccountId: oldAccount?.id || member.userId,
+            oldAccountEmail: oldAccount?.email || null,
+            newAccountId: null,
+            newAccountEmail: null,
+          });
+        }
         return res.json({
           success: true,
           member: updatedMember,
@@ -76,13 +89,34 @@ export function registerAdminMemberAccountRoutes(app: Express, isAdmin: RequestH
             },
           });
         }
+        const detachedAccount = await storage.getUser(user.id);
         await storage.unlinkUserFromFamilyMember(existingLinkedMember.id);
+        await storage.createAccountLinkRepairHistory({
+          familyName: existingLinkedMember.familyName,
+          memberId: existingLinkedMember.id,
+          memberDisplayName: existingLinkedMember.displayName,
+          action: "move_detach",
+          oldAccountId: detachedAccount?.id || user.id,
+          oldAccountEmail: detachedAccount?.email || user.email || null,
+          newAccountId: null,
+          newAccountEmail: null,
+        });
       }
 
       const linkedMember = await storage.linkUserToFamilyMember(member.id, user.id, {
         displayName: member.displayName,
         avatarUrl: member.avatarUrl || "",
         color: member.color,
+      });
+      await storage.createAccountLinkRepairHistory({
+        familyName,
+        memberId: member.id,
+        memberDisplayName: member.displayName,
+        action: parsed.detachExisting ? "move_link" : "link",
+        oldAccountId: member.userId || null,
+        oldAccountEmail: null,
+        newAccountId: user.id,
+        newAccountEmail: user.email || null,
       });
 
       res.json({
