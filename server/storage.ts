@@ -647,7 +647,7 @@ export class DatabaseStorage implements IStorage {
   async unlinkUserFromFamilyMember(id: string): Promise<FamilyMember> {
     const [member] = await db
       .update(familyMembers)
-      .set({ userId: null, updatedAt: new Date() } as any)
+      .set({ userId: sql`NULL`, updatedAt: new Date() })
       .where(eq(familyMembers.id, id))
       .returning();
 
