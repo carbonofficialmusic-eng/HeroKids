@@ -204,7 +204,7 @@ describe("admin email health UI", () => {
       action: string;
       oldAccountEmail: string | null;
       newAccountEmail: string | null;
-      repairedBy: string | null;
+      repairedBy?: string | null;
       repairedAt: string;
     }>;
   };
@@ -509,6 +509,44 @@ describe("admin email health UI", () => {
     await waitFor(() => {
       expect(screen.getByTestId("badge-account-email-member-riewert").textContent).toContain("sonoastudio@me.com");
     });
+  });
+
+  it("shows repaired-by labels and older repair entries without an actor", async () => {
+    const user = userEvent.setup();
+    adminFamilyDetails = {
+      ...adminFamilyDetails,
+      accountLinkRepairHistory: [
+        {
+          id: "repair-with-actor",
+          memberId: "member-diego",
+          memberDisplayName: "Diego",
+          action: "unlink",
+          oldAccountEmail: "carbon.official.music@gmail.com",
+          newAccountEmail: null,
+          repairedBy: "Alice Admin",
+          repairedAt: "2026-04-21T00:00:00.000Z",
+        },
+        {
+          id: "repair-legacy",
+          memberId: "member-riewert",
+          memberDisplayName: "Riewert",
+          action: "link",
+          oldAccountEmail: null,
+          newAccountEmail: "sonoastudio@me.com",
+          repairedAt: "2026-04-21T00:01:00.000Z",
+        },
+      ],
+    };
+    renderAdmin();
+
+    await user.click(await screen.findByTestId("tab-families"));
+    await user.click(await screen.findByText("Hero Family"));
+
+    expect((await screen.findByTestId("card-account-link-repair-repair-with-actor")).textContent).toContain("Alice Admin");
+    expect(screen.getByTestId("text-account-link-actor-repair-with-actor").textContent).toContain("Repaired by: Alice Admin");
+    expect(screen.getByTestId("card-account-link-repair-repair-legacy").textContent).toContain("Riewert");
+    expect(screen.getByTestId("card-account-link-repair-repair-legacy").textContent).toContain("sonoastudio@me.com");
+    expect(screen.queryByTestId("text-account-link-actor-repair-legacy")).toBeNull();
   });
 
   it("asks admins to confirm moving an already linked account", async () => {
