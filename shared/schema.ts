@@ -37,6 +37,16 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)]
 );
 
+export const authRateLimits = pgTable(
+  "auth_rate_limits",
+  {
+    key: varchar("key", { length: 512 }).primaryKey(),
+    count: integer("count").notNull().default(0),
+    resetTime: timestamp("reset_time").notNull(),
+  },
+  (table) => [index("auth_rate_limits_reset_time_idx").on(table.resetTime)]
+);
+
 // User storage table - HeroKids account identities
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

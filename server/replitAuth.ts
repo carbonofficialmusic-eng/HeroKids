@@ -34,44 +34,22 @@ function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
-interface AuthRateLimitEntry {
-  count: number;
-  resetTime: number;
-}
-
-const authRateLimitStore = new Map<string, AuthRateLimitEntry>();
-
-setInterval(() => {
-  const now = Date.now();
-  Array.from(authRateLimitStore.entries()).forEach(([key, entry]) => {
-    if (entry.resetTime < now) {
-      authRateLimitStore.delete(key);
-    }
-  });
-}, 5 * 60 * 1000);
-
 function authRateLimit(maxRequests: number, windowMs: number): RequestHandler {
-  return (req: any, res, next) => {
+  return async (req: any, res, next) => {
     const clientIp = req.ip || req.connection?.remoteAddress || "unknown";
     const key = `${clientIp}:${req.path}`;
-    const now = Date.now();
-    let entry = authRateLimitStore.get(key);
-
-    if (!entry || entry.resetTime < now) {
-      entry = { count: 1, resetTime: now + windowMs };
-      authRateLimitStore.set(key, entry);
-      return next();
-    }
-
-    entry.count++;
-
-    if (entry.count > maxRequests) {
-      const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
+    try {
+      const result = await storage.incrementAuthRateLimit(key, maxRequests, windowMs);
+      if (result.allowed) {
+        return next();
+      }
+      const retryAfter = result.retryAfter;
       res.set("Retry-After", String(retryAfter));
       return res.status(429).json({ message: "Zu viele Versuche. Bitte versuche es später erneut.", retryAfter });
+    } catch (error) {
+      console.error("Auth rate limit error:", error);
+      next();
     }
-
-    next();
   };
 }
 

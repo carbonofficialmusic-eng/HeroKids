@@ -1,5 +1,6 @@
 import {
   users,
+  authRateLimits,
   families,
   familyMembers,
   tasks,
@@ -182,6 +183,7 @@ export interface IStorage {
   createLocalUser(user: UpsertUser): Promise<User>;
   updateUserAuthFields(id: string, updates: Partial<UpsertUser>): Promise<User>;
   updateUserLastLogin(id: string): Promise<void>;
+  incrementAuthRateLimit(key: string, maxRequests: number, windowMs: number): Promise<{ allowed: boolean; retryAfter: number }>;
 
   // Family operations
   getFamily(familyName: string): Promise<Family | undefined>;
@@ -358,8 +360,34 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .select()
       .from(users)
-      .where(sql`lower(${users.email}) = lower(${email})`);
+      .where(sql`lower(${users.email}) = lower(${email})`)
+      .orderBy(desc(users.isEmailVerified), desc(users.lastLoginAt), desc(users.updatedAt), desc(users.createdAt));
     return user;
+  }
+
+  async incrementAuthRateLimit(key: string, maxRequests: number, windowMs: number): Promise<{ allowed: boolean; retryAfter: number }> {
+    const now = new Date();
+    const resetTime = new Date(now.getTime() + windowMs);
+    const [entry] = await db
+      .insert(authRateLimits)
+      .values({ key, count: 1, resetTime })
+      .onConflictDoUpdate({
+        target: authRateLimits.key,
+        set: {
+          count: sql<number>`CASE WHEN ${authRateLimits.resetTime} < ${now} THEN 1 ELSE ${authRateLimits.count} + 1 END`,
+          resetTime: sql<Date>`CASE WHEN ${authRateLimits.resetTime} < ${now} THEN ${resetTime} ELSE ${authRateLimits.resetTime} END`,
+        },
+      })
+      .returning();
+
+    if (Math.random() < 0.01) {
+      await db.delete(authRateLimits).where(lt(authRateLimits.resetTime, now));
+    }
+
+    return {
+      allowed: entry.count <= maxRequests,
+      retryAfter: Math.max(1, Math.ceil((entry.resetTime.getTime() - Date.now()) / 1000)),
+    };
   }
 
   async getUserByEmailVerificationToken(tokenHash: string): Promise<User | undefined> {
