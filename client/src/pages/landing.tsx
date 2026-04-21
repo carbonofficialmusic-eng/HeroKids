@@ -347,6 +347,7 @@ export default function Landing() {
 
     if (verified === "success") {
       toast({ title: "E-Mail bestätigt", description: "Dein HeroKids-Konto ist jetzt bestätigt." });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       window.history.replaceState({}, "", "/");
     } else if (verified === "invalid") {
       toast({ title: "Bestätigung fehlgeschlagen", description: "Der Link ist ungültig oder abgelaufen.", variant: "destructive" });

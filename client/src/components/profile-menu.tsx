@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import {
@@ -11,8 +12,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon, Menu, Trophy } from "lucide-react";
+import { Settings, Palette, User2, LogOut, Sun, Moon, Menu, Trophy, MailCheck, Loader2 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -36,7 +39,29 @@ export function ProfileMenu({
 }: ProfileMenuProps) {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
+
+  const resendVerificationMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/resend-verification");
+      return response.json() as Promise<{ message?: string }>;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Bestätigungsmail gesendet",
+        description: data.message || "Bitte prüfe deinen Posteingang und den Spam-Ordner.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Bestätigung konnte nicht gesendet werden",
+        description: error?.message || "Bitte versuche es später noch einmal.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleThemeToggle = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -47,6 +72,8 @@ export function ProfileMenu({
     queryClient.clear();
     window.location.href = "/";
   };
+
+  const showVerificationAction = isParent && !!user?.email && !user?.isEmailVerified;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -70,6 +97,26 @@ export function ProfileMenu({
         <DropdownMenuSeparator />
         
         {/* Block 1: Profile & Actions */}
+        {showVerificationAction && (
+          <>
+            <DropdownMenuItem
+              disabled={resendVerificationMutation.isPending}
+              onSelect={(event) => {
+                event.preventDefault();
+                resendVerificationMutation.mutate();
+              }}
+              data-testid="menu-item-resend-verification"
+            >
+              {resendVerificationMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <MailCheck className="mr-2 h-4 w-4" />
+              )}
+              <span>{resendVerificationMutation.isPending ? "Wird gesendet..." : "Bestätigungsmail erneut senden"}</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         {isRealParent && familyMemberCount > 1 && (
           <DropdownMenuItem onClick={onSwitchMember} data-testid="menu-item-switch-member">
             <User2 className="mr-2 h-4 w-4" />
