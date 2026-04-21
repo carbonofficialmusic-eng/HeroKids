@@ -42,9 +42,21 @@ function createToken() {
   return crypto.randomBytes(32).toString("hex");
 }
 
-function getBaseUrl(req: any) {
-  const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
-  return `${protocol}://${req.get("host")}`;
+function getBaseUrl() {
+  const configuredUrl = process.env.APP_BASE_URL || process.env.PUBLIC_APP_URL;
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/$/, "");
+  }
+
+  if (process.env.REPLIT_DOMAINS) {
+    return `https://${process.env.REPLIT_DOMAINS.split(",")[0]}`;
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:5000";
+  }
+
+  throw new Error("APP_BASE_URL must be configured for account email links");
 }
 
 function createSessionUser(userId: string) {
@@ -76,8 +88,8 @@ function loginAsync(req: any, user: any) {
   });
 }
 
-async function trySendVerificationEmail(req: any, user: any, token: string) {
-  const verificationUrl = `${getBaseUrl(req)}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
+async function trySendVerificationEmail(user: any, token: string) {
+  const verificationUrl = `${getBaseUrl()}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
   return sendVerificationEmail(user.email, user.firstName, verificationUrl);
 }
 
@@ -148,7 +160,7 @@ export async function setupAuth(app: Express) {
 
       let emailStatus: any = { status: "sent" };
       try {
-        const delivery = await trySendVerificationEmail(req, user, verificationToken);
+        const delivery = await trySendVerificationEmail(user, verificationToken);
         emailStatus = { status: "sent", provider: delivery.provider };
       } catch (error) {
         if (error instanceof EmailProviderNotConfiguredError) {
@@ -204,7 +216,7 @@ export async function setupAuth(app: Express) {
       const email = normalizeEmail(parsed.email);
       const user = await storage.getUserByEmail(email);
 
-      if (!user || !user.passwordHash) {
+      if (!user) {
         return res.json({ message: "Falls ein Konto existiert, senden wir dir eine E-Mail." });
       }
 
@@ -214,7 +226,7 @@ export async function setupAuth(app: Express) {
         passwordResetTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
       });
 
-      const resetUrl = `${getBaseUrl(req)}/?reset_token=${encodeURIComponent(resetToken)}`;
+      const resetUrl = `${getBaseUrl()}/?reset_token=${encodeURIComponent(resetToken)}`;
       try {
         await sendPasswordResetEmail(email, user.firstName, resetUrl);
       } catch (error) {
@@ -299,7 +311,7 @@ export async function setupAuth(app: Express) {
       });
 
       try {
-        const delivery = await trySendVerificationEmail(req, user, token);
+        const delivery = await trySendVerificationEmail(user, token);
         res.json({ message: "Bestätigungsmail wurde gesendet.", provider: delivery.provider });
       } catch (error) {
         if (error instanceof EmailProviderNotConfiguredError) {

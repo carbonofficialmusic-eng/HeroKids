@@ -18,7 +18,7 @@ Preferred communication style: Simple, everyday language.
 - **Backend**: Express.js with TypeScript (Node.js), RESTful API.
 - **Real-time Updates**: WebSocket server using "family rooms" for live synchronization.
 - **Authentication**: First-party email/password auth using bcrypt password hashes, Passport sessions, PostgreSQL session storage, email verification, password reset tokens, and mobile JWT/device-token compatibility. Legacy `/api/login` and `/api/callback` redirect to `/`.
-- **Email Delivery**: Transactional email abstraction supports Resend through the Replit connection, or `RESEND_API_KEY`/`SENDGRID_API_KEY` secrets as fallback. Resend was connected on 2026-04-21 and `EMAIL_FROM` can be used to override the default `HeroKids <no-reply@herokids.app>` sender.
+- **Email Delivery**: Transactional email abstraction supports Resend through the Replit connection, or `RESEND_API_KEY`/`SENDGRID_API_KEY` secrets as fallback. Resend was connected on 2026-04-21 and `EMAIL_FROM` can be used to override the default `HeroKids <no-reply@herokids.app>` sender. Auth email links use trusted configured origins (`APP_BASE_URL`, `PUBLIC_APP_URL`, or `REPLIT_DOMAINS`) instead of request host headers.
 - **File Uploads**: Replit Object Storage (Google Cloud Storage backend) with presigned URL-based client-side uploads.
 - **Subscription Tiers**: 3-tier model (Free, Family, Enterprise) with feature unlocks enforced by backend middleware.
 - **Gamification Features**: Monthly leaderboards, unlockable character skins across various themed collections (122 total skins), a star collection system for unlocking special avatars, and an achievements system with flexible reward types.
