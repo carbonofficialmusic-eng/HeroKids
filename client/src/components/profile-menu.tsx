@@ -43,6 +43,10 @@ export function ProfileMenu({
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
+  const getErrorMessage = (error: unknown) => {
+    return error instanceof Error ? error.message : "Bitte versuche es später noch einmal.";
+  };
+
   const resendVerificationMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/auth/resend-verification");
@@ -54,10 +58,10 @@ export function ProfileMenu({
         description: data.message || "Bitte prüfe deinen Posteingang und den Spam-Ordner.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: "Bestätigung konnte nicht gesendet werden",
-        description: error?.message || "Bitte versuche es später noch einmal.",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     },
