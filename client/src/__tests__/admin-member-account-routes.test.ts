@@ -5,10 +5,12 @@ import { registerAdminMemberAccountRoutes } from "../../../server/adminMemberAcc
 
 const storageMocks = vi.hoisted(() => ({
   getFamilyMember: vi.fn(),
+  getUser: vi.fn(),
   getUserByEmail: vi.fn(),
   getFamilyMemberByUserId: vi.fn(),
   unlinkUserFromFamilyMember: vi.fn(),
   linkUserToFamilyMember: vi.fn(),
+  createAccountLinkRepairHistory: vi.fn(),
 }));
 
 vi.mock("../../../server/storage", () => ({
@@ -96,10 +98,14 @@ describe("admin member account repair routes", () => {
 
   beforeEach(async () => {
     storageMocks.getFamilyMember.mockResolvedValue(parentMember);
+    storageMocks.getUser.mockImplementation(async (id: string) => (
+      id === activeUser.id ? activeUser : { id, email: "carbon@example.com" }
+    ));
     storageMocks.getUserByEmail.mockResolvedValue(activeUser);
     storageMocks.getFamilyMemberByUserId.mockResolvedValue(undefined);
     storageMocks.unlinkUserFromFamilyMember.mockResolvedValue({ ...linkedChildMember, userId: null });
     storageMocks.linkUserToFamilyMember.mockResolvedValue({ ...parentMember, userId: activeUser.id });
+    storageMocks.createAccountLinkRepairHistory.mockImplementation(async (history) => ({ id: "repair-1", ...history }));
     server = await startAdminMemberAccountServer();
   });
 
@@ -114,7 +120,10 @@ describe("admin member account repair routes", () => {
   it("unlinks an account from a member", async () => {
     storageMocks.getFamilyMember.mockResolvedValue(linkedChildMember);
 
-    const response = await adminPatch(server!, "Hero Family", "member-diego", { action: "unlink" });
+    const response = await adminPatch(server!, "Hero Family", "member-diego", {
+      action: "unlink",
+      adminActor: " Alice\nAdmin ",
+    });
 
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
@@ -123,12 +132,23 @@ describe("admin member account repair routes", () => {
       message: "Account unlinked from member",
     });
     expect(storageMocks.unlinkUserFromFamilyMember).toHaveBeenCalledWith("member-diego");
+    expect(storageMocks.createAccountLinkRepairHistory).toHaveBeenCalledWith(expect.objectContaining({
+      familyName: "Hero Family",
+      memberId: "member-diego",
+      action: "unlink",
+      oldAccountId: "user-carbon",
+      oldAccountEmail: "carbon@example.com",
+      newAccountId: null,
+      newAccountEmail: null,
+      repairedBy: "Alice Admin",
+    }));
   });
 
   it("links an active account to an unlinked member", async () => {
     const response = await adminPatch(server!, "Hero Family", "member-riewert", {
       action: "link",
       email: " SonoAStudio@Me.com ",
+      adminActor: "Riewert",
     });
 
     expect(response.status).toBe(200);
@@ -148,6 +168,16 @@ describe("admin member account repair routes", () => {
       avatarUrl: "",
       color: "#8B5CF6",
     });
+    expect(storageMocks.createAccountLinkRepairHistory).toHaveBeenCalledWith(expect.objectContaining({
+      familyName: "Hero Family",
+      memberId: "member-riewert",
+      action: "link",
+      oldAccountId: null,
+      oldAccountEmail: null,
+      newAccountId: "user-sonoastudio",
+      newAccountEmail: "sonoastudio@me.com",
+      repairedBy: "Riewert",
+    }));
   });
 
   it("rejects account changes for a member from another family", async () => {
@@ -205,6 +235,7 @@ describe("admin member account repair routes", () => {
       action: "link",
       email: "sonoastudio@me.com",
       detachExisting: true,
+      adminActor: "Support Admin",
     });
 
     expect(response.status).toBe(200);
@@ -214,5 +245,15 @@ describe("admin member account repair routes", () => {
     });
     expect(storageMocks.unlinkUserFromFamilyMember).toHaveBeenCalledWith("member-diego");
     expect(storageMocks.linkUserToFamilyMember).toHaveBeenCalledWith("member-riewert", "user-sonoastudio", expect.any(Object));
+    expect(storageMocks.createAccountLinkRepairHistory).toHaveBeenCalledWith(expect.objectContaining({
+      memberId: "member-diego",
+      action: "move_detach",
+      repairedBy: "Support Admin",
+    }));
+    expect(storageMocks.createAccountLinkRepairHistory).toHaveBeenCalledWith(expect.objectContaining({
+      memberId: "member-riewert",
+      action: "move_link",
+      repairedBy: "Support Admin",
+    }));
   });
 });

@@ -5968,6 +5968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: entry.action,
         oldAccountEmail: entry.oldAccountEmail,
         newAccountEmail: entry.newAccountEmail,
+        repairedBy: entry.repairedBy,
         repairedAt: entry.repairedAt,
       }));
 

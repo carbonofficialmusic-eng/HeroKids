@@ -6,6 +6,7 @@ const adminMemberAccountSchema = z.object({
   action: z.enum(["link", "unlink"]),
   email: z.preprocess((value) => (typeof value === "string" ? value.trim() : value), z.string().email()).optional(),
   detachExisting: z.boolean().optional().default(false),
+  adminActor: z.string().optional(),
 });
 
 function sanitizeAccountForAdmin(user: any) {
@@ -21,11 +22,21 @@ function sanitizeAccountForAdmin(user: any) {
   return safeUser;
 }
 
+function sanitizeAdminRepairActor(value: string | undefined) {
+  if (!value) return null;
+  const cleaned = value
+    .replace(/[\u0000-\u001F\u007F]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return cleaned ? cleaned.slice(0, 120) : null;
+}
+
 export function registerAdminMemberAccountRoutes(app: Express, isAdmin: RequestHandler) {
   app.patch("/api/admin/families/:familyName/members/:memberId/account", isAdmin, async (req, res) => {
     try {
       const { familyName, memberId } = req.params;
       const parsed = adminMemberAccountSchema.parse(req.body);
+      const repairedBy = sanitizeAdminRepairActor(parsed.adminActor);
       const member = await storage.getFamilyMember(memberId);
 
       if (!member) {
@@ -49,6 +60,7 @@ export function registerAdminMemberAccountRoutes(app: Express, isAdmin: RequestH
             oldAccountEmail: oldAccount?.email || null,
             newAccountId: null,
             newAccountEmail: null,
+            repairedBy,
           });
         }
         return res.json({
@@ -100,6 +112,7 @@ export function registerAdminMemberAccountRoutes(app: Express, isAdmin: RequestH
           oldAccountEmail: detachedAccount?.email || user.email || null,
           newAccountId: null,
           newAccountEmail: null,
+          repairedBy,
         });
       }
 
@@ -117,6 +130,7 @@ export function registerAdminMemberAccountRoutes(app: Express, isAdmin: RequestH
         oldAccountEmail: null,
         newAccountId: user.id,
         newAccountEmail: user.email || null,
+        repairedBy,
       });
 
       res.json({

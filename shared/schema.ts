@@ -183,6 +183,7 @@ export const accountLinkRepairHistory = pgTable("account_link_repair_history", {
   oldAccountEmail: varchar("old_account_email", { length: 320 }),
   newAccountId: varchar("new_account_id").references(() => users.id, { onDelete: "set null" }),
   newAccountEmail: varchar("new_account_email", { length: 320 }),
+  repairedBy: varchar("repaired_by", { length: 120 }),
   repairedAt: timestamp("repaired_at").defaultNow(),
 }, (table) => [
   index("account_link_repair_history_family_repaired_idx").on(table.familyName, table.repairedAt),

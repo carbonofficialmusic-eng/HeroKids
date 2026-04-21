@@ -127,6 +127,7 @@ interface AccountLinkRepairEntry {
   action: "link" | "unlink" | "move_detach" | "move_link" | string;
   oldAccountEmail?: string | null;
   newAccountEmail?: string | null;
+  repairedBy?: string | null;
   repairedAt: string;
 }
 
@@ -239,6 +240,7 @@ export default function AdminPage() {
   const [memberToAddPoints, setMemberToAddPoints] = useState<{ id: string; name: string } | null>(null);
   const [memberToLinkAccount, setMemberToLinkAccount] = useState<{ id: string; name: string; familyName: string } | null>(null);
   const [accountEmailToLink, setAccountEmailToLink] = useState("");
+  const [adminActor, setAdminActor] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("admin_actor") : null) || "Admin");
   const [pointsToAdd, setPointsToAdd] = useState("");
   const [selectedFamilies, setSelectedFamilies] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -253,6 +255,10 @@ export default function AdminPage() {
       setToken(stored);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("admin_actor", adminActor);
+  }, [adminActor]);
 
   const loginMutation = useMutation({
     mutationFn: async (password: string) => {
@@ -475,12 +481,14 @@ export default function AdminPage() {
       action,
       email,
       detachExisting,
+      adminActor,
     }: {
       familyName: string;
       memberId: string;
       action: "link" | "unlink";
       email?: string;
       detachExisting?: boolean;
+      adminActor?: string;
     }) => {
       const res = await fetch(`/api/admin/families/${encodeURIComponent(familyName)}/members/${memberId}/account`, {
         method: "PATCH",
@@ -488,7 +496,7 @@ export default function AdminPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ action, email, detachExisting }),
+        body: JSON.stringify({ action, email, detachExisting, adminActor }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to update account link");
@@ -657,15 +665,23 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Shield className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold">HeroKids Admin</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              value={adminActor}
+              onChange={(event) => setAdminActor(event.target.value)}
+              placeholder="Repair audit name"
+              className="w-48"
+              maxLength={120}
+              data-testid="input-admin-actor"
+              aria-label="Repair audit name"
+            />
             <Button
               variant="ghost"
-              size="sm"
               onClick={() => {
                 refetchStats();
                 refetchFamilies();
@@ -679,7 +695,7 @@ export default function AdminPage() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
-            <Button variant="outline" size="sm" onClick={logout} data-testid="button-admin-logout">
+            <Button variant="outline" onClick={logout} data-testid="button-admin-logout">
               <LogOut className="h-4 w-4 mr-2" />
               Logout
             </Button>
@@ -1778,6 +1794,7 @@ export default function AdminPage() {
                                   familyName: selectedFamily!,
                                   memberId: member.id,
                                   action: "unlink",
+                                  adminActor,
                                 });
                               } else {
                                 setMemberToLinkAccount({
@@ -1844,6 +1861,11 @@ export default function AdminPage() {
                               <p className="text-sm text-muted-foreground break-all" data-testid={`text-account-link-accounts-${entry.id}`}>
                                 Old: {entry.oldAccountEmail || "None"} · New: {entry.newAccountEmail || "None"}
                               </p>
+                              {entry.repairedBy ? (
+                                <p className="text-sm text-muted-foreground" data-testid={`text-account-link-actor-${entry.id}`}>
+                                  Repaired by: {entry.repairedBy}
+                                </p>
+                              ) : null}
                             </div>
                             <p className="text-sm text-muted-foreground" data-testid={`text-account-link-time-${entry.id}`}>
                               {formatEmailCheckTime(entry.repairedAt)}
@@ -1901,6 +1923,7 @@ export default function AdminPage() {
                       memberId: memberToLinkAccount.id,
                       action: "link",
                       email: accountEmailToLink.trim(),
+                      adminActor,
                     });
                   }
                 }}
