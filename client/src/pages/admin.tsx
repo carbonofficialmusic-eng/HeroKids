@@ -84,6 +84,7 @@ interface FamilyWithStats {
 
 interface FamilyMember {
   id: string;
+  userId?: string | null;
   displayName: string;
   role: string;
   avatarUrl: string;
@@ -93,6 +94,15 @@ interface FamilyMember {
   totalPoints: number;
   weeklyPoints: number;
   monthlyPoints: number;
+  account?: {
+    email?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    isEmailVerified?: boolean;
+    isDisabled?: boolean;
+    lastLoginAt?: string | null;
+    createdAt?: string | null;
+  } | null;
 }
 
 interface FamilyDetails {
@@ -1200,9 +1210,30 @@ export default function AdminPage() {
                           </Avatar>
                           <div>
                             <p className="font-medium">{member.displayName}</p>
-                            <Badge variant={member.role === "parent" ? "default" : "secondary"} className="text-xs">
-                              {member.role}
-                            </Badge>
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
+                              <Badge variant={member.role === "parent" ? "default" : "secondary"} className="text-xs">
+                                {member.role}
+                              </Badge>
+                              {member.account?.email && (
+                                <Badge variant="outline" className="text-xs" data-testid={`badge-account-email-${member.id}`}>
+                                  {member.account.email}
+                                </Badge>
+                              )}
+                              {member.account && (
+                                <Badge
+                                  variant={member.account.isEmailVerified ? "default" : "secondary"}
+                                  className="text-xs"
+                                  data-testid={`badge-account-status-${member.id}`}
+                                >
+                                  {member.account.isEmailVerified ? "Verified" : "Unverified"}
+                                </Badge>
+                              )}
+                              {member.account?.isDisabled && (
+                                <Badge variant="destructive" className="text-xs" data-testid={`badge-account-disabled-${member.id}`}>
+                                  Disabled
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-4">

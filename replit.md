@@ -17,7 +17,8 @@ Preferred communication style: Simple, everyday language.
 - **Frontend**: React with TypeScript (Vite), Wouter for routing, TanStack Query for server state management.
 - **Backend**: Express.js with TypeScript (Node.js), RESTful API.
 - **Real-time Updates**: WebSocket server using "family rooms" for live synchronization.
-- **Authentication**: Replit Auth (OIDC-based) via `openid-client` and Passport.js, with Express-session and PostgreSQL store.
+- **Authentication**: First-party email/password auth using bcrypt password hashes, Passport sessions, PostgreSQL session storage, email verification, password reset tokens, and mobile JWT/device-token compatibility. Legacy `/api/login` and `/api/callback` redirect to `/`.
+- **Email Delivery**: Transactional email abstraction supports Resend or SendGrid via environment variables, with explicit failures when no provider is configured.
 - **File Uploads**: Replit Object Storage (Google Cloud Storage backend) with presigned URL-based client-side uploads.
 - **Subscription Tiers**: 3-tier model (Free, Family, Enterprise) with feature unlocks enforced by backend middleware.
 - **Gamification Features**: Monthly leaderboards, unlockable character skins across various themed collections (122 total skins), a star collection system for unlocking special avatars, and an achievements system with flexible reward types.
@@ -32,7 +33,7 @@ Preferred communication style: Simple, everyday language.
 - **Kid Dashboard**: A child-friendly interface with full API integration, real rewards, active tasks with completion states, and time-based task filtering with collapsible category groups.
 - **Parent Dashboard Task Filtering**: Time-based filter tabs with localStorage persistence and collapsible category groups based on task iconEmoji.
 - **Device Linking**: Allows children to link accounts from shared devices to personal devices using a secure link code.
-- **Admin Dashboard**: Password-protected interface for key metrics, analytics, family management, and skin usage statistics.
+- **Admin Dashboard**: Password-protected interface for key metrics, analytics, family management, skin usage statistics, and sanitized account status per family member.
 
 ### System Design Choices
 - **Data Storage**: PostgreSQL (Neon serverless driver) with Drizzle ORM. Character skins are auto-seeded and incrementally added via migrations.
@@ -41,7 +42,7 @@ Preferred communication style: Simple, everyday language.
 - **Development**: Custom Vite integration for React HMR and API routing.
 
 ## External Dependencies
--   **Authentication**: Replit Auth OIDC provider.
+-   **Authentication**: Local email/password authentication with optional Resend or SendGrid for account emails.
 -   **Database**: Neon PostgreSQL serverless database.
 -   **Asset Storage**: Replit Object Storage (Google Cloud Storage) for uploaded photos; pre-made avatar assets.
 -   **Fonts**: Google Fonts (Nunito, Fredoka).

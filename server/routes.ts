@@ -285,7 +285,33 @@ function rateLimit(maxRequests: number, windowMs: number) {
   };
 }
 
-// Helper function to get the current member from a request (supports Replit Auth, Device sessions, Mobile JWT, and Acting-As sessions)
+function sanitizeAccountForAdmin(user: any) {
+  if (!user) return null;
+  const {
+    passwordHash,
+    emailVerificationTokenHash,
+    emailVerificationTokenExpiresAt,
+    passwordResetTokenHash,
+    passwordResetTokenExpiresAt,
+    ...safeUser
+  } = user;
+  return safeUser;
+}
+
+function sanitizeAccountForClient(user: any) {
+  if (!user) return null;
+  const {
+    passwordHash,
+    emailVerificationTokenHash,
+    emailVerificationTokenExpiresAt,
+    passwordResetTokenHash,
+    passwordResetTokenExpiresAt,
+    ...safeUser
+  } = user;
+  return safeUser;
+}
+
+// Helper function to get the current member from a request (supports local accounts, Device sessions, Mobile JWT, and Acting-As sessions)
 async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isDeviceSession: boolean; isMobileSession: boolean } | null> {
   // Mobile JWT session: member is directly available
   if (req.user?.authMethod === "mobile" && req.user?.member) {
@@ -430,10 +456,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
       
-      // Normal Replit Auth flow
+      // Normal account flow
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
-      res.json(user);
+      res.json(sanitizeAccountForClient(user));
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -491,6 +517,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Mobile login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/mobile/auth/login-email", rateLimit(5, 60 * 1000), async (req, res) => {
+    try {
+      const { email, password, deviceId } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const user = await storage.getUserByEmail(String(email).trim().toLowerCase());
+      if (!user || !user.passwordHash || user.isDisabled) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      const isValidPassword = await bcrypt.compare(String(password), user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      const member = await storage.getFamilyMemberByUserId(user.id);
+      if (!member) {
+        return res.status(404).json({ message: "Family profile not found" });
+      }
+
+      await storage.updateUserLastLogin(user.id);
+      const tokens = await generateTokenPair(member, deviceId);
+      res.json({
+        ...tokens,
+        user: sanitizeAccountForClient(user),
+        member: {
+          id: member.id,
+          displayName: member.displayName,
+          role: member.role,
+          familyName: member.familyName,
+          avatarUrl: member.avatarUrl,
+          activeSkinId: member.activeSkinId,
+        },
+      });
+    } catch (error) {
+      console.error("Mobile email login error:", error);
       res.status(500).json({ message: "Login failed" });
     }
   });
@@ -663,6 +731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!family) {
         return res.status(404).json({ message: "Family not found" });
       }
+      const account = await storage.getUser(userId);
       
       const memberCount = await storage.getFamilyMemberCount(member.familyName);
       
@@ -5340,7 +5409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!customerId) {
         const customer = await stripe.customers.create({
-          email: req.user.claims.email,
+          email: account?.email || undefined,
           metadata: {
             familyName: family.familyName,
           },
@@ -5376,7 +5445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         host,
         protocol,
         baseUrl,
-        successUrl: `${baseUrl}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
+        successUrl: `${baseUrl}/?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${baseUrl}/pricing?canceled=true`,
       });
       
@@ -5390,7 +5459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             quantity: 1,
           },
         ],
-        success_url: `${baseUrl}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${baseUrl}/?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/pricing?canceled=true`,
         metadata: {
           familyName: family.familyName,
@@ -5864,12 +5933,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const members = await storage.getFamilyMembersByFamily(familyName);
+      const membersWithAccounts = await Promise.all(
+        members.map(async (member) => ({
+          ...member,
+          account: member.userId ? sanitizeAccountForAdmin(await storage.getUser(member.userId)) : null,
+        }))
+      );
       const tasks = await storage.getTasksByFamily(familyName);
       const rewards = await storage.getRewardsByFamily(familyName);
 
       res.json({
         family,
-        members,
+        members: membersWithAccounts,
         taskCount: tasks.length,
         rewardCount: rewards.length,
       });

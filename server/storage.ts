@@ -173,9 +173,15 @@ function isToday(date: Date, timezone: string): boolean {
 }
 
 export interface IStorage {
-  // User operations (required for Replit Auth)
+  // User operations
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByEmailVerificationToken(tokenHash: string): Promise<User | undefined>;
+  getUserByPasswordResetToken(tokenHash: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  createLocalUser(user: UpsertUser): Promise<User>;
+  updateUserAuthFields(id: string, updates: Partial<UpsertUser>): Promise<User>;
+  updateUserLastLogin(id: string): Promise<void>;
 
   // Family operations
   getFamily(familyName: string): Promise<Family | undefined>;
@@ -348,6 +354,30 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email.toLowerCase()));
+    return user;
+  }
+
+  async getUserByEmailVerificationToken(tokenHash: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.emailVerificationTokenHash, tokenHash));
+    return user;
+  }
+
+  async getUserByPasswordResetToken(tokenHash: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.passwordResetTokenHash, tokenHash));
+    return user;
+  }
+
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
@@ -364,6 +394,33 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  async createLocalUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...userData,
+        email: userData.email?.toLowerCase(),
+      })
+      .returning();
+    return user;
+  }
+
+  async updateUserAuthFields(id: string, updates: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUserLastLogin(id: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ lastLoginAt: new Date(), updatedAt: new Date() })
+      .where(eq(users.id, id));
   }
 
   // Family operations

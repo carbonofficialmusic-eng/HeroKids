@@ -15,6 +15,7 @@ import { Settings, Palette, User2, LogOut, ChevronDown, Sun, Moon, Menu, Trophy 
 import { useTheme } from "@/components/theme-provider";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface ProfileMenuProps {
   member: FamilyMember;
@@ -39,6 +40,12 @@ export function ProfileMenu({
 
   const handleThemeToggle = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const handleLogout = async () => {
+    await apiRequest("POST", "/api/auth/logout");
+    queryClient.clear();
+    window.location.href = "/";
   };
 
   return (
@@ -114,7 +121,7 @@ export function ProfileMenu({
         {/* Only show logout for parents - children use "Switch Member" instead */}
         {isParent && (
           <DropdownMenuItem
-            onClick={() => (window.location.href = "/api/logout")}
+            onClick={handleLogout}
             data-testid="menu-item-logout"
           >
             <LogOut className="mr-2 h-4 w-4" />

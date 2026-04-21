@@ -1,30 +1,88 @@
-import * as client from "openid-client";
-import { Strategy, type VerifyFunction } from "openid-client/passport";
 import passport from "passport";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
-import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
-import { storage } from "./storage";
+import { z } from "zod";
+import crypto from "crypto";
 import bcrypt from "bcrypt";
+import { storage } from "./storage";
 import { verifyAccessToken } from "./mobileAuth";
+import { EmailProviderNotConfiguredError, sendPasswordResetEmail, sendVerificationEmail } from "./email";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+const registerSchema = z.object({
+  email: z.string().email().max(320),
+  password: z.string().min(8).max(128),
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().max(100).optional().nullable(),
+});
+
+const loginSchema = z.object({
+  email: z.string().email().max(320),
+  password: z.string().min(1).max(128),
+});
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email().max(320),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(20),
+  password: z.string().min(8).max(128),
+});
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
 }
 
-const getOidcConfig = memoize(
-  async () => {
-    return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
-    );
-  },
-  { maxAge: 3600 * 1000 }
-);
+function hashToken(token: string) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+function createToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+function getBaseUrl(req: any) {
+  const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
+  return `${protocol}://${req.get("host")}`;
+}
+
+function createSessionUser(userId: string) {
+  return {
+    claims: { sub: userId },
+    authMethod: "local",
+  };
+}
+
+function sanitizeUser(user: any) {
+  if (!user) return user;
+  const {
+    passwordHash,
+    emailVerificationTokenHash,
+    emailVerificationTokenExpiresAt,
+    passwordResetTokenHash,
+    passwordResetTokenExpiresAt,
+    ...safeUser
+  } = user;
+  return safeUser;
+}
+
+function loginAsync(req: any, user: any) {
+  return new Promise<void>((resolve, reject) => {
+    req.login(user, (error: any) => {
+      if (error) reject(error);
+      else resolve();
+    });
+  });
+}
+
+async function trySendVerificationEmail(req: any, user: any, token: string) {
+  const verificationUrl = `${getBaseUrl(req)}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
+  return sendVerificationEmail(user.email, user.firstName, verificationUrl);
+}
 
 export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const sessionTtl = 7 * 24 * 60 * 60 * 1000;
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
@@ -40,29 +98,9 @@ export function getSession() {
     cookie: {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax', // CSRF protection - 'lax' allows Stripe redirect while blocking cross-site POST attacks
+      sameSite: "lax",
       maxAge: sessionTtl,
     },
-  });
-}
-
-function updateUserSession(
-  user: any,
-  tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
-) {
-  user.claims = tokens.claims();
-  user.access_token = tokens.access_token;
-  user.refresh_token = tokens.refresh_token;
-  user.expires_at = user.claims?.exp;
-}
-
-async function upsertUser(claims: any) {
-  await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
   });
 }
 
@@ -72,56 +110,224 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  const config = await getOidcConfig();
-
-  const verify: VerifyFunction = async (
-    tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
-  ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
-  };
-
-  for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
-      },
-      verify
-    );
-    passport.use(strategy);
-  }
-
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+  app.get("/api/login", (_req, res) => {
+    res.redirect("/");
   });
 
-  app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
-    })(req, res, next);
+  app.get("/api/callback", (_req, res) => {
+    res.redirect("/");
+  });
+
+  app.post("/api/auth/register", async (req: any, res) => {
+    try {
+      const parsed = registerSchema.parse(req.body);
+      const email = normalizeEmail(parsed.email);
+      const existing = await storage.getUserByEmail(email);
+      if (existing) {
+        return res.status(409).json({ message: "Für diese E-Mail-Adresse gibt es bereits ein Konto." });
+      }
+
+      const passwordHash = await bcrypt.hash(parsed.password, 12);
+      const verificationToken = createToken();
+      const verificationTokenHash = hashToken(verificationToken);
+      const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      const user = await storage.createLocalUser({
+        email,
+        firstName: parsed.firstName.trim(),
+        lastName: parsed.lastName?.trim() || null,
+        passwordHash,
+        emailVerificationTokenHash: verificationTokenHash,
+        emailVerificationTokenExpiresAt: verificationExpiresAt,
+      });
+
+      await loginAsync(req, createSessionUser(user.id));
+
+      let emailStatus: any = { status: "sent" };
+      try {
+        const delivery = await trySendVerificationEmail(req, user, verificationToken);
+        emailStatus = { status: "sent", provider: delivery.provider };
+      } catch (error) {
+        if (error instanceof EmailProviderNotConfiguredError) {
+          emailStatus = {
+            status: "not_configured",
+            message: "E-Mail-Versand ist noch nicht verbunden. Registrierung funktioniert, Bestätigungsmail wurde nicht gesendet.",
+          };
+        } else {
+          console.error("Verification email failed:", error);
+          emailStatus = { status: "failed", message: "Bestätigungsmail konnte nicht gesendet werden." };
+        }
+      }
+
+      res.status(201).json({ user: sanitizeUser(user), emailStatus });
+    } catch (error: any) {
+      console.error("Register error:", error);
+      res.status(400).json({ message: error?.message || "Registrierung fehlgeschlagen" });
+    }
+  });
+
+  app.post("/api/auth/login", async (req: any, res) => {
+    try {
+      const parsed = loginSchema.parse(req.body);
+      const email = normalizeEmail(parsed.email);
+      const user = await storage.getUserByEmail(email);
+
+      if (!user || !user.passwordHash) {
+        return res.status(401).json({ message: "E-Mail oder Passwort ist falsch." });
+      }
+
+      if (user.isDisabled) {
+        return res.status(403).json({ message: "Dieses Konto ist deaktiviert." });
+      }
+
+      const isValidPassword = await bcrypt.compare(parsed.password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "E-Mail oder Passwort ist falsch." });
+      }
+
+      await storage.updateUserLastLogin(user.id);
+      await loginAsync(req, createSessionUser(user.id));
+      const updatedUser = await storage.getUser(user.id);
+      res.json({ user: sanitizeUser(updatedUser || user) });
+    } catch (error: any) {
+      console.error("Login error:", error);
+      res.status(400).json({ message: error?.message || "Login fehlgeschlagen" });
+    }
+  });
+
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const parsed = forgotPasswordSchema.parse(req.body);
+      const email = normalizeEmail(parsed.email);
+      const user = await storage.getUserByEmail(email);
+
+      if (!user || !user.passwordHash) {
+        return res.json({ message: "Falls ein Konto existiert, senden wir dir eine E-Mail." });
+      }
+
+      const resetToken = createToken();
+      await storage.updateUserAuthFields(user.id, {
+        passwordResetTokenHash: hashToken(resetToken),
+        passwordResetTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      });
+
+      const resetUrl = `${getBaseUrl(req)}/?reset_token=${encodeURIComponent(resetToken)}`;
+      try {
+        await sendPasswordResetEmail(email, user.firstName, resetUrl);
+      } catch (error) {
+        if (error instanceof EmailProviderNotConfiguredError) {
+          return res.status(503).json({ message: error.message });
+        }
+        throw error;
+      }
+
+      res.json({ message: "Falls ein Konto existiert, senden wir dir eine E-Mail." });
+    } catch (error: any) {
+      console.error("Forgot password error:", error);
+      res.status(400).json({ message: error?.message || "Passwort-Reset fehlgeschlagen" });
+    }
+  });
+
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const parsed = resetPasswordSchema.parse(req.body);
+      const tokenHash = hashToken(parsed.token);
+      const user = await storage.getUserByPasswordResetToken(tokenHash);
+
+      if (!user || !user.passwordResetTokenExpiresAt || user.passwordResetTokenExpiresAt < new Date()) {
+        return res.status(400).json({ message: "Der Reset-Link ist ungültig oder abgelaufen." });
+      }
+
+      const passwordHash = await bcrypt.hash(parsed.password, 12);
+      await storage.updateUserAuthFields(user.id, {
+        passwordHash,
+        passwordResetTokenHash: null,
+        passwordResetTokenExpiresAt: null,
+      });
+
+      res.json({ message: "Passwort wurde aktualisiert." });
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      res.status(400).json({ message: error?.message || "Passwort konnte nicht aktualisiert werden" });
+    }
+  });
+
+  app.get("/api/auth/verify-email", async (req, res) => {
+    try {
+      const token = String(req.query.token || "");
+      if (!token) {
+        return res.redirect("/?verified=invalid");
+      }
+
+      const user = await storage.getUserByEmailVerificationToken(hashToken(token));
+      if (!user || !user.emailVerificationTokenExpiresAt || user.emailVerificationTokenExpiresAt < new Date()) {
+        return res.redirect("/?verified=invalid");
+      }
+
+      await storage.updateUserAuthFields(user.id, {
+        isEmailVerified: true,
+        emailVerificationTokenHash: null,
+        emailVerificationTokenExpiresAt: null,
+      });
+
+      res.redirect("/?verified=success");
+    } catch (error) {
+      console.error("Verify email error:", error);
+      res.redirect("/?verified=invalid");
+    }
+  });
+
+  app.post("/api/auth/resend-verification", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const user = await storage.getUser(userId);
+      if (!user?.email) {
+        return res.status(404).json({ message: "Konto nicht gefunden." });
+      }
+
+      if (user.isEmailVerified) {
+        return res.json({ message: "E-Mail ist bereits bestätigt." });
+      }
+
+      const token = createToken();
+      await storage.updateUserAuthFields(user.id, {
+        emailVerificationTokenHash: hashToken(token),
+        emailVerificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+
+      try {
+        const delivery = await trySendVerificationEmail(req, user, token);
+        res.json({ message: "Bestätigungsmail wurde gesendet.", provider: delivery.provider });
+      } catch (error) {
+        if (error instanceof EmailProviderNotConfiguredError) {
+          return res.status(503).json({ message: error.message });
+        }
+        throw error;
+      }
+    } catch (error: any) {
+      console.error("Resend verification error:", error);
+      res.status(400).json({ message: error?.message || "Bestätigungsmail konnte nicht gesendet werden" });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.logout(() => {
+      req.session.destroy(() => {
+        res.clearCookie("connect.sid");
+        res.json({ success: true });
+      });
+    });
   });
 
   app.get("/api/logout", (req, res) => {
     req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
+      req.session.destroy(() => {
+        res.clearCookie("connect.sid");
+        res.redirect("/");
+      });
     });
   });
 }
@@ -129,27 +335,13 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  // First, try Replit Auth
-  if (req.isAuthenticated() && user?.expires_at) {
-    const now = Math.floor(Date.now() / 1000);
-    if (now <= user.expires_at) {
+  if (req.isAuthenticated() && user?.claims?.sub) {
+    const account = await storage.getUser(user.claims.sub);
+    if (account && !account.isDisabled) {
       return next();
-    }
-
-    const refreshToken = user.refresh_token;
-    if (refreshToken) {
-      try {
-        const config = await getOidcConfig();
-        const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-        updateUserSession(user, tokenResponse);
-        return next();
-      } catch (error) {
-        // Fall through to device token check
-      }
     }
   }
 
-  // Second, try JWT Bearer Token (for mobile apps)
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.substring(7);
@@ -174,7 +366,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     }
   }
 
-  // Third, try Device-Link Token (for linked child devices via cookies)
   const deviceToken = req.cookies?.child_device_token;
   if (deviceToken) {
     try {
@@ -182,10 +373,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
       if (session) {
         const member = await storage.getFamilyMember(session.memberId);
         if (member) {
-          // Update last seen
           await storage.updateDeviceSessionLastSeen(session.id);
-          
-          // Attach device auth info to request
           (req as any).user = {
             claims: {
               sub: `device:${member.id}`,
