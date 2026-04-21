@@ -22,7 +22,7 @@ import type { SubscriptionTier } from "@shared/tier-config";
 import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD } from "@shared/skin-config";
 import { eq } from "drizzle-orm";
 import "./types";
-import { checkTransactionalEmailHealth } from "./emailHealth";
+import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
 
 // Backend notification translations for all 8 supported languages
 const notificationTranslations: Record<string, Record<string, string>> = {
@@ -5997,38 +5997,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const adminEmailHealthTestSchema = z.object({
-    recipient: z.string().trim().email("Enter a valid recipient email address"),
-  });
-
-  app.get("/api/admin/email-health", isAdmin, async (req, res) => {
-    try {
-      const health = await checkTransactionalEmailHealth({
-        includeMissingTestRecipientIssue: false,
-      });
-      res.json(health);
-    } catch (error) {
-      console.error("Error checking admin email health:", error);
-      res.status(500).json({ message: "Failed to check email health" });
-    }
-  });
-
-  app.post("/api/admin/email-health/test", isAdmin, async (req, res) => {
-    try {
-      const parsed = adminEmailHealthTestSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: parsed.error.issues[0]?.message || "Invalid test recipient" });
-      }
-
-      const health = await checkTransactionalEmailHealth({
-        testRecipient: parsed.data.recipient,
-      });
-      res.json(health);
-    } catch (error) {
-      console.error("Error sending admin email health test:", error);
-      res.status(500).json({ message: "Failed to send email health test" });
-    }
-  });
+  registerAdminEmailHealthRoutes(app, isAdmin);
 
   // Update family subscription tier (admin override)
   app.patch("/api/admin/families/:familyName/tier", isAdmin, async (req, res) => {
