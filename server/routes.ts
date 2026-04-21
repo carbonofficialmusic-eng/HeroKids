@@ -731,7 +731,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!family) {
         return res.status(404).json({ message: "Family not found" });
       }
-      const account = await storage.getUser(userId);
       
       const memberCount = await storage.getFamilyMemberCount(member.familyName);
       
@@ -5398,6 +5397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!family) {
         return res.status(404).json({ message: "Family not found" });
       }
+      const account = await storage.getUser(userId);
       
       const tierConfig = TIER_CONFIG[tier as SubscriptionTier];
       if (!tierConfig.stripePriceId) {
