@@ -161,6 +161,43 @@ describe("admin email health routes", () => {
 
 describe("admin email health UI", () => {
   let currentEmailStatus: TestEmailHealthStatus;
+  let adminFamilyDetails: {
+    family: {
+      familyName: string;
+      subscriptionTier: string;
+      memberCount: number;
+      parentCount: number;
+      childCount: number;
+      taskCount: number;
+      rewardCount: number;
+      totalPointsEarned: number;
+      createdAt: string;
+    };
+    members: Array<{
+      id: string;
+      userId: string | null;
+      displayName: string;
+      role: "parent" | "child";
+      avatarUrl: string;
+      activeSkinId: string | null;
+      useCustomAvatar: boolean;
+      totalEarned: number;
+      totalPoints: number;
+      weeklyPoints: number;
+      monthlyPoints: number;
+      account: {
+        email: string;
+        firstName: string;
+        lastName: string | null;
+        isEmailVerified: boolean;
+        isDisabled: boolean;
+        lastLoginAt: string | null;
+        createdAt: string;
+      } | null;
+    }>;
+    taskCount: number;
+    rewardCount: number;
+  };
 
   const setupFetchMock = () => {
     vi.stubGlobal(
@@ -182,7 +219,59 @@ describe("admin email health UI", () => {
         }
 
         if (path === "/api/admin/families" && method === "GET") {
-          return jsonResponse([]);
+          return jsonResponse([
+            {
+              ...adminFamilyDetails.family,
+              memberCount: adminFamilyDetails.members.length,
+              parentCount: adminFamilyDetails.members.filter((member) => member.role === "parent").length,
+              childCount: adminFamilyDetails.members.filter((member) => member.role === "child").length,
+            },
+          ]);
+        }
+
+        if (path === "/api/admin/families/Hero%20Family" && method === "GET") {
+          return jsonResponse(adminFamilyDetails);
+        }
+
+        if (path === "/api/admin/families/Hero%20Family/members/member-diego/account" && method === "PATCH") {
+          const body = JSON.parse(String(init?.body));
+          expect(body).toMatchObject({ action: "unlink" });
+          adminFamilyDetails = {
+            ...adminFamilyDetails,
+            members: adminFamilyDetails.members.map((member) =>
+              member.id === "member-diego" ? { ...member, userId: null, account: null } : member,
+            ),
+          };
+          return jsonResponse({ success: true, message: "Account unlinked from member" });
+        }
+
+        if (path === "/api/admin/families/Hero%20Family/members/member-riewert/account" && method === "PATCH") {
+          const body = JSON.parse(String(init?.body));
+          expect(body).toMatchObject({
+            action: "link",
+            email: "sonoastudio@me.com",
+          });
+          adminFamilyDetails = {
+            ...adminFamilyDetails,
+            members: adminFamilyDetails.members.map((member) =>
+              member.id === "member-riewert"
+                ? {
+                    ...member,
+                    userId: "user-sonoastudio",
+                    account: {
+                      email: "sonoastudio@me.com",
+                      firstName: "Riewert",
+                      lastName: null,
+                      isEmailVerified: true,
+                      isDisabled: false,
+                      lastLoginAt: null,
+                      createdAt: "2026-04-21T00:00:00.000Z",
+                    },
+                  }
+                : member,
+            ),
+          };
+          return jsonResponse({ success: true, message: "Account linked to member" });
         }
 
         if (path === "/api/admin/skins/stats" && method === "GET") {
@@ -229,6 +318,59 @@ describe("admin email health UI", () => {
     queryClient.clear();
     localStorage.setItem("admin_token", "admin-secret");
     currentEmailStatus = healthyEmailStatus;
+    adminFamilyDetails = {
+      family: {
+        familyName: "Hero Family",
+        subscriptionTier: "free",
+        memberCount: 2,
+        parentCount: 1,
+        childCount: 1,
+        taskCount: 0,
+        rewardCount: 0,
+        totalPointsEarned: 0,
+        createdAt: "2026-04-21T00:00:00.000Z",
+      },
+      members: [
+        {
+          id: "member-riewert",
+          userId: null,
+          displayName: "Riewert",
+          role: "parent",
+          avatarUrl: "",
+          activeSkinId: null,
+          useCustomAvatar: false,
+          totalEarned: 0,
+          totalPoints: 0,
+          weeklyPoints: 0,
+          monthlyPoints: 0,
+          account: null,
+        },
+        {
+          id: "member-diego",
+          userId: "user-carbon",
+          displayName: "Diego",
+          role: "child",
+          avatarUrl: "",
+          activeSkinId: null,
+          useCustomAvatar: false,
+          totalEarned: 0,
+          totalPoints: 0,
+          weeklyPoints: 0,
+          monthlyPoints: 0,
+          account: {
+            email: "carbon.official.music@gmail.com",
+            firstName: "Carbon",
+            lastName: null,
+            isEmailVerified: true,
+            isDisabled: false,
+            lastLoginAt: null,
+            createdAt: "2026-04-21T00:00:00.000Z",
+          },
+        },
+      ],
+      taskCount: 0,
+      rewardCount: 0,
+    };
     setupFetchMock();
   });
 
@@ -299,5 +441,27 @@ describe("admin email health UI", () => {
     expect(screen.getByTestId("text-email-health-alert-status").textContent).toContain("Status: Not ready");
     expect(screen.getByTestId("text-email-health-alert-issue").textContent).toContain("Resend credentials are missing.");
     expect(screen.getByTestId("button-refresh-email-health-alert")).toBeTruthy();
+  });
+
+  it("lets admins repair member account links from family details", async () => {
+    const user = userEvent.setup();
+    renderAdmin();
+
+    await user.click(await screen.findByTestId("tab-families"));
+    await user.click(await screen.findByText("Hero Family"));
+    expect((await screen.findByTestId("badge-account-email-member-diego")).textContent).toContain("carbon.official.music@gmail.com");
+
+    await user.click(screen.getByTestId("button-unlink-account-member-diego"));
+    await waitFor(() => {
+      expect(screen.getByTestId("button-link-account-member-diego")).toBeTruthy();
+    });
+
+    await user.click(screen.getByTestId("button-link-account-member-riewert"));
+    await user.type(await screen.findByTestId("input-link-account-email"), "sonoastudio@me.com");
+    await user.click(screen.getByTestId("button-confirm-link-account"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("badge-account-email-member-riewert").textContent).toContain("sonoastudio@me.com");
+    });
   });
 });

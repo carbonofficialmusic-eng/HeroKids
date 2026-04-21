@@ -312,6 +312,31 @@ function sanitizeAccountForClient(user: any) {
   return safeUser;
 }
 
+async function getValidActingAsMemberFromRequest(req: any) {
+  const actingAsMemberId = req.session?.actingAsMemberId;
+  if (!actingAsMemberId) return null;
+
+  const userId = req.user?.claims?.sub;
+  if (!userId) {
+    delete req.session.actingAsMemberId;
+    return null;
+  }
+
+  const realMember = await storage.getFamilyMemberByUserId(userId);
+  if (!realMember || realMember.role !== "parent") {
+    delete req.session.actingAsMemberId;
+    return null;
+  }
+
+  const actingAsMember = await storage.getFamilyMember(actingAsMemberId);
+  if (!actingAsMember || actingAsMember.familyName !== realMember.familyName) {
+    delete req.session.actingAsMemberId;
+    return null;
+  }
+
+  return actingAsMember;
+}
+
 // Helper function to get the current member from a request (supports local accounts, Device sessions, Mobile JWT, and Acting-As sessions)
 async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isDeviceSession: boolean; isMobileSession: boolean } | null> {
   // Mobile JWT session: member is directly available
@@ -325,13 +350,9 @@ async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isD
   }
   
   // Check if acting as another member (single-device mode)
-  if (req.session?.actingAsMemberId) {
-    const actingAsMember = await storage.getFamilyMember(req.session.actingAsMemberId);
-    if (actingAsMember) {
-      return { member: actingAsMember, isDeviceSession: false, isMobileSession: false };
-    }
-    // If acting as member not found, clear the session and fall through
-    delete req.session.actingAsMemberId;
+  const actingAsMember = await getValidActingAsMemberFromRequest(req);
+  if (actingAsMember) {
+    return { member: actingAsMember, isDeviceSession: false, isMobileSession: false };
   }
   
   // Normal Replit Auth flow
@@ -882,13 +903,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/family-members/current", isAuthenticated, async (req: any, res) => {
     try {
       // Check if we're acting as another member
-      if (req.session?.actingAsMemberId) {
-        const actingAsMember = await storage.getFamilyMember(req.session.actingAsMemberId);
-        if (actingAsMember) {
-          return res.json(actingAsMember);
-        }
-        // If acting as member not found, clear the session and fall through
-        delete req.session.actingAsMemberId;
+      const actingAsMember = await getValidActingAsMemberFromRequest(req);
+      if (actingAsMember) {
+        return res.json(actingAsMember);
       }
       
       // Device-linked session: fetch fresh data from DB (session member may be stale)
@@ -1011,6 +1028,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error switching member:", error);
       res.status(500).json({ message: "Failed to switch member" });
     }
+  });
+
+  const adminMemberAccountSchema = z.object({
+    action: z.enum(["link", "unlink"]),
+    email: z.string().email().optional(),
+    detachExisting: z.boolean().optional().default(false),
   });
 
   // Set or update PIN code for a family member (parents only)
@@ -5953,6 +5976,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching admin family details:", error);
       res.status(500).json({ message: "Failed to fetch family details" });
+    }
+  });
+
+  app.patch("/api/admin/families/:familyName/members/:memberId/account", isAdmin, async (req, res) => {
+    try {
+      const { familyName, memberId } = req.params;
+      const parsed = adminMemberAccountSchema.parse(req.body);
+      const member = await storage.getFamilyMember(memberId);
+
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      if (member.familyName !== familyName) {
+        return res.status(400).json({ message: "Member not in this family" });
+      }
+
+      if (parsed.action === "unlink") {
+        const updatedMember = member.userId ? await storage.unlinkUserFromFamilyMember(member.id) : member;
+        return res.json({
+          success: true,
+          member: updatedMember,
+          account: null,
+          message: "Account unlinked from member",
+        });
+      }
+
+      if (!parsed.email) {
+        return res.status(400).json({ message: "Email is required to link an account" });
+      }
+
+      if (member.userId) {
+        return res.status(409).json({ message: "This member is already linked to an account. Unlink it first." });
+      }
+
+      const user = await storage.getUserByEmail(parsed.email.trim().toLowerCase());
+      if (!user) {
+        return res.status(404).json({ message: "Account not found for this email" });
+      }
+
+      if (user.isDisabled) {
+        return res.status(400).json({ message: "Disabled accounts cannot be linked to a member" });
+      }
+
+      const existingLinkedMember = await storage.getFamilyMemberByUserId(user.id);
+      if (existingLinkedMember && existingLinkedMember.id !== member.id) {
+        if (!parsed.detachExisting) {
+          return res.status(409).json({
+            message: `This account is already linked to ${existingLinkedMember.displayName}. Unlink it there first or confirm moving it.`,
+            existingMember: {
+              id: existingLinkedMember.id,
+              displayName: existingLinkedMember.displayName,
+              familyName: existingLinkedMember.familyName,
+              role: existingLinkedMember.role,
+            },
+          });
+        }
+        await storage.unlinkUserFromFamilyMember(existingLinkedMember.id);
+      }
+
+      const linkedMember = await storage.linkUserToFamilyMember(member.id, user.id, {
+        displayName: member.displayName,
+        avatarUrl: member.avatarUrl || "",
+        color: member.color,
+      });
+
+      res.json({
+        success: true,
+        member: linkedMember,
+        account: sanitizeAccountForAdmin(user),
+        message: "Account linked to member",
+      });
+    } catch (error: any) {
+      console.error("Error updating member account link:", error);
+      res.status(400).json({ message: error?.message || "Failed to update member account link" });
     }
   });
 

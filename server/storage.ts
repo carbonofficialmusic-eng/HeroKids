@@ -209,6 +209,7 @@ export interface IStorage {
   createFamilyMember(member: InsertFamilyMember): Promise<FamilyMember>;
   updateFamilyMember(id: string, updates: Partial<InsertFamilyMember>): Promise<FamilyMember>;
   linkUserToFamilyMember(id: string, userId: string, updates: { displayName: string; avatarUrl: string; color: string }): Promise<FamilyMember>;
+  unlinkUserFromFamilyMember(id: string): Promise<FamilyMember>;
   deleteFamilyMember(id: string): Promise<void>;
   updateFamilyMemberPoints(
     id: string,
@@ -603,16 +604,57 @@ export class DatabaseStorage implements IStorage {
     userId: string,
     updates: { displayName: string; avatarUrl: string; color: string }
   ): Promise<FamilyMember> {
+    return await db.transaction(async (tx) => {
+      const [targetMember] = await tx
+        .select()
+        .from(familyMembers)
+        .where(eq(familyMembers.id, id))
+        .for("update");
+
+      if (!targetMember) {
+        throw new Error(`Family member with id ${id} not found`);
+      }
+
+      if (targetMember.userId && targetMember.userId !== userId) {
+        throw new Error("This family member is already linked to another account.");
+      }
+
+      const [existingLinkedMember] = await tx
+        .select()
+        .from(familyMembers)
+        .where(eq(familyMembers.userId, userId))
+        .for("update");
+
+      if (existingLinkedMember && existingLinkedMember.id !== id) {
+        throw new Error("This account is already linked to another family member.");
+      }
+
+      const [member] = await tx
+        .update(familyMembers)
+        .set({
+          userId,
+          displayName: updates.displayName,
+          avatarUrl: updates.avatarUrl,
+          color: updates.color,
+          updatedAt: new Date(),
+        })
+        .where(eq(familyMembers.id, id))
+        .returning();
+      return member;
+    });
+  }
+
+  async unlinkUserFromFamilyMember(id: string): Promise<FamilyMember> {
     const [member] = await db
       .update(familyMembers)
-      .set({
-        userId,
-        displayName: updates.displayName,
-        avatarUrl: updates.avatarUrl,
-        color: updates.color,
-      })
+      .set({ userId: null, updatedAt: new Date() } as any)
       .where(eq(familyMembers.id, id))
       .returning();
+
+    if (!member) {
+      throw new Error(`Family member with id ${id} not found`);
+    }
+
     return member;
   }
 

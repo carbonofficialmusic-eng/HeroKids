@@ -43,7 +43,9 @@ import {
   Mail,
   CheckCircle2,
   AlertTriangle,
-  XCircle
+  XCircle,
+  Link as LinkIcon,
+  Unlink
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/skins";
 import { queryClient } from "@/lib/queryClient";
@@ -216,6 +218,8 @@ export default function AdminPage() {
   const [messageToSend, setMessageToSend] = useState("");
   const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string; familyName: string } | null>(null);
   const [memberToAddPoints, setMemberToAddPoints] = useState<{ id: string; name: string } | null>(null);
+  const [memberToLinkAccount, setMemberToLinkAccount] = useState<{ id: string; name: string; familyName: string } | null>(null);
+  const [accountEmailToLink, setAccountEmailToLink] = useState("");
   const [pointsToAdd, setPointsToAdd] = useState("");
   const [selectedFamilies, setSelectedFamilies] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -438,6 +442,43 @@ export default function AdminPage() {
       toast({ title: `Punkte hinzugefügt! Neuer Stand: ${data.newTotalPoints}` });
       setMemberToAddPoints(null);
       setPointsToAdd("");
+      refetchDetails();
+    },
+    onError: (error: Error) => {
+      toast({ title: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateMemberAccountMutation = useMutation({
+    mutationFn: async ({
+      familyName,
+      memberId,
+      action,
+      email,
+      detachExisting,
+    }: {
+      familyName: string;
+      memberId: string;
+      action: "link" | "unlink";
+      email?: string;
+      detachExisting?: boolean;
+    }) => {
+      const res = await fetch(`/api/admin/families/${encodeURIComponent(familyName)}/members/${memberId}/account`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action, email, detachExisting }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update account link");
+      return data;
+    },
+    onSuccess: (data) => {
+      toast({ title: data.message || "Account link updated" });
+      setMemberToLinkAccount(null);
+      setAccountEmailToLink("");
       refetchDetails();
     },
     onError: (error: Error) => {
@@ -1712,6 +1753,34 @@ export default function AdminPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => {
+                              if (member.userId) {
+                                updateMemberAccountMutation.mutate({
+                                  familyName: selectedFamily!,
+                                  memberId: member.id,
+                                  action: "unlink",
+                                });
+                              } else {
+                                setMemberToLinkAccount({
+                                  id: member.id,
+                                  name: member.displayName,
+                                  familyName: selectedFamily!,
+                                });
+                              }
+                            }}
+                            disabled={updateMemberAccountMutation.isPending}
+                            data-testid={`button-${member.userId ? "unlink" : "link"}-account-${member.id}`}
+                            title={member.userId ? "Unlink account from member" : "Link account by email"}
+                          >
+                            {member.userId ? (
+                              <Unlink className="h-4 w-4 text-orange-600" />
+                            ) : (
+                              <LinkIcon className="h-4 w-4 text-blue-600" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setMemberToRemove({ 
                               id: member.id, 
                               name: member.displayName, 
@@ -1735,6 +1804,50 @@ export default function AdminPage() {
                 )}
               </div>
             ) : null}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!memberToLinkAccount} onOpenChange={(open) => { if (!open) { setMemberToLinkAccount(null); setAccountEmailToLink(""); } }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Link account</DialogTitle>
+              <DialogDescription>
+                Link an existing login account to <strong>{memberToLinkAccount?.name}</strong>. If that account is already linked to another member, unlink it there first.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-3">
+              <Input
+                type="email"
+                placeholder="parent@example.com"
+                value={accountEmailToLink}
+                onChange={(event) => setAccountEmailToLink(event.target.value)}
+                data-testid="input-link-account-email"
+              />
+              <p className="text-sm text-muted-foreground">
+                This is for admin repair only. Double-check the member name and email before linking.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setMemberToLinkAccount(null); setAccountEmailToLink(""); }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (memberToLinkAccount && accountEmailToLink.trim()) {
+                    updateMemberAccountMutation.mutate({
+                      familyName: memberToLinkAccount.familyName,
+                      memberId: memberToLinkAccount.id,
+                      action: "link",
+                      email: accountEmailToLink.trim(),
+                    });
+                  }
+                }}
+                disabled={updateMemberAccountMutation.isPending || !accountEmailToLink.trim()}
+                data-testid="button-confirm-link-account"
+              >
+                {updateMemberAccountMutation.isPending ? "Linking..." : "Link account"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 

@@ -91,6 +91,12 @@ function loginAsync(req: any, user: any) {
   });
 }
 
+function clearAccountSessionState(req: any) {
+  if (req.session?.actingAsMemberId) {
+    delete req.session.actingAsMemberId;
+  }
+}
+
 async function trySendVerificationEmail(user: any, token: string) {
   const verificationUrl = createEmailVerificationUrl(token);
   return sendVerificationEmail(user.email, user.firstName, verificationUrl);
@@ -159,7 +165,9 @@ export async function setupAuth(app: Express) {
         emailVerificationTokenExpiresAt: verificationExpiresAt,
       });
 
+      clearAccountSessionState(req);
       await loginAsync(req, createSessionUser(user.id));
+      clearAccountSessionState(req);
 
       let emailStatus: any = { status: "sent" };
       try {
@@ -204,7 +212,9 @@ export async function setupAuth(app: Express) {
       }
 
       await storage.updateUserLastLogin(user.id);
+      clearAccountSessionState(req);
       await loginAsync(req, createSessionUser(user.id));
+      clearAccountSessionState(req);
       const updatedUser = await storage.getUser(user.id);
       res.json({ user: sanitizeUser(updatedUser || user) });
     } catch (error: any) {
@@ -272,6 +282,7 @@ export async function setupAuth(app: Express) {
         passwordResetTokenHash: null,
         passwordResetTokenExpiresAt: null,
       });
+      clearAccountSessionState(req);
 
       res.json({ message: "Passwort wurde aktualisiert." });
     } catch (error: any) {
