@@ -13,6 +13,7 @@ import { Camera, Upload, X } from "lucide-react";
 import type { Task } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
+import { isPhotoPickerCancelError } from "@/lib/cameraUtils";
 
 interface TaskCompletionDialogProps {
   open: boolean;
@@ -75,9 +76,7 @@ export function TaskCompletionDialog({
         setUploadedPhoto(file);
       }
     } catch (error: unknown) {
-      if (error instanceof Error && error.message?.toLowerCase().includes("cancel")) {
-        return;
-      }
+      if (isPhotoPickerCancelError(error)) return;
       console.error("Camera error:", error);
       setCameraError(t("tasks.cameraError", "Could not open camera. Please try again."));
     }

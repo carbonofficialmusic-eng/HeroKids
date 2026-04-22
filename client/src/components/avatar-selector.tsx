@@ -5,6 +5,7 @@ import { Check, Upload, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
+import { isPhotoPickerCancelError } from "@/lib/cameraUtils";
 
 interface AvatarSelectorProps {
   selectedAvatar: string;
@@ -90,9 +91,7 @@ export function AvatarSelector({
         }
       }
     } catch (error: unknown) {
-      if (error instanceof Error && error.message?.toLowerCase().includes("cancel")) {
-        return;
-      }
+      if (isPhotoPickerCancelError(error)) return;
       console.error("Camera error:", error);
       setCameraError(t("tasks.cameraError", "Could not open camera. Please try again."));
     }
