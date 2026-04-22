@@ -100,7 +100,7 @@ export function TaskCompletionDialog({
       if (/denied|permission|not allowed/i.test(msg)) {
         setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
       } else {
-        setCameraError(t("tasks.cameraError", "Kamera konnte nicht geöffnet werden. Bitte erneut versuchen."));
+        setCameraError(`[DEBUG] ${msg}`);
       }
     }
   };
