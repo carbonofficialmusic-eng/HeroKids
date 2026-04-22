@@ -1004,7 +1004,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className={`container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden ${isParent ? "pb-[calc(6rem+env(safe-area-inset-bottom))]" : ""}`}>
+      <div className={`container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden ${isParent ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))]" : ""}`}>
         {isParent ? (
           /* Parent View */
           <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
@@ -1722,13 +1722,13 @@ export default function Dashboard() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, type: "spring" }}
         >
-          <Card className="p-1.5 mx-2 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl sm:mx-auto">
+          <Card className="p-1 mx-2 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl sm:mx-auto">
             <div className="flex justify-center">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px] relative">
-                <Button variant="ghost" size="lg" asChild data-testid="button-parent-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
+                <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" className="h-10 w-full px-3 sm:px-4 rounded-2xl">
                   <Link href="/chat">
-                    <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
-                    <span className="font-bold text-sm sm:text-base truncate">{t("nav.chat")}</span>
+                    <MessageCircle className="h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
+                    <span className="font-medium text-sm truncate">{t("nav.chat")}</span>
                   </Link>
                 </Button>
                 {unreadChatData && unreadChatData.count > 0 && (
