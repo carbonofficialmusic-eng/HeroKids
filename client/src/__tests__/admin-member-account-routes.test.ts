@@ -186,6 +186,7 @@ describe("admin member account repair routes", () => {
     const response = await adminPatch(server!, "Hero Family", "member-other", {
       action: "link",
       email: "sonoastudio@me.com",
+      adminActor: "Support Admin",
     });
 
     expect(response.status).toBe(400);
@@ -199,6 +200,7 @@ describe("admin member account repair routes", () => {
     const response = await adminPatch(server!, "Hero Family", "member-riewert", {
       action: "link",
       email: "sonoastudio@me.com",
+      adminActor: "Support Admin",
     });
 
     expect(response.status).toBe(400);
@@ -212,6 +214,7 @@ describe("admin member account repair routes", () => {
     const response = await adminPatch(server!, "Hero Family", "member-riewert", {
       action: "link",
       email: "sonoastudio@me.com",
+      adminActor: "Support Admin",
     });
 
     expect(response.status).toBe(409);

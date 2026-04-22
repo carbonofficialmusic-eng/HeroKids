@@ -362,6 +362,7 @@ describe("admin email health UI", () => {
   beforeEach(() => {
     queryClient.clear();
     localStorage.setItem("admin_token", "admin-secret");
+    localStorage.setItem("admin_actor", "Test Admin");
     currentEmailStatus = healthyEmailStatus;
     adminFamilyDetails = {
       family: {
@@ -547,6 +548,69 @@ describe("admin email health UI", () => {
     expect(screen.getByTestId("card-account-link-repair-repair-legacy").textContent).toContain("Riewert");
     expect(screen.getByTestId("card-account-link-repair-repair-legacy").textContent).toContain("sonoastudio@me.com");
     expect(screen.queryByTestId("text-account-link-actor-repair-legacy")).toBeNull();
+  });
+
+  it("filters account-link repair history by member action and email", async () => {
+    const user = userEvent.setup();
+    adminFamilyDetails = {
+      ...adminFamilyDetails,
+      accountLinkRepairHistory: [
+        {
+          id: "repair-diego-unlink",
+          memberId: "member-diego",
+          memberDisplayName: "Diego",
+          action: "unlink",
+          oldAccountEmail: "carbon.official.music@gmail.com",
+          newAccountEmail: null,
+          repairedBy: "Alice Admin",
+          repairedAt: "2026-04-21T00:00:00.000Z",
+        },
+        {
+          id: "repair-riewert-link",
+          memberId: "member-riewert",
+          memberDisplayName: "Riewert",
+          action: "link",
+          oldAccountEmail: null,
+          newAccountEmail: "sonoastudio@me.com",
+          repairedBy: "Bob Admin",
+          repairedAt: "2026-04-21T00:01:00.000Z",
+        },
+        {
+          id: "repair-mila-move",
+          memberId: "member-mila",
+          memberDisplayName: "Mila",
+          action: "move_link",
+          oldAccountEmail: null,
+          newAccountEmail: "mila@example.com",
+          repairedBy: "Chris Admin",
+          repairedAt: "2026-04-21T00:02:00.000Z",
+        },
+      ],
+    };
+    renderAdmin();
+
+    await user.click(await screen.findByTestId("tab-families"));
+    await user.click(await screen.findByText("Hero Family"));
+    const search = await screen.findByTestId("input-account-link-repair-search");
+
+    await user.type(search, "riewert");
+    expect(screen.getByTestId("text-account-link-repair-filter-count").textContent).toContain("Showing 1 of 3 repairs");
+    expect(screen.getByTestId("card-account-link-repair-repair-riewert-link").textContent).toContain("sonoastudio@me.com");
+    expect(screen.queryByTestId("card-account-link-repair-repair-diego-unlink")).toBeNull();
+
+    await user.clear(search);
+    await user.type(search, "moved here");
+    expect(screen.getByTestId("card-account-link-repair-repair-mila-move").textContent).toContain("Moved here");
+    expect(screen.queryByTestId("card-account-link-repair-repair-riewert-link")).toBeNull();
+
+    await user.clear(search);
+    await user.type(search, "carbon.official");
+    expect(screen.getByTestId("card-account-link-repair-repair-diego-unlink").textContent).toContain("carbon.official.music@gmail.com");
+    expect(screen.queryByTestId("card-account-link-repair-repair-mila-move")).toBeNull();
+
+    await user.clear(search);
+    await user.type(search, "missing@example.com");
+    expect(screen.getByTestId("text-account-link-history-no-results").textContent).toContain("No account-link repairs match this search.");
   });
 
   it("asks admins to confirm moving an already linked account", async () => {

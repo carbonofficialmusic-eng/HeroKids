@@ -270,6 +270,7 @@ export default function AdminPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [emailTestRecipient, setEmailTestRecipient] = useState("");
+  const [repairHistorySearch, setRepairHistorySearch] = useState("");
   const lastEmailAlertKeyRef = useRef<string | null>(null);
   const { toast } = useToast();
 
@@ -283,6 +284,10 @@ export default function AdminPage() {
   useEffect(() => {
     localStorage.setItem("admin_actor", adminActor);
   }, [adminActor]);
+
+  useEffect(() => {
+    setRepairHistorySearch("");
+  }, [selectedFamily]);
 
   const loginMutation = useMutation({
     mutationFn: async (password: string) => {
@@ -631,6 +636,22 @@ export default function AdminPage() {
     (emailHealth?.status === "warning" ? "Run a test email to confirm delivery before launch." : "Check the transactional email provider and launch domain settings.");
   const sanitizedAdminActor = adminActor.replace(/[\u0000-\u001F\u007F]/g, " ").replace(/\s+/g, " ").trim();
   const hasRepairAuditName = sanitizedAdminActor.length > 0 && !["admin", "administrator"].includes(sanitizedAdminActor.toLowerCase());
+  const accountLinkRepairHistory = familyDetails?.accountLinkRepairHistory || [];
+  const repairHistorySearchTerm = repairHistorySearch.trim().toLowerCase();
+  const filteredAccountLinkRepairHistory = repairHistorySearchTerm
+    ? accountLinkRepairHistory.filter((entry) => {
+        const searchableValues = [
+          entry.memberDisplayName,
+          getAccountLinkRepairActionLabel(entry.action),
+          entry.action,
+          entry.oldAccountEmail,
+          entry.newAccountEmail,
+          entry.repairedBy,
+          formatEmailCheckTime(entry.repairedAt),
+        ];
+        return searchableValues.some((value) => (value || "").toLowerCase().includes(repairHistorySearchTerm));
+      })
+    : accountLinkRepairHistory;
 
   useEffect(() => {
     if (!emailHealth || emailHealth.status === "healthy") {
@@ -1885,43 +1906,67 @@ export default function AdminPage() {
                 <Separator />
 
                 <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <LinkIcon className="h-4 w-4" />
-                    Recent Account-Link Repairs
-                  </h3>
-                  {(familyDetails.accountLinkRepairHistory || []).length > 0 ? (
-                    <div className="space-y-2" data-testid="list-account-link-repair-history">
-                      {(familyDetails.accountLinkRepairHistory || []).map((entry) => (
-                        <div
-                          key={entry.id}
-                          className="rounded-md bg-muted/50 p-3"
-                          data-testid={`card-account-link-repair-${entry.id}`}
-                        >
-                          <div className="flex flex-wrap items-start justify-between gap-3">
-                            <div className="space-y-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <Badge variant="outline" data-testid={`badge-account-link-action-${entry.id}`}>
-                                  {getAccountLinkRepairActionLabel(entry.action)}
-                                </Badge>
-                                <p className="font-medium" data-testid={`text-account-link-member-${entry.id}`}>
-                                  {entry.memberDisplayName}
+                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <LinkIcon className="h-4 w-4" />
+                      Recent Account-Link Repairs
+                    </h3>
+                    {accountLinkRepairHistory.length > 0 ? (
+                      <div className="w-full sm:max-w-xs">
+                        <Input
+                          type="search"
+                          placeholder="Search member, action, or email"
+                          value={repairHistorySearch}
+                          onChange={(event) => setRepairHistorySearch(event.target.value)}
+                          data-testid="input-account-link-repair-search"
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                  {accountLinkRepairHistory.length > 0 ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground" data-testid="text-account-link-repair-filter-count">
+                        Showing {filteredAccountLinkRepairHistory.length} of {accountLinkRepairHistory.length} repairs
+                      </p>
+                      {filteredAccountLinkRepairHistory.length > 0 ? (
+                        <div className="space-y-2" data-testid="list-account-link-repair-history">
+                          {filteredAccountLinkRepairHistory.map((entry) => (
+                            <div
+                              key={entry.id}
+                              className="rounded-md bg-muted/50 p-3"
+                              data-testid={`card-account-link-repair-${entry.id}`}
+                            >
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="space-y-1">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="outline" data-testid={`badge-account-link-action-${entry.id}`}>
+                                      {getAccountLinkRepairActionLabel(entry.action)}
+                                    </Badge>
+                                    <p className="font-medium" data-testid={`text-account-link-member-${entry.id}`}>
+                                      {entry.memberDisplayName}
+                                    </p>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground break-all" data-testid={`text-account-link-accounts-${entry.id}`}>
+                                    Old: {entry.oldAccountEmail || "None"} · New: {entry.newAccountEmail || "None"}
+                                  </p>
+                                  {entry.repairedBy ? (
+                                    <p className="text-sm text-muted-foreground" data-testid={`text-account-link-actor-${entry.id}`}>
+                                      Repaired by: {entry.repairedBy}
+                                    </p>
+                                  ) : null}
+                                </div>
+                                <p className="text-sm text-muted-foreground" data-testid={`text-account-link-time-${entry.id}`}>
+                                  {formatEmailCheckTime(entry.repairedAt)}
                                 </p>
                               </div>
-                              <p className="text-sm text-muted-foreground break-all" data-testid={`text-account-link-accounts-${entry.id}`}>
-                                Old: {entry.oldAccountEmail || "None"} · New: {entry.newAccountEmail || "None"}
-                              </p>
-                              {entry.repairedBy ? (
-                                <p className="text-sm text-muted-foreground" data-testid={`text-account-link-actor-${entry.id}`}>
-                                  Repaired by: {entry.repairedBy}
-                                </p>
-                              ) : null}
                             </div>
-                            <p className="text-sm text-muted-foreground" data-testid={`text-account-link-time-${entry.id}`}>
-                              {formatEmailCheckTime(entry.repairedAt)}
-                            </p>
-                          </div>
+                          ))}
                         </div>
-                      ))}
+                      ) : (
+                        <p className="text-sm text-muted-foreground" data-testid="text-account-link-history-no-results">
+                          No account-link repairs match this search.
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground" data-testid="text-account-link-history-empty">
