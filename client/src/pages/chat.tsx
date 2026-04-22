@@ -186,24 +186,21 @@ export default function Chat() {
 
   return (
     <div className="container mx-auto p-4 h-screen flex flex-col" data-testid="page-chat">
-      <Link href={dashboardUrl}>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
-          data-testid="button-back-to-dashboard"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {t('settings.backToDashboard')}
-        </Button>
-      </Link>
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold mb-2" data-testid="heading-chat">
+      <div className="flex items-center gap-3 mb-4 shrink-0">
+        <Link href={dashboardUrl}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
+            data-testid="button-back-to-dashboard"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            {t('settings.backToDashboard')}
+          </Button>
+        </Link>
+        <h1 className="text-2xl font-bold" data-testid="heading-chat">
           {t('chat.title')}
         </h1>
-        <p className="text-muted-foreground">
-          {t('chat.chatWithFamily')}
-        </p>
       </div>
 
       <Card className="flex-1 flex flex-col overflow-hidden">
