@@ -269,6 +269,7 @@
     "uploadPhotoProof": "Upload Photo Proof",
     "takePhoto": "Take a photo showing you completed this task",
     "choosePhoto": "Choose Photo",
+    "takePhotoBtn": "Take Photo",
     "cameraError": "Could not open camera. Please try again.",
     "cameraPermissionDenied": "Camera access denied. Please enable it in your device Settings.",
     "submitting": "Submitting...",

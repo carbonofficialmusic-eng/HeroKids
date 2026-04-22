@@ -228,6 +228,7 @@
     "uploadPhotoProof": "Subir Prueba Fotográfica",
     "takePhoto": "Toma una foto mostrando que completaste esta tarea",
     "choosePhoto": "Elegir Foto",
+    "takePhotoBtn": "Tomar Foto",
     "cameraError": "No se pudo abrir la cámara. Por favor inténtalo de nuevo.",
     "cameraPermissionDenied": "Acceso a la cámara denegado. Por favor actívalo en Ajustes.",
     "submitting": "Enviando...",

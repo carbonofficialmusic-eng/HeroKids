@@ -268,6 +268,7 @@
     "uploadPhotoProof": "Ladda upp fotobevis",
     "takePhoto": "Ta ett foto som visar att du slutfört denna uppgift",
     "choosePhoto": "Välj foto",
+    "takePhotoBtn": "Ta foto",
     "cameraError": "Kunde inte öppna kameran. Försök igen.",
     "cameraPermissionDenied": "Kameraåtkomst nekad. Aktivera det i Inställningar.",
     "submitting": "Skickar...",

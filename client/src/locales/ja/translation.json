@@ -228,6 +228,7 @@
     "uploadPhotoProof": "証明写真をアップロード",
     "takePhoto": "タスクを完了した写真を撮影",
     "choosePhoto": "写真を選択",
+    "takePhotoBtn": "写真を撮る",
     "cameraError": "カメラを開けませんでした。もう一度お試しください。",
     "cameraPermissionDenied": "カメラのアクセスが拒否されました。設定で有効にしてください。",
     "submitting": "送信中...",

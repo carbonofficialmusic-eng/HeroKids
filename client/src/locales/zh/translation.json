@@ -263,6 +263,7 @@
     "uploadPhotoProof": "上传照片证明",
     "takePhoto": "拍照显示你已完成此任务",
     "choosePhoto": "选择照片",
+    "takePhotoBtn": "拍照",
     "cameraError": "无法打开相机，请重试。",
     "cameraPermissionDenied": "相机访问被拒绝，请在设置中启用。",
     "submitting": "提交中...",
