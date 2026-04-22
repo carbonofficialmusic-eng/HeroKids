@@ -36,11 +36,14 @@ Dies erstellt den `dist/public` Ordner, der von Capacitor verwendet wird.
 npx cap add ios
 ```
 
-### 1.5 iOS-Projekt synchronisieren
+### 1.5 iOS-Projekt synchronisieren (mit Berechtigungen)
 
 ```bash
-npx cap sync ios
+chmod +x scripts/ios-sync.sh
+./scripts/ios-sync.sh
 ```
+
+Dieses Script führt `npx cap sync ios` aus **und** setzt automatisch die erforderlichen Kamera-Berechtigungen in `Info.plist`. Immer dieses Script statt `npx cap sync ios` direkt verwenden.
 
 ## Schritt 2: App-Icons erstellen
 
@@ -297,11 +300,8 @@ npm run build
 # iOS-Plattform einmalig hinzufügen
 npx cap add ios
 
-# iOS synchronisieren
-npx cap sync ios
-
-# Kamera-Berechtigungen setzen (einmalig nach cap add ios)
-chmod +x scripts/ios-post-sync.sh && ./scripts/ios-post-sync.sh
+# iOS synchronisieren UND Kamera-Berechtigungen setzen (immer statt cap sync nutzen)
+chmod +x scripts/ios-sync.sh && ./scripts/ios-sync.sh
 
 # In Xcode öffnen
 npx cap open ios
