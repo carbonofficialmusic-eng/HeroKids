@@ -90,37 +90,11 @@ Der Splash Screen wird in Xcode bearbeitet:
 2. Wähle die Hintergrund-View
 3. Ändere die Hintergrundfarbe auf HeroKids Teal (#14b8a6)
 
-## Schritt 3b: Kamera-Berechtigungen einrichten
+## Schritt 3b: Kamera-Berechtigungen
 
-Die HeroKids-App ermöglicht Kindern, Fotos als Aufgaben-Nachweis aufzunehmen. iOS erfordert dafür zwei Einträge in der `Info.plist`.
+Die HeroKids-App ermöglicht Kindern, Fotos als Aufgaben-Nachweis aufzunehmen. Die erforderlichen iOS-Berechtigungen (`NSCameraUsageDescription` und `NSPhotoLibraryUsageDescription`) sind bereits in `ios/App/App/Info.plist` im Projekt eingetragen — kein manueller Schritt nötig.
 
-**Wichtig:** Ohne diese Einträge stürzt die App ab, sobald ein Kind ein Foto aufnehmen möchte.
-
-### Schnellster Weg: Setup-Script verwenden
-
-Nach `npx cap add ios && npx cap sync ios` einmalig ausführen:
-
-```bash
-chmod +x scripts/ios-post-sync.sh
-./scripts/ios-post-sync.sh
-```
-
-Das Script fügt `NSCameraUsageDescription` und `NSPhotoLibraryUsageDescription` automatisch in die `Info.plist` ein. Es ist idempotent — es fügt keine Duplikate hinzu, wenn es mehrfach ausgeführt wird.
-
-### Manuell in Xcode:
-
-Falls du die Berechtigungen lieber manuell setzen möchtest:
-
-1. Öffne das Projekt mit `npx cap open ios`
-2. Navigiere zu `App/App/Info.plist` in der Projektstruktur
-3. Rechtsklick auf `Info.plist` → **Open As** → **Source Code** und füge vor dem letzten `</dict>` ein:
-
-```xml
-<key>NSCameraUsageDescription</key>
-<string>HeroKids needs camera access so kids can take photos as proof of completing tasks.</string>
-<key>NSPhotoLibraryUsageDescription</key>
-<string>HeroKids needs photo library access so kids can choose a photo as proof of completing tasks.</string>
-```
+Diese Einträge werden durch `npx cap sync ios` nicht überschrieben, da Capacitor native Konfigurationsdateien erhält.
 
 ## Schritt 4: In Xcode öffnen und konfigurieren
 
@@ -297,11 +271,8 @@ Ersetze `DEINE-APP-URL` mit deiner tatsächlichen Replit-URL.
 # Web-App bauen
 npm run build
 
-# iOS-Plattform einmalig hinzufügen
-npx cap add ios
-
-# iOS synchronisieren UND Kamera-Berechtigungen setzen (immer statt cap sync nutzen)
-chmod +x scripts/ios-sync.sh && ./scripts/ios-sync.sh
+# iOS synchronisieren (Kamera-Berechtigungen sind bereits in Info.plist eingetragen)
+npx cap sync ios
 
 # In Xcode öffnen
 npx cap open ios
@@ -323,8 +294,9 @@ npx cap open ios
 → Prüfe, dass `npm run build` erfolgreich war und `dist/public` existiert
 
 ### "App crashes when taking a photo"
-→ Die Kamera-Berechtigungen fehlen in Info.plist. Schritt 3b in dieser Anleitung ausführen.
-→ Danach `npx cap sync ios` ausführen und die App neu auf das Gerät installieren.
+→ Prüfe, ob `NSCameraUsageDescription` in `ios/App/App/Info.plist` vorhanden ist.
+→ Falls nicht: `npx cap sync ios` hat möglicherweise eine saubere ios/ Struktur benötigt.
+   Lösung: `git checkout ios/App/App/Info.plist` stellt die Berechtigungen wieder her.
 
 ### "White screen in app"
 → Server-URL in capacitor.config.ts prüfen - für Production sollte die App lokal funktionieren
