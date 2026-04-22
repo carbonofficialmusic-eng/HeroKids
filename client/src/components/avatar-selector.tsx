@@ -1,7 +1,7 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
-import { Check, Upload, X, Camera, Images } from "lucide-react";
+import { Check, Upload, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
@@ -21,18 +21,6 @@ async function dataUrlToFile(dataUrl: string, filename: string): Promise<File> {
   const response = await fetch(dataUrl);
   const blob = await response.blob();
   return new File([blob], filename, { type: blob.type || "image/jpeg" });
-}
-
-async function nativeUriToDataUrl(uri: string): Promise<string> {
-  const webPath = Capacitor.convertFileSrc(uri);
-  const response = await fetch(webPath);
-  const blob = await response.blob();
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
 }
 
 export function AvatarSelector({
@@ -77,71 +65,28 @@ export function AvatarSelector({
     }
   };
 
-  const handleNativeTakePhoto = async () => {
+  const handleNativePhotoCapture = async () => {
     setCameraError(null);
     try {
-      const { Camera } = await import("@capacitor/camera");
-
-      let perms = await Camera.checkPermissions();
-      if (perms.camera === "prompt" || perms.camera === "prompt-with-rationale") {
-        perms = await Camera.requestPermissions({ permissions: ["camera"] });
-      }
-      if (perms.camera === "denied") {
-        setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
-        return;
-      }
-
-      const result = await Camera.takePhoto({ quality: 85 });
-      if (result.uri) {
-        const dataUrl = await nativeUriToDataUrl(result.uri);
-        setPreviewUrl(dataUrl);
+      const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+      const photo = await Camera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Prompt,
+      });
+      if (photo.dataUrl) {
+        setPreviewUrl(photo.dataUrl);
         lastProcessedFileRef.current = null;
         if (onCustomUpload) {
-          const file = await dataUrlToFile(dataUrl, "avatar-photo.jpg");
+          const file = await dataUrlToFile(photo.dataUrl, "avatar-photo.jpg");
           onCustomUpload(file);
         }
       }
     } catch (error: unknown) {
       if (isPhotoPickerCancelError(error)) return;
       const msg = error instanceof Error ? error.message : String(error);
-      console.error("Camera takePhoto error:", msg);
-      if (/denied|permission|not allowed/i.test(msg)) {
-        setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
-      } else {
-        setCameraError(t("tasks.cameraError", "Kamera konnte nicht geöffnet werden. Bitte erneut versuchen."));
-      }
-    }
-  };
-
-  const handleNativeGalleryPick = async () => {
-    setCameraError(null);
-    try {
-      const { Camera } = await import("@capacitor/camera");
-
-      let perms = await Camera.checkPermissions();
-      if (perms.photos === "prompt" || perms.photos === "prompt-with-rationale") {
-        perms = await Camera.requestPermissions({ permissions: ["photos"] });
-      }
-      if (perms.photos === "denied") {
-        setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
-        return;
-      }
-
-      const results = await Camera.chooseFromGallery({ allowMultipleSelection: false });
-      const uri = results.results[0]?.uri;
-      if (uri) {
-        const dataUrl = await nativeUriToDataUrl(uri);
-        setPreviewUrl(dataUrl);
-        lastProcessedFileRef.current = null;
-        if (onCustomUpload) {
-          const file = await dataUrlToFile(dataUrl, "avatar-photo.jpg");
-          onCustomUpload(file);
-        }
-      }
-    } catch (error: unknown) {
-      if (isPhotoPickerCancelError(error)) return;
-      const msg = error instanceof Error ? error.message : String(error);
-      console.error("Gallery pick error:", msg);
+      console.error("Camera error:", msg);
       if (/denied|permission|not allowed/i.test(msg)) {
         setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
       } else {
@@ -151,7 +96,11 @@ export function AvatarSelector({
   };
 
   const handleUploadClick = () => {
-    fileInputRef.current?.click();
+    if (isNativeMobile) {
+      handleNativePhotoCapture();
+    } else {
+      fileInputRef.current?.click();
+    }
   };
 
   const clearCustomPhoto = () => {
@@ -209,47 +158,18 @@ export function AvatarSelector({
             </div>
           ) : (
             <>
-              {isNativeMobile ? (
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 h-16 border-dashed"
-                    onClick={handleNativeTakePhoto}
-                    data-testid="button-upload-avatar"
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <Camera className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-xs">{t("tasks.takePhotoBtn", "Foto aufnehmen")}</span>
-                    </div>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 h-16 border-dashed"
-                    onClick={handleNativeGalleryPick}
-                    data-testid="button-gallery-avatar"
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <Images className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-xs">{t("tasks.choosePhoto")}</span>
-                    </div>
-                  </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-20 border-dashed"
+                onClick={handleUploadClick}
+                data-testid="button-upload-avatar"
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm">{t("avatarSelector.uploadYourPhoto")}</span>
                 </div>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-20 border-dashed"
-                  onClick={handleUploadClick}
-                  data-testid="button-upload-avatar"
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-sm">{t("avatarSelector.uploadYourPhoto")}</span>
-                  </div>
-                </Button>
-              )}
+              </Button>
               {cameraError && (
                 <p className="text-sm text-destructive mt-2" data-testid="text-avatar-camera-error">
                   {cameraError}

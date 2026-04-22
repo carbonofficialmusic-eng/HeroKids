@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, X, Images } from "lucide-react";
+import { Camera, Upload, X } from "lucide-react";
 import type { Task } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
@@ -27,18 +27,6 @@ async function dataUrlToFile(dataUrl: string, filename: string): Promise<File> {
   const response = await fetch(dataUrl);
   const blob = await response.blob();
   return new File([blob], filename, { type: blob.type || "image/jpeg" });
-}
-
-async function nativeUriToDataUrl(uri: string): Promise<string> {
-  const webPath = Capacitor.convertFileSrc(uri);
-  const response = await fetch(webPath);
-  const blob = await response.blob();
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
 }
 
 export function TaskCompletionDialog({
@@ -72,49 +60,29 @@ export function TaskCompletionDialog({
     }
   }, [open]);
 
-  const handleNativeTakePhoto = async () => {
+  const handleNativePhotoCapture = async () => {
     setCameraError(null);
     try {
-      const { Camera } = await import("@capacitor/camera");
-      const result = await Camera.takePhoto({ quality: 85 });
-      if (result.uri) {
-        const dataUrl = await nativeUriToDataUrl(result.uri);
-        setPreviewUrl(dataUrl);
-        const file = await dataUrlToFile(dataUrl, "proof-photo.jpg");
+      const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+      const photo = await Camera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Prompt,
+      });
+      if (photo.dataUrl) {
+        setPreviewUrl(photo.dataUrl);
+        const file = await dataUrlToFile(photo.dataUrl, "proof-photo.jpg");
         setUploadedPhoto(file);
       }
     } catch (error: unknown) {
       if (isPhotoPickerCancelError(error)) return;
       const msg = error instanceof Error ? error.message : String(error);
-      console.error("Camera takePhoto error:", msg);
+      console.error("Camera error:", msg);
       if (/denied|permission|not allowed/i.test(msg)) {
         setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
       } else {
-        setCameraError(`[DEBUG takePhoto] ${msg}`);
-      }
-    }
-  };
-
-  const handleNativeGalleryPick = async () => {
-    setCameraError(null);
-    try {
-      const { Camera } = await import("@capacitor/camera");
-      const results = await Camera.chooseFromGallery({ allowMultipleSelection: false });
-      const uri = results.results[0]?.uri;
-      if (uri) {
-        const dataUrl = await nativeUriToDataUrl(uri);
-        setPreviewUrl(dataUrl);
-        const file = await dataUrlToFile(dataUrl, "proof-photo.jpg");
-        setUploadedPhoto(file);
-      }
-    } catch (error: unknown) {
-      if (isPhotoPickerCancelError(error)) return;
-      const msg = error instanceof Error ? error.message : String(error);
-      console.error("Gallery pick error:", msg);
-      if (/denied|permission|not allowed/i.test(msg)) {
-        setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
-      } else {
-        setCameraError(`[DEBUG gallery] ${msg}`);
+        setCameraError(t("tasks.cameraError", "Kamera konnte nicht geöffnet werden. Bitte erneut versuchen."));
       }
     }
   };
@@ -262,38 +230,15 @@ export function TaskCompletionDialog({
                       {cameraError}
                     </p>
                   )}
-                  {isNativeMobile ? (
-                    <div className="flex gap-2 justify-center flex-wrap">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleNativeTakePhoto}
-                        data-testid="button-take-photo"
-                      >
-                        <Camera className="h-4 w-4 mr-2" />
-                        {t("tasks.takePhotoBtn", "Foto aufnehmen")}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleNativeGalleryPick}
-                        data-testid="button-choose-photo"
-                      >
-                        <Images className="h-4 w-4 mr-2" />
-                        {t("tasks.choosePhoto")}
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      data-testid="button-choose-photo"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      {t("tasks.choosePhoto")}
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={isNativeMobile ? handleNativePhotoCapture : () => fileInputRef.current?.click()}
+                    data-testid="button-choose-photo"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {t("tasks.choosePhoto")}
+                  </Button>
                 </div>
               ) : (
                 <div className="relative">
