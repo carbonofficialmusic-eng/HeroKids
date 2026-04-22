@@ -10,24 +10,16 @@ import AdminPage from "../pages/admin";
 import { queryClient } from "../lib/queryClient";
 import { registerAdminEmailHealthRoutes } from "../../../server/adminEmailHealthRoutes";
 import { checkTransactionalEmailHealth } from "../../../server/emailHealth";
+import {
+  jsonResponse,
+  healthyEmailStatus,
+  makeDefaultAdminFamilyDetails,
+  type AdminFamilyDetails,
+} from "./adminTestHelpers";
 
-vi.mock("recharts", () => {
-  const Chart = ({ children }: { children?: React.ReactNode }) => createElement("div", {}, children);
-  return {
-    BarChart: Chart,
-    Bar: Chart,
-    XAxis: Chart,
-    YAxis: Chart,
-    CartesianGrid: Chart,
-    Tooltip: Chart,
-    Legend: Chart,
-    ResponsiveContainer: Chart,
-    PieChart: Chart,
-    Pie: Chart,
-    Cell: Chart,
-    LineChart: Chart,
-    Line: Chart,
-  };
+vi.mock("recharts", async () => {
+  const { rechartsModuleMock: mock } = await import("./adminTestHelpers");
+  return mock;
 });
 
 vi.mock("../../../server/emailHealth", () => ({
@@ -35,25 +27,6 @@ vi.mock("../../../server/emailHealth", () => ({
 }));
 
 const mockCheckTransactionalEmailHealth = vi.mocked(checkTransactionalEmailHealth);
-
-const healthyEmailStatus = {
-  status: "healthy" as const,
-  configured: true,
-  provider: "resend",
-  credentialSource: "replit_connection",
-  fromAddress: "noreply@herokids.app",
-  baseUrl: "https://herokids.app",
-  linksUseExpectedDomain: true,
-  productionLinksUseExpectedDomain: true,
-  expectedProductionBaseUrl: "https://herokids.app",
-  verificationUrlSample: "https://herokids.app/api/auth/verify-email?token=sample",
-  passwordResetUrlSample: "https://herokids.app/?reset_token=sample",
-  testSend: {
-    attempted: false,
-    succeeded: false,
-  },
-  issues: [],
-};
 
 type TestEmailHealthStatus = typeof healthyEmailStatus & {
   status: "healthy" | "warning" | "unhealthy";
@@ -64,12 +37,6 @@ type TestEmailHealthStatus = typeof healthyEmailStatus & {
   linksUseExpectedDomain: boolean;
   issues: string[];
 };
-
-const jsonResponse = (data: unknown, status = 200) =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
 
 async function startAdminEmailHealthServer() {
   const app = express();
@@ -161,53 +128,7 @@ describe("admin email health routes", () => {
 
 describe("admin email health UI", () => {
   let currentEmailStatus: TestEmailHealthStatus;
-  let adminFamilyDetails: {
-    family: {
-      familyName: string;
-      subscriptionTier: string;
-      memberCount: number;
-      parentCount: number;
-      childCount: number;
-      taskCount: number;
-      rewardCount: number;
-      totalPointsEarned: number;
-      createdAt: string;
-    };
-    members: Array<{
-      id: string;
-      userId: string | null;
-      displayName: string;
-      role: "parent" | "child";
-      avatarUrl: string;
-      activeSkinId: string | null;
-      useCustomAvatar: boolean;
-      totalEarned: number;
-      totalPoints: number;
-      weeklyPoints: number;
-      monthlyPoints: number;
-      account: {
-        email: string;
-        firstName: string;
-        lastName: string | null;
-        isEmailVerified: boolean;
-        isDisabled: boolean;
-        lastLoginAt: string | null;
-        createdAt: string;
-      } | null;
-    }>;
-    taskCount: number;
-    rewardCount: number;
-    accountLinkRepairHistory?: Array<{
-      id: string;
-      memberId: string;
-      memberDisplayName: string;
-      action: string;
-      oldAccountEmail: string | null;
-      newAccountEmail: string | null;
-      repairedBy?: string | null;
-      repairedAt: string;
-    }>;
-  };
+  let adminFamilyDetails: AdminFamilyDetails;
 
   const setupFetchMock = () => {
     vi.stubGlobal(
@@ -365,60 +286,7 @@ describe("admin email health UI", () => {
     localStorage.setItem("admin_token", "admin-secret");
     localStorage.setItem("admin_actor", "Test Admin");
     currentEmailStatus = healthyEmailStatus;
-    adminFamilyDetails = {
-      family: {
-        familyName: "Hero Family",
-        subscriptionTier: "free",
-        memberCount: 2,
-        parentCount: 1,
-        childCount: 1,
-        taskCount: 0,
-        rewardCount: 0,
-        totalPointsEarned: 0,
-        createdAt: "2026-04-21T00:00:00.000Z",
-      },
-      members: [
-        {
-          id: "member-riewert",
-          userId: null,
-          displayName: "Riewert",
-          role: "parent",
-          avatarUrl: "",
-          activeSkinId: null,
-          useCustomAvatar: false,
-          totalEarned: 0,
-          totalPoints: 0,
-          weeklyPoints: 0,
-          monthlyPoints: 0,
-          account: null,
-        },
-        {
-          id: "member-diego",
-          userId: "user-carbon",
-          displayName: "Diego",
-          role: "child",
-          avatarUrl: "",
-          activeSkinId: null,
-          useCustomAvatar: false,
-          totalEarned: 0,
-          totalPoints: 0,
-          weeklyPoints: 0,
-          monthlyPoints: 0,
-          account: {
-            email: "carbon.official.music@gmail.com",
-            firstName: "Carbon",
-            lastName: null,
-            isEmailVerified: true,
-            isDisabled: false,
-            lastLoginAt: null,
-            createdAt: "2026-04-21T00:00:00.000Z",
-          },
-        },
-      ],
-      taskCount: 0,
-      rewardCount: 0,
-      accountLinkRepairHistory: [],
-    };
+    adminFamilyDetails = makeDefaultAdminFamilyDetails();
     setupFetchMock();
   });
 
