@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, Upload, X } from "lucide-react";
 import type { Task } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import { Capacitor } from "@capacitor/core";
 
 interface TaskCompletionDialogProps {
   open: boolean;
@@ -19,6 +20,12 @@ interface TaskCompletionDialogProps {
   task: Task | null;
   onComplete: (taskId: string, proofPhotoUrl?: string) => void;
   isSubmitting?: boolean;
+}
+
+async function dataUrlToFile(dataUrl: string, filename: string): Promise<File> {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  return new File([blob], filename, { type: blob.type || "image/jpeg" });
 }
 
 export function TaskCompletionDialog({
@@ -33,20 +40,47 @@ export function TaskCompletionDialog({
   const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Reset state when dialog closes
+  const isNative = Capacitor.isNativePlatform();
+
   useEffect(() => {
     if (!open) {
       setUploadedPhoto(null);
       setUploadedPhotoUrl(null);
       setPreviewUrl(null);
       setIsUploading(false);
+      setCameraError(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
   }, [open]);
+
+  const handleNativePhotoCapture = async () => {
+    setCameraError(null);
+    try {
+      const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+      const photo = await Camera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Prompt,
+      });
+      if (photo.dataUrl) {
+        setPreviewUrl(photo.dataUrl);
+        const file = await dataUrlToFile(photo.dataUrl, "proof-photo.jpg");
+        setUploadedPhoto(file);
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message?.toLowerCase().includes("cancel")) {
+        return;
+      }
+      console.error("Camera error:", error);
+      setCameraError(t("tasks.cameraError", "Could not open camera. Please try again."));
+    }
+  };
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,6 +98,7 @@ export function TaskCompletionDialog({
     setUploadedPhoto(null);
     setPreviewUrl(null);
     setUploadedPhotoUrl(null);
+    setCameraError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -72,73 +107,64 @@ export function TaskCompletionDialog({
   const handleSubmit = async () => {
     if (!task) return;
 
-    // If task requires proof and no photo uploaded yet, upload it first
     if (task.requiresProof && uploadedPhoto && !uploadedPhotoUrl) {
       setIsUploading(true);
       try {
-        // Step 1: Get presigned upload URL
-        const urlResponse = await fetch('/api/tasks/upload-proof-url', {
-          method: 'POST',
+        const urlResponse = await fetch("/api/tasks/upload-proof-url", {
+          method: "POST",
         });
 
         if (!urlResponse.ok) {
           const error = await urlResponse.json();
-          alert(error.message || 'Failed to get upload URL');
+          alert(error.message || "Failed to get upload URL");
           setIsUploading(false);
           return;
         }
 
         const { uploadURL } = await urlResponse.json();
 
-        // Step 2: Upload file directly to Object Storage using presigned URL
         const uploadResponse = await fetch(uploadURL, {
-          method: 'PUT',
+          method: "PUT",
           body: uploadedPhoto,
           headers: {
-            'Content-Type': uploadedPhoto.type,
+            "Content-Type": uploadedPhoto.type || "image/jpeg",
           },
         });
 
         if (!uploadResponse.ok) {
-          alert('Failed to upload photo to storage');
+          alert("Failed to upload photo to storage");
           setIsUploading(false);
           return;
         }
 
-        // Step 3: Set ACL policy and get final object path
         const aclResponse = await fetch(`/api/tasks/${task.id}/proof-photo`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ photoUrl: uploadURL }),
         });
 
         if (!aclResponse.ok) {
           const error = await aclResponse.json();
-          alert(error.message || 'Failed to finalize upload');
+          alert(error.message || "Failed to finalize upload");
           setIsUploading(false);
           return;
         }
 
         const { photoUrl } = await aclResponse.json();
         setUploadedPhotoUrl(photoUrl);
-        
-        // Now complete the task with the photo URL
         onComplete(task.id, photoUrl);
         setIsUploading(false);
       } catch (error) {
-        console.error('Error uploading photo:', error);
-        alert('Failed to upload photo. Please try again.');
+        console.error("Error uploading photo:", error);
+        alert("Failed to upload photo. Please try again.");
         setIsUploading(false);
         return;
       }
     } else {
-      // No photo needed or already uploaded
       onComplete(task.id, uploadedPhotoUrl || undefined);
     }
-
-    // Don't reset state here - let the mutation's onSuccess handler close the dialog
   };
 
   const canSubmit = !task?.requiresProof || (task.requiresProof && uploadedPhoto);
@@ -149,66 +175,71 @@ export function TaskCompletionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent data-testid="dialog-complete-task">
         <DialogHeader>
-          <DialogTitle>{t('tasks.completeTask')}</DialogTitle>
+          <DialogTitle>{t("tasks.completeTask")}</DialogTitle>
           <DialogDescription>
-            {t('tasks.confirmCompletion')}
+            {t("tasks.confirmCompletion")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Task Info */}
           <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
             <div className="text-4xl">{task.iconEmoji}</div>
             <div className="flex-1">
               <h3 className="font-semibold text-lg">{task.title}</h3>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className="gradient-achievement text-white border-0">
-                  +{task.points} {t('dashboard.pointsLabel')}
+                  +{task.points} {t("dashboard.pointsLabel")}
                 </Badge>
                 {task.requiresProof && (
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Camera className="h-3 w-3" />
-                    <span>{t('tasks.photoRequired')}</span>
+                    <span>{t("tasks.photoRequired")}</span>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Photo Upload Section */}
           {task.requiresProof && (
             <div className="space-y-3">
-              <div className="text-sm font-medium">{t('tasks.uploadPhotoProof')}</div>
-              
+              <div className="text-sm font-medium">{t("tasks.uploadPhotoProof")}</div>
+
               {!previewUrl ? (
                 <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoSelect}
-                    className="hidden"
-                    data-testid="input-photo-upload"
-                  />
+                  {!isNative && (
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoSelect}
+                      className="hidden"
+                      data-testid="input-photo-upload"
+                    />
+                  )}
                   <Camera className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground mb-3">
-                    {t('tasks.takePhoto')}
+                    {t("tasks.takePhoto")}
                   </p>
+                  {cameraError && (
+                    <p className="text-sm text-destructive mb-3" data-testid="text-camera-error">
+                      {cameraError}
+                    </p>
+                  )}
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={isNative ? handleNativePhotoCapture : () => fileInputRef.current?.click()}
                     data-testid="button-choose-photo"
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    {t('tasks.choosePhoto')}
+                    {t("tasks.choosePhoto")}
                   </Button>
                 </div>
               ) : (
                 <div className="relative">
                   <img
                     src={previewUrl}
-                    alt={t('tasks.choosePhoto')}
+                    alt={t("tasks.choosePhoto")}
                     className="w-full h-48 object-cover rounded-lg"
                     data-testid="img-photo-preview"
                   />
@@ -235,14 +266,14 @@ export function TaskCompletionDialog({
             disabled={isSubmitting || isUploading}
             data-testid="button-cancel-complete"
           >
-            {t('common.cancel')}
+            {t("common.cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={!canSubmit || isSubmitting || isUploading}
             data-testid="button-submit-complete"
           >
-            {isSubmitting || isUploading ? t('tasks.submitting') : t('tasks.completeAndEarn')}
+            {isSubmitting || isUploading ? t("tasks.submitting") : t("tasks.completeAndEarn")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -26,7 +26,7 @@ Preferred communication style: Simple, everyday language.
 - **File Uploads**: Replit Object Storage (Google Cloud Storage backend) with presigned URL-based client-side uploads.
 - **Subscription Tiers**: 3-tier model (Free, Family, Enterprise) with feature unlocks enforced by backend middleware.
 - **Gamification Features**: Monthly leaderboards, unlockable character skins across various themed collections (122 total skins), a star collection system for unlocking special avatars, and an achievements system with flexible reward types.
-- **Platform Detection**: Native iOS/Android builds hide Stripe payment UI for "Reader Model" compliance.
+- **Platform Detection**: Native iOS/Android builds hide Stripe payment UI for "Reader Model" compliance. On native iOS, `Capacitor.isNativePlatform()` is used to switch the photo-proof capture from a browser file input to the `@capacitor/camera` plugin, which opens the native iOS camera/photo picker. The iOS project requires `NSCameraUsageDescription` and `NSPhotoLibraryUsageDescription` entries in `Info.plist` (see `IOS_APP_STORE_GUIDE.md` Step 3b).
 - **Task Management**: Configurable recurrence (one-time, daily, weekly, monthly, yearly) with sub-options; per-task approval system with granular completion states; multi-completion tasks for multiple family members; shared tasks with point splitting; optional due dates with visual urgency indicators, enforcement, and grace periods.
 - **Shared Rewards**: Children can split reward costs equally, with atomic transactions and real-time WebSocket updates.
 - **Notification System**: Real-time notification center for family activity updates, distinguishing between parent and child notifications.

@@ -87,6 +87,35 @@ Der Splash Screen wird in Xcode bearbeitet:
 2. Wähle die Hintergrund-View
 3. Ändere die Hintergrundfarbe auf HeroKids Teal (#14b8a6)
 
+## Schritt 3b: Kamera-Berechtigungen einrichten
+
+Die HeroKids-App ermöglicht Kindern, Fotos als Aufgaben-Nachweis aufzunehmen. iOS erfordert dafür zwei Einträge in der `Info.plist`.
+
+### In Xcode:
+
+1. Öffne das Projekt mit `npx cap open ios`
+2. Navigiere zu `App/App/Info.plist` in der Projektstruktur
+3. Klicke auf das **+**-Symbol beim letzten Eintrag, um eine neue Zeile hinzuzufügen
+4. Füge diese beiden Einträge hinzu:
+
+| Key | Type | Value |
+|-----|------|-------|
+| `NSCameraUsageDescription` | String | `HeroKids needs camera access so kids can take photos as proof of completing tasks.` |
+| `NSPhotoLibraryUsageDescription` | String | `HeroKids needs photo library access so kids can choose a photo as proof of completing tasks.` |
+
+### Alternativ: Info.plist direkt bearbeiten
+
+Rechtsklick auf `Info.plist` → **Open As** → **Source Code** und füge vor dem letzten `</dict>` ein:
+
+```xml
+<key>NSCameraUsageDescription</key>
+<string>HeroKids needs camera access so kids can take photos as proof of completing tasks.</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>HeroKids needs photo library access so kids can choose a photo as proof of completing tasks.</string>
+```
+
+**Wichtig:** Ohne diese Einträge stürzt die App ab, sobald ein Kind ein Foto aufnehmen möchte.
+
 ## Schritt 4: In Xcode öffnen und konfigurieren
 
 ### 4.1 Xcode öffnen
@@ -283,6 +312,10 @@ npx cap open ios
 
 ### "App crashes on launch"
 → Prüfe, dass `npm run build` erfolgreich war und `dist/public` existiert
+
+### "App crashes when taking a photo"
+→ Die Kamera-Berechtigungen fehlen in Info.plist. Schritt 3b in dieser Anleitung ausführen.
+→ Danach `npx cap sync ios` ausführen und die App neu auf das Gerät installieren.
 
 ### "White screen in app"
 → Server-URL in capacitor.config.ts prüfen - für Production sollte die App lokal funktionieren
