@@ -43,7 +43,7 @@ export function TaskCompletionDialog({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isNative = Capacitor.isNativePlatform();
+  const isNativeIos = Capacitor.getPlatform() === "ios";
 
   useEffect(() => {
     if (!open) {
@@ -206,7 +206,7 @@ export function TaskCompletionDialog({
 
               {!previewUrl ? (
                 <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                  {!isNative && (
+                  {!isNativeIos && (
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -228,7 +228,7 @@ export function TaskCompletionDialog({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={isNative ? handleNativePhotoCapture : () => fileInputRef.current?.click()}
+                    onClick={isNativeIos ? handleNativePhotoCapture : () => fileInputRef.current?.click()}
                     data-testid="button-choose-photo"
                   >
                     <Upload className="h-4 w-4 mr-2" />

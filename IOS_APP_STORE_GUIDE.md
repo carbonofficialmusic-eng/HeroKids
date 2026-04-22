@@ -91,21 +91,26 @@ Der Splash Screen wird in Xcode bearbeitet:
 
 Die HeroKids-App ermöglicht Kindern, Fotos als Aufgaben-Nachweis aufzunehmen. iOS erfordert dafür zwei Einträge in der `Info.plist`.
 
-### In Xcode:
+**Wichtig:** Ohne diese Einträge stürzt die App ab, sobald ein Kind ein Foto aufnehmen möchte.
+
+### Schnellster Weg: Setup-Script verwenden
+
+Nach `npx cap add ios && npx cap sync ios` einmalig ausführen:
+
+```bash
+chmod +x scripts/ios-post-sync.sh
+./scripts/ios-post-sync.sh
+```
+
+Das Script fügt `NSCameraUsageDescription` und `NSPhotoLibraryUsageDescription` automatisch in die `Info.plist` ein. Es ist idempotent — es fügt keine Duplikate hinzu, wenn es mehrfach ausgeführt wird.
+
+### Manuell in Xcode:
+
+Falls du die Berechtigungen lieber manuell setzen möchtest:
 
 1. Öffne das Projekt mit `npx cap open ios`
 2. Navigiere zu `App/App/Info.plist` in der Projektstruktur
-3. Klicke auf das **+**-Symbol beim letzten Eintrag, um eine neue Zeile hinzuzufügen
-4. Füge diese beiden Einträge hinzu:
-
-| Key | Type | Value |
-|-----|------|-------|
-| `NSCameraUsageDescription` | String | `HeroKids needs camera access so kids can take photos as proof of completing tasks.` |
-| `NSPhotoLibraryUsageDescription` | String | `HeroKids needs photo library access so kids can choose a photo as proof of completing tasks.` |
-
-### Alternativ: Info.plist direkt bearbeiten
-
-Rechtsklick auf `Info.plist` → **Open As** → **Source Code** und füge vor dem letzten `</dict>` ein:
+3. Rechtsklick auf `Info.plist` → **Open As** → **Source Code** und füge vor dem letzten `</dict>` ein:
 
 ```xml
 <key>NSCameraUsageDescription</key>
@@ -113,8 +118,6 @@ Rechtsklick auf `Info.plist` → **Open As** → **Source Code** und füge vor d
 <key>NSPhotoLibraryUsageDescription</key>
 <string>HeroKids needs photo library access so kids can choose a photo as proof of completing tasks.</string>
 ```
-
-**Wichtig:** Ohne diese Einträge stürzt die App ab, sobald ein Kind ein Foto aufnehmen möchte.
 
 ## Schritt 4: In Xcode öffnen und konfigurieren
 
@@ -291,8 +294,14 @@ Ersetze `DEINE-APP-URL` mit deiner tatsächlichen Replit-URL.
 # Web-App bauen
 npm run build
 
+# iOS-Plattform einmalig hinzufügen
+npx cap add ios
+
 # iOS synchronisieren
 npx cap sync ios
+
+# Kamera-Berechtigungen setzen (einmalig nach cap add ios)
+chmod +x scripts/ios-post-sync.sh && ./scripts/ios-post-sync.sh
 
 # In Xcode öffnen
 npx cap open ios
