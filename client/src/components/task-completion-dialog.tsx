@@ -76,16 +76,6 @@ export function TaskCompletionDialog({
     setCameraError(null);
     try {
       const { Camera } = await import("@capacitor/camera");
-
-      let perms = await Camera.checkPermissions();
-      if (perms.camera === "prompt" || perms.camera === "prompt-with-rationale") {
-        perms = await Camera.requestPermissions({ permissions: ["camera"] });
-      }
-      if (perms.camera === "denied") {
-        setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
-        return;
-      }
-
       const result = await Camera.takePhoto({ quality: 85 });
       if (result.uri) {
         const dataUrl = await nativeUriToDataUrl(result.uri);
@@ -100,7 +90,7 @@ export function TaskCompletionDialog({
       if (/denied|permission|not allowed/i.test(msg)) {
         setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
       } else {
-        setCameraError(`[DEBUG] ${msg}`);
+        setCameraError(`[DEBUG takePhoto] ${msg}`);
       }
     }
   };
@@ -109,16 +99,6 @@ export function TaskCompletionDialog({
     setCameraError(null);
     try {
       const { Camera } = await import("@capacitor/camera");
-
-      let perms = await Camera.checkPermissions();
-      if (perms.photos === "prompt" || perms.photos === "prompt-with-rationale") {
-        perms = await Camera.requestPermissions({ permissions: ["photos"] });
-      }
-      if (perms.photos === "denied") {
-        setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
-        return;
-      }
-
       const results = await Camera.chooseFromGallery({ allowMultipleSelection: false });
       const uri = results.results[0]?.uri;
       if (uri) {
@@ -134,7 +114,7 @@ export function TaskCompletionDialog({
       if (/denied|permission|not allowed/i.test(msg)) {
         setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
       } else {
-        setCameraError(t("tasks.cameraError", "Kamera konnte nicht geöffnet werden. Bitte erneut versuchen."));
+        setCameraError(`[DEBUG gallery] ${msg}`);
       }
     }
   };
