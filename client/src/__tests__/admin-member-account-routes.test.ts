@@ -144,6 +144,27 @@ describe("admin member account repair routes", () => {
     }));
   });
 
+  it.each([
+    ["blank", "   "],
+    ["generic admin", "admin"],
+    ["generic administrator", " Administrator "],
+  ])("rejects %s repair names before unlinking accounts", async (_label, adminActor) => {
+    storageMocks.getFamilyMember.mockResolvedValue(linkedChildMember);
+
+    const response = await adminPatch(server!, "Hero Family", "member-diego", {
+      action: "unlink",
+      adminActor,
+    });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      message: "Enter a specific repair audit name before changing account links",
+    });
+    expect(storageMocks.getFamilyMember).not.toHaveBeenCalled();
+    expect(storageMocks.unlinkUserFromFamilyMember).not.toHaveBeenCalled();
+    expect(storageMocks.createAccountLinkRepairHistory).not.toHaveBeenCalled();
+  });
+
   it("links an active account to an unlinked member", async () => {
     const response = await adminPatch(server!, "Hero Family", "member-riewert", {
       action: "link",
@@ -178,6 +199,28 @@ describe("admin member account repair routes", () => {
       newAccountEmail: "sonoastudio@me.com",
       repairedBy: "Riewert",
     }));
+  });
+
+  it.each([
+    ["missing", undefined],
+    ["blank", "\n\t "],
+    ["generic admin", "Admin"],
+    ["generic administrator", "administrator"],
+  ])("rejects %s repair names before linking accounts", async (_label, adminActor) => {
+    const response = await adminPatch(server!, "Hero Family", "member-riewert", {
+      action: "link",
+      email: "sonoastudio@me.com",
+      adminActor,
+    });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      message: "Enter a specific repair audit name before changing account links",
+    });
+    expect(storageMocks.getFamilyMember).not.toHaveBeenCalled();
+    expect(storageMocks.getUserByEmail).not.toHaveBeenCalled();
+    expect(storageMocks.linkUserToFamilyMember).not.toHaveBeenCalled();
+    expect(storageMocks.createAccountLinkRepairHistory).not.toHaveBeenCalled();
   });
 
   it("rejects account changes for a member from another family", async () => {

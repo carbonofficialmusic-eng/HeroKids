@@ -245,7 +245,7 @@ describe("admin email health UI", () => {
 
         if (path === "/api/admin/families/Hero%20Family/members/member-diego/account" && method === "PATCH") {
           const body = JSON.parse(String(init?.body));
-          expect(body).toMatchObject({ action: "unlink" });
+          expect(body).toMatchObject({ action: "unlink", adminActor: "Test Admin" });
           adminFamilyDetails = {
             ...adminFamilyDetails,
             members: adminFamilyDetails.members.map((member) =>
@@ -260,6 +260,7 @@ describe("admin email health UI", () => {
           expect(body).toMatchObject({
             action: "link",
             email: "sonoastudio@me.com",
+            adminActor: "Test Admin",
           });
           if (!body.detachExisting && adminFamilyDetails.members.some((member) => member.userId === "user-sonoastudio")) {
             return jsonResponse({
@@ -510,6 +511,37 @@ describe("admin email health UI", () => {
     await waitFor(() => {
       expect(screen.getByTestId("badge-account-email-member-riewert").textContent).toContain("sonoastudio@me.com");
     });
+  });
+
+  it("disables account repair controls until a specific admin name is entered", async () => {
+    const renderFamilyDetailsWithActor = async (actor: string) => {
+      cleanup();
+      queryClient.clear();
+      setupFetchMock();
+      localStorage.setItem("admin_actor", actor);
+      const user = userEvent.setup();
+      renderAdmin();
+
+      await user.click(await screen.findByTestId("tab-families"));
+      await user.click(await screen.findByText("Hero Family"));
+
+      return {
+        unlinkButton: screen.getByTestId("button-unlink-account-member-diego") as HTMLButtonElement,
+        linkButton: screen.getByTestId("button-link-account-member-riewert") as HTMLButtonElement,
+      };
+    };
+
+    let controls = await renderFamilyDetailsWithActor("");
+    expect(controls.unlinkButton.disabled).toBe(true);
+    expect(controls.linkButton.disabled).toBe(true);
+
+    controls = await renderFamilyDetailsWithActor("admin");
+    expect(controls.unlinkButton.disabled).toBe(true);
+    expect(controls.linkButton.disabled).toBe(true);
+
+    controls = await renderFamilyDetailsWithActor("Casey Support");
+    expect(controls.unlinkButton.disabled).toBe(false);
+    expect(controls.linkButton.disabled).toBe(false);
   });
 
   it("shows repaired-by labels and older repair entries without an actor", async () => {
