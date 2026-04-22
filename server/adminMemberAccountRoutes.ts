@@ -31,12 +31,20 @@ function sanitizeAdminRepairActor(value: string | undefined) {
   return cleaned ? cleaned.slice(0, 120) : null;
 }
 
+function isSpecificAdminRepairActor(value: string | null) {
+  if (!value) return false;
+  return !["admin", "administrator"].includes(value.toLowerCase());
+}
+
 export function registerAdminMemberAccountRoutes(app: Express, isAdmin: RequestHandler) {
   app.patch("/api/admin/families/:familyName/members/:memberId/account", isAdmin, async (req, res) => {
     try {
       const { familyName, memberId } = req.params;
       const parsed = adminMemberAccountSchema.parse(req.body);
       const repairedBy = sanitizeAdminRepairActor(parsed.adminActor);
+      if (!isSpecificAdminRepairActor(repairedBy)) {
+        return res.status(400).json({ message: "Enter a specific repair audit name before changing account links" });
+      }
       const member = await storage.getFamilyMember(memberId);
 
       if (!member) {

@@ -264,7 +264,7 @@ export default function AdminPage() {
     email: string;
     existingMember: ExistingLinkedMember;
   } | null>(null);
-  const [adminActor, setAdminActor] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("admin_actor") : null) || "Admin");
+  const [adminActor, setAdminActor] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("admin_actor") : null) || "");
   const [pointsToAdd, setPointsToAdd] = useState("");
   const [selectedFamilies, setSelectedFamilies] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -629,6 +629,8 @@ export default function AdminPage() {
   const emailHealthAlertIssue =
     emailHealth?.issues[0] ||
     (emailHealth?.status === "warning" ? "Run a test email to confirm delivery before launch." : "Check the transactional email provider and launch domain settings.");
+  const sanitizedAdminActor = adminActor.replace(/[\u0000-\u001F\u007F]/g, " ").replace(/\s+/g, " ").trim();
+  const hasRepairAuditName = sanitizedAdminActor.length > 0 && !["admin", "administrator"].includes(sanitizedAdminActor.toLowerCase());
 
   useEffect(() => {
     if (!emailHealth || emailHealth.status === "healthy") {
@@ -713,15 +715,20 @@ export default function AdminPage() {
             <h1 className="text-xl font-bold">HeroKids Admin</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Input
-              value={adminActor}
-              onChange={(event) => setAdminActor(event.target.value)}
-              placeholder="Repair audit name"
-              className="w-48"
-              maxLength={120}
-              data-testid="input-admin-actor"
-              aria-label="Repair audit name"
-            />
+            <div className="space-y-1">
+              <Input
+                value={adminActor}
+                onChange={(event) => setAdminActor(event.target.value)}
+                placeholder="Repair audit name"
+                className="w-48"
+                maxLength={120}
+                data-testid="input-admin-actor"
+                aria-label="Repair audit name"
+              />
+              <p className="max-w-64 text-xs text-muted-foreground" data-testid="text-admin-actor-help">
+                Enter your name before account repairs. It will be saved with repair history.
+              </p>
+            </div>
             <Button
               variant="ghost"
               onClick={() => {
@@ -1836,7 +1843,7 @@ export default function AdminPage() {
                                   familyName: selectedFamily!,
                                   memberId: member.id,
                                   action: "unlink",
-                                  adminActor,
+                                  adminActor: sanitizedAdminActor,
                                 });
                               } else {
                                 setMemberToLinkAccount({
@@ -1846,9 +1853,9 @@ export default function AdminPage() {
                                 });
                               }
                             }}
-                            disabled={updateMemberAccountMutation.isPending}
+                            disabled={updateMemberAccountMutation.isPending || !hasRepairAuditName}
                             data-testid={`button-${member.userId ? "unlink" : "link"}-account-${member.id}`}
-                            title={member.userId ? "Unlink account from member" : "Link account by email"}
+                            title={!hasRepairAuditName ? "Enter a named repair audit name first" : member.userId ? "Unlink account from member" : "Link account by email"}
                           >
                             {member.userId ? (
                               <Unlink className="h-4 w-4 text-orange-600" />
@@ -1949,8 +1956,8 @@ export default function AdminPage() {
                 onChange={(event) => setAccountEmailToLink(event.target.value)}
                 data-testid="input-link-account-email"
               />
-              <p className="text-sm text-muted-foreground">
-                This is for admin repair only. Double-check the member name and email before linking.
+              <p className="text-sm text-muted-foreground" data-testid="text-link-account-audit-help">
+                This is for admin repair only. Double-check the member name and email before linking. Your repair audit name will be saved with the repair history.
               </p>
             </div>
             <DialogFooter>
@@ -1965,12 +1972,12 @@ export default function AdminPage() {
                       memberId: memberToLinkAccount.id,
                       action: "link",
                       email: accountEmailToLink.trim(),
-                      adminActor,
+                      adminActor: sanitizedAdminActor,
                       memberName: memberToLinkAccount.name,
                     });
                   }
                 }}
-                disabled={updateMemberAccountMutation.isPending || !accountEmailToLink.trim()}
+                disabled={updateMemberAccountMutation.isPending || !accountEmailToLink.trim() || !hasRepairAuditName}
                 data-testid="button-confirm-link-account"
               >
                 {updateMemberAccountMutation.isPending ? "Linking..." : "Link account"}
@@ -2003,7 +2010,7 @@ export default function AdminPage() {
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
-                disabled={updateMemberAccountMutation.isPending || !accountMoveConfirmation}
+                disabled={updateMemberAccountMutation.isPending || !accountMoveConfirmation || !hasRepairAuditName}
                 onClick={(event) => {
                   event.preventDefault();
                   if (accountMoveConfirmation) {
@@ -2013,7 +2020,7 @@ export default function AdminPage() {
                       action: "link",
                       email: accountMoveConfirmation.email,
                       detachExisting: true,
-                      adminActor,
+                      adminActor: sanitizedAdminActor,
                       memberName: accountMoveConfirmation.memberName,
                     });
                   }
