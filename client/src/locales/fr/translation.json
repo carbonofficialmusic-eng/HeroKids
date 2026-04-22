@@ -228,6 +228,8 @@
     "uploadPhotoProof": "Télécharger une preuve photo",
     "takePhoto": "Prends une photo montrant que tu as terminé cette tâche",
     "choosePhoto": "Choisir une photo",
+    "cameraError": "Impossible d'ouvrir la caméra. Veuillez réessayer.",
+    "cameraPermissionDenied": "Accès à la caméra refusé. Veuillez l'activer dans les Réglages.",
     "submitting": "Envoi...",
     "completeAndEarn": "Terminer et gagner des points !",
     "pts": "pts",

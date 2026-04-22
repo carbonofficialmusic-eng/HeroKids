@@ -64,6 +64,18 @@ export function TaskCompletionDialog({
     setCameraError(null);
     try {
       const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+
+      // Check and request permissions before opening the picker
+      let perms = await Camera.checkPermissions();
+      if (perms.camera === "prompt" || perms.photos === "prompt" ||
+          perms.camera === "prompt-with-rationale" || perms.photos === "prompt-with-rationale") {
+        perms = await Camera.requestPermissions({ permissions: ["camera", "photos"] });
+      }
+      if (perms.camera === "denied" && perms.photos === "denied") {
+        setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
+        return;
+      }
+
       const photo = await Camera.getPhoto({
         quality: 85,
         allowEditing: false,
@@ -77,8 +89,14 @@ export function TaskCompletionDialog({
       }
     } catch (error: unknown) {
       if (isPhotoPickerCancelError(error)) return;
-      console.error("Camera error:", error);
-      setCameraError(t("tasks.cameraError", "Could not open camera. Please try again."));
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("Camera error:", msg);
+      // Treat permission-related errors gracefully
+      if (msg && (msg.toLowerCase().includes("denied") || msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("not allowed"))) {
+        setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
+      } else {
+        setCameraError(t("tasks.cameraError", "Could not open camera. Please try again."));
+      }
     }
   };
 

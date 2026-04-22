@@ -232,6 +232,8 @@
     "uploadPhotoProof": "증빙 사진 업로드",
     "takePhoto": "과제를 완료했음을 보여주는 사진을 찍으세요",
     "choosePhoto": "사진 선택",
+    "cameraError": "카메라를 열 수 없습니다. 다시 시도해 주세요.",
+    "cameraPermissionDenied": "카메라 접근이 거부되었습니다. 설정에서 활성화해 주세요.",
     "submitting": "제출 중...",
     "completeAndEarn": "완료하고 포인트 획득!",
     "pts": "포인트",

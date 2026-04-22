@@ -257,6 +257,8 @@
     "uploadPhotoProof": "Foto-Nachweis hochladen",
     "takePhoto": "Mache ein Foto, das zeigt, dass du die Aufgabe erledigt hast",
     "choosePhoto": "Foto auswählen",
+    "cameraError": "Kamera konnte nicht geöffnet werden. Bitte erneut versuchen.",
+    "cameraPermissionDenied": "Kamera-Zugriff verweigert. Bitte in den Geräte-Einstellungen aktivieren.",
     "submitting": "Wird gesendet...",
     "completeAndEarn": "Abschließen & Punkte verdienen!",
     "pts": "Pkt",
