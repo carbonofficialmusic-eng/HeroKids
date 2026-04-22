@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { isNativePlatform } from "@/lib/platform";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -1573,14 +1572,14 @@ export default function KidDashboard() {
               const badge = (
                 <Badge
                   variant="secondary"
-                  className={!isNativePlatform() ? "cursor-pointer hover-elevate" : ""}
+                  className="cursor-pointer hover-elevate"
                   data-testid="badge-current-tier"
                 >
                   <Crown className="h-3 w-3 mr-1" />
                   {tierLabel}
                 </Badge>
               );
-              return isNativePlatform() ? badge : <Link href="/pricing">{badge}</Link>;
+              return <Link href="/pricing">{badge}</Link>;
             })()}
             <NotificationBell familyLanguage="en" memberRole={member.role} />
             <ProfileMenu

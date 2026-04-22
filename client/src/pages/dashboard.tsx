@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
-import { isNativePlatform } from "@/lib/platform";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -979,14 +978,14 @@ export default function Dashboard() {
               const badge = (
                 <Badge
                   variant="secondary"
-                  className={!isNativePlatform() ? "cursor-pointer hover-elevate" : ""}
+                  className="cursor-pointer hover-elevate"
                   data-testid="badge-current-tier"
                 >
                   <Crown className="h-3 w-3 mr-1" />
                   {tierLabel}
                 </Badge>
               );
-              return isNativePlatform() ? badge : <Link href="/pricing">{badge}</Link>;
+              return <Link href="/pricing">{badge}</Link>;
             })()}
             <NotificationBell familyLanguage="en" memberRole={member.role} />
             <ProfileMenu
