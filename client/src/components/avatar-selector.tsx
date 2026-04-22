@@ -33,6 +33,7 @@ export function AvatarSelector({
 }: AvatarSelectorProps) {
   const { t } = useTranslation();
   const [previewUrl, setPreviewUrl] = useState<string | null>(uploadedAvatarUrl || null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastProcessedFileRef = useRef<string | null>(null);
 
@@ -71,6 +72,7 @@ export function AvatarSelector({
   };
 
   const handleNativePhotoCapture = async () => {
+    setCameraError(null);
     try {
       const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
       const photo = await Camera.getPhoto({
@@ -92,6 +94,7 @@ export function AvatarSelector({
         return;
       }
       console.error("Camera error:", error);
+      setCameraError(t("tasks.cameraError", "Could not open camera. Please try again."));
     }
   };
 
@@ -159,18 +162,25 @@ export function AvatarSelector({
               </Button>
             </div>
           ) : (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-20 border-dashed"
-              onClick={handleUploadClick}
-              data-testid="button-upload-avatar"
-            >
-              <div className="flex flex-col items-center gap-2">
-                <Upload className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">{t("avatarSelector.uploadYourPhoto")}</span>
-              </div>
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-20 border-dashed"
+                onClick={handleUploadClick}
+                data-testid="button-upload-avatar"
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm">{t("avatarSelector.uploadYourPhoto")}</span>
+                </div>
+              </Button>
+              {cameraError && (
+                <p className="text-sm text-destructive mt-2" data-testid="text-avatar-camera-error">
+                  {cameraError}
+                </p>
+              )}
+            </>
           )}
         </div>
 
