@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
 import { isNativePlatform } from "@/lib/platform";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -32,7 +33,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar, Zap } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -116,6 +127,9 @@ export default function Dashboard() {
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
+  const [sendPointsOpen, setSendPointsOpen] = useState(false);
+  const [selectedPointsRecipients, setSelectedPointsRecipients] = useState<string[]>([]);
+  const [pointsAmount, setPointsAmount] = useState("");
   const [celebration, setCelebration] = useState<{
     points: number;
     message: string;
@@ -765,6 +779,29 @@ export default function Dashboard() {
     },
   });
 
+  const awardPointsMutation = useMutation({
+    mutationFn: async ({ memberIds, points }: { memberIds: string[]; points: number }) => {
+      return await apiRequest("POST", "/api/family/award-points", { memberIds, points });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      setSendPointsOpen(false);
+      setSelectedPointsRecipients([]);
+      setPointsAmount("");
+      toast({
+        title: t("dashboard.pointsSent", "Punkte gesendet!"),
+        description: t("dashboard.pointsSentDesc", "Die Punkte wurden erfolgreich übertragen."),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("dashboard.pointsSendFailed", "Fehler"),
+        description: error.message || t("dashboard.pointsSendFailedDesc", "Punkte konnten nicht gesendet werden."),
+        variant: "destructive",
+      });
+    },
+  });
+
   if (memberLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -967,7 +1004,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden">
+      <div className={`container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden ${isParent ? "pb-[calc(6rem+env(safe-area-inset-bottom))]" : ""}`}>
         {isParent ? (
           /* Parent View */
           <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
@@ -1062,7 +1099,7 @@ export default function Dashboard() {
                     </span>
                   )}
                 </div>
-                {/* Row 2: Family Goals, Family Chat */}
+                {/* Row 2: Family Goals, Send Points */}
                 <Link href="/family-goals" className="w-full">
                   <Button variant="card" data-testid="button-family-goals" className="w-full h-14 justify-start px-4 gap-3">
                     <span className="w-6 flex-shrink-0 flex justify-center">
@@ -1071,21 +1108,21 @@ export default function Dashboard() {
                     <span className="text-left flex-1">{t("dashboard.familyGoals")}</span>
                   </Button>
                 </Link>
-                <div className="relative w-full">
-                  <Link href="/chat" className="w-full block">
-                    <Button variant="card" data-testid="button-chat" className="w-full h-14 justify-start px-4 gap-3">
-                      <span className="w-6 flex-shrink-0 flex justify-center">
-                        <MessageCircle className="h-5 w-5" />
-                      </span>
-                      <span className="text-left flex-1">{t("nav.chat")}</span>
-                    </Button>
-                  </Link>
-                  {unreadChatData && unreadChatData.count > 0 && (
-                    <span className="absolute top-2 right-2 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold" data-testid="badge-unread-count">
-                      {unreadChatData.count}
-                    </span>
-                  )}
-                </div>
+                <Button
+                  variant="card"
+                  data-testid="button-send-points"
+                  className="w-full h-14 justify-start px-4 gap-3"
+                  onClick={() => {
+                    setSelectedPointsRecipients([]);
+                    setPointsAmount("");
+                    setSendPointsOpen(true);
+                  }}
+                >
+                  <span className="w-6 flex-shrink-0 flex justify-center">
+                    <Zap className="h-5 w-5 text-amber-500" />
+                  </span>
+                  <span className="text-left flex-1">{t("dashboard.sendPoints", "Punkte senden")}</span>
+                </Button>
                 {/* Row 3: Add Task, Add Reward */}
                 <Button
                   onClick={() => {
@@ -1677,6 +1714,37 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Parent Bottom Navigation Bar */}
+      {isParent && (
+        <motion.div
+          className="fixed bottom-0 left-0 right-0 z-50 p-2"
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, type: "spring" }}
+        >
+          <Card className="p-1.5 mx-2 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 backdrop-blur-md border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl sm:mx-auto">
+            <div className="flex justify-center">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px] relative">
+                <Button variant="ghost" size="lg" asChild data-testid="button-parent-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
+                  <Link href="/chat">
+                    <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
+                    <span className="font-bold text-sm sm:text-base truncate">{t("nav.chat")}</span>
+                  </Link>
+                </Button>
+                {unreadChatData && unreadChatData.count > 0 && (
+                  <span
+                    className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                    data-testid="badge-parent-unread-chat"
+                  >
+                    {unreadChatData.count}
+                  </span>
+                )}
+              </motion.div>
+            </div>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Dialogs */}
       {isParent && member && (
         <>
@@ -1793,6 +1861,111 @@ export default function Dashboard() {
           message={celebration.message}
           onComplete={() => setCelebration(null)}
         />
+      )}
+
+      {/* Send Points Dialog */}
+      {isParent && (
+        <Dialog open={sendPointsOpen} onOpenChange={(open) => {
+          setSendPointsOpen(open);
+          if (!open) { setSelectedPointsRecipients([]); setPointsAmount(""); }
+        }}>
+          <DialogContent data-testid="dialog-send-points" className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-amber-500" />
+                {t("dashboard.sendPoints", "Punkte senden")}
+              </DialogTitle>
+              <DialogDescription>
+                {t("dashboard.sendPointsDesc", "Wähle Familienmitglieder aus und sende ihnen Bonuspunkte.")}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              {/* Member Selection */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  {t("dashboard.selectRecipients", "Empfänger")}
+                </Label>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {familyMembers.filter((m) => m.id !== member?.id).map((fm) => {
+                    const selected = selectedPointsRecipients.includes(fm.id);
+                    return (
+                      <button
+                        key={fm.id}
+                        type="button"
+                        data-testid={`button-recipient-${fm.id}`}
+                        onClick={() =>
+                          setSelectedPointsRecipients((prev) =>
+                            selected ? prev.filter((id) => id !== fm.id) : [...prev, fm.id]
+                          )
+                        }
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg border text-left transition-colors ${selected ? "border-primary bg-primary/10" : "border-border bg-transparent hover-elevate"}`}
+                      >
+                        <Avatar className="h-8 w-8 flex-shrink-0" style={{ borderWidth: "2px", borderColor: fm.avatarColor || "#14b8a6" }}>
+                          <AvatarImage src={getAvatarUrl(fm)} />
+                          <AvatarFallback style={{ backgroundColor: fm.avatarColor || "#14b8a6" }} className="text-white text-xs">
+                            {fm.displayName.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{fm.displayName}</p>
+                          <p className="text-xs text-muted-foreground">{fm.role === "child" ? t("common.child", "Kind") : t("common.parent", "Elternteil")} · {fm.totalPoints} {t("dashboard.pointsLabel")}</p>
+                        </div>
+                        {selected && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Points Amount */}
+              <div className="space-y-2">
+                <Label htmlFor="points-amount" className="text-sm font-medium">
+                  {t("dashboard.pointsAmount", "Anzahl Punkte")}
+                </Label>
+                <Input
+                  id="points-amount"
+                  type="number"
+                  min="1"
+                  max="10000"
+                  placeholder="z. B. 50"
+                  value={pointsAmount}
+                  onChange={(e) => setPointsAmount(e.target.value)}
+                  data-testid="input-points-amount"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setSendPointsOpen(false)}
+                data-testid="button-cancel-send-points"
+              >
+                {t("common.cancel")}
+              </Button>
+              <Button
+                onClick={() => {
+                  const pts = parseInt(pointsAmount, 10);
+                  if (selectedPointsRecipients.length === 0 || !pts || pts < 1) return;
+                  awardPointsMutation.mutate({ memberIds: selectedPointsRecipients, points: pts });
+                }}
+                disabled={
+                  selectedPointsRecipients.length === 0 ||
+                  !pointsAmount ||
+                  parseInt(pointsAmount, 10) < 1 ||
+                  awardPointsMutation.isPending
+                }
+                data-testid="button-confirm-send-points"
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                {awardPointsMutation.isPending
+                  ? t("common.loading")
+                  : t("dashboard.sendPointsConfirm", "Punkte senden")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Debug Info Panel - activated by 5 taps on logo */}

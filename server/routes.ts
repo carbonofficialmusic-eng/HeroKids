@@ -1389,6 +1389,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Award bonus points to family members (parents only)
+  app.post("/api/family/award-points", isAuthenticated, async (req: any, res) => {
+    try {
+      let currentMember;
+      if ((req.user.authMethod === "device" || req.user.authMethod === "mobile") && req.user.member) {
+        currentMember = req.user.member;
+      } else {
+        const userId = req.user.claims.sub;
+        currentMember = await storage.getFamilyMemberByUserId(userId);
+      }
+
+      if (!currentMember || currentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can award points" });
+      }
+
+      const { memberIds, points } = req.body;
+
+      if (!Array.isArray(memberIds) || memberIds.length === 0) {
+        return res.status(400).json({ message: "At least one member must be selected" });
+      }
+      if (typeof points !== "number" || !Number.isInteger(points) || points < 1 || points > 10000) {
+        return res.status(400).json({ message: "Points must be a whole number between 1 and 10,000" });
+      }
+
+      for (const memberId of memberIds) {
+        const target = await storage.getFamilyMember(memberId);
+        if (!target || target.familyName !== currentMember.familyName) {
+          return res.status(403).json({ message: "Cannot award points to members outside your family" });
+        }
+
+        await storage.updateFamilyMemberPoints(
+          memberId,
+          target.totalEarned + points,
+          target.totalPoints + points,
+          target.weeklyPoints + points,
+          target.monthlyPoints + points
+        );
+
+        await storage.addPointsHistory({
+          memberId,
+          points,
+          reason: `Bonus from ${currentMember.displayName}`,
+        });
+
+        broadcastToFamily(currentMember.familyName, {
+          type: "points_updated",
+          memberId,
+          addedPoints: points,
+          fromParent: currentMember.displayName,
+        });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error awarding points:", error);
+      res.status(500).json({ message: "Failed to award points" });
+    }
+  });
+
   app.delete("/api/family-members/:memberId", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
