@@ -4,6 +4,7 @@ import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
 import { Check, Upload, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Capacitor } from "@capacitor/core";
 
 interface AvatarSelectorProps {
   selectedAvatar: string;
@@ -13,6 +14,12 @@ interface AvatarSelectorProps {
   onCustomUpload?: (file: File) => void;
   onClearCustomUpload?: () => void;
   uploadedAvatarUrl?: string | null;
+}
+
+async function dataUrlToFile(dataUrl: string, filename: string): Promise<File> {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  return new File([blob], filename, { type: blob.type || "image/jpeg" });
 }
 
 export function AvatarSelector({
@@ -28,6 +35,8 @@ export function AvatarSelector({
   const [previewUrl, setPreviewUrl] = useState<string | null>(uploadedAvatarUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastProcessedFileRef = useRef<string | null>(null);
+
+  const isNativeIos = Capacitor.getPlatform() === "ios";
 
   // Sync previewUrl when a history avatar is selected externally
   useEffect(() => {
@@ -60,6 +69,39 @@ export function AvatarSelector({
     }
   };
 
+  const handleNativePhotoCapture = async () => {
+    try {
+      const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+      const photo = await Camera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Prompt,
+      });
+      if (photo.dataUrl) {
+        setPreviewUrl(photo.dataUrl);
+        lastProcessedFileRef.current = null;
+        if (onCustomUpload) {
+          const file = await dataUrlToFile(photo.dataUrl, "avatar-photo.jpg");
+          onCustomUpload(file);
+        }
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message?.toLowerCase().includes("cancel")) {
+        return;
+      }
+      console.error("Camera error:", error);
+    }
+  };
+
+  const handleUploadClick = () => {
+    if (isNativeIos) {
+      handleNativePhotoCapture();
+    } else {
+      fileInputRef.current?.click();
+    }
+  };
+
   const clearCustomPhoto = () => {
     setPreviewUrl(null);
     lastProcessedFileRef.current = null;
@@ -84,14 +126,16 @@ export function AvatarSelector({
         
         {/* Custom Upload Option */}
         <div className="mb-4">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-            data-testid="input-avatar-upload"
-          />
+          {!isNativeIos && (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              data-testid="input-avatar-upload"
+            />
+          )}
           {previewUrl ? (
             <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
               <img
@@ -118,7 +162,7 @@ export function AvatarSelector({
               type="button"
               variant="outline"
               className="w-full h-20 border-dashed"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleUploadClick}
               data-testid="button-upload-avatar"
             >
               <div className="flex flex-col items-center gap-2">
