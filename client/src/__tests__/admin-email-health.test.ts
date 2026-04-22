@@ -14,6 +14,7 @@ import {
   jsonResponse,
   healthyEmailStatus,
   makeDefaultAdminFamilyDetails,
+  makeAdminFetchMock,
   type AdminFamilyDetails,
 } from "./adminTestHelpers";
 
@@ -133,151 +134,26 @@ describe("admin email health UI", () => {
   const setupFetchMock = () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
-        const path = url.startsWith("http") ? new URL(url).pathname : url;
-        const method = init?.method || "GET";
-
-        if (path === "/api/admin/stats" && method === "GET") {
-          return jsonResponse({
-            totalFamilies: 1,
-            totalMembers: 2,
-            totalTasks: 3,
-            totalRewards: 4,
-            totalPointsEarned: 50,
-            tierCounts: { free: 1, family: 0, family_plus: 0, family_hero: 0 },
-          });
-        }
-
-        if (path === "/api/admin/families" && method === "GET") {
-          return jsonResponse([
-            {
-              ...adminFamilyDetails.family,
-              memberCount: adminFamilyDetails.members.length,
-              parentCount: adminFamilyDetails.members.filter((member) => member.role === "parent").length,
-              childCount: adminFamilyDetails.members.filter((member) => member.role === "child").length,
-            },
-          ]);
-        }
-
-        if (path === "/api/admin/families/Hero%20Family" && method === "GET") {
-          return jsonResponse(adminFamilyDetails);
-        }
-
-        if (path === "/api/admin/families/Hero%20Family/members/member-diego/account" && method === "PATCH") {
-          const body = JSON.parse(String(init?.body));
-          expect(body).toMatchObject({ action: "unlink", adminActor: "Test Admin" });
-          adminFamilyDetails = {
-            ...adminFamilyDetails,
-            members: adminFamilyDetails.members.map((member) =>
-              member.id === "member-diego" ? { ...member, userId: null, account: null } : member,
-            ),
-          };
-          return jsonResponse({ success: true, message: "Account unlinked from member" });
-        }
-
-        if (path === "/api/admin/families/Hero%20Family/members/member-riewert/account" && method === "PATCH") {
-          const body = JSON.parse(String(init?.body));
-          expect(body).toMatchObject({
-            action: "link",
-            email: "sonoastudio@me.com",
-            adminActor: "Test Admin",
-          });
-          if (!body.detachExisting && adminFamilyDetails.members.some((member) => member.userId === "user-sonoastudio")) {
-            return jsonResponse({
-              message: "This account is already linked to Diego. Unlink it there first or confirm moving it.",
-              existingMember: {
-                id: "member-diego",
-                displayName: "Diego",
-                familyName: "Hero Family",
-                role: "child",
+      makeAdminFetchMock(
+        () => adminFamilyDetails,
+        (d) => { adminFamilyDetails = d; },
+        {
+          "GET /api/admin/email-health": () => jsonResponse(currentEmailStatus),
+          "POST /api/admin/email-health/test": (init) => {
+            const body = JSON.parse(String(init?.body));
+            currentEmailStatus = {
+              ...healthyEmailStatus,
+              testSend: {
+                attempted: true,
+                succeeded: true,
+                recipient: body.recipient,
+                provider: "resend",
               },
-            }, 409);
-          }
-          adminFamilyDetails = {
-            ...adminFamilyDetails,
-            members: adminFamilyDetails.members.map((member) =>
-              member.id === "member-riewert"
-                ? {
-                    ...member,
-                    userId: "user-sonoastudio",
-                    account: {
-                      email: "sonoastudio@me.com",
-                      firstName: "Riewert",
-                      lastName: null,
-                      isEmailVerified: true,
-                      isDisabled: false,
-                      lastLoginAt: null,
-                      createdAt: "2026-04-21T00:00:00.000Z",
-                    },
-                  }
-                : member,
-            ),
-            accountLinkRepairHistory: body.detachExisting
-              ? [
-                  {
-                    id: "repair-move-detach",
-                    memberId: "member-diego",
-                    memberDisplayName: "Diego",
-                    action: "move_detach",
-                    oldAccountEmail: "sonoastudio@me.com",
-                    newAccountEmail: null,
-                    repairedBy: "Admin",
-                    repairedAt: "2026-04-21T00:00:00.000Z",
-                  },
-                  {
-                    id: "repair-move-link",
-                    memberId: "member-riewert",
-                    memberDisplayName: "Riewert",
-                    action: "move_link",
-                    oldAccountEmail: null,
-                    newAccountEmail: "sonoastudio@me.com",
-                    repairedBy: "Admin",
-                    repairedAt: "2026-04-21T00:01:00.000Z",
-                  },
-                ]
-              : adminFamilyDetails.accountLinkRepairHistory,
-          };
-          return jsonResponse({ success: true, message: "Account linked to member" });
-        }
-
-        if (path === "/api/admin/skins/stats" && method === "GET") {
-          return jsonResponse({ totalSkins: 122, stats: [] });
-        }
-
-        if (path === "/api/admin/analytics" && method === "GET") {
-          return jsonResponse({
-            weeklyRegistrations: [],
-            monthlyRegistrations: [],
-            activeFamilies: [],
-            avgPointsPerChild: 0,
-            pointsByRole: [],
-            tierDistribution: [],
-            totalChildren: 0,
-            totalParents: 0,
-          });
-        }
-
-        if (path === "/api/admin/email-health" && method === "GET") {
-          return jsonResponse(currentEmailStatus);
-        }
-
-        if (path === "/api/admin/email-health/test" && method === "POST") {
-          const body = JSON.parse(String(init?.body));
-          currentEmailStatus = {
-            ...healthyEmailStatus,
-            testSend: {
-              attempted: true,
-              succeeded: true,
-              recipient: body.recipient,
-              provider: "resend",
-            },
-          };
-          return jsonResponse(currentEmailStatus);
-        }
-
-        return jsonResponse({ message: `Unhandled ${method} ${path}` }, 404);
-      }),
+            };
+            return jsonResponse(currentEmailStatus);
+          },
+        },
+      ),
     );
   };
 
