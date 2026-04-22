@@ -36,7 +36,8 @@ export function AvatarSelector({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastProcessedFileRef = useRef<string | null>(null);
 
-  const isNativeIos = Capacitor.getPlatform() === "ios";
+  const platform = Capacitor.getPlatform();
+  const isNativeMobile = platform === "ios" || platform === "android";
 
   // Sync previewUrl when a history avatar is selected externally
   useEffect(() => {
@@ -95,7 +96,7 @@ export function AvatarSelector({
   };
 
   const handleUploadClick = () => {
-    if (isNativeIos) {
+    if (isNativeMobile) {
       handleNativePhotoCapture();
     } else {
       fileInputRef.current?.click();
@@ -126,7 +127,7 @@ export function AvatarSelector({
         
         {/* Custom Upload Option */}
         <div className="mb-4">
-          {!isNativeIos && (
+          {!isNativeMobile && (
             <input
               ref={fileInputRef}
               type="file"
