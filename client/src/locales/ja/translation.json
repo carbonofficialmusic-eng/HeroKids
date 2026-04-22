@@ -115,7 +115,12 @@
     "categoryOther": "その他",
     "tasksInCategory": "{{count}}件のタスク",
     "expandAll": "すべて展開",
-    "collapseAll": "すべて折りたたむ"
+    "collapseAll": "すべて折りたたむ",
+    "sendPoints": "ポイントを送る",
+    "sendPointsDesc": "家族のメンバーを選択してボーナスポイントを送りましょう。",
+    "selectRecipients": "送り先",
+    "sendPointsAmount": "ポイント数",
+    "sendPointsConfirm": "ポイントを送る"
   },
   "tasks": {
     "title": "タスク",

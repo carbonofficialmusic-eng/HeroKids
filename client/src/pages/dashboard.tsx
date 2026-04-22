@@ -1921,7 +1921,7 @@ export default function Dashboard() {
               {/* Points Amount */}
               <div className="space-y-2">
                 <Label htmlFor="points-amount" className="text-sm font-medium">
-                  {t("dashboard.pointsAmount", "Anzahl Punkte")}
+                  {t("dashboard.sendPointsAmount", "Anzahl Punkte")}
                 </Label>
                 <Input
                   id="points-amount"

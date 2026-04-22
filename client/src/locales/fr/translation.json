@@ -115,7 +115,12 @@
     "categoryOther": "Autres",
     "tasksInCategory": "{{count}} tâche(s)",
     "expandAll": "Tout déplier",
-    "collapseAll": "Tout replier"
+    "collapseAll": "Tout replier",
+    "sendPoints": "Envoyer des points",
+    "sendPointsDesc": "Sélectionne des membres de la famille et envoie-leur des points bonus.",
+    "selectRecipients": "Destinataires",
+    "sendPointsAmount": "Nombre de points",
+    "sendPointsConfirm": "Envoyer des points"
   },
   "tasks": {
     "title": "Tâches",

@@ -119,7 +119,12 @@
     "categoryOther": "기타",
     "tasksInCategory": "{{count}}개 과제",
     "expandAll": "모두 펼치기",
-    "collapseAll": "모두 접기"
+    "collapseAll": "모두 접기",
+    "sendPoints": "포인트 보내기",
+    "sendPointsDesc": "가족 구성원을 선택하고 보너스 포인트를 보내세요.",
+    "selectRecipients": "받는 사람",
+    "sendPointsAmount": "포인트 수",
+    "sendPointsConfirm": "포인트 보내기"
   },
   "tasks": {
     "title": "과제",

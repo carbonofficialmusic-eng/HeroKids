@@ -120,7 +120,12 @@
     "categoryOther": "Other",
     "tasksInCategory": "{{count}} task(s)",
     "expandAll": "Expand all",
-    "collapseAll": "Collapse all"
+    "collapseAll": "Collapse all",
+    "sendPoints": "Send Points",
+    "sendPointsDesc": "Select family members and send them bonus points.",
+    "selectRecipients": "Recipients",
+    "sendPointsAmount": "Number of points",
+    "sendPointsConfirm": "Send Points"
   },
   "tasks": {
     "title": "Tasks",

@@ -115,7 +115,12 @@
     "categoryOther": "Otras",
     "tasksInCategory": "{{count}} tarea(s)",
     "expandAll": "Expandir todo",
-    "collapseAll": "Contraer todo"
+    "collapseAll": "Contraer todo",
+    "sendPoints": "Enviar puntos",
+    "sendPointsDesc": "Selecciona miembros de la familia y envíales puntos bonus.",
+    "selectRecipients": "Destinatarios",
+    "sendPointsAmount": "Cantidad de puntos",
+    "sendPointsConfirm": "Enviar puntos"
   },
   "tasks": {
     "title": "Tareas",

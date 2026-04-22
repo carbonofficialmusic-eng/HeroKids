@@ -115,7 +115,12 @@
     "categoryOther": "其他",
     "tasksInCategory": "{{count}}个任务",
     "expandAll": "全部展开",
-    "collapseAll": "全部折叠"
+    "collapseAll": "全部折叠",
+    "sendPoints": "发送积分",
+    "sendPointsDesc": "选择家庭成员并向他们发送奖励积分。",
+    "selectRecipients": "收件人",
+    "sendPointsAmount": "积分数量",
+    "sendPointsConfirm": "发送积分"
   },
   "tasks": {
     "title": "任务",

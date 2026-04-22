@@ -133,7 +133,12 @@
     "categoryOther": "Sonstige",
     "tasksInCategory": "{{count}} Aufgabe(n)",
     "expandAll": "Alle ausklappen",
-    "collapseAll": "Alle einklappen"
+    "collapseAll": "Alle einklappen",
+    "sendPoints": "Punkte senden",
+    "sendPointsDesc": "Wähle Familienmitglieder aus und sende ihnen Bonuspunkte.",
+    "selectRecipients": "Empfänger",
+    "sendPointsAmount": "Anzahl Punkte",
+    "sendPointsConfirm": "Punkte senden"
   },
   "tasks": {
     "title": "Aufgaben",

@@ -119,7 +119,12 @@
     "categoryOther": "Övriga",
     "tasksInCategory": "{{count}} uppgift(er)",
     "expandAll": "Expandera alla",
-    "collapseAll": "Minimera alla"
+    "collapseAll": "Minimera alla",
+    "sendPoints": "Skicka poäng",
+    "sendPointsDesc": "Välj familjemedlemmar och skicka bonuspoäng till dem.",
+    "selectRecipients": "Mottagare",
+    "sendPointsAmount": "Antal poäng",
+    "sendPointsConfirm": "Skicka poäng"
   },
   "tasks": {
     "title": "Uppgifter",
