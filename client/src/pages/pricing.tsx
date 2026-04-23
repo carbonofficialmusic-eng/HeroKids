@@ -122,7 +122,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b sticky top-0 backdrop-blur-md z-40 bg-background/80">
+      <header className="border-b sticky top-0 backdrop-blur-md z-40 bg-background/80" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/">
             <Button 
