@@ -10,14 +10,23 @@
 html, body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
-  overflow-x: hidden;
-  overscroll-behavior-y: none;
+  /* position:fixed stops WKWebView/iOS from bouncing the native scroll view */
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 #root {
-  min-height: 100vh;
-  overflow-x: hidden;
+  /* #root becomes the real scroll container — bounce-free on iOS WKWebView */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 
