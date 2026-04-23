@@ -49,5 +49,7 @@
         <string>HeroKids needs camera access so kids can take photos as proof of completing tasks.</string>
         <key>NSPhotoLibraryUsageDescription</key>
         <string>HeroKids needs photo library access so kids can choose a photo as proof of completing tasks.</string>
+        <key>NSPhotoLibraryAddUsageDescription</key>
+        <string>HeroKids needs access to save photos to your library.</string>
 </dict>
 </plist>
