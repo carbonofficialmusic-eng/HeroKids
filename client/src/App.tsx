@@ -130,6 +130,11 @@ function Router() {
   const [location] = useLocation();
   const dashboardKey = `dashboard-${location}`;
 
+  // Reset scroll to top on every page navigation (prevents status bar overlap on iOS)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+
   // Show nothing while loading to prevent 404 flash
   if (isLoading) {
     return (
