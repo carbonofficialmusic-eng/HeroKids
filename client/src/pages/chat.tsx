@@ -75,6 +75,14 @@ export default function Chat() {
   });
 
   const scrollToBottom = () => {
+    // Scroll the ScrollArea viewport directly to avoid affecting window scroll
+    if (scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight;
+        return;
+      }
+    }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -185,7 +193,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="container mx-auto p-4 flex flex-col" style={{ height: 'calc(100vh - env(safe-area-inset-top))' }} data-testid="page-chat">
+    <div className="p-4 flex flex-col" style={{ position: 'fixed', inset: 0, paddingTop: 'max(1rem, env(safe-area-inset-top))' }} data-testid="page-chat">
       <div className="flex items-center gap-3 mb-4 shrink-0">
         <Link href={dashboardUrl}>
           <Button
