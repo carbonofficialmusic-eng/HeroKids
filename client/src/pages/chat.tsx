@@ -185,7 +185,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="container mx-auto p-4 h-screen flex flex-col" data-testid="page-chat">
+    <div className="container mx-auto p-4 h-screen flex flex-col" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }} data-testid="page-chat">
       <div className="flex items-center gap-3 mb-4 shrink-0">
         <Link href={dashboardUrl}>
           <Button
