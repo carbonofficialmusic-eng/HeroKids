@@ -423,11 +423,12 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
-      // If the camera was used to capture a new profile photo, trigger a silent
-      // dashboard remount 2 s later to fix WKWebView GPU compositing desync on iOS.
+      // If the camera was used to capture a new profile photo, do a full page
+      // reload after 1.5 s to fix WKWebView GPU compositing desync on iOS.
+      // (Same mechanism as the member-switch which uses window.location.href.)
       if (isCameraUsed()) {
         clearCameraUsed();
-        setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000);
+        setTimeout(() => window.location.reload(), 1500);
       }
       toast({
         title: t("toast.profileUpdated"),
@@ -536,7 +537,7 @@ export default function Dashboard() {
       // If a photo proof was taken with the native camera, fix WKWebView GPU desync.
       if (isCameraUsed()) {
         clearCameraUsed();
-        setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000);
+        setTimeout(() => window.location.reload(), 2500);
       }
       
       // Show celebration for auto-approved tasks

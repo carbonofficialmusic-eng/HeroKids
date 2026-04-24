@@ -128,15 +128,7 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   // Use location-based key to force complete remount when navigating between dashboards
   const [location] = useLocation();
-  // reloadCounter is incremented by the camera-fix event (dispatched from dashboard after
-  // camera use) to silently remount the dashboard — same healing effect as a profile switch.
-  const [reloadCounter, setReloadCounter] = useState(0);
-  useEffect(() => {
-    const handle = () => setReloadCounter(c => c + 1);
-    window.addEventListener('herokids:camera-fix', handle);
-    return () => window.removeEventListener('herokids:camera-fix', handle);
-  }, []);
-  const dashboardKey = `dashboard-${location}-${reloadCounter}`;
+  const dashboardKey = `dashboard-${location}`;
 
   // Scroll #root (our scroll container) back to top on every navigation
   useEffect(() => {

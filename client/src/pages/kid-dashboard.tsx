@@ -1256,7 +1256,7 @@ export default function KidDashboard() {
       setMemberToEdit(null);
       if (isCameraUsed()) {
         clearCameraUsed();
-        setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000);
+        setTimeout(() => window.location.reload(), 1500);
       }
       toast({
         title: t("toast.profileUpdated"),
@@ -1327,7 +1327,7 @@ export default function KidDashboard() {
       setSelectedTask(null);
       if (isCameraUsed()) {
         clearCameraUsed();
-        setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000);
+        setTimeout(() => window.location.reload(), 2500);
       }
       toast({
         title: t("kidDashboard.taskCompleted"),
