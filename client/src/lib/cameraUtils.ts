@@ -18,37 +18,26 @@ export function isPhotoPickerCancelError(error: unknown): boolean {
 }
 
 /**
- * Forces WKWebView to reset its UIScrollView contentInset after the iOS
- * camera/photo-picker dismisses.
+ * Timestamp (ms) until which the App.tsx rAF scroll-enforcement loop should
+ * skip its window.scrollTo(0,0) calls.
  *
- * Background: iOS presents the native camera as a view controller on top of
- * WKWebView. When it dismisses, WKWebView can end up with a stale
- * contentInset.top on its underlying UIScrollView. This makes a large
- * non-scrollable gap appear at the top of the page even though JS-level
- * scrollTop is 0. The fix is to scroll the *window* (not #root) to a
- * non-zero position and immediately back — this forces WKWebView to
- * recalculate and flush the contentInset.
+ * Background: after the iOS native camera/photo-picker dismisses, WKWebView
+ * temporarily applies a non-zero contentInset.top to its UIScrollView.  While
+ * this inset is active, window.scrollY reads as non-zero, which causes the
+ * enforcement loop to fire window.scrollTo(0,0) on every animation frame.
+ * On some WKWebView versions those calls are routed through to #root.scrollTop,
+ * making the page appear non-scrollable for as long as the inset persists.
  *
- * We repeat the reset at 0 ms, 150 ms, 400 ms, and 700 ms to cover the
- * entire camera dismiss animation timeline.
+ * By pausing the loop for ~1 second we let WKWebView resolve the inset
+ * on its own, then resume normal enforcement afterwards.
+ */
+export let cameraRecoveryUntil = 0;
+
+/**
+ * Call this immediately after the Capacitor Camera plugin returns a photo.
+ * Suppresses the window-scroll enforcement loop for 1 second so that
+ * WKWebView can reset its UIScrollView contentInset without interference.
  */
 export function syncScrollAfterCamera(): void {
-  function resetWindowScroll() {
-    // Momentarily scroll to 1 then back to 0 — this is the canonical iOS trick
-    // to force WKWebView UIScrollView to flush a stale contentInset.top.
-    window.scrollTo(0, 1);
-    window.scrollTo(0, 0);
-    // Belt-and-suspenders: also reset via documentElement and body
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }
-
-  // Immediate (covers the case where camera dismiss already finished)
-  requestAnimationFrame(resetWindowScroll);
-  // Mid-animation (dismiss animation is ~300ms on most iPhones)
-  setTimeout(resetWindowScroll, 150);
-  // Post-animation (cover slower devices / longer transitions)
-  setTimeout(resetWindowScroll, 400);
-  // Final safeguard
-  setTimeout(resetWindowScroll, 700);
+  cameraRecoveryUntil = Date.now() + 1000;
 }

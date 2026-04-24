@@ -138,10 +138,6 @@ export default function Dashboard() {
     if (anyDialogOpen) {
       savedRootScrollRef.current = root.scrollTop;
       root.style.overflowY = 'hidden';
-      // Belt-and-suspenders: snap back if iOS scrolls #root despite overflow:hidden
-      const onScroll = () => { root.scrollTop = savedRootScrollRef.current; };
-      root.addEventListener('scroll', onScroll);
-      return () => root.removeEventListener('scroll', onScroll);
     } else {
       root.style.overflowY = 'auto';
       const target = savedRootScrollRef.current;

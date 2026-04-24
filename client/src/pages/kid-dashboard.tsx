@@ -924,10 +924,6 @@ export default function KidDashboard() {
     if (anyKidDialogOpen) {
       savedScrollRef.current = el.scrollTop;
       el.style.overflowY = 'hidden';
-      // Belt-and-suspenders: if iOS scrolls the container anyway, snap it back
-      const onScroll = () => { el.scrollTop = savedScrollRef.current; };
-      el.addEventListener('scroll', onScroll);
-      return () => el.removeEventListener('scroll', onScroll);
     } else {
       el.style.overflowY = 'auto';
       const target = savedScrollRef.current;
