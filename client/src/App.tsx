@@ -136,28 +136,53 @@ function Router() {
   }, [location]);
 
   // iOS WKWebView architectural fix:
-  // The WKWebView UIScrollView.contentOffset can be moved by ANY system event
-  // (keyboard, camera, app-switch, etc.) without firing a JS 'scroll' event.
-  // Solution: a rAF loop that runs every frame and enforces window.scroll = 0.
-  // This is separate from #root.scrollTop which is CSS-managed and unaffected.
+  // WKWebView's UIScrollView.contentOffset can be silently displaced by any
+  // system event (keyboard, photo-picker, app-switch). Crucially, WKWebView
+  // sometimes LIES and reports window.scrollY = 0 even when the UIScrollView
+  // is visually offset by 50-100 px. The old guard `if (scrollY !== 0)` meant
+  // the fix never ran when WKWebView was lying. Fix: call scrollTo(0,0)
+  // unconditionally every frame so UIScrollView is always snapped to the top.
   useEffect(() => {
     let rafId: number;
-    const enforceZeroWindowScroll = () => {
-      if (window.scrollX !== 0 || window.scrollY !== 0) {
-        // On some WKWebView versions, window.scrollTo(0,0) is routed through
-        // to #root.scrollTop, clobbering the user's actual scroll position.
-        // Guard against this by saving and immediately restoring #root.scrollTop
-        // so the call only fixes the window-level offset.
-        const root = document.getElementById('root');
-        const savedTop = root ? root.scrollTop : 0;
-        window.scrollTo(0, 0);
-        if (root && root.scrollTop !== savedTop) {
-          root.scrollTop = savedTop;
-        }
+    const snapWindowScroll = () => {
+      // Always call scrollTo — WKWebView may report scrollY=0 while the
+      // UIScrollView is actually displaced. The save/restore below ensures
+      // this never clobbers the user's real scroll position inside #root.
+      const root = document.getElementById('root');
+      const savedTop = root ? root.scrollTop : 0;
+      window.scrollTo(0, 0);
+      if (root && root.scrollTop !== savedTop) {
+        root.scrollTop = savedTop;
       }
-      rafId = requestAnimationFrame(enforceZeroWindowScroll);
+      rafId = requestAnimationFrame(snapWindowScroll);
     };
-    rafId = requestAnimationFrame(enforceZeroWindowScroll);
+    rafId = requestAnimationFrame(snapWindowScroll);
+
+    // Extra "kick" when keyboard dismisses: do a 1→0 scroll to force
+    // WKWebView to process the UIScrollView reset even if it thinks it's
+    // already at 0. Only fires when viewport grows (= keyboard closed).
+    const vv = window.visualViewport;
+    let prevVVHeight = vv?.height ?? window.innerHeight;
+    let kickTimer: ReturnType<typeof setTimeout> | null = null;
+    const onViewportResize = () => {
+      const h = vv?.height ?? window.innerHeight;
+      if (h > prevVVHeight + 50) {
+        // Keyboard just closed — debounce until resize settles
+        if (kickTimer) clearTimeout(kickTimer);
+        kickTimer = setTimeout(() => {
+          const root = document.getElementById('root');
+          const savedTop = root ? root.scrollTop : 0;
+          window.scrollTo(0, 1);
+          if (root) root.scrollTop = savedTop;
+          requestAnimationFrame(() => {
+            window.scrollTo(0, 0);
+            if (root) root.scrollTop = savedTop;
+          });
+        }, 100);
+      }
+      prevVVHeight = h;
+    };
+    vv?.addEventListener('resize', onViewportResize);
 
     // Also snap on visibility-restore (app-switch / wake)
     const onVisible = () => {
@@ -173,6 +198,8 @@ function Router() {
 
     return () => {
       cancelAnimationFrame(rafId);
+      vv?.removeEventListener('resize', onViewportResize);
+      if (kickTimer) clearTimeout(kickTimer);
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener('focus', onVisible);
     };
