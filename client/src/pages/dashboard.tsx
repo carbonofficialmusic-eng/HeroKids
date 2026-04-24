@@ -144,11 +144,17 @@ export default function Dashboard() {
       return () => root.removeEventListener('scroll', onScroll);
     } else {
       root.style.overflowY = 'auto';
-      root.scrollTo({ top: savedRootScrollRef.current, behavior: 'instant' });
-      // Also restore after iOS keyboard animation fully completes (~300ms)
+      // "Tickle" the scroll position to force WKWebView native layer re-sync
+      // (after camera dismiss the GPU compositing layer can be visually offset
+      // while JS-level scrollTop is correct — tickling forces a native repaint)
+      const target = savedRootScrollRef.current;
+      root.scrollTop = target === 0 ? 1 : target - 1;
+      root.scrollTop = target;
+      // Also restore after iOS keyboard/camera animation fully completes (~300ms)
       const timer = setTimeout(() => {
         window.scrollTo(0, 0);
-        root.scrollTo({ top: savedRootScrollRef.current, behavior: 'instant' });
+        root.scrollTop = target === 0 ? 1 : target - 1;
+        root.scrollTop = target;
       }, 350);
       return () => clearTimeout(timer);
     }
