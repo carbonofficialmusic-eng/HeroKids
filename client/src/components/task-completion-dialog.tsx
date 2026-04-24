@@ -98,6 +98,12 @@ export function TaskCompletionDialog({
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // On iOS the system photo picker causes WKWebView GPU displacement —
+      // mark it so the mutation's onSuccess triggers a reload to fix the shift.
+      const cap = (window as any).Capacitor;
+      const isIOS = (cap?.isNativePlatform?.() === true) ||
+                    /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) markCameraUsed();
       setUploadedPhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {

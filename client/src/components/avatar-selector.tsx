@@ -54,7 +54,13 @@ export function AvatarSelector({
         return;
       }
       lastProcessedFileRef.current = fileKey;
-
+      // On iOS (native or browser), the system photo picker causes the same
+      // WKWebView GPU displacement as the Capacitor camera — mark it so the
+      // mutation's onSuccess can trigger a page reload to fix the visual shift.
+      const cap = (window as any).Capacitor;
+      const isIOS = (cap?.isNativePlatform?.() === true) ||
+                    /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) markCameraUsed();
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);

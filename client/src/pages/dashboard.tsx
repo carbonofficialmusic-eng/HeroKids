@@ -428,7 +428,7 @@ export default function Dashboard() {
       // (Same mechanism as the member-switch which uses window.location.href.)
       if (isCameraUsed()) {
         clearCameraUsed();
-        setTimeout(() => window.location.reload(), 1500);
+        setTimeout(() => { window.location.href = window.location.pathname; }, 1500);
       }
       toast({
         title: t("toast.profileUpdated"),
@@ -537,7 +537,7 @@ export default function Dashboard() {
       // If a photo proof was taken with the native camera, fix WKWebView GPU desync.
       if (isCameraUsed()) {
         clearCameraUsed();
-        setTimeout(() => window.location.reload(), 2500);
+        setTimeout(() => { window.location.href = window.location.pathname; }, 2500);
       }
       
       // Show celebration for auto-approved tasks
