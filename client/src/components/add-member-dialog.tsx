@@ -138,7 +138,7 @@ export function AddMemberDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto" data-testid="dialog-add-member">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto" data-testid="dialog-add-member" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{t("addMember.title")}</DialogTitle>
           <DialogDescription>

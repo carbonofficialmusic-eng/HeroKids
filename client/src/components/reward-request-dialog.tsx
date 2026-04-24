@@ -87,7 +87,7 @@ export function RewardRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" data-testid={isEditing ? "dialog-edit-request" : "dialog-request-reward"}>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" data-testid={isEditing ? "dialog-edit-request" : "dialog-request-reward"} onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <div className="flex items-center gap-2">
             {isEditing ? (

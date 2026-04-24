@@ -929,8 +929,9 @@ export default function KidDashboard() {
       el.style.overflowY = 'auto';
       const target = savedScrollRef.current;
       el.scrollTop = target;
-      const scrollTimer = setTimeout(() => { el.scrollTop = target; }, 350);
-      return () => clearTimeout(scrollTimer);
+      const t1 = setTimeout(() => { el.scrollTop = target; }, 350);
+      const t2 = setTimeout(() => { el.scrollTop = target; }, 700);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
     }
   }, [anyKidDialogOpen]);
 

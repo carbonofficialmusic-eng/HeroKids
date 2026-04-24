@@ -143,8 +143,9 @@ export default function Dashboard() {
       root.style.overflowY = 'auto';
       const target = savedRootScrollRef.current;
       root.scrollTop = target;
-      const scrollTimer = setTimeout(() => { root.scrollTop = target; }, 350);
-      return () => clearTimeout(scrollTimer);
+      const t1 = setTimeout(() => { root.scrollTop = target; }, 350);
+      const t2 = setTimeout(() => { root.scrollTop = target; }, 700);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
     }
   }, [anyDialogOpen]);
   const [selectedPointsRecipients, setSelectedPointsRecipients] = useState<string[]>([]);

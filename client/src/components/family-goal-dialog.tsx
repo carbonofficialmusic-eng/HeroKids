@@ -98,7 +98,7 @@ export function FamilyGoalDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-family-goal">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-family-goal" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-accent">
             {editingGoal ? "Familienziel bearbeiten" : "Neues Familienziel erstellen"}

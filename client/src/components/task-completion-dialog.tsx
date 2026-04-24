@@ -192,7 +192,7 @@ export function TaskCompletionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent data-testid="dialog-complete-task">
+      <DialogContent data-testid="dialog-complete-task" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{t("tasks.completeTask")}</DialogTitle>
           <DialogDescription>
