@@ -916,19 +916,21 @@ export default function KidDashboard() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const savedScrollRef = useRef(0);
 
-  // Save scroll before opening any dialog; restore after it closes
-  const openWithScrollSave = (setter: (v: boolean) => void) => {
-    savedScrollRef.current = scrollContainerRef.current?.scrollTop ?? 0;
-    setter(true);
-  };
-
+  // Freeze internal scroll container while any dialog is open, then restore (iOS keyboard shifts viewport)
+  const anyKidDialogOpen = taskDialogOpen || requestRewardDialogOpen || editMemberDialogOpen || switchMemberDialogOpen;
   useEffect(() => {
-    if (!requestRewardDialogOpen) {
-      requestAnimationFrame(() => {
-        scrollContainerRef.current?.scrollTo({ top: savedScrollRef.current, behavior: 'instant' });
-      });
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    if (anyKidDialogOpen) {
+      savedScrollRef.current = el.scrollTop;
+      el.style.overflowY = 'hidden';
+    } else {
+      el.style.overflowY = 'auto';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.scrollTo({ top: savedScrollRef.current, behavior: 'instant' });
+      }));
     }
-  }, [requestRewardDialogOpen]);
+  }, [anyKidDialogOpen]);
 
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("week");
   const [kidTaskFilter, setKidTaskFilter] = useState<"today" | "week" | "all">("all");
@@ -2372,7 +2374,7 @@ export default function KidDashboard() {
               <Button 
                 variant="ghost" 
                 size="lg" 
-                onClick={() => openWithScrollSave(setRequestRewardDialogOpen)}
+                onClick={() => setRequestRewardDialogOpen(true)}
                 data-testid="button-nav-request-reward" 
                 className="h-14 w-full px-3 sm:px-5 rounded-2xl"
               >

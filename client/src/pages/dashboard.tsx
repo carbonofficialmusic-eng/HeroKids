@@ -128,17 +128,22 @@ export default function Dashboard() {
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
   const [sendPointsOpen, setSendPointsOpen] = useState(false);
 
-  // Restore #root scroll after ANY dialog closes (Radix react-remove-scroll resets it)
+  // Freeze #root scroll while any dialog is open, then restore exactly (iOS keyboard shifts viewport)
   const savedRootScrollRef = useRef(0);
   const anyDialogOpen = taskDialogOpen || rewardDialogOpen || requestRewardDialogOpen ||
     editMemberDialogOpen || switchMemberDialogOpen || completionDialogOpen || sendPointsOpen;
   useEffect(() => {
+    const root = document.getElementById('root');
+    if (!root) return;
     if (anyDialogOpen) {
-      savedRootScrollRef.current = document.getElementById('root')?.scrollTop ?? 0;
+      savedRootScrollRef.current = root.scrollTop;
+      root.style.overflowY = 'hidden';
     } else {
-      requestAnimationFrame(() => {
-        document.getElementById('root')?.scrollTo({ top: savedRootScrollRef.current, behavior: 'instant' });
-      });
+      root.style.overflowY = 'auto';
+      // Double rAF ensures iOS has settled after keyboard dismissal
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        root.scrollTo({ top: savedRootScrollRef.current, behavior: 'instant' });
+      }));
     }
   }, [anyDialogOpen]);
   const [selectedPointsRecipients, setSelectedPointsRecipients] = useState<string[]>([]);
