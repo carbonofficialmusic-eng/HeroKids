@@ -8,7 +8,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { getBackgroundUrl } from "@/lib/skins";
-import { cameraRecoveryUntil } from "@/lib/cameraUtils";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
@@ -144,15 +143,16 @@ function Router() {
   useEffect(() => {
     let rafId: number;
     const enforceZeroWindowScroll = () => {
-      // Skip enforcement while camera is recovering — WKWebView temporarily
-      // sets a non-zero contentInset.top after camera dismiss, making
-      // window.scrollY appear non-zero. Calling window.scrollTo(0,0) in that
-      // state can reroute to #root.scrollTop=0 on some iOS versions, making
-      // the page non-scrollable. We pause for 1 second to let WKWebView
-      // resolve the inset on its own.
-      if (Date.now() >= cameraRecoveryUntil) {
-        if (window.scrollX !== 0 || window.scrollY !== 0) {
-          window.scrollTo(0, 0);
+      if (window.scrollX !== 0 || window.scrollY !== 0) {
+        // On some WKWebView versions, window.scrollTo(0,0) is routed through
+        // to #root.scrollTop, clobbering the user's actual scroll position.
+        // Guard against this by saving and immediately restoring #root.scrollTop
+        // so the call only fixes the window-level offset.
+        const root = document.getElementById('root');
+        const savedTop = root ? root.scrollTop : 0;
+        window.scrollTo(0, 0);
+        if (root && root.scrollTop !== savedTop) {
+          root.scrollTop = savedTop;
         }
       }
       rafId = requestAnimationFrame(enforceZeroWindowScroll);
@@ -160,10 +160,12 @@ function Router() {
     rafId = requestAnimationFrame(enforceZeroWindowScroll);
 
     // Also snap on visibility-restore (camera dismiss, app-switch)
-    // Skip during camera recovery for the same reason as the rAF loop above.
     const onVisible = () => {
-      if (Date.now() >= cameraRecoveryUntil) {
-        window.scrollTo(0, 0);
+      const root = document.getElementById('root');
+      const savedTop = root ? root.scrollTop : 0;
+      window.scrollTo(0, 0);
+      if (root && root.scrollTop !== savedTop) {
+        root.scrollTop = savedTop;
       }
     };
     document.addEventListener('visibilitychange', onVisible);
