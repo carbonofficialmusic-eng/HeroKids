@@ -453,7 +453,7 @@ export default function RewardsBoard() {
   }
 
   return (
-    <div className="min-h-screen p-4 sm:p-6">
+    <div className="min-h-screen p-4 sm:p-6" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
       <div className="container mx-auto max-w-4xl space-y-6">
         {/* Header */}
         <div className="space-y-4">

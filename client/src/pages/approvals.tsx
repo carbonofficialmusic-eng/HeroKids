@@ -204,7 +204,7 @@ export default function Approvals() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen p-6">
+      <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
         <div className="max-w-5xl mx-auto">
           <Link href="/dashboard">
             <Button 
@@ -230,7 +230,7 @@ export default function Approvals() {
   const completions = Array.isArray(pendingCompletions) ? pendingCompletions : [];
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
       <div className="max-w-5xl mx-auto">
         <Link href="/dashboard">
           <Button 

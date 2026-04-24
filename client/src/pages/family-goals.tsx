@@ -197,7 +197,7 @@ export default function FamilyGoals() {
   const completedGoals = goals.filter((goal) => !goal.isActive && goal.completedAt);
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="mb-8">
           <Link href="/dashboard">
