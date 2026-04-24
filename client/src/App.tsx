@@ -130,6 +130,11 @@ function Router() {
   const [location] = useLocation();
   const dashboardKey = `dashboard-${location}`;
 
+  // Scroll #root (our scroll container) back to top on every navigation
+  useEffect(() => {
+    document.getElementById('root')?.scrollTo({ top: 0, behavior: 'instant' });
+  }, [location]);
+
 
   // Show nothing while loading to prevent 404 flash
   if (isLoading) {
