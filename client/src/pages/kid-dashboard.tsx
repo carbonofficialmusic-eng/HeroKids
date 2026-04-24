@@ -2341,6 +2341,7 @@ export default function KidDashboard() {
       {/* Simplified Navigation - Fixed Bottom Bar */}
       <motion.div
         className="fixed bottom-0 left-0 right-0 z-50 p-2"
+        style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5, type: "spring" }}
