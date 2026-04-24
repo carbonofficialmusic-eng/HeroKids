@@ -43,6 +43,7 @@ export function TaskCompletionDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isCapturingRef = useRef(false);
 
   const platform = Capacitor.getPlatform();
   const isNativeMobile = platform === "ios" || platform === "android";
@@ -54,6 +55,7 @@ export function TaskCompletionDialog({
       setPreviewUrl(null);
       setIsUploading(false);
       setCameraError(null);
+      isCapturingRef.current = false;
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -61,6 +63,8 @@ export function TaskCompletionDialog({
   }, [open]);
 
   const handleNativePhotoCapture = async () => {
+    if (isCapturingRef.current) return;
+    isCapturingRef.current = true;
     setCameraError(null);
     try {
       const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
@@ -84,6 +88,8 @@ export function TaskCompletionDialog({
       } else {
         setCameraError(t("tasks.cameraError", "Kamera konnte nicht geöffnet werden. Bitte erneut versuchen."));
       }
+    } finally {
+      isCapturingRef.current = false;
     }
   };
 

@@ -37,6 +37,7 @@ export function AvatarSelector({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastProcessedFileRef = useRef<string | null>(null);
+  const isCapturingRef = useRef(false);
 
   const platform = Capacitor.getPlatform();
   const isNativeMobile = platform === "ios" || platform === "android";
@@ -66,6 +67,8 @@ export function AvatarSelector({
   };
 
   const handleNativePhotoCapture = async () => {
+    if (isCapturingRef.current) return;
+    isCapturingRef.current = true;
     setCameraError(null);
     try {
       const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
@@ -92,6 +95,8 @@ export function AvatarSelector({
       } else {
         setCameraError(t("tasks.cameraError", "Kamera konnte nicht geöffnet werden. Bitte erneut versuchen."));
       }
+    } finally {
+      isCapturingRef.current = false;
     }
   };
 
