@@ -1256,7 +1256,7 @@ export default function KidDashboard() {
       setMemberToEdit(null);
       if (isCameraUsed()) {
         clearCameraUsed();
-        setTimeout(() => { window.location.href = window.location.pathname; }, 1500);
+        setTimeout(() => { window.location.href = window.location.pathname; }, 500);
       }
       toast({
         title: t("toast.profileUpdated"),

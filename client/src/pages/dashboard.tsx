@@ -428,7 +428,7 @@ export default function Dashboard() {
       // (Same mechanism as the member-switch which uses window.location.href.)
       if (isCameraUsed()) {
         clearCameraUsed();
-        setTimeout(() => { window.location.href = window.location.pathname; }, 1500);
+        setTimeout(() => { window.location.href = window.location.pathname; }, 500);
       }
       toast({
         title: t("toast.profileUpdated"),
