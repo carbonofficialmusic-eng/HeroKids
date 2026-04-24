@@ -930,13 +930,10 @@ export default function KidDashboard() {
       return () => el.removeEventListener('scroll', onScroll);
     } else {
       el.style.overflowY = 'auto';
-      // "Tickle" the scroll position to force WKWebView native layer re-sync
       const target = savedScrollRef.current;
-      el.scrollTop = target === 0 ? 1 : target - 1;
       el.scrollTop = target;
       const timer = setTimeout(() => {
         window.scrollTo(0, 0);
-        el.scrollTop = target === 0 ? 1 : target - 1;
         el.scrollTop = target;
       }, 350);
       return () => clearTimeout(timer);
