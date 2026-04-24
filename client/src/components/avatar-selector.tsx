@@ -79,8 +79,10 @@ export function AvatarSelector({
         source: CameraSource.Prompt,
       });
       if (photo.dataUrl) {
+        const dedupeKey = photo.dataUrl.slice(0, 200);
+        if (lastProcessedFileRef.current === dedupeKey) return;
+        lastProcessedFileRef.current = dedupeKey;
         setPreviewUrl(photo.dataUrl);
-        lastProcessedFileRef.current = null;
         if (onCustomUpload) {
           const file = await dataUrlToFile(photo.dataUrl, "avatar-photo.jpg");
           onCustomUpload(file);

@@ -65,6 +65,7 @@ export function EditMemberDialog({
   const [uploadedAvatarFile, setUploadedAvatarFile] = useState<File | null>(null);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
   const [useCustomAvatarToggle, setUseCustomAvatarToggle] = useState(member?.useCustomAvatar || false);
+  const [isLocalSubmitting, setIsLocalSubmitting] = useState(false);
 
   const form = useForm<EditMemberForm>({
     resolver: zodResolver(editMemberSchema),
@@ -108,87 +109,92 @@ export function EditMemberDialog({
   };
 
   const handleSubmit = async (data: EditMemberForm) => {
-    if (!member) return;
+    if (!member || isLocalSubmitting) return;
+    setIsLocalSubmitting(true);
 
-    let finalAvatarUrl = selectedAvatar;
+    try {
+      let finalAvatarUrl = selectedAvatar;
 
-    // If user selected an avatar from history, use that URL directly
-    if (uploadedAvatarUrl) {
-      finalAvatarUrl = uploadedAvatarUrl;
-    }
-    // If user uploaded a new custom avatar file, upload it first using 3-step Object Storage flow
-    else if (uploadedAvatarFile && uploadedAvatarFile.size > 0) {
-      try {
-        // Step 1: Get presigned upload URL
-        const urlResponse = await fetch('/api/upload-avatar-url', {
-          method: 'POST',
-        });
-
-        if (!urlResponse.ok) {
-          throw new Error('Failed to get upload URL');
-        }
-
-        const { uploadURL } = await urlResponse.json();
-
-        // Step 2: Upload file directly to Object Storage using presigned URL
-        const uploadResponse = await fetch(uploadURL, {
-          method: 'PUT',
-          body: uploadedAvatarFile,
-          headers: {
-            'Content-Type': uploadedAvatarFile.type,
-          },
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error('Failed to upload avatar to storage');
-        }
-
-        // Step 3: Set ACL policy and get final object path
-        const aclResponse = await fetch('/api/avatar', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ avatarUrl: uploadURL }),
-        });
-
-        if (!aclResponse.ok) {
-          throw new Error('Failed to finalize avatar upload');
-        }
-
-        const { avatarUrl } = await aclResponse.json();
-        finalAvatarUrl = avatarUrl;
-      } catch (error) {
-        console.error('Error uploading avatar:', error);
-        // Continue with default avatar on error
+      // If user selected an avatar from history, use that URL directly
+      if (uploadedAvatarUrl) {
+        finalAvatarUrl = uploadedAvatarUrl;
       }
-    }
+      // If user uploaded a new custom avatar file, upload it first using 3-step Object Storage flow
+      else if (uploadedAvatarFile && uploadedAvatarFile.size > 0) {
+        try {
+          // Step 1: Get presigned upload URL
+          const urlResponse = await fetch('/api/upload-avatar-url', {
+            method: 'POST',
+          });
 
-    // Determine useCustomAvatar flag:
-    // - If new avatar uploaded or history selected → true
-    // - If toggle was changed by user → use toggle value
-    // - If reverted to skin/default avatar → false
-    let useCustomAvatarFlag: boolean;
-    if (uploadedAvatarUrl || (uploadedAvatarFile && uploadedAvatarFile.size > 0)) {
-      // New upload or history selection → always use custom avatar
-      useCustomAvatarFlag = true;
-    } else if (member.activeSkinId) {
-      // If skin is active, respect the toggle value
-      useCustomAvatarFlag = useCustomAvatarToggle;
-    } else if (finalAvatarUrl !== member.avatarUrl) {
-      // Avatar changed to something else (likely skin asset)
-      useCustomAvatarFlag = false;
-    } else {
-      // No avatar change, preserve existing flag
-      useCustomAvatarFlag = member.useCustomAvatar;
-    }
+          if (!urlResponse.ok) {
+            throw new Error('Failed to get upload URL');
+          }
 
-    onSubmit(member.id, {
-      ...data,
-      avatarUrl: finalAvatarUrl,
-      color: selectedColor,
-      useCustomAvatar: useCustomAvatarFlag,
-    });
+          const { uploadURL } = await urlResponse.json();
+
+          // Step 2: Upload file directly to Object Storage using presigned URL
+          const uploadResponse = await fetch(uploadURL, {
+            method: 'PUT',
+            body: uploadedAvatarFile,
+            headers: {
+              'Content-Type': uploadedAvatarFile.type,
+            },
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to upload avatar to storage');
+          }
+
+          // Step 3: Set ACL policy and get final object path
+          const aclResponse = await fetch('/api/avatar', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ avatarUrl: uploadURL }),
+          });
+
+          if (!aclResponse.ok) {
+            throw new Error('Failed to finalize avatar upload');
+          }
+
+          const { avatarUrl } = await aclResponse.json();
+          finalAvatarUrl = avatarUrl;
+        } catch (error) {
+          console.error('Error uploading avatar:', error);
+          // Continue with default avatar on error
+        }
+      }
+
+      // Determine useCustomAvatar flag:
+      // - If new avatar uploaded or history selected → true
+      // - If toggle was changed by user → use toggle value
+      // - If reverted to skin/default avatar → false
+      let useCustomAvatarFlag: boolean;
+      if (uploadedAvatarUrl || (uploadedAvatarFile && uploadedAvatarFile.size > 0)) {
+        // New upload or history selection → always use custom avatar
+        useCustomAvatarFlag = true;
+      } else if (member.activeSkinId) {
+        // If skin is active, respect the toggle value
+        useCustomAvatarFlag = useCustomAvatarToggle;
+      } else if (finalAvatarUrl !== member.avatarUrl) {
+        // Avatar changed to something else (likely skin asset)
+        useCustomAvatarFlag = false;
+      } else {
+        // No avatar change, preserve existing flag
+        useCustomAvatarFlag = member.useCustomAvatar;
+      }
+
+      onSubmit(member.id, {
+        ...data,
+        avatarUrl: finalAvatarUrl,
+        color: selectedColor,
+        useCustomAvatar: useCustomAvatarFlag,
+      });
+    } finally {
+      setIsLocalSubmitting(false);
+    }
   };
 
   if (!member) return null;
@@ -349,17 +355,17 @@ export function EditMemberDialog({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isLocalSubmitting}
                 data-testid="button-cancel-edit"
               >
                 {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isLocalSubmitting}
                 data-testid="button-submit-edit"
               >
-                {isSubmitting ? t('rewards.saving') : t('rewards.saveChanges')}
+                {(isSubmitting || isLocalSubmitting) ? t('rewards.saving') : t('rewards.saveChanges')}
               </Button>
             </DialogFooter>
           </form>
