@@ -120,21 +120,6 @@ export default function Dashboard() {
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
-  const savedRootScrollRef = useRef(0);
-
-  const openDialogWithScrollSave = (setter: (v: boolean) => void) => {
-    savedRootScrollRef.current = document.getElementById('root')?.scrollTop ?? 0;
-    setter(true);
-  };
-
-  useEffect(() => {
-    if (!requestRewardDialogOpen) {
-      requestAnimationFrame(() => {
-        document.getElementById('root')?.scrollTo({ top: savedRootScrollRef.current, behavior: 'instant' });
-      });
-    }
-  }, [requestRewardDialogOpen]);
-
   const [requestToEdit, setRequestToEdit] = useState<any>(null);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
@@ -142,6 +127,20 @@ export default function Dashboard() {
   const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
   const [sendPointsOpen, setSendPointsOpen] = useState(false);
+
+  // Restore #root scroll after ANY dialog closes (Radix react-remove-scroll resets it)
+  const savedRootScrollRef = useRef(0);
+  const anyDialogOpen = taskDialogOpen || rewardDialogOpen || requestRewardDialogOpen ||
+    editMemberDialogOpen || switchMemberDialogOpen || completionDialogOpen || sendPointsOpen;
+  useEffect(() => {
+    if (anyDialogOpen) {
+      savedRootScrollRef.current = document.getElementById('root')?.scrollTop ?? 0;
+    } else {
+      requestAnimationFrame(() => {
+        document.getElementById('root')?.scrollTo({ top: savedRootScrollRef.current, behavior: 'instant' });
+      });
+    }
+  }, [anyDialogOpen]);
   const [selectedPointsRecipients, setSelectedPointsRecipients] = useState<string[]>([]);
   const [pointsAmount, setPointsAmount] = useState("");
   const [celebration, setCelebration] = useState<{
@@ -1567,7 +1566,7 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-3 mt-6">
                 <Button
                   variant="card"
-                  onClick={() => openDialogWithScrollSave(setRequestRewardDialogOpen)}
+                  onClick={() => setRequestRewardDialogOpen(true)}
                   data-testid="button-request-reward"
                   className="w-full h-14 whitespace-normal leading-tight"
                 >
@@ -1661,7 +1660,7 @@ export default function Dashboard() {
                   </p>
                   <Button
                     variant="outline"
-                    onClick={() => openDialogWithScrollSave(setRequestRewardDialogOpen)}
+                    onClick={() => setRequestRewardDialogOpen(true)}
                     data-testid="button-request-reward-empty"
                   >
                     <Lightbulb className="h-4 w-4 mr-2" />
