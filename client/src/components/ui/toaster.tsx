@@ -41,7 +41,7 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport />
+      <ToastViewport style={{ paddingTop: "calc(1rem + env(safe-area-inset-top))" }} />
     </ToastProvider>
   )
 }
