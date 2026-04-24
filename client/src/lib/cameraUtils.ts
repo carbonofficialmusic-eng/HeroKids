@@ -20,25 +20,45 @@ export function isPhotoPickerCancelError(error: unknown): boolean {
 /**
  * Called immediately after Camera.getPhoto() resolves on iOS.
  *
- * After the native camera picker dismisses, WKWebView may have a non-zero
- * window.scrollY due to UIScrollView contentInset adjustments made by iOS
- * during the camera overlay. A brief scroll pulse (to 1 then back to 0)
- * nudges WKWebView to flush the contentInset so the visual rendering
- * re-aligns with the DOM layout.
+ * After the native camera picker dismisses, WKWebView's GPU compositing layer
+ * can become desynced from the DOM layout — the visual content appears shifted
+ * downward while click areas remain at the correct positions.
  *
- * #root.scrollTop is saved before the pulse and restored immediately if
- * window.scrollTo had a side-effect on it (known WKWebView behaviour on
- * some iOS versions).
+ * Two sync mechanisms are used:
+ *
+ * 1. CSS-scroll nudge (root.scrollTop ± 1):
+ *    Changing the CSS scroll container's scrollTop forces WKWebView to submit
+ *    new GPU tiles at the correct position. We nudge by +1px then restore in
+ *    the next animation frame — the user sees at most one 1px scroll frame.
+ *
+ * 2. Window scroll pulse (scrollTo 0,1 → 0,0):
+ *    Flushes any UIScrollView contentInset.top that iOS may have set during
+ *    the camera overlay, which can leave window.scrollY reading as non-zero
+ *    even when the visual content looks correct.
+ *
+ * Both run at t=350ms and t=700ms after camera resolve to cover the full
+ * dismiss-animation window (~300ms on iOS).
  */
 export function syncScrollAfterCamera(): void {
-  const pulse = () => {
+  const fix = () => {
     const root = document.getElementById('root');
     if (!root) return;
-    const savedTop = root.scrollTop;
+    const saved = root.scrollTop;
+
+    // --- 1. window scroll pulse ---
     window.scrollTo(0, 1);
     window.scrollTo(0, 0);
-    if (root.scrollTop !== savedTop) root.scrollTop = savedTop;
+    if (root.scrollTop !== saved) root.scrollTop = saved;
+
+    // --- 2. CSS-scroll nudge across two frames ---
+    const t = root.scrollTop;
+    root.scrollTop = t + 1;
+    requestAnimationFrame(() => {
+      root.scrollTop = t;
+    });
   };
-  pulse();
-  setTimeout(pulse, 300);
+
+  // Delay until after the native dismiss animation (~300ms).
+  setTimeout(fix, 350);
+  setTimeout(fix, 700);
 }
