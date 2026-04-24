@@ -1,4 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { kickScrollReset } from "@/lib/cameraUtils";
 import { motion } from "framer-motion";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -142,6 +143,7 @@ export default function Dashboard() {
       root.style.overflowY = 'auto';
       const target = savedRootScrollRef.current;
       root.scrollTop = target;
+      kickScrollReset(200);
       const t1 = setTimeout(() => { root.scrollTop = target; }, 350);
       const t2 = setTimeout(() => { root.scrollTop = target; }, 700);
       return () => { clearTimeout(t1); clearTimeout(t2); };

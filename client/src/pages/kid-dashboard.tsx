@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { kickScrollReset } from "@/lib/cameraUtils";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -928,6 +929,9 @@ export default function KidDashboard() {
       el.style.overflowY = 'auto';
       const target = savedScrollRef.current;
       el.scrollTop = target;
+      // After any dialog close (keyboard or picker), apply scroll kick so
+      // WKWebView re-syncs UIScrollView even when scrollY is falsely reported as 0.
+      kickScrollReset(200);
       const t1 = setTimeout(() => { el.scrollTop = target; }, 350);
       const t2 = setTimeout(() => { el.scrollTop = target; }, 700);
       return () => { clearTimeout(t1); clearTimeout(t2); };

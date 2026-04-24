@@ -13,7 +13,7 @@ import { Camera, Upload, X } from "lucide-react";
 import type { Task } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
-import { isPhotoPickerCancelError } from "@/lib/cameraUtils";
+import { isPhotoPickerCancelError, kickScrollReset } from "@/lib/cameraUtils";
 
 interface TaskCompletionDialogProps {
   open: boolean;
@@ -75,6 +75,7 @@ export function TaskCompletionDialog({
         source: CameraSource.Prompt,
       });
       if (photo.dataUrl) {
+        kickScrollReset();
         setPreviewUrl(photo.dataUrl);
         const file = await dataUrlToFile(photo.dataUrl, "proof-photo.jpg");
         setUploadedPhoto(file);
@@ -96,6 +97,7 @@ export function TaskCompletionDialog({
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      kickScrollReset();
       setUploadedPhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
