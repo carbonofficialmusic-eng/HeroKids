@@ -163,8 +163,6 @@ function Router() {
     const onVisible = () => {
       const root = document.getElementById('root');
       const savedTop = root ? root.scrollTop : 0;
-      // Scroll-pulse flushes WKWebView contentInset; save/restore protects #root position.
-      window.scrollTo(0, 1);
       window.scrollTo(0, 0);
       if (root && root.scrollTop !== savedTop) {
         root.scrollTop = savedTop;

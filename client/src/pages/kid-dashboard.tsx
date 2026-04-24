@@ -928,19 +928,9 @@ export default function KidDashboard() {
       el.style.overflowY = 'auto';
       const target = savedScrollRef.current;
       el.scrollTop = target;
-      // Second restore + GPU compositing re-sync after iOS camera/keyboard animation (~350ms).
+      // Second restore after iOS keyboard/camera animation completes (~350ms).
       const timer = setTimeout(() => {
         el.scrollTop = target;
-        el.style.setProperty('-webkit-transform', 'translateZ(0)');
-        el.style.setProperty('transform', 'translateZ(0)');
-        window.scrollTo(0, 1);
-        window.scrollTo(0, 0);
-        if (el.scrollTop !== target) el.scrollTop = target;
-        requestAnimationFrame(() => {
-          el.style.removeProperty('-webkit-transform');
-          el.style.removeProperty('transform');
-          if (el.scrollTop !== target) el.scrollTop = target;
-        });
       }, 350);
       return () => clearTimeout(timer);
     }

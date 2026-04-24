@@ -142,21 +142,9 @@ export default function Dashboard() {
       root.style.overflowY = 'auto';
       const target = savedRootScrollRef.current;
       root.scrollTop = target;
-      // Second restore + GPU compositing re-sync after iOS camera/keyboard animation (~350ms).
-      // The transform:translateZ(0) trick forces WKWebView to re-create the GPU layer at the
-      // correct position. The scroll-pulse flushes any contentInset.top iOS set during camera.
+      // Second restore after iOS keyboard/camera animation completes (~350ms).
       const timer = setTimeout(() => {
         root.scrollTop = target;
-        root.style.setProperty('-webkit-transform', 'translateZ(0)');
-        root.style.setProperty('transform', 'translateZ(0)');
-        window.scrollTo(0, 1);
-        window.scrollTo(0, 0);
-        if (root.scrollTop !== target) root.scrollTop = target;
-        requestAnimationFrame(() => {
-          root.style.removeProperty('-webkit-transform');
-          root.style.removeProperty('transform');
-          if (root.scrollTop !== target) root.scrollTop = target;
-        });
       }, 350);
       return () => clearTimeout(timer);
     }
