@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -913,6 +913,23 @@ export default function KidDashboard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const savedScrollRef = useRef(0);
+
+  // Save scroll before opening any dialog; restore after it closes
+  const openWithScrollSave = (setter: (v: boolean) => void) => {
+    savedScrollRef.current = scrollContainerRef.current?.scrollTop ?? 0;
+    setter(true);
+  };
+
+  useEffect(() => {
+    if (!requestRewardDialogOpen) {
+      requestAnimationFrame(() => {
+        scrollContainerRef.current?.scrollTo({ top: savedScrollRef.current, behavior: 'instant' });
+      });
+    }
+  }, [requestRewardDialogOpen]);
+
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("week");
   const [kidTaskFilter, setKidTaskFilter] = useState<"today" | "week" | "all">("all");
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
@@ -1598,7 +1615,7 @@ export default function KidDashboard() {
       </header>
 
       {/* Scrollable content area — isolated from #root so Radix dialogs don't reset scroll */}
-      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'none' }}>
+      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'none' }}>
       <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-6 pb-[calc(8rem+env(safe-area-inset-bottom))] overflow-hidden">
         {/* HeroKids Logo */}
         <div className="flex justify-center">
@@ -2355,7 +2372,7 @@ export default function KidDashboard() {
               <Button 
                 variant="ghost" 
                 size="lg" 
-                onClick={() => setRequestRewardDialogOpen(true)}
+                onClick={() => openWithScrollSave(setRequestRewardDialogOpen)}
                 data-testid="button-nav-request-reward" 
                 className="h-14 w-full px-3 sm:px-5 rounded-2xl"
               >
