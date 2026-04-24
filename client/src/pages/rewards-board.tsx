@@ -389,10 +389,14 @@ export default function RewardsBoard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
       setRequestToEdit(null);
-      toast({
-        title: t("rewards.updated"),
-        description: t("rewards.updatedDesc"),
-      });
+      if ((window as any).Capacitor?.isNativePlatform?.()) {
+        setTimeout(() => { window.location.href = window.location.pathname; }, 400);
+      } else {
+        toast({
+          title: t("rewards.updated"),
+          description: t("rewards.updatedDesc"),
+        });
+      }
     },
     onError: (error: any) => {
       toast({
