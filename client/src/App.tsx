@@ -135,17 +135,31 @@ function Router() {
     document.getElementById('root')?.scrollTo({ top: 0, behavior: 'instant' });
   }, [location]);
 
-  // iOS WKWebView fix: prevent window from ever having a non-zero scroll offset.
-  // When keyboard appears, WKWebView scrolls its UIScrollView (= window.scrollY).
-  // We reset it immediately on every scroll event.
+  // iOS WKWebView architectural fix:
+  // The WKWebView UIScrollView.contentOffset can be moved by ANY system event
+  // (keyboard, camera, app-switch, etc.) without firing a JS 'scroll' event.
+  // Solution: a rAF loop that runs every frame and enforces window.scroll = 0.
+  // This is separate from #root.scrollTop which is CSS-managed and unaffected.
   useEffect(() => {
-    const onWindowScroll = () => {
+    let rafId: number;
+    const enforceZeroWindowScroll = () => {
       if (window.scrollX !== 0 || window.scrollY !== 0) {
         window.scrollTo(0, 0);
       }
+      rafId = requestAnimationFrame(enforceZeroWindowScroll);
     };
-    window.addEventListener('scroll', onWindowScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onWindowScroll);
+    rafId = requestAnimationFrame(enforceZeroWindowScroll);
+
+    // Also snap on visibility-restore (camera dismiss, app-switch)
+    const onVisible = () => { window.scrollTo(0, 0); };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
   }, []);
 
 
