@@ -929,7 +929,6 @@ export default function KidDashboard() {
       const target = savedScrollRef.current;
       el.scrollTop = target;
       const timer = setTimeout(() => {
-        window.scrollTo(0, 0);
         el.scrollTop = target;
       }, 350);
       return () => clearTimeout(timer);

@@ -142,9 +142,10 @@ export default function Dashboard() {
       root.style.overflowY = 'auto';
       const target = savedRootScrollRef.current;
       root.scrollTop = target;
-      // Also restore after iOS keyboard/camera animation fully completes (~300ms)
+      // Second restore after iOS keyboard/camera animation completes (~300ms)
+      // NOTE: no window.scrollTo here — on WKWebView that call maps to
+      // root.scrollTop=0 and would override the restore we just did above.
       const timer = setTimeout(() => {
-        window.scrollTo(0, 0);
         root.scrollTop = target;
       }, 350);
       return () => clearTimeout(timer);
