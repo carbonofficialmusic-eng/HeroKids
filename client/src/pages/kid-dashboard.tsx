@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -918,17 +918,19 @@ export default function KidDashboard() {
 
   // Freeze internal scroll container while any dialog is open, then restore (iOS keyboard shifts viewport)
   const anyKidDialogOpen = taskDialogOpen || requestRewardDialogOpen || editMemberDialogOpen || switchMemberDialogOpen;
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
     if (anyKidDialogOpen) {
       savedScrollRef.current = el.scrollTop;
       el.style.overflowY = 'hidden';
     } else {
+      // Reset WKWebView native scroll offset (iOS keyboard scrolls at native layer independently of CSS)
+      window.scrollTo(0, 0);
       el.style.overflowY = 'auto';
-      requestAnimationFrame(() => requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         el.scrollTo({ top: savedScrollRef.current, behavior: 'instant' });
-      }));
+      });
     }
   }, [anyKidDialogOpen]);
 

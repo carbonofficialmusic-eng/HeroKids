@@ -135,6 +135,26 @@ function Router() {
     document.getElementById('root')?.scrollTo({ top: 0, behavior: 'instant' });
   }, [location]);
 
+  // iOS WKWebView fix: when keyboard dismisses the visual viewport grows; reset native scroll offset
+  useEffect(() => {
+    let lastHeight = window.visualViewport?.height ?? window.innerHeight;
+    const onVVResize = () => {
+      const h = window.visualViewport?.height ?? window.innerHeight;
+      if (h > lastHeight) {
+        // Viewport just grew → keyboard dismissed → reset WKWebView's native UIScrollView offset
+        window.scrollTo(0, 0);
+      }
+      lastHeight = h;
+    };
+    const vv = window.visualViewport;
+    if (vv) vv.addEventListener('resize', onVVResize);
+    else window.addEventListener('resize', onVVResize);
+    return () => {
+      if (vv) vv.removeEventListener('resize', onVVResize);
+      else window.removeEventListener('resize', onVVResize);
+    };
+  }, []);
+
 
   // Show nothing while loading to prevent 404 flash
   if (isLoading) {

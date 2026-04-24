@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -132,18 +132,19 @@ export default function Dashboard() {
   const savedRootScrollRef = useRef(0);
   const anyDialogOpen = taskDialogOpen || rewardDialogOpen || requestRewardDialogOpen ||
     editMemberDialogOpen || switchMemberDialogOpen || completionDialogOpen || sendPointsOpen;
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.getElementById('root');
     if (!root) return;
     if (anyDialogOpen) {
       savedRootScrollRef.current = root.scrollTop;
       root.style.overflowY = 'hidden';
     } else {
+      // Reset WKWebView native scroll offset first (iOS keyboard moves it independently of CSS)
+      window.scrollTo(0, 0);
       root.style.overflowY = 'auto';
-      // Double rAF ensures iOS has settled after keyboard dismissal
-      requestAnimationFrame(() => requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         root.scrollTo({ top: savedRootScrollRef.current, behavior: 'instant' });
-      }));
+      });
     }
   }, [anyDialogOpen]);
   const [selectedPointsRecipients, setSelectedPointsRecipients] = useState<string[]>([]);
