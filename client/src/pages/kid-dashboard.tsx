@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { cameraWasUsed, clearCameraUsed } from "@/lib/cameraUtils";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -928,11 +929,16 @@ export default function KidDashboard() {
       el.style.overflowY = 'auto';
       const target = savedScrollRef.current;
       el.scrollTop = target;
-      // Second restore after iOS keyboard/camera animation completes (~350ms).
-      const timer = setTimeout(() => {
-        el.scrollTop = target;
-      }, 350);
-      return () => clearTimeout(timer);
+      const scrollTimer = setTimeout(() => { el.scrollTop = target; }, 350);
+      const usedCamera = cameraWasUsed;
+      clearCameraUsed();
+      const cameraTimer = usedCamera
+        ? setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000)
+        : undefined;
+      return () => {
+        clearTimeout(scrollTimer);
+        if (cameraTimer !== undefined) clearTimeout(cameraTimer);
+      };
     }
   }, [anyKidDialogOpen]);
 

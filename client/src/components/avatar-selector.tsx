@@ -5,7 +5,7 @@ import { Check, Upload, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
-import { isPhotoPickerCancelError, syncScrollAfterCamera } from "@/lib/cameraUtils";
+import { isPhotoPickerCancelError, syncScrollAfterCamera, markCameraUsed } from "@/lib/cameraUtils";
 
 interface AvatarSelectorProps {
   selectedAvatar: string;
@@ -83,6 +83,7 @@ export function AvatarSelector({
         if (lastProcessedFileRef.current === dedupeKey) return;
         lastProcessedFileRef.current = dedupeKey;
         setPreviewUrl(photo.dataUrl);
+        markCameraUsed();
         syncScrollAfterCamera();
         if (onCustomUpload) {
           const file = await dataUrlToFile(photo.dataUrl, "avatar-photo.jpg");
