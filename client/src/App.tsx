@@ -135,24 +135,17 @@ function Router() {
     document.getElementById('root')?.scrollTo({ top: 0, behavior: 'instant' });
   }, [location]);
 
-  // iOS WKWebView fix: when keyboard dismisses the visual viewport grows; reset native scroll offset
+  // iOS WKWebView fix: prevent window from ever having a non-zero scroll offset.
+  // When keyboard appears, WKWebView scrolls its UIScrollView (= window.scrollY).
+  // We reset it immediately on every scroll event.
   useEffect(() => {
-    let lastHeight = window.visualViewport?.height ?? window.innerHeight;
-    const onVVResize = () => {
-      const h = window.visualViewport?.height ?? window.innerHeight;
-      if (h > lastHeight) {
-        // Viewport just grew → keyboard dismissed → reset WKWebView's native UIScrollView offset
+    const onWindowScroll = () => {
+      if (window.scrollX !== 0 || window.scrollY !== 0) {
         window.scrollTo(0, 0);
       }
-      lastHeight = h;
     };
-    const vv = window.visualViewport;
-    if (vv) vv.addEventListener('resize', onVVResize);
-    else window.addEventListener('resize', onVVResize);
-    return () => {
-      if (vv) vv.removeEventListener('resize', onVVResize);
-      else window.removeEventListener('resize', onVVResize);
-    };
+    window.addEventListener('scroll', onWindowScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onWindowScroll);
   }, []);
 
 

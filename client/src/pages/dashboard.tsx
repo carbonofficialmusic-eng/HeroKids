@@ -138,13 +138,19 @@ export default function Dashboard() {
     if (anyDialogOpen) {
       savedRootScrollRef.current = root.scrollTop;
       root.style.overflowY = 'hidden';
+      // Belt-and-suspenders: snap back if iOS scrolls #root despite overflow:hidden
+      const onScroll = () => { root.scrollTop = savedRootScrollRef.current; };
+      root.addEventListener('scroll', onScroll);
+      return () => root.removeEventListener('scroll', onScroll);
     } else {
-      // Reset WKWebView native scroll offset first (iOS keyboard moves it independently of CSS)
-      window.scrollTo(0, 0);
       root.style.overflowY = 'auto';
-      requestAnimationFrame(() => {
+      root.scrollTo({ top: savedRootScrollRef.current, behavior: 'instant' });
+      // Also restore after iOS keyboard animation fully completes (~300ms)
+      const timer = setTimeout(() => {
+        window.scrollTo(0, 0);
         root.scrollTo({ top: savedRootScrollRef.current, behavior: 'instant' });
-      });
+      }, 350);
+      return () => clearTimeout(timer);
     }
   }, [anyDialogOpen]);
   const [selectedPointsRecipients, setSelectedPointsRecipients] = useState<string[]>([]);

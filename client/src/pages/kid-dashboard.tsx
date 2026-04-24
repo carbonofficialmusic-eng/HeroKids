@@ -916,7 +916,7 @@ export default function KidDashboard() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const savedScrollRef = useRef(0);
 
-  // Freeze internal scroll container while any dialog is open, then restore (iOS keyboard shifts viewport)
+  // Lock scroll container while any dialog is open; restore after close (iOS keyboard shifts viewport)
   const anyKidDialogOpen = taskDialogOpen || requestRewardDialogOpen || editMemberDialogOpen || switchMemberDialogOpen;
   useLayoutEffect(() => {
     const el = scrollContainerRef.current;
@@ -924,13 +924,19 @@ export default function KidDashboard() {
     if (anyKidDialogOpen) {
       savedScrollRef.current = el.scrollTop;
       el.style.overflowY = 'hidden';
+      // Belt-and-suspenders: if iOS scrolls the container anyway, snap it back
+      const onScroll = () => { el.scrollTop = savedScrollRef.current; };
+      el.addEventListener('scroll', onScroll);
+      return () => el.removeEventListener('scroll', onScroll);
     } else {
-      // Reset WKWebView native scroll offset (iOS keyboard scrolls at native layer independently of CSS)
-      window.scrollTo(0, 0);
       el.style.overflowY = 'auto';
-      requestAnimationFrame(() => {
+      // Restore immediately and again after iOS keyboard animation (~300ms)
+      el.scrollTo({ top: savedScrollRef.current, behavior: 'instant' });
+      const timer = setTimeout(() => {
+        window.scrollTo(0, 0);
         el.scrollTo({ top: savedScrollRef.current, behavior: 'instant' });
-      });
+      }, 350);
+      return () => clearTimeout(timer);
     }
   }, [anyKidDialogOpen]);
 
