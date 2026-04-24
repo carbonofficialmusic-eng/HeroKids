@@ -5,7 +5,7 @@ import { Check, Upload, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
-import { isPhotoPickerCancelError, syncScrollAfterCamera, markCameraUsed } from "@/lib/cameraUtils";
+import { isPhotoPickerCancelError } from "@/lib/cameraUtils";
 
 interface AvatarSelectorProps {
   selectedAvatar: string;
@@ -54,13 +54,6 @@ export function AvatarSelector({
         return;
       }
       lastProcessedFileRef.current = fileKey;
-      // On iOS (native or browser), the system photo picker causes the same
-      // WKWebView GPU displacement as the Capacitor camera — mark it so the
-      // mutation's onSuccess can trigger a page reload to fix the visual shift.
-      const cap = (window as any).Capacitor;
-      const isIOS = (cap?.isNativePlatform?.() === true) ||
-                    /iPad|iPhone|iPod/.test(navigator.userAgent);
-      if (isIOS) markCameraUsed();
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
@@ -89,8 +82,6 @@ export function AvatarSelector({
         if (lastProcessedFileRef.current === dedupeKey) return;
         lastProcessedFileRef.current = dedupeKey;
         setPreviewUrl(photo.dataUrl);
-        markCameraUsed();
-        syncScrollAfterCamera();
         if (onCustomUpload) {
           const file = await dataUrlToFile(photo.dataUrl, "avatar-photo.jpg");
           onCustomUpload(file);

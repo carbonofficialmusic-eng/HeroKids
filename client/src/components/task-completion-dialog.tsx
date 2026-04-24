@@ -13,7 +13,7 @@ import { Camera, Upload, X } from "lucide-react";
 import type { Task } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
-import { isPhotoPickerCancelError, syncScrollAfterCamera, markCameraUsed } from "@/lib/cameraUtils";
+import { isPhotoPickerCancelError } from "@/lib/cameraUtils";
 
 interface TaskCompletionDialogProps {
   open: boolean;
@@ -76,8 +76,6 @@ export function TaskCompletionDialog({
       });
       if (photo.dataUrl) {
         setPreviewUrl(photo.dataUrl);
-        markCameraUsed();
-        syncScrollAfterCamera();
         const file = await dataUrlToFile(photo.dataUrl, "proof-photo.jpg");
         setUploadedPhoto(file);
       }
@@ -98,12 +96,6 @@ export function TaskCompletionDialog({
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // On iOS the system photo picker causes WKWebView GPU displacement —
-      // mark it so the mutation's onSuccess triggers a reload to fix the shift.
-      const cap = (window as any).Capacitor;
-      const isIOS = (cap?.isNativePlatform?.() === true) ||
-                    /iPad|iPhone|iPod/.test(navigator.userAgent);
-      if (isIOS) markCameraUsed();
       setUploadedPhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {

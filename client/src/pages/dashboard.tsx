@@ -1,7 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
-import { isCameraUsed, clearCameraUsed } from "@/lib/cameraUtils";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -424,13 +423,6 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
-      // If the camera was used to capture a new profile photo, do a full page
-      // reload after 1.5 s to fix WKWebView GPU compositing desync on iOS.
-      // (Same mechanism as the member-switch which uses window.location.href.)
-      if (isCameraUsed()) {
-        clearCameraUsed();
-        setTimeout(() => { window.location.href = window.location.pathname; }, 500);
-      }
       toast({
         title: t("toast.profileUpdated"),
         description: t("toast.profileUpdatedDesc"),
@@ -535,11 +527,6 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"], refetchType: 'active' });
       setCompletionDialogOpen(false);
       setTaskToComplete(null);
-      // If a photo proof was taken with the native camera, fix WKWebView GPU desync.
-      if (isCameraUsed()) {
-        clearCameraUsed();
-        setTimeout(() => { window.location.href = window.location.pathname; }, 2500);
-      }
       
       // Show celebration for auto-approved tasks
       if (data.autoApproved) {
