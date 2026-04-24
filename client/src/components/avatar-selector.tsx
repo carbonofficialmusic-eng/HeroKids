@@ -5,7 +5,7 @@ import { Check, Upload, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
-import { isPhotoPickerCancelError, kickScrollReset } from "@/lib/cameraUtils";
+import { isPhotoPickerCancelError, kickScrollReset, markPhotoUsed } from "@/lib/cameraUtils";
 
 interface AvatarSelectorProps {
   selectedAvatar: string;
@@ -54,6 +54,7 @@ export function AvatarSelector({
         return;
       }
       lastProcessedFileRef.current = fileKey;
+      markPhotoUsed();
       kickScrollReset();
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -82,6 +83,7 @@ export function AvatarSelector({
         const dedupeKey = photo.dataUrl.slice(0, 200);
         if (lastProcessedFileRef.current === dedupeKey) return;
         lastProcessedFileRef.current = dedupeKey;
+        markPhotoUsed();
         kickScrollReset();
         setPreviewUrl(photo.dataUrl);
         if (onCustomUpload) {

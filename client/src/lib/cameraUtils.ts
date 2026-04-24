@@ -13,11 +13,24 @@ export function isPhotoPickerCancelError(error: unknown): boolean {
 }
 
 /**
+ * Window-backed flag set whenever the user selects a photo (native camera or
+ * file input). The dashboard mutations read this in onSuccess to decide
+ * whether a full-page navigation is needed to fix WKWebView GPU displacement.
+ * Using a window property avoids ES-module live-binding caveats.
+ */
+export function markPhotoUsed(): void {
+  (window as any).__herokidsPhotoUsed = true;
+}
+export function clearPhotoUsed(): void {
+  (window as any).__herokidsPhotoUsed = false;
+}
+export function isPhotoUsed(): boolean {
+  return !!(window as any).__herokidsPhotoUsed;
+}
+
+/**
  * Forces WKWebView to re-sync its UIScrollView after a native photo picker
- * (camera or file input) closes. The picker dismissal does not fire a
- * visualViewport resize event, so the global rAF loop cannot detect it.
- * Applying a 1→0 scroll "kick" after the picker closes forces the UIScrollView
- * to process the reset even when WKWebView falsely reports scrollY = 0.
+ * closes (supplementary best-effort attempt alongside the page navigation).
  */
 export function kickScrollReset(delayMs = 150): void {
   const apply = () => {

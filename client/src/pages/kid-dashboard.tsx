@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { kickScrollReset } from "@/lib/cameraUtils";
+import { kickScrollReset, isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -1258,6 +1258,10 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
+      if (isPhotoUsed()) {
+        clearPhotoUsed();
+        setTimeout(() => { window.location.href = window.location.pathname; }, 500);
+      }
       toast({
         title: t("toast.profileUpdated"),
         description: t("toast.profileUpdatedDesc"),
@@ -1325,6 +1329,10 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setTaskDialogOpen(false);
       setSelectedTask(null);
+      if (isPhotoUsed()) {
+        clearPhotoUsed();
+        setTimeout(() => { window.location.href = window.location.pathname; }, 2500);
+      }
       toast({
         title: t("kidDashboard.taskCompleted"),
         description: selectedTask?.requiresApproval 

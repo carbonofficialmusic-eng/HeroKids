@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { kickScrollReset } from "@/lib/cameraUtils";
+import { kickScrollReset, isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
 import { motion } from "framer-motion";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -425,6 +425,10 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
+      if (isPhotoUsed()) {
+        clearPhotoUsed();
+        setTimeout(() => { window.location.href = window.location.pathname; }, 500);
+      }
       toast({
         title: t("toast.profileUpdated"),
         description: t("toast.profileUpdatedDesc"),
@@ -529,6 +533,10 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"], refetchType: 'active' });
       setCompletionDialogOpen(false);
       setTaskToComplete(null);
+      if (isPhotoUsed()) {
+        clearPhotoUsed();
+        setTimeout(() => { window.location.href = window.location.pathname; }, 2500);
+      }
       
       // Show celebration for auto-approved tasks
       if (data.autoApproved) {
