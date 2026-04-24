@@ -1,7 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
-import { cameraWasUsed, clearCameraUsed } from "@/lib/cameraUtils";
+import { isCameraUsed, clearCameraUsed } from "@/lib/cameraUtils";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -144,18 +144,7 @@ export default function Dashboard() {
       const target = savedRootScrollRef.current;
       root.scrollTop = target;
       const scrollTimer = setTimeout(() => { root.scrollTop = target; }, 350);
-      // If the camera was used in this dialog session, trigger a silent
-      // dashboard remount 2 s later — the same effect as a profile switch,
-      // which reliably clears WKWebView's GPU compositing desync on iOS.
-      const usedCamera = cameraWasUsed;
-      clearCameraUsed();
-      const cameraTimer = usedCamera
-        ? setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000)
-        : undefined;
-      return () => {
-        clearTimeout(scrollTimer);
-        if (cameraTimer !== undefined) clearTimeout(cameraTimer);
-      };
+      return () => clearTimeout(scrollTimer);
     }
   }, [anyDialogOpen]);
   const [selectedPointsRecipients, setSelectedPointsRecipients] = useState<string[]>([]);
@@ -434,6 +423,12 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
+      // If the camera was used to capture a new profile photo, trigger a silent
+      // dashboard remount 2 s later to fix WKWebView GPU compositing desync on iOS.
+      if (isCameraUsed()) {
+        clearCameraUsed();
+        setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000);
+      }
       toast({
         title: t("toast.profileUpdated"),
         description: t("toast.profileUpdatedDesc"),
@@ -538,6 +533,11 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"], refetchType: 'active' });
       setCompletionDialogOpen(false);
       setTaskToComplete(null);
+      // If a photo proof was taken with the native camera, fix WKWebView GPU desync.
+      if (isCameraUsed()) {
+        clearCameraUsed();
+        setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000);
+      }
       
       // Show celebration for auto-approved tasks
       if (data.autoApproved) {

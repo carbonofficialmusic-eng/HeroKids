@@ -13,23 +13,23 @@ export function isPhotoPickerCancelError(error: unknown): boolean {
 }
 
 /**
- * Module-level flag: set true after a native camera session, cleared when the
- * surrounding dialog closes.  The dashboard's dialog-close handler checks this
- * flag to decide whether to trigger a silent remount that fixes WKWebView's
- * GPU compositing layer desync (the same effect that a profile switch achieves).
+ * window-backed flag: set true after a native camera session, cleared when the
+ * surrounding mutation's onSuccess handler dispatches the herokids:camera-fix event.
+ * Using window ensures the value is always live — no ES module binding caveats.
  */
-export let cameraWasUsed = false;
-
 export function markCameraUsed(): void {
-  cameraWasUsed = true;
+  (window as any).__herokidsCameraUsed = true;
 }
 
 export function clearCameraUsed(): void {
-  cameraWasUsed = false;
+  (window as any).__herokidsCameraUsed = false;
+}
+
+export function isCameraUsed(): boolean {
+  return !!(window as any).__herokidsCameraUsed;
 }
 
 /**
- * No-op kept for call-site compatibility.  The remount mechanism in the
- * dashboard handles the WKWebView displacement fix.
+ * No-op kept for call-site compatibility.
  */
 export function syncScrollAfterCamera(): void {}

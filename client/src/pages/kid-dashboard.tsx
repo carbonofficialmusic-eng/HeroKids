@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { cameraWasUsed, clearCameraUsed } from "@/lib/cameraUtils";
+import { isCameraUsed, clearCameraUsed } from "@/lib/cameraUtils";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -930,15 +930,7 @@ export default function KidDashboard() {
       const target = savedScrollRef.current;
       el.scrollTop = target;
       const scrollTimer = setTimeout(() => { el.scrollTop = target; }, 350);
-      const usedCamera = cameraWasUsed;
-      clearCameraUsed();
-      const cameraTimer = usedCamera
-        ? setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000)
-        : undefined;
-      return () => {
-        clearTimeout(scrollTimer);
-        if (cameraTimer !== undefined) clearTimeout(cameraTimer);
-      };
+      return () => clearTimeout(scrollTimer);
     }
   }, [anyKidDialogOpen]);
 
@@ -1262,6 +1254,10 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
+      if (isCameraUsed()) {
+        clearCameraUsed();
+        setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000);
+      }
       toast({
         title: t("toast.profileUpdated"),
         description: t("toast.profileUpdatedDesc"),
@@ -1329,6 +1325,10 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setTaskDialogOpen(false);
       setSelectedTask(null);
+      if (isCameraUsed()) {
+        clearCameraUsed();
+        setTimeout(() => window.dispatchEvent(new CustomEvent('herokids:camera-fix')), 2000);
+      }
       toast({
         title: t("kidDashboard.taskCompleted"),
         description: selectedTask?.requiresApproval 
