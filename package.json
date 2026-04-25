@@ -15,7 +15,6 @@
     "@capacitor/cli": "^7.4.5",
     "@capacitor/core": "^8.0.1",
     "@capacitor/ios": "^8.0.1",
-    "@capacitor/keyboard": "^8.0.3",
     "@google-cloud/storage": "^7.18.0",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",

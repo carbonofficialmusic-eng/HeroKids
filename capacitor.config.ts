@@ -27,15 +27,6 @@ const config: CapacitorConfig = {
       splashFullScreen: true,
       splashImmersive: true,
     },
-    // WICHTIG – behebt den breiten Rand nach Tastatur (Make a Wish etc.):
-    // resize: 'none' verhindert, dass iOS den WKWebView-Frame beim
-    // Erscheinen/Verschwinden der Tastatur physisch verschiebt.
-    // Nach dieser Änderung: `npx cap sync` → Xcode → Build → auf iPhone testen.
-    Keyboard: {
-      resize: 'none',
-      style: 'default',
-      resizeOnFullScreen: true,
-    },
   },
 };
 
