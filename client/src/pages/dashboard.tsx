@@ -982,7 +982,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b sticky top-0 backdrop-blur-md z-40" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <header className="sticky top-0 backdrop-blur-md z-40" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex-shrink-0" data-testid="avatar-header-parent">

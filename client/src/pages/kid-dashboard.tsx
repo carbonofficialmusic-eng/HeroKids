@@ -1579,7 +1579,7 @@ export default function KidDashboard() {
   return (
     <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
       {/* Header - Like Dashboard */}
-      <header className="border-b flex-shrink-0 backdrop-blur-md z-40 bg-background/80" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <header className="flex-shrink-0 backdrop-blur-md z-40 bg-background/80" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex-shrink-0" data-testid="avatar-header-kid">
