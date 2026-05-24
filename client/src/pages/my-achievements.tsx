@@ -86,19 +86,16 @@ export default function MyAchievements() {
 
   const { data: authUser } = useQuery<User>({
     queryKey: ["/api/auth/user"],
-    staleTime: 5 * 60 * 1000,
   });
 
   const { data: member } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
     enabled: !!authUser,
-    staleTime: 5 * 60 * 1000,
   });
 
   const { data: achievements = [] } = useQuery<AchievementDefinition[]>({
     queryKey: ["/api/achievements"],
     enabled: !!member,
-    staleTime: 5 * 60 * 1000,
   });
 
   const activeAchievements = achievements

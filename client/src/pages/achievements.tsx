@@ -141,28 +141,24 @@ export default function Achievements() {
   const { data: member } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
     enabled: !!user,
-    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch real user's member record (to determine permissions)
   const { data: realMember } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/real"],
     enabled: !!user,
-    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch achievement definitions
   const { data: achievements = [], isLoading } = useQuery<AchievementDefinition[]>({
     queryKey: ["/api/achievements"],
     enabled: !!member,
-    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch achievement awards
   const { data: awards = [], isLoading: awardsLoading } = useQuery<AchievementAward[]>({
     queryKey: ["/api/achievements/awards"],
     enabled: !!member,
-    staleTime: 5 * 60 * 1000,
   });
 
   // Seed default achievements mutation

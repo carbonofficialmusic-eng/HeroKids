@@ -98,13 +98,11 @@ export default function RewardsBoard() {
   // Fetch current member (acting member)
   const { data: member } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
-    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch real member (authenticated user)
   const { data: realMember } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/real"],
-    staleTime: 5 * 60 * 1000,
   });
 
   // Determine permission levels
@@ -118,28 +116,24 @@ export default function RewardsBoard() {
   const { data: redemptions = [], isLoading } = useQuery<RedemptionWithDetails[]>({
     queryKey: ["/api/reward-redemptions"],
     enabled: !!member,
-    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch all active shared rewards
   const { data: sharedRewards = [] } = useQuery<SharedReward[]>({
     queryKey: ["/api/rewards/shared"],
     enabled: !!member,
-    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch all family members
   const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
     queryKey: ["/api/family-members"],
     enabled: !!member,
-    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch family data for tier check
   const { data: familyData } = useQuery<{ subscriptionTier: string }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
-    staleTime: 5 * 60 * 1000,
   });
   const canUseSharedRewards = familyData?.subscriptionTier === "family" || familyData?.subscriptionTier === "enterprise";
 
@@ -147,7 +141,6 @@ export default function RewardsBoard() {
   const { data: rewardRequests = [] } = useQuery<RewardRequest[]>({
     queryKey: ["/api/reward-requests"],
     enabled: !!member && isRealParent,
-    staleTime: 5 * 60 * 1000,
   });
 
   // Dialog states for reward request editing
