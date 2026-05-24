@@ -1589,7 +1589,7 @@ export default function KidDashboard() {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
       {/* Header - Like Dashboard */}
       <header className="flex-shrink-0 z-40 w-full bg-gradient-to-b from-background/90 to-transparent" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">

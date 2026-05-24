@@ -188,24 +188,47 @@ function Router() {
     };
     vv?.addEventListener('resize', onViewportResize);
 
-    // Also snap on visibility-restore (app-switch / wake)
-    const onVisible = () => {
+    // Snap on visibility-restore (app-switch / wake / close+reopen).
+    // WKWebView can lie about BOTH scrollX and scrollY after resume — it reports
+    // 0 while the UIScrollView contentOffset is actually non-zero, so a plain
+    // scrollTo(0,0) is silently ignored. The 1→0 "kick" forces WKWebView to
+    // process the reset even when it thinks it is already at the origin.
+    // We kick both axes (X first, then Y) and repeat after 150 ms because
+    // WKWebView's rendering pipeline may not have settled by the first kick.
+    let resumeTimer: ReturnType<typeof setTimeout> | null = null;
+    const doResumeKick = () => {
       const root = document.getElementById('root');
       const savedTop = root ? root.scrollTop : 0;
+      // Horizontal kick: force WKWebView to process even if scrollX appears 0
+      window.scrollTo(1, 0);
       window.scrollTo(0, 0);
-      if (root && root.scrollTop !== savedTop) {
-        root.scrollTop = savedTop;
-      }
+      // Restore vertical position inside #root
+      if (root && root.scrollTop !== savedTop) root.scrollTop = savedTop;
     };
+    const onVisible = () => {
+      doResumeKick();
+      // Second kick after WKWebView's rendering pipeline has had time to settle
+      if (resumeTimer) clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => {
+        doResumeKick();
+        resumeTimer = null;
+      }, 150);
+    };
+    // visibilitychange fires on every background→foreground transition
     document.addEventListener('visibilitychange', onVisible);
+    // focus fires as a backup (e.g. split-screen switches)
     window.addEventListener('focus', onVisible);
+    // pageshow fires when iOS restores from bfcache after close+reopen
+    window.addEventListener('pageshow', onVisible);
 
     return () => {
       cancelAnimationFrame(rafId);
       vv?.removeEventListener('resize', onViewportResize);
       if (kickTimer) clearTimeout(kickTimer);
+      if (resumeTimer) clearTimeout(resumeTimer);
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener('focus', onVisible);
+      window.removeEventListener('pageshow', onVisible);
     };
   }, []);
 
