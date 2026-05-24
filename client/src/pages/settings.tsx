@@ -33,7 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import type { FamilyMember, Family } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 
-type FamilyMemberWithLimit = FamilyMember & { isOverLimit?: boolean };
+type FamilyMemberWithLimit = FamilyMember & { isOverLimit?: boolean; accountEmail?: string | null };
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -528,6 +528,11 @@ export default function Settings() {
                               <span>•</span>
                               <span>{familyMember.totalPoints} {t('dashboard.pointsLabel')}</span>
                             </div>
+                            {familyMember.accountEmail && (
+                              <div className="text-xs text-muted-foreground truncate max-w-[180px]" data-testid={`text-account-email-${familyMember.id}`}>
+                                {familyMember.accountEmail}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -541,14 +546,20 @@ export default function Settings() {
                                   setDeviceLinkDialogOpen(true);
                                 }}
                                 data-testid={`button-link-device-${familyMember.id}`}
-                                title={familyMember.userId ? t('settings.accountLinked') : t('settings.noAccountLinked')}
+                                title={familyMember.userId
+                                  ? (familyMember.accountEmail
+                                    ? `${t('settings.accountLinked')}: ${familyMember.accountEmail}`
+                                    : t('settings.accountLinked'))
+                                  : t('settings.noAccountLinked')}
                               >
                                 <Smartphone className={`h-4 w-4 ${familyMember.userId ? 'text-green-500' : 'text-red-500'}`} />
                               </Button>
                             ) : (
                               <span
                                 className="flex items-center justify-center h-9 w-9"
-                                title={t('settings.accountLinked')}
+                                title={familyMember.accountEmail
+                                  ? `${t('settings.accountLinked')}: ${familyMember.accountEmail}`
+                                  : t('settings.accountLinked')}
                                 data-testid={`icon-account-status-${familyMember.id}`}
                               >
                                 <Smartphone className="h-4 w-4 text-green-500" />

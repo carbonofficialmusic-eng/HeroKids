@@ -20,7 +20,7 @@ import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertR
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD } from "@shared/skin-config";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import "./types";
 import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
 import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
@@ -1091,6 +1091,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const members = await storage.getFamilyMembersByFamily(result.member.familyName);
       
+      // For parents, look up linked account emails
+      const isParent = result.member.role === "parent";
+      let accountEmails: Record<string, string> = {};
+      if (isParent) {
+        const userIds = members.filter(m => m.userId).map(m => m.userId as string);
+        if (userIds.length > 0) {
+          const userRecords = await db
+            .select({ id: users.id, email: users.email })
+            .from(users)
+            .where(inArray(users.id, userIds));
+          for (const u of userRecords) {
+            if (u.email) accountEmails[u.id] = u.email;
+          }
+        }
+      }
+
       // Compute over-limit members based on tier
       const family = await storage.getFamily(result.member.familyName);
       if (family) {
@@ -1105,11 +1121,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const membersWithLimit = members.map(m => ({
           ...m,
           isOverLimit: overLimitIds.has(m.id),
+          accountEmail: isParent && m.userId ? (accountEmails[m.userId] ?? null) : undefined,
         }));
         return res.json(membersWithLimit);
       }
       
-      res.json(members);
+      res.json(members.map(m => ({
+        ...m,
+        accountEmail: isParent && m.userId ? (accountEmails[m.userId] ?? null) : undefined,
+      })));
     } catch (error) {
       console.error("Error fetching family members:", error);
       res.status(500).json({ message: "Failed to fetch family members" });
