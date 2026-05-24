@@ -240,12 +240,14 @@ export default function Dashboard() {
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
     enabled: !!user,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch real user's member record (to determine permissions)
   const { data: realMember } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/real"],
     enabled: !!user,
+    staleTime: 5 * 60 * 1000,
   });
 
   // WebSocket connection for real-time updates
@@ -258,18 +260,21 @@ export default function Dashboard() {
   const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
     queryKey: ["/api/family-members"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch tasks
   const { data: tasks = [] } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch rewards
   const { data: rewards = [] } = useQuery<Reward[]>({
     queryKey: ["/api/rewards"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch star stats for star collection display
@@ -280,6 +285,7 @@ export default function Dashboard() {
   }>({
     queryKey: ["/api/stars"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
   
   // Log rewards data for debugging
@@ -295,6 +301,7 @@ export default function Dashboard() {
   const { data: rewardRequests = [] } = useQuery<RewardRequest[]>({
     queryKey: ["/api/reward-requests"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch family subscription tier
@@ -310,6 +317,7 @@ export default function Dashboard() {
   }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch unread chat message count
@@ -317,6 +325,7 @@ export default function Dashboard() {
     queryKey: ["/api/chat/unread-count"],
     enabled: !!member && hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat"),
     refetchInterval: 10000, // Refetch every 10 seconds
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch pending approvals count (for parents)
@@ -324,6 +333,7 @@ export default function Dashboard() {
     queryKey: ["/api/tasks/pending-count"],
     enabled: !!member && member?.role === "parent",
     refetchInterval: 10000, // Refetch every 10 seconds
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch pending reward redemptions count (for parents)
@@ -331,6 +341,7 @@ export default function Dashboard() {
     queryKey: ["/api/reward-redemptions/pending-count"],
     enabled: !!member && member?.role === "parent",
     refetchInterval: 10000, // Refetch every 10 seconds
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch achievement definitions for special rewards display
@@ -348,6 +359,7 @@ export default function Dashboard() {
   }[]>({
     queryKey: ["/api/achievements"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Filter for all active achievements

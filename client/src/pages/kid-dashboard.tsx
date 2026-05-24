@@ -1095,6 +1095,7 @@ export default function KidDashboard() {
   const { data: authUser, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Check for device session (for linked child devices)
@@ -1118,6 +1119,7 @@ export default function KidDashboard() {
   }>({
     queryKey: ["/api/device-link/session"],
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   // User is authenticated via either Replit Auth OR Device Session
@@ -1129,7 +1131,7 @@ export default function KidDashboard() {
   const { data: memberFromApi, isLoading: memberApiLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
     enabled: !!authUser || isDeviceAuthenticated, // Fetch for both auth types
-    staleTime: 0, // Always refetch to get latest points
+    staleTime: 5 * 60 * 1000,
   });
 
   // Build member object from device session if available
@@ -1171,44 +1173,52 @@ export default function KidDashboard() {
   const { data: realMember } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/real"],
     enabled: hasAnyAuth,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: familyData } = useQuery<Family>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
     queryKey: ["/api/family-members"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: rewards = [] } = useQuery<Reward[]>({
     queryKey: ["/api/rewards"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: tasks = [] } = useQuery<TaskWithMeta[]>({
     queryKey: ["/api/tasks"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch family goals
   const { data: goals = [] } = useQuery<FamilyGoal[]>({
     queryKey: ["/api/family-goals"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch reward redemptions (child's redeemed rewards)
   const { data: redemptions = [] } = useQuery<(RewardRedemption & { rewardTitle?: string })[]>({
     queryKey: ["/api/reward-redemptions"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch active shared rewards from other family members
   const { data: sharedRewards = [] } = useQuery<SharedReward[]>({
     queryKey: ["/api/rewards/shared"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch unread chat message count
@@ -1216,12 +1226,14 @@ export default function KidDashboard() {
     queryKey: ["/api/chat/unread-count"],
     enabled: !!member && hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat"),
     refetchInterval: 5000,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch achievement definitions for special rewards display
   const { data: achievements = [] } = useQuery<AchievementDefinition[]>({
     queryKey: ["/api/achievements"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Filter for all active achievements
