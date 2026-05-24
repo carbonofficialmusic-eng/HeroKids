@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { kickScrollReset, isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
+import { isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
 import { motion } from "framer-motion";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -129,23 +129,23 @@ export default function Dashboard() {
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
   const [sendPointsOpen, setSendPointsOpen] = useState(false);
 
-  // Freeze #root scroll while any dialog is open, then restore exactly (iOS keyboard shifts viewport)
-  const savedRootScrollRef = useRef(0);
+  // Local scroll container ref (same pattern as kid-dashboard — avoids #root width issues on iOS)
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const savedScrollRef = useRef(0);
   const anyDialogOpen = taskDialogOpen || rewardDialogOpen || requestRewardDialogOpen ||
     editMemberDialogOpen || switchMemberDialogOpen || completionDialogOpen || sendPointsOpen;
   useLayoutEffect(() => {
-    const root = document.getElementById('root');
-    if (!root) return;
+    const el = scrollContainerRef.current;
+    if (!el) return;
     if (anyDialogOpen) {
-      savedRootScrollRef.current = root.scrollTop;
-      root.style.overflowY = 'hidden';
+      savedScrollRef.current = el.scrollTop;
+      el.style.overflowY = 'hidden';
     } else {
-      root.style.overflowY = 'auto';
-      const target = savedRootScrollRef.current;
-      root.scrollTop = target;
-      kickScrollReset(200);
-      const t1 = setTimeout(() => { root.scrollTop = target; }, 350);
-      const t2 = setTimeout(() => { root.scrollTop = target; }, 700);
+      el.style.overflowY = 'auto';
+      const target = savedScrollRef.current;
+      el.scrollTop = target;
+      const t1 = setTimeout(() => { el.scrollTop = target; }, 350);
+      const t2 = setTimeout(() => { el.scrollTop = target; }, 700);
       return () => { clearTimeout(t1); clearTimeout(t2); };
     }
   }, [anyDialogOpen]);
@@ -992,9 +992,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full overflow-hidden bg-gradient-to-b from-background/90 to-transparent" style={{ paddingTop: 'env(safe-area-inset-top)', maxWidth: '100vw', left: 0, right: 0 }}>
+      <header className="flex-shrink-0 z-40 w-full overflow-hidden bg-gradient-to-b from-background/90 to-transparent" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex-shrink-0" data-testid="avatar-header-parent">
@@ -1049,6 +1049,7 @@ export default function Dashboard() {
         </div>
       </header>
 
+      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'none' }}>
       <div className={`container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden ${isParent ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))]" : ""}`}>
         {isParent ? (
           /* Parent View */
@@ -1757,6 +1758,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+      </div>
       </div>
 
       {/* Parent Bottom Navigation Bar */}
