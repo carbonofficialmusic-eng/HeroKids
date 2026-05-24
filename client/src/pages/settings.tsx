@@ -501,16 +501,16 @@ export default function Settings() {
                         className={`flex items-center justify-between p-3 rounded-lg border bg-card ${isOverLimit ? 'opacity-50 border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10' : 'hover-elevate'}`}
                         data-testid={`member-item-${familyMember.id}`}
                       >
-                        <div className="flex items-center gap-3">
-                          <Avatar className={`h-10 w-10 ${isOverLimit ? 'grayscale' : ''}`}>
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <Avatar className={`h-10 w-10 flex-shrink-0 ${isOverLimit ? 'grayscale' : ''}`}>
                             <AvatarImage src={getAvatarUrl(familyMember.activeSkinId, familyMember.avatarUrl, familyMember.useCustomAvatar, familyMember.updatedAt)} alt={familyMember.displayName} />
                             <AvatarFallback style={{ backgroundColor: familyMember.color }}>
                               {familyMember.displayName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
+                          <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium" data-testid={`member-name-${familyMember.id}`}>
+                              <span className="font-medium truncate" data-testid={`member-name-${familyMember.id}`}>
                                 {familyMember.displayName}
                               </span>
                               {isCurrentUser && (
@@ -523,19 +523,19 @@ export default function Settings() {
                                 </Badge>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <span>{familyMember.role === "parent" ? t('settings.parent') : t('settings.child')}</span>
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground flex-wrap">
+                              <span className="whitespace-nowrap">{familyMember.role === "parent" ? t('settings.parent') : t('settings.child')}</span>
                               <span>•</span>
-                              <span>{familyMember.totalPoints} {t('dashboard.pointsLabel')}</span>
+                              <span className="whitespace-nowrap">{familyMember.totalPoints} {t('dashboard.pointsLabel')}</span>
                             </div>
                             {familyMember.accountEmail && (
-                              <div className="text-xs text-muted-foreground truncate max-w-[180px]" data-testid={`text-account-email-${familyMember.id}`}>
+                              <div className="text-xs text-muted-foreground truncate" data-testid={`text-account-email-${familyMember.id}`}>
                                 {familyMember.accountEmail}
                               </div>
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           {!isOverLimit && (
                             familyMember.role === "child" ? (
                               <Button
