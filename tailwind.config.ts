@@ -82,6 +82,19 @@ export default {
           offline: "rgb(156 163 175)",
         },
       },
+      // Use 100dvh instead of 100vh for all "screen" height utilities.
+      // 100dvh is the *dynamic* viewport height — it shrinks/grows when the
+      // iOS address bar or keyboard appear, preventing layout shifts and
+      // ensuring the value is always recalculated after WKWebView resume.
+      height: {
+        screen: "100dvh",
+      },
+      minHeight: {
+        screen: "100dvh",
+      },
+      maxHeight: {
+        screen: "100dvh",
+      },
       fontFamily: {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],

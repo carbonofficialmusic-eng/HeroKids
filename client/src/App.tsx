@@ -195,24 +195,46 @@ function Router() {
     // process the reset even when it thinks it is already at the origin.
     // We kick both axes (X first, then Y) and repeat after 150 ms because
     // WKWebView's rendering pipeline may not have settled by the first kick.
-    let resumeTimer: ReturnType<typeof setTimeout> | null = null;
+    let resumeTimer1: ReturnType<typeof setTimeout> | null = null;
+    let resumeTimer2: ReturnType<typeof setTimeout> | null = null;
     const doResumeKick = () => {
       const root = document.getElementById('root');
       const savedTop = root ? root.scrollTop : 0;
-      // Horizontal kick: force WKWebView to process even if scrollX appears 0
+
+      // 1. Horizontal kick — WKWebView may report scrollX=0 while the
+      //    UIScrollView contentOffset.x is non-zero; the 1→0 forces a real reset.
       window.scrollTo(1, 0);
       window.scrollTo(0, 0);
-      // Restore vertical position inside #root
+
+      // 2. Restore the user's vertical scroll position inside #root.
       if (root && root.scrollTop !== savedTop) root.scrollTop = savedTop;
+
+      // 3. Dispatch a synthetic resize event so every hook/component that reads
+      //    window.innerWidth / window.innerHeight (mobile detection, sticky
+      //    panels, etc.) recalculates with the current, post-resume values.
+      //    This also triggers safe-area env() recalculation in WKWebView.
+      window.dispatchEvent(new Event('resize'));
+
+      // 4. Force a synchronous reflow so WKWebView flushes stale cached
+      //    viewport dimensions and re-evaluates position:fixed coordinates.
+      void document.documentElement.getBoundingClientRect();
     };
     const onVisible = () => {
       doResumeKick();
-      // Second kick after WKWebView's rendering pipeline has had time to settle
-      if (resumeTimer) clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(() => {
+      // Second kick at 150 ms — WKWebView's rendering pipeline may not have
+      // finished settling when the first kick fires.
+      if (resumeTimer1) clearTimeout(resumeTimer1);
+      resumeTimer1 = setTimeout(() => {
         doResumeKick();
-        resumeTimer = null;
+        resumeTimer1 = null;
       }, 150);
+      // Third kick at 350 ms — catches late safe-area / UIScrollView updates
+      // that only complete after the full transition animation finishes.
+      if (resumeTimer2) clearTimeout(resumeTimer2);
+      resumeTimer2 = setTimeout(() => {
+        doResumeKick();
+        resumeTimer2 = null;
+      }, 350);
     };
     // visibilitychange fires on every background→foreground transition
     document.addEventListener('visibilitychange', onVisible);
@@ -220,15 +242,19 @@ function Router() {
     window.addEventListener('focus', onVisible);
     // pageshow fires when iOS restores from bfcache after close+reopen
     window.addEventListener('pageshow', onVisible);
+    // Capacitor native resume event — most reliable signal in a WKWebView shell
+    document.addEventListener('resume', onVisible);
 
     return () => {
       cancelAnimationFrame(rafId);
       vv?.removeEventListener('resize', onViewportResize);
       if (kickTimer) clearTimeout(kickTimer);
-      if (resumeTimer) clearTimeout(resumeTimer);
+      if (resumeTimer1) clearTimeout(resumeTimer1);
+      if (resumeTimer2) clearTimeout(resumeTimer2);
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener('focus', onVisible);
       window.removeEventListener('pageshow', onVisible);
+      document.removeEventListener('resume', onVisible);
     };
   }, []);
 
