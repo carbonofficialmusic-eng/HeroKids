@@ -665,6 +665,8 @@
     "you": "Du",
     "addMember": "Mitglied hinzufügen",
     "linkDevice": "Gerät verknüpfen",
+    "accountLinked": "Eigenes Konto verknüpft",
+    "noAccountLinked": "Kein eigenes Konto",
     "noMembersYet": "Noch keine Familienmitglieder. Füge dein erstes Mitglied unten hinzu.",
     "familyJoinCodeTitle": "Familien-Beitrittscode",
     "joinCodeDesc": "Teile diesen Code mit Kindern und anderen Eltern, um sie in deine Familie einzuladen. Jeder mit diesem Code kann beitreten.",

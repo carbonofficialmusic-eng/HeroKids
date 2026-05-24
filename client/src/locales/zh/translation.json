@@ -610,6 +610,8 @@
     "deactivated": "已停用",
     "you": "你",
     "addMember": "添加成员",
+    "accountLinked": "已关联账户",
+    "noAccountLinked": "未关联账户",
     "noMembersYet": "还没有家庭成员。在下方添加你的第一个成员。",
     "familyJoinCodeTitle": "家庭加入代码",
     "joinCodeDesc": "与孩子和其他家长分享此代码以邀请他们加入你的家庭。任何有此代码的人都可以加入。",

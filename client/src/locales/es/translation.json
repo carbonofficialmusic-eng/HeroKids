@@ -610,6 +610,8 @@
     "deactivated": "Desactivado",
     "you": "Tú",
     "addMember": "Agregar Miembro",
+    "accountLinked": "Cuenta propia vinculada",
+    "noAccountLinked": "Sin cuenta propia",
     "noMembersYet": "Aún no hay miembros de la familia. Agrega tu primer miembro a continuación.",
     "familyJoinCodeTitle": "Código de Unión Familiar",
     "joinCodeDesc": "Comparte este código con niños y otros padres para invitarlos a tu familia. Cualquiera con este código puede unirse.",

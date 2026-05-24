@@ -531,19 +531,29 @@ export default function Settings() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {!isOverLimit && familyMember.role === "child" && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setMemberForDeviceLink(familyMember);
-                                setDeviceLinkDialogOpen(true);
-                              }}
-                              data-testid={`button-link-device-${familyMember.id}`}
-                              title={t('settings.linkDevice')}
-                            >
-                              <Smartphone className="h-4 w-4" />
-                            </Button>
+                          {!isOverLimit && (
+                            familyMember.role === "child" ? (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setMemberForDeviceLink(familyMember);
+                                  setDeviceLinkDialogOpen(true);
+                                }}
+                                data-testid={`button-link-device-${familyMember.id}`}
+                                title={familyMember.userId ? t('settings.accountLinked') : t('settings.noAccountLinked')}
+                              >
+                                <Smartphone className={`h-4 w-4 ${familyMember.userId ? 'text-green-500' : 'text-red-500'}`} />
+                              </Button>
+                            ) : (
+                              <span
+                                className="flex items-center justify-center h-9 w-9"
+                                title={t('settings.accountLinked')}
+                                data-testid={`icon-account-status-${familyMember.id}`}
+                              >
+                                <Smartphone className="h-4 w-4 text-green-500" />
+                              </span>
+                            )
                           )}
                           {!isOverLimit && (
                             <Button

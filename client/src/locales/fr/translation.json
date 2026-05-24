@@ -610,6 +610,8 @@
     "deactivated": "Désactivé",
     "you": "Vous",
     "addMember": "Ajouter un membre",
+    "accountLinked": "Compte propre lié",
+    "noAccountLinked": "Aucun compte lié",
     "noMembersYet": "Aucun membre de la famille pour le moment. Ajoutez votre premier membre ci-dessous.",
     "familyJoinCodeTitle": "Code d'accès familial",
     "joinCodeDesc": "Partagez ce code avec les enfants et autres parents pour les inviter dans votre famille. Toute personne possédant ce code peut rejoindre.",

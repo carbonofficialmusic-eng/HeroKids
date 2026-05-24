@@ -642,6 +642,8 @@
     "you": "You",
     "addMember": "Add Member",
     "linkDevice": "Link Device",
+    "accountLinked": "Own account linked",
+    "noAccountLinked": "No account linked",
     "noMembersYet": "No family members yet. Add your first member below.",
     "familyJoinCodeTitle": "Family Join Code",
     "joinCodeDesc": "Share this code with children and other parents to invite them to your family. Anyone with this code can join.",

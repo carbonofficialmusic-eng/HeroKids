@@ -614,6 +614,8 @@
     "deactivated": "비활성화",
     "you": "나",
     "addMember": "구성원 추가",
+    "accountLinked": "자체 계정 연결됨",
+    "noAccountLinked": "계정 없음",
     "noMembersYet": "가족 구성원이 아직 없습니다. 아래에서 첫 구성원을 추가하세요.",
     "familyJoinCodeTitle": "가족 참여 코드",
     "joinCodeDesc": "이 코드를 자녀와 다른 부모에게 공유하여 가족에 초대하세요. 이 코드를 가진 사람은 누구나 참여할 수 있습니다.",

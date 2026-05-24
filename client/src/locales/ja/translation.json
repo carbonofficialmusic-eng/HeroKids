@@ -610,6 +610,8 @@
     "deactivated": "無効",
     "you": "あなた",
     "addMember": "メンバーを追加",
+    "accountLinked": "アカウント連携済み",
+    "noAccountLinked": "アカウントなし",
     "noMembersYet": "まだ家族メンバーがいません。下に最初のメンバーを追加してください。",
     "familyJoinCodeTitle": "家族参加コード",
     "joinCodeDesc": "このコードを子供や他の親と共有して、家族に招待します。このコードを持っている人は誰でも参加できます。",

@@ -641,6 +641,8 @@
     "you": "Du",
     "addMember": "Lägg till medlem",
     "linkDevice": "Länka enhet",
+    "accountLinked": "Eget konto länkat",
+    "noAccountLinked": "Inget konto länkat",
     "noMembersYet": "Inga familjemedlemmar ännu. Lägg till din första medlem nedan.",
     "familyJoinCodeTitle": "Familjens anslutningskod",
     "joinCodeDesc": "Dela denna kod med barn och andra föräldrar för att bjuda in dem till din familj. Alla med denna kod kan gå med.",
