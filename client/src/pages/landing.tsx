@@ -391,7 +391,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 backdrop-blur-md z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <header className="sticky top-0 backdrop-blur-md z-50 w-full overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <img 
