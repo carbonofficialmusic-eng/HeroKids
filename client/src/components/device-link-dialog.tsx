@@ -52,6 +52,7 @@ export function DeviceLinkDialog({ member, open, onOpenChange }: DeviceLinkDialo
   const { data: devices, isLoading: devicesLoading, refetch: refetchDevices } = useQuery<DeviceSession[]>({
     queryKey: ["/api/device-link/devices", member?.id],
     enabled: !!member && open,
+    staleTime: 5 * 60 * 1000,
   });
 
   const generateCodeMutation = useMutation({

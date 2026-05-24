@@ -22,6 +22,7 @@ export function ProtectedRoute({
   
   const { data: member, isLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
+    staleTime: 5 * 60 * 1000,
   });
 
   useEffect(() => {

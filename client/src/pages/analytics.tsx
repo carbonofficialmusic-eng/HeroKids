@@ -41,6 +41,7 @@ export default function Analytics() {
   const { data: analytics, isLoading, error } = useQuery<AnalyticsData>({
     queryKey: ["/api/analytics"],
     enabled: !!user,
+    staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) {

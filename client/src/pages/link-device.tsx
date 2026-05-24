@@ -36,6 +36,7 @@ export default function LinkDevice() {
   const { data: existingSession, isLoading: checkingSession } = useQuery<DeviceSession>({
     queryKey: ["/api/device-link/session"],
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const verifyCodeMutation = useMutation({

@@ -23,6 +23,7 @@ export default function AutoRedirect() {
   const { data: member, isLoading, isError } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const createFamilyMutation = useMutation({

@@ -82,6 +82,7 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
   // Fetch all skins and filter for discovered ones
   const { data: skinsData } = useQuery<SkinsResponse>({
     queryKey: ["/api/skins"],
+    staleTime: 5 * 60 * 1000,
   });
 
   const discoveredSkins = skinsData?.skins.filter(skin => skin.isDiscovered) || [];

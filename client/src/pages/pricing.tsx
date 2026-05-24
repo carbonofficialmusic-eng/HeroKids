@@ -58,6 +58,7 @@ export default function Pricing() {
   const { data: member } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
     enabled: !!user,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch family subscription tier
@@ -68,6 +69,7 @@ export default function Pricing() {
   }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   const checkoutMutation = useMutation({

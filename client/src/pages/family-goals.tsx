@@ -53,6 +53,7 @@ export default function FamilyGoals() {
   const { data: member } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
     enabled: !!user,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Enable real-time WebSocket updates
@@ -61,11 +62,13 @@ export default function FamilyGoals() {
   const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
     queryKey: ["/api/family-members"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: goals = [], isLoading } = useQuery<FamilyGoalWithContributions[]>({
     queryKey: ["/api/family-goals"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   const createGoalMutation = useMutation({

@@ -91,6 +91,7 @@ export function MessageRenderer({ message }: MessageRendererProps) {
   // Fetch all skins to render skin emoticons
   const { data: skinsData } = useQuery<SkinsResponse>({
     queryKey: ["/api/skins"],
+    staleTime: 5 * 60 * 1000,
   });
 
   const skins = skinsData?.skins || [];

@@ -112,11 +112,13 @@ export default function SkinsGallery() {
 
   const { data: memberData, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: familyData } = useQuery<Family>({
     queryKey: ["/api/families/settings"],
     enabled: !!memberData,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Use family's skinCardCost or default to 60
@@ -139,6 +141,7 @@ export default function SkinsGallery() {
   }>({
     queryKey: ["/api/skins"],
     placeholderData: keepPreviousData,
+    staleTime: 5 * 60 * 1000,
   });
   
   // Star animation state

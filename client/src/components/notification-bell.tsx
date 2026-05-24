@@ -113,11 +113,13 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
   const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
     refetchInterval: 60000,
+    staleTime: 30 * 1000,
   });
 
   const { data: unreadData } = useQuery<{ count: number }>({
     queryKey: ["/api/notifications/unread-count"],
     refetchInterval: 30000,
+    staleTime: 15 * 1000,
   });
 
   const unreadCount = unreadData?.count ?? 0;

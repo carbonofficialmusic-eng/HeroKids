@@ -60,31 +60,37 @@ export default function MyRewards() {
 
   const { data: authUser } = useQuery<User>({
     queryKey: ["/api/auth/user"],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: member } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
     enabled: !!authUser,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: realMember } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/real"],
     enabled: !!authUser,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: redemptions = [] } = useQuery<(RewardRedemption & { rewardTitle?: string })[]>({
     queryKey: ["/api/reward-redemptions"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: sharedRewards = [] } = useQuery<SharedReward[]>({
     queryKey: ["/api/rewards/shared"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: familyData } = useQuery<{ subscriptionTier: string }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
   const canUseSharedRewards = familyData?.subscriptionTier === "family" || familyData?.subscriptionTier === "enterprise";
 

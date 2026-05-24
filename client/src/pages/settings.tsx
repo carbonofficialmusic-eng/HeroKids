@@ -60,24 +60,28 @@ export default function Settings() {
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
     enabled: !!user,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch real user's member record (to determine permissions)
   const { data: realMember } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/real"],
     enabled: !!user,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch family data including settings
   const { data: familyData, isLoading: familyLoading } = useQuery<Family>({
     queryKey: ["/api/families/settings"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch all family members
   const { data: familyMembers, isLoading: membersLoading } = useQuery<FamilyMemberWithLimit[]>({
     queryKey: ["/api/family-members"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Update family settings mutation

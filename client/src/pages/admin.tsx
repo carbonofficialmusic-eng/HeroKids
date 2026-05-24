@@ -324,6 +324,7 @@ export default function AdminPage() {
       return res.json();
     },
     enabled: !!token,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: families, isLoading: familiesLoading, refetch: refetchFamilies } = useQuery<FamilyWithStats[]>({
@@ -336,6 +337,7 @@ export default function AdminPage() {
       return res.json();
     },
     enabled: !!token,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: familyDetails, isLoading: detailsLoading, refetch: refetchDetails } = useQuery<FamilyDetails>({
@@ -348,6 +350,7 @@ export default function AdminPage() {
       return res.json();
     },
     enabled: !!token && !!selectedFamily,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: skinStats, isLoading: skinsLoading, refetch: refetchSkins } = useQuery<SkinStats>({
@@ -360,6 +363,7 @@ export default function AdminPage() {
       return res.json();
     },
     enabled: !!token,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: analytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useQuery<AnalyticsData>({
@@ -372,6 +376,7 @@ export default function AdminPage() {
       return res.json();
     },
     enabled: !!token,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: emailHealth, isLoading: emailHealthLoading, refetch: refetchEmailHealth } = useQuery<EmailHealthResult>({
@@ -386,6 +391,7 @@ export default function AdminPage() {
     enabled: !!token,
     refetchInterval: 5 * 60 * 1000,
     refetchIntervalInBackground: true,
+    staleTime: 30 * 1000,
   });
 
   const { data: emailHistory, isLoading: emailHistoryLoading, refetch: refetchEmailHistory } = useQuery<EmailReadinessCheck[]>({
@@ -398,6 +404,7 @@ export default function AdminPage() {
       return res.json();
     },
     enabled: !!token,
+    staleTime: 5 * 60 * 1000,
   });
 
   useEffect(() => {

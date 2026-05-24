@@ -34,12 +34,14 @@ export default function Chat() {
   // Use member query directly - works for both Replit Auth and Device Sessions
   const { data: member, isLoading: memberLoading } = useQuery<any>({
     queryKey: ["/api/family-members/current"],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: messages = [], isLoading, error } = useQuery<ChatMessage[]>({
     queryKey: ["/api/chat"],
     enabled: !!member, // Enable when member is loaded (works for Device Sessions)
     refetchInterval: 5000, // Refetch every 5 seconds as fallback
+    staleTime: 5 * 60 * 1000,
   });
 
   const isChild = member?.role === "child";

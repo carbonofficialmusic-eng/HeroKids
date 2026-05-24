@@ -37,14 +37,17 @@ export default function Approvals() {
 
   const { data: pendingCompletions, isLoading } = useQuery({
     queryKey: ["/api/tasks/completions/pending"],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: rewardRequests = [] } = useQuery<any[]>({
     queryKey: ["/api/reward-requests"],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: familyMembers = [] } = useQuery<any[]>({
     queryKey: ["/api/family-members"],
+    staleTime: 5 * 60 * 1000,
   });
 
   const pendingRewardRequests = rewardRequests.filter((r: any) => r.status === "pending");
