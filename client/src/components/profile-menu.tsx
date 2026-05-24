@@ -169,8 +169,8 @@ export function ProfileMenu({
           )}
           <span>{theme === "dark" ? t("settings.lightMode") : t("settings.darkMode")}</span>
         </DropdownMenuItem>
-        {/* Only show logout for parents - children use "Switch Member" instead */}
-        {isParent && (
+        {/* Show logout for parents, and for children who have their own account (not acted-as by a parent) */}
+        {(isParent || (!isRealParent && !!user?.email)) && (
           <DropdownMenuItem
             onClick={handleLogout}
             data-testid="menu-item-logout"
