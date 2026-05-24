@@ -82,9 +82,9 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
   }, [backgroundUrl, currentBg]);
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background container - fixed positioning */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+    <div className="min-h-full">
+      {/* Background container - fixed positioning, below all content via negative z-index */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: -1 }}>
         {previousBg && (
           <img 
             src={previousBg}
@@ -117,7 +117,11 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
         )}
       </div>
       
-      <div className="relative" style={{ zIndex: 1 }}>
+      {/* No explicit z-index here — avoids creating a stacking context that can
+          cause iOS WKWebView to miscalculate the horizontal position of
+          fixed/sticky descendants (the fixed background is z-index:-1 so it
+          sits below normal-flow content without needing a counter-index). */}
+      <div>
         {children}
       </div>
     </div>
