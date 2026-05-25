@@ -213,7 +213,7 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
         <Button
           variant="ghost"
           size="icon"
-          className="relative flex-shrink-0 bg-background/60 backdrop-blur-sm border border-border/50 overflow-visible"
+          className="relative flex-shrink-0 bg-background border border-border/50 overflow-visible"
           data-testid="button-notification-bell"
         >
           <Bell className="h-5 w-5" />
