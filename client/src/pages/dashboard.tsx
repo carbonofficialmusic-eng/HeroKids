@@ -739,14 +739,10 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
-      if ((window as any).Capacitor?.isNativePlatform?.()) {
-        setTimeout(() => { window.location.href = window.location.pathname; }, 400);
-      } else {
-        toast({
-          title: t("toast.requestSent"),
-          description: t("toast.requestSentDesc"),
-        });
-      }
+      toast({
+        title: t("toast.requestSent"),
+        description: t("toast.requestSentDesc"),
+      });
     },
     onError: (error: any) => {
       toast({

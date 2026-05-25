@@ -980,14 +980,10 @@ export default function KidDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
-      if ((window as any).Capacitor?.isNativePlatform?.()) {
-        setTimeout(() => { window.location.href = window.location.pathname; }, 400);
-      } else {
-        toast({
-          title: t("kidDashboard.wishSent"),
-          description: t("kidDashboard.wishSentDesc"),
-        });
-      }
+      toast({
+        title: t("kidDashboard.wishSent"),
+        description: t("kidDashboard.wishSentDesc"),
+      });
     },
     onError: (error: any) => {
       toast({
