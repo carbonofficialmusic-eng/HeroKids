@@ -919,16 +919,28 @@ export default function KidDashboard() {
 
   // Lock scroll container while any dialog is open; restore after close (iOS keyboard shifts viewport)
   const anyKidDialogOpen = taskDialogOpen || requestRewardDialogOpen || editMemberDialogOpen || switchMemberDialogOpen;
+  const savedRootScrollRef = useRef(0);
   useLayoutEffect(() => {
     const el = scrollContainerRef.current;
+    const root = document.getElementById('root');
     if (!el) return;
     if (anyKidDialogOpen) {
       savedScrollRef.current = el.scrollTop;
       el.style.overflowY = 'hidden';
+      // Also lock #root so iOS WKWebView cannot shift the sticky header
+      if (root) {
+        savedRootScrollRef.current = root.scrollTop;
+        root.style.overflowY = 'hidden';
+      }
     } else {
       el.style.overflowY = 'auto';
       const target = savedScrollRef.current;
       el.scrollTop = target;
+      // Restore #root scroll and overflow
+      if (root) {
+        root.style.overflowY = 'auto';
+        root.scrollTop = savedRootScrollRef.current;
+      }
       // After any dialog close (keyboard or picker), apply scroll kick so
       // WKWebView re-syncs UIScrollView even when scrollY is falsely reported as 0.
       kickScrollReset(200);

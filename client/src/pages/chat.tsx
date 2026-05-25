@@ -110,22 +110,29 @@ export default function Chat() {
     setMessageText((prev) => prev + emoticon + " ");
   };
 
+  const safeTopStyle: React.CSSProperties = { position: 'fixed', inset: 0, paddingTop: 'max(1rem, env(safe-area-inset-top))' };
+  const backBtn = (
+    <Link href={dashboardUrl}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="border-border/40"
+        data-testid="button-back-to-dashboard"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        {t('settings.backToDashboard')}
+      </Button>
+    </Link>
+  );
+
   if (isLoading || memberLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <Link href={dashboardUrl}>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
-            data-testid="button-back-to-dashboard"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t('settings.backToDashboard')}
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold mb-6">{t('chat.title')}</h1>
-        <div className="flex items-center justify-center min-h-[60vh]" data-testid="loading-chat">
+      <div className="p-4 flex flex-col" style={safeTopStyle}>
+        <div className="flex items-center gap-3 mb-4 shrink-0">
+          {backBtn}
+          <h1 className="text-2xl font-bold">{t('chat.title')}</h1>
+        </div>
+        <div className="flex items-center justify-center flex-1" data-testid="loading-chat">
           <div className="animate-pulse">{t('chat.loadingChat')}</div>
         </div>
       </div>
@@ -139,19 +146,11 @@ export default function Chat() {
     
     if (isTierError) {
       return (
-        <div className="container mx-auto p-6" data-testid="chat-upgrade-prompt">
-          <Link href={dashboardUrl}>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
-              data-testid="button-back-to-dashboard"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t('settings.backToDashboard')}
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-bold mb-6">{t('chat.title')}</h1>
+        <div className="p-4 overflow-y-auto" style={safeTopStyle} data-testid="chat-upgrade-prompt">
+          <div className="flex items-center gap-3 mb-4 shrink-0">
+            {backBtn}
+            <h1 className="text-2xl font-bold">{t('chat.title')}</h1>
+          </div>
           <Card className="max-w-2xl mx-auto">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
@@ -195,19 +194,9 @@ export default function Chat() {
   }
 
   return (
-    <div className="p-4 flex flex-col" style={{ position: 'fixed', inset: 0, paddingTop: 'max(1rem, env(safe-area-inset-top))' }} data-testid="page-chat">
+    <div className="p-4 flex flex-col" style={safeTopStyle} data-testid="page-chat">
       <div className="flex items-center gap-3 mb-4 shrink-0">
-        <Link href={dashboardUrl}>
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
-            data-testid="button-back-to-dashboard"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t('settings.backToDashboard')}
-          </Button>
-        </Link>
+        {backBtn}
         <h1 className="text-2xl font-bold" data-testid="heading-chat">
           {t('chat.title')}
         </h1>
