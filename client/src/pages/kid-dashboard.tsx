@@ -1621,6 +1621,8 @@ export default function KidDashboard() {
   return (
     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
       {/* Header - Like Dashboard */}
+      {/* TEMP BUILD MARKER - remove after confirming */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: 'red', zIndex: 9999 }} />
       <header
         className="flex-shrink-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
         style={{
