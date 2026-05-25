@@ -917,21 +917,24 @@ export default function KidDashboard() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const savedScrollRef = useRef(0);
 
-  // On mount (e.g. after navigating back from Family Chat), force WKWebView to
-  // re-composite the fixed container. A new position:fixed element can be
-  // briefly mis-positioned in WKWebView when the previous page also used fixed.
+  // On mount: lock #root overflow so it never scrolls the kid-dashboard
+  // absolute container, and kick a header repaint for WKWebView recovery.
   useEffect(() => {
-    // Re-read and freeze --sat in case WKWebView has stale safe-area values
+    const root = document.getElementById('root');
+    if (root) root.style.overflowY = 'hidden';
+    // Re-read and freeze --sat
     const div = document.createElement('div');
     div.style.cssText = 'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:0;visibility:hidden;pointer-events:none';
     document.documentElement.appendChild(div);
     const px = parseFloat(getComputedStyle(div).height) || 0;
     document.documentElement.removeChild(div);
     document.documentElement.style.setProperty('--sat', `${px}px`);
-    // Kick header repaint immediately and after short delays
     kickHeaderRepaint();
     const t = setTimeout(() => kickHeaderRepaint(), 300);
-    return () => clearTimeout(t);
+    return () => {
+      if (root) root.style.overflowY = 'auto';
+      clearTimeout(t);
+    };
   }, []);
 
   // Lock scroll container while any dialog is open; restore after close (iOS keyboard shifts viewport)
@@ -953,9 +956,9 @@ export default function KidDashboard() {
       el.style.overflowY = 'auto';
       const target = savedScrollRef.current;
       el.scrollTop = target;
-      // Restore #root scroll and overflow
+      // Restore #root to hidden (kid dashboard always keeps #root locked)
       if (root) {
-        root.style.overflowY = 'auto';
+        root.style.overflowY = 'hidden';
         root.scrollTop = savedRootScrollRef.current;
       }
       // After any dialog close (keyboard or picker), apply scroll kick so
@@ -1616,7 +1619,7 @@ export default function KidDashboard() {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1, transform: 'translate3d(0,0,0)' }}>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
       {/* Header - Like Dashboard */}
       <header
         className="flex-shrink-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
