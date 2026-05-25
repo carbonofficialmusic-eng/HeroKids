@@ -48,31 +48,69 @@ export function kickScrollReset(delayMs = 150): void {
 }
 
 /**
- * Forces the sticky/fixed header to repaint after a native camera dismiss.
- * On iOS WKWebView, closing the native camera picker does NOT trigger
- * visibilitychange or resume events — the app never leaves foreground.
- * WKWebView's compositor may keep a stale cached layer for position:sticky
- * elements. Briefly toggling opacity forces a fresh composite pass.
+ * Refreshes the frozen --sat CSS variable from the live env(safe-area-inset-top).
+ * Called after camera dismiss and app resume so the header height stays correct
+ * even if WKWebView briefly reported a stale value during the transition.
+ */
+function refreshSat(): void {
+  const div = document.createElement("div");
+  div.style.cssText =
+    "position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:0;visibility:hidden;pointer-events:none";
+  document.documentElement.appendChild(div);
+  const px = parseFloat(getComputedStyle(div).height) || 0;
+  document.documentElement.removeChild(div);
+  document.documentElement.style.setProperty("--sat", `${px}px`);
+}
+
+/**
+ * Full WKWebView recovery kick after a native camera dismiss.
+ *
+ * Closing the native camera picker does NOT fire visibilitychange or resume
+ * events, so App.tsx's doResumeKick never runs. This function replicates the
+ * same sequence:
+ *  1. Refresh --sat so the frozen safe-area value is up-to-date.
+ *  2. Horizontal 1→0 scroll kick to force UIScrollView X-axis reset.
+ *  3. Save/restore #root.scrollTop so vertical scroll isn't lost.
+ *  4. Synthetic resize so hooks re-read window dimensions.
+ *  5. Synchronous reflow (getBoundingClientRect) to flush stale layout.
+ *  6. Opacity toggle on <header> to force GPU compositor re-composite.
+ *
+ * Fired immediately and at 200 / 500 / 900 ms to cover the full camera
+ * dismiss animation window.
  */
 export function kickHeaderRepaint(): void {
-  const repaint = () => {
+  const kick = () => {
+    const root = document.getElementById("root");
+    const savedTop = root ? root.scrollTop : 0;
+
+    // 1. Re-freeze safe-area value
+    refreshSat();
+
+    // 2+3. Horizontal kick + restore vertical scroll
+    window.scrollTo(1, 0);
+    window.scrollTo(0, 0);
+    if (root && root.scrollTop !== savedTop) root.scrollTop = savedTop;
+
+    // 4. Synthetic resize
+    window.dispatchEvent(new Event("resize"));
+
+    // 5. Synchronous reflow
+    void document.documentElement.getBoundingClientRect();
+
+    // 6. Header opacity toggle
     const header = document.querySelector("header");
-    if (!header) return;
-    const h = header as HTMLElement;
-    h.style.opacity = "0.9999";
-    requestAnimationFrame(() => {
-      h.style.opacity = "";
-      // Also force a reflow
-      void document.documentElement.getBoundingClientRect();
-      window.dispatchEvent(new Event("resize"));
-    });
+    if (header) {
+      const h = header as HTMLElement;
+      h.style.opacity = "0.9999";
+      requestAnimationFrame(() => {
+        h.style.opacity = "";
+        if (root && root.scrollTop !== savedTop) root.scrollTop = savedTop;
+      });
+    }
   };
-  // Immediate
-  repaint();
-  // At 200ms — camera dismiss animation may still be in progress
-  setTimeout(repaint, 200);
-  // At 500ms — final compositor settle
-  setTimeout(repaint, 500);
-  // At 900ms — last resort
-  setTimeout(repaint, 900);
+
+  kick();
+  setTimeout(kick, 200);
+  setTimeout(kick, 500);
+  setTimeout(kick, 900);
 }
