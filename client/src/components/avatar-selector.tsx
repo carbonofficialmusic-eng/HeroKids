@@ -5,7 +5,7 @@ import { Check, Upload, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
-import { isPhotoPickerCancelError, kickScrollReset, markPhotoUsed } from "@/lib/cameraUtils";
+import { isPhotoPickerCancelError, kickScrollReset, markPhotoUsed, kickHeaderRepaint } from "@/lib/cameraUtils";
 
 interface AvatarSelectorProps {
   selectedAvatar: string;
@@ -85,6 +85,7 @@ export function AvatarSelector({
         lastProcessedFileRef.current = dedupeKey;
         markPhotoUsed();
         kickScrollReset();
+        kickHeaderRepaint();
         setPreviewUrl(photo.dataUrl);
         if (onCustomUpload) {
           const file = await dataUrlToFile(photo.dataUrl, "avatar-photo.jpg");

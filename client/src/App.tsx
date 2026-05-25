@@ -196,6 +196,8 @@ function Router() {
     // WKWebView's rendering pipeline may not have settled by the first kick.
     let resumeTimer1: ReturnType<typeof setTimeout> | null = null;
     let resumeTimer2: ReturnType<typeof setTimeout> | null = null;
+    let resumeTimer3: ReturnType<typeof setTimeout> | null = null;
+    let resumeTimer4: ReturnType<typeof setTimeout> | null = null;
     const doResumeKick = () => {
       const root = document.getElementById('root');
       const savedTop = root ? root.scrollTop : 0;
@@ -217,23 +219,31 @@ function Router() {
       // 4. Force a synchronous reflow so WKWebView flushes stale cached
       //    viewport dimensions and re-evaluates position:fixed coordinates.
       void document.documentElement.getBoundingClientRect();
+
+      // 5. Force sticky/fixed headers to repaint by briefly toggling a style.
+      //    After the camera dismisses, WKWebView may not re-composite the header
+      //    layer until a visual change is detected.
+      const header = document.querySelector('header');
+      if (header) {
+        const h = header as HTMLElement;
+        h.style.opacity = '0.9999';
+        requestAnimationFrame(() => { h.style.opacity = ''; });
+      }
     };
     const onVisible = () => {
       doResumeKick();
-      // Second kick at 150 ms — WKWebView's rendering pipeline may not have
-      // finished settling when the first kick fires.
+      // Second kick at 150 ms
       if (resumeTimer1) clearTimeout(resumeTimer1);
-      resumeTimer1 = setTimeout(() => {
-        doResumeKick();
-        resumeTimer1 = null;
-      }, 150);
-      // Third kick at 350 ms — catches late safe-area / UIScrollView updates
-      // that only complete after the full transition animation finishes.
+      resumeTimer1 = setTimeout(() => { doResumeKick(); resumeTimer1 = null; }, 150);
+      // Third kick at 400 ms
       if (resumeTimer2) clearTimeout(resumeTimer2);
-      resumeTimer2 = setTimeout(() => {
-        doResumeKick();
-        resumeTimer2 = null;
-      }, 350);
+      resumeTimer2 = setTimeout(() => { doResumeKick(); resumeTimer2 = null; }, 400);
+      // Fourth kick at 700 ms — camera dismiss animation can take this long
+      if (resumeTimer3) clearTimeout(resumeTimer3);
+      resumeTimer3 = setTimeout(() => { doResumeKick(); resumeTimer3 = null; }, 700);
+      // Fifth kick at 1200 ms — final catch for slow WKWebView compositor updates
+      if (resumeTimer4) clearTimeout(resumeTimer4);
+      resumeTimer4 = setTimeout(() => { doResumeKick(); resumeTimer4 = null; }, 1200);
     };
     // visibilitychange fires on every background→foreground transition
     document.addEventListener('visibilitychange', onVisible);
@@ -250,6 +260,8 @@ function Router() {
       if (kickTimer) clearTimeout(kickTimer);
       if (resumeTimer1) clearTimeout(resumeTimer1);
       if (resumeTimer2) clearTimeout(resumeTimer2);
+      if (resumeTimer3) clearTimeout(resumeTimer3);
+      if (resumeTimer4) clearTimeout(resumeTimer4);
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener('focus', onVisible);
       window.removeEventListener('pageshow', onVisible);

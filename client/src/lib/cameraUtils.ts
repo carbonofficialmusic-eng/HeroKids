@@ -46,3 +46,33 @@ export function kickScrollReset(delayMs = 150): void {
   if (delayMs > 0) setTimeout(apply, delayMs);
   else apply();
 }
+
+/**
+ * Forces the sticky/fixed header to repaint after a native camera dismiss.
+ * On iOS WKWebView, closing the native camera picker does NOT trigger
+ * visibilitychange or resume events — the app never leaves foreground.
+ * WKWebView's compositor may keep a stale cached layer for position:sticky
+ * elements. Briefly toggling opacity forces a fresh composite pass.
+ */
+export function kickHeaderRepaint(): void {
+  const repaint = () => {
+    const header = document.querySelector("header");
+    if (!header) return;
+    const h = header as HTMLElement;
+    h.style.opacity = "0.9999";
+    requestAnimationFrame(() => {
+      h.style.opacity = "";
+      // Also force a reflow
+      void document.documentElement.getBoundingClientRect();
+      window.dispatchEvent(new Event("resize"));
+    });
+  };
+  // Immediate
+  repaint();
+  // At 200ms — camera dismiss animation may still be in progress
+  setTimeout(repaint, 200);
+  // At 500ms — final compositor settle
+  setTimeout(repaint, 500);
+  // At 900ms — last resort
+  setTimeout(repaint, 900);
+}
