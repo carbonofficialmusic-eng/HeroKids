@@ -1591,7 +1591,15 @@ export default function KidDashboard() {
   return (
     <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
       {/* Header - Like Dashboard */}
-      <header className="flex-shrink-0 z-40 w-full bg-gradient-to-b from-background/90 to-transparent" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <header
+        className="flex-shrink-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          height: 'calc(4rem + env(safe-area-inset-top))',
+          minHeight: 'calc(4rem + env(safe-area-inset-top))',
+          maxHeight: 'calc(4rem + env(safe-area-inset-top))',
+        }}
+      >
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex-shrink-0" data-testid="avatar-header-kid">
@@ -2391,13 +2399,15 @@ export default function KidDashboard() {
       </div>{/* end scrollable content area */}
 
       {/* Simplified Navigation - Fixed Bottom Bar */}
-      <motion.div
+      <div
         className="fixed bottom-0 left-0 right-0 z-50 p-2"
         style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.5, type: "spring" }}
       >
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5, type: "spring" }}
+        >
         <Card className="p-1.5 mx-2 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl sm:mx-auto">
           <div className="flex justify-center gap-1 sm:gap-2">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px]">
@@ -2430,7 +2440,8 @@ export default function KidDashboard() {
             </motion.div>
           </div>
         </Card>
-      </motion.div>
+        </motion.div>
+      </div>
 
       {/* Edit Profile Dialog - Available to all members */}
       {member && (
