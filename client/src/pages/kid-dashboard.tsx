@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { kickScrollReset, isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
+import { kickScrollReset, kickHeaderRepaint, isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -917,6 +917,23 @@ export default function KidDashboard() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const savedScrollRef = useRef(0);
 
+  // On mount (e.g. after navigating back from Family Chat), force WKWebView to
+  // re-composite the fixed container. A new position:fixed element can be
+  // briefly mis-positioned in WKWebView when the previous page also used fixed.
+  useEffect(() => {
+    // Re-read and freeze --sat in case WKWebView has stale safe-area values
+    const div = document.createElement('div');
+    div.style.cssText = 'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:0;visibility:hidden;pointer-events:none';
+    document.documentElement.appendChild(div);
+    const px = parseFloat(getComputedStyle(div).height) || 0;
+    document.documentElement.removeChild(div);
+    document.documentElement.style.setProperty('--sat', `${px}px`);
+    // Kick header repaint immediately and after short delays
+    kickHeaderRepaint();
+    const t = setTimeout(() => kickHeaderRepaint(), 300);
+    return () => clearTimeout(t);
+  }, []);
+
   // Lock scroll container while any dialog is open; restore after close (iOS keyboard shifts viewport)
   const anyKidDialogOpen = taskDialogOpen || requestRewardDialogOpen || editMemberDialogOpen || switchMemberDialogOpen;
   const savedRootScrollRef = useRef(0);
@@ -944,6 +961,8 @@ export default function KidDashboard() {
       // After any dialog close (keyboard or picker), apply scroll kick so
       // WKWebView re-syncs UIScrollView even when scrollY is falsely reported as 0.
       kickScrollReset(200);
+      // Also repaint the header — keyboard dismiss can displace fixed elements
+      kickHeaderRepaint();
       const t1 = setTimeout(() => { el.scrollTop = target; }, 350);
       const t2 = setTimeout(() => { el.scrollTop = target; }, 700);
       return () => { clearTimeout(t1); clearTimeout(t2); };
@@ -1597,7 +1616,7 @@ export default function KidDashboard() {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1, transform: 'translate3d(0,0,0)' }}>
       {/* Header - Like Dashboard */}
       <header
         className="flex-shrink-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
