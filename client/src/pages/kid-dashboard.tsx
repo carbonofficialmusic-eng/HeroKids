@@ -928,7 +928,7 @@ export default function KidDashboard() {
     document.documentElement.appendChild(div);
     const px = parseFloat(getComputedStyle(div).height) || 0;
     document.documentElement.removeChild(div);
-    document.documentElement.style.setProperty('--sat', `${px}px`);
+    if (px > 0) document.documentElement.style.setProperty('--sat', `${px}px`);
     kickHeaderRepaint();
     const t = setTimeout(() => kickHeaderRepaint(), 300);
     return () => {

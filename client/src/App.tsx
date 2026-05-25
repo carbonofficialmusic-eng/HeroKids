@@ -139,9 +139,8 @@ function Router() {
   }, [location]);
 
   // Cache env(safe-area-inset-top) as --sat CSS variable on :root.
-  // This prevents WKWebView from re-evaluating env() during transient layout
-  // passes (keyboard show/hide, dialog open, camera dismiss) which otherwise
-  // causes the header to momentarily shift as env() briefly resolves to 0.
+  // Only set when value > 0 — if WKWebView hasn't resolved the inset yet it
+  // returns 0, and a stored 0px would shadow the env() fallback permanently.
   useEffect(() => {
     const cacheSafeAreaTop = () => {
       const div = document.createElement('div');
@@ -149,12 +148,20 @@ function Router() {
       document.documentElement.appendChild(div);
       const px = parseFloat(getComputedStyle(div).height) || 0;
       document.documentElement.removeChild(div);
-      document.documentElement.style.setProperty('--sat', `${px}px`);
+      if (px > 0) {
+        document.documentElement.style.setProperty('--sat', `${px}px`);
+      }
     };
     cacheSafeAreaTop();
-    // Re-read on orientation change (landscape vs portrait have different insets)
+    // Retry shortly after — WKWebView may not know the inset on first paint
+    const t1 = setTimeout(cacheSafeAreaTop, 100);
+    const t2 = setTimeout(cacheSafeAreaTop, 500);
     window.addEventListener('orientationchange', cacheSafeAreaTop);
-    return () => window.removeEventListener('orientationchange', cacheSafeAreaTop);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener('orientationchange', cacheSafeAreaTop);
+    };
   }, []);
 
   // iOS WKWebView architectural fix:
@@ -223,7 +230,7 @@ function Router() {
       document.documentElement.appendChild(div);
       const px = parseFloat(getComputedStyle(div).height) || 0;
       document.documentElement.removeChild(div);
-      document.documentElement.style.setProperty('--sat', `${px}px`);
+      if (px > 0) document.documentElement.style.setProperty('--sat', `${px}px`);
     };
     const doResumeKick = () => {
       const root = document.getElementById('root');
