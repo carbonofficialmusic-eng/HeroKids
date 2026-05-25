@@ -917,11 +917,15 @@ export default function KidDashboard() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const savedScrollRef = useRef(0);
 
-  // On mount: lock #root overflow so it never scrolls the kid-dashboard
-  // absolute container, and kick a header repaint for WKWebView recovery.
+  // On mount: reset #root scrollTop to 0 and lock overflow so the kid-dashboard
+  // absolute container starts exactly at the viewport top (not offset by any
+  // prior parent-dashboard scroll position).
   useEffect(() => {
     const root = document.getElementById('root');
-    if (root) root.style.overflowY = 'hidden';
+    if (root) {
+      root.scrollTop = 0;
+      root.style.overflowY = 'hidden';
+    }
     // Re-read and freeze --sat
     const div = document.createElement('div');
     div.style.cssText = 'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:0;visibility:hidden;pointer-events:none';
