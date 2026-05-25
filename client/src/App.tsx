@@ -138,6 +138,25 @@ function Router() {
     document.getElementById('root')?.scrollTo({ top: 0, behavior: 'instant' });
   }, [location]);
 
+  // Cache env(safe-area-inset-top) as --sat CSS variable on :root.
+  // This prevents WKWebView from re-evaluating env() during transient layout
+  // passes (keyboard show/hide, dialog open, camera dismiss) which otherwise
+  // causes the header to momentarily shift as env() briefly resolves to 0.
+  useEffect(() => {
+    const cacheSafeAreaTop = () => {
+      const div = document.createElement('div');
+      div.style.cssText = 'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:0;visibility:hidden;pointer-events:none';
+      document.documentElement.appendChild(div);
+      const px = parseFloat(getComputedStyle(div).height) || 0;
+      document.documentElement.removeChild(div);
+      document.documentElement.style.setProperty('--sat', `${px}px`);
+    };
+    cacheSafeAreaTop();
+    // Re-read on orientation change (landscape vs portrait have different insets)
+    window.addEventListener('orientationchange', cacheSafeAreaTop);
+    return () => window.removeEventListener('orientationchange', cacheSafeAreaTop);
+  }, []);
+
   // iOS WKWebView architectural fix:
   // WKWebView's UIScrollView.contentOffset can be silently displaced by any
   // system event (keyboard, photo-picker, app-switch). Crucially, WKWebView
@@ -198,9 +217,20 @@ function Router() {
     let resumeTimer2: ReturnType<typeof setTimeout> | null = null;
     let resumeTimer3: ReturnType<typeof setTimeout> | null = null;
     let resumeTimer4: ReturnType<typeof setTimeout> | null = null;
+    const refreshSat = () => {
+      const div = document.createElement('div');
+      div.style.cssText = 'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:0;visibility:hidden;pointer-events:none';
+      document.documentElement.appendChild(div);
+      const px = parseFloat(getComputedStyle(div).height) || 0;
+      document.documentElement.removeChild(div);
+      document.documentElement.style.setProperty('--sat', `${px}px`);
+    };
     const doResumeKick = () => {
       const root = document.getElementById('root');
       const savedTop = root ? root.scrollTop : 0;
+
+      // 0. Re-read safe-area-inset-top after resume/orientation and freeze as --sat.
+      refreshSat();
 
       // 1. Horizontal kick — WKWebView may report scrollX=0 while the
       //    UIScrollView contentOffset.x is non-zero; the 1→0 forces a real reset.

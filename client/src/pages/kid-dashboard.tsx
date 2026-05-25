@@ -1602,10 +1602,10 @@ export default function KidDashboard() {
       <header
         className="flex-shrink-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
         style={{
-          paddingTop: 'env(safe-area-inset-top)',
-          height: 'calc(4rem + env(safe-area-inset-top))',
-          minHeight: 'calc(4rem + env(safe-area-inset-top))',
-          maxHeight: 'calc(4rem + env(safe-area-inset-top))',
+          paddingTop: 'var(--sat, env(safe-area-inset-top))',
+          height: 'calc(4rem + var(--sat, env(safe-area-inset-top)))',
+          minHeight: 'calc(4rem + var(--sat, env(safe-area-inset-top)))',
+          maxHeight: 'calc(4rem + var(--sat, env(safe-area-inset-top)))',
         }}
       >
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
