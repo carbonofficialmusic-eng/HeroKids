@@ -14,7 +14,7 @@ const config: CapacitorConfig = {
     iosScheme: 'https',
   },
   ios: {
-    contentInset: 'never',
+    contentInset: 'automatic',
     preferredContentMode: 'mobile',
     scheme: 'HeroKids',
   },
