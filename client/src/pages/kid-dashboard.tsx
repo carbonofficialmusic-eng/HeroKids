@@ -1592,7 +1592,7 @@ export default function KidDashboard() {
     <div className="min-h-screen">
       {/* Header — same structure as parent dashboard: fixed, in root stacking context */}
       <header
-        className="fixed top-0 left-0 right-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
+        className="fixed top-0 left-0 right-0 z-40 w-full bg-gradient-to-b from-transparent to-background/85 overflow-hidden"
         style={{
           paddingTop: 'var(--sat, env(safe-area-inset-top))',
           height: 'calc(4rem + var(--sat, env(safe-area-inset-top)))',
