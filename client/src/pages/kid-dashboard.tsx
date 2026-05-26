@@ -916,15 +916,8 @@ export default function KidDashboard() {
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
   const savedScrollRef = useRef(0);
 
-  // After first paint: re-read --sat and kick WKWebView header repaint.
+  // Kick WKWebView header repaint on mount (App.tsx already owns --sat, no re-read here)
   useEffect(() => {
-    const div = document.createElement('div');
-    div.style.cssText = 'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:0;visibility:hidden;pointer-events:none';
-    document.documentElement.appendChild(div);
-    const px = parseFloat(getComputedStyle(div).height) || 0;
-    document.documentElement.removeChild(div);
-    if (px > 0) document.documentElement.style.setProperty('--sat', `${px}px`);
-    kickHeaderRepaint();
     const t = setTimeout(() => kickHeaderRepaint(), 300);
     return () => clearTimeout(t);
   }, []);
