@@ -24,6 +24,9 @@ html, body {
   overflow-x: hidden;
   /* Ensure max width never exceeds viewport */
   max-width: 100%;
+  /* Fill the WKWebView background so it never shows as black if iOS briefly
+     displaces the scroll view during photo picker / keyboard transitions */
+  background-color: hsl(var(--background));
 }
 
 #root {
