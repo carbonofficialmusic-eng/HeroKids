@@ -1,5 +1,5 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { Link } from "wouter";
+import { useState, useEffect, useLayoutEffect } from "react";
+import { useLocation } from "wouter";
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -13,29 +13,49 @@ function measureEnv(): number {
   return px;
 }
 
-function getSat(): string {
+function btn(label: string, onClick: () => void, color = "#334155") {
   return (
-    getComputedStyle(document.documentElement)
-      .getPropertyValue("--sat")
-      .trim() || "unset"
+    <button
+      onClick={onClick}
+      style={{
+        display: "block",
+        width: "100%",
+        padding: "14px 16px",
+        marginBottom: "10px",
+        background: color,
+        color: "white",
+        fontWeight: 700,
+        fontSize: 15,
+        border: "none",
+        borderRadius: 10,
+        textAlign: "left",
+        cursor: "pointer",
+        WebkitTapHighlightColor: "transparent",
+      }}
+    >
+      {label}
+    </button>
   );
 }
 
-// ── debug bar ──────────────────────────────────────────────────────────────
+// ── debug strip ────────────────────────────────────────────────────────────
 
-function DebugBar({ label }: { label: string }) {
-  const [vals, setVals] = useState("...");
+function DebugStrip({ label }: { label: string }) {
+  const [line, setLine] = useState("...");
   useEffect(() => {
-    const update = () => {
+    const tick = () => {
       const env = measureEnv();
-      const sat = getSat();
+      const sat =
+        getComputedStyle(document.documentElement)
+          .getPropertyValue("--sat")
+          .trim() || "unset";
       const root = document.getElementById("root");
-      setVals(
+      setLine(
         `env=${env}px | --sat=${sat} | ih=${window.innerHeight} | rootST=${root?.scrollTop ?? "?"}`
       );
     };
-    update();
-    const t = setInterval(update, 1000);
+    tick();
+    const t = setInterval(tick, 800);
     return () => clearInterval(t);
   }, []);
   return (
@@ -46,376 +66,203 @@ function DebugBar({ label }: { label: string }) {
         left: 0,
         right: 0,
         zIndex: 99999,
-        background: "rgba(0,0,0,0.85)",
+        background: "rgba(0,0,0,0.9)",
         color: "lime",
         fontSize: 10,
-        padding: "3px 6px",
+        padding: "4px 6px 6px",
         fontFamily: "monospace",
         pointerEvents: "none",
-        lineHeight: 1.4,
       }}
     >
-      <div style={{ color: "#facc15" }}>{label}</div>
-      <div>{vals}</div>
+      <span style={{ color: "#facc15" }}>{label} · </span>
+      {line}
     </div>
   );
 }
 
-// ── VARIANTE A: position:fixed outer + flex-shrink-0 header (aktueller Code) ─
+// ── shared content ─────────────────────────────────────────────────────────
 
-function VariantA() {
+function Content({ name, go }: { name: string; go: (path: string) => void }) {
+  return (
+    <div style={{ padding: "16px 16px 80px" }}>
+      <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginBottom: 20 }}>
+        Sitzt der Balken direkt unter der Uhrzeit (Statusleiste)?{"\n"}
+        Tippe auf eine andere Variante, dann komm zurück — sitzt er noch?
+      </p>
+      {["A", "B", "C", "D"]
+        .filter((v) => v !== name)
+        .map((v) => btn(`→ Variante ${v} (direkt wechseln)`, () => go(`/ios-test/${v.toLowerCase()}`), "#1e293b"))}
+      {btn(
+        "→ Zwischen-Seite (scrollen) dann zurück",
+        () => go(`/ios-test/scroll?back=${name.toLowerCase()}`),
+        "#0f4c75"
+      )}
+      {btn("← Zurück zur echten App", () => go("/"), "#1a1a1a")}
+    </div>
+  );
+}
+
+// ── Variante A: position:fixed + flex-shrink-0 ─────────────────────────────
+
+function VariantA({ go }: { go: (p: string) => void }) {
   useLayoutEffect(() => {
     const root = document.getElementById("root");
     if (root) root.style.overflowY = "hidden";
-    return () => {
-      if (root) root.style.overflowY = "auto";
-    };
+    return () => { const r = document.getElementById("root"); if (r) r.style.overflowY = "auto"; };
   }, []);
-
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        zIndex: 1,
-        background: "#1e1b4b",
-      }}
-    >
-      <header
-        style={{
-          flexShrink: 0,
-          background: "#4f46e5",
-          paddingTop: "var(--sat, env(safe-area-inset-top))",
-          height: "calc(4rem + var(--sat, env(safe-area-inset-top)))",
-        }}
-      >
-        <div
-          style={{
-            height: "4rem",
-            display: "flex",
-            alignItems: "center",
-            padding: "0 1rem",
-            color: "white",
-            fontWeight: "bold",
-          }}
-        >
-          A — fixed+flex-shrink-0
+    <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 1, background: "#0f0f2d" }}>
+      <header style={{
+        flexShrink: 0, background: "#4f46e5",
+        paddingTop: "var(--sat, env(safe-area-inset-top))",
+        height: "calc(4rem + var(--sat, env(safe-area-inset-top)))",
+        display: "flex", alignItems: "flex-end",
+      }}>
+        <div style={{ height: "4rem", display: "flex", alignItems: "center", padding: "0 16px", color: "white", fontWeight: 700, fontSize: 15 }}>
+          A — fixed + flex-shrink-0
         </div>
       </header>
-      <div style={{ flex: 1, overflowY: "auto", padding: "1rem", color: "white" }}>
-        <NavButtons variant="A" />
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        <Content name="A" go={go} />
       </div>
-      <DebugBar label="Variante A: position:fixed + flex-shrink-0" />
+      <DebugStrip label="A" />
     </div>
   );
 }
 
-// ── VARIANTE B: sticky top-0 header in normalem flow ──────────────────────
+// ── Variante B: sticky top:0 (wie Parent-Dashboard) ───────────────────────
 
-function VariantB() {
+function VariantB({ go }: { go: (p: string) => void }) {
   useLayoutEffect(() => {
     const root = document.getElementById("root");
-    if (root) {
-      root.scrollTop = 0;
-      root.style.overflowY = "auto";
-    }
+    if (root) { root.scrollTop = 0; root.style.overflowY = "auto"; }
   }, []);
-
   return (
-    <div style={{ minHeight: "100%", background: "#1a2e1a" }}>
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 40,
-          background: "#16a34a",
-          paddingTop: "var(--sat, env(safe-area-inset-top))",
-          height: "calc(4rem + var(--sat, env(safe-area-inset-top)))",
-        }}
-      >
-        <div
-          style={{
-            height: "4rem",
-            display: "flex",
-            alignItems: "center",
-            padding: "0 1rem",
-            color: "white",
-            fontWeight: "bold",
-          }}
-        >
+    <div style={{ minHeight: "100%", background: "#0d1f0d" }}>
+      <header style={{
+        position: "sticky", top: 0, zIndex: 40, background: "#16a34a",
+        paddingTop: "var(--sat, env(safe-area-inset-top))",
+        height: "calc(4rem + var(--sat, env(safe-area-inset-top)))",
+        display: "flex", alignItems: "flex-end",
+      }}>
+        <div style={{ height: "4rem", display: "flex", alignItems: "center", padding: "0 16px", color: "white", fontWeight: 700, fontSize: 15 }}>
           B — sticky top:0 (wie Parent)
         </div>
       </header>
-      <div style={{ padding: "1rem", color: "white" }}>
-        <NavButtons variant="B" />
-      </div>
-      <DebugBar label="Variante B: sticky top:0 (wie Parent-Dashboard)" />
+      <Content name="B" go={go} />
+      <DebugStrip label="B" />
     </div>
   );
 }
 
-// ── VARIANTE C: paddingTop direkt auf #root (body-level) ──────────────────
+// ── Variante C: paddingTop auf #root ──────────────────────────────────────
 
-function VariantC() {
+function VariantC({ go }: { go: (p: string) => void }) {
   useLayoutEffect(() => {
     const root = document.getElementById("root");
-    if (root) {
-      root.scrollTop = 0;
-      root.style.overflowY = "auto";
-      root.style.paddingTop = "var(--sat, env(safe-area-inset-top))";
-    }
-    return () => {
-      const root = document.getElementById("root");
-      if (root) root.style.paddingTop = "";
-    };
+    if (root) { root.scrollTop = 0; root.style.overflowY = "auto"; root.style.paddingTop = "var(--sat, env(safe-area-inset-top))"; }
+    return () => { const r = document.getElementById("root"); if (r) r.style.paddingTop = ""; };
   }, []);
-
   return (
-    <div style={{ minHeight: "100%", background: "#1a1a2e" }}>
-      <header
-        style={{
-          background: "#7c3aed",
-          height: "4rem",
-          display: "flex",
-          alignItems: "center",
-          padding: "0 1rem",
-          color: "white",
-          fontWeight: "bold",
-          position: "sticky",
-          top: 0,
-          zIndex: 40,
-        }}
-      >
+    <div style={{ minHeight: "100%", background: "#120d1f" }}>
+      <header style={{
+        position: "sticky", top: 0, zIndex: 40, background: "#7c3aed",
+        height: "4rem", display: "flex", alignItems: "center",
+        padding: "0 16px", color: "white", fontWeight: 700, fontSize: 15,
+      }}>
         C — paddingTop auf #root
       </header>
-      <div style={{ padding: "1rem", color: "white" }}>
-        <NavButtons variant="C" />
-      </div>
-      <DebugBar label="Variante C: paddingTop direkt auf #root" />
+      <Content name="C" go={go} />
+      <DebugStrip label="C" />
     </div>
   );
 }
 
-// ── VARIANTE D: position:fixed + paddingTop auf dem CONTAINER selbst ───────
+// ── Variante D: fixed container, Padding auf Container ────────────────────
 
-function VariantD() {
+function VariantD({ go }: { go: (p: string) => void }) {
   useLayoutEffect(() => {
     const root = document.getElementById("root");
     if (root) root.style.overflowY = "hidden";
-    return () => {
-      const root = document.getElementById("root");
-      if (root) root.style.overflowY = "auto";
-    };
+    return () => { const r = document.getElementById("root"); if (r) r.style.overflowY = "auto"; };
   }, []);
-
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        background: "#2d1515",
-        paddingTop: "var(--sat, env(safe-area-inset-top))",
-      }}
-    >
-      <header
-        style={{
-          flexShrink: 0,
-          height: "4rem",
-          background: "#dc2626",
-          display: "flex",
-          alignItems: "center",
-          padding: "0 1rem",
-          color: "white",
-          fontWeight: "bold",
-        }}
-      >
+    <div style={{
+      position: "fixed", inset: 0, display: "flex", flexDirection: "column",
+      background: "#1f0d0d",
+      paddingTop: "var(--sat, env(safe-area-inset-top))",
+    }}>
+      <header style={{
+        flexShrink: 0, height: "4rem", background: "#dc2626",
+        display: "flex", alignItems: "center",
+        padding: "0 16px", color: "white", fontWeight: 700, fontSize: 15,
+      }}>
         D — fixed container + paddingTop
       </header>
-      <div style={{ flex: 1, overflowY: "auto", padding: "1rem", color: "white" }}>
-        <NavButtons variant="D" />
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        <Content name="D" go={go} />
       </div>
-      <DebugBar label="Variante D: fixed container mit paddingTop (kein header-padding)" />
+      <DebugStrip label="D" />
     </div>
   );
 }
 
-// ── Navigation ─────────────────────────────────────────────────────────────
+// ── Zwischen-Seite: scrollbarer Inhalt ────────────────────────────────────
 
-function NavButtons({ variant }: { variant: string }) {
-  const variants = ["A", "B", "C", "D"];
-  return (
-    <div>
-      <p style={{ marginBottom: "1rem", opacity: 0.7, fontSize: 13 }}>
-        Aktuell: <strong>Variante {variant}</strong>
-        <br />
-        Schau ob der farbige Header direkt unter der Statusleiste sitzt.
-        <br />
-        Navigiere zu einer anderen Variante und zurück — sitzt er immer noch richtig?
-      </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-        {variants
-          .filter((v) => v !== variant)
-          .map((v) => (
-            <Link key={v} href={`/ios-test/${v.toLowerCase()}`}>
-              <div
-                style={{
-                  background: "rgba(255,255,255,0.15)",
-                  padding: "0.75rem 1rem",
-                  borderRadius: 8,
-                  color: "white",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                → Variante {v} testen
-              </div>
-            </Link>
-          ))}
-        <Link href="/ios-test/between">
-          <div
-            style={{
-              background: "rgba(255,255,200,0.2)",
-              padding: "0.75rem 1rem",
-              borderRadius: 8,
-              color: "white",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            → Zwischen-Seite (simuliert Parent→Kid Navigation)
-          </div>
-        </Link>
-        <Link href="/">
-          <div
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              padding: "0.75rem 1rem",
-              borderRadius: 8,
-              color: "white",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            ← Zurück zur App
-          </div>
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-// ── Zwischen-Seite (scrollbarer Inhalt wie Parent-Dashboard) ───────────────
-
-function BetweenPage({ returnTo }: { returnTo: string }) {
+function ScrollPage({ backTo, go }: { backTo: string; go: (p: string) => void }) {
   useLayoutEffect(() => {
     const root = document.getElementById("root");
-    if (root) root.style.overflowY = "auto";
-    return () => {
-      const root = document.getElementById("root");
-      if (root) root.style.overflowY = "auto";
-    };
+    if (root) { root.scrollTop = 0; root.style.overflowY = "auto"; }
   }, []);
-
+  const label = backTo.toUpperCase();
   return (
-    <div style={{ minHeight: "100%", background: "#0f172a" }}>
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 40,
-          background: "#0ea5e9",
-          paddingTop: "var(--sat, env(safe-area-inset-top))",
-          height: "calc(4rem + var(--sat, env(safe-area-inset-top)))",
-        }}
-      >
-        <div
-          style={{
-            height: "4rem",
-            display: "flex",
-            alignItems: "center",
-            padding: "0 1rem",
-            color: "white",
-            fontWeight: "bold",
-          }}
-        >
-          Zwischen-Seite (scroll runter, dann zurück)
+    <div style={{ minHeight: "150vh", background: "#0c1a2e" }}>
+      <header style={{
+        position: "sticky", top: 0, zIndex: 40, background: "#0ea5e9",
+        paddingTop: "var(--sat, env(safe-area-inset-top))",
+        height: "calc(4rem + var(--sat, env(safe-area-inset-top)))",
+        display: "flex", alignItems: "flex-end",
+      }}>
+        <div style={{ height: "4rem", display: "flex", alignItems: "center", padding: "0 16px", color: "white", fontWeight: 700, fontSize: 15 }}>
+          Scrolle bis ganz unten → dann zurück
         </div>
       </header>
-      <div style={{ padding: "1rem", color: "white" }}>
-        <p style={{ opacity: 0.7, fontSize: 13, marginBottom: "1rem" }}>
-          Scrolle diese Seite komplett herunter, dann gehe zurück zur Variante — sitzt der Header noch richtig?
+      <div style={{ padding: "16px 16px 80px", color: "white" }}>
+        {btn(`← Zurück zu Variante ${label} (von oben)`, () => go(`/ios-test/${backTo}`), "#0369a1")}
+        <p style={{ fontSize: 13, opacity: 0.6, margin: "12px 0" }}>
+          Scrolle diese Seite jetzt komplett herunter, dann tippe auf den Link unten.
         </p>
-        <Link href={`/ios-test/${returnTo}`}>
-          <div
-            style={{
-              background: "#0ea5e9",
-              padding: "0.75rem 1rem",
-              borderRadius: 8,
-              color: "white",
-              fontWeight: 600,
-              cursor: "pointer",
-              marginBottom: "1rem",
-            }}
-          >
-            ← Zurück zu Variante {returnTo.toUpperCase()}
-          </div>
-        </Link>
-        {Array.from({ length: 30 }).map((_, i) => (
-          <div
-            key={i}
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              padding: "0.75rem",
-              borderRadius: 6,
-              marginBottom: "0.5rem",
-              fontSize: 13,
-            }}
-          >
-            Scroll-Inhalt Zeile {i + 1} — scrolle bis ganz unten
+        {Array.from({ length: 25 }).map((_, i) => (
+          <div key={i} style={{ padding: "10px", marginBottom: 6, background: "rgba(255,255,255,0.05)", borderRadius: 6, fontSize: 13 }}>
+            Zeile {i + 1} — scroll weiter runter…
           </div>
         ))}
-        <Link href={`/ios-test/${returnTo}`}>
-          <div
-            style={{
-              background: "#0ea5e9",
-              padding: "0.75rem 1rem",
-              borderRadius: 8,
-              color: "white",
-              fontWeight: 600,
-              cursor: "pointer",
-              marginTop: "0.5rem",
-            }}
-          >
-            ← Zurück zu Variante {returnTo.toUpperCase()} (von unten)
-          </div>
-        </Link>
+        {btn(`← Zurück zu Variante ${label} (von unten)`, () => go(`/ios-test/${backTo}`), "#0369a1")}
       </div>
-      <DebugBar label="Zwischen-Seite" />
+      <DebugStrip label="Scroll-Seite" />
     </div>
   );
 }
 
-// ── Router ─────────────────────────────────────────────────────────────────
+// ── main export ────────────────────────────────────────────────────────────
 
 export default function IosTest({ variant }: { variant?: string }) {
+  const [, navigate] = useLocation();
+  const go = (path: string) => navigate(path);
+
   const v = (variant || "a").toLowerCase();
 
-  if (v === "between") {
-    const ref = useRef(
+  // zwischen-seite: /ios-test/scroll?back=a
+  if (v === "scroll") {
+    const backTo =
       typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search).get("from") || "a"
-        : "a"
-    );
-    return <BetweenPage returnTo={ref.current} />;
+        ? new URLSearchParams(window.location.search).get("back") || "a"
+        : "a";
+    return <ScrollPage backTo={backTo} go={go} />;
   }
 
-  if (v === "b") return <VariantB />;
-  if (v === "c") return <VariantC />;
-  if (v === "d") return <VariantD />;
-  return <VariantA />;
+  if (v === "b") return <VariantB go={go} />;
+  if (v === "c") return <VariantC go={go} />;
+  if (v === "d") return <VariantD go={go} />;
+  return <VariantA go={go} />;
 }
