@@ -19,6 +19,10 @@ const config: CapacitorConfig = {
     scheme: 'HeroKids',
   },
   plugins: {
+    StatusBar: {
+      overlay: true,
+      style: 'LIGHT',
+    },
     SplashScreen: {
       launchShowDuration: 2000,
       launchAutoHide: true,

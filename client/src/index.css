@@ -24,9 +24,10 @@ html, body {
   overflow-x: hidden;
   /* Ensure max width never exceeds viewport */
   max-width: 100%;
-  /* Fill the WKWebView background so it never shows as black if iOS briefly
-     displaces the scroll view during photo picker / keyboard transitions */
-  background-color: hsl(var(--background));
+  /* Transparent so iOS can see the web content behind the status bar.
+     The App.tsx skin background (position:fixed; inset:0) covers the
+     full viewport — no WKWebView flash is possible once it renders. */
+  background: transparent;
 }
 
 #root {
