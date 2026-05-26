@@ -1409,11 +1409,11 @@ export default function KidDashboard() {
     setTaskDialogOpen(true);
   };
 
-  // Show loading state
+  // Show loading state — use same fixed container so WKWebView never sees a layout shift
   const isLoading = userLoading || deviceSessionLoading || memberLoading;
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -1422,7 +1422,7 @@ export default function KidDashboard() {
   // If not logged in via either method
   if (!hasAnyAuth || !member) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
         <Card className="p-8 text-center">
           <p className="text-lg mb-4">{t("kidDashboard.loginPrompt")}</p>
           <Button asChild>
