@@ -44,7 +44,9 @@
                 <string>UIInterfaceOrientationLandscapeRight</string>
         </array>
         <key>UIViewControllerBasedStatusBarAppearance</key>
-        <true/>
+        <false/>
+        <key>UIStatusBarStyle</key>
+        <string>UIStatusBarStyleLightContent</string>
         <key>NSCameraUsageDescription</key>
         <string>HeroKids needs camera access so kids can take photos as proof of completing tasks.</string>
         <key>NSPhotoLibraryUsageDescription</key>
