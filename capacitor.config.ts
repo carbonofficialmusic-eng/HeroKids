@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.herokids.app',
+  appId: 'app.herokids.com',
   appName: 'HeroKids',
   webDir: 'dist/public',
   server: {
