@@ -1622,8 +1622,8 @@ export default function KidDashboard() {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
-      {/* Header — position:fixed so it never scrolls away in WKWebView */}
+    <>
+      {/* Header — outside the stacking context so transparency works like parent dashboard */}
       <header
         className="fixed top-0 left-0 right-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
         style={{
@@ -1687,6 +1687,8 @@ export default function KidDashboard() {
         </div>
       </header>
 
+      {/* Content container — isolated scroll area, z-index:1 so it sits above background */}
+      <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
       {/* Spacer so content starts below the fixed header */}
       <div style={{ flexShrink: 0, height: 'calc(4rem + var(--sat, env(safe-area-inset-top)))' }} />
 
@@ -2522,6 +2524,7 @@ export default function KidDashboard() {
           familyName={member.familyName}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }
