@@ -116,6 +116,19 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
         {!currentBg && !previousBg && (
           <div className="absolute inset-0 bg-background" />
         )}
+
+        {/* Dark vignette at the very top — ensures the status-bar area (behind
+            the clock / wifi / battery icons) is always dark enough for iOS to
+            keep its own .lightContent (white) icons without adding a solid
+            black overlay of its own. The gradient fades out after the safe-area
+            zone so it is invisible below the header. */}
+        <div
+          className="absolute inset-x-0 top-0 pointer-events-none"
+          style={{
+            height: 'calc(var(--sat, env(safe-area-inset-top)) + 1rem)',
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 100%)',
+          }}
+        />
       </div>
       
       {/* isolation:isolate creates a stacking context so this layer paints
