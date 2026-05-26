@@ -392,6 +392,34 @@ function Router() {
   );
 }
 
+function SatDebug() {
+  const [info, setInfo] = useState('...');
+  useEffect(() => {
+    const measure = () => {
+      const div = document.createElement('div');
+      div.style.cssText = 'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:1px;visibility:hidden;pointer-events:none';
+      document.body.appendChild(div);
+      const px = parseFloat(getComputedStyle(div).height) || 0;
+      document.body.removeChild(div);
+      const sat = getComputedStyle(document.documentElement).getPropertyValue('--sat').trim() || 'unset';
+      setInfo(`env=${px}px | --sat=${sat} | ih=${window.innerHeight}`);
+    };
+    measure();
+    const t = setInterval(measure, 2000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div style={{
+      position: 'fixed', bottom: 60, left: 0, right: 0, zIndex: 99999,
+      background: 'rgba(0,0,0,0.8)', color: 'lime', fontSize: 11,
+      padding: '4px 8px', textAlign: 'center', fontFamily: 'monospace',
+      pointerEvents: 'none',
+    }}>
+      {info}
+    </div>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -399,6 +427,7 @@ function App() {
         <TooltipProvider>
           <LanguageProvider>
             <Toaster />
+            <SatDebug />
             <Router />
           </LanguageProvider>
         </TooltipProvider>
