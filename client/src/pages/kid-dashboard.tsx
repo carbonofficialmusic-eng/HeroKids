@@ -917,16 +917,18 @@ export default function KidDashboard() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const savedScrollRef = useRef(0);
 
-  // On mount: reset #root scrollTop to 0 and lock overflow so the kid-dashboard
-  // absolute container starts exactly at the viewport top (not offset by any
-  // prior parent-dashboard scroll position).
-  useEffect(() => {
+  // On mount (before first paint): lock #root overflow so WKWebView can't scroll
+  // the #root container while the fixed kid-dashboard is shown.
+  useLayoutEffect(() => {
     const root = document.getElementById('root');
-    if (root) {
-      root.scrollTop = 0;
-      root.style.overflowY = 'hidden';
-    }
-    // Re-read and freeze --sat
+    if (root) root.style.overflowY = 'hidden';
+    return () => {
+      if (root) root.style.overflowY = 'auto';
+    };
+  }, []);
+
+  // After first paint: re-read --sat and kick WKWebView header repaint.
+  useEffect(() => {
     const div = document.createElement('div');
     div.style.cssText = 'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:0;visibility:hidden;pointer-events:none';
     document.documentElement.appendChild(div);
@@ -935,10 +937,7 @@ export default function KidDashboard() {
     if (px > 0) document.documentElement.style.setProperty('--sat', `${px}px`);
     kickHeaderRepaint();
     const t = setTimeout(() => kickHeaderRepaint(), 300);
-    return () => {
-      if (root) root.style.overflowY = 'auto';
-      clearTimeout(t);
-    };
+    return () => clearTimeout(t);
   }, []);
 
   // Lock scroll container while any dialog is open; restore after close (iOS keyboard shifts viewport)
@@ -1623,7 +1622,7 @@ export default function KidDashboard() {
   };
 
   return (
-    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
       {/* Header - Like Dashboard */}
       <header
         className="flex-shrink-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
