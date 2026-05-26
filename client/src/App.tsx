@@ -149,7 +149,10 @@ function Router() {
       document.documentElement.appendChild(div);
       const px = parseFloat(getComputedStyle(div).height) || 0;
       document.documentElement.removeChild(div);
-      if (px > 0) {
+      // Guard: plausible safe-area range only (0 < px < 100).
+      // Transient WKWebView spikes (e.g. UIScrollView offset leaking in) are
+      // rejected so a stale large value can never corrupt --sat.
+      if (px > 0 && px < 100) {
         document.documentElement.style.setProperty('--sat', `${px}px`);
       }
     };

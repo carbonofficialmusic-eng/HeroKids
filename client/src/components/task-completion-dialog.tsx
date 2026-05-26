@@ -101,6 +101,7 @@ export function TaskCompletionDialog({
     if (file) {
       markPhotoUsed();
       kickScrollReset();
+      kickHeaderRepaint();
       setUploadedPhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {

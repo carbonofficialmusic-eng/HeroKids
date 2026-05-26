@@ -59,7 +59,13 @@ function refreshSat(): void {
   document.documentElement.appendChild(div);
   const px = parseFloat(getComputedStyle(div).height) || 0;
   document.documentElement.removeChild(div);
-  document.documentElement.style.setProperty("--sat", `${px}px`);
+  // Guard: only write if value is a plausible safe-area size (0 < px < 100).
+  // WKWebView can momentarily return the full UIScrollView offset (e.g. 111px)
+  // when the viewport hasn't settled after camera dismiss or wake — that would
+  // corrupt --sat and shift the header downward. Ignore those transient spikes.
+  if (px > 0 && px < 100) {
+    document.documentElement.style.setProperty("--sat", `${px}px`);
+  }
 }
 
 /**

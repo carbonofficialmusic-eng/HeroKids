@@ -56,6 +56,7 @@ export function AvatarSelector({
       lastProcessedFileRef.current = fileKey;
       markPhotoUsed();
       kickScrollReset();
+      kickHeaderRepaint();
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
