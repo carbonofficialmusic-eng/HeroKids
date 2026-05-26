@@ -26,7 +26,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        // Restore the status bar appearance after native pickers (photo picker, camera)
+        // dismiss. PHPickerViewController leaves a dark status-bar background behind;
+        // calling setNeedsStatusBarAppearanceUpdate() forces the root view controller to
+        // re-read its preferredStatusBarStyle and clear that leftover overlay.
+        DispatchQueue.main.async {
+            self.window?.rootViewController?.setNeedsStatusBarAppearanceUpdate()
+        }
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
