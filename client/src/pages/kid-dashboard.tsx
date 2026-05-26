@@ -1623,9 +1623,9 @@ export default function KidDashboard() {
 
   return (
     <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
-      {/* Header - Like Dashboard */}
+      {/* Header — position:fixed so it never scrolls away in WKWebView */}
       <header
-        className="flex-shrink-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
+        className="fixed top-0 left-0 right-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
         style={{
           paddingTop: 'var(--sat, env(safe-area-inset-top))',
           height: 'calc(4rem + var(--sat, env(safe-area-inset-top)))',
@@ -1687,9 +1687,12 @@ export default function KidDashboard() {
         </div>
       </header>
 
+      {/* Spacer so content starts below the fixed header */}
+      <div style={{ flexShrink: 0, height: 'calc(4rem + var(--sat, env(safe-area-inset-top)))' }} />
+
       {/* Scrollable content area — isolated from #root so Radix dialogs don't reset scroll */}
       <div ref={scrollContainerRef} style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'none' }}>
-      <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-6 pb-[calc(8rem+env(safe-area-inset-bottom))] overflow-hidden">
+      <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-4 pb-[calc(8rem+env(safe-area-inset-bottom))] overflow-hidden">
         {/* HeroKids Logo */}
         <div className="flex justify-center">
           <motion.img 

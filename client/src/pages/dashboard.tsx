@@ -988,9 +988,9 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      {/* Header */}
+      {/* Header — position:fixed so it never scrolls away in WKWebView */}
       <header
-        className="sticky top-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 flex-shrink-0 overflow-hidden"
+        className="fixed top-0 left-0 right-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
         style={{
           paddingTop: 'var(--sat, env(safe-area-inset-top))',
           height: 'calc(4rem + var(--sat, env(safe-area-inset-top)))',
@@ -1052,7 +1052,10 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className={`container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden ${isParent ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))]" : ""}`}>
+      <div
+        className={`container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden ${isParent ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))]" : ""}`}
+        style={{ paddingTop: 'calc(4rem + var(--sat, env(safe-area-inset-top)) + 1rem)' }}
+      >
         {isParent ? (
           /* Parent View */
           <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
