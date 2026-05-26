@@ -914,18 +914,7 @@ export default function KidDashboard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const savedScrollRef = useRef(0);
-
-  // On mount (before first paint): lock #root overflow so WKWebView can't scroll
-  // the #root container while the fixed kid-dashboard is shown.
-  useLayoutEffect(() => {
-    const root = document.getElementById('root');
-    if (root) root.style.overflowY = 'hidden';
-    return () => {
-      if (root) root.style.overflowY = 'auto';
-    };
-  }, []);
 
   // After first paint: re-read --sat and kick WKWebView header repaint.
   useEffect(() => {
@@ -940,37 +929,22 @@ export default function KidDashboard() {
     return () => clearTimeout(t);
   }, []);
 
-  // Lock scroll container while any dialog is open; restore after close (iOS keyboard shifts viewport)
+  // Lock #root scroll while any dialog is open — same pattern as parent dashboard
   const anyKidDialogOpen = taskDialogOpen || requestRewardDialogOpen || editMemberDialogOpen || switchMemberDialogOpen;
-  const savedRootScrollRef = useRef(0);
   useLayoutEffect(() => {
-    const el = scrollContainerRef.current;
     const root = document.getElementById('root');
-    if (!el) return;
+    if (!root) return;
     if (anyKidDialogOpen) {
-      savedScrollRef.current = el.scrollTop;
-      el.style.overflowY = 'hidden';
-      // Also lock #root so iOS WKWebView cannot shift the sticky header
-      if (root) {
-        savedRootScrollRef.current = root.scrollTop;
-        root.style.overflowY = 'hidden';
-      }
+      savedScrollRef.current = root.scrollTop;
+      root.style.overflowY = 'hidden';
     } else {
-      el.style.overflowY = 'auto';
+      root.style.overflowY = 'auto';
       const target = savedScrollRef.current;
-      el.scrollTop = target;
-      // Restore #root to hidden (kid dashboard always keeps #root locked)
-      if (root) {
-        root.style.overflowY = 'hidden';
-        root.scrollTop = savedRootScrollRef.current;
-      }
-      // After any dialog close (keyboard or picker), apply scroll kick so
-      // WKWebView re-syncs UIScrollView even when scrollY is falsely reported as 0.
+      root.scrollTop = target;
       kickScrollReset(200);
-      // Also repaint the header — keyboard dismiss can displace fixed elements
       kickHeaderRepaint();
-      const t1 = setTimeout(() => { el.scrollTop = target; }, 350);
-      const t2 = setTimeout(() => { el.scrollTop = target; }, 700);
+      const t1 = setTimeout(() => { root.scrollTop = target; }, 350);
+      const t2 = setTimeout(() => { root.scrollTop = target; }, 700);
       return () => { clearTimeout(t1); clearTimeout(t2); };
     }
   }, [anyKidDialogOpen]);
@@ -1622,8 +1596,8 @@ export default function KidDashboard() {
   };
 
   return (
-    <>
-      {/* Header — outside the stacking context so transparency works like parent dashboard */}
+    <div className="min-h-screen">
+      {/* Header — same structure as parent dashboard: fixed, in root stacking context */}
       <header
         className="fixed top-0 left-0 right-0 z-40 w-full bg-gradient-to-b from-background/95 to-background/80 overflow-hidden"
         style={{
@@ -1687,13 +1661,8 @@ export default function KidDashboard() {
         </div>
       </header>
 
-      {/* Content container — isolated scroll area, z-index:1 so it sits above background */}
-      <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
-      {/* Spacer so content starts below the fixed header */}
-      <div style={{ flexShrink: 0, height: 'calc(4rem + var(--sat, env(safe-area-inset-top)))' }} />
-
-      {/* Scrollable content area — isolated from #root so Radix dialogs don't reset scroll */}
-      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'none' }}>
+      {/* Content — paddingTop pushes below fixed header, #root handles scrolling like parent dashboard */}
+      <div style={{ paddingTop: 'calc(4rem + var(--sat, env(safe-area-inset-top)))' }}>
       <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-4 pb-[calc(8rem+env(safe-area-inset-bottom))] overflow-hidden">
         {/* HeroKids Logo */}
         <div className="flex justify-center">
@@ -2434,7 +2403,7 @@ export default function KidDashboard() {
         )}
 
       </div>
-      </div>{/* end scrollable content area */}
+      </div>
 
       {/* Simplified Navigation - Fixed Bottom Bar */}
       <div
@@ -2524,7 +2493,6 @@ export default function KidDashboard() {
           familyName={member.familyName}
         />
       )}
-      </div>
-    </>
+    </div>
   );
 }
