@@ -29,6 +29,7 @@ import MyAchievements from "@/pages/my-achievements";
 import LinkDevice from "@/pages/link-device";
 import Admin from "@/pages/admin";
 import Privacy from "@/pages/privacy";
+import IosTest from "@/pages/ios-test";
 
 interface FamilyMember {
   id: number;
@@ -386,6 +387,12 @@ function Router() {
         <Route path="/link-device" component={LinkDevice} />
         <Route path="/privacy" component={Privacy} />
         <Route path="/admin" component={Admin} />
+        <Route path="/ios-test">
+          <IosTest variant="a" />
+        </Route>
+        <Route path="/ios-test/:variant">
+          {(params) => <IosTest variant={params.variant} />}
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </BackgroundWrapper>
