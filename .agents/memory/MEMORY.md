@@ -1,1 +1,2 @@
 - [iOS Status Bar Black Bar Fix](ios-statusbar-fix.md) — contentInset:'never' + apple-mobile-web-app-status-bar-style:black-translucent eliminates native black bar in WKWebView overlay mode
+- [Replit Dev Auth Fix](replit-dev-auth.md) — Replit preview iframe blocks cookies; dev-token-in-localStorage + X-Dev-Token header is the fix
