@@ -398,6 +398,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
+  // Skin images served with long-lived cache (1 year, immutable).
+  // Only unlocked skins are ever fetched by the client, so this is
+  // effectively "load once, cache forever".
+  app.use('/skins', (req, res, next) => {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  });
+  app.use('/skins', express.static(join(process.cwd(), 'client', 'public', 'skins')));
+
   // NOTE: Stripe webhook handler is in server/index.ts (MUST be before express.json())
   // The webhook endpoint is /api/stripe-webhook (with hyphen, not slash)
 
