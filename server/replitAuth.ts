@@ -123,10 +123,11 @@ export function getSession() {
     store,
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       httpOnly: true,
-      secure: !isDev,
-      sameSite: isDev ? false : "lax",
+      secure: true,
+      sameSite: isDev ? "none" : "lax",
       maxAge: sessionTtl,
     },
   });
