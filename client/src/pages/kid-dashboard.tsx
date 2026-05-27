@@ -897,11 +897,16 @@ function useStickyPanel(isDesktop: boolean) {
       setStickyStyle({});
       return;
     }
+
+    const getHeaderBottom = () =>
+      (document.querySelector('[data-app-header]') as HTMLElement | null)
+        ?.getBoundingClientRect().bottom ?? 0;
+
     const handleScroll = () => {
       if (!containerRef.current || !panelRef.current) return;
       const containerRect = containerRef.current.getBoundingClientRect();
       const panelHeight = panelRef.current.offsetHeight;
-      const topOffset = document.querySelector('.fixed.top-0')?.getBoundingClientRect().bottom ?? 72;
+      const topOffset = getHeaderBottom();
       if (containerRect.top < topOffset) {
         const maxScroll = containerRect.height - panelHeight;
         const currentScroll = topOffset - containerRect.top;
@@ -914,12 +919,22 @@ function useStickyPanel(isDesktop: boolean) {
         setStickyStyle({});
       }
     };
+
+    // Re-run whenever the header resizes (safe-area changes, font-scale, etc.)
+    const headerEl = document.querySelector('[data-app-header]');
+    let ro: ResizeObserver | null = null;
+    if (headerEl && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(handleScroll);
+      ro.observe(headerEl);
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleScroll, { passive: true });
     handleScroll();
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
+      ro?.disconnect();
     };
   }, [isDesktop]);
 
@@ -1652,6 +1667,7 @@ export default function KidDashboard() {
     <div className="min-h-screen">
       {/* Header — same structure as parent dashboard: fixed, in root stacking context */}
       <header
+        data-app-header
         className="fixed top-0 left-0 right-0 z-40 w-full bg-gradient-to-b from-transparent to-background/85 overflow-hidden"
         style={{
           paddingTop: 'var(--sat, env(safe-area-inset-top))',
