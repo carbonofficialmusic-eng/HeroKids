@@ -602,18 +602,18 @@ function TaskCard({
       className="min-w-0"
     >
       <Card
-        className={`p-4 transition-all bg-card/80 backdrop-blur-md border-2 rounded-2xl min-w-0 w-full ${
-          isActionable && !isRejected ? "cursor-pointer border-border hover:border-primary" : 
-          isActionable && isRejected ? "cursor-pointer border-blue-500 hover:border-blue-600" :
-          isApproved ? "opacity-70 border-green-500" :
-          isPending ? "opacity-60 border-amber-500" :
-          hasNoSlots ? "opacity-50 border-amber-500" :
-          isSharedTaskNotAssigned ? "opacity-50 border-muted" :
-          allSharedMembersCompleted ? "opacity-60 border-green-500" :
-          dueDateInfo.notYet ? "opacity-50 border-muted" :
-          dueDateInfo.expired ? "opacity-40 border-destructive" :
-          isWeekendUnavailable ? "opacity-50 border-muted" :
-          "opacity-70 border-muted"
+        className={`p-4 transition-all backdrop-blur-md border-2 rounded-2xl min-w-0 w-full ${
+          isActionable && !isRejected ? "bg-card/80 cursor-pointer border-border hover:border-primary" : 
+          isActionable && isRejected ? "bg-card/80 cursor-pointer border-blue-500 hover:border-blue-600" :
+          isApproved ? "bg-card/20 border-green-500" :
+          isPending ? "bg-card/30 border-amber-500" :
+          hasNoSlots ? "bg-card/30 opacity-50 border-amber-500" :
+          isSharedTaskNotAssigned ? "bg-card/25 opacity-50 border-muted" :
+          allSharedMembersCompleted ? "bg-card/20 border-green-500" :
+          dueDateInfo.notYet ? "bg-card/25 opacity-50 border-muted" :
+          dueDateInfo.expired ? "bg-card/20 opacity-40 border-destructive" :
+          isWeekendUnavailable ? "bg-card/25 opacity-50 border-muted" :
+          "bg-card/25 opacity-60 border-muted"
         }`}
         data-testid={`task-card-${task.id}`}
         onClick={isActionable ? handleComplete : undefined}
@@ -2295,9 +2295,9 @@ export default function KidDashboard() {
                   open={!collapsedCategories.has(category)}
                   onOpenChange={() => toggleCategory(category)}
                 >
-                  <Card className="bg-card/60 backdrop-blur-md rounded-2xl overflow-hidden">
+                  <div>
                     <CollapsibleTrigger asChild>
-                      <div className="p-4 flex items-center justify-between cursor-pointer hover-elevate transition-colors">
+                      <div className="px-1 py-2 flex items-center justify-between cursor-pointer transition-colors">
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{getCategoryEmoji(category)}</span>
                           <span className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
@@ -2311,7 +2311,7 @@ export default function KidDashboard() {
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="p-4 pt-0 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-hidden">
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
                         {categoryTasks.map((task, index) => (
                           <motion.div
                             key={task.id}
@@ -2325,7 +2325,7 @@ export default function KidDashboard() {
                         ))}
                       </div>
                     </CollapsibleContent>
-                  </Card>
+                  </div>
                 </Collapsible>
               ))}
             </div>
