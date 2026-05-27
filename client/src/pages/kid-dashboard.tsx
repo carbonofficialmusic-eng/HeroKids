@@ -11,7 +11,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, MessageSquare } from "lucide-react";
+import { ChevronDown, MessageSquare, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -2196,24 +2196,34 @@ export default function KidDashboard() {
             {/* Kid-friendly filter tabs */}
             <div className="flex gap-2 flex-wrap">
               <Button
-                variant={kidTaskFilter === "today" ? "default" : "outline"}
+                variant={kidTaskFilter === "daily" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setKidTaskFilter("today")}
+                onClick={() => setKidTaskFilter("daily")}
                 className="rounded-full gap-1.5"
-                data-testid="button-kid-filter-today"
+                data-testid="button-kid-filter-daily"
               >
-                <Calendar className="h-4 w-4" />
-                {t("kidDashboard.filterToday")}
+                <RefreshCw className="h-4 w-4" />
+                {t("kidDashboard.filterDaily")}
               </Button>
               <Button
-                variant={kidTaskFilter === "week" ? "default" : "outline"}
+                variant={kidTaskFilter === "weekly" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setKidTaskFilter("week")}
+                onClick={() => setKidTaskFilter("weekly")}
                 className="rounded-full gap-1.5"
-                data-testid="button-kid-filter-week"
+                data-testid="button-kid-filter-weekly"
               >
                 <Calendar className="h-4 w-4" />
-                {t("kidDashboard.filterThisWeek")}
+                {t("kidDashboard.filterWeekly")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "rarely" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setKidTaskFilter("rarely")}
+                className="rounded-full gap-1.5"
+                data-testid="button-kid-filter-rarely"
+              >
+                <Star className="h-4 w-4" />
+                {t("kidDashboard.filterRarely")}
               </Button>
               <Button
                 variant={kidTaskFilter === "all" ? "default" : "outline"}
