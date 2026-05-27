@@ -141,7 +141,7 @@ export default function RewardsBoard() {
     enabled: !!member,
     staleTime: 5 * 60 * 1000,
   });
-  const canUseSharedRewards = familyData?.subscriptionTier === "family" || familyData?.subscriptionTier === "enterprise";
+  const canUseSharedRewards = familyData?.subscriptionTier === "family" || familyData?.subscriptionTier === "family_plus" || familyData?.subscriptionTier === "family_hero";
 
   // Fetch reward requests (parent only)
   const { data: rewardRequests = [] } = useQuery<RewardRequest[]>({
