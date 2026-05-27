@@ -901,7 +901,7 @@ function useStickyPanel(isDesktop: boolean) {
       if (!containerRef.current || !panelRef.current) return;
       const containerRect = containerRef.current.getBoundingClientRect();
       const panelHeight = panelRef.current.offsetHeight;
-      const topOffset = 16;
+      const topOffset = document.querySelector('.fixed.top-0')?.getBoundingClientRect().bottom ?? 72;
       if (containerRect.top < topOffset) {
         const maxScroll = containerRect.height - panelHeight;
         const currentScroll = topOffset - containerRect.top;
