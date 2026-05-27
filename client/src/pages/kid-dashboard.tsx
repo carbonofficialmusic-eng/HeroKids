@@ -1778,17 +1778,16 @@ export default function KidDashboard() {
                     </span>
                   </div>
                 </Link>
-                <Button
-                  size="icon"
-                  variant="ghost"
+                <button
                   data-testid="button-scroll-to-pinboard-kid"
+                  className="flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate"
                   onClick={() => {
                     const el = document.getElementById("pinboard");
                     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
                 >
                   <MessageSquare className="h-5 w-5" />
-                </Button>
+                </button>
               </div>
               <div className="bg-card/80 p-5 rounded-2xl border-2 border-primary/30 min-w-[260px]">
                 <p className="text-sm text-muted-foreground mb-3 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
