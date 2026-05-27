@@ -85,7 +85,7 @@ import { RewardRequestDialog } from "@/components/reward-request-dialog";
 import { Leaderboard } from "@/components/leaderboard";
 import { Pinboard } from "@/components/pinboard";
 import { getAvatarUrl } from "@/lib/skins";
-import { hasFeature, type SubscriptionTier } from "@shared/tier-config";
+import { hasFeature, canUseSharedRewards, type SubscriptionTier } from "@shared/tier-config";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
@@ -2059,8 +2059,7 @@ export default function KidDashboard() {
                 const participants = shared?.participants || [];
                 const isSharing = typed.sharingStatus === "sharing_active";
                 const isFinalized = typed.sharingStatus === "sharing_finalized";
-                const canUseSharedRewards = familyData?.subscriptionTier === "family" || familyData?.subscriptionTier === "family_plus" || familyData?.subscriptionTier === "family_hero";
-                const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && canUseSharedRewards;
+                const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && canUseSharedRewards(familyData?.subscriptionTier);
                 const canFinalize = isSharing && participants.length > 0;
                 const canCancelSharing = isSharing; // Can cancel anytime while sharing is active
 

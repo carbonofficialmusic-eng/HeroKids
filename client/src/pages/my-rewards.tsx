@@ -19,6 +19,7 @@ import {
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import type { User, FamilyMember, RewardRedemption } from "@shared/schema";
+import { canUseSharedRewards } from "@shared/tier-config";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getAvatarUrl } from "@/lib/skins";
@@ -92,7 +93,7 @@ export default function MyRewards() {
     enabled: !!member,
     staleTime: 5 * 60 * 1000,
   });
-  const canUseSharedRewards = familyData?.subscriptionTier === "family" || familyData?.subscriptionTier === "family_plus" || familyData?.subscriptionTier === "family_hero";
+  const canUseSharedRewardsFeature = canUseSharedRewards(familyData?.subscriptionTier);
 
   // Mutations for reward sharing
   const startSharingMutation = useMutation({
@@ -259,7 +260,7 @@ export default function MyRewards() {
               const participants = shared?.participants || [];
               const isSharing = typed.sharingStatus === "sharing_active";
               const isFinalized = typed.sharingStatus === "sharing_finalized";
-              const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && canUseSharedRewards;
+              const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && canUseSharedRewardsFeature;
               const canFinalize = isSharing && participants.length > 0;
               const canCancelSharing = isSharing && participants.length === 0;
 

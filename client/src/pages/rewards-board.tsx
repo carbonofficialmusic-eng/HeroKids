@@ -14,6 +14,7 @@ import { Link } from "wouter";
 import { getAvatarUrl } from "@/lib/skins";
 import { useTranslation } from "react-i18next";
 import { RewardRequestDialog } from "@/components/reward-request-dialog";
+import { canUseSharedRewards } from "@shared/tier-config";
 
 type FamilyMember = {
   id: string;
@@ -141,7 +142,7 @@ export default function RewardsBoard() {
     enabled: !!member,
     staleTime: 5 * 60 * 1000,
   });
-  const canUseSharedRewards = familyData?.subscriptionTier === "family" || familyData?.subscriptionTier === "family_plus" || familyData?.subscriptionTier === "family_hero";
+  const canUseSharedRewardsFeature = canUseSharedRewards(familyData?.subscriptionTier);
 
   // Fetch reward requests (parent only)
   const { data: rewardRequests = [] } = useQuery<RewardRequest[]>({
@@ -823,7 +824,7 @@ export default function RewardsBoard() {
                  redemption.sharingStatus === "not_shared" && 
                  redemption.status !== "completed" && (
                   <div className="flex gap-2 pt-2 border-t">
-                    {canUseSharedRewards ? (
+                    {canUseSharedRewardsFeature ? (
                       <Button
                         size="sm"
                         variant="outline"

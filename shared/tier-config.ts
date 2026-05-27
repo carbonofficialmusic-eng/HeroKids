@@ -222,3 +222,15 @@ export function getUpgradeOptions(currentTier: SubscriptionTierLegacy): TierConf
   const currentPrice = TIER_CONFIG[normalizedTier].price;
   return getAllTiers().filter(tier => tier.price > currentPrice);
 }
+
+/**
+ * Check if a tier can use the shared rewards feature.
+ * Single source of truth — import this instead of comparing tier name strings inline.
+ * Accepts any string (including raw API values) and fails closed for unknown tiers.
+ */
+export function canUseSharedRewards(tier: string | null | undefined): boolean {
+  if (!tier) return false;
+  const normalized = normalizeTier(tier as SubscriptionTierLegacy);
+  if (!(normalized in TIER_CONFIG)) return false;
+  return TIER_CONFIG[normalized].features.sharedRewards;
+}
