@@ -105,22 +105,28 @@ async function trySendVerificationEmail(user: any, token: string) {
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000;
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    pool: pool as any,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
-  });
+  const isDev = process.env.NODE_ENV !== "production";
+
+  let store: session.Store | undefined = undefined;
+  if (!isDev) {
+    const pgStore = connectPg(session);
+    store = new pgStore({
+      pool: pool as any,
+      createTableIfMissing: false,
+      ttl: sessionTtl,
+      tableName: "sessions",
+    });
+  }
+
   return session({
-    secret: process.env.SESSION_SECRET!,
-    store: sessionStore,
+    secret: process.env.SESSION_SECRET || "dev-secret-fallback",
+    store,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: !isDev,
+      sameSite: isDev ? false : "lax",
       maxAge: sessionTtl,
     },
   });
