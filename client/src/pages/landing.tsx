@@ -357,8 +357,16 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Right: auth panel */}
-          <div id="auth-panel" style={{ display: "flex", justifyContent: "center" }}>
+          {/* Right: hero image + auth panel */}
+          <div id="auth-panel" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem" }}>
+            <div className="hk-float2" style={{ position: "relative", width: "100%", maxWidth: "28rem" }}>
+              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 60%, ${C.orange}28 0%, transparent 70%)`, borderRadius: "1.5rem", transform: "scale(1.05)" }} />
+              <img
+                src="/images/herokids-hero.png"
+                alt="Glückliche Familie beim High-Five"
+                style={{ width: "100%", borderRadius: "1.5rem", display: "block", position: "relative" }}
+              />
+            </div>
             <AuthPanel />
           </div>
         </div>
