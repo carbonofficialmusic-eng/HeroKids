@@ -203,103 +203,107 @@ export default function Chat() {
   }
 
   return (
-    <div className="p-4 flex flex-col" style={safeTopStyle} data-testid="page-chat">
-      <div className="w-full lg:max-w-3xl flex flex-col flex-1 mx-auto">
-      <div className="flex items-center gap-3 mb-4 shrink-0">
-        {backBtn}
-        <h1 className="text-2xl font-bold" data-testid="heading-chat">
-          {t('chat.title')}
-        </h1>
-      </div>
+    <div
+      className="flex flex-col"
+      style={{ ...safeTopStyle, paddingBottom: 'env(safe-area-inset-bottom)' }}
+      data-testid="page-chat"
+    >
+      <div className="w-full lg:max-w-3xl flex flex-col flex-1 min-h-0 mx-auto px-4 pb-4">
+        <div className="flex items-center gap-3 mb-4 shrink-0">
+          {backBtn}
+          <h1 className="text-2xl font-bold" data-testid="heading-chat">
+            {t('chat.title')}
+          </h1>
+        </div>
 
-      <Card className="flex-1 flex flex-col overflow-hidden">
-        <CardHeader className="border-b">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              {t('chat.messages')}
-            </CardTitle>
-            <span className="text-sm text-muted-foreground">
-              {t(messages.length === 1 ? 'chat.messageCount' : 'chat.messageCount_other', { count: messages.length })}
-            </span>
-          </div>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-          {/* Messages area */}
-          <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-            <div className="space-y-4" data-testid="chat-messages">
-              {messages.length === 0 ? (
-                <div className="text-center text-muted-foreground py-12">
-                  <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>{t('chat.noMessagesStart')}</p>
-                </div>
-              ) : (
-                messages.map((msg, index) => (
-                  <div
-                    key={msg.id}
-                    className="flex gap-3 items-start"
-                    data-testid={`chat-message-${index}`}
-                  >
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                      style={{ backgroundColor: msg.memberColor }}
-                    >
-                      {msg.memberName.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="font-semibold text-sm" data-testid={`text-message-author-${index}`}>
-                          {msg.memberName}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(msg.createdAt), "h:mm a")}
-                        </span>
-                      </div>
-                      <div className="text-sm break-words" data-testid={`text-message-content-${index}`}>
-                        <MessageRenderer message={msg.message} />
-                      </div>
-                    </div>
+        <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <CardHeader className="border-b shrink-0 py-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className="w-5 h-5" />
+                {t('chat.messages')}
+              </CardTitle>
+              <span className="text-sm text-muted-foreground">
+                {t(messages.length === 1 ? 'chat.messageCount' : 'chat.messageCount_other', { count: messages.length })}
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
+            {/* Messages area — scrolls independently */}
+            <ScrollArea className="flex-1 min-h-0 p-4" ref={scrollAreaRef}>
+              <div className="space-y-4" data-testid="chat-messages">
+                {messages.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-12">
+                    <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>{t('chat.noMessagesStart')}</p>
                   </div>
-                ))
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
+                ) : (
+                  messages.map((msg, index) => (
+                    <div
+                      key={msg.id}
+                      className="flex gap-3 items-start"
+                      data-testid={`chat-message-${index}`}
+                    >
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                        style={{ backgroundColor: msg.memberColor }}
+                      >
+                        {msg.memberName.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-2 mb-1">
+                          <span className="font-semibold text-sm" data-testid={`text-message-author-${index}`}>
+                            {msg.memberName}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(msg.createdAt), "h:mm a")}
+                          </span>
+                        </div>
+                        <div className="text-sm break-words" data-testid={`text-message-content-${index}`}>
+                          <MessageRenderer message={msg.message} />
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
 
-          {/* Input area */}
-          {isActingAs ? (
-            <div className="border-t p-4 flex items-center gap-2 text-sm text-muted-foreground bg-muted/30" data-testid="chat-readonly-notice">
-              <EyeOff className="w-4 h-4 flex-shrink-0" />
-              <span>{t('chat.readOnlyActingAs', 'Nur lesen — du bist als {{name}} angemeldet. Melde dich mit deinem eigenen Account an, um zu schreiben.', { name: member?.displayName })}</span>
-            </div>
-          ) : (
-            <form
-              onSubmit={handleSendMessage}
-              className="border-t p-4 flex gap-2"
-              data-testid="form-send-message"
-            >
-              <EmoticonPicker onSelectEmoticon={handleSelectEmoticon} />
-              <Input
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder={t('chat.typeMessage')}
-                maxLength={1000}
-                disabled={sendMessageMutation.isPending}
-                className="flex-1"
-                data-testid="input-message"
-              />
-              <Button
-                type="submit"
-                disabled={!messageText.trim() || sendMessageMutation.isPending}
-                data-testid="button-send-message"
+            {/* Input area — always pinned at bottom */}
+            {isActingAs ? (
+              <div className="border-t p-4 flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 shrink-0" data-testid="chat-readonly-notice">
+                <EyeOff className="w-4 h-4 flex-shrink-0" />
+                <span>{t('chat.readOnlyActingAs', 'Nur lesen — du bist als {{name}} angemeldet. Melde dich mit deinem eigenen Account an, um zu schreiben.', { name: member?.displayName })}</span>
+              </div>
+            ) : (
+              <form
+                onSubmit={handleSendMessage}
+                className="border-t p-4 flex gap-2 shrink-0"
+                data-testid="form-send-message"
               >
-                <Send className="w-4 h-4" />
-              </Button>
-            </form>
-          )}
-        </CardContent>
-      </Card>
-      </div>{/* end max-width wrapper */}
+                <EmoticonPicker onSelectEmoticon={handleSelectEmoticon} />
+                <Input
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder={t('chat.typeMessage')}
+                  maxLength={1000}
+                  disabled={sendMessageMutation.isPending}
+                  className="flex-1"
+                  data-testid="input-message"
+                />
+                <Button
+                  type="submit"
+                  disabled={!messageText.trim() || sendMessageMutation.isPending}
+                  data-testid="button-send-message"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
