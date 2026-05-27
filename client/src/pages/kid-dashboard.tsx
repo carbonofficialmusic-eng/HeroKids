@@ -941,14 +941,17 @@ function useStickyPanel(isDesktop: boolean) {
   return { containerRef, panelRef, stickyStyle };
 }
 
-// Scrollt die Pinnwand sauber unterhalb des fixen Headers sichtbar
+// Scrollt die Pinnwand so, dass sie direkt unterhalb des fixen Headers erscheint
 function scrollToPinboard(el: HTMLElement) {
   const root = document.getElementById("root") ?? document.documentElement;
   const header = document.querySelector("[data-app-header]") as HTMLElement | null;
-  const headerHeight = header ? header.getBoundingClientRect().height : 72;
-  const gap = 12; // kleiner Abstand zwischen Header-Unterkante und Pinnwand
-  const elTop = el.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
-  root.scrollTo({ top: elTop - headerHeight - gap, behavior: "smooth" });
+  // headerBottom ist die Unterkante des Headers (viewport-relativ, inkl. safe-area)
+  const headerBottom = header ? header.getBoundingClientRect().bottom : 72;
+  // Wo ist das Element gerade (viewport-relativ)?
+  const currentTop = el.getBoundingClientRect().top;
+  // Wir wollen, dass currentTop nach dem Scroll gleich headerBottom + 8px ist
+  const delta = currentTop - (headerBottom + 8);
+  root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
 }
 
 export default function KidDashboard() {
