@@ -158,9 +158,10 @@ export default function Dashboard() {
   const [childActiveTab, setChildActiveTab] = useState<string>("active");
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("month");
   const [subscriptionProcessing, setSubscriptionProcessing] = useState(false);
-  const [taskFilter, setTaskFilter] = useState<"today" | "week" | "all">(() => {
+  const [taskFilter, setTaskFilter] = useState<"daily" | "weekly" | "rarely" | "all">(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("herokids_task_filter") as "today" | "week" | "all") || "all";
+      const saved = localStorage.getItem("herokids_task_filter");
+      if (saved === "daily" || saved === "weekly" || saved === "rarely" || saved === "all") return saved;
     }
     return "all";
   });
@@ -1225,26 +1226,35 @@ export default function Dashboard() {
 
               {/* Task Filter Tabs */}
               {activeTasks.length > 0 && (
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex bg-muted rounded-lg p-1 gap-1">
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
+                  <div className="flex bg-muted rounded-lg p-1 gap-1 flex-wrap">
                     <Button
-                      variant={taskFilter === "today" ? "default" : "ghost"}
+                      variant={taskFilter === "daily" ? "default" : "ghost"}
                       size="sm"
-                      onClick={() => setTaskFilter("today")}
+                      onClick={() => setTaskFilter("daily")}
                       className="text-xs px-3"
-                      data-testid="button-filter-today"
+                      data-testid="button-filter-daily"
                     >
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {t("dashboard.filterToday")}
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      {t("dashboard.filterDaily")}
                     </Button>
                     <Button
-                      variant={taskFilter === "week" ? "default" : "ghost"}
+                      variant={taskFilter === "weekly" ? "default" : "ghost"}
                       size="sm"
-                      onClick={() => setTaskFilter("week")}
+                      onClick={() => setTaskFilter("weekly")}
                       className="text-xs px-3"
-                      data-testid="button-filter-week"
+                      data-testid="button-filter-weekly"
                     >
-                      {t("dashboard.filterThisWeek")}
+                      {t("dashboard.filterWeekly")}
+                    </Button>
+                    <Button
+                      variant={taskFilter === "rarely" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setTaskFilter("rarely")}
+                      className="text-xs px-3"
+                      data-testid="button-filter-rarely"
+                    >
+                      {t("dashboard.filterRarely")}
                     </Button>
                     <Button
                       variant={taskFilter === "all" ? "default" : "ghost"}
@@ -1283,7 +1293,7 @@ export default function Dashboard() {
                 <Card className="p-8 text-center">
                   <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                   <h3 className="text-lg font-bold font-accent mb-2">
-                    {taskFilter === "today" ? t("dashboard.noTasksToday") : t("dashboard.noTasksThisWeek")}
+                    {taskFilter === "daily" ? t("dashboard.noTasksDaily") : taskFilter === "weekly" ? t("dashboard.noTasksWeekly") : t("dashboard.noTasksRarely")}
                   </h3>
                   <Button 
                     variant="outline" 

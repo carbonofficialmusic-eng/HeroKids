@@ -1003,7 +1003,7 @@ export default function KidDashboard() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const [kidTaskFilter, setKidTaskFilter] = useState<"today" | "week" | "all">("all");
+  const [kidTaskFilter, setKidTaskFilter] = useState<"daily" | "weekly" | "rarely" | "all">("all");
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   // Auto-refresh tasks at midnight when daily tasks reset
