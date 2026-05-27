@@ -193,7 +193,7 @@
     "immediateRecurrenceDesc": "常に利用可能で、1日に何度でも完了できます。常に親の承認が必要です。",
     "customDaysDesc": "タスクを繰り返すカスタム日数を設定",
     "repeatSchedule": "繰り返しスケジュール",
-    "oneTime": "1回のみ",
+    "oneTime": "日程を設定",
     "immediate": "即時繰り返し",
     "immediateDesc": "いつでも繰り返し可能。常に親の承認が必要です。",
     "daily": "毎日",

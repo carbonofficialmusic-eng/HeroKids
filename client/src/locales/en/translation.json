@@ -199,7 +199,7 @@
     "immediateRecurrenceDesc": "Always available and can be completed multiple times a day. ALWAYS requires parent approval.",
     "customDaysDesc": "Set a custom number of days for the task to repeat",
     "repeatSchedule": "Repeat Schedule",
-    "oneTime": "One-time",
+    "oneTime": "Set date",
     "immediate": "Immediate Repeat",
     "immediateDesc": "Can be repeated anytime. ALWAYS requires parent approval.",
     "daily": "Daily",
