@@ -941,6 +941,16 @@ function useStickyPanel(isDesktop: boolean) {
   return { containerRef, panelRef, stickyStyle };
 }
 
+// Scrollt die Pinnwand sauber unterhalb des fixen Headers sichtbar
+function scrollToPinboard(el: HTMLElement) {
+  const root = document.getElementById("root") ?? document.documentElement;
+  const header = document.querySelector("[data-app-header]") as HTMLElement | null;
+  const headerHeight = header ? header.getBoundingClientRect().height : 72;
+  const gap = 12; // kleiner Abstand zwischen Header-Unterkante und Pinnwand
+  const elTop = el.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
+  root.scrollTo({ top: elTop - headerHeight - gap, behavior: "smooth" });
+}
+
 export default function KidDashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -983,7 +993,7 @@ export default function KidDashboard() {
     if (window.location.hash !== "#pinboard") return;
     const el = document.getElementById("pinboard");
     if (el) {
-      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+      setTimeout(() => scrollToPinboard(el), 300);
     }
   }, []);
 
@@ -1799,7 +1809,7 @@ export default function KidDashboard() {
                   className="flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate"
                   onClick={() => {
                     const el = document.getElementById("pinboard");
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    if (el) scrollToPinboard(el);
                   }}
                 >
                   <MessageSquare className="h-5 w-5" />
