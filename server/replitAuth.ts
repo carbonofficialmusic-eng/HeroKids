@@ -216,6 +216,10 @@ export async function setupAuth(app: Express) {
       clearAccountSessionState(req);
       await loginAsync(req, createSessionUser(user.id));
       clearAccountSessionState(req);
+      console.log("[AUTH DEBUG] session id after login:", req.sessionID);
+      console.log("[AUTH DEBUG] passport user in session:", JSON.stringify(req.session?.passport));
+      console.log("[AUTH DEBUG] req.isAuthenticated():", req.isAuthenticated());
+      console.log("[AUTH DEBUG] Set-Cookie header will be sent:", JSON.stringify(res.getHeader("set-cookie")));
       const updatedUser = await storage.getUser(user.id);
       res.json({ user: sanitizeUser(updatedUser || user) });
     } catch (error: any) {
@@ -371,6 +375,8 @@ export async function setupAuth(app: Express) {
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
+  console.log("[AUTH DEBUG] isAuthenticated check - cookie header:", req.headers.cookie?.substring(0, 80));
+  console.log("[AUTH DEBUG] req.isAuthenticated():", req.isAuthenticated(), "req.user:", user?.claims?.sub);
 
   if (req.isAuthenticated() && user?.claims?.sub) {
     const account = await storage.getUser(user.claims.sub);
