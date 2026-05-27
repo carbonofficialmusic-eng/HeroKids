@@ -11,7 +11,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, MessageSquare } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -1778,6 +1778,17 @@ export default function KidDashboard() {
                     </span>
                   </div>
                 </Link>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  data-testid="button-scroll-to-pinboard-kid"
+                  onClick={() => {
+                    const el = document.getElementById("pinboard");
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                </Button>
               </div>
               <div className="bg-card/80 p-5 rounded-2xl border-2 border-primary/30 min-w-[260px]">
                 <p className="text-sm text-muted-foreground mb-3 font-medium text-center">{t("kidDashboard.yourPoints")}</p>

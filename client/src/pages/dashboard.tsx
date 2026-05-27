@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar, Zap } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar, Zap } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -1105,6 +1105,17 @@ export default function Dashboard() {
                         </span>
                       </div>
                     </Link>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      data-testid="button-scroll-to-pinboard"
+                      onClick={() => {
+                        const el = document.getElementById("pinboard");
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                    >
+                      <MessageSquare className="h-5 w-5" />
+                    </Button>
                   </div>
                   {/* Right: Points box */}
                   <div className="bg-card/80 p-4 rounded-2xl border min-w-[220px]">
