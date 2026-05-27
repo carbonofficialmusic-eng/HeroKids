@@ -106,16 +106,25 @@ async function trySendVerificationEmail(user: any, token: string) {
 export const isDev = process.env.NODE_ENV !== "production";
 
 // In-memory dev token store — bypasses cookie restrictions in Replit's embedded iframe preview
-const devTokenStore = new Map<string, any>();
+interface DevTokenEntry {
+  user: any;
+  actingAsMemberId?: string | null;
+}
+const devTokenStore = new Map<string, DevTokenEntry>();
 
 export function createDevToken(user: any): string {
   const token = crypto.randomBytes(32).toString("hex");
-  devTokenStore.set(token, user);
+  devTokenStore.set(token, { user });
   return token;
 }
 
-export function getDevTokenUser(token: string): any {
+export function getDevTokenEntry(token: string): DevTokenEntry | undefined {
   return devTokenStore.get(token);
+}
+
+export function setDevTokenActingAs(token: string, memberId: string | null): void {
+  const entry = devTokenStore.get(token);
+  if (entry) entry.actingAsMemberId = memberId;
 }
 
 export function deleteDevToken(token: string): void {
@@ -415,11 +424,17 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   if (isDev) {
     const devTokenHeader = req.headers["x-dev-token"] as string | undefined;
     if (devTokenHeader) {
-      const sessionUser = getDevTokenUser(devTokenHeader);
-      if (sessionUser?.claims?.sub) {
-        const account = await storage.getUser(sessionUser.claims.sub);
+      const entry = getDevTokenEntry(devTokenHeader);
+      if (entry?.user?.claims?.sub) {
+        const account = await storage.getUser(entry.user.claims.sub);
         if (account && !account.isDisabled) {
-          (req as any).user = sessionUser;
+          (req as any).user = entry.user;
+          // Restore session state (e.g. actingAsMemberId) that can't travel via cookie
+          if (entry.actingAsMemberId) {
+            req.session.actingAsMemberId = entry.actingAsMemberId;
+          } else {
+            delete req.session.actingAsMemberId;
+          }
           return next();
         }
       }

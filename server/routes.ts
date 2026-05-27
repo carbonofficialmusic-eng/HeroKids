@@ -10,7 +10,7 @@ import Stripe from "stripe";
 import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 import { storage } from "./storage";
 import { db } from "./db";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, isDev, setDevTokenActingAs } from "./replitAuth";
 import { generateTokenPair, refreshAccessToken, revokeRefreshToken, registerPushToken, unregisterPushToken } from "./mobileAuth";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
@@ -1002,6 +1002,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If no memberId provided, switch back to self
       if (!memberId) {
         delete req.session.actingAsMemberId;
+        if (isDev) {
+          const devToken = req.headers["x-dev-token"] as string | undefined;
+          if (devToken) setDevTokenActingAs(devToken, null);
+        }
         return res.json({ message: "Switched back to self", member: realMember });
       }
       
@@ -1049,6 +1053,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Set the session to act as this member
       req.session.actingAsMemberId = memberId;
+      if (isDev) {
+        const devToken = req.headers["x-dev-token"] as string | undefined;
+        if (devToken) setDevTokenActingAs(devToken, memberId);
+      }
       
       res.json({ message: "Switched member successfully", member: targetMember });
     } catch (error) {
