@@ -6,6 +6,7 @@ import { z } from "zod";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
+import { pool } from "./db";
 import { verifyAccessToken } from "./mobileAuth";
 import { EmailProviderNotConfiguredError, isTransactionalEmailConfigured, sendPasswordResetEmail, sendVerificationEmail } from "./email";
 import { createEmailVerificationUrl, createPasswordResetUrl } from "./authLinks";
@@ -106,7 +107,7 @@ export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000;
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
+    pool: pool as any,
     createTableIfMissing: false,
     ttl: sessionTtl,
     tableName: "sessions",
