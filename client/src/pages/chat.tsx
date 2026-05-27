@@ -116,7 +116,7 @@ export default function Chat() {
       <Button
         variant="outline"
         size="sm"
-        className="border-border/40"
+        className="bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
         data-testid="button-back-to-dashboard"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
