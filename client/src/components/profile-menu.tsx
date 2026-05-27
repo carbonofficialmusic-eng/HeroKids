@@ -159,14 +159,6 @@ export function ProfileMenu({
           </>
         )}
         
-        {/* iOS Header Test — temporär */}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/ios-test" data-testid="menu-item-ios-test">
-            <span>🔧 iOS Header Test</span>
-          </Link>
-        </DropdownMenuItem>
-
         {/* Block 3: System & Logout */}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleThemeToggle} data-testid="menu-item-theme-toggle">
