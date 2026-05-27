@@ -74,7 +74,7 @@ function getDueDateStatus(dueDate: Date | string | null): { status: "overdue" | 
   return { status: "normal", daysUntil };
 }
 import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal } from "@shared/schema";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, getDevHeaders } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileMenu } from "@/components/profile-menu";
 import { NotificationBell } from "@/components/notification-bell";
@@ -248,7 +248,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
     mutationFn: async () => {
       const response = await fetch(`/api/rewards/${reward.id}/redeem`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getDevHeaders() },
       });
       if (!response.ok) throw new Error("Failed to redeem reward");
       return response.json();
@@ -512,7 +512,7 @@ function TaskCard({
     mutationFn: async () => {
       const response = await fetch(`/api/tasks/${task.id}/complete`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getDevHeaders() },
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
@@ -1414,7 +1414,7 @@ export default function KidDashboard() {
     mutationFn: async ({ taskId, proofPhotoUrl }: { taskId: string; proofPhotoUrl?: string }) => {
       const response = await fetch(`/api/tasks/${taskId}/complete`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getDevHeaders() },
         body: JSON.stringify(proofPhotoUrl ? { proofPhotoUrl } : {}),
       });
       if (!response.ok) {

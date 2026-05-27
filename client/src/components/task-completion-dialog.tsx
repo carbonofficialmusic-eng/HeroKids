@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { getDevHeaders } from "@/lib/queryClient";
 import {
   Dialog,
   DialogContent,
@@ -158,6 +159,7 @@ export function TaskCompletionDialog({
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            ...getDevHeaders(),
           },
           body: JSON.stringify({ photoUrl: uploadURL }),
         });

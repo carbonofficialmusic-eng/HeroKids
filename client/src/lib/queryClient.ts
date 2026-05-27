@@ -15,7 +15,7 @@ export class ApiError extends Error {
 
 const DEV_TOKEN_KEY = "__hk_dev_token";
 
-function getDevHeaders(): Record<string, string> {
+export function getDevHeaders(): Record<string, string> {
   if (import.meta.env.DEV) {
     const token = localStorage.getItem(DEV_TOKEN_KEY);
     if (token) return { "X-Dev-Token": token };

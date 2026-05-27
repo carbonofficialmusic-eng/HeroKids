@@ -48,7 +48,7 @@ import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, L
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, getDevHeaders } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import type { FamilyMember, Task, Reward, RewardRequest } from "@shared/schema";
@@ -650,7 +650,7 @@ export default function Dashboard() {
       
       const res = await fetch(`/api/rewards/${rewardId}/redeem`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getDevHeaders() },
         credentials: "include",
         body: JSON.stringify({}),
       });
