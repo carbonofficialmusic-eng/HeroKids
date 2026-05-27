@@ -1,7 +1,6 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Trophy, Medal, Award, Zap } from "lucide-react";
+import { Trophy, Medal, Award } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
@@ -11,10 +10,9 @@ interface LeaderboardProps {
   period?: "week" | "month" | "all";
   weeklyPrize?: string | null;
   monthlyPrize?: string | null;
-  onAwardPoints?: (memberId: number) => void;
 }
 
-export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPrize, onAwardPoints }: LeaderboardProps) {
+export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPrize }: LeaderboardProps) {
   const { t } = useTranslation();
   // Filter out members who opted out of leaderboard competition
   const eligibleMembers = members.filter(m => !m.excludeFromLeaderboard);
@@ -75,11 +73,6 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
               <div className="text-2xl font-black font-accent gradient-text-achievement" data-testid={`text-member-points-2`}>
                 {getPoints(top3[1])}
               </div>
-              {onAwardPoints && (
-                <Button size="sm" variant="ghost" className="mt-1 h-7 px-2 text-amber-500" onClick={() => onAwardPoints(top3[1].id)} data-testid={`button-award-points-2`}>
-                  <Zap className="h-3.5 w-3.5 mr-1" />{t("dashboard.sendPoints", "Punkte")}
-                </Button>
-              )}
             </div>
           )}
 
@@ -99,11 +92,6 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
               <div className="text-3xl font-black font-accent gradient-text-winner" data-testid={`text-member-points-1`}>
                 {getPoints(top3[0])}
               </div>
-              {onAwardPoints && (
-                <Button size="sm" variant="ghost" className="mt-1 h-7 px-2 text-amber-500" onClick={() => onAwardPoints(top3[0].id)} data-testid={`button-award-points-1`}>
-                  <Zap className="h-3.5 w-3.5 mr-1" />{t("dashboard.sendPoints", "Punkte")}
-                </Button>
-              )}
             </div>
           )}
 
@@ -123,11 +111,6 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
               <div className="text-2xl font-black font-accent gradient-text-achievement" data-testid={`text-member-points-3`}>
                 {getPoints(top3[2])}
               </div>
-              {onAwardPoints && (
-                <Button size="sm" variant="ghost" className="mt-1 h-7 px-2 text-amber-500" onClick={() => onAwardPoints(top3[2].id)} data-testid={`button-award-points-3`}>
-                  <Zap className="h-3.5 w-3.5 mr-1" />{t("dashboard.sendPoints", "Punkte")}
-                </Button>
-              )}
             </div>
           )}
         </div>
@@ -161,11 +144,6 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
                 <div className="text-xl font-black font-accent" data-testid={`text-member-points-${rank}`}>
                   {getPoints(member)}
                 </div>
-                {onAwardPoints && (
-                  <Button size="icon" variant="ghost" className="text-amber-500 flex-shrink-0" onClick={() => onAwardPoints(member.id)} data-testid={`button-award-points-${rank}`}>
-                    <Zap className="h-4 w-4" />
-                  </Button>
-                )}
               </div>
             );
           })}

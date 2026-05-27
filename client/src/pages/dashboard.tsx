@@ -1559,11 +1559,6 @@ export default function Dashboard() {
                 period={leaderboardPeriod}
                 weeklyPrize={familyData?.weeklyPrize}
                 monthlyPrize={familyData?.monthlyPrize}
-                onAwardPoints={(memberId) => {
-                  setSelectedPointsRecipients([memberId]);
-                  setPointsAmount("");
-                  setSendPointsOpen(true);
-                }}
               />
               </div>
             </div>
