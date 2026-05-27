@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Pencil, Trash2, Plus, Check, X, Pin } from "lucide-react";
+
 interface PinboardNote {
   id: number;
   memberId: string;
@@ -106,12 +107,12 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
   };
 
   return (
-    <div className="rounded-xl overflow-hidden shadow-lg">
-      {/* Cork board header */}
-      <div className="flex items-center justify-between px-3 py-2" style={{ background: "#5C3D11" }}>
+    <div className="rounded-xl overflow-hidden shadow-lg border border-border">
+      {/* Header */}
+      <div className="flex items-center justify-between px-3 py-2 bg-muted border-b border-border">
         <div className="flex items-center gap-2">
-          <Pin className="h-4 w-4 text-amber-300 fill-amber-300" />
-          <span className="font-bold text-sm text-amber-100" style={{ fontFamily: "Fredoka, sans-serif" }}>
+          <Pin className="h-4 w-4 text-primary fill-primary" />
+          <span className="font-bold text-sm text-foreground" style={{ fontFamily: "Fredoka, sans-serif" }}>
             {t("pinboard.title")}
           </span>
         </div>
@@ -119,7 +120,7 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
           <Button
             size="icon"
             variant="ghost"
-            className="h-7 w-7 text-amber-300 hover:text-amber-100"
+            className="h-7 w-7"
             onClick={() => setIsAdding(true)}
             data-testid="button-pinboard-add"
           >
@@ -128,18 +129,13 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
         )}
       </div>
 
-      {/* Cork surface */}
-      <div
-        className="p-3 space-y-3 min-h-[80px]"
-        style={{
-          background: "linear-gradient(145deg, #A0722A 0%, #8B6914 40%, #7A5C12 70%, #6B4C1E 100%)",
-        }}
-      >
+      {/* Board surface */}
+      <div className="p-3 space-y-3 min-h-[80px] bg-muted/40">
         {isLoading && (
-          <p className="text-amber-200/70 text-xs text-center py-2">{t("pinboard.loading")}</p>
+          <p className="text-muted-foreground text-xs text-center py-2">{t("pinboard.loading")}</p>
         )}
         {!isLoading && notes.length === 0 && !isAdding && (
-          <p className="text-amber-200/50 text-xs text-center py-3 italic">{t("pinboard.empty")}</p>
+          <p className="text-muted-foreground/60 text-xs text-center py-3 italic">{t("pinboard.empty")}</p>
         )}
 
         {notes.map((note) => {
@@ -254,40 +250,39 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
         {/* New note input */}
         {isAdding && (
           <div
-            className="relative rounded-sm shadow-md"
+            className="relative rounded-sm shadow-md bg-card border border-border"
             style={{
               transform: `rotate(${ROTATIONS[(notes.length) % ROTATIONS.length]}deg)`,
-              backgroundColor: "rgba(255, 251, 200, 0.92)",
-              borderTop: "3px solid #FBBF24",
+              borderTop: "3px solid hsl(var(--primary))",
               padding: "10px 10px 8px",
             }}
           >
             <div
-              className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full shadow"
-              style={{ backgroundColor: "#FBBF24", border: "2px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 4px rgba(0,0,0,0.4)" }}
+              className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full shadow bg-primary"
+              style={{ border: "2px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 4px rgba(0,0,0,0.4)" }}
             />
             <textarea
               value={newText}
               onChange={(e) => setNewText(e.target.value.slice(0, 150))}
               placeholder={t("pinboard.placeholder")}
-              className="w-full text-[13px] bg-transparent border-0 outline-none resize-none min-h-[56px] text-gray-800 placeholder-gray-400"
+              className="w-full text-[13px] bg-transparent border-0 outline-none resize-none min-h-[56px] text-foreground placeholder:text-muted-foreground"
               style={{ fontFamily: "'Nunito', cursive" }}
               autoFocus
               data-testid="textarea-pinboard-new"
             />
             <div className="flex items-center justify-between mt-1">
-              <span className="text-[10px] text-gray-500">{newText.length}/150</span>
+              <span className="text-[10px] text-muted-foreground">{newText.length}/150</span>
               <div className="flex gap-1">
                 <button
                   onClick={() => { setIsAdding(false); setNewText(""); }}
-                  className="p-0.5 text-gray-600 opacity-50 hover:opacity-90 transition-opacity"
+                  className="p-0.5 text-muted-foreground opacity-50 hover:opacity-90 transition-opacity"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
                 <button
                   onClick={handlePost}
                   disabled={!newText.trim() || createMutation.isPending}
-                  className="p-0.5 text-gray-700 opacity-70 hover:opacity-100 disabled:opacity-30 transition-opacity"
+                  className="p-0.5 text-foreground opacity-70 hover:opacity-100 disabled:opacity-30 transition-opacity"
                   data-testid="button-pinboard-post"
                 >
                   <Check className="h-3.5 w-3.5" />
