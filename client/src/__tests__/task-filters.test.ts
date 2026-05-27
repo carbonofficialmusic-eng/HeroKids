@@ -63,29 +63,29 @@ describe("filterTasksByDate — parent dashboard", () => {
     });
   });
 
-  describe('filter: "rarely"', () => {
+  describe('filter: "monthly"', () => {
     it("includes monthly tasks", () => {
-      expect(filterTasksByDate([monthlyTask], "rarely")).toHaveLength(1);
+      expect(filterTasksByDate([monthlyTask], "monthly")).toHaveLength(1);
     });
 
-    it("includes yearly tasks", () => {
-      expect(filterTasksByDate([yearlyTask], "rarely")).toHaveLength(1);
+    it("excludes yearly tasks", () => {
+      expect(filterTasksByDate([yearlyTask], "monthly")).toHaveLength(0);
     });
 
-    it("includes one-time tasks", () => {
-      expect(filterTasksByDate([oneTimeTask], "rarely")).toHaveLength(1);
+    it("excludes one-time tasks", () => {
+      expect(filterTasksByDate([oneTimeTask], "monthly")).toHaveLength(0);
     });
 
-    it("includes one-time tasks with no due date", () => {
-      expect(filterTasksByDate([oneTimeTaskNoDueDate], "rarely")).toHaveLength(1);
+    it("excludes one-time tasks with no due date", () => {
+      expect(filterTasksByDate([oneTimeTaskNoDueDate], "monthly")).toHaveLength(0);
     });
 
     it("excludes daily tasks", () => {
-      expect(filterTasksByDate([dailyTask], "rarely")).toHaveLength(0);
+      expect(filterTasksByDate([dailyTask], "monthly")).toHaveLength(0);
     });
 
     it("excludes weekly tasks", () => {
-      expect(filterTasksByDate([weeklyTask], "rarely")).toHaveLength(0);
+      expect(filterTasksByDate([weeklyTask], "monthly")).toHaveLength(0);
     });
   });
 
@@ -93,6 +93,11 @@ describe("filterTasksByDate — parent dashboard", () => {
     it("includes all task types", () => {
       const tasks = [weekdaysTask, dailyTask, immediateTask, weeklyTask, monthlyTask, yearlyTask, oneTimeTask, oneTimeTaskNoDueDate];
       expect(filterTasksByDate(tasks, "all")).toHaveLength(tasks.length);
+    });
+
+    it("includes yearly and one-time tasks that have no dedicated filter tab", () => {
+      expect(filterTasksByDate([yearlyTask], "all")).toHaveLength(1);
+      expect(filterTasksByDate([oneTimeTask], "all")).toHaveLength(1);
     });
   });
 
@@ -104,11 +109,11 @@ describe("filterTasksByDate — parent dashboard", () => {
       expect(result.every(t => ["daily", "weekdays", "immediate"].includes(t.recurrence))).toBe(true);
     });
 
-    it("rarely filter returns only monthly/yearly/none tasks", () => {
+    it("monthly filter returns only monthly tasks", () => {
       const tasks = [dailyTask, weeklyTask, monthlyTask, yearlyTask, oneTimeTask];
-      const result = filterTasksByDate(tasks, "rarely");
-      expect(result).toHaveLength(3);
-      expect(result.every(t => ["monthly", "yearly", "none"].includes(t.recurrence))).toBe(true);
+      const result = filterTasksByDate(tasks, "monthly");
+      expect(result).toHaveLength(1);
+      expect(result[0].recurrence).toBe("monthly");
     });
   });
 });
@@ -162,29 +167,29 @@ describe("filterKidTasksByDate — kid dashboard", () => {
     });
   });
 
-  describe('filter: "rarely"', () => {
+  describe('filter: "monthly"', () => {
     it("includes monthly tasks", () => {
-      expect(filterKidTasksByDate([monthlyTask], "rarely")).toHaveLength(1);
+      expect(filterKidTasksByDate([monthlyTask], "monthly")).toHaveLength(1);
     });
 
-    it("includes yearly tasks", () => {
-      expect(filterKidTasksByDate([yearlyTask], "rarely")).toHaveLength(1);
+    it("excludes yearly tasks", () => {
+      expect(filterKidTasksByDate([yearlyTask], "monthly")).toHaveLength(0);
     });
 
-    it("includes one-time tasks", () => {
-      expect(filterKidTasksByDate([oneTimeTask], "rarely")).toHaveLength(1);
+    it("excludes one-time tasks", () => {
+      expect(filterKidTasksByDate([oneTimeTask], "monthly")).toHaveLength(0);
     });
 
-    it("includes one-time tasks with no due date", () => {
-      expect(filterKidTasksByDate([oneTimeTaskNoDueDate], "rarely")).toHaveLength(1);
+    it("excludes one-time tasks with no due date", () => {
+      expect(filterKidTasksByDate([oneTimeTaskNoDueDate], "monthly")).toHaveLength(0);
     });
 
     it("excludes daily tasks", () => {
-      expect(filterKidTasksByDate([dailyTask], "rarely")).toHaveLength(0);
+      expect(filterKidTasksByDate([dailyTask], "monthly")).toHaveLength(0);
     });
 
     it("excludes weekly tasks", () => {
-      expect(filterKidTasksByDate([weeklyTask], "rarely")).toHaveLength(0);
+      expect(filterKidTasksByDate([weeklyTask], "monthly")).toHaveLength(0);
     });
   });
 
@@ -208,6 +213,13 @@ describe("filterKidTasksByDate — kid dashboard", () => {
       const result = filterKidTasksByDate(tasks, "weekly");
       expect(result).toHaveLength(1);
       expect(result[0].recurrence).toBe("weekly");
+    });
+
+    it("monthly filter returns only monthly tasks", () => {
+      const tasks = [dailyTask, weeklyTask, monthlyTask, yearlyTask, oneTimeTask];
+      const result = filterKidTasksByDate(tasks, "monthly");
+      expect(result).toHaveLength(1);
+      expect(result[0].recurrence).toBe("monthly");
     });
   });
 });

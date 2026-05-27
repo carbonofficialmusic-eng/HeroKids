@@ -168,10 +168,10 @@ export default function Dashboard() {
   const [childActiveTab, setChildActiveTab] = useState<string>("active");
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("month");
   const [subscriptionProcessing, setSubscriptionProcessing] = useState(false);
-  const [taskFilter, setTaskFilter] = useState<"daily" | "weekly" | "rarely" | "all">(() => {
+  const [taskFilter, setTaskFilter] = useState<"daily" | "weekly" | "monthly" | "all">(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("herokids_task_filter");
-      if (saved === "daily" || saved === "weekly" || saved === "rarely" || saved === "all") return saved;
+      if (saved === "daily" || saved === "weekly" || saved === "monthly" || saved === "all") return saved;
     }
     return "all";
   });
@@ -1259,13 +1259,13 @@ export default function Dashboard() {
                       {t("dashboard.filterWeekly")}
                     </Button>
                     <Button
-                      variant={taskFilter === "rarely" ? "default" : "ghost"}
+                      variant={taskFilter === "monthly" ? "default" : "ghost"}
                       size="sm"
-                      onClick={() => setTaskFilter("rarely")}
+                      onClick={() => setTaskFilter("monthly")}
                       className="text-xs px-3"
-                      data-testid="button-filter-rarely"
+                      data-testid="button-filter-monthly"
                     >
-                      {t("dashboard.filterRarely")}
+                      {t("dashboard.filterMonthly")}
                     </Button>
                     <Button
                       variant={taskFilter === "all" ? "default" : "ghost"}
@@ -1304,7 +1304,7 @@ export default function Dashboard() {
                 <Card className="p-8 text-center">
                   <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                   <h3 className="text-lg font-bold font-accent mb-2">
-                    {taskFilter === "daily" ? t("dashboard.noTasksDaily") : taskFilter === "weekly" ? t("dashboard.noTasksWeekly") : t("dashboard.noTasksRarely")}
+                    {taskFilter === "daily" ? t("dashboard.noTasksDaily") : taskFilter === "weekly" ? t("dashboard.noTasksWeekly") : t("dashboard.noTasksMonthly")}
                   </h3>
                   <Button 
                     variant="outline" 

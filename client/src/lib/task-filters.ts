@@ -9,7 +9,7 @@ export interface FilterableTask {
  * Filters tasks by recurrence frequency group.
  *
  * @param taskList - Array of tasks to filter
- * @param taskFilter - "daily" | "weekly" | "rarely" | "all"
+ * @param taskFilter - "daily" | "weekly" | "monthly" | "all"
  */
 export function filterTasksByDate<T extends FilterableTask>(
   taskList: T[],
@@ -31,12 +31,8 @@ export function filterTasksByDate<T extends FilterableTask>(
       return task.recurrence === "weekly";
     }
 
-    if (taskFilter === "rarely") {
-      return (
-        task.recurrence === "monthly" ||
-        task.recurrence === "yearly" ||
-        task.recurrence === "none"
-      );
+    if (taskFilter === "monthly") {
+      return task.recurrence === "monthly";
     }
 
     return true;
@@ -47,7 +43,7 @@ export function filterTasksByDate<T extends FilterableTask>(
  * Filters kid tasks by recurrence frequency group.
  *
  * @param taskList - Array of tasks to filter
- * @param kidTaskFilter - "daily" | "weekly" | "rarely" | "all"
+ * @param kidTaskFilter - "daily" | "weekly" | "monthly" | "all"
  */
 export function filterKidTasksByDate<T extends FilterableTask>(
   taskList: T[],
@@ -69,12 +65,8 @@ export function filterKidTasksByDate<T extends FilterableTask>(
       return task.recurrence === "weekly";
     }
 
-    if (kidTaskFilter === "rarely") {
-      return (
-        task.recurrence === "monthly" ||
-        task.recurrence === "yearly" ||
-        task.recurrence === "none"
-      );
+    if (kidTaskFilter === "monthly") {
+      return task.recurrence === "monthly";
     }
 
     return true;

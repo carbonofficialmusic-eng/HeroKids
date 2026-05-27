@@ -1031,7 +1031,7 @@ export default function KidDashboard() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const [kidTaskFilter, setKidTaskFilter] = useState<"daily" | "weekly" | "rarely" | "all">("all");
+  const [kidTaskFilter, setKidTaskFilter] = useState<"daily" | "weekly" | "monthly" | "all">("all");
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   // Auto-refresh tasks at midnight when daily tasks reset
@@ -2244,14 +2244,14 @@ export default function KidDashboard() {
                 {t("kidDashboard.filterWeekly")}
               </Button>
               <Button
-                variant={kidTaskFilter === "rarely" ? "default" : "outline"}
+                variant={kidTaskFilter === "monthly" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setKidTaskFilter("rarely")}
+                onClick={() => setKidTaskFilter("monthly")}
                 className="rounded-full gap-1.5"
-                data-testid="button-kid-filter-rarely"
+                data-testid="button-kid-filter-monthly"
               >
                 <Star className="h-4 w-4" />
-                {t("kidDashboard.filterRarely")}
+                {t("kidDashboard.filterMonthly")}
               </Button>
               <Button
                 variant={kidTaskFilter === "all" ? "default" : "outline"}
