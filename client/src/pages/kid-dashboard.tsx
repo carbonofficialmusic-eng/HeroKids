@@ -993,7 +993,6 @@ export default function KidDashboard() {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
-  const { containerRef: lbContainerRef, panelRef: lbPanelRef, stickyStyle: lbStickyStyle } = useStickyPanel(isDesktop);
 
   const [kidTaskFilter, setKidTaskFilter] = useState<"today" | "week" | "all">("all");
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
@@ -1708,7 +1707,7 @@ export default function KidDashboard() {
 
       {/* Content — paddingTop pushes below fixed header, #root handles scrolling like parent dashboard */}
       <div style={{ paddingTop: 'calc(4rem + var(--sat, env(safe-area-inset-top)))' }}>
-      <div ref={lbContainerRef} className="container mx-auto px-4 max-w-7xl pt-4 pb-[calc(8rem+env(safe-area-inset-bottom))] relative">
+      <div className="container mx-auto px-4 max-w-7xl pt-4 pb-[calc(8rem+env(safe-area-inset-bottom))] relative">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <div className="lg:col-span-2 space-y-8 min-w-0 overflow-hidden">
         {/* HeroKids Logo */}
@@ -2440,7 +2439,7 @@ export default function KidDashboard() {
       </div>{/* end left column */}
 
       {/* Right column — sticky (desktop only): pinboard + optional leaderboard */}
-      <div ref={lbPanelRef} className="hidden lg:flex lg:col-span-1 flex-col gap-4" style={lbStickyStyle}>
+      <div className="hidden lg:flex lg:col-span-1 flex-col gap-4 self-start sticky top-4">
         <Pinboard currentMemberId={member?.id ?? null} />
         {familyData?.showLeaderboard && (
           <div className="space-y-4">
