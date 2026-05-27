@@ -1089,7 +1089,7 @@ export default function Dashboard() {
                     </button>
                     <Link href="/skins" data-testid="link-stars-to-skins-parent">
                       <div className="flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate">
-                        <Star className="h-5 w-5 fill-muted-foreground text-muted-foreground" />
+                        <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                         <span className="text-base font-semibold" data-testid="text-parent-stars-header">
                           {(starData?.starsFound ?? member.starsFound) ?? 0}/{TOTAL_HIDDEN_STARS}
                         </span>
