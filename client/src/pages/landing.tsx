@@ -323,18 +323,21 @@ export default function Landing() {
       </nav>
 
       {/* ── Hero ── */}
-      <section style={{ position: "relative", padding: "5rem 1rem 6rem", overflow: "hidden", zIndex: 1 }}>
-        <div style={{ maxWidth: 1152, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr", gap: "3rem", alignItems: "center" }} className="lg:grid-cols-[1fr_28rem]">
+      <section style={{ position: "relative", padding: "4rem 1rem 5rem", overflow: "hidden", zIndex: 1 }}>
+        <div style={{ maxWidth: 1152, margin: "0 auto", display: "grid", gap: "3rem", alignItems: "center", gridTemplateColumns: "1fr" }} className="lg:grid-cols-2">
+
           {/* Left: copy */}
           <div style={{ textAlign: "center" }} className="lg:text-left">
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 999, background: `${C.bgCard}`, border: `1px solid ${C.border}`, marginBottom: 24, color: C.fgMuted, fontSize: "0.875rem", fontWeight: 700 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 999, background: C.bgCard, border: `1px solid ${C.border}`, marginBottom: 28, color: C.fgMuted, fontSize: "0.875rem", fontWeight: 700 }}>
               <Sparkles style={{ width: 14, height: 14, color: C.yellow }} />
               Haushalt-Chaos? Nicht mehr.
             </div>
-            <h1 className="hk-display" style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", fontWeight: 800, lineHeight: 1.1, marginBottom: "1.25rem", color: C.fg }} data-testid="text-hero-title">
-              {t('landing.heroTitle')}
+            <h1 className="hk-display" data-testid="text-hero-title" style={{ fontSize: "clamp(2.8rem, 6vw, 4.75rem)", fontWeight: 800, lineHeight: 1.08, marginBottom: "1.5rem" }}>
+              <span style={{ color: C.fg }}>Starke Kinder<br />erziehen.</span>
+              <br />
+              <span style={{ color: C.orange }}>Ohne das ewige Nörgeln.</span>
             </h1>
-            <p style={{ fontSize: "1.2rem", color: C.fgMuted, marginBottom: "2rem", maxWidth: 480, lineHeight: 1.65 }} data-testid="text-hero-subtitle">
+            <p style={{ fontSize: "1.1rem", color: C.fgMuted, marginBottom: "2rem", maxWidth: 460, lineHeight: 1.7 }} data-testid="text-hero-subtitle">
               {t('landing.heroSubtitle')}
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }} className="lg:justify-start">
@@ -342,10 +345,16 @@ export default function Landing() {
                 onClick={() => document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth" })}
                 style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 2rem", height: 52, borderRadius: 999, background: C.orange, color: "#fff", fontWeight: 800, fontSize: "1rem", border: "none", cursor: "pointer", boxShadow: `0 8px 24px -8px ${C.orange}88` }}
               >
-                Jetzt kostenlos starten <ArrowRight style={{ width: 18, height: 18 }} />
+                Kostenlos starten <ArrowRight style={{ width: 18, height: 18 }} />
+              </button>
+              <button
+                onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+                style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 1.5rem", height: 52, borderRadius: 999, background: "transparent", color: C.fg, fontWeight: 700, fontSize: "1rem", border: `1px solid ${C.border}`, cursor: "pointer" }}
+              >
+                <Play style={{ width: 14, height: 14, fill: C.fg }} /> So funktionierts
               </button>
             </div>
-            <div style={{ marginTop: "1.5rem", display: "flex", alignItems: "center", gap: 10, justifyContent: "center", fontSize: "0.875rem", color: C.fgMuted, fontWeight: 600 }} className="lg:justify-start">
+            <div style={{ marginTop: "1.75rem", display: "flex", alignItems: "center", gap: 10, justifyContent: "center", fontSize: "0.875rem", color: C.fgMuted, fontWeight: 600 }} className="lg:justify-start">
               <div style={{ display: "flex" }}>
                 {[1,2,3,4].map(i => (
                   <div key={i} style={{ width: 30, height: 30, borderRadius: "50%", border: `2px solid ${C.bg}`, background: C.bgCard, marginLeft: i > 1 ? -8 : 0, overflow: "hidden" }}>
@@ -353,27 +362,54 @@ export default function Landing() {
                   </div>
                 ))}
               </div>
-              Bereits 10.000+ Familien dabei
+              Bereits von 10.000+ Familien geliebt
             </div>
           </div>
 
-          {/* Right: hero image + auth panel */}
-          <div id="auth-panel" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem" }}>
-            <div className="hk-float2" style={{ position: "relative", width: "100%", maxWidth: "28rem" }}>
-              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 60%, ${C.orange}28 0%, transparent 70%)`, borderRadius: "1.5rem", transform: "scale(1.05)" }} />
+          {/* Right: floating image with badges */}
+          <div className="hk-float" style={{ position: "relative", display: "flex", justifyContent: "center" }}>
+            {/* glow behind image */}
+            <div style={{ position: "absolute", inset: "10%", background: `radial-gradient(circle, ${C.orange}30 0%, transparent 70%)`, borderRadius: "2rem", filter: "blur(32px)" }} />
+            <div style={{ position: "relative", width: "100%", maxWidth: "500px" }}>
               <img
                 src="/images/herokids-hero.png"
                 alt="Glückliche Familie beim High-Five"
-                style={{ width: "100%", borderRadius: "1.5rem", display: "block", position: "relative" }}
+                style={{ width: "100%", borderRadius: "1.5rem", display: "block", boxShadow: `0 24px 60px -16px rgba(0,0,0,0.5)` }}
               />
+              {/* Badge: Completed task */}
+              <div className="hk-float2" style={{ position: "absolute", top: "10%", left: "-8%", display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", borderRadius: 999, background: "rgba(20,30,50,0.92)", backdropFilter: "blur(10px)", border: `1px solid ${C.border}`, boxShadow: "0 8px 24px rgba(0,0,0,0.4)", whiteSpace: "nowrap" }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgb(34,197,94)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <CheckCircle2 style={{ width: 18, height: 18, color: "#fff" }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: "0.65rem", fontWeight: 700, color: "rgb(34,197,94)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Erledigt</div>
+                  <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.fg }}>Zimmer aufgeräumt!</div>
+                </div>
+              </div>
+              {/* Badge: Points earned */}
+              <div style={{ position: "absolute", bottom: "10%", right: "-6%", display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", borderRadius: 999, background: "rgba(20,30,50,0.92)", backdropFilter: "blur(10px)", border: `1px solid ${C.border}`, boxShadow: "0 8px 24px rgba(0,0,0,0.4)", whiteSpace: "nowrap" }}>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: C.yellow, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Star style={{ width: 20, height: 20, color: "#fff", fill: "#fff" }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: "1.1rem", fontWeight: 800, color: C.fg, fontFamily: "Fredoka, sans-serif" }}>+50</div>
+                  <div style={{ fontSize: "0.65rem", fontWeight: 700, color: C.fgMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Punkte verdient</div>
+                </div>
+              </div>
             </div>
-            <AuthPanel />
           </div>
         </div>
       </section>
 
+      {/* ── Auth Panel ── */}
+      <section id="auth-panel" style={{ padding: "2rem 1rem 5rem", zIndex: 1, position: "relative" }}>
+        <div style={{ maxWidth: 480, margin: "0 auto" }}>
+          <AuthPanel />
+        </div>
+      </section>
+
       {/* ── How it Works ── */}
-      <section style={{ padding: "5rem 1rem", background: C.bgSection, position: "relative", zIndex: 1 }}>
+      <section id="how-it-works" style={{ padding: "5rem 1rem", background: C.bgSection, position: "relative", zIndex: 1 }}>
         <div style={{ maxWidth: 1152, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
             <h2 className="hk-display" style={{ fontSize: "clamp(1.8rem, 4vw, 2.75rem)", fontWeight: 800, marginBottom: "0.75rem" }} data-testid="text-features-title">
