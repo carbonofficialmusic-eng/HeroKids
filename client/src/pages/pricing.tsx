@@ -139,23 +139,10 @@ export default function Pricing() {
       </header>
 
       {/* Pricing Content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="text-4xl md:text-5xl font-black font-accent mb-4" data-testid="heading-pricing">
-            {t("pricing.title")}
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            {t("pricing.subtitle")}
-          </p>
-          <p className="text-sm text-amber-600 dark:text-amber-400 mt-4 font-medium bg-amber-50 dark:bg-amber-950/30 px-4 py-2 rounded-lg inline-block">
-            {t("pricing.testModeNotice")}
-          </p>
-          {!isParent && (
-            <p className="text-sm text-amber-600 dark:text-amber-500 mt-4">
-              {t("pricing.onlyParents")}
-            </p>
-          )}
-        </div>
+      <div className="container mx-auto px-4 pt-8 pb-12">
+        <h1 className="text-4xl md:text-5xl font-black font-accent text-center mb-8" data-testid="heading-pricing">
+          {t("pricing.title")}
+        </h1>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {tiers.map((tier) => {
