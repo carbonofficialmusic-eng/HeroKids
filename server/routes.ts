@@ -28,6 +28,8 @@ import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
 // Backend notification translations for all 8 supported languages
 const notificationTranslations: Record<string, Record<string, string>> = {
   en: {
+    "pinboard_posted.title": "{{name}} posted on the pinboard",
+    "pinboard_posted.message": "",
     "task_pending.title": "{{name}} completed \"{{task}}\"",
     "task_pending.message": "Waiting for approval (+{{points}} points)",
     "task_completed.title": "{{name}} earned {{points}} points",
@@ -51,6 +53,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "Did not meet expectations",
   },
   de: {
+    "pinboard_posted.title": "{{name}} hat an die Pinnwand geschrieben",
+    "pinboard_posted.message": "",
     "task_pending.title": "{{name}} hat \"{{task}}\" erledigt",
     "task_pending.message": "Wartet auf Genehmigung (+{{points}} Punkte)",
     "task_completed.title": "{{name}} hat {{points}} Punkte verdient",
@@ -74,6 +78,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "Entspricht nicht den Erwartungen",
   },
   fr: {
+    "pinboard_posted.title": "{{name}} a écrit sur le tableau d'affichage",
+    "pinboard_posted.message": "",
     "task_pending.title": "{{name}} a terminé \"{{task}}\"",
     "task_pending.message": "En attente d'approbation (+{{points}} points)",
     "task_completed.title": "{{name}} a gagné {{points}} points",
@@ -97,6 +103,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "Ne répond pas aux attentes",
   },
   es: {
+    "pinboard_posted.title": "{{name}} escribió en el tablón",
+    "pinboard_posted.message": "",
     "task_pending.title": "{{name}} completó \"{{task}}\"",
     "task_pending.message": "Esperando aprobación (+{{points}} puntos)",
     "task_completed.title": "{{name}} ganó {{points}} puntos",
@@ -120,6 +128,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "No cumple las expectativas",
   },
   ja: {
+    "pinboard_posted.title": "{{name}}が掲示板に書きました",
+    "pinboard_posted.message": "",
     "task_pending.title": "{{name}}が「{{task}}」を完了しました",
     "task_pending.message": "承認待ち (+{{points}}ポイント)",
     "task_completed.title": "{{name}}が{{points}}ポイントを獲得しました",
@@ -143,6 +153,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "期待に沿っていません",
   },
   zh: {
+    "pinboard_posted.title": "{{name}}在留言板上写了内容",
+    "pinboard_posted.message": "",
     "task_pending.title": "{{name}}完成了「{{task}}」",
     "task_pending.message": "等待批准 (+{{points}}积分)",
     "task_completed.title": "{{name}}获得了{{points}}积分",
@@ -166,6 +178,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "未达到预期",
   },
   ko: {
+    "pinboard_posted.title": "{{name}}이(가) 게시판에 글을 남겼어요",
+    "pinboard_posted.message": "",
     "task_pending.title": "{{name}}이(가) \"{{task}}\"을(를) 완료했어요",
     "task_pending.message": "승인 대기 중 (+{{points}}포인트)",
     "task_completed.title": "{{name}}이(가) {{points}}포인트를 얻었어요",
@@ -189,6 +203,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "기대에 미치지 못함",
   },
   sv: {
+    "pinboard_posted.title": "{{name}} skrev på anslagstavlan",
+    "pinboard_posted.message": "",
     "task_pending.title": "{{name}} slutförde \"{{task}}\"",
     "task_pending.message": "Väntar på godkännande (+{{points}} poäng)",
     "task_completed.title": "{{name}} tjänade {{points}} poäng",
@@ -4563,6 +4579,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .returning();
 
       broadcastToFamily(member.familyName, { type: "pinboard_update" });
+
+      // Notify all other family members about the new pinboard note
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      const pinboardNotification = {
+        familyName: member.familyName,
+        type: "pinboard_posted" as const,
+        title: translateNotification(lang, "pinboard_posted.title", { name: member.displayName }),
+        message: translateNotification(lang, "pinboard_posted.message"),
+        relatedMemberId: member.id,
+        isRead: false,
+      };
+      await storage.createNotificationForParents(member.familyName, pinboardNotification, member.id);
+      await storage.createNotificationForSiblings(member.familyName, pinboardNotification, member.id);
+      broadcastToFamily(member.familyName, { type: "notification_update" });
+
       res.status(201).json(note);
     } catch (error: any) {
       console.error("Error creating pinboard note:", error);
