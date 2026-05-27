@@ -559,6 +559,7 @@
     "title": "Chat Familial",
     "sendMessage": "Envoyer un message",
     "typeMessage": "Tapez un message...",
+    "readOnlyActingAs": "Lecture seule — vous consultez en tant que {{name}}. Connectez-vous avec votre propre compte pour écrire.",
     "noMessages": "Pas encore de messages",
     "upgradeRequired": "Le Chat Familial nécessite un abonnement Family+ ou Enterprise",
     "loadingChat": "Chargement du chat...",

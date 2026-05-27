@@ -563,6 +563,7 @@
     "title": "가족 채팅",
     "sendMessage": "메시지 보내기",
     "typeMessage": "메시지를 입력하세요...",
+    "readOnlyActingAs": "읽기 전용 — {{name}} 으로 보는 중입니다. 메시지를 보내려면 본인 계정으로 로그인하세요.",
     "noMessages": "아직 메시지가 없습니다",
     "upgradeRequired": "가족 채팅은 Family+ 또는 Enterprise 구독이 필요합니다",
     "loadingChat": "채팅 로딩 중...",

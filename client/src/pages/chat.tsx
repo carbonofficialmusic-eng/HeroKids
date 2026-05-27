@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Lock, MessageCircle, ArrowLeft } from "lucide-react";
+import { Send, Lock, MessageCircle, ArrowLeft, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Link } from "wouter";
@@ -36,6 +36,15 @@ export default function Chat() {
     queryKey: ["/api/family-members/current"],
     staleTime: 5 * 60 * 1000,
   });
+
+  // Real (non-acting-as) member — to detect if we're acting as someone else
+  const { data: realMember } = useQuery<any>({
+    queryKey: ["/api/family-members/real"],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // True when a parent has switched into a child's profile
+  const isActingAs = !!(member && realMember && member.id !== realMember.id);
 
   const { data: messages = [], isLoading, error } = useQuery<ChatMessage[]>({
     queryKey: ["/api/chat"],
@@ -257,29 +266,36 @@ export default function Chat() {
           </ScrollArea>
 
           {/* Input area */}
-          <form
-            onSubmit={handleSendMessage}
-            className="border-t p-4 flex gap-2"
-            data-testid="form-send-message"
-          >
-            <EmoticonPicker onSelectEmoticon={handleSelectEmoticon} />
-            <Input
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              placeholder={t('chat.typeMessage')}
-              maxLength={1000}
-              disabled={sendMessageMutation.isPending}
-              className="flex-1"
-              data-testid="input-message"
-            />
-            <Button
-              type="submit"
-              disabled={!messageText.trim() || sendMessageMutation.isPending}
-              data-testid="button-send-message"
+          {isActingAs ? (
+            <div className="border-t p-4 flex items-center gap-2 text-sm text-muted-foreground bg-muted/30" data-testid="chat-readonly-notice">
+              <EyeOff className="w-4 h-4 flex-shrink-0" />
+              <span>{t('chat.readOnlyActingAs', 'Nur lesen — du bist als {{name}} angemeldet. Melde dich mit deinem eigenen Account an, um zu schreiben.', { name: member?.displayName })}</span>
+            </div>
+          ) : (
+            <form
+              onSubmit={handleSendMessage}
+              className="border-t p-4 flex gap-2"
+              data-testid="form-send-message"
             >
-              <Send className="w-4 h-4" />
-            </Button>
-          </form>
+              <EmoticonPicker onSelectEmoticon={handleSelectEmoticon} />
+              <Input
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                placeholder={t('chat.typeMessage')}
+                maxLength={1000}
+                disabled={sendMessageMutation.isPending}
+                className="flex-1"
+                data-testid="input-message"
+              />
+              <Button
+                type="submit"
+                disabled={!messageText.trim() || sendMessageMutation.isPending}
+                data-testid="button-send-message"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>

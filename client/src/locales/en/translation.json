@@ -590,6 +590,7 @@
     "title": "Family Chat",
     "sendMessage": "Send message",
     "typeMessage": "Type a message...",
+    "readOnlyActingAs": "Read only — you are viewing as {{name}}. Sign in with your own account to write messages.",
     "noMessages": "No messages yet",
     "upgradeRequired": "Family Chat requires Family+ or Enterprise subscription",
     "loadingChat": "Loading chat...",

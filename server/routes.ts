@@ -4354,6 +4354,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
       }
+
+      // Block sending if acting as another member (privacy: only own login can write)
+      if (req.session?.actingAsMemberId) {
+        return res.status(403).json({ message: "acting_as_member" });
+      }
       
       // Get family tier and check if chat is allowed
       const family = await storage.getFamily(member.familyName);
