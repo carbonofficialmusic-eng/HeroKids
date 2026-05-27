@@ -60,6 +60,7 @@ import {
   type InsertChildDeviceSession,
   starPlacements,
   type StarPlacement,
+  pinboardNotes,
   notifications,
   emailReadinessChecks,
   accountLinkRepairHistory,
@@ -2396,6 +2397,16 @@ export class DatabaseStorage implements IStorage {
       // 8. Delete all chat messages for this family
       await tx.delete(chatMessages)
         .where(eq(chatMessages.familyName, familyName));
+
+      // 8b. Delete all pinboard notes for this family
+      await tx.delete(pinboardNotes)
+        .where(eq(pinboardNotes.familyName, familyName));
+
+      // 8c. Delete all notifications for all members
+      for (const memberId of memberIds) {
+        await tx.delete(notifications)
+          .where(eq(notifications.targetMemberId, memberId));
+      }
 
       // 9. Delete all achievement awards for members (must be before achievement definitions due to FK)
       for (const memberId of memberIds) {
