@@ -606,14 +606,14 @@ function TaskCard({
           isActionable && !isRejected ? "bg-card/80 cursor-pointer border-border hover:border-primary" : 
           isActionable && isRejected ? "bg-card/80 cursor-pointer border-blue-500 hover:border-blue-600" :
           isApproved ? "bg-card/20 border-green-500" :
-          isPending ? "bg-card/30 border-amber-500" :
-          hasNoSlots ? "bg-card/30 opacity-50 border-amber-500" :
-          isSharedTaskNotAssigned ? "bg-card/25 opacity-50 border-muted" :
+          isPending ? "bg-card/20 border-amber-500" :
+          hasNoSlots ? "bg-card/20 border-amber-500" :
+          isSharedTaskNotAssigned ? "bg-card/20 border-muted" :
           allSharedMembersCompleted ? "bg-card/20 border-green-500" :
-          dueDateInfo.notYet ? "bg-card/25 opacity-50 border-muted" :
-          dueDateInfo.expired ? "bg-card/20 opacity-40 border-destructive" :
-          isWeekendUnavailable ? "bg-card/25 opacity-50 border-muted" :
-          "bg-card/25 opacity-60 border-muted"
+          dueDateInfo.notYet ? "bg-card/20 border-muted" :
+          dueDateInfo.expired ? "bg-card/20 border-destructive" :
+          isWeekendUnavailable ? "bg-card/20 border-muted" :
+          "bg-card/20 border-muted"
         }`}
         data-testid={`task-card-${task.id}`}
         onClick={isActionable ? handleComplete : undefined}
@@ -636,7 +636,10 @@ function TaskCard({
             ) : allSharedMembersCompleted ? (
               <CheckCircle2 className="h-12 w-12 text-green-500" />
             ) : (
-              <TaskIcon className="h-12 w-12 text-primary" />
+              <TaskIcon
+                className="h-12 w-12 text-primary transition-all duration-300"
+                style={{ filter: isActionable ? "grayscale(0%)" : "grayscale(100%)" }}
+              />
             )}
           </div>
           <div className="flex items-center justify-center gap-2">
