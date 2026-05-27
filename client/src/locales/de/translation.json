@@ -214,7 +214,7 @@
     "immediateRecurrenceDesc": "Ist immer da und kann mehrmals am Tag ausgeführt werden. Erfordert IMMER elterliche Genehmigung.",
     "customDaysDesc": "Lege eine benutzerdefinierte Anzahl von Tagen für die Wiederholung fest",
     "repeatSchedule": "Wiederholungsplan",
-    "oneTime": "Termin festlegen",
+    "oneTime": "Einmalig",
     "immediate": "Direkte Wiederholung",
     "immediateDesc": "Kann jederzeit wiederholt werden. Erfordert IMMER elterliche Genehmigung.",
     "daily": "Täglich",

@@ -195,7 +195,7 @@
     "immediateRecurrenceDesc": "始终可用，一天内可多次完成。始终需要家长批准。",
     "customDaysDesc": "设置任务重复的自定义天数",
     "repeatSchedule": "重复计划",
-    "oneTime": "设定日期",
+    "oneTime": "一次性",
     "immediate": "即时重复",
     "immediateDesc": "可随时重复。始终需要家长批准。",
     "daily": "每天",

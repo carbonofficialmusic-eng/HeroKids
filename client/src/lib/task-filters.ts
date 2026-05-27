@@ -1,4 +1,4 @@
-import { startOfDay, addDays, parseISO } from "date-fns";
+import { differenceInDays, parseISO, startOfDay } from "date-fns";
 
 export interface FilterableTask {
   recurrence: string;
@@ -7,9 +7,26 @@ export interface FilterableTask {
 }
 
 /**
+ * Returns how many calendar days from today until the given due date.
+ * Negative means past-due. 0 means today.
+ */
+function daysUntilDue(dueDate: string | Date): number {
+  const due = startOfDay(typeof dueDate === "string" ? parseISO(dueDate) : dueDate);
+  const today = startOfDay(new Date());
+  return differenceInDays(due, today);
+}
+
+/**
  * Filters tasks by recurrence frequency group.
  *
- * Custom-interval tasks (recurrence === "none" && recurrenceDays > 0):
+ * One-time tasks (recurrence === "none", no recurrenceDays):
+ *   no dueDate          → daily
+ *   dueDate ≤ 3 days    → daily
+ *   dueDate 4–7 days    → weekly
+ *   dueDate 8–30 days   → monthly
+ *   dueDate 31+ days    → only "all"
+ *
+ * Custom-interval tasks (recurrence === "none", recurrenceDays > 0):
  *   1–3 days   → daily
  *   4–7 days   → weekly
  *   8–30 days  → monthly
@@ -26,14 +43,28 @@ export function filterTasksByDate<T extends FilterableTask>(
   return taskList.filter((task) => {
     if (taskFilter === "all") return true;
 
-    const isCustom = task.recurrence === "none" && task.recurrenceDays != null && task.recurrenceDays > 0;
-
-    if (isCustom) {
+    // Custom interval (recurrenceDays set, no real recurrence)
+    const isCustomInterval = task.recurrence === "none" && task.recurrenceDays != null && task.recurrenceDays > 0;
+    if (isCustomInterval) {
       const d = task.recurrenceDays!;
       if (taskFilter === "daily")   return d <= 3;
       if (taskFilter === "weekly")  return d >= 4 && d <= 7;
       if (taskFilter === "monthly") return d >= 8 && d <= 30;
       return false;
+    }
+
+    // One-time task (recurrence === "none", no interval)
+    const isOneTime = task.recurrence === "none";
+    if (isOneTime) {
+      if (!task.dueDate) {
+        // No date → always show in daily
+        return taskFilter === "daily";
+      }
+      const days = daysUntilDue(task.dueDate);
+      if (taskFilter === "daily")   return days <= 3;
+      if (taskFilter === "weekly")  return days >= 4 && days <= 7;
+      if (taskFilter === "monthly") return days >= 8 && days <= 30;
+      return false; // 31+ only in "all"
     }
 
     if (taskFilter === "daily") {
@@ -58,12 +89,7 @@ export function filterTasksByDate<T extends FilterableTask>(
 
 /**
  * Filters kid tasks by recurrence frequency group.
- *
- * Custom-interval tasks (recurrence === "none" && recurrenceDays > 0):
- *   1–3 days   → daily
- *   4–7 days   → weekly
- *   8–30 days  → monthly
- *   31+ days   → only "all"
+ * Same rules as filterTasksByDate.
  *
  * @param taskList - Array of tasks to filter
  * @param kidTaskFilter - "daily" | "weekly" | "monthly" | "all"
@@ -76,13 +102,26 @@ export function filterKidTasksByDate<T extends FilterableTask>(
   return taskList.filter((task) => {
     if (kidTaskFilter === "all") return true;
 
-    const isCustom = task.recurrence === "none" && task.recurrenceDays != null && task.recurrenceDays > 0;
-
-    if (isCustom) {
+    // Custom interval
+    const isCustomInterval = task.recurrence === "none" && task.recurrenceDays != null && task.recurrenceDays > 0;
+    if (isCustomInterval) {
       const d = task.recurrenceDays!;
       if (kidTaskFilter === "daily")   return d <= 3;
       if (kidTaskFilter === "weekly")  return d >= 4 && d <= 7;
       if (kidTaskFilter === "monthly") return d >= 8 && d <= 30;
+      return false;
+    }
+
+    // One-time task
+    const isOneTime = task.recurrence === "none";
+    if (isOneTime) {
+      if (!task.dueDate) {
+        return kidTaskFilter === "daily";
+      }
+      const days = daysUntilDue(task.dueDate);
+      if (kidTaskFilter === "daily")   return days <= 3;
+      if (kidTaskFilter === "weekly")  return days >= 4 && days <= 7;
+      if (kidTaskFilter === "monthly") return days >= 8 && days <= 30;
       return false;
     }
 

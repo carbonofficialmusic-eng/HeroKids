@@ -195,7 +195,7 @@
     "immediateRecurrenceDesc": "Toujours disponible et peut être effectuée plusieurs fois par jour. Nécessite TOUJOURS l'approbation parentale.",
     "customDaysDesc": "Définissez un nombre de jours personnalisé pour la répétition de la tâche",
     "repeatSchedule": "Programme de répétition",
-    "oneTime": "Fixer une date",
+    "oneTime": "Unique",
     "immediate": "Répétition immédiate",
     "immediateDesc": "Peut être répétée à tout moment. Nécessite TOUJOURS l'approbation parentale.",
     "daily": "Quotidien",
