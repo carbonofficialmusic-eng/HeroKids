@@ -84,8 +84,10 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-full">
-      {/* Background container - fixed positioning, below all content via negative z-index */}
-      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+      {/* Background container - extends 60px above layout viewport so it always
+          covers the native status-bar zone even when iOS sets the WKWebView
+          layout viewport origin to y=safe-area-inset-top instead of y=0. */}
+      <div className="fixed inset-x-0 bottom-0 pointer-events-none" style={{ zIndex: 0, top: '-60px' }}>
         {previousBg && (
           <img 
             src={previousBg}
