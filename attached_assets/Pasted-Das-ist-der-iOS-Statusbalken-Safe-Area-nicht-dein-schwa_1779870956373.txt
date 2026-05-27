@@ -1,0 +1,36 @@
+Das ist der iOS-Statusbalken/Safe-Area, nicht “dein” schwarzer Balken. Er erscheint, wenn deine View hinter den System-Statusbereich läuft und der Hintergrund dort nicht durchgefärbt/verlängert wird. Bei einem Profil scheint die View die Safe-Area zu respektieren, beim anderen nicht (oder hat andere Insets).
+
+So bekommst du ihn weg bzw. beziehst ihn korrekt ein:
+
+iOS (SwiftUI)
+• Wenn der Header/Hintergrund bis ganz nach oben gehen soll:
+  - Hintergründe an die Kanten legen: .ignoresSafeArea(.all, edges: .top)
+  - Oder für ScrollViews: .scrollContentInsets(.never) + .ignoresSafeArea(.container, edges: .top)
+• Wenn der Inhalt NICHT unter die Statusleiste laufen soll:
+  - Safe-Area respektieren (kein ignoresSafeArea) und dem Hintergrund eine durchgehende Farbe geben, z. B. ZStack { Color.background.ignoresSafeArea(); Inhalt }
+• Achte darauf, dass beide Profile dieselben Modifier bekommen. Unterschiedliche Container (NavigationStack, ScrollView, VStack) können auto Insets hinzufügen.
+
+iOS (UIKit)
+• View unter Statusleiste erlauben oder verbieten:
+  - View Controller: extendedLayoutIncludesOpaqueBars = true/false
+  - ScrollViews: contentInsetAdjustmentBehavior = .never
+  - Hintergrundfarbe der Superview bis zur Fensterkante setzen (view.backgroundColor).
+• Autolayout: Top-Constraints entweder zur Superview.topAnchor (für Vollbild) oder zum safeAreaLayoutGuide.topAnchor (für unter der Statusleiste).
+
+Web-/Hybrid-App (React Native/Flutter/HTML in WKWebView)
+• React Native: SafeAreaView konsistent nutzen oder entfernen; für Vollbild StatusBar translucent={true} + padding manuell, oder StatusBar hidden.
+• Flutter: SafeArea-Widget gleichartig verwenden; für Vollbild: extendBodyBehindAppBar: true und eigenen Padding oben berücksichtigen.
+• Mobile Web (PWA/WKWebView):
+  - Meta-Tag: <meta name="viewport" content="viewport-fit=cover">
+  - CSS: body { background: … } und für Notches:
+    padding-top: env(safe-area-inset-top);
+    oder wenn Vollbild-Hintergrund gewünscht: ein übergeordnetes Element mit position: fixed; inset: 0; das den Hintergrund füllt.
+  - iOS Standalone (PWA): <meta name="apple-mobile-web-app-capable" content="yes"> und Statusbar-Style: <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">, damit dein Hintergrund bis unter die Statusleiste reicht.
+
+Praktischer Fix-Tipp
+• Entscheide: Soll das Headerbild bis ganz nach oben laufen? Dann:
+  - Native: Hintergrund in den Safe-Area-Bereich ausdehnen (ignoresSafeArea/top) und den eigentlichen Content unten mit safe-area Padding versehen.
+  - Web: viewport-fit=cover + ein volles Hintergrund-Element und ggf. padding-top: env(safe-area-inset-top) nur für den Content.
+• Stelle sicher, dass Kinder- und Elternseite denselben Container/Modifier verwenden. Der Unterschied in deinen Screenshots deutet auf unterschiedliche Safe-Area/Inset-Einstellungen je Screen hin.
+
+Wenn du mir sagst, ob es SwiftUI, React Native, Flutter oder eine WebView ist (und zeigst den Header-/Root-Code), gebe ich dir die exakten Zeilen.
