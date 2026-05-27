@@ -204,7 +204,7 @@ export default function Chat() {
 
   return (
     <div className="p-4 flex flex-col" style={safeTopStyle} data-testid="page-chat">
-      <div className="w-full lg:max-w-3xl flex flex-col flex-1">
+      <div className="w-full lg:max-w-3xl flex flex-col flex-1 mx-auto">
       <div className="flex items-center gap-3 mb-4 shrink-0">
         {backBtn}
         <h1 className="text-2xl font-bold" data-testid="heading-chat">
