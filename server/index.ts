@@ -195,15 +195,6 @@ app.use((req, res, next) => {
     return originalResJson.apply(res, [bodyJson, ...args]);
   };
 
-  const originalWriteHead = res.writeHead.bind(res);
-  (res as any).writeHead = function(statusCode: any, ...args: any[]) {
-    if (path === "/api/auth/login") {
-      console.log("[HEADER DEBUG] login response set-cookie:", res.getHeader("set-cookie"));
-      console.log("[HEADER DEBUG] login response all headers:", JSON.stringify(res.getHeaders()));
-    }
-    return originalWriteHead(statusCode, ...args);
-  };
-
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {

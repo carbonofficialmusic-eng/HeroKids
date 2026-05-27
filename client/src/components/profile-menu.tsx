@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, clearDevToken } from "@/lib/queryClient";
 
 interface ProfileMenuProps {
   member: FamilyMember;
@@ -72,6 +72,7 @@ export function ProfileMenu({
   };
 
   const handleLogout = async () => {
+    clearDevToken();
     await apiRequest("POST", "/api/auth/logout");
     queryClient.clear();
     window.location.href = "/";

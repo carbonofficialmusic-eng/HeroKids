@@ -12,7 +12,7 @@ import { Star, CheckCircle2, Shield, Heart, ArrowRight, Play, Gamepad2, Gift, Sp
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, storeDevToken } from "@/lib/queryClient";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
 // ─── Auth schemas ─────────────────────────────────────────────────────────────
@@ -66,6 +66,7 @@ function AuthPanel() {
     try {
       const res = await apiRequest("POST", "/api/auth/login", data);
       const result = await res.json();
+      if (result.devToken) storeDevToken(result.devToken);
       await finishAuth(result.user);
     } catch (e: any) { setFormMessage(e.message || "Login fehlgeschlagen."); }
     finally { setIsSubmitting(false); }

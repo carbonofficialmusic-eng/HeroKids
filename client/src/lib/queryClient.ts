@@ -13,6 +13,24 @@ export class ApiError extends Error {
   }
 }
 
+const DEV_TOKEN_KEY = "__hk_dev_token";
+
+function getDevHeaders(): Record<string, string> {
+  if (import.meta.env.DEV) {
+    const token = localStorage.getItem(DEV_TOKEN_KEY);
+    if (token) return { "X-Dev-Token": token };
+  }
+  return {};
+}
+
+export function storeDevToken(token: string): void {
+  localStorage.setItem(DEV_TOKEN_KEY, token);
+}
+
+export function clearDevToken(): void {
+  localStorage.removeItem(DEV_TOKEN_KEY);
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     let data: any;
@@ -39,7 +57,7 @@ export async function apiRequest(
 ): Promise<Response> {
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers: { ...(data ? { "Content-Type": "application/json" } : {}), ...getDevHeaders() },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -56,6 +74,7 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
+      headers: getDevHeaders(),
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

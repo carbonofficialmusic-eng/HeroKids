@@ -103,9 +103,27 @@ async function trySendVerificationEmail(user: any, token: string) {
   return sendVerificationEmail(user.email, user.firstName, verificationUrl);
 }
 
+export const isDev = process.env.NODE_ENV !== "production";
+
+// In-memory dev token store — bypasses cookie restrictions in Replit's embedded iframe preview
+const devTokenStore = new Map<string, any>();
+
+export function createDevToken(user: any): string {
+  const token = crypto.randomBytes(32).toString("hex");
+  devTokenStore.set(token, user);
+  return token;
+}
+
+export function getDevTokenUser(token: string): any {
+  return devTokenStore.get(token);
+}
+
+export function deleteDevToken(token: string): void {
+  devTokenStore.delete(token);
+}
+
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000;
-  const isDev = process.env.NODE_ENV !== "production";
 
   let store: session.Store | undefined = undefined;
   if (!isDev) {
@@ -123,11 +141,10 @@ export function getSession() {
     store,
     resave: false,
     saveUninitialized: false,
-    proxy: true,
     cookie: {
       httpOnly: true,
-      secure: true,
-      sameSite: isDev ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "lax" : false,
       maxAge: sessionTtl,
     },
   });
@@ -223,12 +240,12 @@ export async function setupAuth(app: Express) {
       clearAccountSessionState(req);
       await loginAsync(req, createSessionUser(user.id));
       clearAccountSessionState(req);
-      console.log("[AUTH DEBUG] session id after login:", req.sessionID);
-      console.log("[AUTH DEBUG] passport user in session:", JSON.stringify(req.session?.passport));
-      console.log("[AUTH DEBUG] req.isAuthenticated():", req.isAuthenticated());
-      console.log("[AUTH DEBUG] Set-Cookie header will be sent:", JSON.stringify(res.getHeader("set-cookie")));
       const updatedUser = await storage.getUser(user.id);
-      res.json({ user: sanitizeUser(updatedUser || user) });
+      const responseBody: any = { user: sanitizeUser(updatedUser || user) };
+      if (isDev) {
+        responseBody.devToken = createDevToken(createSessionUser(user.id));
+      }
+      res.json(responseBody);
     } catch (error: any) {
       console.error("Login error:", error);
       res.status(400).json({ message: error?.message || "Login fehlgeschlagen" });
@@ -362,6 +379,10 @@ export async function setupAuth(app: Express) {
   });
 
   app.post("/api/auth/logout", (req, res) => {
+    if (isDev) {
+      const devToken = req.headers["x-dev-token"] as string | undefined;
+      if (devToken) deleteDevToken(devToken);
+    }
     req.logout(() => {
       req.session.destroy(() => {
         res.clearCookie("connect.sid");
@@ -382,13 +403,26 @@ export async function setupAuth(app: Express) {
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
-  console.log("[AUTH DEBUG] isAuthenticated check - cookie header:", req.headers.cookie?.substring(0, 80));
-  console.log("[AUTH DEBUG] req.isAuthenticated():", req.isAuthenticated(), "req.user:", user?.claims?.sub);
 
   if (req.isAuthenticated() && user?.claims?.sub) {
     const account = await storage.getUser(user.claims.sub);
     if (account && !account.isDisabled) {
       return next();
+    }
+  }
+
+  // Dev-only: bearer token stored in localStorage bypasses cookie restrictions in Replit preview iframe
+  if (isDev) {
+    const devTokenHeader = req.headers["x-dev-token"] as string | undefined;
+    if (devTokenHeader) {
+      const sessionUser = getDevTokenUser(devTokenHeader);
+      if (sessionUser?.claims?.sub) {
+        const account = await storage.getUser(sessionUser.claims.sub);
+        if (account && !account.isDisabled) {
+          (req as any).user = sessionUser;
+          return next();
+        }
+      }
     }
   }
 
