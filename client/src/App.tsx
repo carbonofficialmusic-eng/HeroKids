@@ -125,7 +125,7 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
         <div
           className="absolute inset-x-0 top-0 pointer-events-none"
           style={{
-            height: 'calc(var(--sat, env(safe-area-inset-top)) + 1rem)',
+            height: 'max(80px, calc(var(--sat, env(safe-area-inset-top)) + 1rem))',
             background: 'linear-gradient(to bottom, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.40) 60%, rgba(0,0,0,0) 100%)',
           }}
         />
