@@ -141,14 +141,15 @@ export function TaskCard({
       className="min-h-[140px] min-w-0 w-full"
       initial={false}
       animate={{
-        opacity: isGrayedOut ? 0.6 : 1,
         scale: 1,
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
       whileTap={onClick ? { scale: 0.98 } : undefined}
     >
       <Card
-        className={`p-4 transition-all min-h-[140px] h-full flex flex-col ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
+        className={`p-4 transition-all min-h-[140px] h-full flex flex-col backdrop-blur-md ${
+          isGrayedOut ? 'bg-card/20' : 'bg-card/80'
+        } ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
         data-testid={`card-task-${task.id}`}
         onClick={() => onClick?.(task)}
       >
