@@ -1372,6 +1372,13 @@
     "contributedThisPeriod": "Han contribuido",
     "nextContribution": "Próxima contribución el {{date}}"
   },
+  "pinboard": {
+    "title": "Tablón de notas",
+    "empty": "Sin notas aún — ¡sé el primero!",
+    "loading": "Cargando…",
+    "placeholder": "Tu mensaje (máx. 150 caracteres)…",
+    "error": "Error al guardar"
+  },
   "notifications": {
     "title": "Notificaciones",
     "empty": "Aún no hay notificaciones",

@@ -765,8 +765,29 @@ async function migrateExistingMembersForTestPhase() {
   }
 }
 
+async function ensurePinboardTable() {
+  try {
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS pinboard_notes (
+        id SERIAL PRIMARY KEY,
+        family_name VARCHAR NOT NULL REFERENCES families(family_name) ON DELETE CASCADE,
+        member_id VARCHAR NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+        message VARCHAR(150) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+      )
+    `);
+    log("✅ Pinboard notes table ready");
+  } catch (error) {
+    console.error("❌ Error ensuring pinboard table:", error);
+  }
+}
+
 (async () => {
   const server = await registerRoutes(app);
+
+  // Ensure pinboard_notes table exists
+  await ensurePinboardTable();
 
   // Auto-seed character skins on first startup
   await autoSeedSkinsIfNeeded();

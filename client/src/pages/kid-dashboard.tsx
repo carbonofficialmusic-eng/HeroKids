@@ -83,6 +83,7 @@ import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { RewardRequestDialog } from "@/components/reward-request-dialog";
 import { Leaderboard } from "@/components/leaderboard";
+import { Pinboard } from "@/components/pinboard";
 import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature, type SubscriptionTier } from "@shared/tier-config";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
@@ -2438,9 +2439,10 @@ export default function KidDashboard() {
 
       </div>{/* end left column */}
 
-      {/* Right column — sticky leaderboard (desktop only) */}
-      {familyData?.showLeaderboard && (
-        <div ref={lbPanelRef} className="hidden lg:block lg:col-span-1" style={lbStickyStyle}>
+      {/* Right column — sticky (desktop only): pinboard + optional leaderboard */}
+      <div ref={lbPanelRef} className="hidden lg:flex lg:col-span-1 flex-col gap-4" style={lbStickyStyle}>
+        <Pinboard currentMemberId={member?.id ?? null} />
+        {familyData?.showLeaderboard && (
           <div className="space-y-4">
             {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
               <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
@@ -2452,8 +2454,8 @@ export default function KidDashboard() {
             )}
             <Leaderboard members={familyMembers} period={leaderboardPeriod} weeklyPrize={familyData?.weeklyPrize} monthlyPrize={familyData?.monthlyPrize} />
           </div>
-        </div>
-      )}
+        )}
+      </div>{/* end right column */}
 
       </div>{/* end grid */}
       </div>{/* end container */}

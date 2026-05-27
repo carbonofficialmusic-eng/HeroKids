@@ -1372,6 +1372,13 @@
     "contributedThisPeriod": "已贡献",
     "nextContribution": "下次贡献于{{date}}"
   },
+  "pinboard": {
+    "title": "留言板",
+    "empty": "还没有留言 — 来第一个吧！",
+    "loading": "加载中…",
+    "placeholder": "你的留言（最多150个字符）…",
+    "error": "保存失败"
+  },
   "notifications": {
     "title": "通知",
     "empty": "暂无通知",

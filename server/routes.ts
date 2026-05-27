@@ -16,11 +16,11 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, childDeviceSessions, users } from "@shared/schema";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, childDeviceSessions, users, pinboardNotes } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD } from "@shared/skin-config";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, and, desc } from "drizzle-orm";
 import "./types";
 import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
 import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
@@ -4498,6 +4498,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error marking messages as read:", error);
       res.status(500).json({ message: "Failed to mark messages as read" });
+    }
+  });
+
+  // ===== PINBOARD ROUTES =====
+  app.get("/api/pinboard", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const member = result.member;
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const notes = await db
+        .select({
+          id: pinboardNotes.id,
+          familyName: pinboardNotes.familyName,
+          memberId: pinboardNotes.memberId,
+          message: pinboardNotes.message,
+          createdAt: pinboardNotes.createdAt,
+          updatedAt: pinboardNotes.updatedAt,
+          memberName: familyMembers.displayName,
+          memberColor: familyMembers.color,
+          memberAvatarUrl: familyMembers.avatarUrl,
+        })
+        .from(pinboardNotes)
+        .innerJoin(familyMembers, eq(pinboardNotes.memberId, familyMembers.id))
+        .where(eq(pinboardNotes.familyName, member.familyName))
+        .orderBy(desc(pinboardNotes.updatedAt));
+
+      res.json(notes);
+    } catch (error: any) {
+      console.error("Error fetching pinboard:", error);
+      res.status(500).json({ message: "Failed to fetch pinboard" });
+    }
+  });
+
+  app.post("/api/pinboard", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const member = result.member;
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const { message } = req.body;
+      if (!message || typeof message !== "string" || message.trim().length === 0) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+      if (message.length > 150) {
+        return res.status(400).json({ message: "Message too long (max 150 characters)" });
+      }
+
+      // Check max 2 notes per member
+      const existing = await db
+        .select({ id: pinboardNotes.id })
+        .from(pinboardNotes)
+        .where(and(eq(pinboardNotes.familyName, member.familyName), eq(pinboardNotes.memberId, member.id)));
+      if (existing.length >= 2) {
+        return res.status(400).json({ message: "You can have at most 2 notes on the board" });
+      }
+
+      const [note] = await db
+        .insert(pinboardNotes)
+        .values({ familyName: member.familyName, memberId: member.id, message: message.trim() })
+        .returning();
+
+      broadcastToFamily(member.familyName, { type: "pinboard_update" });
+      res.status(201).json(note);
+    } catch (error: any) {
+      console.error("Error creating pinboard note:", error);
+      res.status(500).json({ message: "Failed to create note" });
+    }
+  });
+
+  app.put("/api/pinboard/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const member = result.member;
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const noteId = parseInt(req.params.id);
+      const { message } = req.body;
+      if (!message || typeof message !== "string" || message.trim().length === 0) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+      if (message.length > 150) {
+        return res.status(400).json({ message: "Message too long" });
+      }
+
+      const [note] = await db
+        .update(pinboardNotes)
+        .set({ message: message.trim(), updatedAt: new Date() })
+        .where(and(eq(pinboardNotes.id, noteId), eq(pinboardNotes.memberId, member.id)))
+        .returning();
+
+      if (!note) return res.status(404).json({ message: "Note not found or not yours" });
+
+      broadcastToFamily(member.familyName, { type: "pinboard_update" });
+      res.json(note);
+    } catch (error: any) {
+      console.error("Error updating pinboard note:", error);
+      res.status(500).json({ message: "Failed to update note" });
+    }
+  });
+
+  app.delete("/api/pinboard/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const member = result.member;
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const noteId = parseInt(req.params.id);
+      const [deleted] = await db
+        .delete(pinboardNotes)
+        .where(and(eq(pinboardNotes.id, noteId), eq(pinboardNotes.memberId, member.id)))
+        .returning();
+
+      if (!deleted) return res.status(404).json({ message: "Note not found or not yours" });
+
+      broadcastToFamily(member.familyName, { type: "pinboard_update" });
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error deleting pinboard note:", error);
+      res.status(500).json({ message: "Failed to delete note" });
     }
   });
 

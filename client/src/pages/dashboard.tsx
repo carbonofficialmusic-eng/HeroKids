@@ -10,6 +10,7 @@ import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { FamilySetup } from "@/components/family-setup";
 import { TaskCard } from "@/components/task-card";
 import { Leaderboard } from "@/components/leaderboard";
+import { Pinboard } from "@/components/pinboard";
 import { TaskDialog } from "@/components/task-dialog";
 import { RewardDialog } from "@/components/reward-dialog";
 import { RewardRequestDialog } from "@/components/reward-request-dialog";
@@ -1494,6 +1495,8 @@ export default function Dashboard() {
             {/* Sidebar - sticky on desktop */}
             <div className="relative">
               <div ref={panelRef} style={stickyStyle} className="space-y-6">
+              {/* Pinboard */}
+              <Pinboard currentMemberId={member?.id ?? null} />
               {/* Special Achievement Rewards Section */}
               {specialRewards.length > 0 && (
                 <div className="space-y-3">

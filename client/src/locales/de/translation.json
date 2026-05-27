@@ -1446,6 +1446,13 @@
     "contributedThisPeriod": "Beigetragen",
     "nextContribution": "Nächster Beitrag am {{date}}"
   },
+  "pinboard": {
+    "title": "Pinnwand",
+    "empty": "Noch keine Zettel — sei der Erste!",
+    "loading": "Laden...",
+    "placeholder": "Deine Nachricht (max. 150 Zeichen)…",
+    "error": "Fehler beim Speichern"
+  },
   "notifications": {
     "title": "Benachrichtigungen",
     "empty": "Noch keine Benachrichtigungen",

@@ -1406,6 +1406,13 @@
     "invalidPin": "Ogiltig PIN",
     "verify": "Verifiera"
   },
+  "pinboard": {
+    "title": "Anslagstavla",
+    "empty": "Inga lappar ännu — var den första!",
+    "loading": "Laddar…",
+    "placeholder": "Ditt meddelande (max 150 tecken)…",
+    "error": "Kunde inte spara"
+  },
   "notifications": {
     "title": "Aviseringar",
     "empty": "Inga aviseringar ännu",

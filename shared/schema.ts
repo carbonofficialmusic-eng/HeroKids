@@ -12,6 +12,7 @@ import {
   jsonb,
   pgEnum,
   unique,
+  serial,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -914,3 +915,27 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type NotificationType = typeof notificationTypeEnum.enumValues[number];
+
+// ===== PINBOARD NOTES =====
+export const pinboardNotes = pgTable("pinboard_notes", {
+  id: serial("id").primaryKey(),
+  familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  message: varchar("message", { length: 150 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const pinboardNotesRelations = relations(pinboardNotes, ({ one }) => ({
+  family: one(families, { fields: [pinboardNotes.familyName], references: [families.familyName] }),
+  member: one(familyMembers, { fields: [pinboardNotes.memberId], references: [familyMembers.id] }),
+}));
+
+export const insertPinboardNoteSchema = createInsertSchema(pinboardNotes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPinboardNote = z.infer<typeof insertPinboardNoteSchema>;
+export type PinboardNote = typeof pinboardNotes.$inferSelect;

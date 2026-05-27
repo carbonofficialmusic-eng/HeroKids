@@ -203,6 +203,10 @@ export function useWebSocket(familyName: string | null) {
               }
               break;
 
+            case "pinboard_update":
+              queryClient.invalidateQueries({ queryKey: ["/api/pinboard"] });
+              break;
+
             case "notification_update":
               // Invalidate notification queries for real-time updates
               queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });

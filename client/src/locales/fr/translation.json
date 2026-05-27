@@ -1372,6 +1372,13 @@
     "contributedThisPeriod": "Ont contribué",
     "nextContribution": "Prochaine contribution le {{date}}"
   },
+  "pinboard": {
+    "title": "Tableau d'affichage",
+    "empty": "Aucune note pour l'instant — sois le premier !",
+    "loading": "Chargement…",
+    "placeholder": "Ton message (max. 150 caractères)…",
+    "error": "Échec de l'enregistrement"
+  },
   "notifications": {
     "title": "Notifications",
     "empty": "Pas encore de notifications",

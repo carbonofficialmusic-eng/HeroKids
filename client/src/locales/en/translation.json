@@ -1423,6 +1423,13 @@
     "contributedThisPeriod": "Contributed",
     "nextContribution": "Next contribution on {{date}}"
   },
+  "pinboard": {
+    "title": "Pinboard",
+    "empty": "No notes yet — be the first!",
+    "loading": "Loading…",
+    "placeholder": "Your message (max. 150 characters)…",
+    "error": "Failed to save"
+  },
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications yet",
