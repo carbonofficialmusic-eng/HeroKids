@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+.herokids-theme {
+  --primary: 22 100% 50%; /* Vibrant Orange */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 45 100% 51%; /* Warm Yellow */
+  --secondary-foreground: 24 10% 10%;
+  --accent: 199 89% 48%; /* Playful Blue */
+  --accent-foreground: 0 0% 100%;
+  --background: 40 100% 98%; /* Sunny off-white */
+  --foreground: 220 20% 15%;
+  --muted: 30 100% 92%;
+  --muted-foreground: 220 15% 40%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 20% 15%;
+  --border: 30 50% 85%;
+  
+  font-family: 'Nunito', sans-serif;
+}
+
+.herokids-theme h1, 
+.herokids-theme h2, 
+.herokids-theme h3, 
+.herokids-theme h4, 
+.herokids-theme .font-display {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Fun blob shapes */
+.bg-blob-1 {
+  background: radial-gradient(circle, hsl(var(--secondary) / 0.3) 0%, transparent 70%);
+}
+.bg-blob-2 {
+  background: radial-gradient(circle, hsl(var(--primary) / 0.2) 0%, transparent 70%);
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+.btn-bounce {
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-bounce:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 20px -10px hsl(var(--primary) / 0.5);
+}
+.btn-bounce:active {
+  transform: translateY(2px) scale(0.98);
+}
