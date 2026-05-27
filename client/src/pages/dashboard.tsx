@@ -113,6 +113,16 @@ function useStickyPanel(isDesktop: boolean) {
   return { containerRef, panelRef, stickyStyle };
 }
 
+// Scrollt die Pinnwand so, dass sie direkt unterhalb des fixen Headers erscheint
+function scrollToPinboard(el: HTMLElement) {
+  const root = document.getElementById("root") ?? document.documentElement;
+  const header = document.querySelector("[data-app-header]") as HTMLElement | null;
+  const headerBottom = header ? header.getBoundingClientRect().bottom : 72;
+  const currentTop = el.getBoundingClientRect().top;
+  const delta = currentTop - (headerBottom + 8);
+  root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
+}
+
 export default function Dashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -186,7 +196,7 @@ export default function Dashboard() {
     if (window.location.hash !== "#pinboard") return;
     const el = document.getElementById("pinboard");
     if (el) {
-      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+      setTimeout(() => scrollToPinboard(el), 300);
     }
   }, []);
 
@@ -1112,7 +1122,7 @@ export default function Dashboard() {
                       className="flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate"
                       onClick={() => {
                         const el = document.getElementById("pinboard");
-                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        if (el) scrollToPinboard(el);
                       }}
                     >
                       <MessageSquare className="h-5 w-5" />
