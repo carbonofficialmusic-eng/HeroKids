@@ -34,7 +34,8 @@ import {
   Check,
   CheckCheck,
   Trash2,
-  Share2
+  Share2,
+  MessageSquare
 } from "lucide-react";
 import type { Notification } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
@@ -68,6 +69,7 @@ const notificationIcons: Record<string, typeof Bell> = {
   achievement_earned: Trophy,
   points_milestone: Star,
   member_joined: UserPlus,
+  pinboard_posted: MessageSquare,
 };
 
 export function NotificationBell({ familyLanguage = "en", wsConnection, memberRole = "parent" }: NotificationBellProps) {
@@ -103,6 +105,8 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
       case "reward_request":
         // Parents go to approvals for reward requests, children go to kid-dashboard
         return memberRole === "parent" ? "/approvals" : childDashboard;
+      case "pinboard_posted":
+        return memberRole === "parent" ? `${parentDashboard}#pinboard` : `${childDashboard}#pinboard`;
       case "points_milestone":
       case "member_joined":
       default:

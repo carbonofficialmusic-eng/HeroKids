@@ -963,6 +963,15 @@ export default function KidDashboard() {
     return () => clearTimeout(t);
   }, []);
 
+  // Scroll to pinboard when navigated here from a pinboard_posted notification
+  useEffect(() => {
+    if (window.location.hash !== "#pinboard") return;
+    const el = document.getElementById("pinboard");
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+    }
+  }, []);
+
   // Lock #root scroll while any dialog is open — same pattern as parent dashboard
   const anyKidDialogOpen = taskDialogOpen || requestRewardDialogOpen || editMemberDialogOpen || switchMemberDialogOpen;
   useLayoutEffect(() => {
@@ -2410,6 +2419,11 @@ export default function KidDashboard() {
             })}
           </div>
         )}
+
+        {/* Pinboard Section — mobile only (desktop version is in right column) */}
+        <div id="pinboard" className="lg:hidden">
+          <Pinboard currentMemberId={member?.id ?? null} />
+        </div>
 
         {/* Leaderboard Section — mobile only (desktop version is in right column) */}
         {familyData?.showLeaderboard && (

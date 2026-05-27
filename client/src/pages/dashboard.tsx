@@ -180,6 +180,15 @@ export default function Dashboard() {
   
   const { containerRef, panelRef, stickyStyle } = useStickyPanel(isDesktop);
 
+  // Scroll to pinboard when navigated here from a pinboard_posted notification
+  useEffect(() => {
+    if (window.location.hash !== "#pinboard") return;
+    const el = document.getElementById("pinboard");
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+    }
+  }, []);
+
   // Debug tap handler - 5 taps on logo shows viewport info
   const handleDebugTap = () => {
     setDebugTapCount(prev => {
@@ -1496,7 +1505,9 @@ export default function Dashboard() {
             <div className="relative">
               <div ref={panelRef} style={stickyStyle} className="space-y-6">
               {/* Pinboard */}
+              <div id="pinboard">
               <Pinboard currentMemberId={member?.id ?? null} />
+              </div>
               {/* Special Achievement Rewards Section */}
               {specialRewards.length > 0 && (
                 <div className="space-y-3">
