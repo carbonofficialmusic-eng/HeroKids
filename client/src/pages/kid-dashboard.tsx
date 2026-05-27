@@ -885,6 +885,46 @@ function TaskCard({
   );
 }
 
+// Sticky sidebar hook (same as parent dashboard)
+function useStickyPanel(isDesktop: boolean) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [stickyStyle, setStickyStyle] = useState<React.CSSProperties>({});
+
+  useEffect(() => {
+    if (!isDesktop) {
+      setStickyStyle({});
+      return;
+    }
+    const handleScroll = () => {
+      if (!containerRef.current || !panelRef.current) return;
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const panelHeight = panelRef.current.offsetHeight;
+      const topOffset = 16;
+      if (containerRect.top < topOffset) {
+        const maxScroll = containerRect.height - panelHeight;
+        const currentScroll = topOffset - containerRect.top;
+        if (currentScroll < maxScroll) {
+          setStickyStyle({ position: 'fixed', top: `${topOffset}px`, width: `${panelRef.current.offsetWidth}px` });
+        } else {
+          setStickyStyle({ position: 'absolute', bottom: '0', top: 'auto' });
+        }
+      } else {
+        setStickyStyle({});
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+    handleScroll();
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [isDesktop]);
+
+  return { containerRef, panelRef, stickyStyle };
+}
+
 export default function KidDashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -943,6 +983,17 @@ export default function KidDashboard() {
   }, [anyKidDialogOpen]);
 
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"week" | "month">("week");
+
+  // Detect desktop for sticky leaderboard sidebar (lg = 1024px)
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  const { containerRef: lbContainerRef, panelRef: lbPanelRef, stickyStyle: lbStickyStyle } = useStickyPanel(isDesktop);
+
   const [kidTaskFilter, setKidTaskFilter] = useState<"today" | "week" | "all">("all");
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
@@ -1656,7 +1707,9 @@ export default function KidDashboard() {
 
       {/* Content — paddingTop pushes below fixed header, #root handles scrolling like parent dashboard */}
       <div style={{ paddingTop: 'calc(4rem + var(--sat, env(safe-area-inset-top)))' }}>
-      <div className="container mx-auto px-4 max-w-6xl space-y-8 pt-4 pb-[calc(8rem+env(safe-area-inset-bottom))] overflow-hidden">
+      <div ref={lbContainerRef} className="container mx-auto px-4 max-w-7xl pt-4 pb-[calc(8rem+env(safe-area-inset-bottom))] relative">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="lg:col-span-2 space-y-8 min-w-0 overflow-hidden">
         {/* HeroKids Logo */}
         <div className="flex justify-center">
           <motion.img 
@@ -2358,9 +2411,9 @@ export default function KidDashboard() {
           </div>
         )}
 
-        {/* Leaderboard Section */}
+        {/* Leaderboard Section — mobile only (desktop version is in right column) */}
         {familyData?.showLeaderboard && (
-          <div className="space-y-6">
+          <div className="lg:hidden space-y-6">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl">
                 <Trophy className="h-8 w-8 text-white" />
@@ -2369,34 +2422,42 @@ export default function KidDashboard() {
                 {t("kidDashboard.leaderboard")}
               </h2>
             </div>
-
-            {/* Weekly/Monthly Toggle */}
             {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
               <div className="mb-4">
                 <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
                   <TabsList className="grid w-full grid-cols-2" data-testid="tabs-leaderboard-period">
-                    <TabsTrigger value="week" data-testid="tab-leaderboard-week">
-                      {t("dashboard.weekly")}
-                    </TabsTrigger>
-                    <TabsTrigger value="month" data-testid="tab-leaderboard-month">
-                      {t("dashboard.monthly")}
-                    </TabsTrigger>
+                    <TabsTrigger value="week" data-testid="tab-leaderboard-week">{t("dashboard.weekly")}</TabsTrigger>
+                    <TabsTrigger value="month" data-testid="tab-leaderboard-month">{t("dashboard.monthly")}</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
             )}
-
-            <Leaderboard 
-              members={familyMembers} 
-              period={leaderboardPeriod}
-              weeklyPrize={familyData?.weeklyPrize}
-              monthlyPrize={familyData?.monthlyPrize}
-            />
+            <Leaderboard members={familyMembers} period={leaderboardPeriod} weeklyPrize={familyData?.weeklyPrize} monthlyPrize={familyData?.monthlyPrize} />
           </div>
         )}
 
-      </div>
-      </div>
+      </div>{/* end left column */}
+
+      {/* Right column — sticky leaderboard (desktop only) */}
+      {familyData?.showLeaderboard && (
+        <div ref={lbPanelRef} className="hidden lg:block lg:col-span-1" style={lbStickyStyle}>
+          <div className="space-y-4">
+            {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
+              <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="week">{t("dashboard.weekly")}</TabsTrigger>
+                  <TabsTrigger value="month">{t("dashboard.monthly")}</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            )}
+            <Leaderboard members={familyMembers} period={leaderboardPeriod} weeklyPrize={familyData?.weeklyPrize} monthlyPrize={familyData?.monthlyPrize} />
+          </div>
+        </div>
+      )}
+
+      </div>{/* end grid */}
+      </div>{/* end container */}
+      </div>{/* end paddingTop wrapper */}
 
       {/* Simplified Navigation - Fixed Bottom Bar */}
       <div
