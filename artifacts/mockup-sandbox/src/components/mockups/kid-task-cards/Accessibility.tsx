@@ -1,4 +1,4 @@
-import { Star, Broom, CheckCircle2, Clock, BookOpen, Music, Leaf, Trash2, RotateCcw, AlertTriangle } from "lucide-react";
+import { Star, BrushCleaning, CheckCircle2, Clock, BookOpen, Music, Leaf, Trash2, RotateCcw, AlertTriangle } from "lucide-react";
 
 type TaskState = "actionable" | "pending" | "approved" | "rejected" | "locked";
 

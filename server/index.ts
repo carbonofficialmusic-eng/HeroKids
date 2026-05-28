@@ -5,6 +5,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import http from "http";
 import { startPointsResetScheduler } from "./scheduler";
 import { db } from "./db";
 import { skins, familyMembers, starPlacements } from "../shared/schema";
@@ -12,6 +13,24 @@ import { sql, eq, and, notInArray } from "drizzle-orm";
 import Stripe from "stripe";
 
 const app = express();
+
+// Proxy /__mockup/ requests to the mockup sandbox dev server (port 23636)
+// This allows the canvas to embed mockup iframes through the main HTTPS domain
+app.use("/__mockup", (req: Request, res: Response) => {
+  const options = {
+    hostname: "127.0.0.1",
+    port: 23636,
+    path: "/__mockup" + req.url,
+    method: req.method,
+    headers: { ...req.headers, host: "localhost:23636" },
+  };
+  const proxy = http.request(options, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode || 200, proxyRes.headers);
+    proxyRes.pipe(res, { end: true });
+  });
+  proxy.on("error", () => res.status(502).send("Mockup sandbox not running"));
+  req.pipe(proxy, { end: true });
+});
 
 // CRITICAL: Stripe webhook with custom raw body parser
 app.post("/api/stripe-webhook",

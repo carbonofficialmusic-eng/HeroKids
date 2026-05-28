@@ -1,4 +1,4 @@
-import { Star, Broom, CheckCircle2, Clock, BookOpen, Music, Zap, ChevronRight, Sparkles } from "lucide-react";
+import { Star, BrushCleaning, CheckCircle2, Clock, BookOpen, Music, Zap, ChevronRight, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 type TaskState = "actionable" | "pending" | "approved";
@@ -12,7 +12,7 @@ interface MockTask {
 }
 
 const tasks: MockTask[] = [
-  { title: "Zimmer aufräumen", points: 20, icon: Broom, state: "actionable", emoji: "🧹" },
+  { title: "Zimmer aufräumen", points: 20, icon: BrushCleaning, state: "actionable", emoji: "🧹" },
   { title: "Hausaufgaben", points: 30, icon: BookOpen, state: "pending", emoji: "📚" },
   { title: "Klavier üben", points: 15, icon: Music, state: "approved", emoji: "🎹" },
 ];
