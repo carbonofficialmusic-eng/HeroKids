@@ -842,7 +842,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       household: z.string().max(40).optional(),
       school: z.string().max(40).optional(),
       selfCare: z.string().max(40).optional(),
-      pets: z.string().max(40).optional(),
       other: z.string().max(40).optional(),
     }).nullable().optional(),
   }).refine(data => 

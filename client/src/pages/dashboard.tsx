@@ -343,7 +343,7 @@ export default function Dashboard() {
     weeklyPrize?: string | null;
     monthlyPrize?: string | null;
     yearlyPrize?: string | null;
-    categoryNames?: { household?: string; school?: string; selfCare?: string; pets?: string; other?: string } | null;
+    categoryNames?: { household?: string; school?: string; selfCare?: string; other?: string } | null;
   }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
@@ -913,12 +913,9 @@ export default function Dashboard() {
     const householdIcons = ["🧹", "🍽️", "🗑️", "🧺", "🛁", "🧼", "🪣", "🧽"];
     const schoolIcons = ["📚", "✏️", "📝", "📖", "🎒", "✍️", "📓", "🎓"];
     const selfCareIcons = ["🦷", "🚿", "💇", "🛏️", "👕", "👟", "🧴"];
-    const petIcons = ["🐕", "🐈", "🐾", "🌱", "🌿", "🌷", "🐟", "🐢"];
-    
     if (householdIcons.includes(emoji)) return "household";
     if (schoolIcons.includes(emoji)) return "school";
     if (selfCareIcons.includes(emoji)) return "selfCare";
-    if (petIcons.includes(emoji)) return "pets";
     return "other";
   };
 
@@ -931,7 +928,6 @@ export default function Dashboard() {
       household: t("dashboard.categoryHousehold"),
       school: t("dashboard.categorySchool"),
       selfCare: t("dashboard.categorySelfCare"),
-      pets: t("dashboard.categoryPets"),
       other: t("dashboard.categoryOther"),
     };
     return labels[category] || category;
@@ -942,7 +938,6 @@ export default function Dashboard() {
       household: "🏠",
       school: "📚",
       selfCare: "🧼",
-      pets: "🐾",
       other: "⭐",
     };
     return emojis[category] || "⭐";
@@ -990,8 +985,8 @@ export default function Dashboard() {
       groups[category].push(task);
     });
     
-    // Sort categories: household, school, selfCare, pets, other
-    const categoryOrder = ["household", "school", "selfCare", "pets", "other"];
+    // Sort categories: household, school, selfCare, other
+    const categoryOrder = ["household", "school", "selfCare", "other"];
     const sortedGroups: Record<string, typeof activeTasks> = {};
     
     categoryOrder.forEach(cat => {

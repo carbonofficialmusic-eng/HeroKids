@@ -1663,17 +1663,14 @@ export default function KidDashboard() {
     const householdIcons = ["🧹", "🍽️", "🗑️", "🧺", "🛁", "🧼", "🪣", "🧽"];
     const schoolIcons = ["📚", "✏️", "📝", "📖", "🎒", "✍️", "📓", "🎓"];
     const selfCareIcons = ["🦷", "🚿", "💇", "🛏️", "👕", "👟", "🧴"];
-    const petIcons = ["🐕", "🐈", "🐾", "🌱", "🌿", "🌷", "🐟", "🐢"];
-    
     if (householdIcons.includes(emoji)) return "household";
     if (schoolIcons.includes(emoji)) return "school";
     if (selfCareIcons.includes(emoji)) return "selfCare";
-    if (petIcons.includes(emoji)) return "pets";
     return "other";
   };
 
   const getCategoryLabel = (category: string): string => {
-    const customNames = familyData?.categoryNames as { household?: string; school?: string; selfCare?: string; pets?: string; other?: string } | null | undefined;
+    const customNames = familyData?.categoryNames as { household?: string; school?: string; selfCare?: string; other?: string } | null | undefined;
     if (customNames && customNames[category as keyof typeof customNames]) {
       return customNames[category as keyof typeof customNames]!;
     }
@@ -1681,7 +1678,6 @@ export default function KidDashboard() {
       household: t("dashboard.categoryHousehold"),
       school: t("dashboard.categorySchool"),
       selfCare: t("dashboard.categorySelfCare"),
-      pets: t("dashboard.categoryPets"),
       other: t("dashboard.categoryOther"),
     };
     return labels[category] || category;
@@ -1692,7 +1688,6 @@ export default function KidDashboard() {
       household: "🏠",
       school: "📚",
       selfCare: "🧼",
-      pets: "🐾",
       other: "⭐",
     };
     return emojis[category] || "⭐";
@@ -1740,7 +1735,7 @@ export default function KidDashboard() {
       groups[category].push(task);
     });
     
-    const categoryOrder = ["household", "school", "selfCare", "pets", "other"];
+    const categoryOrder = ["household", "school", "selfCare", "other"];
     const sortedGroups: Record<string, typeof myTasks> = {};
     
     categoryOrder.forEach(cat => {
