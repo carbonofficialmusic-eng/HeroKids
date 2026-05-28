@@ -1618,7 +1618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Use acting member if available, otherwise use authenticated user (only for non-device sessions)
       let member = realMember;
-      if (req.session?.actingAsMemberId && !req.user.authMethod) {
+      if (req.session?.actingAsMemberId && req.user.authMethod !== "device") {
         const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
         
         // Security: Validate acting member belongs to same family
