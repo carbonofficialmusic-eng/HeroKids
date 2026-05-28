@@ -1647,6 +1647,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ? completionStatus === "pending"  // Immediate: blocked while pending
                 : completionStatus === "approved"; // Others: completed when approved
               
+              console.log(`[TASK-DEBUG-ENTRY] task="${task.title}" member="${member.displayName}" completionStatus=${completionStatus} maxCompletions=${task.maxCompletions} isSharedTask=${task.isSharedTask} sharedMemberIds=${JSON.stringify(task.sharedMemberIds)}`);
+
               // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
               if (task.maxCompletions !== null) {
                 // If task also has shared/assigned targeting, apply membership filter
@@ -1661,6 +1663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   const completions = await storage.getActiveCompletionsByTask(task.id);
                   // Calculate completion count from approved completions
                   const completionCount = completions.filter(c => c.status === "approved").length;
+                  console.log(`[TASK-DEBUG-MC] task="${task.title}" member="${member.displayName}" maxCompletions=${task.maxCompletions} completionCount=${completionCount} remainingSlots=${task.maxCompletions - completionCount} memberCompletionStatus=${completionStatus} allCompletions=${JSON.stringify(completions.map(c => ({memberId:c.memberId,status:c.status})))}`);
                   return {
                     ...task,
                     remainingSlots: task.maxCompletions - completionCount,
