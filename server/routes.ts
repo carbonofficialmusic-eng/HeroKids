@@ -4389,9 +4389,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
 
-      // Block sending if acting as another member (privacy: only own login can write)
+      // Block sending if acting as a DIFFERENT member (privacy: only own login can write)
+      // Allow if actingAsMemberId === the user's own linked member (parent viewing own profile)
       if (req.session?.actingAsMemberId) {
-        return res.status(403).json({ message: "acting_as_member" });
+        const realUserId = req.user?.claims?.sub;
+        if (realUserId) {
+          const realLinkedMember = await storage.getFamilyMemberByUserId(realUserId);
+          if (!realLinkedMember || req.session.actingAsMemberId !== realLinkedMember.id) {
+            return res.status(403).json({ message: "acting_as_member" });
+          }
+          // actingAsMemberId === own member → allow (they're effectively themselves)
+        } else {
+          // No userId (unexpected for non-device sessions) — block to be safe
+          return res.status(403).json({ message: "acting_as_member" });
+        }
       }
       
       // Get family tier and check if chat is allowed

@@ -68,9 +68,12 @@ export default function Chat() {
       setTimeout(scrollToBottom, 100);
     },
     onError: (error: any) => {
+      const description = error.message === "acting_as_member"
+        ? t('chat.readOnlyActingAs', { name: member?.displayName ?? "" })
+        : (error.message || t('errors.tryAgain'));
       toast({
         title: t('chat.failedToSend'),
-        description: error.message || t('errors.tryAgain'),
+        description,
         variant: "destructive",
       });
     },
