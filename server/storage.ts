@@ -73,7 +73,7 @@ import {
   type InsertAccountLinkRepairHistory,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gt, lt, sql, inArray, isNull, isNotNull } from "drizzle-orm";
+import { eq, and, desc, gt, gte, lt, sql, inArray, isNull, isNotNull } from "drizzle-orm";
 import { startOfDay } from 'date-fns';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import bcrypt from 'bcrypt';
@@ -1253,7 +1253,7 @@ export class DatabaseStorage implements IStorage {
             eq(taskCompletions.taskId, taskId),
             eq(taskCompletions.memberId, memberId),
             inArray(taskCompletions.status, ["pending", "approved", "rejected"]),
-            sql`${taskCompletions.completedAt} >= ${nextDate}`
+            gte(taskCompletions.completedAt, nextDate!)
           )
         )
         .orderBy(desc(taskCompletions.completedAt))
@@ -1389,7 +1389,7 @@ export class DatabaseStorage implements IStorage {
           and(
             eq(taskCompletions.taskId, taskId),
             inArray(taskCompletions.status, ["pending", "approved", "rejected"]),
-            sql`${taskCompletions.completedAt} >= ${nextDate}`
+            gte(taskCompletions.completedAt, nextDate!)
           )
         )
         .orderBy(desc(taskCompletions.completedAt));
