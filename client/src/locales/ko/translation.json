@@ -1051,6 +1051,7 @@
     "earnedPoints": "{{count}} 포인트를 획득했어요!",
     "taskError": "과제를 완료할 수 없습니다.",
     "waitingApproval": "승인 대기 중",
+    "waitingForOthers": "제출됨 – 다른 구성원 대기 중",
     "completedApproved": "완료 및 승인됨",
     "tryAgain": "다시 시도",
     "allSlotsTaken": "모든 자리가 찼어요",

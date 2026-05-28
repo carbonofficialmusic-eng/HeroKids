@@ -1772,6 +1772,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 };
               }
               
+              // Safety fallback: if this is a shared task with multiple members that somehow
+              // bypassed the shared-task path above, use the member's OWN status — not the
+              // family-wide status — so one member's pending/approved state never bleeds into another member's card.
+              if (task.isSharedTask && Array.isArray(task.sharedMemberIds) && task.sharedMemberIds.length > 1
+                  && task.sharedMemberIds.includes(member.id)) {
+                const ownHasSubmitted = completionStatus === "pending" || completionStatus === "approved";
+                return {
+                  ...task,
+                  remainingSlots: null,
+                  memberHasCompleted: ownHasSubmitted,
+                  memberCompletionStatus: completionStatus,
+                  completions: [],
+                  sharedMemberCompletions: [],
+                };
+              }
+
               // Normal mode (maxCompletions == null, single/no assignment) - if ANYONE completes it, it's done for everyone
               // Use family-wide completion status for normal tasks
               const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);

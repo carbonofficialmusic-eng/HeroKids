@@ -492,7 +492,20 @@ function TaskCard({
   
   // Combined check for all members completed (new or legacy)
   const allMembersCompleted = allAssignedMembersCompleted || allSharedMembersCompleted;
-  
+
+  // Is this a task shared between 2+ people?
+  const isMultiMemberSharedTask =
+    (task.sharedMemberCompletions && task.sharedMemberCompletions.length > 1) ||
+    (task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1);
+
+  // For multi-member tasks the displayed states differ from the raw status:
+  // - No yellow "waiting for approval" — suppress isPending in the UI
+  // - Green "completed & approved" only when ALL members are approved (allMembersCompleted)
+  // - If THIS member submitted but not all are approved yet → show as a neutral submitted state
+  const showAsApproved = isMultiMemberSharedTask ? allMembersCompleted : isApproved;
+  const showAsPending  = isMultiMemberSharedTask ? false : isPending;
+  const showAsSubmitted = isMultiMemberSharedTask && (isPending || (isApproved && !allMembersCompleted));
+
   // Get assigned member names for message (prefer new style over legacy)
   const assignedMemberNames = task.assignedMemberCompletions?.map(m => m.displayName).join(' & ') || 
     task.sharedMemberCompletions?.map(m => m.displayName).join(' & ') || '';
@@ -574,10 +587,13 @@ function TaskCard({
   let statusMessage = "";
   let statusColor = "";
   
-  if (isPending) {
+  if (showAsSubmitted) {
+    statusMessage = t("kidDashboard.waitingForOthers") || "Warte auf andere Mitglieder…";
+    statusColor = "text-muted-foreground";
+  } else if (showAsPending) {
     statusMessage = t("kidDashboard.waitingApproval");
     statusColor = "text-amber-600 dark:text-amber-400";
-  } else if (isApproved) {
+  } else if (showAsApproved) {
     statusMessage = t("kidDashboard.completedApproved");
     statusColor = "text-green-600 dark:text-green-400";
   } else if (isRejected) {
@@ -619,8 +635,9 @@ function TaskCard({
         className={`p-4 transition-all backdrop-blur-md border-2 rounded-2xl min-w-0 w-full ${
           isActionable && !isRejected ? "bg-card/80 cursor-pointer border-border hover:border-primary" : 
           isActionable && isRejected ? "bg-card/80 cursor-pointer border-blue-500 hover:border-blue-600" :
-          isApproved ? "bg-transparent border-green-500" :
-          isPending ? "bg-transparent border-amber-500" :
+          showAsApproved ? "bg-transparent border-green-500" :
+          showAsSubmitted ? "bg-transparent border-border" :
+          showAsPending ? "bg-transparent border-amber-500" :
           hasNoSlots ? "bg-transparent border-amber-500" :
           isSharedTaskNotAssigned ? "bg-transparent border-border" :
           allSharedMembersCompleted ? "bg-transparent border-green-500" :
@@ -634,8 +651,9 @@ function TaskCard({
       >
         <div className="text-center space-y-3">
           <div className={`flex justify-center p-3 rounded-2xl mx-auto w-fit ${
-            isApproved ? "bg-green-500/20" : 
-            isPending ? "bg-amber-500/20" :
+            showAsApproved ? "bg-green-500/20" : 
+            showAsSubmitted ? "bg-muted/40" :
+            showAsPending ? "bg-amber-500/20" :
             isRejected ? "bg-blue-500/20" :
             hasNoSlots ? "bg-amber-500/20" :
             allSharedMembersCompleted ? "bg-green-500/20" :
@@ -643,9 +661,11 @@ function TaskCard({
           }`}>
             {completeMutation.isPending ? (
               <Loader2 className="h-12 w-12 text-primary animate-spin" />
-            ) : isApproved ? (
+            ) : showAsApproved ? (
               <CheckCircle2 className="h-12 w-12 text-green-500" />
-            ) : isPending ? (
+            ) : showAsSubmitted ? (
+              <CheckCircle2 className="h-12 w-12 text-muted-foreground" />
+            ) : showAsPending ? (
               <CheckCircle2 className="h-12 w-12 text-amber-500" />
             ) : allSharedMembersCompleted ? (
               <CheckCircle2 className="h-12 w-12 text-green-500" />

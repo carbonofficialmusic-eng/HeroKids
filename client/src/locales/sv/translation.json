@@ -1132,6 +1132,7 @@
     "earnedPoints": "Du tjänade {{count}} poäng!",
     "taskError": "Kunde inte slutföra uppgift.",
     "waitingApproval": "Väntar på godkännande",
+    "waitingForOthers": "Inlämnad – väntar på andra medlemmar",
     "completedApproved": "Slutförd & godkänd",
     "tryAgain": "Försök igen",
     "allSlotsTaken": "Alla platser tagna",
