@@ -1716,6 +1716,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 return {
                   ...task,
+                  // If this member hasn't submitted yet, clear nextAvailableDate so the frontend
+                  // doesn't incorrectly mark the task as inactive (another member's submission
+                  // must not lock out remaining members via nextAvailableDate).
+                  nextAvailableDate: thisMemberHasSubmitted ? task.nextAvailableDate : null,
                   remainingSlots: null,
                   memberHasCompleted: thisMemberHasSubmitted, // Grey out for THIS member if they submitted
                   memberCompletionStatus: currentMemberCompletion?.status || null,
@@ -1782,9 +1786,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 // Rejected member gets button back (hasCompleted=false) so they can resubmit
                 const isRejectedMember = currentMemberStatus === "rejected";
+                const memberIsEffectivelyDone = !isRejectedMember && thisMemberHasSubmitted;
                 
                 return {
                   ...task,
+                  // Only pass nextAvailableDate through if this member has already submitted —
+                  // otherwise another member's submission would lock this member out via isInactive.
+                  nextAvailableDate: memberIsEffectivelyDone ? task.nextAvailableDate : null,
                   remainingSlots: null,
                   memberHasCompleted: isRejectedMember ? false : thisMemberHasSubmitted,
                   memberCompletionStatus: cardCompletionStatus,
