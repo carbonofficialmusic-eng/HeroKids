@@ -878,7 +878,7 @@ export function TaskDialog({
               </Button>
             </div>
 
-            {isRecurringTask && (
+            {editingTask && (
               <div className="pt-4 border-t">
                 <Button
                   type="button"
