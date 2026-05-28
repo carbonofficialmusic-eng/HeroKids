@@ -1762,28 +1762,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const currentMemberCompletion = validCompletions.find(m => m?.memberId === member.id);
                 const thisMemberHasSubmitted = currentMemberCompletion?.hasSubmitted || false;
                 
-                // Yellow border logic: show only when ALL assigned members have submitted.
-                // Individual submission is already shown via the avatar badges.
-                // If this member was rejected → show rejected so they can resubmit.
+                // Yellow border logic: show only when ALL assigned members have submitted
+                // with no rejections. Individual submission is shown via avatar badges.
                 const currentMemberStatus = currentMemberCompletion?.status || null;
+                const anyRejected = validCompletions.some(m => m?.status === "rejected");
+                // allSubmitted: every assigned member has a pending/approved entry AND none rejected
                 const allSubmitted = validCompletions.length === assignedMemberIds.length &&
-                  validCompletions.every(m => m?.hasSubmitted);
+                  validCompletions.every(m => m?.hasSubmitted) &&
+                  !anyRejected;
                 
                 let cardCompletionStatus: "pending" | "approved" | "rejected" | null;
-                if (currentMemberStatus === "rejected") {
-                  cardCompletionStatus = "rejected"; // This member rejected — show so they can resubmit
-                } else if (allCompleted) {
+                if (allCompleted) {
                   cardCompletionStatus = "approved"; // All approved — green
                 } else if (allSubmitted) {
-                  cardCompletionStatus = "pending"; // All submitted — yellow
+                  cardCompletionStatus = "pending"; // All submitted, no rejections — yellow
                 } else {
-                  cardCompletionStatus = null; // Partial — no border color yet
+                  cardCompletionStatus = null; // Partial, or someone rejected — no border
                 }
+                
+                // Rejected member gets button back (hasCompleted=false) so they can resubmit
+                const isRejectedMember = currentMemberStatus === "rejected";
                 
                 return {
                   ...task,
                   remainingSlots: null,
-                  memberHasCompleted: thisMemberHasSubmitted, // Grey out for THIS member if they submitted
+                  memberHasCompleted: isRejectedMember ? false : thisMemberHasSubmitted,
                   memberCompletionStatus: cardCompletionStatus,
                   completions: [],
                   assignedMemberCompletions: validCompletions, // Include for UI to show who completed
