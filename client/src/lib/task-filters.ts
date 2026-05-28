@@ -19,21 +19,18 @@ function daysUntilDue(dueDate: string | Date): number {
 /**
  * Filters tasks by recurrence frequency group.
  *
- * One-time tasks (recurrence === "none", no recurrenceDays):
- *   no dueDate          → daily
- *   dueDate ≤ 3 days    → daily
- *   dueDate 4–7 days    → weekly
- *   dueDate 8–30 days   → monthly
- *   dueDate 31+ days    → only "all"
+ * - "daily"   → daily / weekdays recurring; custom intervals ≤ 3 days
+ * - "weekly"  → weekly recurring; custom intervals 4–7 days
+ * - "monthly" → monthly / yearly recurring; custom intervals 8–30 days
+ * - "onetime" → true one-time tasks (recurrence "none", no recurrenceDays)
+ *               + immediate tasks (recurrence "immediate")
+ * - "all"     → everything
  *
- * Custom-interval tasks (recurrence === "none", recurrenceDays > 0):
- *   1–3 days   → daily
- *   4–7 days   → weekly
- *   8–30 days  → monthly
- *   31+ days   → only "all"
+ * Custom-interval tasks (recurrence "none" + recurrenceDays > 0) stay in
+ * daily/weekly/monthly based on their interval length, not in "onetime".
  *
  * @param taskList - Array of tasks to filter
- * @param taskFilter - "daily" | "weekly" | "monthly" | "all"
+ * @param taskFilter - "daily" | "weekly" | "monthly" | "onetime" | "all"
  */
 export function filterTasksByDate<T extends FilterableTask>(
   taskList: T[],
@@ -43,9 +40,10 @@ export function filterTasksByDate<T extends FilterableTask>(
   return taskList.filter((task) => {
     if (taskFilter === "all") return true;
 
-    // Custom interval (recurrenceDays set, no real recurrence)
+    // Custom interval tasks: distribute by recurrenceDays, never in "onetime"
     const isCustomInterval = task.recurrence === "none" && task.recurrenceDays != null && task.recurrenceDays > 0;
     if (isCustomInterval) {
+      if (taskFilter === "onetime") return false;
       const d = task.recurrenceDays!;
       if (taskFilter === "daily")   return d <= 3;
       if (taskFilter === "weekly")  return d >= 4 && d <= 7;
@@ -53,26 +51,21 @@ export function filterTasksByDate<T extends FilterableTask>(
       return false;
     }
 
-    // One-time task (recurrence === "none", no interval)
-    const isOneTime = task.recurrence === "none";
-    if (isOneTime) {
-      if (!task.dueDate) {
-        // No date → always show in daily
-        return taskFilter === "daily";
-      }
-      const days = daysUntilDue(task.dueDate);
-      if (taskFilter === "daily")   return days <= 3;
-      if (taskFilter === "weekly")  return days >= 4 && days <= 7;
-      if (taskFilter === "monthly") return days >= 8 && days <= 30;
-      return false; // 31+ only in "all"
+    // Immediate tasks → "onetime" tab
+    if (task.recurrence === "immediate") {
+      return taskFilter === "onetime";
     }
 
+    // True one-time tasks (recurrence "none", no custom interval) → "onetime" tab
+    if (task.recurrence === "none") {
+      return taskFilter === "onetime";
+    }
+
+    // Recurring tasks
+    if (taskFilter === "onetime") return false;
+
     if (taskFilter === "daily") {
-      return (
-        task.recurrence === "daily" ||
-        task.recurrence === "weekdays" ||
-        task.recurrence === "immediate"
-      );
+      return task.recurrence === "daily" || task.recurrence === "weekdays";
     }
 
     if (taskFilter === "weekly") {
@@ -80,7 +73,7 @@ export function filterTasksByDate<T extends FilterableTask>(
     }
 
     if (taskFilter === "monthly") {
-      return task.recurrence === "monthly";
+      return task.recurrence === "monthly" || task.recurrence === "yearly";
     }
 
     return true;
