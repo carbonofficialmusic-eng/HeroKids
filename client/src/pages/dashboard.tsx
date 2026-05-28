@@ -71,17 +71,24 @@ function useStickyPanel(isDesktop: boolean) {
       return;
     }
 
+    const getHeaderHeight = () => {
+      const header = document.querySelector("[data-app-header]") as HTMLElement | null;
+      return header ? header.offsetHeight : 72;
+    };
+
     const handleScroll = () => {
       if (!containerRef.current || !panelRef.current) return;
-      
+
+      const headerHeight = getHeaderHeight();
+      const topOffset = headerHeight + 8; // 8px gap below header
+
       const containerRect = containerRef.current.getBoundingClientRect();
       const panelHeight = panelRef.current.offsetHeight;
-      const topOffset = 16;
-      
+
       if (containerRect.top < topOffset) {
         const maxScroll = containerRect.height - panelHeight;
         const currentScroll = topOffset - containerRect.top;
-        
+
         if (currentScroll < maxScroll) {
           setStickyStyle({
             position: 'fixed',
@@ -100,12 +107,14 @@ function useStickyPanel(isDesktop: boolean) {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    // The app scrolls on #root, not window (body is position:fixed)
+    const scrollEl = document.getElementById("root") ?? window;
+    scrollEl.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleScroll, { passive: true });
     handleScroll();
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      scrollEl.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
   }, [isDesktop]);
