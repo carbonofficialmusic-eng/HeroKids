@@ -1071,7 +1071,9 @@ export class DatabaseStorage implements IStorage {
     const [task] = await client
       .select({
         recurrence: tasks.recurrence,
-        familyName: tasks.familyName
+        recurrenceDays: tasks.recurrenceDays,
+        familyName: tasks.familyName,
+        nextAvailableDate: tasks.nextAvailableDate
       })
       .from(tasks)
       .where(eq(tasks.id, taskId));
@@ -1120,7 +1122,30 @@ export class DatabaseStorage implements IStorage {
       return completions.some((c: { completedAt: Date }) => isToday(c.completedAt, familyTimezone));
     }
     
-    // For non-daily tasks, use the original logic (any active completion)
+    // For non-daily recurring tasks: only count completions from the current period.
+    // When nextAvailableDate has passed (new period), only completions AFTER that date count.
+    const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
+    if (isRecurring) {
+      const now = new Date();
+      const nextDate = task.nextAvailableDate ? new Date(task.nextAvailableDate as unknown as string) : null;
+      if (nextDate && nextDate <= now) {
+        // We're in a new period — only count completions made after the period reset
+        const [result] = await client
+          .select({ count: sql<number>`count(*)` })
+          .from(taskCompletions)
+          .where(
+            and(
+              eq(taskCompletions.taskId, taskId),
+              eq(taskCompletions.memberId, memberId),
+              inArray(taskCompletions.status, ["pending", "approved"]),
+              gte(taskCompletions.completedAt, nextDate)
+            )
+          );
+        return Number(result?.count || 0) > 0;
+      }
+    }
+
+    // Non-recurring tasks or locked recurring tasks: any active completion blocks submission
     const [result] = await client
       .select({ count: sql<number>`count(*)` })
       .from(taskCompletions)

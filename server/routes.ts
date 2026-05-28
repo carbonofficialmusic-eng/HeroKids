@@ -2481,11 +2481,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Get updated task to check completion count after the completion was processed
           const updatedTask = await storage.getTask(taskId);
           
+          // For multi-member shared tasks: only set nextAvailableDate when ALL assigned members
+          // have submitted in the current period. Setting it after ONE member submits would cause
+          // getMemberCompletionStatus to return other members' previous-period completions,
+          // making them appear as already done and blocking their submission.
+          let allAssignedMembersSubmitted = true;
+          const taskAssignmentMemberIds = await storage.getTaskAssignmentsByTask(taskId);
+          const effectiveSharedMemberIds: string[] | null =
+            taskAssignmentMemberIds.length > 1
+              ? taskAssignmentMemberIds
+              : updatedTask?.isSharedTask && updatedTask?.sharedMemberIds && updatedTask.sharedMemberIds.length > 1
+              ? updatedTask.sharedMemberIds as string[]
+              : null;
+
+          if (effectiveSharedMemberIds) {
+            const allCompletions = await storage.getTaskCompletionsByTask(taskId);
+            const now = new Date();
+            // Only count completions from the current period (after the previous nextAvailableDate)
+            const periodStart = updatedTask?.nextAvailableDate && new Date(updatedTask.nextAvailableDate as unknown as string) <= now
+              ? new Date(updatedTask.nextAvailableDate as unknown as string)
+              : null;
+            const currentPeriodCompletions = allCompletions.filter((c: { status: string; completedAt: Date | string | null }) => {
+              if (c.status === 'rejected') return false;
+              if (periodStart && c.completedAt) {
+                const completedAt = c.completedAt instanceof Date ? c.completedAt : new Date(c.completedAt as string);
+                return completedAt >= periodStart;
+              }
+              return true;
+            });
+            const submittedMemberIds = [...new Set(currentPeriodCompletions.map((c: { memberId: string }) => c.memberId))];
+            allAssignedMembersSubmitted = effectiveSharedMemberIds.every((id: string) => submittedMemberIds.includes(id));
+          }
+
           // For multi-completion tasks, only set nextAvailableDate if max completions reached
           // Otherwise, keep the task available for other children to complete
           const shouldSetNextAvailableDate = 
-            !updatedTask?.maxCompletions || 
-            (updatedTask.completionCount >= updatedTask.maxCompletions);
+            allAssignedMembersSubmitted && (
+              !updatedTask?.maxCompletions || 
+              (updatedTask.completionCount >= updatedTask.maxCompletions)
+            );
           
           if (shouldSetNextAvailableDate) {
             // Calculate next available date based on recurrence
