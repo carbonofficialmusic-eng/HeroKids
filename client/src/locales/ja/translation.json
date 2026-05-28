@@ -167,6 +167,8 @@
     "autoApproved": "自動承認",
     "availableToday": "今日から利用可能",
     "availableTomorrow": "明日から",
+    "availableInDays": "{{count}}日後に利用可能",
+    "availableAgainLabel": "次の解放",
     "availableOn": "{{date}}から再開",
     "availableOnDate": "{{date}}から再開",
     "updateDetails": "このタスクの詳細を更新します。",

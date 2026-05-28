@@ -171,6 +171,8 @@
     "autoApproved": "Automatiskt godkänd",
     "availableToday": "Tillgänglig idag",
     "availableTomorrow": "Imorgon",
+    "availableInDays": "Om {{count}} dagar",
+    "availableAgainLabel": "Tillgänglig igen",
     "availableOn": "Tillbaka på {{date}}",
     "availableOnDate": "Tillbaka den {{date}}",
     "participants": "Deltagare",

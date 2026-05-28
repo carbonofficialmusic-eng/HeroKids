@@ -171,6 +171,8 @@
     "autoApproved": "자동 승인됨",
     "availableToday": "오늘 이용 가능",
     "availableTomorrow": "내일",
+    "availableInDays": "{{count}}일 후",
+    "availableAgainLabel": "다시 이용 가능",
     "availableOn": "{{date}}에 다시",
     "availableOnDate": "{{date}}에 다시",
     "updateDetails": "이 과제의 세부 정보를 업데이트합니다.",

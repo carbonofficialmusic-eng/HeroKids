@@ -11,7 +11,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, MessageSquare, RefreshCw } from "lucide-react";
+import { ChevronDown, Clock, MessageSquare, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +58,14 @@ import {
 } from "lucide-react";
 
 // Helper to determine due date status
+function getAvailableAgainDays(nextAvailableDate: Date | string | null): number | null {
+  if (!nextAvailableDate) return null;
+  const now = startOfDay(new Date());
+  const next = startOfDay(new Date(nextAvailableDate));
+  const diff = differenceInDays(next, now);
+  return Math.max(0, diff);
+}
+
 function getDueDateStatus(dueDate: Date | string | null): { status: "overdue" | "soon" | "normal" | null; daysUntil: number } {
   if (!dueDate) return { status: null, daysUntil: 0 };
   
@@ -492,7 +500,13 @@ function TaskCard({
   // Fallback check: if memberHasCompleted is true but status is null, treat as completed
   // This handles edge cases where status might be missing due to data inconsistency
   const hasCompletedWithoutStatus = task.memberHasCompleted && neverAttempted;
-  
+
+  // "Available again in X days" — shown on locked recurring tasks
+  const isRecurringTask = task.recurrence !== "none" && task.recurrence !== "immediate";
+  const availableAgainDays = (isApproved || isPending || hasNoSlots || hasCompletedWithoutStatus) && isRecurringTask
+    ? getAvailableAgainDays((task as any).nextAvailableDate ?? null)
+    : null;
+
   // Check if this is a weekdays task that is unavailable on weekends (Sat=6, Sun=0)
   const todayDow = new Date().getDay();
   const isWeekendUnavailable = task.recurrence === 'weekdays' && (todayDow === 0 || todayDow === 6);
@@ -646,8 +660,8 @@ function TaskCard({
             <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
               {task.title}
             </h3>
-            {/* Info Button - only show if description exists */}
-            {task.description && (
+            {/* Info Button - show if description OR time-info available */}
+            {(task.description || availableAgainDays !== null) && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -833,6 +847,20 @@ function TaskCard({
               {t("kidDashboard.noSlotsLeft")}
             </p>
           )}
+
+          {/* Available-again time chip for locked recurring tasks */}
+          {availableAgainDays !== null && (
+            <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3 shrink-0" />
+              <span>
+                {availableAgainDays === 0
+                  ? t("kidDashboard.availableToday")
+                  : availableAgainDays === 1
+                  ? t("kidDashboard.availableTomorrow")
+                  : t("kidDashboard.availableInDays", { count: availableAgainDays })}
+              </span>
+            </div>
+          )}
         </div>
       </Card>
 
@@ -874,6 +902,22 @@ function TaskCard({
                     <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
                       <span className="font-semibold">{t("kidDashboard.needsPhoto")}</span>
                       <Lightbulb className="h-5 w-5 text-blue-500" />
+                    </div>
+                  )}
+
+                  {availableAgainDays !== null && (
+                    <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
+                      <span className="font-semibold">{t("kidDashboard.availableAgainLabel")}</span>
+                      <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        <span>
+                          {availableAgainDays === 0
+                            ? t("kidDashboard.availableToday")
+                            : availableAgainDays === 1
+                            ? t("kidDashboard.availableTomorrow")
+                            : t("kidDashboard.availableInDays", { count: availableAgainDays })}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>

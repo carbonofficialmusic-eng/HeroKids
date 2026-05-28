@@ -167,6 +167,8 @@
     "autoApproved": "Auto-aprobada",
     "availableToday": "Disponible hoy",
     "availableTomorrow": "Mañana",
+    "availableInDays": "En {{count}} días",
+    "availableAgainLabel": "Disponible de nuevo",
     "availableOn": "Vuelve el {{date}}",
     "availableOnDate": "Vuelve el {{date}}",
     "updateDetails": "Actualiza los detalles de esta tarea.",

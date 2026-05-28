@@ -185,6 +185,8 @@
     "autoApproved": "Automatisch genehmigt",
     "availableToday": "Heute wieder",
     "availableTomorrow": "Morgen wieder",
+    "availableInDays": "In {{count}} Tagen wieder",
+    "availableAgainLabel": "Wieder verfügbar",
     "availableOn": "Wieder am {{date}}",
     "availableOnDate": "Wieder am {{date}}",
     "participants": "Teilnehmer",

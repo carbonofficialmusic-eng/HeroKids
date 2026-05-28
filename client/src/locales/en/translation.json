@@ -172,6 +172,8 @@
     "autoApproved": "Auto-approved",
     "availableToday": "Available today",
     "availableTomorrow": "Tomorrow",
+    "availableInDays": "In {{count}} days",
+    "availableAgainLabel": "Available again",
     "availableOn": "Back on {{date}}",
     "availableOnDate": "Back on {{date}}",
     "participants": "Participants",
