@@ -492,6 +492,17 @@ function TaskCard({
   
   // Combined check for all members completed (new or legacy)
   const allMembersCompleted = allAssignedMembersCompleted || allSharedMembersCompleted;
+
+  // For shared tasks: all assigned members have submitted (pending or approved) — only then show amber
+  const allSharedMembersSubmitted = task.isSharedTask &&
+    task.sharedMemberCompletions &&
+    task.sharedMemberCompletions.length > 0 &&
+    task.sharedMemberCompletions.every((m: { hasSubmitted?: boolean; status?: string | null }) =>
+      m.hasSubmitted || m.status !== null
+    );
+
+  // This member submitted but others haven't yet — keep card neutral, don't show amber
+  const waitingForOtherMembers = isPending && task.isSharedTask && !allSharedMembersSubmitted;
   
   // Get assigned member names for message (prefer new style over legacy)
   const assignedMemberNames = task.assignedMemberCompletions?.map(m => m.displayName).join(' & ') || 
@@ -503,7 +514,7 @@ function TaskCard({
 
   // "Available again in X days" — shown on locked recurring tasks
   const isRecurringTask = task.recurrence !== "none" && task.recurrence !== "immediate";
-  const availableAgainDays = (isApproved || isPending || hasNoSlots || hasCompletedWithoutStatus) && isRecurringTask
+  const availableAgainDays = (isApproved || (isPending && !waitingForOtherMembers) || hasNoSlots || hasCompletedWithoutStatus) && isRecurringTask
     ? getAvailableAgainDays((task as any).nextAvailableDate ?? null)
     : null;
 
@@ -574,7 +585,10 @@ function TaskCard({
   let statusMessage = "";
   let statusColor = "";
   
-  if (isPending) {
+  if (waitingForOtherMembers) {
+    statusMessage = t("kidDashboard.submittedWaitingOthers", "Abgegeben – warte auf andere Mitglieder");
+    statusColor = "text-muted-foreground";
+  } else if (isPending) {
     statusMessage = t("kidDashboard.waitingApproval");
     statusColor = "text-amber-600 dark:text-amber-400";
   } else if (isApproved) {
@@ -620,6 +634,7 @@ function TaskCard({
           isActionable && !isRejected ? "bg-card/80 cursor-pointer border-border hover:border-primary" : 
           isActionable && isRejected ? "bg-card/80 cursor-pointer border-blue-500 hover:border-blue-600" :
           isApproved ? "bg-transparent border-green-500" :
+          waitingForOtherMembers ? "bg-transparent border-border" :
           isPending ? "bg-transparent border-amber-500" :
           hasNoSlots ? "bg-transparent border-amber-500" :
           isSharedTaskNotAssigned ? "bg-transparent border-border" :
@@ -635,6 +650,7 @@ function TaskCard({
         <div className="text-center space-y-3">
           <div className={`flex justify-center p-3 rounded-2xl mx-auto w-fit ${
             isApproved ? "bg-green-500/20" : 
+            waitingForOtherMembers ? "bg-primary/10" :
             isPending ? "bg-amber-500/20" :
             isRejected ? "bg-blue-500/20" :
             hasNoSlots ? "bg-amber-500/20" :
@@ -645,6 +661,11 @@ function TaskCard({
               <Loader2 className="h-12 w-12 text-primary animate-spin" />
             ) : isApproved ? (
               <CheckCircle2 className="h-12 w-12 text-green-500" />
+            ) : waitingForOtherMembers ? (
+              <TaskIcon
+                className="h-12 w-12 text-primary transition-all duration-300"
+                style={{ filter: "grayscale(30%)" }}
+              />
             ) : isPending ? (
               <CheckCircle2 className="h-12 w-12 text-amber-500" />
             ) : allSharedMembersCompleted ? (
@@ -747,25 +768,28 @@ function TaskCard({
                   {t("kidDashboard.sharedWith")}
                 </p>
                 <div className="flex flex-wrap justify-center gap-1">
-                  {task.sharedMemberCompletions.map((m) => (
-                    <Badge 
-                      key={m.memberId} 
-                      variant={m.hasCompleted ? "default" : "outline"}
-                      className="gap-1 text-xs"
-                    >
-                      <Avatar className="h-4 w-4">
-                        <AvatarImage src={getAvatarUrl(m.activeSkinId, m.avatarUrl, m.useCustomAvatar)} />
-                        <AvatarFallback 
-                          className="text-xs text-white font-bold"
-                          style={{ backgroundColor: m.color }}
-                        >
-                          {m.displayName[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      {m.displayName}
-                      {m.hasCompleted && " ✓"}
-                    </Badge>
-                  ))}
+                  {task.sharedMemberCompletions.map((m) => {
+                    const memberSubmitted = m.hasSubmitted || m.status !== null;
+                    return (
+                      <Badge 
+                        key={m.memberId} 
+                        variant={memberSubmitted ? "default" : "outline"}
+                        className="gap-1 text-xs"
+                      >
+                        <Avatar className="h-4 w-4">
+                          <AvatarImage src={getAvatarUrl(m.activeSkinId, m.avatarUrl, m.useCustomAvatar)} />
+                          <AvatarFallback 
+                            className="text-xs text-white font-bold"
+                            style={{ backgroundColor: m.color }}
+                          >
+                            {m.displayName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        {m.displayName}
+                        {m.status === "approved" ? " ✓" : m.status === "pending" ? " ⏳" : ""}
+                      </Badge>
+                    );
+                  })}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {t("tasks.sharedProgress", {
