@@ -2225,45 +2225,44 @@ export default function KidDashboard() {
             </div>
             
             {/* Kid-friendly filter tabs */}
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex bg-muted rounded-lg p-1 gap-1 flex-wrap">
               <Button
-                variant={kidTaskFilter === "daily" ? "default" : "outline"}
+                variant={kidTaskFilter === "daily" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("daily")}
-                className="rounded-full gap-1.5"
+                className="text-xs px-3"
                 data-testid="button-kid-filter-daily"
               >
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className="h-3 w-3 mr-1" />
                 {t("kidDashboard.filterDaily")}
               </Button>
               <Button
-                variant={kidTaskFilter === "weekly" ? "default" : "outline"}
+                variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("weekly")}
-                className="rounded-full gap-1.5"
+                className="text-xs px-3"
                 data-testid="button-kid-filter-weekly"
               >
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-3 w-3 mr-1" />
                 {t("kidDashboard.filterWeekly")}
               </Button>
               <Button
-                variant={kidTaskFilter === "monthly" ? "default" : "outline"}
+                variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("monthly")}
-                className="rounded-full gap-1.5"
+                className="text-xs px-3"
                 data-testid="button-kid-filter-monthly"
               >
-                <Star className="h-4 w-4" />
+                <Star className="h-3 w-3 mr-1" />
                 {t("kidDashboard.filterMonthly")}
               </Button>
               <Button
-                variant={kidTaskFilter === "all" ? "default" : "outline"}
+                variant={kidTaskFilter === "all" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("all")}
-                className="rounded-full gap-1.5"
+                className="text-xs px-3"
                 data-testid="button-kid-filter-all"
               >
-                <Star className="h-4 w-4" />
                 {t("kidDashboard.filterAll")}
               </Button>
             </div>
