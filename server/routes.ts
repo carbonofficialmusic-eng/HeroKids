@@ -1618,7 +1618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Use acting member if available, otherwise use authenticated user (only for non-device sessions)
       let member = realMember;
-      if (req.session?.actingAsMemberId && !req.user.authMethod) {
+      if (req.session?.actingAsMemberId && req.user.authMethod !== "device") {
         const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
         
         // Security: Validate acting member belongs to same family
@@ -1713,8 +1713,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 // For children: check if THIS member has submitted (to grey out the card while pending/approved)
                 const currentMemberCompletion = sharedMemberCompletions.find(m => m?.memberId === member.id);
                 const thisMemberHasSubmitted = currentMemberCompletion?.hasSubmitted || false;
-                
-                console.log(`[SHARED-TASK-DEBUG] task=${task.id} member=${member.id}(${member.displayName}) status=${currentMemberCompletion?.status} hasSubmitted=${thisMemberHasSubmitted} allCompletions=${JSON.stringify(sharedMemberCompletions.map(m => ({id:m?.memberId?.slice(0,8), status:m?.status})))}`);
                 
                 return {
                   ...task,
