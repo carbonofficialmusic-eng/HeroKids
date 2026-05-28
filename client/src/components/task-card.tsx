@@ -143,8 +143,11 @@ export function TaskCard({
   if (compact) {
     // Date label shown directly on the compact card
     const compactDateText = (() => {
+      // Unavailable (completed, waiting for reset) — highest priority
       if (isUnavailable && getNextAvailableText()) return { text: getNextAvailableText()!, color: "text-muted-foreground" };
+      // Weekend unavailable (weekdays-only task shown on Sat/Sun)
       if (isWeekendUnavailable) return { text: t('tasks.weekendUnavailable'), color: "text-muted-foreground" };
+      // One-time task with due date
       if (task.dueDate && task.recurrence === "none") {
         const dateStr = typeof task.dueDate === "string" ? task.dueDate.substring(0, 10) : String(task.dueDate).substring(0, 10);
         const dueDate = parse(dateStr, "yyyy-MM-dd", new Date());
@@ -157,6 +160,14 @@ export function TaskCard({
         if (dueDateInfo.notYet) return { text: t('tasks.dueDateNotYet', { date: format(dueDate, "d. MMM", { locale }) }), color: "text-muted-foreground" };
         return { text: format(dueDate, "d. MMM", { locale }), color: "text-muted-foreground" };
       }
+      // Currently available recurring task — show the recurrence cadence so parents know when it repeats
+      const r = task.recurrence;
+      if (r === "daily") return { text: t('tasks.recurrenceDaily', { defaultValue: 'Daily' }), color: "text-muted-foreground" };
+      if (r === "weekdays") return { text: t('tasks.recurrenceWeekdays', { defaultValue: 'Mon–Fri' }), color: "text-muted-foreground" };
+      if (r === "weekly") return { text: t('tasks.recurrenceWeekly', { defaultValue: 'Weekly' }), color: "text-muted-foreground" };
+      if (r === "monthly") return { text: t('tasks.recurrenceMonthly', { defaultValue: 'Monthly' }), color: "text-muted-foreground" };
+      if (r === "yearly") return { text: t('tasks.recurrenceYearly', { defaultValue: 'Yearly' }), color: "text-muted-foreground" };
+      if (task.recurrenceDays) return { text: t('tasks.recurrenceEveryN', { count: task.recurrenceDays, defaultValue: `Every ${task.recurrenceDays}d` }), color: "text-muted-foreground" };
       return null;
     })();
 
