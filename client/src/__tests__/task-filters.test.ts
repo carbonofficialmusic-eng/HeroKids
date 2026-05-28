@@ -219,16 +219,19 @@ describe("filterKidTasksByDate — kid dashboard", () => {
     it("includes daily tasks", () => {
       expect(filterKidTasksByDate([dailyTask], "daily")).toHaveLength(1);
     });
-    it("includes immediate tasks", () => {
-      expect(filterKidTasksByDate([immediateTask], "daily")).toHaveLength(1);
+    it("includes weekdays tasks", () => {
+      expect(filterKidTasksByDate([weekdaysTask], "daily")).toHaveLength(1);
     });
-    it("includes one-time tasks with no due date", () => {
-      expect(filterKidTasksByDate([oneTimeNoDate], "daily")).toHaveLength(1);
+    it("excludes immediate tasks (go to onetime)", () => {
+      expect(filterKidTasksByDate([immediateTask], "daily")).toHaveLength(0);
     });
-    it("includes one-time tasks due in 3 days", () => {
-      expect(filterKidTasksByDate([oneTime3days], "daily")).toHaveLength(1);
+    it("excludes one-time tasks with no due date (go to onetime)", () => {
+      expect(filterKidTasksByDate([oneTimeNoDate], "daily")).toHaveLength(0);
     });
-    it("excludes one-time tasks due in 4 days", () => {
+    it("excludes one-time tasks due in 3 days (go to onetime)", () => {
+      expect(filterKidTasksByDate([oneTime3days], "daily")).toHaveLength(0);
+    });
+    it("excludes one-time tasks due in 4 days (go to onetime)", () => {
       expect(filterKidTasksByDate([oneTime4days], "daily")).toHaveLength(0);
     });
     it("includes custom 3-day interval tasks", () => {
@@ -249,16 +252,16 @@ describe("filterKidTasksByDate — kid dashboard", () => {
     it("includes weekly tasks", () => {
       expect(filterKidTasksByDate([weeklyTask], "weekly")).toHaveLength(1);
     });
-    it("includes one-time tasks due in 4 days", () => {
-      expect(filterKidTasksByDate([oneTime4days], "weekly")).toHaveLength(1);
+    it("excludes one-time tasks due in 4 days (go to onetime)", () => {
+      expect(filterKidTasksByDate([oneTime4days], "weekly")).toHaveLength(0);
     });
-    it("includes one-time tasks due in 7 days", () => {
-      expect(filterKidTasksByDate([oneTime7days], "weekly")).toHaveLength(1);
+    it("excludes one-time tasks due in 7 days (go to onetime)", () => {
+      expect(filterKidTasksByDate([oneTime7days], "weekly")).toHaveLength(0);
     });
-    it("excludes one-time tasks with no date", () => {
+    it("excludes one-time tasks with no date (go to onetime)", () => {
       expect(filterKidTasksByDate([oneTimeNoDate], "weekly")).toHaveLength(0);
     });
-    it("excludes one-time tasks due in 8 days", () => {
+    it("excludes one-time tasks due in 8 days (go to onetime)", () => {
       expect(filterKidTasksByDate([oneTime8days], "weekly")).toHaveLength(0);
     });
     it("includes custom 4-day interval tasks", () => {
@@ -279,16 +282,19 @@ describe("filterKidTasksByDate — kid dashboard", () => {
     it("includes monthly tasks", () => {
       expect(filterKidTasksByDate([monthlyTask], "monthly")).toHaveLength(1);
     });
-    it("includes one-time tasks due in 8 days", () => {
-      expect(filterKidTasksByDate([oneTime8days], "monthly")).toHaveLength(1);
+    it("includes yearly tasks", () => {
+      expect(filterKidTasksByDate([yearlyTask], "monthly")).toHaveLength(1);
     });
-    it("includes one-time tasks due in 30 days", () => {
-      expect(filterKidTasksByDate([oneTime30days], "monthly")).toHaveLength(1);
+    it("excludes one-time tasks due in 8 days (go to onetime)", () => {
+      expect(filterKidTasksByDate([oneTime8days], "monthly")).toHaveLength(0);
     });
-    it("excludes one-time tasks with no date", () => {
+    it("excludes one-time tasks due in 30 days (go to onetime)", () => {
+      expect(filterKidTasksByDate([oneTime30days], "monthly")).toHaveLength(0);
+    });
+    it("excludes one-time tasks with no date (go to onetime)", () => {
       expect(filterKidTasksByDate([oneTimeNoDate], "monthly")).toHaveLength(0);
     });
-    it("excludes one-time tasks due in 31 days", () => {
+    it("excludes one-time tasks due in 31 days (go to onetime)", () => {
       expect(filterKidTasksByDate([oneTime31days], "monthly")).toHaveLength(0);
     });
     it("includes custom 8-day interval tasks", () => {
@@ -300,11 +306,40 @@ describe("filterKidTasksByDate — kid dashboard", () => {
     it("excludes custom 31-day interval tasks", () => {
       expect(filterKidTasksByDate([custom31days], "monthly")).toHaveLength(0);
     });
-    it("excludes yearly tasks", () => {
-      expect(filterKidTasksByDate([yearlyTask], "monthly")).toHaveLength(0);
-    });
     it("excludes daily tasks", () => {
       expect(filterKidTasksByDate([dailyTask], "monthly")).toHaveLength(0);
+    });
+  });
+
+  describe('filter: "onetime"', () => {
+    it("includes immediate tasks", () => {
+      expect(filterKidTasksByDate([immediateTask], "onetime")).toHaveLength(1);
+    });
+    it("includes one-time tasks with no due date", () => {
+      expect(filterKidTasksByDate([oneTimeNoDate], "onetime")).toHaveLength(1);
+    });
+    it("includes one-time tasks due in 3 days", () => {
+      expect(filterKidTasksByDate([oneTime3days], "onetime")).toHaveLength(1);
+    });
+    it("includes one-time tasks due in 31 days", () => {
+      expect(filterKidTasksByDate([oneTime31days], "onetime")).toHaveLength(1);
+    });
+    it("includes one-time tasks due in 90 days", () => {
+      expect(filterKidTasksByDate([oneTime90days], "onetime")).toHaveLength(1);
+    });
+    it("excludes custom interval tasks (they go to daily/weekly/monthly)", () => {
+      expect(filterKidTasksByDate([custom3days], "onetime")).toHaveLength(0);
+      expect(filterKidTasksByDate([custom7days], "onetime")).toHaveLength(0);
+      expect(filterKidTasksByDate([custom30days], "onetime")).toHaveLength(0);
+    });
+    it("excludes daily tasks", () => {
+      expect(filterKidTasksByDate([dailyTask], "onetime")).toHaveLength(0);
+    });
+    it("excludes weekly tasks", () => {
+      expect(filterKidTasksByDate([weeklyTask], "onetime")).toHaveLength(0);
+    });
+    it("excludes monthly tasks", () => {
+      expect(filterKidTasksByDate([monthlyTask], "onetime")).toHaveLength(0);
     });
   });
 
@@ -325,17 +360,22 @@ describe("filterKidTasksByDate — kid dashboard", () => {
     it("daily filter groups correctly", () => {
       const tasks = [dailyTask, weekdaysTask, oneTimeNoDate, custom3days, custom4days, weeklyTask];
       const result = filterKidTasksByDate(tasks, "daily");
-      expect(result).toHaveLength(4); // daily, weekdays, oneTimeNoDate, custom3
+      expect(result).toHaveLength(3); // daily, weekdays, custom3 (oneTimeNoDate → onetime)
     });
     it("weekly filter groups correctly", () => {
       const tasks = [dailyTask, weeklyTask, monthlyTask, custom4days, custom7days, custom8days, oneTime4days];
       const result = filterKidTasksByDate(tasks, "weekly");
-      expect(result).toHaveLength(4); // weekly, custom4, custom7, oneTime4
+      expect(result).toHaveLength(3); // weekly, custom4, custom7 (oneTime4days → onetime)
     });
     it("monthly filter groups correctly", () => {
       const tasks = [dailyTask, weeklyTask, monthlyTask, yearlyTask, custom8days, custom30days, custom31days, oneTime8days];
       const result = filterKidTasksByDate(tasks, "monthly");
-      expect(result).toHaveLength(4); // monthly, custom8, custom30, oneTime8
+      expect(result).toHaveLength(4); // monthly, yearly, custom8, custom30 (oneTime8days → onetime)
+    });
+    it("onetime filter groups correctly", () => {
+      const tasks = [dailyTask, weeklyTask, immediateTask, oneTimeNoDate, oneTime4days, oneTime31days, custom3days];
+      const result = filterKidTasksByDate(tasks, "onetime");
+      expect(result).toHaveLength(4); // immediate, oneTimeNoDate, oneTime4days, oneTime31days
     });
   });
 });

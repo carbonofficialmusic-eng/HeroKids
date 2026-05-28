@@ -1248,6 +1248,7 @@
     "filterDaily": "Täglich",
     "filterWeekly": "Wöchentlich",
     "filterMonthly": "Monatlich",
+    "filterOneTime": "Einmalig & Direkt",
     "filterAll": "Alle Aufgaben",
     "noTasksForFilter": "Keine Aufgaben für diesen Filter!",
     "showAllTasks": "Alle Aufgaben zeigen",

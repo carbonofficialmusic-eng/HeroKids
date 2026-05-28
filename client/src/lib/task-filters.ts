@@ -89,10 +89,19 @@ export function filterTasksByDate<T extends FilterableTask>(
 
 /**
  * Filters kid tasks by recurrence frequency group.
- * Same rules as filterTasksByDate.
+ *
+ * - "daily"   → daily / weekdays recurring; custom intervals ≤ 3 days
+ * - "weekly"  → weekly recurring; custom intervals 4–7 days
+ * - "monthly" → monthly / yearly recurring; custom intervals 8–30 days
+ * - "onetime" → true one-time tasks (recurrence "none", no recurrenceDays)
+ *               + immediate tasks (recurrence "immediate")
+ * - "all"     → everything
+ *
+ * Custom-interval tasks (recurrence "none" + recurrenceDays > 0) stay in
+ * daily/weekly/monthly based on their interval length, not in "onetime".
  *
  * @param taskList - Array of tasks to filter
- * @param kidTaskFilter - "daily" | "weekly" | "monthly" | "all"
+ * @param kidTaskFilter - "daily" | "weekly" | "monthly" | "onetime" | "all"
  */
 export function filterKidTasksByDate<T extends FilterableTask>(
   taskList: T[],
@@ -102,9 +111,10 @@ export function filterKidTasksByDate<T extends FilterableTask>(
   return taskList.filter((task) => {
     if (kidTaskFilter === "all") return true;
 
-    // Custom interval
+    // Custom interval tasks: distribute by recurrenceDays, never in "onetime"
     const isCustomInterval = task.recurrence === "none" && task.recurrenceDays != null && task.recurrenceDays > 0;
     if (isCustomInterval) {
+      if (kidTaskFilter === "onetime") return false;
       const d = task.recurrenceDays!;
       if (kidTaskFilter === "daily")   return d <= 3;
       if (kidTaskFilter === "weekly")  return d >= 4 && d <= 7;
@@ -112,25 +122,21 @@ export function filterKidTasksByDate<T extends FilterableTask>(
       return false;
     }
 
-    // One-time task
-    const isOneTime = task.recurrence === "none";
-    if (isOneTime) {
-      if (!task.dueDate) {
-        return kidTaskFilter === "daily";
-      }
-      const days = daysUntilDue(task.dueDate);
-      if (kidTaskFilter === "daily")   return days <= 3;
-      if (kidTaskFilter === "weekly")  return days >= 4 && days <= 7;
-      if (kidTaskFilter === "monthly") return days >= 8 && days <= 30;
-      return false;
+    // Immediate tasks → "onetime" tab
+    if (task.recurrence === "immediate") {
+      return kidTaskFilter === "onetime";
     }
 
+    // True one-time tasks (recurrence "none", no custom interval) → "onetime" tab
+    if (task.recurrence === "none") {
+      return kidTaskFilter === "onetime";
+    }
+
+    // Recurring tasks
+    if (kidTaskFilter === "onetime") return false;
+
     if (kidTaskFilter === "daily") {
-      return (
-        task.recurrence === "daily" ||
-        task.recurrence === "weekdays" ||
-        task.recurrence === "immediate"
-      );
+      return task.recurrence === "daily" || task.recurrence === "weekdays";
     }
 
     if (kidTaskFilter === "weekly") {
@@ -138,7 +144,7 @@ export function filterKidTasksByDate<T extends FilterableTask>(
     }
 
     if (kidTaskFilter === "monthly") {
-      return task.recurrence === "monthly";
+      return task.recurrence === "monthly" || task.recurrence === "yearly";
     }
 
     return true;

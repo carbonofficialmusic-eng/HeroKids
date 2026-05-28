@@ -1225,6 +1225,7 @@
     "filterDaily": "Daily",
     "filterWeekly": "Weekly",
     "filterMonthly": "Monthly",
+    "filterOneTime": "One-time",
     "filterAll": "All Tasks",
     "noTasksForFilter": "No tasks for this filter!",
     "showAllTasks": "Show all tasks",

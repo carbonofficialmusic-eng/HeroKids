@@ -1174,6 +1174,7 @@
     "filterDaily": "毎日",
     "filterWeekly": "毎週",
     "filterMonthly": "毎月",
+    "filterOneTime": "単発・即時",
     "filterAll": "すべてのタスク",
     "noTasksForFilter": "このフィルターにはタスクがありません！",
     "showAllTasks": "すべてのタスクを見る",

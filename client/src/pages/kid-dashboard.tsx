@@ -1034,7 +1034,7 @@ export default function KidDashboard() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const [kidTaskFilter, setKidTaskFilter] = useState<"daily" | "weekly" | "monthly" | "all">("all");
+  const [kidTaskFilter, setKidTaskFilter] = useState<"daily" | "weekly" | "monthly" | "onetime" | "all">("all");
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   // Auto-refresh tasks at midnight when daily tasks reset
@@ -2255,6 +2255,16 @@ export default function KidDashboard() {
               >
                 <Star className="h-3 w-3 mr-1" />
                 {t("kidDashboard.filterMonthly")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("onetime")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-onetime"
+              >
+                <Target className="h-3 w-3 mr-1" />
+                {t("kidDashboard.filterOneTime")}
               </Button>
               <Button
                 variant={kidTaskFilter === "all" ? "default" : "ghost"}

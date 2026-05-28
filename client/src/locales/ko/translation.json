@@ -1127,6 +1127,7 @@
     "filterDaily": "매일",
     "filterWeekly": "매주",
     "filterMonthly": "매월",
+    "filterOneTime": "일회성",
     "filterAll": "모든 과제",
     "noTasksForFilter": "이 필터에는 과제가 없어요!",
     "showAllTasks": "모든 과제 보기",

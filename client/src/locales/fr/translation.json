@@ -1174,6 +1174,7 @@
     "filterDaily": "Quotidien",
     "filterWeekly": "Hebdomadaire",
     "filterMonthly": "Mensuel",
+    "filterOneTime": "Ponctuel",
     "filterAll": "Toutes les tâches",
     "noTasksForFilter": "Pas de tâches pour ce filtre !",
     "showAllTasks": "Voir toutes les tâches",

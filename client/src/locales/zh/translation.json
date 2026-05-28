@@ -1174,6 +1174,7 @@
     "filterDaily": "每天",
     "filterWeekly": "每周",
     "filterMonthly": "每月",
+    "filterOneTime": "一次性",
     "filterAll": "所有任务",
     "noTasksForFilter": "此筛选条件下没有任务！",
     "showAllTasks": "查看所有任务",
