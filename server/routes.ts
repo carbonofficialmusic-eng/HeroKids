@@ -1632,8 +1632,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const allTasks = await storage.getTasksByFamily(member.familyName);
       
-      console.log(`[TASK-DEBUG-ROLE] member="${member.displayName}" id="${member.id}" role="${member.role}" actingAsMemberId="${req.session?.actingAsMemberId}"`);
-
       // For children: filter and enhance tasks based on Multi-Completion mode
       if (member.role === "child") {
         const tasksWithMeta = await Promise.allSettled(
@@ -1649,8 +1647,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ? completionStatus === "pending"  // Immediate: blocked while pending
                 : completionStatus === "approved"; // Others: completed when approved
               
-              console.log(`[TASK-DEBUG-ENTRY] task="${task.title}" member="${member.displayName}" completionStatus=${completionStatus} maxCompletions=${task.maxCompletions} isSharedTask=${task.isSharedTask} sharedMemberIds=${JSON.stringify(task.sharedMemberIds)}`);
-
               // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
               if (task.maxCompletions !== null) {
                 // If task also has shared/assigned targeting, apply membership filter
@@ -1665,7 +1661,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   const completions = await storage.getActiveCompletionsByTask(task.id);
                   // Calculate completion count from approved completions
                   const completionCount = completions.filter(c => c.status === "approved").length;
-                  console.log(`[TASK-DEBUG-MC] task="${task.title}" member="${member.displayName}" maxCompletions=${task.maxCompletions} completionCount=${completionCount} remainingSlots=${task.maxCompletions - completionCount} memberCompletionStatus=${completionStatus} allCompletions=${JSON.stringify(completions.map(c => ({memberId:c.memberId,status:c.status})))}`);
                   return {
                     ...task,
                     remainingSlots: task.maxCompletions - completionCount,
@@ -1689,7 +1684,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Shared tasks - check each shared member's completion status
               if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
-                console.log(`[TASK-DEBUG] task="${task.title}" member="${member.displayName}" → PRIMARY SHARED PATH (sharedMemberIds=${JSON.stringify(task.sharedMemberIds)})`);
                 // Only show shared tasks to members who are part of the shared group
                 if (!task.sharedMemberIds.includes(member.id)) {
                   return null;
@@ -1739,7 +1733,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
 
               if (assignedMemberIds.length > 1) {
-                console.log(`[TASK-DEBUG] task="${task.title}" member="${member.displayName}" → MULTI-ASSIGN PATH (assignedMemberIds=${JSON.stringify(assignedMemberIds)})`);
                 // Multi-assignment task: Each assigned member completes independently, gets full points
                 // Box grays out for members who submitted (pending/approved), stays active for others
                 const assignedMemberCompletions = await Promise.all(
@@ -1779,9 +1772,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 };
               }
               
-              // DEBUG: Log the path taken for multi-member tasks
-              console.log(`[TASK-DEBUG] task="${task.title}" member="${member.displayName}" (${member.id}) → assignedMemberIds=[${assignedMemberIds.join(',')}] isSharedTask=${task.isSharedTask} sharedMemberIds=[${(task.sharedMemberIds||[]).join(',')}] completionStatus=${completionStatus} → falling to safety/normal path`);
-
               // Safety fallback: if this is a shared task that somehow bypassed all
               // dedicated shared/assignment paths above, ALWAYS use the member's OWN status —
               // never the family-wide status — so one member's pending/approved state never
