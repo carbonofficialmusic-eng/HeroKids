@@ -1064,36 +1064,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Task completion operations
-  // Calculate the start of the current recurrence period when nextAvailableDate is not set.
-  // Prevents stale completions from previous periods being counted.
-  private getCurrentPeriodStart(recurrence: string, recurrenceDays: number | null): Date {
-    const now = new Date();
-
-    if (recurrenceDays && recurrenceDays > 0) {
-      const start = new Date(now);
-      start.setDate(now.getDate() - recurrenceDays);
-      start.setHours(0, 0, 0, 0);
-      return start;
-    }
-
-    switch (recurrence) {
-      case 'weekly': {
-        const day = now.getDay();
-        const diff = day === 0 ? -6 : 1 - day; // Monday = start of week
-        const monday = new Date(now);
-        monday.setDate(now.getDate() + diff);
-        monday.setHours(0, 0, 0, 0);
-        return monday;
-      }
-      case 'monthly':
-        return new Date(now.getFullYear(), now.getMonth(), 1);
-      case 'yearly':
-        return new Date(now.getFullYear(), 0, 1);
-      default:
-        return new Date(0); // fallback: all time
-    }
-  }
-
   async hasActiveMemberCompletion(taskId: string, memberId: string, txClient?: any): Promise<boolean> {
     const client = txClient || db;
     
@@ -1101,9 +1071,7 @@ export class DatabaseStorage implements IStorage {
     const [task] = await client
       .select({
         recurrence: tasks.recurrence,
-        recurrenceDays: tasks.recurrenceDays,
-        familyName: tasks.familyName,
-        nextAvailableDate: tasks.nextAvailableDate
+        familyName: tasks.familyName
       })
       .from(tasks)
       .where(eq(tasks.id, taskId));
@@ -1152,47 +1120,7 @@ export class DatabaseStorage implements IStorage {
       return completions.some((c: { completedAt: Date }) => isToday(c.completedAt, familyTimezone));
     }
     
-    // For non-daily recurring tasks: only count completions from the current period.
-    // When nextAvailableDate has passed (new period), only completions AFTER that date count.
-    const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
-    if (isRecurring) {
-      const now = new Date();
-      const nextDate = task.nextAvailableDate ? new Date(task.nextAvailableDate as unknown as string) : null;
-      if (nextDate && nextDate <= now) {
-        // We're in a new period — only count completions made after the period reset
-        const [result] = await client
-          .select({ count: sql<number>`count(*)` })
-          .from(taskCompletions)
-          .where(
-            and(
-              eq(taskCompletions.taskId, taskId),
-              eq(taskCompletions.memberId, memberId),
-              inArray(taskCompletions.status, ["pending", "approved"]),
-              gte(taskCompletions.completedAt, nextDate)
-            )
-          );
-        return Number(result?.count || 0) > 0;
-      }
-      if (!nextDate) {
-        // nextAvailableDate not yet set — derive period start from recurrence type so
-        // stale completions from previous periods do not block re-submission.
-        const periodStart = this.getCurrentPeriodStart(task.recurrence, task.recurrenceDays);
-        const [result] = await client
-          .select({ count: sql<number>`count(*)` })
-          .from(taskCompletions)
-          .where(
-            and(
-              eq(taskCompletions.taskId, taskId),
-              eq(taskCompletions.memberId, memberId),
-              inArray(taskCompletions.status, ["pending", "approved"]),
-              gte(taskCompletions.completedAt, periodStart)
-            )
-          );
-        return Number(result?.count || 0) > 0;
-      }
-    }
-
-    // Non-recurring tasks or locked recurring tasks: any active completion blocks submission
+    // For non-daily tasks, use the original logic (any active completion)
     const [result] = await client
       .select({ count: sql<number>`count(*)` })
       .from(taskCompletions)
@@ -1279,10 +1207,9 @@ export class DatabaseStorage implements IStorage {
       const nextDate = task.nextAvailableDate ? new Date(task.nextAvailableDate) : null;
       
       if (!nextDate) {
-        // nextAvailableDate not yet set (e.g. not all shared members have submitted yet,
-        // or ghost member prevents it). Derive period start from recurrence type so stale
-        // completions from previous periods don't show up for the current member.
-        const periodStart = this.getCurrentPeriodStart(task.recurrence, task.recurrenceDays);
+        // nextAvailableDate not yet set — e.g. multi-completion task where requiresApproval=true
+        // and not all slots are filled yet (completion count never reached max).
+        // Still check if THIS member has an active submission so the UI can show "pending" state.
         const [memberCompletion] = await client
           .select({ status: taskCompletions.status })
           .from(taskCompletions)
@@ -1290,8 +1217,7 @@ export class DatabaseStorage implements IStorage {
             and(
               eq(taskCompletions.taskId, taskId),
               eq(taskCompletions.memberId, memberId),
-              inArray(taskCompletions.status, ["pending", "approved", "rejected"]),
-              gte(taskCompletions.completedAt, periodStart)
+              inArray(taskCompletions.status, ["pending", "approved", "rejected"])
             )
           )
           .orderBy(desc(taskCompletions.completedAt))

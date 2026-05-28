@@ -7,8 +7,8 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { startPointsResetScheduler } from "./scheduler";
 import { db } from "./db";
-import { skins, familyMembers, starPlacements, tasks, taskCompletions } from "../shared/schema";
-import { sql, eq, and, notInArray, isNotNull, gt, inArray } from "drizzle-orm";
+import { skins, familyMembers, starPlacements } from "../shared/schema";
+import { sql, eq, and, notInArray } from "drizzle-orm";
 import Stripe from "stripe";
 
 const app = express();
@@ -765,129 +765,6 @@ async function migrateExistingMembersForTestPhase() {
   }
 }
 
-// One-time fix: reset nextAvailableDate for shared tasks where not all assigned members
-// have submitted yet. The old code set nextAvailableDate after ONE member submitted,
-// which incorrectly locked out the remaining members via isInactive in the frontend.
-async function fixSharedTaskNextAvailableDate() {
-  try {
-    // Find shared tasks with a nextAvailableDate in the future
-    const sharedTasksToCheck = await db
-      .select({
-        id: tasks.id,
-        recurrence: tasks.recurrence,
-        sharedMemberIds: tasks.sharedMemberIds,
-        nextAvailableDate: tasks.nextAvailableDate,
-      })
-      .from(tasks)
-      .where(
-        and(
-          eq(tasks.isSharedTask, true),
-          isNotNull(tasks.nextAvailableDate),
-          gt(tasks.nextAvailableDate, new Date())
-        )
-      );
-
-    if (sharedTasksToCheck.length === 0) {
-      log("✅ Shared task nextAvailableDate fix: no tasks to fix");
-      return;
-    }
-
-    const taskIdsToReset: string[] = [];
-
-    for (const task of sharedTasksToCheck) {
-      const memberIds = (task.sharedMemberIds as string[]) || [];
-      if (memberIds.length < 2) continue;
-
-      // For daily tasks: check completions from today; for others: completions after period start
-      const periodStart = new Date(task.nextAvailableDate as Date);
-      // Go back one full period to find current-period completions
-      // For daily: one day back; for weekly: 7 days; etc.
-      let currentPeriodStart: Date;
-      if (task.recurrence === 'daily' || task.recurrence === 'weekdays') {
-        currentPeriodStart = new Date();
-        currentPeriodStart.setHours(0, 0, 0, 0);
-      } else {
-        // Use the previous nextAvailableDate as the current period start —
-        // but we don't have it. Use completions' timestamps to infer.
-        // For non-daily: any completion since the previous reset (before nextAvailableDate) 
-        // counts. We approximate by looking at completions before nextAvailableDate.
-        currentPeriodStart = new Date(0); // All completions count
-      }
-
-      const completions = await db
-        .select({ memberId: taskCompletions.memberId })
-        .from(taskCompletions)
-        .where(
-          and(
-            eq(taskCompletions.taskId, task.id),
-            inArray(taskCompletions.status, ['pending', 'approved'])
-          )
-        );
-
-      const submittedMemberIds = [...new Set(completions.map(c => c.memberId))];
-      const allSubmitted = memberIds.every(id => submittedMemberIds.includes(id));
-
-      if (!allSubmitted) {
-        taskIdsToReset.push(task.id);
-      }
-    }
-
-    if (taskIdsToReset.length > 0) {
-      await db
-        .update(tasks)
-        .set({ nextAvailableDate: null })
-        .where(inArray(tasks.id, taskIdsToReset));
-      log(`✅ Shared task fix: reset nextAvailableDate for ${taskIdsToReset.length} task(s) where not all members had submitted`);
-    } else {
-      log("✅ Shared task nextAvailableDate fix: all shared tasks are consistent");
-    }
-  } catch (error) {
-    console.error("❌ Error fixing shared task nextAvailableDate:", error);
-  }
-}
-
-async function removeGhostMembersFromSharedTasks() {
-  try {
-    const sharedTasks = await db
-      .select({ id: tasks.id, sharedMemberIds: tasks.sharedMemberIds })
-      .from(tasks)
-      .where(eq(tasks.isSharedTask, true));
-
-    let fixedCount = 0;
-
-    for (const task of sharedTasks) {
-      const memberIds = (task.sharedMemberIds as string[]) || [];
-      if (memberIds.length === 0) continue;
-
-      const validMembers = await db
-        .select({ id: familyMembers.id })
-        .from(familyMembers)
-        .where(inArray(familyMembers.id, memberIds));
-
-      const validMemberIds = validMembers.map((m: { id: string }) => m.id);
-      const ghostIds = memberIds.filter((id: string) => !validMemberIds.includes(id));
-
-      if (ghostIds.length > 0) {
-        const cleanedIds = memberIds.filter((id: string) => validMemberIds.includes(id));
-        await db
-          .update(tasks)
-          .set({ sharedMemberIds: cleanedIds })
-          .where(eq(tasks.id, task.id));
-        fixedCount++;
-        log(`✅ Ghost member fix: removed [${ghostIds.join(', ')}] from task ${task.id} (kept ${cleanedIds.length} real member(s))`);
-      }
-    }
-
-    if (fixedCount === 0) {
-      log("✅ Ghost member check: no ghost members found in shared tasks");
-    } else {
-      log(`✅ Ghost member fix: cleaned up ${fixedCount} task(s)`);
-    }
-  } catch (error) {
-    console.error("❌ Error removing ghost members from shared tasks:", error);
-  }
-}
-
 async function ensurePinboardTable() {
   try {
     await db.execute(sql`
@@ -929,12 +806,6 @@ async function ensurePinboardTable() {
 
   // One-time migration for existing testers (starter skin + star redistribution)
   await migrateExistingMembersForTestPhase();
-
-  // Fix corrupted nextAvailableDate for shared tasks where not all members submitted
-  await fixSharedTaskNextAvailableDate();
-
-  // Remove ghost / deleted members from shared task sharedMemberIds
-  await removeGhostMembersFromSharedTasks();
 
   // Start points reset scheduler
   startPointsResetScheduler();
