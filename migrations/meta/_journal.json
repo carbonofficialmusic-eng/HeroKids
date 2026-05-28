@@ -43,6 +43,13 @@
       "when": 1776808439131,
       "tag": "0006_account_link_repair_actor",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780009720489,
+      "tag": "0006_family_category_names",
+      "breakpoints": true
     }
   ]
 }
