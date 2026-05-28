@@ -846,6 +846,48 @@ async function fixSharedTaskNextAvailableDate() {
   }
 }
 
+async function removeGhostMembersFromSharedTasks() {
+  try {
+    const sharedTasks = await db
+      .select({ id: tasks.id, sharedMemberIds: tasks.sharedMemberIds })
+      .from(tasks)
+      .where(eq(tasks.isSharedTask, true));
+
+    let fixedCount = 0;
+
+    for (const task of sharedTasks) {
+      const memberIds = (task.sharedMemberIds as string[]) || [];
+      if (memberIds.length === 0) continue;
+
+      const validMembers = await db
+        .select({ id: familyMembers.id })
+        .from(familyMembers)
+        .where(inArray(familyMembers.id, memberIds));
+
+      const validMemberIds = validMembers.map((m: { id: string }) => m.id);
+      const ghostIds = memberIds.filter((id: string) => !validMemberIds.includes(id));
+
+      if (ghostIds.length > 0) {
+        const cleanedIds = memberIds.filter((id: string) => validMemberIds.includes(id));
+        await db
+          .update(tasks)
+          .set({ sharedMemberIds: cleanedIds })
+          .where(eq(tasks.id, task.id));
+        fixedCount++;
+        log(`✅ Ghost member fix: removed [${ghostIds.join(', ')}] from task ${task.id} (kept ${cleanedIds.length} real member(s))`);
+      }
+    }
+
+    if (fixedCount === 0) {
+      log("✅ Ghost member check: no ghost members found in shared tasks");
+    } else {
+      log(`✅ Ghost member fix: cleaned up ${fixedCount} task(s)`);
+    }
+  } catch (error) {
+    console.error("❌ Error removing ghost members from shared tasks:", error);
+  }
+}
+
 async function ensurePinboardTable() {
   try {
     await db.execute(sql`
@@ -890,6 +932,9 @@ async function ensurePinboardTable() {
 
   // Fix corrupted nextAvailableDate for shared tasks where not all members submitted
   await fixSharedTaskNextAvailableDate();
+
+  // Remove ghost / deleted members from shared task sharedMemberIds
+  await removeGhostMembersFromSharedTasks();
 
   // Start points reset scheduler
   startPointsResetScheduler();

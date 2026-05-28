@@ -1915,8 +1915,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   })
                 );
                 
-                // allApproved: Only true when ALL members have APPROVED status (not pending)
-                const allApproved = sharedMemberCompletions.filter(m => m?.hasCompleted).length === task.sharedMemberIds.length;
+                // allApproved: Only true when ALL *resolved* members have APPROVED status.
+                // Use resolved count (not raw sharedMemberIds.length) to handle ghost / deleted members.
+                const resolvedMemberCount = sharedMemberCompletions.filter(Boolean).length;
+                const allApproved = resolvedMemberCount > 0 &&
+                  sharedMemberCompletions.filter(m => m?.hasCompleted).length === resolvedMemberCount;
                 
                 // Check if THIS parent is assigned and has already submitted
                 const isThisParentAssigned = task.sharedMemberIds.includes(member.id);
