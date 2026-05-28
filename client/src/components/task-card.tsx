@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Moon } from "lucide-react";
+import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Moon, Info } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { Task, FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { motion } from "framer-motion";
@@ -140,6 +141,7 @@ export function TaskCard({
 
   // ── Compact (grid) rendering ──────────────────────────────────────────────
   if (compact) {
+    // Date label shown directly on the compact card
     const compactDateText = (() => {
       if (isUnavailable && getNextAvailableText()) return { text: getNextAvailableText()!, color: "text-muted-foreground" };
       if (isWeekendUnavailable) return { text: t('tasks.weekendUnavailable'), color: "text-muted-foreground" };
@@ -158,6 +160,23 @@ export function TaskCard({
       return null;
     })();
 
+    // Recurrence label for the popover
+    const recurrenceLabel = (() => {
+      const r = task.recurrence;
+      if (r === "none") return t('tasks.recurrenceNone', { defaultValue: 'One-time' });
+      if (r === "daily") return t('tasks.recurrenceDaily', { defaultValue: 'Daily' });
+      if (r === "weekdays") return t('tasks.recurrenceWeekdays', { defaultValue: 'Mon–Fri' });
+      if (r === "weekly") return t('tasks.recurrenceWeekly', { defaultValue: 'Weekly' });
+      if (r === "monthly") return t('tasks.recurrenceMonthly', { defaultValue: 'Monthly' });
+      if (r === "yearly") return t('tasks.recurrenceYearly', { defaultValue: 'Yearly' });
+      return r;
+    })();
+
+    // Assignee display name(s) for the popover
+    const assigneeLabel = assignedTo?.displayName
+      || assignedMemberNames
+      || null;
+
     return (
       <motion.div
         className="min-w-0 w-full"
@@ -173,7 +192,7 @@ export function TaskCard({
           data-testid={`card-task-${task.id}`}
           onClick={() => onClick?.(task)}
         >
-          <div className="flex items-start gap-2 flex-1">
+          <div className="flex items-start gap-1.5 flex-1">
             {/* Compact emoji */}
             <motion.div
               className="text-xl flex-shrink-0 leading-none mt-0.5"
@@ -184,7 +203,7 @@ export function TaskCard({
               {task.iconEmoji}
             </motion.div>
 
-            {/* Title + date */}
+            {/* Title + date — only primary info directly visible */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1">
                 <p
@@ -204,12 +223,41 @@ export function TaskCard({
                   {compactDateText.text}
                 </p>
               )}
-              {/* Points badge */}
-              <div className="flex items-center gap-1 mt-0.5">
-                <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400 shrink-0" />
-                <span className="text-xs text-muted-foreground" data-testid={`badge-points-${task.id}`}>{task.points}</span>
-              </div>
             </div>
+
+            {/* Info popover — secondary details (points, assignee, recurrence) */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="flex-shrink-0 h-6 w-6 text-muted-foreground"
+                  onClick={(e) => e.stopPropagation()}
+                  data-testid={`button-info-task-${task.id}`}
+                >
+                  <Info className="h-3 w-3" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-44 p-2 text-xs space-y-1.5" side="top" align="end">
+                {/* Points */}
+                <div className="flex items-center gap-1.5">
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 shrink-0" />
+                  <span data-testid={`badge-points-${task.id}`}>{task.points} {t('tasks.points', { defaultValue: 'pts' })}</span>
+                </div>
+                {/* Recurrence */}
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Calendar className="h-3 w-3 shrink-0" />
+                  <span>{recurrenceLabel}</span>
+                </div>
+                {/* Assignee */}
+                {assigneeLabel && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Users className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{assigneeLabel}</span>
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
 
             {/* Complete button */}
             {onComplete && (
@@ -219,12 +267,12 @@ export function TaskCard({
                     <Button
                       size="icon"
                       variant="outline"
-                      className="flex-shrink-0 opacity-50 cursor-not-allowed"
+                      className="flex-shrink-0 h-7 w-7 opacity-50 cursor-not-allowed"
                       onClick={(e) => e.stopPropagation()}
                       disabled
                       data-testid={`button-complete-task-${task.id}`}
                     >
-                      <Lock className="h-4 w-4" />
+                      <Lock className="h-3 w-3" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -237,12 +285,12 @@ export function TaskCard({
                     <Button
                       size="icon"
                       variant="outline"
-                      className="flex-shrink-0 opacity-50 cursor-not-allowed"
+                      className="flex-shrink-0 h-7 w-7 opacity-50 cursor-not-allowed"
                       onClick={(e) => e.stopPropagation()}
                       disabled
                       data-testid={`button-complete-task-${task.id}`}
                     >
-                      <Lock className="h-4 w-4" />
+                      <Lock className="h-3 w-3" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -253,7 +301,7 @@ export function TaskCard({
                 <Button
                   size="icon"
                   variant={isGrayedOut ? "outline" : "default"}
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 h-7 w-7"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!isGrayedOut) onComplete(task.id);
@@ -261,7 +309,7 @@ export function TaskCard({
                   disabled={isCompleting || isGrayedOut}
                   data-testid={`button-complete-task-${task.id}`}
                 >
-                  <CheckCircle className="h-4 w-4" />
+                  <CheckCircle className="h-3 w-3" />
                 </Button>
               )
             )}
