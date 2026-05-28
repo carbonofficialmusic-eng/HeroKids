@@ -297,8 +297,10 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
         whileTap={{ scale: 0.98 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        <Card className={`p-4 transition-all bg-card/80 backdrop-blur-md border-2 rounded-2xl ${
-          isReady ? "ring-4 ring-primary shadow-2xl border-primary" : "border-border"
+        <Card className={`p-4 transition-all backdrop-blur-md border-2 rounded-2xl ${
+          isReady 
+            ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-4 ring-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55" 
+            : "bg-card/80 border-border shadow-md shadow-black/15"
         }`}>
           <div className="flex items-center gap-4">
             <div className={`flex-shrink-0 p-3 rounded-2xl ${
@@ -343,7 +345,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
                 size="default"
                 onClick={handleRequest}
                 disabled={!isReady || redeemMutation.isPending}
-                className="h-11 px-5 text-base font-bold rounded-2xl"
+                className={`h-11 px-5 text-base font-bold rounded-2xl ${isReady ? "shadow-lg shadow-primary/30" : "opacity-55"}`}
                 data-testid={`button-request-reward-${reward.id}`}
               >
                 {redeemMutation.isPending ? (
@@ -628,36 +630,49 @@ function TaskCard({
   return (
     <motion.div
       whileHover={{ scale: isActionable ? 1.02 : 1 }}
-      whileTap={{ scale: isActionable ? 0.98 : 1 }}
+      whileTap={{ scale: isActionable ? 0.97 : 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 20 }}
       className="min-w-0"
     >
       <Card
-        className={`p-4 transition-all backdrop-blur-md border-2 rounded-2xl min-w-0 w-full ${
-          isActionable && !isRejected ? "bg-card/80 cursor-pointer border-border hover:border-primary" : 
-          isActionable && isRejected ? "bg-card/80 cursor-pointer border-blue-500 hover:border-blue-600" :
-          showAsApproved ? "bg-transparent border-green-500" :
-          showAsSubmitted ? "bg-transparent border-border" :
-          showAsPending ? "bg-transparent border-amber-500" :
-          hasNoSlots ? "bg-transparent border-amber-500" :
-          isSharedTaskNotAssigned ? "bg-transparent border-border" :
-          allSharedMembersCompleted ? "bg-transparent border-green-500" :
-          dueDateInfo.notYet ? "bg-transparent border-border" :
-          dueDateInfo.expired ? "bg-transparent border-destructive" :
-          isWeekendUnavailable ? "bg-transparent border-border" :
-          "bg-transparent border-border"
+        className={`p-5 transition-all backdrop-blur-md border-2 rounded-2xl min-w-0 w-full ${
+          isActionable && !isRejected 
+            ? "bg-white/10 cursor-pointer border-white/20 shadow-lg shadow-black/20 hover:border-primary/60 hover:bg-white/15 hover:shadow-xl" 
+            : isActionable && isRejected 
+            ? "bg-blue-500/10 cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15 hover:bg-blue-500/15 hover:border-blue-400/60" 
+            : showAsApproved 
+            ? "bg-green-500/10 border-green-500/45 shadow-md shadow-green-900/15" 
+            : showAsSubmitted 
+            ? "bg-white/5 border-white/15" 
+            : showAsPending 
+            ? "bg-amber-500/10 border-amber-400/45 shadow-md shadow-amber-900/15" 
+            : hasNoSlots 
+            ? "bg-amber-500/8 border-amber-400/25" 
+            : isSharedTaskNotAssigned 
+            ? "bg-white/5 border-white/15" 
+            : allSharedMembersCompleted 
+            ? "bg-green-500/10 border-green-500/45 shadow-md shadow-green-900/15" 
+            : dueDateInfo.notYet 
+            ? "bg-white/5 border-white/15" 
+            : dueDateInfo.expired 
+            ? "bg-destructive/10 border-destructive/40" 
+            : isWeekendUnavailable 
+            ? "bg-white/5 border-white/15" 
+            : "bg-white/5 border-white/15"
         }`}
         data-testid={`task-card-${task.id}`}
         onClick={isActionable ? handleComplete : undefined}
       >
         <div className="text-center space-y-3">
-          <div className={`flex justify-center p-3 rounded-2xl mx-auto w-fit ${
-            showAsApproved ? "bg-green-500/20" : 
-            showAsSubmitted ? "bg-muted/40" :
-            showAsPending ? "bg-amber-500/20" :
+          <div className={`flex justify-center p-4 rounded-2xl mx-auto w-fit shadow-inner ${
+            showAsApproved ? "bg-green-500/25" : 
+            showAsSubmitted ? "bg-white/10" :
+            showAsPending ? "bg-amber-500/25" :
             isRejected ? "bg-blue-500/20" :
-            hasNoSlots ? "bg-amber-500/20" :
-            allSharedMembersCompleted ? "bg-green-500/20" :
-            "bg-primary/10"
+            hasNoSlots ? "bg-amber-500/15" :
+            allSharedMembersCompleted ? "bg-green-500/25" :
+            isActionable ? "bg-gradient-to-br from-primary/25 to-primary/15 shadow-primary/15" :
+            "bg-white/10"
           }`}>
             {completeMutation.isPending ? (
               <Loader2 className="h-12 w-12 text-primary animate-spin" />
@@ -843,34 +858,41 @@ function TaskCard({
           })()}
 
           {statusMessage ? (
-            <div className="space-y-1 w-full">
+            <div className="space-y-1.5 w-full">
               <div 
-                className={`text-sm px-3 py-1.5 rounded-xl text-center whitespace-normal break-words bg-secondary ${statusColor}`}
+                className={`text-sm px-4 py-2 rounded-full text-center font-semibold border ${
+                  showAsSubmitted ? 'bg-white/8 border-white/15 text-muted-foreground' :
+                  showAsPending ? 'bg-amber-500/15 border-amber-400/30 text-amber-600 dark:text-amber-400' :
+                  showAsApproved || allSharedMembersCompleted ? 'bg-green-500/15 border-green-400/30 text-green-600 dark:text-green-400' :
+                  isRejected ? 'bg-blue-500/15 border-blue-400/30 text-blue-600 dark:text-blue-400' :
+                  hasNoSlots ? 'bg-amber-500/15 border-amber-400/30 text-amber-600 dark:text-amber-400' :
+                  dueDateInfo.expired ? 'bg-destructive/15 border-destructive/30 text-destructive' :
+                  'bg-white/8 border-white/15 text-muted-foreground'
+                }`}
               >
                 {statusMessage}
               </div>
-              <p className="text-sm font-bold text-muted-foreground">
-                {task.points} {t("kidDashboard.points")}
-              </p>
+              <div className="flex items-center justify-center gap-1.5 opacity-55">
+                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                <span className="text-sm font-bold text-muted-foreground">{task.points}</span>
+              </div>
             </div>
           ) : (
-            <Badge 
-              variant="default" 
-              className="text-base px-3 py-1 font-bold rounded-xl"
-            >
-              {t("kidDashboard.plusPoints", { count: task.points })}
-            </Badge>
+            <div className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500/90 to-yellow-400/90 text-white px-4 py-2 rounded-full font-bold text-base shadow-md shadow-amber-900/30">
+              <Star className="h-4 w-4 fill-white text-white" />
+              <span>+{task.points}</span>
+            </div>
           )}
           
           {hasNoSlots && task.remainingSlots === 0 && (
-            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+            <div className="flex items-center justify-center gap-1.5 text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 px-3 py-1 rounded-full border border-amber-400/20 font-medium">
               {t("kidDashboard.noSlotsLeft")}
-            </p>
+            </div>
           )}
 
           {/* Available-again time chip for locked recurring tasks */}
           {availableAgainDays !== null && (
-            <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+            <div className="flex items-center justify-center gap-1.5 bg-white/8 text-muted-foreground px-3 py-1 rounded-full border border-white/10 text-xs">
               <Clock className="h-3 w-3 shrink-0" />
               <span>
                 {availableAgainDays === 0
@@ -1885,11 +1907,11 @@ export default function KidDashboard() {
                   <MessageSquare className="h-5 w-5" />
                 </button>
               </div>
-              <div className="bg-card/80 p-5 rounded-2xl border-2 border-primary/30 min-w-[260px]">
-                <p className="text-sm text-muted-foreground mb-3 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
+              <div className="bg-black/30 backdrop-blur-xl p-5 rounded-2xl border border-white/20 shadow-xl shadow-black/30 min-w-[260px]">
+                <p className="text-sm text-white/60 mb-3 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
                 <div className="space-y-3">
-                  <div className="text-center pb-3 border-b border-border">
-                    <p className="text-xs text-muted-foreground mb-1">{t("kidDashboard.totalEarned")}</p>
+                  <div className="text-center pb-3 border-b border-white/15">
+                    <p className="text-xs text-white/55 mb-1">{t("kidDashboard.totalEarned")}</p>
                     <motion.div
                       className="text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
                       animate={{ scale: [1, 1.05, 1] }}
@@ -1902,10 +1924,10 @@ export default function KidDashboard() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Coins className="h-4 w-4 text-green-500" />
-                      <span className="font-semibold text-sm">{t("kidDashboard.available")}</span>
+                      <Coins className="h-4 w-4 text-green-400" />
+                      <span className="font-semibold text-sm text-white/80">{t("kidDashboard.available")}</span>
                     </div>
-                    <span className="text-xl font-bold text-green-600 dark:text-green-400" data-testid="text-total-points">
+                    <span className="text-xl font-bold text-green-400" data-testid="text-total-points">
                       {member.totalPoints.toLocaleString()}
                     </span>
                   </div>
@@ -1934,7 +1956,7 @@ export default function KidDashboard() {
                 <Sparkles className="h-5 w-5 text-purple-500 animate-pulse" />
               </div>
               {specialRewards.length > 2 && (
-                <Button variant="ghost" size="sm" asChild data-testid="button-view-all-achievements">
+                <Button variant="ghost" size="sm" asChild className="text-white/90 bg-white/10 border border-white/15 rounded-full px-4" data-testid="button-view-all-achievements">
                   <Link href="/my-achievements">
                     {t("kidDashboard.viewAll")}
                   </Link>
@@ -2109,7 +2131,7 @@ export default function KidDashboard() {
               <Sparkles className="h-6 w-6 text-amber-500 animate-pulse" />
             </div>
             {activeRewards.length > 3 && (
-              <Button variant="ghost" size="sm" asChild data-testid="button-view-all-rewards-board">
+              <Button variant="ghost" size="sm" asChild className="text-white/90 bg-white/10 border border-white/15 rounded-full px-4" data-testid="button-view-all-rewards-board">
                 <Link href="/rewards-board">
                   {t("kidDashboard.viewAll")}
                 </Link>
@@ -2151,7 +2173,7 @@ export default function KidDashboard() {
                   {t("kidDashboard.myRewards")}
                 </h2>
               </div>
-              <Button variant="ghost" size="sm" asChild data-testid="button-view-all-rewards">
+              <Button variant="ghost" size="sm" asChild className="text-white/90 bg-white/10 border border-white/15 rounded-full px-4" data-testid="button-view-all-rewards">
                 <Link href="/my-rewards">
                   {t("kidDashboard.viewAll")}
                 </Link>
@@ -2298,7 +2320,7 @@ export default function KidDashboard() {
             </div>
             
             {/* Kid-friendly filter tabs */}
-            <div className="flex bg-muted rounded-lg p-1 gap-1 flex-wrap">
+            <div className="flex bg-black/25 backdrop-blur-md rounded-xl p-1 gap-0.5 flex-wrap border border-white/10">
               <Button
                 variant={kidTaskFilter === "daily" ? "default" : "ghost"}
                 size="sm"
@@ -2382,7 +2404,7 @@ export default function KidDashboard() {
                 >
                   <div>
                     <CollapsibleTrigger asChild>
-                      <div className="px-1 py-2 flex items-center justify-between cursor-pointer transition-colors">
+                      <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-white/8 border border-white/10 mb-1 hover-elevate">
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{getCategoryEmoji(category)}</span>
                           <span className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
