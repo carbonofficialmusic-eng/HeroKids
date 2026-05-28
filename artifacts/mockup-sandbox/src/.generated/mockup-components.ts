@@ -6,5 +6,6 @@ export const modules: ModuleMap = {
   "./components/mockups/herokids-landing/WarmEnergetic.tsx": () => import("../components/mockups/herokids-landing/WarmEnergetic.tsx"),
   "./components/mockups/kid-task-cards/Accessibility.tsx": () => import("../components/mockups/kid-task-cards/Accessibility.tsx"),
   "./components/mockups/kid-task-cards/InfoHierarchy.tsx": () => import("../components/mockups/kid-task-cards/InfoHierarchy.tsx"),
-  "./components/mockups/kid-task-cards/InteractionAffordance.tsx": () => import("../components/mockups/kid-task-cards/InteractionAffordance.tsx")
+  "./components/mockups/kid-task-cards/InteractionAffordance.tsx": () => import("../components/mockups/kid-task-cards/InteractionAffordance.tsx"),
+  "./components/mockups/kid-task-cards/LiveDesign.tsx": () => import("../components/mockups/kid-task-cards/LiveDesign.tsx")
 };
