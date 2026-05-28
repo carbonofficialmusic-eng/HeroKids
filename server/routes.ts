@@ -1632,6 +1632,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const allTasks = await storage.getTasksByFamily(member.familyName);
       
+      console.log(`[TASK-DEBUG-ROLE] member="${member.displayName}" id="${member.id}" role="${member.role}" actingAsMemberId="${req.session?.actingAsMemberId}"`);
+
       // For children: filter and enhance tasks based on Multi-Completion mode
       if (member.role === "child") {
         const tasksWithMeta = await Promise.allSettled(
