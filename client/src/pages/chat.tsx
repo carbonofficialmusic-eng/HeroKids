@@ -28,6 +28,7 @@ export default function Chat() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [messageText, setMessageText] = useState("");
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -97,6 +98,30 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Push the chat above the on-screen keyboard using the visualViewport API.
+  // Works in iOS WKWebView where the keyboard overlays fixed-position layouts.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const onViewportChange = () => {
+      // Keyboard height = layout viewport bottom minus visual viewport bottom
+      const offset = Math.max(0, window.innerHeight - vv.offsetTop - vv.height);
+      setKeyboardOffset(offset);
+      if (offset > 50) {
+        // Keyboard just opened — make sure the latest message is visible
+        setTimeout(scrollToBottom, 80);
+      }
+    };
+
+    vv.addEventListener("resize", onViewportChange);
+    vv.addEventListener("scroll", onViewportChange);
+    return () => {
+      vv.removeEventListener("resize", onViewportChange);
+      vv.removeEventListener("scroll", onViewportChange);
+    };
+  }, []);
+
   // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
@@ -119,7 +144,12 @@ export default function Chat() {
     setMessageText((prev) => prev + emoticon + " ");
   };
 
-  const safeTopStyle: React.CSSProperties = { position: 'fixed', inset: 0, paddingTop: 'max(1rem, env(safe-area-inset-top))' };
+  const safeTopStyle: React.CSSProperties = {
+    position: 'fixed',
+    inset: 0,
+    bottom: keyboardOffset > 0 ? `${keyboardOffset}px` : 0,
+    paddingTop: 'max(1rem, env(safe-area-inset-top))',
+  };
   const backBtn = (
     <Link href={dashboardUrl}>
       <Button
@@ -205,7 +235,7 @@ export default function Chat() {
   return (
     <div
       className="flex flex-col"
-      style={{ ...safeTopStyle, paddingBottom: 'env(safe-area-inset-bottom)' }}
+      style={{ ...safeTopStyle, paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom)' }}
       data-testid="page-chat"
     >
       <div className="w-full lg:max-w-3xl flex flex-col flex-1 min-h-0 mx-auto px-4 pb-4">
