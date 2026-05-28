@@ -605,15 +605,15 @@ function TaskCard({
         className={`p-4 transition-all backdrop-blur-md border-2 rounded-2xl min-w-0 w-full ${
           isActionable && !isRejected ? "bg-card/80 cursor-pointer border-border hover:border-primary" : 
           isActionable && isRejected ? "bg-card/80 cursor-pointer border-blue-500 hover:border-blue-600" :
-          isApproved ? "bg-card/5 border-green-500" :
-          isPending ? "bg-card/20 border-amber-500" :
-          hasNoSlots ? "bg-card/20 border-amber-500" :
-          isSharedTaskNotAssigned ? "bg-card/20 border-muted" :
-          allSharedMembersCompleted ? "bg-card/5 border-green-500" :
-          dueDateInfo.notYet ? "bg-card/20 border-muted" :
-          dueDateInfo.expired ? "bg-card/20 border-destructive" :
-          isWeekendUnavailable ? "bg-card/20 border-muted" :
-          "bg-card/20 border-muted"
+          isApproved ? "bg-transparent border-green-500" :
+          isPending ? "bg-transparent border-amber-500" :
+          hasNoSlots ? "bg-transparent border-amber-500" :
+          isSharedTaskNotAssigned ? "bg-transparent border-border" :
+          allSharedMembersCompleted ? "bg-transparent border-green-500" :
+          dueDateInfo.notYet ? "bg-transparent border-border" :
+          dueDateInfo.expired ? "bg-transparent border-destructive" :
+          isWeekendUnavailable ? "bg-transparent border-border" :
+          "bg-transparent border-border"
         }`}
         data-testid={`task-card-${task.id}`}
         onClick={isActionable ? handleComplete : undefined}
