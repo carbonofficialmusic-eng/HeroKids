@@ -1714,6 +1714,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const currentMemberCompletion = sharedMemberCompletions.find(m => m?.memberId === member.id);
                 const thisMemberHasSubmitted = currentMemberCompletion?.hasSubmitted || false;
                 
+                console.log(`[SHARED-TASK-DEBUG] task=${task.id} member=${member.id}(${member.displayName}) status=${currentMemberCompletion?.status} hasSubmitted=${thisMemberHasSubmitted} allCompletions=${JSON.stringify(sharedMemberCompletions.map(m => ({id:m?.memberId?.slice(0,8), status:m?.status})))}`);
+                
                 return {
                   ...task,
                   // If this member hasn't submitted yet, clear nextAvailableDate so the frontend
