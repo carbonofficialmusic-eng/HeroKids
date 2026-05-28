@@ -1772,11 +1772,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 };
               }
               
-              // Safety fallback: if this is a shared task with multiple members that somehow
-              // bypassed the shared-task path above, use the member's OWN status — not the
-              // family-wide status — so one member's pending/approved state never bleeds into another member's card.
-              if (task.isSharedTask && Array.isArray(task.sharedMemberIds) && task.sharedMemberIds.length > 1
-                  && task.sharedMemberIds.includes(member.id)) {
+              // Safety fallback: if this is a shared task that somehow bypassed all
+              // dedicated shared/assignment paths above, ALWAYS use the member's OWN status —
+              // never the family-wide status — so one member's pending/approved state never
+              // bleeds into another member's card. This catches tasks with isSharedTask=true
+              // but null/empty sharedMemberIds and no taskAssignments entries.
+              if (task.isSharedTask) {
                 const ownHasSubmitted = completionStatus === "pending" || completionStatus === "approved";
                 return {
                   ...task,
@@ -2476,11 +2477,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Get updated task to check completion count after the completion was processed
           const updatedTask = await storage.getTask(taskId);
           
-          // For multi-completion tasks, only set nextAvailableDate if max completions reached
-          // Otherwise, keep the task available for other children to complete
-          const shouldSetNextAvailableDate = 
-            !updatedTask?.maxCompletions || 
-            (updatedTask.completionCount >= updatedTask.maxCompletions);
+          // For multi-completion tasks: only set nextAvailableDate if max completions reached.
+          // For shared tasks: only set when ALL required members have submitted (pending/approved),
+          // so the first member's submission doesn't lock the task for others.
+          // For single tasks: always set immediately.
+          let shouldSetNextAvailableDate: boolean;
+          if (updatedTask?.maxCompletions) {
+            shouldSetNextAvailableDate = (updatedTask.completionCount >= updatedTask.maxCompletions);
+          } else if (task.isSharedTask) {
+            const sharedTargetIds = (task.sharedMemberIds && task.sharedMemberIds.length > 0)
+              ? task.sharedMemberIds
+              : await storage.getTaskAssignmentsByTask(taskId);
+            if (sharedTargetIds.length > 0) {
+              const allCurrentCompletions = await storage.getTaskCompletionsByTask(taskId);
+              const submittedMemberIds = allCurrentCompletions
+                .filter((c: any) => c.status === "pending" || c.status === "approved")
+                .map((c: any) => c.memberId);
+              shouldSetNextAvailableDate = sharedTargetIds.every((id: string) => submittedMemberIds.includes(id));
+            } else {
+              shouldSetNextAvailableDate = true;
+            }
+          } else {
+            shouldSetNextAvailableDate = true;
+          }
           
           if (shouldSetNextAvailableDate) {
             // Calculate next available date based on recurrence
@@ -2598,11 +2617,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           // If not all approved, task stays active (greyed out for submitted members)
         } else {
-          // Single assignment or no assignments - mark as completed immediately (unless requires approval)
-          if (task.recurrence === "none" && !task.requiresApproval) {
+          // Single assignment or no assignments — only auto-complete non-shared tasks.
+          // isSharedTask=true means other members may still need to submit; don't complete prematurely.
+          if (task.recurrence === "none" && !task.requiresApproval && !task.isSharedTask) {
             await storage.updateTaskStatus(taskId, "completed");
           }
-          // If requiresApproval, task status will be set to "completed" in _approveCompletionInternal
+          // If requiresApproval (non-shared), task status is set to "completed" in _approveCompletionInternal
+          // If isSharedTask=true, completion is handled in the approve route or sharedMemberIds path above
         }
       }
       
@@ -2743,6 +2764,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mark completion as approved - this also awards points via _approveCompletionInternal
       // DO NOT add points manually here as it would cause double counting
       await storage.approveTaskCompletion(completionId, member.id);
+      
+      // For shared tasks: _approveCompletionInternal deliberately doesn't auto-complete
+      // isSharedTask=true tasks (to avoid premature completion when first member is approved).
+      // Check here whether ALL required members now have approved completions, and if so,
+      // finalize the task as "completed".
+      if (task?.isSharedTask && task.recurrence === "none") {
+        const sharedTargetIds: string[] = (task.sharedMemberIds && task.sharedMemberIds.length > 0)
+          ? task.sharedMemberIds
+          : await storage.getTaskAssignmentsByTask(task.id);
+        if (sharedTargetIds.length > 0) {
+          const latestCompletions = await storage.getTaskCompletionsByTask(task.id);
+          const approvedIds = latestCompletions
+            .filter((c: any) => c.status === "approved")
+            .map((c: any) => c.memberId);
+          const allApproved = sharedTargetIds.every((id: string) => approvedIds.includes(id));
+          if (allApproved) {
+            await storage.updateTaskStatus(task.id, "completed");
+          }
+        }
+      }
       
       // Delete proof photo now that the decision is made - it's no longer needed
       if (completion.proofPhotoUrl) {

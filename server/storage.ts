@@ -1717,13 +1717,18 @@ export class DatabaseStorage implements IStorage {
           }
           // If not all members approved, task stays "active"
         } else {
-          // Single or no assignment: Set to completed immediately
-          await tx.update(tasks)
-            .set({
-              status: 'completed',
-              updatedAt: new Date()
-            })
-            .where(eq(tasks.id, task.id));
+          // Single or no assignment — only complete immediately when:
+          // 1. Not a shared task (isSharedTask=true means other members may still need to submit)
+          // 2. The shared-task completion path (approve route / complete route) handles those cases
+          if (!task.isSharedTask) {
+            await tx.update(tasks)
+              .set({
+                status: 'completed',
+                updatedAt: new Date()
+              })
+              .where(eq(tasks.id, task.id));
+          }
+          // If isSharedTask=true, leave status as "active" — other members haven't submitted yet
         }
       }
     }
