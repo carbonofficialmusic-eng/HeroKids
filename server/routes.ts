@@ -1762,11 +1762,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const currentMemberCompletion = validCompletions.find(m => m?.memberId === member.id);
                 const thisMemberHasSubmitted = currentMemberCompletion?.hasSubmitted || false;
                 
+                // Yellow border logic: show only when ALL assigned members have submitted.
+                // Individual submission is already shown via the avatar badges.
+                // If this member was rejected → show rejected so they can resubmit.
+                const currentMemberStatus = currentMemberCompletion?.status || null;
+                const allSubmitted = validCompletions.length === assignedMemberIds.length &&
+                  validCompletions.every(m => m?.hasSubmitted);
+                
+                let cardCompletionStatus: "pending" | "approved" | "rejected" | null;
+                if (currentMemberStatus === "rejected") {
+                  cardCompletionStatus = "rejected"; // This member rejected — show so they can resubmit
+                } else if (allCompleted) {
+                  cardCompletionStatus = "approved"; // All approved — green
+                } else if (allSubmitted) {
+                  cardCompletionStatus = "pending"; // All submitted — yellow
+                } else {
+                  cardCompletionStatus = null; // Partial — no border color yet
+                }
+                
                 return {
                   ...task,
                   remainingSlots: null,
                   memberHasCompleted: thisMemberHasSubmitted, // Grey out for THIS member if they submitted
-                  memberCompletionStatus: currentMemberCompletion?.status || null,
+                  memberCompletionStatus: cardCompletionStatus,
                   completions: [],
                   assignedMemberCompletions: validCompletions, // Include for UI to show who completed
                 };
