@@ -775,7 +775,10 @@
     "skinCardCostInfo": "Niedrigere Kosten = mehr Motivation, aber Karten sind schneller aufgebraucht. Höhere Kosten = Karten halten länger, weniger sofortige Belohnungen.",
     "moreFun": "Mehr Spaß",
     "longerLasting": "Länger spannend",
-    "points": "Punkte"
+    "points": "Punkte",
+    "categoryNamesTitle": "Kategorienamen anpassen",
+    "categoryNamesDesc": "Gib eigene Namen für die Aufgabenkategorien ein. Lasse ein Feld leer, um den Standardnamen beizubehalten.",
+    "categoryNamesSaved": "Kategorienamen gespeichert"
   },
   "subscription": {
     "free": "Free",

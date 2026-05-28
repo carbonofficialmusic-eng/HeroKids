@@ -838,6 +838,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     skinCardCost: z.number().int().min(40).max(80).refine(val => val % 5 === 0, {
       message: "skinCardCost must be a multiple of 5"
     }).optional(),
+    categoryNames: z.object({
+      household: z.string().max(40).optional(),
+      school: z.string().max(40).optional(),
+      selfCare: z.string().max(40).optional(),
+      pets: z.string().max(40).optional(),
+      other: z.string().max(40).optional(),
+    }).nullable().optional(),
   }).refine(data => 
     data.showLeaderboard !== undefined || 
     data.singleDeviceMode !== undefined ||
@@ -846,7 +853,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     data.weeklyPrize !== undefined ||
     data.monthlyPrize !== undefined ||
     data.yearlyPrize !== undefined ||
-    data.skinCardCost !== undefined, {
+    data.skinCardCost !== undefined ||
+    data.categoryNames !== undefined, {
     message: "At least one setting must be provided"
   });
 

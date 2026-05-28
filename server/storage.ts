@@ -199,7 +199,7 @@ export interface IStorage {
   createFamily(family: InsertFamily): Promise<Family>;
   updateFamily(familyName: string, updates: Partial<InsertFamily>): Promise<Family>;
   updateFamilyTier(familyName: string, tier: "free" | "family" | "family_plus" | "family_hero"): Promise<void>;
-  updateFamilySettings(familyName: string, settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "timezone" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>): Promise<void>;
+  updateFamilySettings(familyName: string, settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "timezone" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize" | "skinCardCost" | "categoryNames">>): Promise<void>;
   deleteFamily(familyName: string): Promise<void>;
 
   // Family member operations
@@ -490,7 +490,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateFamilySettings(
     familyName: string,
-    settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "timezone" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize">>
+    settings: Partial<Pick<Family, "showLeaderboard" | "singleDeviceMode" | "language" | "timezone" | "weeklyPrize" | "monthlyPrize" | "yearlyPrize" | "skinCardCost" | "categoryNames">>
   ): Promise<void> {
     await db
       .update(families)

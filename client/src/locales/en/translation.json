@@ -752,7 +752,10 @@
     "skinCardCostInfo": "Lower cost = more motivation, but cards run out faster. Higher cost = cards last longer, fewer immediate rewards.",
     "moreFun": "More Fun",
     "longerLasting": "Longer Lasting",
-    "points": "Points"
+    "points": "Points",
+    "categoryNamesTitle": "Customize Category Names",
+    "categoryNamesDesc": "Enter your own names for task categories. Leave a field empty to keep the default name.",
+    "categoryNamesSaved": "Category names saved"
   },
   "subscription": {
     "free": "Free",

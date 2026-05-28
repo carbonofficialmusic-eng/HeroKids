@@ -343,6 +343,7 @@ export default function Dashboard() {
     weeklyPrize?: string | null;
     monthlyPrize?: string | null;
     yearlyPrize?: string | null;
+    categoryNames?: { household?: string; school?: string; selfCare?: string; pets?: string; other?: string } | null;
   }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
@@ -922,6 +923,10 @@ export default function Dashboard() {
   };
 
   const getCategoryLabel = (category: string): string => {
+    const customNames = familyData?.categoryNames;
+    if (customNames && customNames[category as keyof typeof customNames]) {
+      return customNames[category as keyof typeof customNames]!;
+    }
     const labels: Record<string, string> = {
       household: t("dashboard.categoryHousehold"),
       school: t("dashboard.categorySchool"),

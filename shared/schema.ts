@@ -104,6 +104,7 @@ export const families = pgTable("families", {
   lastDailyPeriod: varchar("last_daily_period", { length: 10 }), // Family-local date string "YYYY-MM-DD"
   lastWeeklyPeriod: varchar("last_weekly_period", { length: 10 }), // Family-local ISO week "RRRR-Www"
   lastMonthlyPeriod: varchar("last_monthly_period", { length: 7 }), // Family-local month "YYYY-MM"
+  categoryNames: jsonb("category_names").$type<{ household?: string; school?: string; selfCare?: string; pets?: string; other?: string } | null>(), // Custom category names per family
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

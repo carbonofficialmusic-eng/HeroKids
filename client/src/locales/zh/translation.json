@@ -720,7 +720,10 @@
     "skinCardCostInfo": "积分越低 = 动力越强，但卡片消耗更快。积分越高 = 卡片持续更久，即时奖励较少。",
     "moreFun": "更有趣",
     "longerLasting": "更持久",
-    "points": "积分"
+    "points": "积分",
+    "categoryNamesTitle": "自定义类别名称",
+    "categoryNamesDesc": "为任务类别输入您自己的名称。留空则保留默认名称。",
+    "categoryNamesSaved": "类别名称已保存"
   },
   "subscription": {
     "free": "Free",

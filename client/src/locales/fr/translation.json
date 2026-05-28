@@ -720,7 +720,10 @@
     "skinCardCostInfo": "Coût plus bas = plus de motivation, mais les cartes s'épuisent plus vite. Coût plus élevé = les cartes durent plus longtemps, moins de récompenses immédiates.",
     "moreFun": "Plus de plaisir",
     "longerLasting": "Plus durable",
-    "points": "Points"
+    "points": "Points",
+    "categoryNamesTitle": "Personnaliser les noms de catégories",
+    "categoryNamesDesc": "Entrez vos propres noms pour les catégories de tâches. Laissez un champ vide pour conserver le nom par défaut.",
+    "categoryNamesSaved": "Noms de catégories enregistrés"
   },
   "subscription": {
     "free": "Free",

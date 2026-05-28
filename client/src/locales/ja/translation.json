@@ -720,7 +720,10 @@
     "skinCardCostInfo": "低コスト = モチベーション向上、でもカードが早く終わります。高コスト = カードが長持ち、即時の報酬は少なめ。",
     "moreFun": "楽しさアップ",
     "longerLasting": "長持ち",
-    "points": "ポイント"
+    "points": "ポイント",
+    "categoryNamesTitle": "カテゴリ名をカスタマイズ",
+    "categoryNamesDesc": "タスクカテゴリに独自の名前を入力してください。空白のままにするとデフォルト名が使用されます。",
+    "categoryNamesSaved": "カテゴリ名を保存しました"
   },
   "subscription": {
     "free": "Free",

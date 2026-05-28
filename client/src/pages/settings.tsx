@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX } from "lucide-react";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +55,7 @@ export default function Settings() {
   const [memberForDeviceLink, setMemberForDeviceLink] = useState<FamilyMember | null>(null);
   const [deviceLinkDialogOpen, setDeviceLinkDialogOpen] = useState(false);
   const [localSkinCardCost, setLocalSkinCardCost] = useState<number | null>(null);
+  const [localCategoryNames, setLocalCategoryNames] = useState<{ household: string; school: string; selfCare: string; pets: string; other: string }>({ household: "", school: "", selfCare: "", pets: "", other: "" });
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -94,6 +95,7 @@ export default function Settings() {
       weeklyPrize?: string | null;
       monthlyPrize?: string | null;
       skinCardCost?: number;
+      categoryNames?: { household?: string; school?: string; selfCare?: string; pets?: string; other?: string } | null;
     }) => {
       return await apiRequest("PATCH", "/api/families/settings", settings);
     },
@@ -317,6 +319,13 @@ export default function Settings() {
     if (familyData) {
       setWeeklyPrize(familyData.weeklyPrize || "");
       setMonthlyPrize(familyData.monthlyPrize || "");
+      setLocalCategoryNames({
+        household: familyData.categoryNames?.household || "",
+        school: familyData.categoryNames?.school || "",
+        selfCare: familyData.categoryNames?.selfCare || "",
+        pets: familyData.categoryNames?.pets || "",
+        other: familyData.categoryNames?.other || "",
+      });
     }
   }, [familyData]);
 
@@ -390,6 +399,20 @@ export default function Settings() {
     updateSettingsMutation.mutate({
       weeklyPrize: weeklyPrize.trim() || null,
       monthlyPrize: monthlyPrize.trim() || null,
+    });
+  };
+
+  const handleSaveCategoryNames = () => {
+    const names: { household?: string; school?: string; selfCare?: string; pets?: string; other?: string } = {};
+    if (localCategoryNames.household.trim()) names.household = localCategoryNames.household.trim();
+    if (localCategoryNames.school.trim()) names.school = localCategoryNames.school.trim();
+    if (localCategoryNames.selfCare.trim()) names.selfCare = localCategoryNames.selfCare.trim();
+    if (localCategoryNames.pets.trim()) names.pets = localCategoryNames.pets.trim();
+    if (localCategoryNames.other.trim()) names.other = localCategoryNames.other.trim();
+    updateSettingsMutation.mutate({ categoryNames: Object.keys(names).length > 0 ? names : null }, {
+      onSuccess: () => {
+        toast({ title: t('settings.categoryNamesSaved') });
+      },
     });
   };
 
@@ -895,6 +918,50 @@ export default function Settings() {
               <p className="text-sm text-muted-foreground">
                 {t('settings.skinCardCostInfo')}
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Category Names Settings */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Tag className="h-5 w-5 text-primary" />
+                <CardTitle>{t('settings.categoryNamesTitle')}</CardTitle>
+              </div>
+              <CardDescription>
+                {t('settings.categoryNamesDesc')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {(
+                [
+                  { key: "household", label: t("dashboard.categoryHousehold") },
+                  { key: "school", label: t("dashboard.categorySchool") },
+                  { key: "selfCare", label: t("dashboard.categorySelfCare") },
+                  { key: "pets", label: t("dashboard.categoryPets") },
+                  { key: "other", label: t("dashboard.categoryOther") },
+                ] as const
+              ).map(({ key, label }) => (
+                <div key={key} className="flex items-center gap-3">
+                  <Label className="w-40 shrink-0 text-sm text-muted-foreground">{label}</Label>
+                  <Input
+                    value={localCategoryNames[key]}
+                    onChange={(e) =>
+                      setLocalCategoryNames((prev) => ({ ...prev, [key]: e.target.value }))
+                    }
+                    placeholder={label}
+                    maxLength={40}
+                    data-testid={`input-category-name-${key}`}
+                  />
+                </div>
+              ))}
+              <Button
+                onClick={handleSaveCategoryNames}
+                disabled={updateSettingsMutation.isPending}
+                data-testid="button-save-category-names"
+              >
+                {t('common.save')}
+              </Button>
             </CardContent>
           </Card>
 

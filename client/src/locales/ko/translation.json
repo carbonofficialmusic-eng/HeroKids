@@ -724,7 +724,10 @@
     "skinCardCostInfo": "낮은 비용 = 동기부여 상승, 하지만 카드가 빨리 소진됩니다. 높은 비용 = 카드가 오래 지속, 즉각적인 보상은 적습니다.",
     "moreFun": "더 재미있게",
     "longerLasting": "더 오래 지속",
-    "points": "포인트"
+    "points": "포인트",
+    "categoryNamesTitle": "카테고리 이름 변경",
+    "categoryNamesDesc": "작업 카테고리에 고유한 이름을 입력하세요. 비워두면 기본 이름이 유지됩니다.",
+    "categoryNamesSaved": "카테고리 이름이 저장되었습니다"
   },
   "subscription": {
     "free": "무료",

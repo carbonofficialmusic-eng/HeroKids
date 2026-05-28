@@ -751,7 +751,10 @@
     "skinCardCostInfo": "Lägre kostnad = mer motivation, men korten tar slut snabbare. Högre kostnad = korten räcker längre, färre omedelbara belöningar.",
     "moreFun": "Roligare",
     "longerLasting": "Längre varaktighet",
-    "points": "Poäng"
+    "points": "Poäng",
+    "categoryNamesTitle": "Anpassa kategorinamn",
+    "categoryNamesDesc": "Ange egna namn för uppgiftskategorierna. Lämna ett fält tomt för att behålla standardnamnet.",
+    "categoryNamesSaved": "Kategorinamn sparade"
   },
   "subscription": {
     "free": "Gratis",
