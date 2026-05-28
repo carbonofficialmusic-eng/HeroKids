@@ -1684,6 +1684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Shared tasks - check each shared member's completion status
               if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+                console.log(`[TASK-DEBUG] task="${task.title}" member="${member.displayName}" → PRIMARY SHARED PATH (sharedMemberIds=${JSON.stringify(task.sharedMemberIds)})`);
                 // Only show shared tasks to members who are part of the shared group
                 if (!task.sharedMemberIds.includes(member.id)) {
                   return null;
@@ -1733,6 +1734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
 
               if (assignedMemberIds.length > 1) {
+                console.log(`[TASK-DEBUG] task="${task.title}" member="${member.displayName}" → MULTI-ASSIGN PATH (assignedMemberIds=${JSON.stringify(assignedMemberIds)})`);
                 // Multi-assignment task: Each assigned member completes independently, gets full points
                 // Box grays out for members who submitted (pending/approved), stays active for others
                 const assignedMemberCompletions = await Promise.all(
@@ -1772,6 +1774,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 };
               }
               
+              // DEBUG: Log the path taken for multi-member tasks
+              console.log(`[TASK-DEBUG] task="${task.title}" member="${member.displayName}" (${member.id}) → assignedMemberIds=[${assignedMemberIds.join(',')}] isSharedTask=${task.isSharedTask} sharedMemberIds=[${(task.sharedMemberIds||[]).join(',')}] completionStatus=${completionStatus} → falling to safety/normal path`);
+
               // Safety fallback: if this is a shared task that somehow bypassed all
               // dedicated shared/assignment paths above, ALWAYS use the member's OWN status —
               // never the family-wide status — so one member's pending/approved state never
