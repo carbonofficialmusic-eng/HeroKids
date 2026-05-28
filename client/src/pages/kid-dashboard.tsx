@@ -2098,14 +2098,23 @@ export default function KidDashboard() {
 
         {/* Rewards Section */}
         <div className="space-y-6 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl">
-              <Trophy className="h-8 w-8 text-white" />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl">
+                <Trophy className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-4xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
+                {t("kidDashboard.rewards")}
+              </h2>
+              <Sparkles className="h-6 w-6 text-amber-500 animate-pulse" />
             </div>
-            <h2 className="text-4xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
-              {t("kidDashboard.rewards")}
-            </h2>
-            <Sparkles className="h-6 w-6 text-amber-500 animate-pulse" />
+            {activeRewards.length > 3 && (
+              <Button variant="ghost" size="sm" asChild data-testid="button-view-all-rewards-board">
+                <Link href="/rewards-board">
+                  {t("kidDashboard.viewAll")}
+                </Link>
+              </Button>
+            )}
           </div>
 
           {activeRewards.length === 0 ? (
@@ -2116,7 +2125,7 @@ export default function KidDashboard() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {activeRewards.map((reward, index) => (
+              {activeRewards.slice(0, 3).map((reward, index) => (
                 <motion.div
                   key={reward.id}
                   initial={{ opacity: 0, y: 20 }}
