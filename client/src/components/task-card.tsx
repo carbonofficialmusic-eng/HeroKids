@@ -54,6 +54,7 @@ interface TaskCardProps {
   showAssignee?: boolean;
   onClick?: (task: Task) => void;
   currentMemberId?: string;
+  compact?: boolean;
 }
 
 export function TaskCard({
@@ -64,6 +65,7 @@ export function TaskCard({
   showAssignee = true,
   onClick,
   currentMemberId,
+  compact = false,
 }: TaskCardProps) {
   const { t, i18n } = useTranslation();
   
@@ -135,7 +137,140 @@ export function TaskCard({
   
   // Task should appear grayed out if it's unavailable OR completed by this member OR due date not yet reached OR expired OR weekend-only unavailable
   const isGrayedOut = isUnavailable || isCompletedByMember || dueDateInfo.notYet || dueDateInfo.expired || isWeekendUnavailable;
-  
+
+  // ── Compact (grid) rendering ──────────────────────────────────────────────
+  if (compact) {
+    const compactDateText = (() => {
+      if (isUnavailable && getNextAvailableText()) return { text: getNextAvailableText()!, color: "text-muted-foreground" };
+      if (isWeekendUnavailable) return { text: t('tasks.weekendUnavailable'), color: "text-muted-foreground" };
+      if (task.dueDate && task.recurrence === "none") {
+        const dateStr = typeof task.dueDate === "string" ? task.dueDate.substring(0, 10) : String(task.dueDate).substring(0, 10);
+        const dueDate = parse(dateStr, "yyyy-MM-dd", new Date());
+        if (isNaN(dueDate.getTime())) return null;
+        const locale = getDateLocale();
+        if (dueDateInfo.expired) return { text: t('tasks.dueDateExpired'), color: "text-destructive" };
+        if (dueDateInfo.isLate) return { text: t('tasks.dueDateLate', { days: dueDateInfo.daysPast }), color: "text-amber-600 dark:text-amber-400" };
+        if (isToday(dueDate)) return { text: t('kidDashboard.dueTodayHurry'), color: "text-amber-600 dark:text-amber-400" };
+        if (isTomorrow(dueDate)) return { text: t('kidDashboard.dueTomorrowHurry'), color: "text-muted-foreground" };
+        if (dueDateInfo.notYet) return { text: t('tasks.dueDateNotYet', { date: format(dueDate, "d. MMM", { locale }) }), color: "text-muted-foreground" };
+        return { text: format(dueDate, "d. MMM", { locale }), color: "text-muted-foreground" };
+      }
+      return null;
+    })();
+
+    return (
+      <motion.div
+        className="min-w-0 w-full"
+        initial={false}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        whileTap={onClick ? { scale: 0.98 } : undefined}
+      >
+        <Card
+          className={`p-2 transition-all h-full flex flex-col backdrop-blur-md ${
+            isGrayedOut ? 'bg-card/20' : 'bg-card/80'
+          } ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
+          data-testid={`card-task-${task.id}`}
+          onClick={() => onClick?.(task)}
+        >
+          <div className="flex items-start gap-2 flex-1">
+            {/* Compact emoji */}
+            <motion.div
+              className="text-xl flex-shrink-0 leading-none mt-0.5"
+              data-testid={`text-task-icon-${task.id}`}
+              animate={{ filter: isGrayedOut ? "grayscale(100%)" : "grayscale(0%)" }}
+              transition={{ duration: 0.3 }}
+            >
+              {task.iconEmoji}
+            </motion.div>
+
+            {/* Title + date */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1">
+                <p
+                  className="text-xs font-semibold truncate flex-1 leading-snug"
+                  data-testid={`text-task-title-${task.id}`}
+                >
+                  {task.title}
+                </p>
+                {isGrayedOut && (
+                  isWeekendUnavailable
+                    ? <Moon className="h-3 w-3 text-muted-foreground shrink-0" />
+                    : <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />
+                )}
+              </div>
+              {compactDateText && (
+                <p className={`text-xs truncate leading-tight mt-0.5 ${compactDateText.color}`}>
+                  {compactDateText.text}
+                </p>
+              )}
+              {/* Points badge */}
+              <div className="flex items-center gap-1 mt-0.5">
+                <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400 shrink-0" />
+                <span className="text-xs text-muted-foreground" data-testid={`badge-points-${task.id}`}>{task.points}</span>
+              </div>
+            </div>
+
+            {/* Complete button */}
+            {onComplete && (
+              isSharedTaskNotAssigned ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="flex-shrink-0 opacity-50 cursor-not-allowed"
+                      onClick={(e) => e.stopPropagation()}
+                      disabled
+                      data-testid={`button-complete-task-${task.id}`}
+                    >
+                      <Lock className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t('tasks.sharedTaskNotAssigned', { members: assignedMemberNames })}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (dueDateInfo.notYet || dueDateInfo.expired) ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="flex-shrink-0 opacity-50 cursor-not-allowed"
+                      onClick={(e) => e.stopPropagation()}
+                      disabled
+                      data-testid={`button-complete-task-${task.id}`}
+                    >
+                      <Lock className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{dueDateInfo.notYet ? t('tasks.dueDateNotYetTooltip') : t('tasks.dueDateExpiredTooltip')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Button
+                  size="icon"
+                  variant={isGrayedOut ? "outline" : "default"}
+                  className="flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isGrayedOut) onComplete(task.id);
+                  }}
+                  disabled={isCompleting || isGrayedOut}
+                  data-testid={`button-complete-task-${task.id}`}
+                >
+                  <CheckCircle className="h-4 w-4" />
+                </Button>
+              )
+            )}
+          </div>
+        </Card>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       className="min-h-[140px] min-w-0 w-full"

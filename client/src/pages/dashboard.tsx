@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -183,6 +183,13 @@ export default function Dashboard() {
       if (saved === "daily" || saved === "weekly" || saved === "monthly" || saved === "onetime" || saved === "all") return saved;
     }
     return "all";
+  });
+  const [dashboardView, setDashboardView] = useState<"list" | "grid">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("herokids_dashboard_view");
+      if (saved === "list" || saved === "grid") return saved;
+    }
+    return "list";
   });
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [debugTapCount, setDebugTapCount] = useState(0);
@@ -421,6 +428,10 @@ export default function Dashboard() {
   useEffect(() => {
     localStorage.setItem("herokids_task_filter", taskFilter);
   }, [taskFilter]);
+
+  useEffect(() => {
+    localStorage.setItem("herokids_dashboard_view", dashboardView);
+  }, [dashboardView]);
 
   // Setup family member
   const setupMutation = useMutation({
@@ -1301,6 +1312,15 @@ export default function Dashboard() {
                       {filteredTasks.length}
                     </Badge>
                   )}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className={`ml-auto toggle-elevate${dashboardView === "grid" ? " toggle-elevated" : ""}`}
+                    onClick={() => setDashboardView(dashboardView === "list" ? "grid" : "list")}
+                    data-testid="button-toggle-dashboard-view"
+                  >
+                    {dashboardView === "grid" ? <LayoutGrid className="h-4 w-4" /> : <LayoutList className="h-4 w-4" />}
+                  </Button>
                 </div>
               )}
 
@@ -1363,12 +1383,13 @@ export default function Dashboard() {
                         </Button>
                       </CollapsibleTrigger>
                       <CollapsibleContent className="pt-2">
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
                           {categoryTasks.map((task) => (
-                            <div key={task.id} className="relative group min-h-[140px] min-w-0">
+                            <div key={task.id} className={`relative min-w-0${dashboardView === "list" ? " group min-h-[140px]" : ""}`}>
                               <TaskCard
                                 task={task}
                                 showAssignee
+                                compact={dashboardView === "grid"}
                                 onClick={handleTaskClick}
                                 onComplete={() => {
                                   setTaskToComplete(task);
@@ -1377,34 +1398,36 @@ export default function Dashboard() {
                                 isCompleting={completeTaskMutation.isPending}
                                 currentMemberId={member?.id}
                               />
-                              <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 bg-card/80 backdrop-blur-sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedTask(task);
-                                    setTaskDialogOpen(true);
-                                  }}
-                                  data-testid={`button-edit-task-${task.id}`}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 bg-card/80 backdrop-blur-sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteTaskMutation.mutate(task.id);
-                                  }}
-                                  disabled={deleteTaskMutation.isPending}
-                                  data-testid={`button-delete-task-${task.id}`}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
+                              {dashboardView === "list" && (
+                                <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedTask(task);
+                                      setTaskDialogOpen(true);
+                                    }}
+                                    data-testid={`button-edit-task-${task.id}`}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteTaskMutation.mutate(task.id);
+                                    }}
+                                    disabled={deleteTaskMutation.isPending}
+                                    data-testid={`button-delete-task-${task.id}`}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -1413,12 +1436,13 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
                   {filteredTasks.map((task) => (
-                    <div key={task.id} className="relative group min-h-[140px] min-w-0">
+                    <div key={task.id} className={`relative min-w-0${dashboardView === "list" ? " group min-h-[140px]" : ""}`}>
                       <TaskCard
                         task={task}
                         showAssignee
+                        compact={dashboardView === "grid"}
                         onClick={handleTaskClick}
                         onComplete={() => {
                           setTaskToComplete(task);
@@ -1427,34 +1451,36 @@ export default function Dashboard() {
                         isCompleting={completeTaskMutation.isPending}
                         currentMemberId={member?.id}
                       />
-                      <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 bg-card/80 backdrop-blur-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedTask(task);
-                            setTaskDialogOpen(true);
-                          }}
-                          data-testid={`button-edit-task-${task.id}`}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 bg-card/80 backdrop-blur-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteTaskMutation.mutate(task.id);
-                          }}
-                          disabled={deleteTaskMutation.isPending}
-                          data-testid={`button-delete-task-${task.id}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      {dashboardView === "list" && (
+                        <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedTask(task);
+                              setTaskDialogOpen(true);
+                            }}
+                            data-testid={`button-edit-task-${task.id}`}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteTaskMutation.mutate(task.id);
+                            }}
+                            disabled={deleteTaskMutation.isPending}
+                            data-testid={`button-delete-task-${task.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
