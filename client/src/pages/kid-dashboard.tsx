@@ -874,10 +874,10 @@ function TaskCard({
               <Clock className="h-3 w-3 shrink-0" />
               <span>
                 {availableAgainDays === 0
-                  ? t("kidDashboard.availableToday")
+                  ? t("tasks.availableToday")
                   : availableAgainDays === 1
-                  ? t("kidDashboard.availableTomorrow")
-                  : t("kidDashboard.availableInDays", { count: availableAgainDays })}
+                  ? t("tasks.availableTomorrow")
+                  : t("tasks.availableInDays", { count: availableAgainDays })}
               </span>
             </div>
           )}
@@ -927,15 +927,15 @@ function TaskCard({
 
                   {availableAgainDays !== null && (
                     <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
-                      <span className="font-semibold">{t("kidDashboard.availableAgainLabel")}</span>
+                      <span className="font-semibold">{t("tasks.availableAgainLabel")}</span>
                       <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
                         <Clock className="h-4 w-4" />
                         <span>
                           {availableAgainDays === 0
-                            ? t("kidDashboard.availableToday")
+                            ? t("tasks.availableToday")
                             : availableAgainDays === 1
-                            ? t("kidDashboard.availableTomorrow")
-                            : t("kidDashboard.availableInDays", { count: availableAgainDays })}
+                            ? t("tasks.availableTomorrow")
+                            : t("tasks.availableInDays", { count: availableAgainDays })}
                         </span>
                       </div>
                     </div>
