@@ -1934,11 +1934,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Shared tasks - check each shared member's completion status (parent view)
               if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+                // For immediate recurrence: keep "approved" visible so the progress box stays filled
+                const skipReset = task.recurrence === 'immediate';
                 const sharedMemberCompletions = await Promise.all(
                   task.sharedMemberIds.map(async (memberId: string) => {
                     const sharedMember = await storage.getFamilyMemberById(memberId);
                     if (!sharedMember) return null;
-                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId, undefined, skipReset);
                     return {
                       memberId,
                       displayName: sharedMember.displayName,
@@ -1979,11 +1981,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               if (assignedMemberIds.length > 1) {
                 // Multi-assignment task: Show parent the status of each assigned member
+                // For immediate recurrence: keep "approved" visible so progress stays filled
+                const skipResetAssigned = task.recurrence === 'immediate';
                 const assignedMemberCompletions = await Promise.all(
                   assignedMemberIds.map(async (memberId: string) => {
                     const assignedMember = await storage.getFamilyMemberById(memberId);
                     if (!assignedMember) return null;
-                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId, undefined, skipResetAssigned);
                     return {
                       memberId,
                       displayName: assignedMember.displayName,
