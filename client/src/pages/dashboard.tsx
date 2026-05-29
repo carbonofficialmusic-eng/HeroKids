@@ -191,7 +191,14 @@ export default function Dashboard() {
     }
     return "list";
   });
-  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem("herokids_parent_collapsed_categories");
+      return saved ? new Set<string>(JSON.parse(saved)) : new Set<string>();
+    } catch {
+      return new Set<string>();
+    }
+  });
   const [debugTapCount, setDebugTapCount] = useState(0);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
   const debugTapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1014,7 +1021,7 @@ export default function Dashboard() {
   const groupedTasks = groupTasksByCategory(filteredTasks);
   const hasMultipleCategories = Object.keys(groupedTasks).length > 1;
 
-  // Toggle category collapse
+  // Toggle category collapse and persist to localStorage
   const toggleCategory = (category: string) => {
     setCollapsedCategories(prev => {
       const newSet = new Set(prev);
@@ -1023,6 +1030,7 @@ export default function Dashboard() {
       } else {
         newSet.add(category);
       }
+      localStorage.setItem("herokids_parent_collapsed_categories", JSON.stringify([...newSet]));
       return newSet;
     });
   };
@@ -1370,7 +1378,7 @@ export default function Dashboard() {
                         >
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{getCategoryEmoji(category)}</span>
-                            <span className="font-semibold">{getCategoryLabel(category)}</span>
+                            <span className="font-semibold bg-muted px-2 py-0.5 rounded-md text-sm">{getCategoryLabel(category)}</span>
                             <Badge variant="secondary" className="text-xs">
                               {categoryTasks.length}
                             </Badge>

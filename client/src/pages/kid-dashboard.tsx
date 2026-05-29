@@ -1196,7 +1196,14 @@ export default function KidDashboard() {
     const saved = localStorage.getItem("herokids_kid_dashboard_view");
     return saved === "grid" ? "grid" : "list";
   });
-  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem("herokids_kid_collapsed_categories");
+      return saved ? new Set<string>(JSON.parse(saved)) : new Set<string>();
+    } catch {
+      return new Set<string>();
+    }
+  });
 
   // Persist kid dashboard view preference
   useEffect(() => {
@@ -1840,6 +1847,7 @@ export default function KidDashboard() {
       } else {
         newSet.add(category);
       }
+      localStorage.setItem("herokids_kid_collapsed_categories", JSON.stringify([...newSet]));
       return newSet;
     });
   };
@@ -2498,7 +2506,7 @@ export default function KidDashboard() {
                       <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-white/8 border border-white/10 mb-1 hover-elevate">
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{getCategoryEmoji(category)}</span>
-                          <span className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                          <span className="font-bold text-base bg-muted/80 px-2.5 py-0.5 rounded-md" style={{ fontFamily: "Fredoka, sans-serif" }}>
                             {getCategoryLabel(category)}
                           </span>
                           <Badge variant="secondary" className="rounded-full">
