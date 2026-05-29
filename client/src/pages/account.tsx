@@ -123,32 +123,21 @@ export default function AccountPage() {
   const backHref = isParent ? "/settings" : "/kid-dashboard";
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ paddingTop: "calc(1rem + env(safe-area-inset-top))" }}
-    >
-      <div className="max-w-lg mx-auto px-4 pb-8">
+    <div className="min-h-screen p-4 pb-20" style={{ paddingTop: "calc(1rem + env(safe-area-inset-top))" }}>
+      <div className="max-w-lg mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            data-testid="button-back-account"
+        <div className="flex items-center gap-4">
+          <Link href={backHref} data-testid="button-back-account">
+            <button className="p-2 rounded-full bg-card/80 backdrop-blur-md">
+              <ArrowLeft className="h-6 w-6" />
+            </button>
+          </Link>
+          <h1
+            className="text-2xl font-bold font-accent"
+            style={{ fontFamily: "Fredoka, sans-serif" }}
           >
-            <Link href={backHref}>
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          </Button>
-          <div>
-            <h1
-              className="text-xl font-bold"
-              style={{ fontFamily: "Fredoka, sans-serif" }}
-            >
-              {t("settings.accountSettings")}
-            </h1>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
-          </div>
+            {t("settings.accountSettings")}
+          </h1>
         </div>
 
         <Card>
