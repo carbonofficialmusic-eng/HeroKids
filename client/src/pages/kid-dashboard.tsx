@@ -2217,10 +2217,10 @@ export default function KidDashboard() {
               </h2>
               <Sparkles className="h-6 w-6 text-amber-500 animate-pulse" />
             </div>
-            {activeRewards.length > 3 && (
+            {redemptions.filter(r => r.memberId === member?.id).length > 0 && (
               <Button variant="ghost" size="sm" asChild className="text-white/90 bg-white/10 border border-white/15 rounded-full px-4" data-testid="button-view-all-rewards-board">
-                <Link href="/rewards-board">
-                  {t("kidDashboard.viewAll")}
+                <Link href="/my-rewards">
+                  {t("kidDashboard.myRewards")}
                 </Link>
               </Button>
             )}
