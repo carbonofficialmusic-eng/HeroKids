@@ -1134,7 +1134,7 @@ export class DatabaseStorage implements IStorage {
     return Number(result?.count || 0) > 0;
   }
 
-  async getMemberCompletionStatus(taskId: string, memberId: string, txClient?: any): Promise<"pending" | "approved" | "rejected" | null> {
+  async getMemberCompletionStatus(taskId: string, memberId: string, txClient?: any, skipApprovedReset?: boolean): Promise<"pending" | "approved" | "rejected" | null> {
     const client = txClient || db;
     
     // Get task info including nextAvailableDate for period-aware completion checks
@@ -1172,8 +1172,10 @@ export class DatabaseStorage implements IStorage {
       if (!latestCompletion) return null;
       if (latestCompletion.status === "pending") return "pending";
       if (latestCompletion.status === "rejected") return "rejected";
-      // approved → immediately available again
-      return null;
+      // approved → immediately available again for single tasks
+      // For multi-assignment tasks (skipApprovedReset=true): keep "approved" so the
+      // "waiting for others" state is shown until all members complete
+      return skipApprovedReset ? "approved" : null;
     }
     
     // For daily/weekdays recurring tasks, only check completions from TODAY (in family timezone)

@@ -1746,7 +1746,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   assignedMemberIds.map(async (memberId: string) => {
                     const assignedMember = await storage.getFamilyMemberById(memberId);
                     if (!assignedMember) return null;
-                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    // For immediate recurrence multi-assignment tasks: keep "approved" status visible
+                    // so the "waiting for others" state shows until ALL members are done.
+                    // For all other task types: use normal getMemberCompletionStatus logic.
+                    const skipReset = task.recurrence === 'immediate';
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId, undefined, skipReset);
                     return {
                       memberId,
                       displayName: assignedMember.displayName,
@@ -1764,6 +1768,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const validCompletions = assignedMemberCompletions.filter(Boolean);
                 // allCompleted only when ALL have approved status (not just pending)
                 const allCompleted = validCompletions.filter(m => m?.hasCompleted).length === assignedMemberIds.length;
+                
+                // For IMMEDIATE recurrence: once all members are approved → reset immediately for everyone.
+                // Show task as available again (null status for all) — no period lock like daily/weekly tasks.
+                if (task.recurrence === 'immediate' && allCompleted) {
+                  const resetCompletions = validCompletions.map(m => m ? {
+                    ...m, hasCompleted: false, hasSubmitted: false, status: null,
+                  } : null).filter(Boolean);
+                  return {
+                    ...task,
+                    remainingSlots: null,
+                    memberHasCompleted: false,
+                    memberCompletionStatus: null,
+                    completions: [],
+                    assignedMemberCompletions: resetCompletions,
+                  };
+                }
                 
                 // For children: check if THIS member has submitted (to grey out the card while pending/approved)
                 const currentMemberCompletion = validCompletions.find(m => m?.memberId === member.id);
