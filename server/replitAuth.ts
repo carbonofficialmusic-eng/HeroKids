@@ -412,6 +412,39 @@ export async function setupAuth(app: Express) {
     }
   });
 
+  // Resend the verification email for a pending email-address change
+  app.post("/api/auth/resend-pending-email-change", isAuthenticated, authRateLimit(5, 60 * 1000), async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ message: "Konto nicht gefunden." });
+
+      if (!user.pendingEmail) {
+        return res.status(400).json({ message: "Keine ausstehende E-Mail-Änderung gefunden." });
+      }
+
+      const token = createToken();
+      await storage.updateUserAuthFields(user.id, {
+        pendingEmailVerificationTokenHash: hashToken(token),
+        pendingEmailVerificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+
+      try {
+        const verificationUrl = createEmailVerificationUrl(token);
+        await sendVerificationEmail(user.pendingEmail, user.firstName, verificationUrl);
+        res.json({ message: "Bestätigungsmail wurde gesendet." });
+      } catch (emailError) {
+        if (emailError instanceof EmailProviderNotConfiguredError) {
+          return res.status(503).json({ message: (emailError as Error).message });
+        }
+        throw emailError;
+      }
+    } catch (error: any) {
+      console.error("Resend pending email change error:", error);
+      res.status(400).json({ message: error?.message || "Bestätigungsmail konnte nicht gesendet werden" });
+    }
+  });
+
   const changePasswordSchema = z.object({
     currentPassword: z.string().min(1).max(128),
     newPassword: z.string().min(8).max(128),

@@ -13,7 +13,8 @@ import { Slider } from "@/components/ui/slider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, Mail } from "lucide-react";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, Mail, MailCheck, Loader2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -330,6 +331,48 @@ export default function Settings() {
     onError: (error: any) => {
       const msg = error instanceof ApiError && error.data?.message ? error.data.message : t('errors.somethingWrong');
       setCeError(msg);
+    },
+  });
+
+  const resendVerificationMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/resend-verification");
+      return response.json() as Promise<{ message?: string }>;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: t("auth.verificationEmailSent"),
+        description: data.message || t("auth.checkInboxAndSpam"),
+      });
+    },
+    onError: (error: unknown) => {
+      const msg = error instanceof Error ? error.message : t("auth.tryAgainLater");
+      toast({
+        title: t("auth.verificationEmailFailed"),
+        description: msg,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resendPendingEmailMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/resend-pending-email-change");
+      return response.json() as Promise<{ message?: string }>;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: t("auth.verificationEmailSent"),
+        description: data.message || t("auth.checkInboxAndSpam"),
+      });
+    },
+    onError: (error: unknown) => {
+      const msg = error instanceof Error ? error.message : t("auth.tryAgainLater");
+      toast({
+        title: t("auth.verificationEmailFailed"),
+        description: msg,
+        variant: "destructive",
+      });
     },
   });
 
@@ -1218,6 +1261,60 @@ export default function Settings() {
                 <CardDescription>{t('settings.accountSettingsDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Pending email-change confirmation banner */}
+                {user?.pendingEmail && (
+                  <Alert data-testid="alert-pending-email-change">
+                    <MailCheck className="h-4 w-4" />
+                    <AlertTitle>{t("settings.pendingEmailBannerTitle")}</AlertTitle>
+                    <AlertDescription className="space-y-3">
+                      <p>{t("settings.pendingEmailBannerDesc", { email: user.pendingEmail })}</p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => resendPendingEmailMutation.mutate()}
+                        disabled={resendPendingEmailMutation.isPending}
+                        data-testid="button-resend-pending-email-settings"
+                      >
+                        {resendPendingEmailMutation.isPending ? (
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                        ) : (
+                          <MailCheck className="mr-2 h-3 w-3" />
+                        )}
+                        {resendPendingEmailMutation.isPending
+                          ? t("auth.resendingVerification")
+                          : t("auth.resendVerification")}
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Initial email verification banner (new registration) */}
+                {user?.email && !user?.isEmailVerified && !user?.pendingEmail && (
+                  <Alert data-testid="alert-email-unverified">
+                    <MailCheck className="h-4 w-4" />
+                    <AlertTitle>{t("settings.verifyEmailBannerTitle")}</AlertTitle>
+                    <AlertDescription className="space-y-3">
+                      <p>{t("settings.verifyEmailBannerDesc", { email: user.email })}</p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => resendVerificationMutation.mutate()}
+                        disabled={resendVerificationMutation.isPending}
+                        data-testid="button-resend-verification-settings"
+                      >
+                        {resendVerificationMutation.isPending ? (
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                        ) : (
+                          <MailCheck className="mr-2 h-3 w-3" />
+                        )}
+                        {resendVerificationMutation.isPending
+                          ? t("auth.resendingVerification")
+                          : t("auth.resendVerification")}
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {/* Change Password */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
