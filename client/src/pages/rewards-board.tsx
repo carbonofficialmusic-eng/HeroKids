@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus, Lock } from "lucide-react";
+import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus, Lock, Trophy, Star } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -92,6 +92,15 @@ type RewardRequest = {
   updatedAt: string;
 };
 
+type Reward = {
+  id: string;
+  title: string;
+  description: string | null;
+  pointThreshold: number;
+  isActive: boolean;
+  familyName: string;
+};
+
 export default function RewardsBoard() {
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -149,6 +158,22 @@ export default function RewardsBoard() {
     queryKey: ["/api/reward-requests"],
     enabled: !!member && isRealParent,
     staleTime: 5 * 60 * 1000,
+  });
+
+  // Fetch all available rewards
+  const { data: allRewards = [] } = useQuery<Reward[]>({
+    queryKey: ["/api/rewards"],
+    enabled: !!member,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const activeRewards = allRewards.filter(r => r.isActive).sort((a, b) => {
+    const currentPoints = member?.totalPoints ?? 0;
+    const aReady = currentPoints >= a.pointThreshold;
+    const bReady = currentPoints >= b.pointThreshold;
+    if (aReady && !bReady) return -1;
+    if (!bReady && aReady) return 1;
+    return Math.abs(currentPoints - a.pointThreshold) - Math.abs(currentPoints - b.pointThreshold);
   });
 
   // Dialog states for reward request editing
@@ -488,6 +513,59 @@ export default function RewardsBoard() {
             </div>
           </div>
         </div>
+
+        {/* Available Rewards Section (Children only) */}
+        {!isParent && activeRewards.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-6 w-6 text-amber-500" />
+              <h2 className="text-2xl font-accent font-bold">{t("kidDashboard.rewards")}</h2>
+            </div>
+            <div className="grid gap-4">
+              {activeRewards.map((reward) => {
+                const currentPoints = member?.totalPoints ?? 0;
+                const percentage = Math.min((currentPoints / reward.pointThreshold) * 100, 100);
+                const remaining = Math.max(reward.pointThreshold - currentPoints, 0);
+                const isReady = currentPoints >= reward.pointThreshold;
+                return (
+                  <Card key={reward.id} className={`p-4 ${isReady ? "border-green-500/50 bg-green-500/5" : ""}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`p-2 rounded-xl shrink-0 ${isReady ? "bg-green-500/20" : "bg-primary/10"}`}>
+                          <Gift className={`h-6 w-6 ${isReady ? "text-green-500" : "text-primary"}`} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold truncate">{reward.title}</p>
+                          {reward.description && (
+                            <p className="text-xs text-muted-foreground truncate">{reward.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <Badge variant={isReady ? "default" : "secondary"} className="whitespace-nowrap">
+                          {reward.pointThreshold} {t("kidDashboard.pts")}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="mt-3 space-y-1">
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${isReady ? "bg-green-500" : "bg-primary"}`}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {isReady
+                          ? t("kidDashboard.youCanClaim")
+                          : t("kidDashboard.pointsUntilReward", { count: remaining })}
+                      </p>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Pending Reward Requests Section (Parents only) */}
         {isRealParent && rewardRequests.filter(r => r.status === "pending").length > 0 && (
