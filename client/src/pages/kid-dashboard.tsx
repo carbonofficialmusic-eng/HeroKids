@@ -794,8 +794,7 @@ function TaskCard({
           </div>
           
           {/* Multi-Assignment Task Info - Show teammates who need to complete (new style) */}
-          {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1 &&
-           task.assignedMemberCompletions.some(m => m.hasSubmitted ?? (m.status !== null)) && (
+          {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1 && (
             <div className="space-y-2 text-left">
               {/* Teammates section */}
               <div className="p-2 bg-primary/5 rounded-xl">
@@ -845,8 +844,7 @@ function TaskCard({
           )}
 
           {/* Legacy Shared Task Info - Show teammates and description (using sharedMemberIds) */}
-          {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 1 && !task.assignedMemberCompletions &&
-           task.sharedMemberCompletions.some(m => m.hasSubmitted ?? m.hasCompleted) && (
+          {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 1 && !task.assignedMemberCompletions && (
             <div className="space-y-2 text-left">
               {/* Teammates section */}
               <div className="p-2 bg-primary/5 rounded-xl">
