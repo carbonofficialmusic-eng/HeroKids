@@ -714,7 +714,7 @@ function TaskCard({
             : showAsApproved 
             ? "bg-green-500/10 backdrop-blur-md border-green-500/45 shadow-md shadow-green-900/15" 
             : showAsSubmitted 
-            ? "bg-white/5 backdrop-blur-md border-white/15" 
+            ? "bg-amber-500/10 backdrop-blur-md border-amber-400/45 shadow-md shadow-amber-900/15" 
             : showAsPending 
             ? "bg-amber-500/10 backdrop-blur-md border-amber-400/45 shadow-md shadow-amber-900/15" 
             : hasNoSlots 
@@ -737,7 +737,7 @@ function TaskCard({
         <div className="text-center space-y-3">
           <div className={`flex justify-center p-4 rounded-2xl mx-auto w-fit shadow-inner ${
             showAsApproved ? "bg-green-500/25" : 
-            showAsSubmitted ? "bg-white/10" :
+            showAsSubmitted ? "bg-amber-500/25" :
             showAsPending ? "bg-amber-500/25" :
             isRejected ? "bg-blue-500/20" :
             hasNoSlots ? "bg-amber-500/15" :
@@ -750,7 +750,7 @@ function TaskCard({
             ) : showAsApproved ? (
               <CheckCircle2 className="h-12 w-12 text-green-500" />
             ) : showAsSubmitted ? (
-              <CheckCircle2 className="h-12 w-12 text-muted-foreground" />
+              <CheckCircle2 className="h-12 w-12 text-amber-500" />
             ) : showAsPending ? (
               <CheckCircle2 className="h-12 w-12 text-amber-500" />
             ) : allSharedMembersCompleted ? (
@@ -932,7 +932,7 @@ function TaskCard({
             <div className="space-y-1.5 w-full">
               <div 
                 className={`text-sm px-4 py-2 rounded-full text-center font-semibold border ${
-                  showAsSubmitted ? 'bg-white/8 border-white/15 text-muted-foreground' :
+                  showAsSubmitted ? 'bg-amber-500/15 border-amber-400/30 text-amber-600 dark:text-amber-400' :
                   showAsPending ? 'bg-amber-500/15 border-amber-400/30 text-amber-600 dark:text-amber-400' :
                   showAsApproved || allSharedMembersCompleted ? 'bg-green-500/15 border-green-400/30 text-green-600 dark:text-green-400' :
                   isRejected ? 'bg-blue-500/15 border-blue-400/30 text-blue-600 dark:text-blue-400' :
