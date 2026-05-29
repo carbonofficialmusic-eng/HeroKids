@@ -1315,11 +1315,6 @@ export default function Dashboard() {
                       {t("dashboard.filterAll")}
                     </Button>
                   </div>
-                  {filteredTasks.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {filteredTasks.length}
-                    </Badge>
-                  )}
                   <Button
                     size="icon"
                     variant="ghost"

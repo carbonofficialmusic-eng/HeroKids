@@ -2419,56 +2419,54 @@ export default function KidDashboard() {
 
           {/* Filter tabs row */}
           <div className="flex items-center gap-2">
-            <div className="flex bg-black/25 backdrop-blur-md rounded-xl p-1 gap-0.5 flex-wrap border border-white/10">
-            <Button
-              variant={kidTaskFilter === "daily" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setKidTaskFilter("daily")}
-              className="text-xs px-3"
-              data-testid="button-kid-filter-daily"
-            >
-              <RefreshCw className="h-3 w-3 mr-1" />
-              {t("kidDashboard.filterDaily")}
-            </Button>
-            <Button
-              variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setKidTaskFilter("weekly")}
-              className="text-xs px-3"
-              data-testid="button-kid-filter-weekly"
-            >
-              <Calendar className="h-3 w-3 mr-1" />
-              {t("kidDashboard.filterWeekly")}
-            </Button>
-            <Button
-              variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setKidTaskFilter("monthly")}
-              className="text-xs px-3"
-              data-testid="button-kid-filter-monthly"
-            >
-              <Star className="h-3 w-3 mr-1" />
-              {t("kidDashboard.filterMonthly")}
-            </Button>
-            <Button
-              variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setKidTaskFilter("onetime")}
-              className="text-xs px-3"
-              data-testid="button-kid-filter-onetime"
-            >
-              <Target className="h-3 w-3 mr-1" />
-              {t("kidDashboard.filterOneTime")}
-            </Button>
-            <Button
-              variant={kidTaskFilter === "all" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setKidTaskFilter("all")}
-              className="text-xs px-3"
-              data-testid="button-kid-filter-all"
-            >
-              {t("kidDashboard.filterAll")}
-            </Button>
+            <div className="flex bg-muted rounded-lg p-1 gap-1 flex-wrap">
+              <Button
+                variant={kidTaskFilter === "daily" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("daily")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-daily"
+              >
+                <RefreshCw className="h-3 w-3 mr-1" />
+                {t("kidDashboard.filterDaily")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("weekly")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-weekly"
+              >
+                {t("kidDashboard.filterWeekly")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("monthly")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-monthly"
+              >
+                {t("kidDashboard.filterMonthly")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("onetime")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-onetime"
+              >
+                <Target className="h-3 w-3 mr-1" />
+                {t("kidDashboard.filterOneTime")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "all" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("all")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-all"
+              >
+                {t("kidDashboard.filterAll")}
+              </Button>
             </div>
           </div>
 
