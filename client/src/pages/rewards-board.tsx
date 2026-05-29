@@ -956,16 +956,14 @@ export default function RewardsBoard() {
         </div>
       )}
 
-      {/* Redemptions List */}
-      {displayRedemptions.length === 0 ? (
+      {/* Redemptions List — parents only; kids use /my-rewards instead */}
+      {isParent && (displayRedemptions.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Gift className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold mb-2">{t("rewardsBoard.noRewardsYet")}</h3>
             <p className="text-muted-foreground text-center">
-              {isParent 
-                ? t("rewardsBoard.noRewardsFamilyDesc")
-                : t("rewardsBoard.noRewardsYouDesc")}
+              {t("rewardsBoard.noRewardsFamilyDesc")}
             </p>
           </CardContent>
         </Card>
@@ -1134,7 +1132,7 @@ export default function RewardsBoard() {
             </Card>
           ))}
         </div>
-      )}
+      ))}
       </div>
 
       {/* Reward Request Dialog for editing */}
