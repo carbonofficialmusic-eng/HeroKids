@@ -1027,14 +1027,20 @@ export default function RewardsBoard() {
                   )}
                 </div>
                 
-                {/* Show participants for shared rewards */}
-                {(redemption.sharingStatus === "sharing_active" || redemption.sharingStatus === "sharing_finalized") && 
-                 redemption.sharingParticipants && redemption.sharingParticipants.length > 0 && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm text-muted-foreground">{t("rewardsBoard.sharedWith")}:</span>
-                    <div className="flex items-center gap-1">
+                {/* Show participants for shared rewards — always visible, even after fulfilled */}
+                {redemption.sharingParticipants && redemption.sharingParticipants.length > 0 && (
+                  <div className={`flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 ${
+                    redemption.status === "completed"
+                      ? "bg-muted/40"
+                      : ""
+                  }`}>
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <Users className="h-3.5 w-3.5" />
+                      <span>{t("rewardsBoard.sharedWith")}:</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
                       {redemption.sharingParticipants.map((participant) => (
-                        <div key={participant.id} className="flex items-center gap-1">
+                        <div key={participant.id} className="flex items-center gap-1.5">
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={getAvatarUrl(participant.activeSkinId, participant.avatarUrl)} />
                             <AvatarFallback 
