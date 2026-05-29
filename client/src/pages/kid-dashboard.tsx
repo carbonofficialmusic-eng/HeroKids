@@ -2215,7 +2215,6 @@ export default function KidDashboard() {
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.rewards")}
               </h2>
-              <Sparkles className="h-6 w-6 text-amber-500 animate-pulse" />
             </div>
             {activeRewards.length > 3 && (
               <Button variant="ghost" size="sm" asChild className="text-white/90 bg-white/10 border border-white/15 rounded-full px-4" data-testid="button-view-all-rewards-board">
