@@ -259,6 +259,7 @@ export interface IStorage {
   approveTaskCompletion(completionId: string, approvedBy: string): Promise<void>;
   rejectTaskCompletion(completionId: string, approvedBy: string, rejectionReason: string): Promise<void>;
   getTaskCompletion(completionId: string): Promise<TaskCompletion | undefined>;
+  deleteTaskCompletionsByTask(taskId: string): Promise<void>;
 
   // Reward operations
   getRewardsByFamily(familyName: string): Promise<Reward[]>;
@@ -1531,6 +1532,10 @@ export class DatabaseStorage implements IStorage {
       .from(taskCompletions)
       .where(eq(taskCompletions.id, completionId));
     return completion;
+  }
+
+  async deleteTaskCompletionsByTask(taskId: string): Promise<void> {
+    await db.delete(taskCompletions).where(eq(taskCompletions.taskId, taskId));
   }
 
   async getPendingCompletionsByFamily(familyName: string): Promise<any[]> {

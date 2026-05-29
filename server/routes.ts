@@ -2792,6 +2792,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // DO NOT add points manually here as it would cause double counting
       await storage.approveTaskCompletion(completionId, member.id);
       
+      // For IMMEDIATE multi-assignment tasks: when ALL assigned members are approved,
+      // delete all completions so the next round starts with a clean slate.
+      // Without this, old "approved" completions from round N bleed into round N+1
+      // causing the task to appear fully completed (0/2) before anyone has submitted.
+      if (task?.recurrence === "immediate") {
+        const immediateAssignedIds = await storage.getTaskAssignmentsByTask(task.id);
+        if (immediateAssignedIds.length > 1) {
+          const allCompletionsNow = await storage.getTaskCompletionsByTask(task.id);
+          const approvedMemberIds = allCompletionsNow
+            .filter((c: any) => c.status === "approved")
+            .map((c: any) => c.memberId);
+          const allNowApproved = immediateAssignedIds.every((id: string) => approvedMemberIds.includes(id));
+          if (allNowApproved) {
+            await storage.deleteTaskCompletionsByTask(task.id);
+          }
+        }
+      }
+
       // For shared tasks: _approveCompletionInternal deliberately doesn't auto-complete
       // isSharedTask=true tasks (to avoid premature completion when first member is approved).
       // Check here whether ALL required members now have approved completions, and if so,
