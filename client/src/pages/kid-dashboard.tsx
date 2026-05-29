@@ -2388,7 +2388,8 @@ export default function KidDashboard() {
 
         {/* Tasks Section */}
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Title row: heading on left, toggle on right */}
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
                 <Star className="h-8 w-8 text-white" />
@@ -2396,69 +2397,69 @@ export default function KidDashboard() {
               <h2 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.tasks")}
               </h2>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => setKidDashboardView(kidDashboardView === "list" ? "grid" : "list")}
-                className={`bg-black/25 backdrop-blur-md border border-white/10 toggle-elevate${kidDashboardView === "grid" ? " toggle-elevated" : ""}`}
-                data-testid="button-kid-view-toggle"
-              >
-                {kidDashboardView === "grid" ? <LayoutGrid className="h-4 w-4" /> : <LayoutList className="h-4 w-4" />}
-              </Button>
             </div>
-            
-            {/* Kid-friendly filter tabs */}
-            <div className="flex bg-black/25 backdrop-blur-md rounded-xl p-1 gap-0.5 flex-wrap border border-white/10">
-              <Button
-                variant={kidTaskFilter === "daily" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setKidTaskFilter("daily")}
-                className="text-xs px-3"
-                data-testid="button-kid-filter-daily"
-              >
-                <RefreshCw className="h-3 w-3 mr-1" />
-                {t("kidDashboard.filterDaily")}
-              </Button>
-              <Button
-                variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setKidTaskFilter("weekly")}
-                className="text-xs px-3"
-                data-testid="button-kid-filter-weekly"
-              >
-                <Calendar className="h-3 w-3 mr-1" />
-                {t("kidDashboard.filterWeekly")}
-              </Button>
-              <Button
-                variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setKidTaskFilter("monthly")}
-                className="text-xs px-3"
-                data-testid="button-kid-filter-monthly"
-              >
-                <Star className="h-3 w-3 mr-1" />
-                {t("kidDashboard.filterMonthly")}
-              </Button>
-              <Button
-                variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setKidTaskFilter("onetime")}
-                className="text-xs px-3"
-                data-testid="button-kid-filter-onetime"
-              >
-                <Target className="h-3 w-3 mr-1" />
-                {t("kidDashboard.filterOneTime")}
-              </Button>
-              <Button
-                variant={kidTaskFilter === "all" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setKidTaskFilter("all")}
-                className="text-xs px-3"
-                data-testid="button-kid-filter-all"
-              >
-                {t("kidDashboard.filterAll")}
-              </Button>
-            </div>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setKidDashboardView(kidDashboardView === "list" ? "grid" : "list")}
+              className={`flex-shrink-0 bg-black/25 backdrop-blur-md border border-white/10 toggle-elevate${kidDashboardView === "grid" ? " toggle-elevated" : ""}`}
+              data-testid="button-kid-view-toggle"
+            >
+              {kidDashboardView === "grid" ? <LayoutGrid className="h-4 w-4" /> : <LayoutList className="h-4 w-4" />}
+            </Button>
+          </div>
+
+          {/* Kid-friendly filter tabs — below title */}
+          <div className="flex bg-black/25 backdrop-blur-md rounded-xl p-1 gap-0.5 flex-wrap border border-white/10">
+            <Button
+              variant={kidTaskFilter === "daily" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setKidTaskFilter("daily")}
+              className="text-xs px-3"
+              data-testid="button-kid-filter-daily"
+            >
+              <RefreshCw className="h-3 w-3 mr-1" />
+              {t("kidDashboard.filterDaily")}
+            </Button>
+            <Button
+              variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setKidTaskFilter("weekly")}
+              className="text-xs px-3"
+              data-testid="button-kid-filter-weekly"
+            >
+              <Calendar className="h-3 w-3 mr-1" />
+              {t("kidDashboard.filterWeekly")}
+            </Button>
+            <Button
+              variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setKidTaskFilter("monthly")}
+              className="text-xs px-3"
+              data-testid="button-kid-filter-monthly"
+            >
+              <Star className="h-3 w-3 mr-1" />
+              {t("kidDashboard.filterMonthly")}
+            </Button>
+            <Button
+              variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setKidTaskFilter("onetime")}
+              className="text-xs px-3"
+              data-testid="button-kid-filter-onetime"
+            >
+              <Target className="h-3 w-3 mr-1" />
+              {t("kidDashboard.filterOneTime")}
+            </Button>
+            <Button
+              variant={kidTaskFilter === "all" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setKidTaskFilter("all")}
+              className="text-xs px-3"
+              data-testid="button-kid-filter-all"
+            >
+              {t("kidDashboard.filterAll")}
+            </Button>
           </div>
 
           {filteredKidTasks.length === 0 ? (
