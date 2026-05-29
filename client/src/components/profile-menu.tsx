@@ -157,15 +157,15 @@ export function ProfileMenu({
                 <span>{t("settings.familySettings")}</span>
               </Link>
             </DropdownMenuItem>
-            {!!user?.email && (
-              <DropdownMenuItem asChild>
-                <Link href="/settings#account" data-testid="menu-item-account-settings">
-                  <KeyRound className="mr-2 h-4 w-4" />
-                  <span>{t("settings.accountSettings")}</span>
-                </Link>
-              </DropdownMenuItem>
-            )}
           </>
+        )}
+        {!!user?.email && (
+          <DropdownMenuItem asChild>
+            <Link href="/account" data-testid="menu-item-account-settings">
+              <KeyRound className="mr-2 h-4 w-4" />
+              <span>{t("settings.accountSettings")}</span>
+            </Link>
+          </DropdownMenuItem>
         )}
         
         {/* Block 3: System & Logout */}

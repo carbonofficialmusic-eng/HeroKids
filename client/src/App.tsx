@@ -30,6 +30,7 @@ import LinkDevice from "@/pages/link-device";
 import Admin from "@/pages/admin";
 import Privacy from "@/pages/privacy";
 import IosTest from "@/pages/ios-test";
+import AccountPage from "@/pages/account";
 
 interface FamilyMember {
   id: number;
@@ -401,6 +402,7 @@ function Router() {
             <Achievements />
           </ProtectedRoute>
         </Route>
+        <Route path="/account" component={AccountPage} />
         <Route path="/family-goals" component={FamilyGoals} />
         <Route path="/link-device" component={LinkDevice} />
         <Route path="/privacy" component={Privacy} />
