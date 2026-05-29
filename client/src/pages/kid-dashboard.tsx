@@ -2399,7 +2399,7 @@ export default function KidDashboard() {
           </div>
 
           {/* Filter tabs + toggle on the same row */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex bg-black/25 backdrop-blur-md rounded-xl p-1 gap-0.5 flex-wrap border border-white/10">
             <Button
               variant={kidTaskFilter === "daily" ? "default" : "ghost"}
