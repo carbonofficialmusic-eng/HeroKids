@@ -543,7 +543,7 @@ export default function RewardsBoard() {
                       </div>
                       <div className="text-right shrink-0">
                         <Badge variant={isReady ? "default" : "secondary"} className="whitespace-nowrap">
-                          {reward.pointThreshold} {t("kidDashboard.pts")}
+                          {reward.pointThreshold} {t("dashboard.pts")}
                         </Badge>
                       </div>
                     </div>
@@ -556,7 +556,7 @@ export default function RewardsBoard() {
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {isReady
-                          ? t("kidDashboard.youCanClaim")
+                          ? t("dashboard.youCanClaim")
                           : t("kidDashboard.pointsUntilReward", { count: remaining })}
                       </p>
                     </div>
