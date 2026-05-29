@@ -503,7 +503,8 @@ export function TaskCard({
             )}
 
             {/* Multi-Assignment Task Progress (new style - uses taskAssignments) */}
-            {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1 && (
+            {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1 &&
+             task.assignedMemberCompletions.some(m => m.hasSubmitted ?? (m.status !== null)) && (
               <div className="mb-2" data-testid={`assigned-progress-${task.id}`}>
                 <div className="flex items-center gap-2 mb-1.5">
                   <Users className="h-3.5 w-3.5 text-muted-foreground" />
@@ -543,7 +544,8 @@ export function TaskCard({
             )}
 
             {/* Legacy Shared Task Progress (uses sharedMemberIds field) */}
-            {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && !task.assignedMemberCompletions && (
+            {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && !task.assignedMemberCompletions &&
+             task.sharedMemberCompletions.some(m => m.hasSubmitted ?? m.hasCompleted) && (
               <div className="mb-2" data-testid={`shared-progress-${task.id}`}>
                 <div className="flex items-center gap-2 mb-1.5">
                   <Users className="h-3.5 w-3.5 text-muted-foreground" />
