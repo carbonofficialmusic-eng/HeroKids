@@ -1150,22 +1150,30 @@ export class DatabaseStorage implements IStorage {
     
     if (!task) return null;
     
-    // For IMMEDIATE tasks: Only return "pending" if there's a pending completion
-    // After approval, return null so task appears available again
+    // For IMMEDIATE tasks: check the most recent completion
+    // - pending  → show amber "waiting" state and block re-submission
+    // - rejected → show blue "try again" badge (same as standard recurrence)
+    // - approved → return null so task is immediately available again
+    // - nothing  → return null (available)
     if (task.recurrence === 'immediate') {
-      const [pendingCompletion] = await client
+      const [latestCompletion] = await client
         .select({ status: taskCompletions.status })
         .from(taskCompletions)
         .where(
           and(
             eq(taskCompletions.taskId, taskId),
             eq(taskCompletions.memberId, memberId),
-            eq(taskCompletions.status, "pending")
+            inArray(taskCompletions.status, ["pending", "approved", "rejected"])
           )
         )
+        .orderBy(desc(taskCompletions.completedAt))
         .limit(1);
-      
-      return pendingCompletion?.status || null;
+
+      if (!latestCompletion) return null;
+      if (latestCompletion.status === "pending") return "pending";
+      if (latestCompletion.status === "rejected") return "rejected";
+      // approved → immediately available again
+      return null;
     }
     
     // For daily/weekdays recurring tasks, only check completions from TODAY (in family timezone)
