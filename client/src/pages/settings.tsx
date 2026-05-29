@@ -13,8 +13,8 @@ import { Slider } from "@/components/ui/slider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag } from "lucide-react";
-import { useLocation } from "wouter";
+import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag } from "lucide-react";
+import { useLocation, Link } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getMaxMembers } from "@shared/tier-config";
@@ -1162,6 +1162,27 @@ export default function Settings() {
                     </>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Account Settings — link to dedicated /account page */}
+          {user?.email && (
+            <Card id="account">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Key className="h-5 w-5 text-primary" />
+                  <CardTitle>{t('settings.accountSettings')}</CardTitle>
+                </div>
+                <CardDescription>{t('settings.accountSettingsDesc')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild variant="outline" className="w-full justify-between" data-testid="button-go-to-account">
+                  <Link href="/account">
+                    <span>{t('settings.changePassword')} &amp; {t('settings.changeEmail')}</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           )}
