@@ -1695,11 +1695,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (!task.sharedMemberIds.includes(member.id)) {
                   return null;
                 }
+                // For immediate recurrence: keep "approved" visible so "waiting for others" shows
+                const skipReset = task.recurrence === 'immediate';
                 const sharedMemberCompletions = await Promise.all(
                   task.sharedMemberIds.map(async (memberId: string) => {
                     const sharedMember = await storage.getFamilyMemberById(memberId);
                     if (!sharedMember) return null;
-                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId, undefined, skipReset);
                     return {
                       memberId,
                       displayName: sharedMember.displayName,
@@ -1716,6 +1718,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 // allApproved: Only true when ALL members have APPROVED status (not pending)
                 const allApproved = sharedMemberCompletions.filter(m => m?.hasCompleted).length === task.sharedMemberIds.length;
+
+                // For IMMEDIATE recurrence: once all members approved → reset for next round
+                if (task.recurrence === 'immediate' && allApproved) {
+                  const resetCompletions = sharedMemberCompletions.filter(Boolean).map(m => m ? {
+                    ...m, hasCompleted: false, hasSubmitted: false, status: null,
+                  } : null).filter(Boolean);
+                  return {
+                    ...task,
+                    remainingSlots: null,
+                    memberHasCompleted: false,
+                    memberCompletionStatus: null,
+                    completions: [],
+                    sharedMemberCompletions: resetCompletions,
+                  };
+                }
                 
                 // For children: check if THIS member has submitted (to grey out the card while pending/approved)
                 const currentMemberCompletion = sharedMemberCompletions.find(m => m?.memberId === member.id);
@@ -2797,13 +2814,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Without this, old "approved" completions from round N bleed into round N+1
       // causing the task to appear fully completed (0/2) before anyone has submitted.
       if (task?.recurrence === "immediate") {
+        // Support both new-style taskAssignments and legacy sharedMemberIds
         const immediateAssignedIds = await storage.getTaskAssignmentsByTask(task.id);
-        if (immediateAssignedIds.length > 1) {
+        const sharedIds: string[] = (task.sharedMemberIds && (task.sharedMemberIds as string[]).length > 0)
+          ? (task.sharedMemberIds as string[])
+          : [];
+        const targetIds = immediateAssignedIds.length > 1
+          ? immediateAssignedIds
+          : sharedIds.length > 1 ? sharedIds : [];
+
+        if (targetIds.length > 1) {
           const allCompletionsNow = await storage.getTaskCompletionsByTask(task.id);
           const approvedMemberIds = allCompletionsNow
             .filter((c: any) => c.status === "approved")
             .map((c: any) => c.memberId);
-          const allNowApproved = immediateAssignedIds.every((id: string) => approvedMemberIds.includes(id));
+          const allNowApproved = targetIds.every((id: string) => approvedMemberIds.includes(id));
           if (allNowApproved) {
             await storage.deleteTaskCompletionsByTask(task.id);
           }
