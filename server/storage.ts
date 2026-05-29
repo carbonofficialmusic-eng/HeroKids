@@ -185,6 +185,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByEmailVerificationToken(tokenHash: string): Promise<User | undefined>;
+  getUserByPendingEmailVerificationToken(tokenHash: string): Promise<User | undefined>;
   getUserByPasswordResetToken(tokenHash: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   createLocalUser(user: UpsertUser): Promise<User>;
@@ -409,6 +410,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.emailVerificationTokenHash, tokenHash));
+    return user;
+  }
+
+  async getUserByPendingEmailVerificationToken(tokenHash: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.pendingEmailVerificationTokenHash, tokenHash));
     return user;
   }
 

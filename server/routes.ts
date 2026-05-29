@@ -324,6 +324,8 @@ function sanitizeAccountForClient(user: any) {
     emailVerificationTokenExpiresAt,
     passwordResetTokenHash,
     passwordResetTokenExpiresAt,
+    pendingEmailVerificationTokenHash,
+    pendingEmailVerificationTokenExpiresAt,
     ...safeUser
   } = user;
   return safeUser;

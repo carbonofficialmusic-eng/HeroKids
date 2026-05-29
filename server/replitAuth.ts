@@ -78,6 +78,8 @@ function sanitizeUser(user: any) {
     emailVerificationTokenExpiresAt,
     passwordResetTokenHash,
     passwordResetTokenExpiresAt,
+    pendingEmailVerificationTokenHash,
+    pendingEmailVerificationTokenExpiresAt,
     ...safeUser
   } = user;
   return safeUser;
@@ -336,18 +338,41 @@ export async function setupAuth(app: Express) {
         return res.redirect("/?verified=invalid");
       }
 
-      const user = await storage.getUserByEmailVerificationToken(hashToken(token));
-      if (!user || !user.emailVerificationTokenExpiresAt || user.emailVerificationTokenExpiresAt < new Date()) {
-        return res.redirect("/?verified=invalid");
+      const tokenHash = hashToken(token);
+
+      // First check normal initial-verification token
+      const user = await storage.getUserByEmailVerificationToken(tokenHash);
+      if (user) {
+        if (!user.emailVerificationTokenExpiresAt || user.emailVerificationTokenExpiresAt < new Date()) {
+          return res.redirect("/?verified=invalid");
+        }
+        await storage.updateUserAuthFields(user.id, {
+          isEmailVerified: true,
+          emailVerificationTokenHash: null,
+          emailVerificationTokenExpiresAt: null,
+        });
+        return res.redirect("/?verified=success");
       }
 
-      await storage.updateUserAuthFields(user.id, {
-        isEmailVerified: true,
-        emailVerificationTokenHash: null,
-        emailVerificationTokenExpiresAt: null,
-      });
+      // Then check pending-email-change token — promote pendingEmail → email
+      const pendingUser = await storage.getUserByPendingEmailVerificationToken(tokenHash);
+      if (
+        pendingUser &&
+        pendingUser.pendingEmail &&
+        pendingUser.pendingEmailVerificationTokenExpiresAt &&
+        pendingUser.pendingEmailVerificationTokenExpiresAt >= new Date()
+      ) {
+        await storage.updateUserAuthFields(pendingUser.id, {
+          email: pendingUser.pendingEmail,
+          isEmailVerified: true,
+          pendingEmail: null,
+          pendingEmailVerificationTokenHash: null,
+          pendingEmailVerificationTokenExpiresAt: null,
+        });
+        return res.redirect("/?verified=success");
+      }
 
-      res.redirect("/?verified=success");
+      res.redirect("/?verified=invalid");
     } catch (error) {
       console.error("Verify email error:", error);
       res.redirect("/?verified=invalid");
@@ -449,12 +474,12 @@ export async function setupAuth(app: Express) {
         return res.status(409).json({ message: "Diese E-Mail-Adresse wird bereits von einem anderen Konto genutzt." });
       }
 
+      // Store as pending — old email stays active until the new one is confirmed
       const token = createToken();
       await storage.updateUserAuthFields(userId, {
-        email: newEmail,
-        isEmailVerified: false,
-        emailVerificationTokenHash: hashToken(token),
-        emailVerificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        pendingEmail: newEmail,
+        pendingEmailVerificationTokenHash: hashToken(token),
+        pendingEmailVerificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       });
 
       try {
@@ -462,12 +487,12 @@ export async function setupAuth(app: Express) {
         await sendVerificationEmail(newEmail, user.firstName, verificationUrl);
       } catch (emailError) {
         if (emailError instanceof EmailProviderNotConfiguredError) {
-          return res.json({ message: "E-Mail-Adresse wurde geändert. Bestätigungsmail konnte nicht gesendet werden (kein E-Mail-Anbieter konfiguriert)." });
+          return res.json({ message: "Bestätigungsmail konnte nicht gesendet werden (kein E-Mail-Anbieter konfiguriert). Deine alte Adresse bleibt aktiv." });
         }
         console.error("Change email: verification send failed:", emailError);
       }
 
-      res.json({ message: "E-Mail-Adresse wurde geändert. Bestätigungsmail wurde gesendet." });
+      res.json({ message: "Bestätigungsmail wurde gesendet. Deine alte Adresse bleibt aktiv bis zur Bestätigung." });
     } catch (error: any) {
       console.error("Change email error:", error);
       res.status(400).json({ message: error?.message || "E-Mail-Änderung fehlgeschlagen." });
