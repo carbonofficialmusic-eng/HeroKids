@@ -26,10 +26,21 @@ import { getAvatarUrl } from "@/lib/skins";
 import confetti from "canvas-confetti";
 
 // Extended RewardRedemption type with sharing details
+type SharingParticipant = {
+  id: string;
+  memberId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  activeSkinId: string | null;
+  color: string;
+  pointsContributed: number;
+};
+
 type RedemptionWithDetails = RewardRedemption & {
   rewardTitle?: string;
   sharingStatus: "not_shared" | "sharing_active" | "sharing_finalized";
   originalPointsSpent: number;
+  sharingParticipants?: SharingParticipant[];
 };
 
 // Shared reward type with participants
@@ -257,7 +268,22 @@ export default function MyRewards() {
             myRedemptions.map((redemption, index) => {
               const typed = redemption as RedemptionWithDetails;
               const shared = sharedRewards.find(s => s.id === typed.id);
-              const participants = shared?.participants || [];
+              // For active shares use the /api/rewards/shared data (has join actions)
+              // For finalized/completed shares use sharingParticipants from /api/reward-redemptions
+              const participants = shared?.participants ||
+                typed.sharingParticipants?.map(p => ({
+                  id: p.id,
+                  memberId: p.memberId,
+                  pointsContributed: p.pointsContributed,
+                  joinedAt: "",
+                  member: {
+                    id: p.memberId,
+                    displayName: p.displayName,
+                    avatarUrl: p.avatarUrl,
+                    activeSkinId: p.activeSkinId,
+                    color: p.color,
+                  },
+                })) || [];
               const isSharing = typed.sharingStatus === "sharing_active";
               const isFinalized = typed.sharingStatus === "sharing_finalized";
               const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && canUseSharedRewardsFeature;
@@ -327,18 +353,31 @@ export default function MyRewards() {
                           )}
                         </div>
 
-                        {/* Participants */}
+                        {/* Participants — always shown, even for fulfilled shared rewards */}
                         {participants.length > 0 && (
-                          <div className="flex items-center gap-2 flex-wrap pt-1">
-                            <p className="text-xs text-muted-foreground">{t("myRewards.with")}:</p>
-                            {participants.map(p => (
-                              <Avatar key={p.id} className="h-6 w-6 border-2 border-background">
-                                <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar, (p.member as any).updatedAt)} />
-                                <AvatarFallback className="text-xs">
-                                  {p.member.displayName[0]}
-                                </AvatarFallback>
-                              </Avatar>
-                            ))}
+                          <div className={`flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 mt-1 ${
+                            typed.status === "completed" ? "bg-black/10 dark:bg-white/5" : ""
+                          }`}>
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Users className="h-3.5 w-3.5" />
+                              <span>{t("myRewards.with")}:</span>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {participants.map(p => (
+                                <div key={p.id} className="flex items-center gap-1.5">
+                                  <Avatar className="h-6 w-6 border-2 border-background">
+                                    <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar, (p.member as any).updatedAt)} />
+                                    <AvatarFallback
+                                      className="text-xs font-bold text-white"
+                                      style={{ backgroundColor: p.member.color }}
+                                    >
+                                      {p.member.displayName[0]}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-sm font-medium">{p.member.displayName}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
 
