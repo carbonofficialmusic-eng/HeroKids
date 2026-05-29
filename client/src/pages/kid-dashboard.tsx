@@ -2218,10 +2218,10 @@ export default function KidDashboard() {
                 {t("kidDashboard.rewards")}
               </h2>
             </div>
-            {myRedemptions.length > 0 && (
+            {activeRewards.length > 3 && (
               <Button variant="ghost" size="sm" asChild className="text-white/90 bg-white/10 border border-white/15 rounded-full px-4" data-testid="button-view-all-rewards-board">
-                <Link href="/my-rewards">
-                  {t("kidDashboard.myRewards")}
+                <Link href="/rewards-board">
+                  {t("kidDashboard.viewAll")}
                 </Link>
               </Button>
             )}
@@ -2235,7 +2235,7 @@ export default function KidDashboard() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {activeRewards.map((reward, index) => (
+              {activeRewards.slice(0, 3).map((reward, index) => (
                 <motion.div
                   key={reward.id}
                   initial={{ opacity: 0, y: 20 }}
