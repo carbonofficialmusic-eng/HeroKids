@@ -387,6 +387,93 @@ export async function setupAuth(app: Express) {
     }
   });
 
+  const changePasswordSchema = z.object({
+    currentPassword: z.string().min(1).max(128),
+    newPassword: z.string().min(8).max(128),
+  });
+
+  app.post("/api/auth/change-password", isAuthenticated, authRateLimit(5, 60 * 1000), async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) return res.status(401).json({ message: "Nicht eingeloggt." });
+
+      const user = await storage.getUser(userId);
+      if (!user?.passwordHash) {
+        return res.status(400).json({ message: "Dieses Konto hat kein Passwort." });
+      }
+
+      const parsed = changePasswordSchema.parse(req.body);
+      const isValid = await bcrypt.compare(parsed.currentPassword, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ message: "Das aktuelle Passwort ist falsch." });
+      }
+
+      const newPasswordHash = await bcrypt.hash(parsed.newPassword, 12);
+      await storage.updateUserAuthFields(userId, { passwordHash: newPasswordHash });
+
+      res.json({ message: "Passwort wurde geändert." });
+    } catch (error: any) {
+      console.error("Change password error:", error);
+      res.status(400).json({ message: error?.message || "Passwortänderung fehlgeschlagen." });
+    }
+  });
+
+  const changeEmailSchema = z.object({
+    currentPassword: z.string().min(1).max(128),
+    newEmail: z.string().email().max(320),
+  });
+
+  app.post("/api/auth/change-email", isAuthenticated, authRateLimit(5, 60 * 1000), async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) return res.status(401).json({ message: "Nicht eingeloggt." });
+
+      const user = await storage.getUser(userId);
+      if (!user?.passwordHash) {
+        return res.status(400).json({ message: "Dieses Konto hat kein Passwort." });
+      }
+
+      const parsed = changeEmailSchema.parse(req.body);
+      const isValid = await bcrypt.compare(parsed.currentPassword, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ message: "Das aktuelle Passwort ist falsch." });
+      }
+
+      const newEmail = normalizeEmail(parsed.newEmail);
+      if (newEmail === normalizeEmail(user.email || "")) {
+        return res.status(400).json({ message: "Die neue E-Mail-Adresse ist identisch mit der aktuellen." });
+      }
+
+      const existing = await storage.getUserByEmail(newEmail);
+      if (existing && existing.id !== userId && existing.isEmailVerified) {
+        return res.status(409).json({ message: "Diese E-Mail-Adresse wird bereits von einem anderen Konto genutzt." });
+      }
+
+      const token = createToken();
+      await storage.updateUserAuthFields(userId, {
+        email: newEmail,
+        isEmailVerified: false,
+        emailVerificationTokenHash: hashToken(token),
+        emailVerificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+
+      try {
+        const verificationUrl = createEmailVerificationUrl(token);
+        await sendVerificationEmail(newEmail, user.firstName, verificationUrl);
+      } catch (emailError) {
+        if (emailError instanceof EmailProviderNotConfiguredError) {
+          return res.json({ message: "E-Mail-Adresse wurde geändert. Bestätigungsmail konnte nicht gesendet werden (kein E-Mail-Anbieter konfiguriert)." });
+        }
+        console.error("Change email: verification send failed:", emailError);
+      }
+
+      res.json({ message: "E-Mail-Adresse wurde geändert. Bestätigungsmail wurde gesendet." });
+    } catch (error: any) {
+      console.error("Change email error:", error);
+      res.status(400).json({ message: error?.message || "E-Mail-Änderung fehlgeschlagen." });
+    }
+  });
+
   app.post("/api/auth/logout", (req, res) => {
     if (isDev) {
       const devToken = req.headers["x-dev-token"] as string | undefined;

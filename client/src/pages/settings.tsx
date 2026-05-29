@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag } from "lucide-react";
+import { ChevronLeft, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, Mail } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +56,13 @@ export default function Settings() {
   const [deviceLinkDialogOpen, setDeviceLinkDialogOpen] = useState(false);
   const [localSkinCardCost, setLocalSkinCardCost] = useState<number | null>(null);
   const [localCategoryNames, setLocalCategoryNames] = useState<{ household: string; school: string; selfCare: string; other: string }>({ household: "", school: "", selfCare: "", other: "" });
+  const [cpCurrentPw, setCpCurrentPw] = useState("");
+  const [cpNewPw, setCpNewPw] = useState("");
+  const [cpConfirmPw, setCpConfirmPw] = useState("");
+  const [cpError, setCpError] = useState("");
+  const [ceCurrentPw, setCeCurrentPw] = useState("");
+  const [ceNewEmail, setCeNewEmail] = useState("");
+  const [ceError, setCeError] = useState("");
 
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -289,6 +296,40 @@ export default function Settings() {
         description: t('settings.errorSetPin'),
         variant: "destructive",
       });
+    },
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
+      return await apiRequest("POST", "/api/auth/change-password", data);
+    },
+    onSuccess: () => {
+      setCpCurrentPw("");
+      setCpNewPw("");
+      setCpConfirmPw("");
+      setCpError("");
+      toast({ title: t('settings.passwordChanged'), description: t('settings.passwordChangedDesc') });
+    },
+    onError: (error: any) => {
+      const msg = error instanceof ApiError && error.data?.message ? error.data.message : t('errors.somethingWrong');
+      setCpError(msg);
+    },
+  });
+
+  const changeEmailMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string; newEmail: string }) => {
+      return await apiRequest("POST", "/api/auth/change-email", data);
+    },
+    onSuccess: () => {
+      setCeCurrentPw("");
+      setCeNewEmail("");
+      setCeError("");
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({ title: t('settings.emailChangeSent'), description: t('settings.emailChangeSentDesc') });
+    },
+    onError: (error: any) => {
+      const msg = error instanceof ApiError && error.data?.message ? error.data.message : t('errors.somethingWrong');
+      setCeError(msg);
     },
   });
 
@@ -1161,6 +1202,114 @@ export default function Settings() {
                       </p>
                     </>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Account Settings — visible only to parents with email/password login */}
+          {user?.email && (
+            <Card id="account">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Key className="h-5 w-5 text-primary" />
+                  <CardTitle>{t('settings.accountSettings')}</CardTitle>
+                </div>
+                <CardDescription>{t('settings.accountSettingsDesc')}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Change Password */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Key className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="font-medium text-sm">{t('settings.changePassword')}</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('settings.changePasswordDesc')}</p>
+                  <div className="space-y-2">
+                    <Input
+                      type="password"
+                      placeholder={t('settings.currentPassword')}
+                      value={cpCurrentPw}
+                      onChange={(e) => { setCpCurrentPw(e.target.value); setCpError(""); }}
+                      data-testid="input-current-password"
+                      autoComplete="current-password"
+                    />
+                    <Input
+                      type="password"
+                      placeholder={t('settings.newPassword')}
+                      value={cpNewPw}
+                      onChange={(e) => { setCpNewPw(e.target.value); setCpError(""); }}
+                      data-testid="input-new-password"
+                      autoComplete="new-password"
+                    />
+                    <Input
+                      type="password"
+                      placeholder={t('settings.confirmNewPassword')}
+                      value={cpConfirmPw}
+                      onChange={(e) => { setCpConfirmPw(e.target.value); setCpError(""); }}
+                      data-testid="input-confirm-new-password"
+                      autoComplete="new-password"
+                    />
+                    {cpError && (
+                      <p className="text-sm text-destructive" data-testid="text-cp-error">{cpError}</p>
+                    )}
+                    <Button
+                      onClick={() => {
+                        if (cpNewPw !== cpConfirmPw) {
+                          setCpError(t('settings.passwordsDoNotMatch'));
+                          return;
+                        }
+                        setCpError("");
+                        changePasswordMutation.mutate({ currentPassword: cpCurrentPw, newPassword: cpNewPw });
+                      }}
+                      disabled={changePasswordMutation.isPending || !cpCurrentPw || !cpNewPw || !cpConfirmPw}
+                      data-testid="button-change-password"
+                    >
+                      {changePasswordMutation.isPending ? t('common.loading') : t('settings.changePassword')}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="border-t" />
+
+                {/* Change Email */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="font-medium text-sm">{t('settings.changeEmail')}</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('settings.changeEmailDesc')}</p>
+                  <div className="space-y-2">
+                    <Input
+                      type="email"
+                      placeholder={t('settings.newEmail')}
+                      value={ceNewEmail}
+                      onChange={(e) => { setCeNewEmail(e.target.value); setCeError(""); }}
+                      data-testid="input-new-email"
+                      autoComplete="email"
+                    />
+                    <Input
+                      type="password"
+                      placeholder={t('settings.currentPassword')}
+                      value={ceCurrentPw}
+                      onChange={(e) => { setCeCurrentPw(e.target.value); setCeError(""); }}
+                      data-testid="input-email-current-password"
+                      autoComplete="current-password"
+                    />
+                    {ceError && (
+                      <p className="text-sm text-destructive" data-testid="text-ce-error">{ceError}</p>
+                    )}
+                    <Button
+                      onClick={() => {
+                        setCeError("");
+                        changeEmailMutation.mutate({ currentPassword: ceCurrentPw, newEmail: ceNewEmail });
+                      }}
+                      disabled={changeEmailMutation.isPending || !ceCurrentPw || !ceNewEmail}
+                      data-testid="button-change-email"
+                    >
+                      {changeEmailMutation.isPending ? t('common.loading') : t('settings.changeEmail')}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

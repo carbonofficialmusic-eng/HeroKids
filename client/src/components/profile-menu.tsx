@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Settings, Palette, User2, LogOut, Sun, Moon, Menu, Trophy, MailCheck, Loader2 } from "lucide-react";
+import { Settings, Palette, User2, LogOut, Sun, Moon, Menu, Trophy, MailCheck, Loader2, KeyRound } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -157,6 +157,14 @@ export function ProfileMenu({
                 <span>{t("settings.familySettings")}</span>
               </Link>
             </DropdownMenuItem>
+            {!!user?.email && (
+              <DropdownMenuItem asChild>
+                <Link href="/settings#account" data-testid="menu-item-account-settings">
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  <span>{t("settings.accountSettings")}</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
           </>
         )}
         
