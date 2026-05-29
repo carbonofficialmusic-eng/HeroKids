@@ -11,7 +11,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Clock, MessageSquare, RefreshCw } from "lucide-react";
+import { ChevronDown, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -435,11 +435,13 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
 function TaskCard({ 
   task, 
   member, 
-  onOpenTaskDialog 
+  onOpenTaskDialog,
+  compact = false,
 }: { 
   task: TaskWithMeta; 
   member: FamilyMember;
   onOpenTaskDialog: (task: TaskWithMeta) => void;
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -625,6 +627,73 @@ function TaskCard({
   } else if (dueDateInfo.isLate) {
     statusMessage = t("tasks.dueDateLate", { days: dueDateInfo.daysPast });
     statusColor = "text-amber-600 dark:text-amber-400";
+  }
+
+  if (compact) {
+    return (
+      <motion.div
+        whileHover={{ scale: isActionable ? 1.02 : 1 }}
+        whileTap={{ scale: isActionable ? 0.97 : 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        className="min-w-0"
+      >
+        <Card
+          className={`p-3 transition-all backdrop-blur-md border-2 rounded-2xl min-w-0 w-full ${
+            isActionable && !isRejected
+              ? "bg-white/10 cursor-pointer border-white/20 shadow-lg shadow-black/20 hover:border-primary/60 hover:bg-white/15"
+              : isActionable && isRejected
+              ? "bg-blue-500/10 cursor-pointer border-blue-400/40"
+              : showAsApproved
+              ? "bg-green-500/10 border-green-500/45"
+              : showAsPending
+              ? "bg-amber-500/10 border-amber-400/45"
+              : dueDateInfo.expired
+              ? "bg-destructive/10 border-destructive/40"
+              : "bg-white/5 border-white/15"
+          }`}
+          data-testid={`task-card-${task.id}`}
+          onClick={isActionable ? handleComplete : undefined}
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className={`flex-shrink-0 p-2 rounded-xl ${
+              showAsApproved ? "bg-green-500/25" :
+              showAsPending ? "bg-amber-500/25" :
+              isRejected ? "bg-blue-500/20" :
+              isActionable ? "bg-gradient-to-br from-primary/25 to-primary/15" :
+              "bg-white/10"
+            }`}>
+              {completeMutation.isPending ? (
+                <Loader2 className="h-6 w-6 text-primary animate-spin" />
+              ) : showAsApproved || allSharedMembersCompleted ? (
+                <CheckCircle2 className="h-6 w-6 text-green-500" />
+              ) : showAsPending ? (
+                <CheckCircle2 className="h-6 w-6 text-amber-500" />
+              ) : showAsSubmitted ? (
+                <CheckCircle2 className="h-6 w-6 text-muted-foreground" />
+              ) : (
+                <TaskIcon
+                  className="h-6 w-6 text-primary"
+                  style={{ filter: isActionable ? "grayscale(0%)" : "grayscale(100%)" }}
+                />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm leading-tight truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                {task.title}
+              </p>
+              {statusMessage ? (
+                <p className={`text-xs truncate leading-tight mt-0.5 ${statusColor}`}>{statusMessage}</p>
+              ) : (
+                <div className="flex items-center gap-1 mt-0.5">
+                  <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />
+                  <span className="text-xs font-bold text-amber-400">+{task.points}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    );
   }
 
   return (
@@ -1121,7 +1190,16 @@ export default function KidDashboard() {
   }, []);
 
   const [kidTaskFilter, setKidTaskFilter] = useState<"daily" | "weekly" | "monthly" | "onetime" | "all">("all");
+  const [kidDashboardView, setKidDashboardView] = useState<"list" | "grid">(() => {
+    const saved = localStorage.getItem("herokids_kid_dashboard_view");
+    return saved === "grid" ? "grid" : "list";
+  });
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+
+  // Persist kid dashboard view preference
+  useEffect(() => {
+    localStorage.setItem("herokids_kid_dashboard_view", kidDashboardView);
+  }, [kidDashboardView]);
 
   // Auto-refresh tasks at midnight when daily tasks reset
   useMidnightRefresh();
@@ -2319,55 +2397,66 @@ export default function KidDashboard() {
             </div>
             
             {/* Kid-friendly filter tabs */}
-            <div className="flex bg-black/25 backdrop-blur-md rounded-xl p-1 gap-0.5 flex-wrap border border-white/10">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex bg-black/25 backdrop-blur-md rounded-xl p-1 gap-0.5 flex-wrap border border-white/10">
+                <Button
+                  variant={kidTaskFilter === "daily" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setKidTaskFilter("daily")}
+                  className="text-xs px-3"
+                  data-testid="button-kid-filter-daily"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  {t("kidDashboard.filterDaily")}
+                </Button>
+                <Button
+                  variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setKidTaskFilter("weekly")}
+                  className="text-xs px-3"
+                  data-testid="button-kid-filter-weekly"
+                >
+                  <Calendar className="h-3 w-3 mr-1" />
+                  {t("kidDashboard.filterWeekly")}
+                </Button>
+                <Button
+                  variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setKidTaskFilter("monthly")}
+                  className="text-xs px-3"
+                  data-testid="button-kid-filter-monthly"
+                >
+                  <Star className="h-3 w-3 mr-1" />
+                  {t("kidDashboard.filterMonthly")}
+                </Button>
+                <Button
+                  variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setKidTaskFilter("onetime")}
+                  className="text-xs px-3"
+                  data-testid="button-kid-filter-onetime"
+                >
+                  <Target className="h-3 w-3 mr-1" />
+                  {t("kidDashboard.filterOneTime")}
+                </Button>
+                <Button
+                  variant={kidTaskFilter === "all" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setKidTaskFilter("all")}
+                  className="text-xs px-3"
+                  data-testid="button-kid-filter-all"
+                >
+                  {t("kidDashboard.filterAll")}
+                </Button>
+              </div>
               <Button
-                variant={kidTaskFilter === "daily" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setKidTaskFilter("daily")}
-                className="text-xs px-3"
-                data-testid="button-kid-filter-daily"
+                size="icon"
+                variant="ghost"
+                onClick={() => setKidDashboardView(kidDashboardView === "list" ? "grid" : "list")}
+                className={`bg-black/25 backdrop-blur-md border border-white/10 toggle-elevate${kidDashboardView === "grid" ? " toggle-elevated" : ""}`}
+                data-testid="button-kid-view-toggle"
               >
-                <RefreshCw className="h-3 w-3 mr-1" />
-                {t("kidDashboard.filterDaily")}
-              </Button>
-              <Button
-                variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setKidTaskFilter("weekly")}
-                className="text-xs px-3"
-                data-testid="button-kid-filter-weekly"
-              >
-                <Calendar className="h-3 w-3 mr-1" />
-                {t("kidDashboard.filterWeekly")}
-              </Button>
-              <Button
-                variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setKidTaskFilter("monthly")}
-                className="text-xs px-3"
-                data-testid="button-kid-filter-monthly"
-              >
-                <Star className="h-3 w-3 mr-1" />
-                {t("kidDashboard.filterMonthly")}
-              </Button>
-              <Button
-                variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setKidTaskFilter("onetime")}
-                className="text-xs px-3"
-                data-testid="button-kid-filter-onetime"
-              >
-                <Target className="h-3 w-3 mr-1" />
-                {t("kidDashboard.filterOneTime")}
-              </Button>
-              <Button
-                variant={kidTaskFilter === "all" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setKidTaskFilter("all")}
-                className="text-xs px-3"
-                data-testid="button-kid-filter-all"
-              >
-                {t("kidDashboard.filterAll")}
+                {kidDashboardView === "grid" ? <LayoutGrid className="h-4 w-4" /> : <LayoutList className="h-4 w-4" />}
               </Button>
             </div>
           </div>
@@ -2417,7 +2506,7 @@ export default function KidDashboard() {
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                      <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2 mt-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2"}>
                         {categoryTasks.map((task, index) => (
                           <motion.div
                             key={task.id}
@@ -2426,7 +2515,7 @@ export default function KidDashboard() {
                             transition={{ delay: index * 0.05 }}
                             className="min-w-0"
                           >
-                            <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} />
+                            <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
                           </motion.div>
                         ))}
                       </div>
@@ -2436,7 +2525,7 @@ export default function KidDashboard() {
               ))}
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-hidden">
+            <div className={`overflow-hidden ${kidDashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4"}`}>
               {filteredKidTasks.map((task, index) => (
                 <motion.div
                   key={task.id}
@@ -2445,7 +2534,7 @@ export default function KidDashboard() {
                   transition={{ delay: index * 0.1 }}
                   className="min-w-0"
                 >
-                  <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} />
+                  <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
                 </motion.div>
               ))}
             </div>
