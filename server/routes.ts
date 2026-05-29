@@ -1653,6 +1653,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const hasCompleted = task.recurrence === "immediate" 
                 ? completionStatus === "pending"  // Immediate: blocked while pending
                 : completionStatus === "approved"; // Others: completed when approved
+
+              // DEBUG: log immediate multi-assignment task state
+              if (task.recurrence === 'immediate') {
+                const _assignedIds = await storage.getTaskAssignmentsByTask(task.id);
+                console.log(`[DEBUG immediate] task=${task.id} title="${task.title}" memberId=${member.id} completionStatus=${completionStatus} isSharedTask=${task.isSharedTask} sharedMemberIds=${JSON.stringify(task.sharedMemberIds)} maxCompletions=${task.maxCompletions} taskAssignments=${JSON.stringify(_assignedIds)}`);
+              }
               
               // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
               if (task.maxCompletions !== null) {
