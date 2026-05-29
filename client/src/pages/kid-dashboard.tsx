@@ -630,68 +630,70 @@ function TaskCard({
   }
 
   if (compact) {
+    const borderColor = showAsApproved || allSharedMembersCompleted
+      ? "border-green-500/50"
+      : showAsPending
+      ? "border-amber-400/50"
+      : isRejected
+      ? "border-blue-400/40"
+      : dueDateInfo.expired
+      ? "border-destructive/40"
+      : isActionable
+      ? "border-white/20"
+      : "border-white/10";
+
+    const bgColor = showAsApproved || allSharedMembersCompleted
+      ? "bg-green-500/10"
+      : showAsPending
+      ? "bg-amber-500/10"
+      : isRejected
+      ? "bg-blue-500/10"
+      : dueDateInfo.expired
+      ? "bg-destructive/10"
+      : isActionable
+      ? "bg-white/10"
+      : "bg-white/5";
+
     return (
       <motion.div
-        whileHover={{ scale: isActionable ? 1.02 : 1 }}
-        whileTap={{ scale: isActionable ? 0.97 : 1 }}
+        whileTap={{ scale: isActionable ? 0.96 : 1 }}
         transition={{ type: "spring", stiffness: 400, damping: 20 }}
         className="min-w-0"
       >
-        <Card
-          className={`p-3 transition-all backdrop-blur-md border-2 rounded-2xl min-w-0 w-full ${
-            isActionable && !isRejected
-              ? "bg-white/10 cursor-pointer border-white/20 shadow-lg shadow-black/20 hover:border-primary/60 hover:bg-white/15"
-              : isActionable && isRejected
-              ? "bg-blue-500/10 cursor-pointer border-blue-400/40"
-              : showAsApproved
-              ? "bg-green-500/10 border-green-500/45"
-              : showAsPending
-              ? "bg-amber-500/10 border-amber-400/45"
-              : dueDateInfo.expired
-              ? "bg-destructive/10 border-destructive/40"
-              : "bg-white/5 border-white/15"
-          }`}
+        <div
+          className={`p-2.5 rounded-2xl backdrop-blur-md border transition-all min-w-0 w-full ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
           data-testid={`task-card-${task.id}`}
           onClick={isActionable ? handleComplete : undefined}
         >
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className={`flex-shrink-0 p-2 rounded-xl ${
-              showAsApproved ? "bg-green-500/25" :
-              showAsPending ? "bg-amber-500/25" :
-              isRejected ? "bg-blue-500/20" :
-              isActionable ? "bg-gradient-to-br from-primary/25 to-primary/15" :
-              "bg-white/10"
-            }`}>
-              {completeMutation.isPending ? (
-                <Loader2 className="h-6 w-6 text-primary animate-spin" />
-              ) : showAsApproved || allSharedMembersCompleted ? (
-                <CheckCircle2 className="h-6 w-6 text-green-500" />
-              ) : showAsPending ? (
-                <CheckCircle2 className="h-6 w-6 text-amber-500" />
-              ) : showAsSubmitted ? (
-                <CheckCircle2 className="h-6 w-6 text-muted-foreground" />
-              ) : (
-                <TaskIcon
-                  className="h-6 w-6 text-primary"
-                  style={{ filter: isActionable ? "grayscale(0%)" : "grayscale(100%)" }}
-                />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-sm leading-tight truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                {task.title}
-              </p>
-              {statusMessage ? (
-                <p className={`text-xs truncate leading-tight mt-0.5 ${statusColor}`}>{statusMessage}</p>
-              ) : (
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />
-                  <span className="text-xs font-bold text-amber-400">+{task.points}</span>
-                </div>
-              )}
-            </div>
+          {/* Emoji + title row */}
+          <div className="flex items-start gap-2 min-w-0">
+            <span className="text-2xl leading-none flex-shrink-0 mt-0.5" style={{ filter: isActionable ? "grayscale(0%)" : "grayscale(80%)" }}>
+              {task.iconEmoji || "✅"}
+            </span>
+            <p className="font-bold text-sm leading-snug line-clamp-2 flex-1 min-w-0 text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+              {task.title}
+            </p>
+            {(showAsApproved || allSharedMembersCompleted) && (
+              <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
+            )}
+            {showAsPending && !showAsApproved && (
+              <CheckCircle2 className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
+            )}
           </div>
-        </Card>
+          {/* Points / status row */}
+          <div className="mt-1.5 flex items-center gap-1">
+            {completeMutation.isPending ? (
+              <Loader2 className="h-3 w-3 animate-spin text-primary" />
+            ) : statusMessage ? (
+              <p className={`text-xs leading-tight truncate ${statusColor}`}>{statusMessage}</p>
+            ) : (
+              <>
+                <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />
+                <span className="text-xs font-bold text-amber-400">+{task.points}</span>
+              </>
+            )}
+          </div>
+        </div>
       </motion.div>
     );
   }
@@ -2394,61 +2396,6 @@ export default function KidDashboard() {
               <h2 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.tasks")}
               </h2>
-            </div>
-            
-            {/* Kid-friendly filter tabs */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex bg-black/25 backdrop-blur-md rounded-xl p-1 gap-0.5 flex-wrap border border-white/10">
-                <Button
-                  variant={kidTaskFilter === "daily" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setKidTaskFilter("daily")}
-                  className="text-xs px-3"
-                  data-testid="button-kid-filter-daily"
-                >
-                  <RefreshCw className="h-3 w-3 mr-1" />
-                  {t("kidDashboard.filterDaily")}
-                </Button>
-                <Button
-                  variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setKidTaskFilter("weekly")}
-                  className="text-xs px-3"
-                  data-testid="button-kid-filter-weekly"
-                >
-                  <Calendar className="h-3 w-3 mr-1" />
-                  {t("kidDashboard.filterWeekly")}
-                </Button>
-                <Button
-                  variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setKidTaskFilter("monthly")}
-                  className="text-xs px-3"
-                  data-testid="button-kid-filter-monthly"
-                >
-                  <Star className="h-3 w-3 mr-1" />
-                  {t("kidDashboard.filterMonthly")}
-                </Button>
-                <Button
-                  variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setKidTaskFilter("onetime")}
-                  className="text-xs px-3"
-                  data-testid="button-kid-filter-onetime"
-                >
-                  <Target className="h-3 w-3 mr-1" />
-                  {t("kidDashboard.filterOneTime")}
-                </Button>
-                <Button
-                  variant={kidTaskFilter === "all" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setKidTaskFilter("all")}
-                  className="text-xs px-3"
-                  data-testid="button-kid-filter-all"
-                >
-                  {t("kidDashboard.filterAll")}
-                </Button>
-              </div>
               <Button
                 size="icon"
                 variant="ghost"
@@ -2457,6 +2404,59 @@ export default function KidDashboard() {
                 data-testid="button-kid-view-toggle"
               >
                 {kidDashboardView === "grid" ? <LayoutGrid className="h-4 w-4" /> : <LayoutList className="h-4 w-4" />}
+              </Button>
+            </div>
+            
+            {/* Kid-friendly filter tabs */}
+            <div className="flex bg-black/25 backdrop-blur-md rounded-xl p-1 gap-0.5 flex-wrap border border-white/10">
+              <Button
+                variant={kidTaskFilter === "daily" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("daily")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-daily"
+              >
+                <RefreshCw className="h-3 w-3 mr-1" />
+                {t("kidDashboard.filterDaily")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("weekly")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-weekly"
+              >
+                <Calendar className="h-3 w-3 mr-1" />
+                {t("kidDashboard.filterWeekly")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("monthly")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-monthly"
+              >
+                <Star className="h-3 w-3 mr-1" />
+                {t("kidDashboard.filterMonthly")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("onetime")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-onetime"
+              >
+                <Target className="h-3 w-3 mr-1" />
+                {t("kidDashboard.filterOneTime")}
+              </Button>
+              <Button
+                variant={kidTaskFilter === "all" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setKidTaskFilter("all")}
+                className="text-xs px-3"
+                data-testid="button-kid-filter-all"
+              >
+                {t("kidDashboard.filterAll")}
               </Button>
             </div>
           </div>
@@ -2525,7 +2525,7 @@ export default function KidDashboard() {
               ))}
             </div>
           ) : (
-            <div className={`overflow-hidden ${kidDashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4"}`}>
+            <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
               {filteredKidTasks.map((task, index) => (
                 <motion.div
                   key={task.id}
