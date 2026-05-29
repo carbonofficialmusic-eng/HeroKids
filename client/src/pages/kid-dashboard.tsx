@@ -2388,18 +2388,29 @@ export default function KidDashboard() {
 
         {/* Tasks Section */}
         <div className="space-y-6">
-          {/* Title row */}
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
-              <Star className="h-8 w-8 text-white" />
+          {/* Title row: heading left, toggle right */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
+                <Star className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
+                {t("kidDashboard.tasks")}
+              </h2>
             </div>
-            <h2 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
-              {t("kidDashboard.tasks")}
-            </h2>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setKidDashboardView(kidDashboardView === "list" ? "grid" : "list")}
+              className={`flex-shrink-0 bg-black/25 backdrop-blur-md border border-white/10 toggle-elevate${kidDashboardView === "grid" ? " toggle-elevated" : ""}`}
+              data-testid="button-kid-view-toggle"
+            >
+              {kidDashboardView === "grid" ? <LayoutGrid className="h-4 w-4" /> : <LayoutList className="h-4 w-4" />}
+            </Button>
           </div>
 
-          {/* Filter tabs + toggle on the same row */}
-          <div className="flex items-center justify-between gap-2">
+          {/* Filter tabs row */}
+          <div className="flex items-center gap-2">
             <div className="flex bg-black/25 backdrop-blur-md rounded-xl p-1 gap-0.5 flex-wrap border border-white/10">
             <Button
               variant={kidTaskFilter === "daily" ? "default" : "ghost"}
@@ -2451,15 +2462,6 @@ export default function KidDashboard() {
               {t("kidDashboard.filterAll")}
             </Button>
             </div>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setKidDashboardView(kidDashboardView === "list" ? "grid" : "list")}
-              className={`flex-shrink-0 bg-black/25 backdrop-blur-md border border-white/10 toggle-elevate${kidDashboardView === "grid" ? " toggle-elevated" : ""}`}
-              data-testid="button-kid-view-toggle"
-            >
-              {kidDashboardView === "grid" ? <LayoutGrid className="h-4 w-4" /> : <LayoutList className="h-4 w-4" />}
-            </Button>
           </div>
 
           {filteredKidTasks.length === 0 ? (
