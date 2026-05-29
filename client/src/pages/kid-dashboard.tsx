@@ -630,29 +630,29 @@ function TaskCard({
   }
 
   if (compact) {
+    const isTransparentState = showAsApproved || allSharedMembersCompleted || showAsPending || showAsSubmitted || isRejected || dueDateInfo.expired;
+
     const borderColor = showAsApproved || allSharedMembersCompleted
       ? "border-green-500/50"
-      : showAsPending
+      : showAsPending || showAsSubmitted
       ? "border-amber-400/50"
       : isRejected
       ? "border-blue-400/40"
       : dueDateInfo.expired
       ? "border-destructive/40"
-      : isActionable
-      ? "border-white/20"
-      : "border-white/10";
+      : "border-border";
 
     const bgColor = showAsApproved || allSharedMembersCompleted
       ? "bg-green-500/10"
-      : showAsPending
+      : showAsPending || showAsSubmitted
       ? "bg-amber-500/10"
       : isRejected
       ? "bg-blue-500/10"
       : dueDateInfo.expired
       ? "bg-destructive/10"
       : isActionable
-      ? "bg-white/10"
-      : "bg-white/5";
+      ? "bg-card"
+      : "bg-card opacity-70";
 
     return (
       <motion.div
@@ -661,7 +661,7 @@ function TaskCard({
         className="min-w-0"
       >
         <div
-          className={`p-2.5 rounded-2xl backdrop-blur-md border transition-all min-w-0 w-full ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
+          className={`p-2.5 rounded-2xl border transition-all min-w-0 w-full ${isTransparentState ? "backdrop-blur-md" : ""} ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
           data-testid={`task-card-${task.id}`}
           onClick={isActionable ? handleComplete : undefined}
         >
@@ -706,30 +706,30 @@ function TaskCard({
       className="min-w-0"
     >
       <Card
-        className={`p-5 transition-all backdrop-blur-md border-2 rounded-2xl min-w-0 w-full ${
+        className={`p-5 transition-all border-2 rounded-2xl min-w-0 w-full ${
           isActionable && !isRejected 
-            ? "bg-white/10 cursor-pointer border-white/20 shadow-lg shadow-black/20 hover:border-primary/60 hover:bg-white/15 hover:shadow-xl" 
+            ? "bg-card cursor-pointer border-border shadow-lg hover:border-primary/60 hover:shadow-xl" 
             : isActionable && isRejected 
-            ? "bg-blue-500/10 cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15 hover:bg-blue-500/15 hover:border-blue-400/60" 
+            ? "bg-blue-500/10 backdrop-blur-md cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15 hover:bg-blue-500/15 hover:border-blue-400/60" 
             : showAsApproved 
-            ? "bg-green-500/10 border-green-500/45 shadow-md shadow-green-900/15" 
+            ? "bg-green-500/10 backdrop-blur-md border-green-500/45 shadow-md shadow-green-900/15" 
             : showAsSubmitted 
-            ? "bg-white/5 border-white/15" 
+            ? "bg-white/5 backdrop-blur-md border-white/15" 
             : showAsPending 
-            ? "bg-amber-500/10 border-amber-400/45 shadow-md shadow-amber-900/15" 
+            ? "bg-amber-500/10 backdrop-blur-md border-amber-400/45 shadow-md shadow-amber-900/15" 
             : hasNoSlots 
-            ? "bg-amber-500/8 border-amber-400/25" 
+            ? "bg-card border-border opacity-70" 
             : isSharedTaskNotAssigned 
-            ? "bg-white/5 border-white/15" 
+            ? "bg-card border-border opacity-70" 
             : allSharedMembersCompleted 
-            ? "bg-green-500/10 border-green-500/45 shadow-md shadow-green-900/15" 
+            ? "bg-green-500/10 backdrop-blur-md border-green-500/45 shadow-md shadow-green-900/15" 
             : dueDateInfo.notYet 
-            ? "bg-white/5 border-white/15" 
+            ? "bg-card border-border opacity-70" 
             : dueDateInfo.expired 
-            ? "bg-destructive/10 border-destructive/40" 
+            ? "bg-destructive/10 backdrop-blur-md border-destructive/40" 
             : isWeekendUnavailable 
-            ? "bg-white/5 border-white/15" 
-            : "bg-white/5 border-white/15"
+            ? "bg-card border-border opacity-70" 
+            : "bg-card border-border opacity-70"
         }`}
         data-testid={`task-card-${task.id}`}
         onClick={isActionable ? handleComplete : undefined}
