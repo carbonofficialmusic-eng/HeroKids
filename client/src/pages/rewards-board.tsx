@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, getDevHeaders } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus, Lock, Trophy, Star, Zap } from "lucide-react";
+import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus, Lock, Trophy, Star, Zap, Info, Loader2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Progress } from "@/components/ui/progress";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
 import { format } from "date-fns";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Link } from "wouter";
@@ -100,6 +104,187 @@ type Reward = {
   isActive: boolean;
   familyName: string;
 };
+
+function getProgressColor(percentage: number) {
+  if (percentage >= 100) return "hsl(142 76% 36%)";
+  if (percentage >= 71) return "hsl(142 69% 58%)";
+  if (percentage >= 31) return "hsl(38 92% 50%)";
+  return "hsl(0 72% 51%)";
+}
+
+function getRewardIcon(title: string) {
+  const lower = title?.toLowerCase() ?? "";
+  if (lower.includes("kino") || lower.includes("film") || lower.includes("movie")) return Gift;
+  if (lower.includes("eis") || lower.includes("ice")) return Gift;
+  if (lower.includes("pizza") || lower.includes("essen") || lower.includes("food")) return Gift;
+  if (lower.includes("spiel") || lower.includes("game") || lower.includes("lego")) return Gift;
+  if (lower.includes("computer") || lower.includes("tablet") || lower.includes("screen")) return Gift;
+  return Gift;
+}
+
+function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
+  reward: Reward;
+  currentPoints: number;
+  member: FamilyMember;
+  t: (key: string, opts?: object) => string;
+  toast: ReturnType<typeof useToast>["toast"];
+}) {
+  const [showDetails, setShowDetails] = useState(false);
+  const percentage = Math.min((currentPoints / reward.pointThreshold) * 100, 100);
+  const remaining = Math.max(reward.pointThreshold - currentPoints, 0);
+  const isReady = currentPoints >= reward.pointThreshold;
+  const progressColor = getProgressColor(percentage);
+  const RewardIcon = getRewardIcon(reward.title);
+
+  const redeemMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/rewards/${reward.id}/redeem`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getDevHeaders() },
+      });
+      if (!response.ok) throw new Error("Failed to redeem reward");
+      return response.json();
+    },
+    onSuccess: () => {
+      confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
+      toast({
+        title: t("kidDashboard.rewardRequested"),
+        description: t("kidDashboard.rewardRequestedDesc", { title: reward.title }),
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: t("kidDashboard.error"),
+        description: t("kidDashboard.rewardRequestError"),
+      });
+    },
+  });
+
+  return (
+    <>
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      >
+        <Card className={`p-4 transition-all backdrop-blur-md border-2 rounded-2xl ${
+          isReady
+            ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-4 ring-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55"
+            : "bg-card/80 border-border shadow-md shadow-black/15"
+        }`}>
+          <div className="flex items-center gap-4">
+            <div className={`flex-shrink-0 p-3 rounded-2xl ${isReady ? "bg-primary/20" : "bg-primary/10"}`}>
+              <RewardIcon className="h-12 w-12 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-bold text-xl truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                  {reward.title}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDetails(true)}
+                  className="h-8 w-8 rounded-full flex-shrink-0"
+                  data-testid={`button-info-reward-${reward.id}`}
+                >
+                  <Info className="h-5 w-5 text-primary" />
+                </Button>
+              </div>
+              <Progress value={percentage} className="h-5 rounded-full mb-1" />
+              {!isReady && (
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <Zap className="h-4 w-4 text-amber-500" />
+                  {t("kidDashboard.pointsRemaining", { count: remaining })}
+                </p>
+              )}
+              {isReady && (
+                <p className="text-sm font-bold text-green-500 flex items-center gap-1">
+                  <Sparkles className="h-4 w-4" />
+                  {t("kidDashboard.readyToRequest")}
+                </p>
+              )}
+            </div>
+            <div className="flex-shrink-0">
+              <Button
+                variant={isReady ? "default" : "outline"}
+                size="default"
+                onClick={() => { if (isReady && !redeemMutation.isPending) redeemMutation.mutate(); }}
+                disabled={!isReady || redeemMutation.isPending}
+                className={`h-11 px-5 text-base font-bold rounded-2xl ${isReady ? "shadow-lg shadow-primary/30" : "opacity-55"}`}
+                data-testid={`button-request-reward-${reward.id}`}
+              >
+                {redeemMutation.isPending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : isReady ? (
+                  <><Gift className="h-5 w-5 mr-2" />{t("kidDashboard.now")}</>
+                ) : (
+                  <><Trophy className="h-4 w-4 mr-2" />{t("kidDashboard.collect")}</>
+                )}
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+
+      <AlertDialog open={showDetails} onOpenChange={setShowDetails}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-3 text-2xl" style={{ fontFamily: "Fredoka, sans-serif" }}>
+              <div className="p-3 bg-primary/10 rounded-2xl">
+                <RewardIcon className="h-10 w-10 text-primary" />
+              </div>
+              {reward.title}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 pt-4">
+                {reward.description && (
+                  <div className="text-base text-foreground">
+                    <span className="font-semibold block mb-1">{t("kidDashboard.description")}</span>
+                    <span className="block">{reward.description}</span>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
+                    <span className="font-semibold">{t("kidDashboard.pointsNeeded")}</span>
+                    <Badge variant="secondary" className="text-lg font-bold px-3 py-1">{reward.pointThreshold}</Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-xl">
+                    <span className="font-semibold">{t("kidDashboard.yourProgress")}</span>
+                    <span className="font-bold" style={{ color: progressColor }}>{Math.round(percentage)}%</span>
+                  </div>
+                </div>
+                {!isReady && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800">
+                    <span className="text-base font-bold flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-amber-500" />
+                      {t("kidDashboard.pointsUntilReward", { count: remaining })}
+                    </span>
+                  </div>
+                )}
+                {isReady && (
+                  <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-xl border border-green-200 dark:border-green-800">
+                    <span className="text-base font-bold flex items-center gap-2 text-green-600 dark:text-green-400">
+                      <Sparkles className="h-5 w-5" />
+                      {t("kidDashboard.canRequestNow")}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction data-testid="button-close-details">{t("kidDashboard.close")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
 
 export default function RewardsBoard() {
   const { toast } = useToast();
@@ -522,57 +707,16 @@ export default function RewardsBoard() {
               <h2 className="text-2xl font-accent font-bold">{t("kidDashboard.rewards")}</h2>
             </div>
             <div className="grid gap-4">
-              {activeRewards.map((reward) => {
-                const currentPoints = member?.totalPoints ?? 0;
-                const percentage = Math.min((currentPoints / reward.pointThreshold) * 100, 100);
-                const remaining = Math.max(reward.pointThreshold - currentPoints, 0);
-                const isReady = currentPoints >= reward.pointThreshold;
-                return (
-                  <Card key={reward.id} className={`p-4 transition-all backdrop-blur-md border-2 rounded-2xl ${
-                    isReady
-                      ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-4 ring-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55"
-                      : "bg-card/80 border-border shadow-md shadow-black/15"
-                  }`}>
-                    <div className="flex items-center gap-4">
-                      <div className={`flex-shrink-0 p-3 rounded-2xl ${isReady ? "bg-primary/20" : "bg-primary/10"}`}>
-                        <Gift className="h-10 w-10 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <h3 className="font-bold text-lg truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                            {reward.title}
-                          </h3>
-                          <span className="flex-shrink-0 text-sm font-semibold text-muted-foreground">
-                            {reward.pointThreshold} {t("dashboard.pts")}
-                          </span>
-                        </div>
-                        {reward.description && (
-                          <p className="text-xs text-muted-foreground truncate mb-2">{reward.description}</p>
-                        )}
-                        <div className="h-4 bg-muted rounded-full overflow-hidden mb-1">
-                          <div
-                            className={`h-full rounded-full transition-all ${isReady ? "bg-green-500" : "bg-primary"}`}
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                        <p className={`text-sm font-medium flex items-center gap-1 ${isReady ? "text-green-500" : "text-muted-foreground"}`}>
-                          {isReady ? (
-                            <>
-                              <Sparkles className="h-4 w-4" />
-                              {t("kidDashboard.readyToRequest")}
-                            </>
-                          ) : (
-                            <>
-                              <Zap className="h-4 w-4 text-amber-500" />
-                              {t("kidDashboard.pointsUntilReward", { count: remaining })}
-                            </>
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
+              {activeRewards.map((reward) => (
+                <RewardBoardCard
+                  key={reward.id}
+                  reward={reward}
+                  currentPoints={member?.totalPoints ?? 0}
+                  member={member!}
+                  t={t}
+                  toast={toast}
+                />
+              ))}
             </div>
           </div>
         )}
