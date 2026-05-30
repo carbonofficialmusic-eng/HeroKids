@@ -181,8 +181,8 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
               <RewardIcon className="h-12 w-12 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-bold text-xl truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
+              <div className="flex items-center gap-2 mb-2 min-w-0">
+                <h3 className="font-bold text-xl truncate min-w-0" style={{ fontFamily: "Fredoka, sans-serif" }}>
                   {reward.title}
                 </h3>
                 <Button
@@ -671,33 +671,35 @@ export default function RewardsBoard() {
   }
 
   return (
-    <div className="min-h-screen p-4 sm:p-6" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
-      <div className="container mx-auto max-w-4xl space-y-6">
-        {/* Header */}
-        <div className="space-y-4">
-          <Link href="/">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
-              data-testid="button-back-dashboard"
-            >
-              <Home className="h-4 w-4" />
-              {t("rewardsBoard.backToDashboard")}
-            </Button>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Gift className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-3xl font-accent font-bold">{t("rewardsBoard.title")}</h1>
-              <p className="text-muted-foreground">
-                {isParent 
-                  ? t("rewardsBoard.manageRedemptions")
-                  : t("rewardsBoard.trackRewards")}
-              </p>
-            </div>
+    <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
+      <div className="max-w-4xl mx-auto">
+        {/* Back button */}
+        <Link href="/">
+          <Button
+            variant="outline"
+            size="sm"
+            className="mb-4 gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
+            data-testid="button-back-dashboard"
+          >
+            <Home className="h-4 w-4" />
+            {t("rewardsBoard.backToDashboard")}
+          </Button>
+        </Link>
+
+        {/* Page title */}
+        <div className="flex items-center gap-3 mb-6">
+          <Gift className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-3xl font-accent font-bold">{t("rewardsBoard.title")}</h1>
+            <p className="text-muted-foreground">
+              {isParent
+                ? t("rewardsBoard.manageRedemptions")
+                : t("rewardsBoard.trackRewards")}
+            </p>
           </div>
         </div>
+
+        <div className="space-y-6">
 
         {/* Available Rewards Section (Children only) */}
         {!isParent && activeRewards.length > 0 && (
@@ -1133,7 +1135,8 @@ export default function RewardsBoard() {
           ))}
         </div>
       ))}
-      </div>
+        </div>{/* end space-y-6 */}
+      </div>{/* end max-w-4xl */}
 
       {/* Reward Request Dialog for editing */}
       <RewardRequestDialog
