@@ -675,8 +675,8 @@ export default function RewardsBoard() {
   }
 
   return (
-    <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen p-6 overflow-x-hidden" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
+      <div className="max-w-4xl mx-auto w-full min-w-0">
         {/* Back button */}
         <Link href="/">
           <Button
@@ -712,7 +712,7 @@ export default function RewardsBoard() {
               <Trophy className="h-6 w-6 text-amber-500" />
               <h2 className="text-2xl font-accent font-bold">{t("kidDashboard.rewards")}</h2>
             </div>
-            <div className="grid gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {activeRewards.map((reward) => (
                 <RewardBoardCard
                   key={reward.id}
@@ -734,7 +734,7 @@ export default function RewardsBoard() {
               <MessageSquarePlus className="h-6 w-6 text-primary" />
               <h2 className="text-2xl font-accent font-bold">{t("dashboard.pendingRewardRequests")}</h2>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {rewardRequests
                 .filter(r => r.status === "pending")
                 .map((request) => {
@@ -812,7 +812,7 @@ export default function RewardsBoard() {
             <Users className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-accent font-bold">{t("rewardsBoard.sharedRewards")}</h2>
           </div>
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {sharedRewards.map((shared) => {
               const isInitiator = shared.memberId === member?.id;
               const hasJoined = shared.participants.some(p => p.memberId === member?.id);
@@ -974,7 +974,7 @@ export default function RewardsBoard() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {displayRedemptions.map((redemption) => (
             <Card key={redemption.id} data-testid={`card-redemption-${redemption.id}`}>
               <CardHeader>
