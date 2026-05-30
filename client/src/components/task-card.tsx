@@ -180,6 +180,7 @@ export function TaskCard({
       if (r === "weekly") return t('tasks.recurrenceWeekly', { defaultValue: 'Weekly' });
       if (r === "monthly") return t('tasks.recurrenceMonthly', { defaultValue: 'Monthly' });
       if (r === "yearly") return t('tasks.recurrenceYearly', { defaultValue: 'Yearly' });
+      if (r === "immediate") return t('tasks.immediate', { defaultValue: 'Immediate Repeat' });
       return r;
     })();
 
