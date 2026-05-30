@@ -299,7 +299,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
       >
         <Card className={`p-4 transition-all backdrop-blur-md border-2 rounded-2xl ${
           isReady 
-            ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 outline outline-4 outline-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55" 
+            ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-4 ring-inset ring-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55" 
             : "bg-card/80 border-border shadow-md shadow-black/15"
         }`}>
           <div className="flex items-center gap-4">
