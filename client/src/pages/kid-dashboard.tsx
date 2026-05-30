@@ -293,7 +293,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
   return (
     <>
       <motion.div
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ y: -3 }}
         whileTap={{ scale: 0.98 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
@@ -700,7 +700,7 @@ function TaskCard({
 
   return (
     <motion.div
-      whileHover={{ scale: isActionable ? 1.02 : 1 }}
+      whileHover={{ y: isActionable ? -3 : 0 }}
       whileTap={{ scale: isActionable ? 0.97 : 1 }}
       transition={{ type: "spring", stiffness: 400, damping: 20 }}
       className="min-w-0"
@@ -2738,7 +2738,7 @@ export default function KidDashboard() {
         >
         <Card className="p-1.5 mx-2 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl sm:mx-auto">
           <div className="flex justify-center gap-1 sm:gap-2">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px]">
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px]">
               <Button 
                 variant="ghost" 
                 size="lg" 
@@ -2750,7 +2750,7 @@ export default function KidDashboard() {
                 <span className="font-bold text-sm sm:text-base truncate">{t("kidDashboard.requestNewReward")}</span>
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px] relative">
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px] relative">
               <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
                 <Link href="/chat">
                   <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
