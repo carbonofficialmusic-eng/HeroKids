@@ -53,7 +53,14 @@ function AuthPanel() {
   const forgotForm = useForm<ForgotForm>({ resolver: zodResolver(forgotSchema), defaultValues: { email: "" } });
   const resetForm = useForm<ResetForm>({ resolver: zodResolver(resetSchema), defaultValues: { password: "" } });
 
-  useEffect(() => { if (resetToken) setAuthTab("reset"); }, [resetToken]);
+  useEffect(() => {
+    if (resetToken) {
+      setAuthTab("reset");
+      setTimeout(() => {
+        document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 150);
+    }
+  }, [resetToken]);
 
   const finishAuth = async (user: unknown, redirectPath = "/") => {
     queryClient.setQueryData(["/api/auth/user"], user);
