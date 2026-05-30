@@ -78,6 +78,7 @@ interface TaskDialogProps {
   editingTask?: Task | null;
   familyMembers?: FamilyMember[];
   subscriptionTier?: string;
+  categoryNames?: { household?: string; school?: string; selfCare?: string; other?: string } | null;
 }
 
 // Emoji categories for task icons (4 categories, 3 emojis each)
@@ -110,6 +111,7 @@ export function TaskDialog({
   editingTask,
   familyMembers = [],
   subscriptionTier = "free",
+  categoryNames,
 }: TaskDialogProps) {
   const canAssignMembers = subscriptionTier !== "free";
   const { t, i18n } = useTranslation();
@@ -407,7 +409,7 @@ export function TaskDialog({
                     {Object.entries(emojiCategories).map(([categoryKey, category]) => (
                       <div key={categoryKey} className="space-y-1.5">
                         <p className="text-xs text-muted-foreground font-medium text-center min-h-[2rem] flex items-center justify-center">
-                          {t(category.label)}
+                          {categoryNames?.[categoryKey as keyof typeof categoryNames] || t(category.label)}
                         </p>
                         <div className="flex justify-center gap-1.5">
                           {category.emojis.map((icon) => (

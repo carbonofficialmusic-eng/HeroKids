@@ -1915,6 +1915,7 @@ export default function Dashboard() {
             editingTask={selectedTask}
             familyMembers={familyMembers}
             subscriptionTier={familyData?.subscriptionTier ?? "free"}
+            categoryNames={familyData?.categoryNames}
           />
           <RewardDialog
             open={rewardDialogOpen}
