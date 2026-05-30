@@ -736,6 +736,7 @@
     "categoryNamesDesc": "Entrez vos propres noms pour les catégories de tâches. Laissez un champ vide pour conserver le nom par défaut.",
     "categoryNamesSaved": "Noms de catégories enregistrés",
     "accountSettings": "Paramètres du compte",
+    "backToSettings": "Retour aux paramètres",
     "accountSettingsDesc": "Gérez vos identifiants de connexion",
     "changePassword": "Changer le mot de passe",
     "changePasswordDesc": "Confirmez votre mot de passe actuel et choisissez-en un nouveau",

@@ -767,6 +767,7 @@
     "categoryNamesDesc": "Ange egna namn för uppgiftskategorierna. Lämna ett fält tomt för att behålla standardnamnet.",
     "categoryNamesSaved": "Kategorinamn sparade",
     "accountSettings": "Kontoinställningar",
+    "backToSettings": "Tillbaka till inställningar",
     "accountSettingsDesc": "Hantera dina inloggningsuppgifter",
     "changePassword": "Byt lösenord",
     "changePasswordDesc": "Bekräfta ditt nuvarande lösenord och ange ett nytt",

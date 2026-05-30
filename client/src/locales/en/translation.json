@@ -768,6 +768,7 @@
     "categoryNamesDesc": "Enter your own names for task categories. Leave a field empty to keep the default name.",
     "categoryNamesSaved": "Category names saved",
     "accountSettings": "Account Settings",
+    "backToSettings": "Back to Settings",
     "accountSettingsDesc": "Manage your login credentials",
     "changePassword": "Change Password",
     "changePasswordDesc": "Enter your current password and choose a new one",

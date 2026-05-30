@@ -740,6 +740,7 @@
     "categoryNamesDesc": "작업 카테고리에 고유한 이름을 입력하세요. 비워두면 기본 이름이 유지됩니다.",
     "categoryNamesSaved": "카테고리 이름이 저장되었습니다",
     "accountSettings": "계정 설정",
+    "backToSettings": "설정으로 돌아가기",
     "accountSettingsDesc": "로그인 자격 증명 관리",
     "changePassword": "비밀번호 변경",
     "changePasswordDesc": "현재 비밀번호를 확인하고 새 비밀번호를 설정하세요",

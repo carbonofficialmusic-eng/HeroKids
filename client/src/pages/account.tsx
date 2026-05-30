@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowLeft, Key, Mail, MailCheck, Loader2 } from "lucide-react";
+import { ArrowLeft, Settings, Home, Key, Mail, MailCheck, Loader2 } from "lucide-react";
 import type { FamilyMember } from "@shared/schema";
 
 export default function AccountPage() {
@@ -123,21 +123,33 @@ export default function AccountPage() {
   const backHref = isParent ? "/settings" : "/kid-dashboard";
 
   return (
-    <div className="min-h-screen p-4 pb-20" style={{ paddingTop: "calc(1rem + env(safe-area-inset-top))" }}>
-      <div className="max-w-lg mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Link href={backHref} data-testid="button-back-account">
-            <button className="p-2 rounded-full bg-card/80 backdrop-blur-md">
-              <ArrowLeft className="h-6 w-6" />
-            </button>
-          </Link>
-          <h1
-            className="text-2xl font-bold font-accent"
-            style={{ fontFamily: "Fredoka, sans-serif" }}
+    <div className="min-h-screen p-6" style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top))" }}>
+      <div className="max-w-lg mx-auto">
+        {/* Back button — pill style matching other sub-pages */}
+        <Link href={backHref}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mb-4 gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
+            data-testid="button-back-account"
           >
-            {t("settings.accountSettings")}
-          </h1>
+            {isParent ? <Settings className="h-4 w-4" /> : <Home className="h-4 w-4" />}
+            {isParent ? t("settings.backToSettings") : t("rewardsBoard.backToDashboard")}
+          </Button>
+        </Link>
+
+        {/* Page title */}
+        <div className="flex items-center gap-3 mb-6">
+          <Key className="h-8 w-8 text-primary" />
+          <div>
+            <h1
+              className="text-3xl font-bold font-accent"
+              style={{ fontFamily: "Fredoka, sans-serif" }}
+            >
+              {t("settings.accountSettings")}
+            </h1>
+            <p className="text-muted-foreground">{user.email}</p>
+          </div>
         </div>
 
         <Card>

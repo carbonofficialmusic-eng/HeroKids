@@ -778,6 +778,7 @@
     "categoryNamesDesc": "Gib eigene Namen für die Aufgabenkategorien ein. Lasse ein Feld leer, um den Standardnamen beizubehalten.",
     "categoryNamesSaved": "Kategorienamen gespeichert",
     "accountSettings": "Konto-Einstellungen",
+    "backToSettings": "Zurück zu Einstellungen",
     "accountSettingsDesc": "Anmeldedaten verwalten",
     "changePassword": "Passwort ändern",
     "changePasswordDesc": "Aktuelles Passwort bestätigen und neues Passwort festlegen",

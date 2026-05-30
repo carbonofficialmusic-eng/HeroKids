@@ -736,6 +736,7 @@
     "categoryNamesDesc": "タスクカテゴリに独自の名前を入力してください。空白のままにするとデフォルト名が使用されます。",
     "categoryNamesSaved": "カテゴリ名を保存しました",
     "accountSettings": "アカウント設定",
+    "backToSettings": "設定に戻る",
     "accountSettingsDesc": "ログイン情報を管理する",
     "changePassword": "パスワードを変更",
     "changePasswordDesc": "現在のパスワードを確認し、新しいパスワードを設定してください",

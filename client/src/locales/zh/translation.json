@@ -736,6 +736,7 @@
     "categoryNamesDesc": "为任务类别输入您自己的名称。留空则保留默认名称。",
     "categoryNamesSaved": "类别名称已保存",
     "accountSettings": "账户设置",
+    "backToSettings": "返回设置",
     "accountSettingsDesc": "管理您的登录凭据",
     "changePassword": "修改密码",
     "changePasswordDesc": "验证当前密码并设置新密码",
