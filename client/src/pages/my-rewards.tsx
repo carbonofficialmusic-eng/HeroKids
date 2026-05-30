@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Trophy,
   ArrowLeft,
+  Home,
   Clock,
   Coins,
   Users,
@@ -221,13 +222,23 @@ export default function MyRewards() {
   return (
     <div className="min-h-screen p-4 pb-20" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="flex items-center gap-4">
-          <Link href={member?.role === "parent" ? "/" : "/kid-dashboard"}>
-            <button className="p-2 rounded-full bg-card/80 backdrop-blur-md" data-testid="button-back">
-              <ArrowLeft className="h-6 w-6" />
-            </button>
-          </Link>
-          <h1 className="text-2xl font-bold font-accent" style={{ fontFamily: "Fredoka, sans-serif" }}>
+        {/* Back button */}
+        <Link href={member?.role === "parent" ? "/" : "/kid-dashboard"}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mb-4 gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
+            data-testid="button-back"
+          >
+            <Home className="h-4 w-4" />
+            {t("rewardsBoard.backToDashboard")}
+          </Button>
+        </Link>
+
+        {/* Page title */}
+        <div className="flex items-center gap-3 mb-2">
+          <Trophy className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
             {t("myRewards.title")}
           </h1>
         </div>
