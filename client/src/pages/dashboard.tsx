@@ -1357,7 +1357,7 @@ export default function Dashboard() {
                     {t("dashboard.filterAll")} ({activeTasks.length})
                   </Button>
                 </Card>
-              ) : hasMultipleCategories ? (
+              ) : filteredTasks.length > 0 ? (
                 <div className="space-y-3">
                   {Object.entries(groupedTasks).map(([category, categoryTasks]) => (
                     <Collapsible
