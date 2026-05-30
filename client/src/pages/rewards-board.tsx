@@ -176,57 +176,61 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
             ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-4 ring-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55"
             : "bg-card/80 border-border shadow-md shadow-black/15"
         }`}>
-          <div className="flex items-center gap-4">
-            <div className={`flex-shrink-0 p-3 rounded-2xl ${isReady ? "bg-primary/20" : "bg-primary/10"}`}>
-              <RewardIcon className="h-12 w-12 text-primary" />
+          {/* Top row: icon + title */}
+          <div className="flex items-start gap-3 mb-3">
+            <div className={`flex-shrink-0 p-2.5 rounded-2xl ${isReady ? "bg-primary/20" : "bg-primary/10"}`}>
+              <RewardIcon className="h-10 w-10 text-primary" />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2 min-w-0">
-                <h3 className="font-bold text-xl truncate min-w-0" style={{ fontFamily: "Fredoka, sans-serif" }}>
+            <div className="flex-1 min-w-0 pt-0.5">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <h3 className="font-bold text-lg leading-tight truncate min-w-0" style={{ fontFamily: "Fredoka, sans-serif" }}>
                   {reward.title}
                 </h3>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowDetails(true)}
-                  className="h-8 w-8 rounded-full flex-shrink-0"
+                  className="h-7 w-7 rounded-full flex-shrink-0"
                   data-testid={`button-info-reward-${reward.id}`}
                 >
-                  <Info className="h-5 w-5 text-primary" />
+                  <Info className="h-4 w-4 text-primary" />
                 </Button>
               </div>
-              <Progress value={percentage} className="h-5 rounded-full mb-1" />
-              {!isReady && (
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Zap className="h-4 w-4 text-amber-500" />
-                  {t("kidDashboard.pointsRemaining", { count: remaining })}
-                </p>
-              )}
-              {isReady && (
-                <p className="text-sm font-bold text-green-500 flex items-center gap-1">
-                  <Sparkles className="h-4 w-4" />
-                  {t("kidDashboard.readyToRequest")}
-                </p>
-              )}
             </div>
-            <div className="flex-shrink-0">
-              <Button
-                variant={isReady ? "default" : "outline"}
-                size="default"
-                onClick={() => { if (isReady && !redeemMutation.isPending) redeemMutation.mutate(); }}
-                disabled={!isReady || redeemMutation.isPending}
-                className={`h-11 px-5 text-base font-bold rounded-2xl ${isReady ? "shadow-lg shadow-primary/30" : "opacity-55"}`}
-                data-testid={`button-request-reward-${reward.id}`}
-              >
-                {redeemMutation.isPending ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : isReady ? (
-                  <><Gift className="h-5 w-5 mr-2" />{t("kidDashboard.now")}</>
-                ) : (
-                  <><Trophy className="h-4 w-4 mr-2" />{t("kidDashboard.collect")}</>
-                )}
-              </Button>
-            </div>
+          </div>
+
+          {/* Progress bar */}
+          <Progress value={percentage} className="h-4 rounded-full mb-2" />
+
+          {/* Bottom row: status text + action button */}
+          <div className="flex items-center justify-between gap-3">
+            {!isReady ? (
+              <p className="text-sm text-muted-foreground flex items-center gap-1 min-w-0">
+                <Zap className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                <span className="truncate">{t("kidDashboard.pointsRemaining", { count: remaining })}</span>
+              </p>
+            ) : (
+              <p className="text-sm font-bold text-green-500 flex items-center gap-1">
+                <Sparkles className="h-4 w-4 flex-shrink-0" />
+                {t("kidDashboard.readyToRequest")}
+              </p>
+            )}
+            <Button
+              variant={isReady ? "default" : "outline"}
+              size="sm"
+              onClick={() => { if (isReady && !redeemMutation.isPending) redeemMutation.mutate(); }}
+              disabled={!isReady || redeemMutation.isPending}
+              className={`flex-shrink-0 font-bold rounded-xl ${isReady ? "shadow-md shadow-primary/30" : "opacity-55"}`}
+              data-testid={`button-request-reward-${reward.id}`}
+            >
+              {redeemMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isReady ? (
+                <><Gift className="h-4 w-4 mr-1.5" />{t("kidDashboard.now")}</>
+              ) : (
+                <><Trophy className="h-4 w-4 mr-1.5" />{t("kidDashboard.collect")}</>
+              )}
+            </Button>
           </div>
         </Card>
       </motion.div>
