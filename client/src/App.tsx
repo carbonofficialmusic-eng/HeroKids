@@ -29,6 +29,7 @@ import MyAchievements from "@/pages/my-achievements";
 import LinkDevice from "@/pages/link-device";
 import Admin from "@/pages/admin";
 import Privacy from "@/pages/privacy";
+import Impressum from "@/pages/impressum";
 import IosTest from "@/pages/ios-test";
 import AccountPage from "@/pages/account";
 
@@ -352,6 +353,7 @@ function Router() {
           <Route path="/kid-dashboard" component={KidDashboard} />
           <Route path="/pricing" component={Pricing} />
           <Route path="/privacy" component={Privacy} />
+          <Route path="/impressum" component={Impressum} />
           <Route path="/admin" component={Admin} />
           <Route path="/dashboard">
             <RedirectToLanding />
@@ -406,6 +408,7 @@ function Router() {
         <Route path="/family-goals" component={FamilyGoals} />
         <Route path="/link-device" component={LinkDevice} />
         <Route path="/privacy" component={Privacy} />
+        <Route path="/impressum" component={Impressum} />
         <Route path="/admin" component={Admin} />
         <Route path="/ios-test">
           <IosTest variant="a" />

@@ -567,6 +567,7 @@ export default function Landing() {
           <p>© {new Date().getFullYear()} HeroKids Inc. Alle Rechte vorbehalten.</p>
           <div style={{ display: "flex", gap: "1.5rem" }}>
             <Link href="/privacy" style={{ color: C.fgMuted, textDecoration: "none" }}>Datenschutz</Link>
+            <Link href="/impressum" style={{ color: C.fgMuted, textDecoration: "none" }}>Impressum</Link>
           </div>
         </div>
       </footer>
