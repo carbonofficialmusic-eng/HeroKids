@@ -1599,6 +1599,19 @@ export default function KidDashboard() {
       }
       return response.json();
     },
+    onMutate: async ({ taskId }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/tasks"] });
+      const previousTasks = queryClient.getQueryData(["/api/tasks"]);
+      queryClient.setQueryData<any[]>(["/api/tasks"], (old) =>
+        old ? old.map((t) => t.id === taskId ? { ...t, memberHasCompleted: true } : t) : old
+      );
+      return { previousTasks };
+    },
+    onError: (_err: any, _vars: any, context: any) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(["/api/tasks"], context.previousTasks);
+      }
+    },
     onSuccess: () => {
       confetti({
         particleCount: 100,

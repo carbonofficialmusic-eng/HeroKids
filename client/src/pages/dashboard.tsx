@@ -585,6 +585,19 @@ export default function Dashboard() {
       const res = await apiRequest("POST", `/api/tasks/${taskId}/complete`, { proofPhotoUrl });
       return await res.json();
     },
+    onMutate: async ({ taskId }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/tasks"] });
+      const previousTasks = queryClient.getQueryData<Task[]>(["/api/tasks"]);
+      queryClient.setQueryData<Task[]>(["/api/tasks"], (old) =>
+        old ? old.map((t) => t.id === taskId ? { ...t, memberHasCompleted: true } : t) : old
+      );
+      return { previousTasks };
+    },
+    onError: (_err, _vars, context: any) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(["/api/tasks"], context.previousTasks);
+      }
+    },
     onSuccess: (data: any) => {
       // Aggressive cache invalidation - force refetch
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"], refetchType: 'active' });
