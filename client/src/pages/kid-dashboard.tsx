@@ -2431,7 +2431,7 @@ export default function KidDashboard() {
               size="icon"
               variant="ghost"
               onClick={() => setKidDashboardView(kidDashboardView === "list" ? "grid" : "list")}
-              className={`flex-shrink-0 bg-black/25 backdrop-blur-md border border-white/10 toggle-elevate${kidDashboardView === "grid" ? " toggle-elevated" : ""}`}
+              className={`flex-shrink-0 bg-card border border-border toggle-elevate${kidDashboardView === "grid" ? " toggle-elevated" : ""}`}
               data-testid="button-kid-view-toggle"
             >
               {kidDashboardView === "grid" ? <LayoutGrid className="h-4 w-4" /> : <LayoutList className="h-4 w-4" />}

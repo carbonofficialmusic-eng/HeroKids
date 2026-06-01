@@ -1331,7 +1331,7 @@ export default function Dashboard() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className={`ml-auto toggle-elevate${dashboardView === "grid" ? " toggle-elevated" : ""}`}
+                    className={`ml-auto bg-card border border-border toggle-elevate${dashboardView === "grid" ? " toggle-elevated" : ""}`}
                     onClick={() => setDashboardView(dashboardView === "list" ? "grid" : "list")}
                     data-testid="button-toggle-dashboard-view"
                   >
