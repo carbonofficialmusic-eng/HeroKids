@@ -5,6 +5,8 @@ import { formatInTimeZone } from "date-fns-tz";
 import { objectStorageService } from "./objectStorage";
 
 const PROOF_PHOTO_RETENTION_DAYS = 30;
+const NOTIFICATION_RETENTION_DAYS = 60;
+const EMAIL_READINESS_KEEP_COUNT = 100;
 
 export function startPointsResetScheduler() {
   const startTime = new Date();
@@ -17,14 +19,18 @@ export function startPointsResetScheduler() {
     await checkAndResetPoints();
   }, 5 * 60 * 1000); // Check every 5 minutes
 
-  // Run proof photo cleanup once per day (every 24 hours)
+  // Run all data cleanup jobs once per day (every 24 hours)
   setInterval(async () => {
     await cleanupOldProofPhotos();
+    await cleanupExpiredTokensAndCodes();
+    await cleanupOldDbRecords();
   }, 24 * 60 * 60 * 1000);
 
   // Also run once shortly after startup (after 2 minutes delay)
   setTimeout(async () => {
     await cleanupOldProofPhotos();
+    await cleanupExpiredTokensAndCodes();
+    await cleanupOldDbRecords();
   }, 2 * 60 * 1000);
 }
 
@@ -260,6 +266,31 @@ async function resetMonthlyPointsForFamily(familyName: string) {
     console.log(`✅ Monthly points reset for family "${familyName}"`);
   } catch (error) {
     console.error(`Error resetting monthly points for family "${familyName}":`, error);
+  }
+}
+
+async function cleanupExpiredTokensAndCodes() {
+  try {
+    const rateLimits = await storage.cleanupExpiredAuthRateLimits();
+    const linkCodes = await storage.cleanupExpiredDeviceLinkCodes();
+    const refreshTokens = await storage.cleanupExpiredMobileRefreshTokens();
+    if (rateLimits + linkCodes + refreshTokens > 0) {
+      console.log(`🗑️  Token cleanup: ${rateLimits} rate-limit entries, ${linkCodes} link codes, ${refreshTokens} refresh tokens removed`);
+    }
+  } catch (error) {
+    console.error("Error during token/code cleanup:", error);
+  }
+}
+
+async function cleanupOldDbRecords() {
+  try {
+    const notifications = await storage.cleanupOldNotifications(NOTIFICATION_RETENTION_DAYS);
+    const emailChecks = await storage.cleanupOldEmailReadinessChecks(EMAIL_READINESS_KEEP_COUNT);
+    if (notifications + emailChecks > 0) {
+      console.log(`🗑️  DB record cleanup: ${notifications} old notifications, ${emailChecks} old email-readiness checks removed`);
+    }
+  } catch (error) {
+    console.error("Error during DB record cleanup:", error);
   }
 }
 

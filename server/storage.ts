@@ -53,6 +53,7 @@ import {
   type GoalContribution,
   type InsertGoalContribution,
   deviceLinkCodes,
+  mobileRefreshTokens,
   childDeviceSessions,
   type DeviceLinkCode,
   type InsertDeviceLinkCode,
@@ -256,6 +257,12 @@ export interface IStorage {
   getTaskCompletionsByTask(taskId: string): Promise<TaskCompletion[]>;
   getCompletionsWithOldProofPhotos(daysOld: number): Promise<TaskCompletion[]>;
   clearCompletionProofPhoto(completionId: string): Promise<void>;
+  // Data cleanup
+  cleanupExpiredAuthRateLimits(): Promise<number>;
+  cleanupExpiredDeviceLinkCodes(): Promise<number>;
+  cleanupExpiredMobileRefreshTokens(): Promise<number>;
+  cleanupOldNotifications(daysOld: number): Promise<number>;
+  cleanupOldEmailReadinessChecks(keepCount: number): Promise<number>;
   getPendingCompletionsByFamily(familyName: string): Promise<any[]>;
   approveTaskCompletion(completionId: string, approvedBy: string): Promise<void>;
   rejectTaskCompletion(completionId: string, approvedBy: string, rejectionReason: string): Promise<void>;
@@ -1547,6 +1554,51 @@ export class DatabaseStorage implements IStorage {
       .update(taskCompletions)
       .set({ proofPhotoUrl: null })
       .where(eq(taskCompletions.id, completionId));
+  }
+
+  async cleanupExpiredAuthRateLimits(): Promise<number> {
+    const result = await db
+      .delete(authRateLimits)
+      .where(lt(authRateLimits.resetTime, new Date()));
+    return (result as any).rowCount ?? 0;
+  }
+
+  async cleanupExpiredDeviceLinkCodes(): Promise<number> {
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000); // older than 24h
+    const result = await db
+      .delete(deviceLinkCodes)
+      .where(lt(deviceLinkCodes.expiresAt, cutoff));
+    return (result as any).rowCount ?? 0;
+  }
+
+  async cleanupExpiredMobileRefreshTokens(): Promise<number> {
+    const result = await db
+      .delete(mobileRefreshTokens)
+      .where(lt(mobileRefreshTokens.expiresAt, new Date()));
+    return (result as any).rowCount ?? 0;
+  }
+
+  async cleanupOldNotifications(daysOld: number): Promise<number> {
+    const cutoff = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
+    const result = await db
+      .delete(notifications)
+      .where(lt(notifications.createdAt, cutoff));
+    return (result as any).rowCount ?? 0;
+  }
+
+  async cleanupOldEmailReadinessChecks(keepCount: number): Promise<number> {
+    // Keep the most recent N rows — delete everything older
+    const recent = await db
+      .select({ id: emailReadinessChecks.id })
+      .from(emailReadinessChecks)
+      .orderBy(desc(emailReadinessChecks.checkedAt))
+      .limit(keepCount);
+    if (recent.length < keepCount) return 0; // not enough rows to trim
+    const keepIds = recent.map((r) => r.id);
+    const result = await db
+      .delete(emailReadinessChecks)
+      .where(sql`${emailReadinessChecks.id} NOT IN (${sql.join(keepIds.map((id) => sql`${id}`), sql`, `)})`);
+    return (result as any).rowCount ?? 0;
   }
 
   async getTaskCompletion(completionId: string): Promise<TaskCompletion | undefined> {
