@@ -393,13 +393,6 @@ setInterval(() => {
 }, 60 * 60 * 1000);
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Serve uploaded files
-  app.use('/uploads', (req, res, next) => {
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    next();
-  });
-  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
-
   // Skin images served with long-lived cache (1 year, immutable).
   // Only unlocked skins are ever fetched by the client, so this is
   // effectively "load once, cache forever".
