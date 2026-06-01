@@ -522,11 +522,11 @@ export default function SkinsGallery() {
 
           {/* Tagline */}
           <div className="mb-4 text-center">
-            <p className="text-sm font-bold tracking-wide uppercase text-muted-foreground">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-xs font-bold tracking-widest uppercase text-white">
               <span className="text-yellow-400">✦</span>{" "}
               {t('skins.tagline')}{" "}
               <span className="text-yellow-400">✦</span>
-            </p>
+            </span>
           </div>
 
           {/* Tier limit banner — shown when Free plan skin cap is reached */}
