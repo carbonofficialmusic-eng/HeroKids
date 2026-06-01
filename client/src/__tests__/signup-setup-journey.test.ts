@@ -230,6 +230,7 @@ describe("sign-up setup journey", () => {
     await user.type(screen.getByTestId("input-register-last-name"), "Lovelace");
     await user.type(screen.getByTestId("input-register-email"), "ada.lovelace@example.com");
     await user.type(screen.getByTestId("input-register-password"), "super-secret-password");
+    await user.click(screen.getByTestId("checkbox-accept-terms"));
     await user.click(screen.getByTestId("button-submit-register"));
 
     await waitFor(() => expect(window.location.pathname).toBe("/setup"));

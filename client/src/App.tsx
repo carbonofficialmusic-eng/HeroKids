@@ -30,6 +30,7 @@ import LinkDevice from "@/pages/link-device";
 import Admin from "@/pages/admin";
 import Privacy from "@/pages/privacy";
 import Impressum from "@/pages/impressum";
+import Terms from "@/pages/terms";
 import IosTest from "@/pages/ios-test";
 import AccountPage from "@/pages/account";
 
@@ -354,6 +355,7 @@ function Router() {
           <Route path="/pricing" component={Pricing} />
           <Route path="/privacy" component={Privacy} />
           <Route path="/impressum" component={Impressum} />
+          <Route path="/terms" component={Terms} />
           <Route path="/admin" component={Admin} />
           <Route path="/dashboard">
             <RedirectToLanding />
@@ -409,6 +411,7 @@ function Router() {
         <Route path="/link-device" component={LinkDevice} />
         <Route path="/privacy" component={Privacy} />
         <Route path="/impressum" component={Impressum} />
+        <Route path="/terms" component={Terms} />
         <Route path="/admin" component={Admin} />
         <Route path="/ios-test">
           <IosTest variant="a" />

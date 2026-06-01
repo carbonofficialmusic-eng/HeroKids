@@ -25,6 +25,7 @@ const registerSchema = z.object({
   lastName: z.string().optional(),
   email: z.string().email("Bitte gib eine gültige E-Mail ein."),
   password: z.string().min(8, "Das Passwort braucht mindestens 8 Zeichen."),
+  acceptTerms: z.literal(true, { errorMap: () => ({ message: "Bitte akzeptiere die AGB und Datenschutzerklärung." }) }),
 });
 const forgotSchema = z.object({
   email: z.string().email("Bitte gib eine gültige E-Mail ein."),
@@ -49,7 +50,7 @@ function AuthPanel() {
   const resetToken = searchParams.get("reset_token");
 
   const loginForm = useForm<LoginForm>({ resolver: zodResolver(loginSchema), defaultValues: { email: "", password: "" } });
-  const registerForm = useForm<RegisterForm>({ resolver: zodResolver(registerSchema), defaultValues: { firstName: "", lastName: "", email: "", password: "" } });
+  const registerForm = useForm<RegisterForm>({ resolver: zodResolver(registerSchema), defaultValues: { firstName: "", lastName: "", email: "", password: "", acceptTerms: undefined as unknown as true } });
   const forgotForm = useForm<ForgotForm>({ resolver: zodResolver(forgotSchema), defaultValues: { email: "" } });
   const resetForm = useForm<ResetForm>({ resolver: zodResolver(resetSchema), defaultValues: { password: "" } });
 
@@ -186,6 +187,28 @@ function AuthPanel() {
                   <FormItem><FormLabel>Passwort</FormLabel><FormControl>
                     <Input type="password" autoComplete="new-password" data-testid="input-register-password" {...field} />
                   </FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={registerForm.control} name="acceptTerms" render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        id="accept-terms-checkbox"
+                        data-testid="checkbox-accept-terms"
+                        checked={!!field.value}
+                        onChange={(e) => field.onChange(e.target.checked || undefined)}
+                        className="mt-1 h-4 w-4 shrink-0 rounded border border-input accent-primary cursor-pointer"
+                      />
+                      <label htmlFor="accept-terms-checkbox" className="text-sm text-muted-foreground leading-snug cursor-pointer">
+                        Ich habe die{" "}
+                        <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-foreground underline font-medium hover:text-primary">AGB</a>
+                        {" "}gelesen und akzeptiere sie. Ich habe die{" "}
+                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-foreground underline font-medium hover:text-primary">Datenschutzerklärung</a>
+                        {" "}zur Kenntnis genommen.
+                      </label>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
                 )} />
                 <Button type="submit" className="w-full" disabled={isSubmitting} data-testid="button-submit-register">
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><UserPlus className="h-4 w-4 mr-1" />Konto erstellen</>}
