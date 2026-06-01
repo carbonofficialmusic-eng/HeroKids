@@ -5880,6 +5880,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create or retrieve Stripe customer
       let customerId = family.billingCustomerId;
       
+      // Validate existing customer ID — it may be from test mode and invalid in live mode
+      if (customerId) {
+        try {
+          await stripe.customers.retrieve(customerId);
+        } catch (err: any) {
+          if (err?.code === 'resource_missing') {
+            console.warn(`⚠️ Stored Stripe customer ${customerId} not found (likely test-mode ID) — creating new customer`);
+            customerId = null;
+            await storage.updateFamily(family.familyName, { billingCustomerId: null });
+          } else {
+            throw err;
+          }
+        }
+      }
+
       if (!customerId) {
         const customer = await stripe.customers.create({
           email: account?.email || undefined,
