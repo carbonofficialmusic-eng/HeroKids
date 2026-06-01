@@ -415,6 +415,7 @@
   },
   "skins": {
     "title": "Character Skins",
+    "tagline": "Find the Stars · Unlock Your Heroes",
     "starCollection": "Star Collection",
     "description": "Earn skin cards by completing tasks! Choose which skins to discover from unlocked packages.",
     "availableCards": "You have {{count}} skin card to open!",

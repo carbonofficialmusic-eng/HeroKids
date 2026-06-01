@@ -414,6 +414,7 @@
   },
   "skins": {
     "title": "Karaktärsskins",
+    "tagline": "Hitta stjärnorna · Lås upp dina hjältar",
     "starCollection": "Stjärnsamling",
     "description": "Tjäna skinkort genom att slutföra uppgifter! Välj vilka skins du vill upptäcka från upplåsta paket.",
     "availableCards": "Du har {{count}} skinkort att öppna!",

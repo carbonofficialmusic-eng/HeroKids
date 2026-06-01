@@ -409,6 +409,7 @@
   },
   "skins": {
     "title": "Apparences de Personnage",
+    "tagline": "Trouve les étoiles · Libère tes héros",
     "starCollection": "Collection d'étoiles",
     "description": "Gagne des cartes d'apparence en accomplissant des tâches ! Choisis quelles apparences découvrir parmi les paquets débloqués.",
     "availableCards": "Tu as {{count}} carte d'apparence à ouvrir !",

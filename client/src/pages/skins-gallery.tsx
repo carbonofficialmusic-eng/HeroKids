@@ -484,7 +484,7 @@ export default function SkinsGallery() {
       <div className="min-h-screen p-4" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <Link href={dashboardUrl}>
               <Button 
                 variant="outline" 
@@ -518,6 +518,15 @@ export default function SkinsGallery() {
                 </Badge>
               )}
             </div>
+          </div>
+
+          {/* Tagline */}
+          <div className="mb-4 text-center">
+            <p className="text-sm font-bold tracking-wide uppercase text-muted-foreground">
+              <span className="text-yellow-400">✦</span>{" "}
+              {t('skins.tagline')}{" "}
+              <span className="text-yellow-400">✦</span>
+            </p>
           </div>
 
           {/* Tier limit banner — shown when Free plan skin cap is reached */}

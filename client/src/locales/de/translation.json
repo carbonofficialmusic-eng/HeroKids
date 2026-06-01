@@ -425,6 +425,7 @@
   },
   "skins": {
     "title": "Charakter-Skins",
+    "tagline": "Finde die Sterne · Schalte deine Helden frei",
     "starCollection": "Sterne-Sammlung",
     "description": "Verdiene Skin-Karten durch das Abschließen von Aufgaben! Wähle, welche Skins du aus freigeschalteten Paketen entdecken möchtest.",
     "availableCards": "Du hast {{count}} Skin-Karte zum Öffnen!",
