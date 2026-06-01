@@ -1379,7 +1379,21 @@ export class DatabaseStorage implements IStorage {
       const nextDate = task.nextAvailableDate ? new Date(task.nextAvailableDate) : null;
       
       if (!nextDate) {
-        // Task has never been completed — no completion status
+        // nextAvailableDate not yet set (e.g. first submission still pending approval).
+        // Check for any active completions so the UI can show "pending" state.
+        const pendingCompletions = await client
+          .select({ status: taskCompletions.status })
+          .from(taskCompletions)
+          .where(
+            and(
+              eq(taskCompletions.taskId, taskId),
+              inArray(taskCompletions.status, ["pending", "approved", "rejected"])
+            )
+          )
+          .orderBy(desc(taskCompletions.completedAt));
+        if (pendingCompletions.some((c: { status: string }) => c.status === "approved")) return "approved";
+        if (pendingCompletions.some((c: { status: string }) => c.status === "pending")) return "pending";
+        if (pendingCompletions.some((c: { status: string }) => c.status === "rejected")) return "rejected";
         return null;
       }
       
