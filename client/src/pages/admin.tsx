@@ -253,6 +253,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
   const [messageToSend, setMessageToSend] = useState("");
+  const [messageSubject, setMessageSubject] = useState("");
   const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string; familyName: string } | null>(null);
   const [memberToAddPoints, setMemberToAddPoints] = useState<{ id: string; name: string } | null>(null);
   const [memberToLinkAccount, setMemberToLinkAccount] = useState<{ id: string; name: string; familyName: string } | null>(null);
@@ -438,21 +439,25 @@ export default function AdminPage() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ familyName, message }: { familyName: string; message: string }) => {
+    mutationFn: async ({ familyName, message, subject }: { familyName: string; message: string; subject: string }) => {
       const res = await fetch(`/api/admin/families/${encodeURIComponent(familyName)}/message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, subject }),
       });
       if (!res.ok) throw new Error("Failed to send message");
       return res.json();
     },
-    onSuccess: () => {
-      toast({ title: "Message sent to family" });
+    onSuccess: (data) => {
+      const emailInfo = data.emailsSent > 0
+        ? ` — ${data.emailsSent} email${data.emailsSent > 1 ? "s" : ""} sent`
+        : " — no verified parent emails found";
+      toast({ title: `Message sent${emailInfo}` });
       setMessageToSend("");
+      setMessageSubject("");
     },
     onError: () => {
       toast({ title: "Failed to send message", variant: "destructive" });
@@ -1759,30 +1764,42 @@ export default function AdminPage() {
                 <div>
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />
-                    Send Message to Family
+                    Send Email to Family
                   </h3>
-                  <div className="flex gap-2">
-                    <Textarea
-                      placeholder="Write a message to this family..."
-                      value={messageToSend}
-                      onChange={(e) => setMessageToSend(e.target.value)}
-                      className="flex-1"
-                      data-testid="input-admin-message"
+                  <p className="text-xs text-muted-foreground mb-3">Sends an email to all verified parent accounts in this family.</p>
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="text"
+                      placeholder="Subject (optional)"
+                      value={messageSubject}
+                      onChange={(e) => setMessageSubject(e.target.value)}
+                      className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
+                      data-testid="input-admin-message-subject"
                     />
-                    <Button
-                      onClick={() => {
-                        if (messageToSend.trim() && selectedFamily) {
-                          sendMessageMutation.mutate({ 
-                            familyName: selectedFamily, 
-                            message: messageToSend.trim() 
-                          });
-                        }
-                      }}
-                      disabled={!messageToSend.trim() || sendMessageMutation.isPending}
-                      data-testid="button-send-message"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Textarea
+                        placeholder="Write a message to this family..."
+                        value={messageToSend}
+                        onChange={(e) => setMessageToSend(e.target.value)}
+                        className="flex-1"
+                        data-testid="input-admin-message"
+                      />
+                      <Button
+                        onClick={() => {
+                          if (messageToSend.trim() && selectedFamily) {
+                            sendMessageMutation.mutate({ 
+                              familyName: selectedFamily, 
+                              message: messageToSend.trim(),
+                              subject: messageSubject.trim(),
+                            });
+                          }
+                        }}
+                        disabled={!messageToSend.trim() || sendMessageMutation.isPending}
+                        data-testid="button-send-message"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
 

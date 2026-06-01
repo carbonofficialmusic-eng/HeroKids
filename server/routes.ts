@@ -6600,7 +6600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/families/:familyName/message", isAdmin, async (req, res) => {
     try {
       const { familyName } = req.params;
-      const { message } = req.body;
+      const { message, subject } = req.body;
       
       if (!message || typeof message !== "string") {
         return res.status(400).json({ message: "Message is required" });
@@ -6619,8 +6619,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         senderName: "HeroKids Admin",
         timestamp: new Date().toISOString()
       });
-      
-      res.json({ success: true });
+
+      // Send email to all parent members with verified email addresses
+      const members = await storage.getFamilyMembersByFamily(familyName);
+      const parents = members.filter(m => m.role === "parent" && m.userId);
+      const emailSubject = subject?.trim() || `Message from HeroKids for family "${familyName}"`;
+      const emailsSent: string[] = [];
+      const emailsFailed: string[] = [];
+
+      for (const parent of parents) {
+        const user = await storage.getUser(parent.userId!);
+        if (!user?.email || !user.isEmailVerified) continue;
+        try {
+          const { sendTransactionalEmail } = await import("./email");
+          await sendTransactionalEmail({
+            to: user.email,
+            subject: emailSubject,
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #7c3aed, #4f46e5); padding: 24px; border-radius: 12px 12px 0 0;">
+                  <h1 style="color: white; margin: 0; font-size: 24px;">HeroKids</h1>
+                  <p style="color: rgba(255,255,255,0.8); margin: 4px 0 0;">Message for the ${familyName} family</p>
+                </div>
+                <div style="background: #f9f9f9; padding: 24px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb;">
+                  <p style="color: #374151; font-size: 16px; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+                  <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+                  <p style="color: #9ca3af; font-size: 13px; margin: 0;">This message was sent by the HeroKids team. Please do not reply to this email — contact us at <a href="mailto:info@herokids.app">info@herokids.app</a>.</p>
+                </div>
+              </div>
+            `,
+          });
+          emailsSent.push(user.email);
+        } catch (err) {
+          console.error(`Failed to send admin email to ${user.email}:`, err);
+          emailsFailed.push(user.email);
+        }
+      }
+
+      console.log(`📧 Admin message sent to family "${familyName}": ${emailsSent.length} emails sent, ${emailsFailed.length} failed`);
+      res.json({ success: true, emailsSent: emailsSent.length, emailsFailed: emailsFailed.length });
     } catch (error) {
       console.error("Error sending admin message:", error);
       res.status(500).json({ message: "Failed to send message" });
