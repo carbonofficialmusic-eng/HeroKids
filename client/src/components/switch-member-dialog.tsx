@@ -42,6 +42,14 @@ export function SwitchMemberDialog({
   const selectedMember = members.find(m => m.id === selectedMemberId);
   const requiresPin = familyData?.singleDeviceMode && selectedMember?.role === "parent";
 
+  // Stable order: founder (earliest parent) first, then other parents, then children — all by createdAt
+  const sortedMembers = [...members].sort((a, b) => {
+    if (a.role === b.role) {
+      return new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime();
+    }
+    return a.role === "parent" ? -1 : 1;
+  });
+
   const handleSwitch = () => {
     // If PIN is required but empty, use default PIN "0000"
     const finalPinCode = requiresPin ? (pinCode || "0000") : undefined;
@@ -66,7 +74,7 @@ export function SwitchMemberDialog({
         
         <div className="space-y-4 py-4 overflow-y-auto flex-1 min-h-0">
           <div className="space-y-2 pr-1">
-            {members.map((member) => (
+            {sortedMembers.map((member) => (
               <div key={member.id}>
                 <button
                   onClick={() => {
