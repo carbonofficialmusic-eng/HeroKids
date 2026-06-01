@@ -772,21 +772,19 @@ function TaskCard({
             {task.requiresProof && isActionable && (
               <Camera className="h-4 w-4 text-sky-400 flex-shrink-0" />
             )}
-            {/* Info Button - show if description OR time-info available */}
-            {(task.description || availableAgainDays !== null) && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDetails(true);
-                }}
-                className="h-7 w-7 rounded-full shrink-0"
-                data-testid={`button-info-task-${task.id}`}
-              >
-                <Info className="h-4 w-4 text-primary" />
-              </Button>
-            )}
+            {/* Info Button - always visible */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDetails(true);
+              }}
+              className="h-7 w-7 rounded-full shrink-0"
+              data-testid={`button-info-task-${task.id}`}
+            >
+              <Info className="h-4 w-4 text-primary" />
+            </Button>
             {/* Multi-Completion Counter Badge */}
             {task.maxCompletions !== null && task.maxCompletions !== undefined && (
               <Badge 
