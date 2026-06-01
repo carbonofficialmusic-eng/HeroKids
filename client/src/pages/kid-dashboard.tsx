@@ -11,7 +11,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList } from "lucide-react";
+import { ChevronDown, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -673,6 +673,9 @@ function TaskCard({
             <p className="font-bold text-sm leading-snug line-clamp-2 flex-1 min-w-0 text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
               {task.title}
             </p>
+            {task.requiresProof && isActionable && (
+              <Camera className="h-3.5 w-3.5 text-sky-400 flex-shrink-0 mt-0.5" />
+            )}
             {(showAsApproved || allSharedMembersCompleted) && (
               <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
             )}
@@ -766,6 +769,9 @@ function TaskCard({
             <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
               {task.title}
             </h3>
+            {task.requiresProof && isActionable && (
+              <Camera className="h-4 w-4 text-sky-400 flex-shrink-0" />
+            )}
             {/* Info Button - show if description OR time-info available */}
             {(task.description || availableAgainDays !== null) && (
               <Button
