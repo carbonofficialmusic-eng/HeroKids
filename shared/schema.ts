@@ -149,6 +149,7 @@ export const familyMembers = pgTable("family_members", {
   avatarHistory: jsonb("avatar_history").$type<string[]>().default(sql`'[]'::jsonb`), // Last 3 uploaded avatar URLs for quick selection
   lastReadChatAt: timestamp("last_read_chat_at"), // When member last viewed chat messages
   excludeFromLeaderboard: boolean("exclude_from_leaderboard").notNull().default(false), // Exclude member from leaderboard competition
+  isPaused: boolean("is_paused").notNull().default(false), // Manually paused by parent after downgrade overflow
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

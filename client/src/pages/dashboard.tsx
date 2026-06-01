@@ -16,6 +16,7 @@ import { RewardDialog } from "@/components/reward-dialog";
 import { RewardRequestDialog } from "@/components/reward-request-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SwitchMemberDialog } from "@/components/switch-member-dialog";
+import { MemberPauseDialog } from "@/components/member-pause-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { ProfileMenu } from "@/components/profile-menu";
@@ -44,7 +45,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -144,6 +145,7 @@ export default function Dashboard() {
   const [requestToEdit, setRequestToEdit] = useState<any>(null);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
+  const [pauseMemberDialogOpen, setPauseMemberDialogOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
@@ -352,6 +354,8 @@ export default function Dashboard() {
     familyName: string;
     subscriptionTier: string;
     memberCount: number;
+    maxMembersForTier?: number;
+    overLimitCount?: number;
     showLeaderboard?: boolean;
     singleDeviceMode?: boolean;
     weeklyPrize?: string | null;
@@ -1122,6 +1126,27 @@ export default function Dashboard() {
         {isParent ? (
           /* Parent View */
           <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
+            {/* Over-limit Banner */}
+            {isParent && (familyData?.overLimitCount ?? 0) > 0 && (
+              <div className="lg:col-span-3">
+                <button
+                  onClick={() => setPauseMemberDialogOpen(true)}
+                  className="w-full flex items-center gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 hover-elevate active-elevate-2 text-left"
+                  data-testid="banner-over-limit"
+                >
+                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm text-amber-900 dark:text-amber-200">
+                      {familyData?.overLimitCount} Mitglied{(familyData?.overLimitCount ?? 0) !== 1 ? "er" : ""} über dem Limit
+                    </div>
+                    <div className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                      Dein Plan erlaubt max. {familyData?.maxMembersForTier} aktive Mitglieder. Tippe um auszuwählen wer pausiert wird.
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                </button>
+              </div>
+            )}
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6 min-w-0">
               {/* Logo and Profile Section */}
@@ -1968,6 +1993,18 @@ export default function Dashboard() {
           familyData={familyData}
           onSwitch={(params) => switchMemberMutation.mutate(params)}
           isSubmitting={switchMemberMutation.isPending}
+        />
+      )}
+
+      {/* Member Pause Dialog - for managing downgrade overflow */}
+      {member && isRealParent && (
+        <MemberPauseDialog
+          open={pauseMemberDialogOpen}
+          onOpenChange={setPauseMemberDialogOpen}
+          members={familyMembers as any}
+          overLimitCount={familyData?.overLimitCount ?? 0}
+          maxMembersForTier={familyData?.maxMembersForTier ?? 999}
+          currentMemberId={member.id}
         />
       )}
 

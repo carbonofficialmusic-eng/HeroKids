@@ -784,8 +784,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const memberCount = await storage.getFamilyMemberCount(member.familyName);
+      const allMembersForLimit = await storage.getFamilyMembersByFamily(member.familyName);
+      const maxMembersForTier = getMaxMembers(family.subscriptionTier as any);
+      const activeCount = allMembersForLimit.filter((m: any) => !m.isPaused).length;
+      const overLimitCount = Math.max(0, activeCount - maxMembersForTier);
       
-      res.json({ ...family, memberCount });
+      res.json({ ...family, memberCount, maxMembersForTier, overLimitCount });
     } catch (error) {
       console.error("Error fetching family:", error);
       res.status(500).json({ message: "Failed to fetch family" });
@@ -1160,7 +1164,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return aTime - bTime;
         });
-        const overLimitIds = new Set(sorted.slice(maxMembers).map(m => m.id));
+        // Explicitly paused members are always blocked; remaining sorted non-paused
+        // members beyond maxMembers are auto-blocked
+        const activeSorted = sorted.filter(m => !m.isPaused);
+        const autoOverLimitIds = new Set(activeSorted.slice(maxMembers).map(m => m.id));
+        const overLimitIds = new Set([
+          ...members.filter(m => m.isPaused).map(m => m.id),
+          ...autoOverLimitIds,
+        ]);
         const membersWithLimit = members.map(m => ({
           ...m,
           isOverLimit: overLimitIds.has(m.id),
@@ -1176,6 +1187,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching family members:", error);
       res.status(500).json({ message: "Failed to fetch family members" });
+    }
+  });
+
+  // Pause / unpause a family member (parent only, for downgrade overflow management)
+  app.patch("/api/family-members/:id/pause", isAuthenticated, async (req: any, res) => {
+    try {
+      const targetId = req.params.id;
+      const { isPaused } = req.body;
+
+      let currentMember;
+      if (req.user.authMethod === "device" && req.user.member) {
+        currentMember = req.user.member;
+      } else {
+        const userId = req.user.claims.sub;
+        currentMember = await storage.getFamilyMemberByUserId(userId);
+      }
+
+      if (!currentMember || currentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can pause members" });
+      }
+
+      const target = await storage.getFamilyMember(targetId);
+      if (!target || target.familyName !== currentMember.familyName) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      if (target.id === currentMember.id) {
+        return res.status(403).json({ message: "Cannot pause yourself" });
+      }
+
+      await storage.updateFamilyMember(targetId, { isPaused: !!isPaused });
+      const updated = await storage.getFamilyMember(targetId);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating member pause state:", error);
+      res.status(500).json({ message: "Failed to update member" });
     }
   });
 
@@ -2404,7 +2451,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return aTime - bTime;
         });
-        const overLimitIds = new Set(sorted.slice(maxMembers).map(m => m.id));
+        const activeSorted = sorted.filter((m: any) => !m.isPaused);
+        const autoOverLimitIds = new Set(activeSorted.slice(maxMembers).map((m: any) => m.id));
+        const overLimitIds = new Set([
+          ...allMembers.filter((m: any) => m.isPaused).map((m: any) => m.id),
+          ...autoOverLimitIds,
+        ]);
         if (overLimitIds.has(member.id)) {
           return res.status(403).json({ message: "MEMBER_OVER_LIMIT" });
         }
