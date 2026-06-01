@@ -1461,6 +1461,7 @@ export default function KidDashboard() {
   const { data: tasks = [] } = useQuery<TaskWithMeta[]>({
     queryKey: ["/api/tasks"],
     enabled: !!member,
+    refetchInterval: 3000,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -1603,7 +1604,15 @@ export default function KidDashboard() {
       await queryClient.cancelQueries({ queryKey: ["/api/tasks"] });
       const previousTasks = queryClient.getQueryData(["/api/tasks"]);
       queryClient.setQueryData<any[]>(["/api/tasks"], (old) =>
-        old ? old.map((t) => t.id === taskId ? { ...t, memberHasCompleted: true } : t) : old
+        old ? old.map((t) => {
+          if (t.id !== taskId) return t;
+          // If task requires approval → optimistically set pending (yellow)
+          // Otherwise → set approved (gray/green)
+          if (t.requiresApproval) {
+            return { ...t, memberHasCompleted: true, memberCompletionStatus: "pending" };
+          }
+          return { ...t, memberHasCompleted: true, memberCompletionStatus: "approved" };
+        }) : old
       );
       return { previousTasks };
     },
