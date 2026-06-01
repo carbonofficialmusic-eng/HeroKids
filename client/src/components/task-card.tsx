@@ -224,6 +224,9 @@ export function TaskCard({
                 >
                   {task.title}
                 </p>
+                {task.requiresProof && !isGrayedOut && (
+                  <Camera className="h-3 w-3 text-sky-400 shrink-0" data-testid={`icon-camera-${task.id}`} />
+                )}
                 {isGrayedOut && (
                   isWeekendUnavailable
                     ? <Moon className="h-3 w-3 text-muted-foreground shrink-0" />
@@ -381,6 +384,9 @@ export function TaskCard({
               >
                 {task.title}
               </h3>
+              {task.requiresProof && !isGrayedOut && (
+                <Camera className="h-4 w-4 text-sky-400 shrink-0" data-testid={`icon-camera-${task.id}`} />
+              )}
               {isGrayedOut && (
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
