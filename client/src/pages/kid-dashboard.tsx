@@ -494,10 +494,21 @@ function KidShoppingListSection({ taskId }: { taskId: string | number }) {
                 ? <CheckSquare className="h-5 w-5 text-green-400 flex-shrink-0" />
                 : <Square className="h-5 w-5 text-muted-foreground flex-shrink-0" />
               }
-              <span className={`text-sm flex-1 font-medium ${isDone ? "line-through text-muted-foreground" : "text-white"}`}
+              <span className={`text-sm flex-1 min-w-0 font-medium ${isDone ? "line-through text-muted-foreground" : "text-white"}`}
                 style={{ textShadow: "0 1px 3px rgba(0,0,0,0.7)" }}>
                 {item.text}
               </span>
+              {isDone && item.completedByMemberName && (
+                <span
+                  className="text-xs font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                  style={{
+                    backgroundColor: item.completedByMemberColor ? `${item.completedByMemberColor}40` : "rgba(255,255,255,0.15)",
+                    color: item.completedByMemberColor ?? "rgba(255,255,255,0.8)",
+                  }}
+                >
+                  {item.completedByMemberName}
+                </span>
+              )}
             </div>
           );
         })}

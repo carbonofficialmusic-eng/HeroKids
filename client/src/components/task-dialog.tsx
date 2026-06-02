@@ -293,8 +293,8 @@ export function TaskDialog({
     const canBeShoppingList = recurrenceMode === "standard" && submitData.recurrence === "none";
     if (canBeShoppingList && isShoppingList && shoppingItems.length > 0) {
       submitData.isShoppingList = true;
-      submitData.requiresApproval = false; // auto-approved when all items done
-      submitData.requiresProof = false;
+      // requiresApproval is forced false server-side for shopping lists;
+      // requiresProof is not forced — leave as parent configured
       submitData.shoppingItems = shoppingItems.map((item, idx) => ({
         text: item.text,
         sortOrder: idx,

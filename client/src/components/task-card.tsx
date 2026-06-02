@@ -115,9 +115,20 @@ function ShoppingListSection({ taskId, onClick }: { taskId: string | number; onC
               ? <CheckSquare className="h-4 w-4 text-green-500 flex-shrink-0" />
               : <Square className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             }
-            <span className={`text-sm flex-1 ${isDone ? "line-through text-muted-foreground" : ""}`}>
+            <span className={`text-sm flex-1 min-w-0 ${isDone ? "line-through text-muted-foreground" : ""}`}>
               {item.text}
             </span>
+            {isDone && item.completedByMemberName && (
+              <span
+                className="text-xs font-medium px-1.5 py-0.5 rounded-full shrink-0"
+                style={{
+                  backgroundColor: item.completedByMemberColor ? `${item.completedByMemberColor}30` : undefined,
+                  color: item.completedByMemberColor ?? undefined,
+                }}
+              >
+                {item.completedByMemberName}
+              </span>
+            )}
           </div>
         );
       })}

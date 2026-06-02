@@ -2169,6 +2169,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (parsed.recurrence === "immediate") {
         parsed.requiresApproval = true;
       }
+
+      // Shopping list tasks auto-approve when all items are done — requiresApproval
+      // must be false so createTaskCompletion awards points immediately
+      if (parsed.isShoppingList) {
+        parsed.requiresApproval = false;
+      }
       
       const task = await storage.createTask(parsed);
       
@@ -2314,8 +2320,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!task) return res.status(404).json({ message: "Task not found" });
       if (task.familyName !== member.familyName) return res.status(403).json({ message: "Forbidden" });
 
-      const items = await storage.getShoppingListItems(taskId);
-      res.json(items);
+      const [items, members] = await Promise.all([
+        storage.getShoppingListItems(taskId),
+        storage.getFamilyMembersByFamily(member.familyName),
+      ]);
+
+      // Enrich items with checker display info
+      const memberMap = new Map(members.map(m => [m.id, m]));
+      const enriched = items.map(item => ({
+        ...item,
+        completedByMemberName: item.completedByMemberId
+          ? (memberMap.get(item.completedByMemberId)?.displayName ?? null)
+          : null,
+        completedByMemberColor: item.completedByMemberId
+          ? (memberMap.get(item.completedByMemberId)?.color ?? null)
+          : null,
+      }));
+
+      res.json(enriched);
     } catch (error: any) {
       console.error("Error fetching shopping items:", error);
       res.status(500).json({ message: "Failed to fetch shopping items" });
@@ -2355,7 +2377,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (allDone) {
         // Collect unique contributors (members who checked at least one item)
-        const contributorIds = [...new Set(allItems.map(i => i.completedByMemberId!))];
+        const contributorIds = allItems
+          .map(i => i.completedByMemberId!)
+          .filter((id, idx, arr) => arr.indexOf(id) === idx);
         const pointsPerMember = Math.floor(task.points / contributorIds.length);
         const remainder = task.points % contributorIds.length;
 
@@ -2363,6 +2387,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const memberId = contributorIds[idx];
           const earnedPoints = pointsPerMember + (idx === 0 ? remainder : 0);
           try {
+            // createTaskCompletion with requiresApproval=false (enforced at task creation)
+            // will auto-approve and award points via _approveCompletionInternal.
+            // Do NOT manually call updateFamilyMemberPoints to avoid double-awarding.
             await storage.createTaskCompletion({
               taskId: task.id,
               memberId,
@@ -2372,17 +2399,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               proofPhotoUrl: null,
               rejectionReason: null,
             });
-            // Update member points
-            const contributor = await storage.getFamilyMember(memberId);
-            if (contributor) {
-              await storage.updateFamilyMemberPoints(
-                memberId,
-                contributor.totalEarned + earnedPoints,
-                contributor.totalPoints + earnedPoints,
-                contributor.weeklyPoints + earnedPoints,
-                contributor.monthlyPoints + earnedPoints,
-              );
-            }
           } catch (err) {
             console.error("Error creating shopping list completion for member", memberId, err);
           }
