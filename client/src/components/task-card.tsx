@@ -61,10 +61,12 @@ interface TaskCardProps {
   compact?: boolean;
 }
 
-function ShoppingListSection({ taskId, onClick }: { taskId: string | number; onClick?: (e: React.MouseEvent) => void }) {
+function ShoppingListSection({ taskId, onClick, expanded: controlledExpanded, onToggle }: { taskId: string | number; onClick?: (e: React.MouseEvent) => void; expanded?: boolean; onToggle?: () => void; }) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
+  const [internalExpanded, setInternalExpanded] = useState(false);
+  const expanded = controlledExpanded !== undefined ? controlledExpanded : internalExpanded;
+  const toggle = onToggle ?? (() => setInternalExpanded((v: boolean) => !v));
 
   const { data: items = [] } = useQuery<any[]>({
     queryKey: ["/api/tasks", taskId, "shopping-items"],
@@ -119,7 +121,7 @@ function ShoppingListSection({ taskId, onClick }: { taskId: string | number; onC
       <button
         type="button"
         className="flex items-center gap-1.5 w-full text-left mb-2 group"
-        onClick={(e) => { e.stopPropagation(); setExpanded((v: boolean) => !v); }}
+        onClick={(e) => { e.stopPropagation(); toggle(); }}
         data-testid={`shopping-list-toggle-${taskId}`}
       >
         <ShoppingCart className="h-3.5 w-3.5 text-muted-foreground" />
@@ -178,6 +180,7 @@ export function TaskCard({
   compact = false,
 }: TaskCardProps) {
   const { t, i18n } = useTranslation();
+  const [shoppingListExpanded, setShoppingListExpanded] = useState(false);
   
   // Get locale for date formatting
   const getDateLocale = () => {
@@ -309,9 +312,9 @@ export function TaskCard({
         <Card
           className={`p-2 transition-all h-full flex flex-col backdrop-blur-md ${
             isGrayedOut ? 'bg-card/20' : 'bg-card/80'
-          } ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
+          } hover-elevate active-elevate-2 cursor-pointer`}
           data-testid={`card-task-${task.id}`}
-          onClick={() => onClick?.(task)}
+          onClick={() => (task as any).isShoppingList ? setShoppingListExpanded(v => !v) : onClick?.(task)}
         >
           <div className="flex items-start gap-1.5 flex-1">
             {/* Compact emoji */}
@@ -438,6 +441,16 @@ export function TaskCard({
               )
             )}
           </div>
+          {/* Shopping list expandable section in compact mode */}
+          {(task as any).isShoppingList && (
+            <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>
+              <ShoppingListSection
+                taskId={task.id}
+                expanded={shoppingListExpanded}
+                onToggle={() => setShoppingListExpanded(v => !v)}
+              />
+            </div>
+          )}
         </Card>
       </motion.div>
     );
