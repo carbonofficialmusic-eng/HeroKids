@@ -142,6 +142,7 @@ export function TaskDialog({
       points: 40,
       iconEmoji: "📚",
       requiresProof: false,
+      recurrence: "weekdays" as const,
     },
     {
       id: "brush-teeth",
@@ -387,6 +388,9 @@ export function TaskDialog({
     form.setValue("points", template.points);
     form.setValue("iconEmoji", template.iconEmoji);
     form.setValue("requiresProof", template.requiresProof);
+    if ((template as any).recurrence) {
+      form.setValue("recurrence", (template as any).recurrence);
+    }
     if ((template as any).isShoppingList) {
       setIsShoppingList(true);
     }
