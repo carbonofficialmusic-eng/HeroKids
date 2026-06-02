@@ -3784,15 +3784,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
 
-      if (member.role !== "parent") {
-        return res.status(403).json({ message: "Only parents can cancel redemptions" });
-      }
-
       const familyRedemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
       const redemption = familyRedemptions.find(r => r.id === id);
 
       if (!redemption) {
         return res.status(404).json({ message: "Redemption not found" });
+      }
+
+      if (member.role !== "parent") {
+        // Children can only cancel their own pending, unshared redemptions
+        if (redemption.memberId !== member.id) {
+          return res.status(403).json({ message: "You can only cancel your own redemptions" });
+        }
+        if (redemption.status === "approved" || redemption.status === "completed") {
+          return res.status(403).json({ message: "Cannot cancel a fulfilled redemption" });
+        }
+        if (redemption.sharingStatus !== "not_shared") {
+          return res.status(403).json({ message: "Cannot cancel a shared redemption" });
+        }
       }
 
       const { memberId, pointsRefunded, rewardId } = await storage.cancelRewardRedemption(id);

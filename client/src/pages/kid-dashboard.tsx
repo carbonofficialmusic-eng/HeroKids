@@ -1510,6 +1510,24 @@ export default function KidDashboard() {
     },
   });
 
+  const cancelRedemptionMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("DELETE", `/api/reward-redemptions/${redemptionId}`);
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({
+        title: t("rewardsBoard.redemptionCancelled"),
+        description: t("rewardsBoard.pointsRefunded", { count: data?.pointsRefunded ?? 0 }),
+      });
+    },
+    onError: (error: any) => {
+      toast({ title: t("rewardsBoard.cancelError"), description: error.message, variant: "destructive" });
+    },
+  });
+
   const cancelSharingMutation = useMutation({
     mutationFn: async (redemptionId: string) => {
       return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/cancel-sharing`, {});
@@ -2481,6 +2499,7 @@ export default function KidDashboard() {
                 const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && canUseSharedRewards(familyData?.subscriptionTier);
                 const canFinalize = isSharing && participants.length > 0;
                 const canCancelSharing = isSharing; // Can cancel anytime while sharing is active
+                const canCancel = typed.status !== "approved" && typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
                 return (
                   <motion.div
@@ -2543,6 +2562,23 @@ export default function KidDashboard() {
                                 {p.member.displayName}
                               </Badge>
                             ))}
+                          </div>
+                        )}
+
+                        {/* Cancel Redemption */}
+                        {canCancel && (
+                          <div className="pt-2 border-t border-green-500/20">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full gap-1.5 text-xs text-destructive border-destructive/40 hover:bg-destructive/10"
+                              onClick={() => cancelRedemptionMutation.mutate(typed.id)}
+                              disabled={cancelRedemptionMutation.isPending}
+                              data-testid={`button-cancel-redemption-kid-${typed.id}`}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                              {t("rewardsBoard.cancelRedemption")}
+                            </Button>
                           </div>
                         )}
 
