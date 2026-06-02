@@ -2172,6 +2172,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const task = await storage.createTask(parsed);
       
+      // If this is a shopping list task, create the items
+      const rawShoppingItems = req.body.shoppingItems;
+      if (parsed.isShoppingList && Array.isArray(rawShoppingItems) && rawShoppingItems.length > 0) {
+        const itemsToCreate = rawShoppingItems
+          .filter((item: any) => item && typeof item.text === "string" && item.text.trim())
+          .map((item: any, idx: number) => ({
+            taskId: task.id,
+            text: item.text.trim(),
+            sortOrder: item.sortOrder ?? idx,
+            completedByMemberId: null,
+            completedAt: null,
+          }));
+        if (itemsToCreate.length > 0) {
+          await storage.createShoppingListItems(itemsToCreate);
+        }
+      }
+
       // Broadcast new task to family
       broadcastToFamily(member.familyName, {
         type: "task_created",
@@ -2282,6 +2299,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error deleting task:", error);
       res.status(500).json({ message: "Failed to delete task" });
+    }
+  });
+
+  // Shopping list: get items for a task
+  app.get("/api/tasks/:taskId/shopping-items", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const { member } = result;
+      const { taskId } = req.params;
+
+      const task = await storage.getTask(taskId);
+      if (!task) return res.status(404).json({ message: "Task not found" });
+      if (task.familyName !== member.familyName) return res.status(403).json({ message: "Forbidden" });
+
+      const items = await storage.getShoppingListItems(taskId);
+      res.json(items);
+    } catch (error: any) {
+      console.error("Error fetching shopping items:", error);
+      res.status(500).json({ message: "Failed to fetch shopping items" });
+    }
+  });
+
+  // Shopping list: toggle an item (check/uncheck)
+  app.patch("/api/shopping-items/:itemId/toggle", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const { member } = result;
+      const { itemId } = req.params;
+
+      const item = await storage.getShoppingListItem(itemId);
+      if (!item) return res.status(404).json({ message: "Item not found" });
+
+      const task = await storage.getTask(item.taskId);
+      if (!task) return res.status(404).json({ message: "Task not found" });
+      if (task.familyName !== member.familyName) return res.status(403).json({ message: "Forbidden" });
+      if (task.status !== "active") return res.status(400).json({ message: "Task is no longer active" });
+
+      const updatedItem = await storage.toggleShoppingListItem(itemId, member.id);
+
+      // Broadcast item toggle
+      broadcastToFamily(member.familyName, {
+        type: "shopping_item_toggled",
+        taskId: task.id,
+        item: updatedItem,
+        memberId: member.id,
+        memberDisplayName: member.displayName,
+      });
+
+      // Check if all items are now completed
+      const allItems = await storage.getShoppingListItems(task.id);
+      const allDone = allItems.length > 0 && allItems.every(i => i.completedByMemberId !== null);
+
+      if (allDone) {
+        // Collect unique contributors (members who checked at least one item)
+        const contributorIds = [...new Set(allItems.map(i => i.completedByMemberId!))];
+        const pointsPerMember = Math.floor(task.points / contributorIds.length);
+        const remainder = task.points % contributorIds.length;
+
+        for (let idx = 0; idx < contributorIds.length; idx++) {
+          const memberId = contributorIds[idx];
+          const earnedPoints = pointsPerMember + (idx === 0 ? remainder : 0);
+          try {
+            await storage.createTaskCompletion({
+              taskId: task.id,
+              memberId,
+              pointsEarned: earnedPoints,
+              status: "approved",
+              approvedBy: null,
+              proofPhotoUrl: null,
+              rejectionReason: null,
+            });
+            // Update member points
+            const contributor = await storage.getFamilyMember(memberId);
+            if (contributor) {
+              await storage.updateFamilyMemberPoints(
+                memberId,
+                contributor.totalEarned + earnedPoints,
+                contributor.totalPoints + earnedPoints,
+                contributor.weeklyPoints + earnedPoints,
+                contributor.monthlyPoints + earnedPoints,
+              );
+            }
+          } catch (err) {
+            console.error("Error creating shopping list completion for member", memberId, err);
+          }
+        }
+
+        // Archive the task
+        await storage.updateTaskStatus(task.id, "completed");
+
+        broadcastToFamily(member.familyName, {
+          type: "shopping_list_completed",
+          taskId: task.id,
+          task: { ...task, status: "completed" },
+        });
+      }
+
+      res.json({ item: updatedItem, allCompleted: allDone });
+    } catch (error: any) {
+      console.error("Error toggling shopping item:", error);
+      res.status(500).json({ message: "Failed to toggle item" });
     }
   });
 

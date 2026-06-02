@@ -65,6 +65,7 @@ import {
   notifications,
   emailReadinessChecks,
   accountLinkRepairHistory,
+  shoppingListItems,
   type Notification,
   type InsertNotification,
   type NotificationType,
@@ -72,6 +73,8 @@ import {
   type InsertEmailReadinessCheck,
   type AccountLinkRepairHistory,
   type InsertAccountLinkRepairHistory,
+  type ShoppingListItem,
+  type InsertShoppingListItem,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gt, gte, lt, sql, inArray, isNull, isNotNull } from "drizzle-orm";
@@ -243,6 +246,13 @@ export interface IStorage {
   updateTaskStatus(id: string, status: "active" | "completed" | "archived"): Promise<void>;
   updateTaskNextAvailableDate(id: string, nextAvailableDate: Date): Promise<void>;
   deleteTask(id: string): Promise<void>;
+
+  // Shopping list item operations
+  getShoppingListItems(taskId: string): Promise<ShoppingListItem[]>;
+  createShoppingListItems(items: InsertShoppingListItem[]): Promise<ShoppingListItem[]>;
+  toggleShoppingListItem(itemId: string, memberId: string): Promise<ShoppingListItem>;
+  uncheckShoppingListItem(itemId: string): Promise<ShoppingListItem>;
+  getShoppingListItem(itemId: string): Promise<ShoppingListItem | undefined>;
 
   // Task assignment operations
   createTaskAssignment(assignment: InsertTaskAssignment): Promise<void>;
@@ -1057,6 +1067,57 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTask(id: string): Promise<void> {
     await db.delete(tasks).where(eq(tasks.id, id));
+  }
+
+  // Shopping list item operations
+  async getShoppingListItems(taskId: string): Promise<ShoppingListItem[]> {
+    return await db
+      .select()
+      .from(shoppingListItems)
+      .where(eq(shoppingListItems.taskId, taskId))
+      .orderBy(shoppingListItems.sortOrder);
+  }
+
+  async getShoppingListItem(itemId: string): Promise<ShoppingListItem | undefined> {
+    const [item] = await db.select().from(shoppingListItems).where(eq(shoppingListItems.id, itemId));
+    return item;
+  }
+
+  async createShoppingListItems(items: InsertShoppingListItem[]): Promise<ShoppingListItem[]> {
+    if (items.length === 0) return [];
+    return await db.insert(shoppingListItems).values(items).returning();
+  }
+
+  async toggleShoppingListItem(itemId: string, memberId: string): Promise<ShoppingListItem> {
+    const [current] = await db.select().from(shoppingListItems).where(eq(shoppingListItems.id, itemId));
+    if (!current) throw new Error("Shopping list item not found");
+
+    if (current.completedByMemberId) {
+      // Already checked — uncheck it
+      const [updated] = await db
+        .update(shoppingListItems)
+        .set({ completedByMemberId: null, completedAt: null })
+        .where(eq(shoppingListItems.id, itemId))
+        .returning();
+      return updated;
+    } else {
+      // Check it off
+      const [updated] = await db
+        .update(shoppingListItems)
+        .set({ completedByMemberId: memberId, completedAt: new Date() })
+        .where(eq(shoppingListItems.id, itemId))
+        .returning();
+      return updated;
+    }
+  }
+
+  async uncheckShoppingListItem(itemId: string): Promise<ShoppingListItem> {
+    const [updated] = await db
+      .update(shoppingListItems)
+      .set({ completedByMemberId: null, completedAt: null })
+      .where(eq(shoppingListItems.id, itemId))
+      .returning();
+    return updated;
   }
 
   // Task assignment operations

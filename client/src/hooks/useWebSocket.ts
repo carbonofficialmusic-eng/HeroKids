@@ -203,6 +203,17 @@ export function useWebSocket(familyName: string | null) {
               }
               break;
 
+            case "shopping_item_toggled":
+            case "shopping_list_completed":
+              // Invalidate shopping items for the specific task + task list
+              if (data.taskId) {
+                queryClient.invalidateQueries({ queryKey: ["/api/tasks", data.taskId, "shopping-items"] });
+              }
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+              break;
+
             case "pinboard_update":
               queryClient.invalidateQueries({ queryKey: ["/api/pinboard"] });
               break;

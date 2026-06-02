@@ -55,6 +55,9 @@ import {
   UserPlus,
   X,
   AlertTriangle,
+  ShoppingCart,
+  Square,
+  CheckSquare,
 } from "lucide-react";
 
 // Helper to determine due date status
@@ -431,6 +434,78 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
   );
 }
 
+// Shopping list section for kid dashboard
+function KidShoppingListSection({ taskId }: { taskId: string | number }) {
+  const queryClient_local = queryClient;
+  const { t } = useTranslation();
+
+  const { data: items = [] } = useQuery<any[]>({
+    queryKey: ["/api/tasks", taskId, "shopping-items"],
+    queryFn: async () => {
+      const res = await fetch(`/api/tasks/${taskId}/shopping-items`, { headers: getDevHeaders() });
+      if (!res.ok) throw new Error("Failed to fetch shopping items");
+      return res.json();
+    },
+    staleTime: 15000,
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async (itemId: number) => {
+      const res = await apiRequest("PATCH", `/api/shopping-items/${itemId}/toggle`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient_local.invalidateQueries({ queryKey: ["/api/tasks", taskId, "shopping-items"] });
+      queryClient_local.invalidateQueries({ queryKey: ["/api/tasks"] });
+      queryClient_local.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+    },
+  });
+
+  if (items.length === 0) return null;
+
+  const doneCount = items.filter((it: any) => it.completedAt !== null).length;
+
+  return (
+    <div className="w-full space-y-2 text-left" data-testid={`kid-shopping-list-${taskId}`}>
+      <div className="flex items-center gap-1.5">
+        <ShoppingCart className="h-4 w-4 text-primary" />
+        <span className="text-sm font-semibold">
+          {doneCount}/{items.length} {t("tasks.shoppingItemsDone", { defaultValue: "Artikel erledigt" })}
+        </span>
+      </div>
+      <div className="space-y-1.5">
+        {items.map((item: any) => {
+          const isDone = item.completedAt !== null;
+          return (
+            <div
+              key={item.id}
+              className={`flex items-center gap-2 rounded-xl px-3 py-2 cursor-pointer transition-colors border ${
+                isDone
+                  ? "bg-green-500/15 border-green-400/30"
+                  : "bg-white/8 border-white/15 hover-elevate"
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!toggleMutation.isPending) toggleMutation.mutate(item.id);
+              }}
+              data-testid={`kid-shopping-item-${item.id}`}
+            >
+              {isDone
+                ? <CheckSquare className="h-5 w-5 text-green-400 flex-shrink-0" />
+                : <Square className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              }
+              <span className={`text-sm flex-1 font-medium ${isDone ? "line-through text-muted-foreground" : "text-white"}`}
+                style={{ textShadow: "0 1px 3px rgba(0,0,0,0.7)" }}>
+                {item.text}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // Task Card Component
 function TaskCard({ 
   task, 
@@ -735,7 +810,7 @@ function TaskCard({
             : "bg-card border-border opacity-70"
         }`}
         data-testid={`task-card-${task.id}`}
-        onClick={isActionable ? handleComplete : undefined}
+        onClick={(isActionable && !(task as any).isShoppingList) ? handleComplete : undefined}
       >
         <div className="text-center space-y-3">
           <div className={`flex justify-center p-4 rounded-2xl mx-auto w-fit shadow-inner ${
@@ -892,6 +967,11 @@ function TaskCard({
                 </p>
               )}
             </div>
+          )}
+
+          {/* Shopping List Items */}
+          {(task as any).isShoppingList && (
+            <KidShoppingListSection taskId={task.id} />
           )}
 
           {/* Due Date Display with kid-friendly warnings */}

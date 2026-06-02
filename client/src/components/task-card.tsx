@@ -3,14 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Moon, Info } from "lucide-react";
+import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Moon, Info, ShoppingCart, Square, CheckSquare } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import type { Task, FamilyMember } from "@shared/schema";
+import type { Task, FamilyMember, ShoppingListItem } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { format, isToday, isTomorrow, isPast, differenceInDays, parse, type Locale } from "date-fns";
 import { de, enUS, fr, es, ja, ko, sv, zhCN } from "date-fns/locale";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest, getDevHeaders } from "@/lib/queryClient";
 
 
 interface TaskCardProps {
@@ -56,6 +58,71 @@ interface TaskCardProps {
   onClick?: (task: Task) => void;
   currentMemberId?: string;
   compact?: boolean;
+}
+
+function ShoppingListSection({ taskId, onClick }: { taskId: string | number; onClick?: (e: React.MouseEvent) => void }) {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  const { data: items = [] } = useQuery<any[]>({
+    queryKey: ["/api/tasks", taskId, "shopping-items"],
+    queryFn: async () => {
+      const res = await fetch(`/api/tasks/${taskId}/shopping-items`, { headers: getDevHeaders() });
+      if (!res.ok) throw new Error("Failed to fetch shopping items");
+      return res.json();
+    },
+    staleTime: 15000,
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async (itemId: number) => {
+      const res = await apiRequest("PATCH", `/api/shopping-items/${itemId}/toggle`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks", taskId, "shopping-items"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+    },
+  });
+
+  if (items.length === 0) return null;
+
+  const doneCount = items.filter((it: any) => it.completedAt !== null).length;
+
+  return (
+    <div
+      className="mt-3 space-y-1.5"
+      onClick={(e) => { e.stopPropagation(); onClick?.(e); }}
+      data-testid={`shopping-list-${taskId}`}
+    >
+      <div className="flex items-center gap-1.5 mb-2">
+        <ShoppingCart className="h-3.5 w-3.5 text-muted-foreground" />
+        <span className="text-xs font-medium text-muted-foreground">
+          {doneCount}/{items.length} {t("tasks.shoppingItemsDone", { defaultValue: "Artikel erledigt" })}
+        </span>
+      </div>
+      {items.map((item: any) => {
+        const isDone = item.completedAt !== null;
+        return (
+          <div
+            key={item.id}
+            className={`flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer transition-colors ${isDone ? "bg-green-500/10" : "bg-muted/30 hover-elevate"}`}
+            onClick={() => { if (!toggleMutation.isPending) toggleMutation.mutate(item.id); }}
+            data-testid={`shopping-item-${item.id}`}
+          >
+            {isDone
+              ? <CheckSquare className="h-4 w-4 text-green-500 flex-shrink-0" />
+              : <Square className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            }
+            <span className={`text-sm flex-1 ${isDone ? "line-through text-muted-foreground" : ""}`}>
+              {item.text}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export function TaskCard({
@@ -475,6 +542,11 @@ export function TaskCard({
               >
                 {task.description}
               </p>
+            )}
+
+            {/* Shopping List Items */}
+            {(task as any).isShoppingList && (
+              <ShoppingListSection taskId={task.id} />
             )}
 
             {/* Multi-Completion Participants */}

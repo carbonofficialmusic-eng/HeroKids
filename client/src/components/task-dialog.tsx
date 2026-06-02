@@ -46,7 +46,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Sparkles, RotateCcw, CalendarIcon, X, Lock } from "lucide-react";
+import { Sparkles, RotateCcw, CalendarIcon, X, Lock, Plus, ShoppingCart } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Calendar } from "@/components/ui/calendar";
@@ -163,6 +163,11 @@ export function TaskDialog({
   // Track which recurrence mode is selected
   const [recurrenceMode, setRecurrenceMode] = useState<"standard" | "custom" | "immediate">("standard");
   
+  // Shopping list state
+  const [isShoppingList, setIsShoppingList] = useState(false);
+  const [shoppingItems, setShoppingItems] = useState<{ text: string }[]>([]);
+  const [newItemText, setNewItemText] = useState("");
+
   // State for assigned member selection
   const [selectedSharedMembers, setSelectedSharedMembers] = useState<string[]>([]);
   
@@ -224,6 +229,10 @@ export function TaskDialog({
         });
         // Sync assigned members state
         setSelectedSharedMembers(editingTask.sharedMemberIds || []);
+        // Sync shopping list state
+        setIsShoppingList((editingTask as any).isShoppingList || false);
+        setShoppingItems([]);
+        setNewItemText("");
       } else {
         setRecurrenceMode("standard");
         form.reset({
@@ -245,12 +254,16 @@ export function TaskDialog({
         });
         // Clear assigned members state
         setSelectedSharedMembers([]);
+        // Clear shopping list state
+        setIsShoppingList(false);
+        setShoppingItems([]);
+        setNewItemText("");
       }
     }
   }, [open, editingTask, familyName, createdBy, totalMemberCount]);
 
   const handleSubmit = (data: TaskFormData) => {
-    const submitData = { ...data };
+    const submitData: any = { ...data };
     if (recurrenceMode === "immediate") {
       submitData.recurrence = "immediate";
       submitData.recurrenceDays = undefined;
@@ -275,6 +288,21 @@ export function TaskDialog({
     }
     
     submitData.maxCompletions = undefined;
+    
+    // Add shopping list data
+    const canBeShoppingList = recurrenceMode === "standard" && submitData.recurrence === "none";
+    if (canBeShoppingList && isShoppingList && shoppingItems.length > 0) {
+      submitData.isShoppingList = true;
+      submitData.requiresApproval = false; // auto-approved when all items done
+      submitData.requiresProof = false;
+      submitData.shoppingItems = shoppingItems.map((item, idx) => ({
+        text: item.text,
+        sortOrder: idx,
+      }));
+    } else {
+      submitData.isShoppingList = false;
+      submitData.shoppingItems = [];
+    }
     
     onSubmit(submitData);
   };
@@ -801,6 +829,98 @@ export function TaskDialog({
                   );
                 }}
               />
+            )}
+
+            {/* Shopping List Toggle - only for one-time tasks */}
+            {recurrenceMode === "standard" && form.watch("recurrence") === "none" && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <ShoppingCart className="h-4 w-4 text-primary" />
+                      <FormLabel className="text-base cursor-pointer">
+                        {t('tasks.shoppingList', { defaultValue: 'Einkaufsliste' })}
+                      </FormLabel>
+                    </div>
+                    <FormDescription>
+                      {t('tasks.shoppingListDesc', { defaultValue: 'Artikel können von allen Familienmitgliedern abgehakt werden. Punkte werden aufgeteilt.' })}
+                    </FormDescription>
+                  </div>
+                  <Switch
+                    checked={isShoppingList}
+                    onCheckedChange={(checked) => {
+                      setIsShoppingList(checked);
+                      if (checked) {
+                        form.setValue("iconEmoji", "🛒");
+                      }
+                    }}
+                    data-testid="switch-shopping-list"
+                  />
+                </div>
+
+                {isShoppingList && (
+                  <div className="rounded-lg border p-4 space-y-3">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t('tasks.shoppingItems', { defaultValue: 'Artikel' })}
+                      {shoppingItems.length > 0 && ` (${shoppingItems.length})`}
+                    </p>
+                    <div className="space-y-2">
+                      {shoppingItems.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <div className="flex-1 text-sm border rounded-md px-3 py-2 bg-muted/30">
+                            {item.text}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setShoppingItems(prev => prev.filter((_, i) => i !== idx))}
+                            data-testid={`button-remove-item-${idx}`}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={newItemText}
+                        onChange={(e) => setNewItemText(e.target.value)}
+                        placeholder={t('tasks.shoppingItemPlaceholder', { defaultValue: 'z.B. Milch, Brot, Eier...' })}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (newItemText.trim()) {
+                              setShoppingItems(prev => [...prev, { text: newItemText.trim() }]);
+                              setNewItemText("");
+                            }
+                          }
+                        }}
+                        data-testid="input-shopping-item"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          if (newItemText.trim()) {
+                            setShoppingItems(prev => [...prev, { text: newItemText.trim() }]);
+                            setNewItemText("");
+                          }
+                        }}
+                        data-testid="button-add-shopping-item"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {shoppingItems.length === 0 && (
+                      <p className="text-xs text-muted-foreground text-center py-1">
+                        {t('tasks.shoppingItemsEmpty', { defaultValue: 'Noch keine Artikel — gib oben einen ein und drücke Enter.' })}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
 
             <FormField

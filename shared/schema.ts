@@ -224,6 +224,7 @@ export const tasks = pgTable("tasks", {
   isSharedTask: boolean("is_shared_task").notNull().default(false), // Shared task: all members must complete together, points split equally
   sharedMemberIds: text("shared_member_ids").array(), // Array of member IDs who must complete this shared task together
   dueDate: varchar("due_date"), // Optional due date for one-time tasks (YYYY-MM-DD format)
+  isShoppingList: boolean("is_shopping_list").notNull().default(false), // Shopping list task: items can be checked off individually
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -235,6 +236,7 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   }),
   assignments: many(taskAssignments),
   completions: many(taskCompletions),
+  shoppingListItems: many(shoppingListItems),
 }));
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({
@@ -245,6 +247,36 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type Task = typeof tasks.$inferSelect;
+
+// Shopping list items - individual items within a shopping list task
+export const shoppingListItems = pgTable("shopping_list_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  taskId: varchar("task_id").notNull().references(() => tasks.id, { onDelete: "cascade" }),
+  text: varchar("text").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  completedByMemberId: varchar("completed_by_member_id").references(() => familyMembers.id, { onDelete: "set null" }),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const shoppingListItemsRelations = relations(shoppingListItems, ({ one }) => ({
+  task: one(tasks, {
+    fields: [shoppingListItems.taskId],
+    references: [tasks.id],
+  }),
+  completedByMember: one(familyMembers, {
+    fields: [shoppingListItems.completedByMemberId],
+    references: [familyMembers.id],
+  }),
+}));
+
+export const insertShoppingListItemSchema = createInsertSchema(shoppingListItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertShoppingListItem = z.infer<typeof insertShoppingListItemSchema>;
+export type ShoppingListItem = typeof shoppingListItems.$inferSelect;
 
 // Task assignments - Who is assigned to which task
 export const taskAssignments = pgTable("task_assignments", {
