@@ -200,6 +200,24 @@ export default function MyRewards() {
     },
   });
 
+  const cancelRedemptionMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("DELETE", `/api/reward-redemptions/${redemptionId}`);
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({
+        title: t("rewardsBoard.redemptionCancelled"),
+        description: t("rewardsBoard.pointsRefunded", { count: data?.pointsRefunded ?? 0 }),
+      });
+    },
+    onError: (error: any) => {
+      toast({ title: t("rewardsBoard.cancelError"), description: error.message, variant: "destructive" });
+    },
+  });
+
   // Filter and sort redemptions by newest first
   const myRedemptions = member 
     ? redemptions
@@ -300,6 +318,7 @@ export default function MyRewards() {
               const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && canUseSharedRewardsFeature;
               const canFinalize = isSharing && participants.length > 0;
               const canCancelSharing = isSharing && participants.length === 0;
+              const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
               return (
                 <motion.div
@@ -389,6 +408,23 @@ export default function MyRewards() {
                                 </div>
                               ))}
                             </div>
+                          </div>
+                        )}
+
+                        {/* Cancel Redemption */}
+                        {canCancel && (
+                          <div className="pt-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1.5 text-destructive border-destructive/40 hover:bg-destructive/10"
+                              onClick={() => cancelRedemptionMutation.mutate(typed.id)}
+                              disabled={cancelRedemptionMutation.isPending}
+                              data-testid={`button-cancel-redemption-${typed.id}`}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                              {t("rewardsBoard.cancelRedemption")}
+                            </Button>
                           </div>
                         )}
 
