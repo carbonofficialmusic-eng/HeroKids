@@ -18,7 +18,33 @@ import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, childDeviceSessions, users, pinboardNotes } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
-import type { SubscriptionTier } from "@shared/tier-config";
+import type { SubscriptionTier, SubscriptionTierLegacy } from "@shared/tier-config";
+
+/**
+ * After a tier upgrade, automatically un-pause members that are now within the new tier's member limit.
+ * isPaused is intended only for downgrade-overflow management, so upgrades should clear it where possible.
+ */
+async function autoUnpauseMembersAfterUpgrade(familyName: string, newTier: SubscriptionTierLegacy): Promise<number> {
+  const allMembers = await storage.getFamilyMembersByFamily(familyName);
+  const pausedMembers = allMembers.filter(m => m.isPaused);
+  if (pausedMembers.length === 0) return 0;
+
+  const maxMembers = getMaxMembers(newTier);
+  const activeCount = allMembers.filter(m => !m.isPaused).length;
+  const canUnpauseCount = maxMembers === Infinity ? pausedMembers.length : Math.max(0, maxMembers - activeCount);
+  if (canUnpauseCount === 0) return 0;
+
+  const toUnpause = pausedMembers
+    .sort((a, b) => (new Date(a.createdAt ?? 0).getTime()) - (new Date(b.createdAt ?? 0).getTime()))
+    .slice(0, canUnpauseCount);
+
+  for (const m of toUnpause) {
+    await storage.updateFamilyMember(m.id, { isPaused: false });
+  }
+
+  console.log(`✅ Auto-unpaused ${toUnpause.length} member(s) for family "${familyName}" after upgrade to ${newTier}`);
+  return toUnpause.length;
+}
 import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD } from "@shared/skin-config";
 import { eq, inArray, and, desc } from "drizzle-orm";
 import "./types";
@@ -5775,6 +5801,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`✅ Subscription verified and activated for ${familyName}: ${tier}`);
       
+      // Auto-unpause members that are now within the new tier's member limit
+      await autoUnpauseMembersAfterUpgrade(familyName, tier);
+      
       // Broadcast subscription update to all family members
       broadcastToFamily(familyName, {
         type: 'subscription-updated',
@@ -5830,6 +5859,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       console.log(`✅ Public verification: Subscription activated for ${familyName}: ${tier}`);
+      
+      // Auto-unpause members that are now within the new tier's member limit
+      await autoUnpauseMembersAfterUpgrade(familyName, tier);
       
       // Broadcast subscription update to all family members
       broadcastToFamily(familyName, {
@@ -6509,6 +6541,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.updateFamilyTier(familyName, tier);
+      
+      // Auto-unpause members that are now within the new tier's member limit
+      await autoUnpauseMembersAfterUpgrade(familyName, tier);
+      
       res.json({ success: true });
     } catch (error) {
       console.error("Error updating family tier:", error);

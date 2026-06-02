@@ -120,6 +120,32 @@ app.post("/api/stripe-webhook",
             .where(eq(families.familyName, familyName));
           
           console.log(`✅ Subscription activated for ${familyName}: ${tier}`);
+          
+          // Auto-unpause members that now fit within the new tier's member limit
+          try {
+            const { getMaxMembers } = await import("../shared/tier-config");
+            const allMembers = await db.select().from(familyMembers)
+              .where(eq(familyMembers.familyName, familyName));
+            const pausedMembers = allMembers.filter((m: any) => m.isPaused);
+            if (pausedMembers.length > 0) {
+              const maxMembers = getMaxMembers(tier as any);
+              const activeCount = allMembers.filter((m: any) => !m.isPaused).length;
+              const canUnpauseCount = maxMembers === Infinity ? pausedMembers.length : Math.max(0, maxMembers - activeCount);
+              const toUnpause = pausedMembers
+                .sort((a: any, b: any) => (new Date(a.createdAt ?? 0).getTime()) - (new Date(b.createdAt ?? 0).getTime()))
+                .slice(0, canUnpauseCount);
+              if (toUnpause.length > 0) {
+                const toUnpauseIds = toUnpause.map((m: any) => m.id);
+                const { inArray } = await import("drizzle-orm");
+                await db.update(familyMembers)
+                  .set({ isPaused: false })
+                  .where(inArray(familyMembers.id, toUnpauseIds));
+                console.log(`✅ Auto-unpaused ${toUnpause.length} member(s) for "${familyName}" after webhook upgrade to ${tier}`);
+              }
+            }
+          } catch (unpauseErr: any) {
+            console.error("⚠️ Auto-unpause failed (non-critical):", unpauseErr.message);
+          }
           break;
         }
         
