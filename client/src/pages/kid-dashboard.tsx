@@ -435,7 +435,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
 }
 
 // Shopping list section for kid dashboard
-function KidShoppingListSection({ taskId }: { taskId: string | number }) {
+function KidShoppingListSection({ taskId, expanded, onToggle }: { taskId: string | number; expanded: boolean; onToggle: () => void }) {
   const queryClient_local = queryClient;
   const { t } = useTranslation();
 
@@ -478,8 +478,6 @@ function KidShoppingListSection({ taskId }: { taskId: string | number }) {
     },
   });
 
-  const [expanded, setExpanded] = useState(false);
-
   if (items.length === 0) return null;
 
   const doneCount = items.filter((it: any) => it.completedAt !== null).length;
@@ -490,7 +488,7 @@ function KidShoppingListSection({ taskId }: { taskId: string | number }) {
       <button
         type="button"
         className="flex items-center gap-1.5 w-full text-left"
-        onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
+        onClick={(e) => { e.stopPropagation(); onToggle(); }}
         data-testid={`kid-shopping-list-toggle-${taskId}`}
       >
         <ShoppingCart className="h-4 w-4 text-primary" />
@@ -560,6 +558,7 @@ function TaskCard({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [showDetails, setShowDetails] = useState(false);
+  const [shoppingListExpanded, setShoppingListExpanded] = useState(false);
   
   // Determine task state based on memberCompletionStatus
   const completionStatus = task.memberCompletionStatus;
@@ -850,7 +849,9 @@ function TaskCard({
             : "bg-card border-border opacity-70"
         }`}
         data-testid={`task-card-${task.id}`}
-        onClick={(isActionable && !(task as any).isShoppingList) ? handleComplete : undefined}
+        onClick={(task as any).isShoppingList
+          ? () => setShoppingListExpanded(v => !v)
+          : isActionable ? handleComplete : undefined}
       >
         <div className="text-center space-y-3">
           <div className={`flex justify-center p-4 rounded-2xl mx-auto w-fit shadow-inner ${
@@ -1011,7 +1012,7 @@ function TaskCard({
 
           {/* Shopping List Items */}
           {(task as any).isShoppingList && (
-            <KidShoppingListSection taskId={task.id} />
+            <KidShoppingListSection taskId={task.id} expanded={shoppingListExpanded} onToggle={() => setShoppingListExpanded(v => !v)} />
           )}
 
           {/* Due Date Display with kid-friendly warnings */}
@@ -1073,7 +1074,10 @@ function TaskCard({
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500/90 to-yellow-400/90 text-white px-4 py-2 rounded-full font-bold text-base shadow-md shadow-amber-900/30">
+            <div
+              className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500/90 to-yellow-400/90 text-white px-4 py-2 rounded-full font-bold text-base shadow-md shadow-amber-900/30"
+              onClick={(task as any).isShoppingList ? (e) => { e.stopPropagation(); setShoppingListExpanded(v => !v); } : undefined}
+            >
               <Star className="h-4 w-4 fill-white text-white" />
               <span>+{task.points}</span>
             </div>
