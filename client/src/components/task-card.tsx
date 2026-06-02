@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -101,7 +102,7 @@ function ShoppingListSection({ taskId, onClick }: { taskId: string | number; onC
       <button
         type="button"
         className="flex items-center gap-1.5 w-full text-left mb-2 group"
-        onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
+        onClick={(e) => { e.stopPropagation(); setExpanded((v: boolean) => !v); }}
         data-testid={`shopping-list-toggle-${taskId}`}
       >
         <ShoppingCart className="h-3.5 w-3.5 text-muted-foreground" />

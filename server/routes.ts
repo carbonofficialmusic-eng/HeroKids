@@ -2396,14 +2396,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const memberId = contributorIds[idx];
           const earnedPoints = pointsPerMember + (idx === 0 ? remainder : 0);
           try {
-            // createTaskCompletion with requiresApproval=false (enforced at task creation)
-            // will auto-approve and award points via _approveCompletionInternal.
+            // createTaskCompletion respects task.requiresApproval:
+            //   - false → auto-approved immediately, points awarded via _approveCompletionInternal
+            //   - true  → status = "pending", no points yet; parent must approve
             // Do NOT manually call updateFamilyMemberPoints to avoid double-awarding.
             await storage.createTaskCompletion({
               taskId: task.id,
               memberId,
               pointsEarned: earnedPoints,
-              status: "approved",
+              status: task.requiresApproval ? "pending" : "approved",
               approvedBy: null,
               proofPhotoUrl: null,
               rejectionReason: null,
@@ -2413,14 +2414,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Archive the task
-        await storage.updateTaskStatus(task.id, "completed");
+        // Only archive the task immediately when no approval is needed.
+        // When requiresApproval=true the normal approval flow will finalize the task.
+        if (!task.requiresApproval) {
+          await storage.updateTaskStatus(task.id, "completed");
 
-        broadcastToFamily(member.familyName, {
-          type: "shopping_list_completed",
-          taskId: task.id,
-          task: { ...task, status: "completed" },
-        });
+          broadcastToFamily(member.familyName, {
+            type: "shopping_list_completed",
+            taskId: task.id,
+            task: { ...task, status: "completed" },
+          });
+        }
       }
 
       res.json({ item: updatedItem, allCompleted: allDone });

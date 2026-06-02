@@ -1090,8 +1090,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async replaceShoppingListItems(taskId: string, items: InsertShoppingListItem[]): Promise<ShoppingListItem[]> {
-    // Delete all existing items for this task, then insert the new set
-    await db.delete(shoppingListItems).where(eq(shoppingListItems.taskId, taskId));
+    // Only delete unchecked items to preserve completion attribution for already-checked items
+    await db.delete(shoppingListItems).where(
+      and(
+        eq(shoppingListItems.taskId, taskId),
+        isNull(shoppingListItems.completedByMemberId),
+      )
+    );
     if (items.length === 0) return [];
     return await db.insert(shoppingListItems).values(items).returning();
   }
