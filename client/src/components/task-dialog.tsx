@@ -46,7 +46,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Sparkles, RotateCcw, CalendarIcon, X, Lock, Plus, ShoppingCart, Check, ChevronUp, ChevronDown } from "lucide-react";
+import { Sparkles, RotateCcw, CalendarIcon, X, Lock, Plus, ShoppingCart, Check, ChevronUp, ChevronDown, Pin } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getDevHeaders } from "@/lib/queryClient";
 import { Calendar } from "@/components/ui/calendar";
@@ -166,6 +166,7 @@ export function TaskDialog({
   const [recurrenceMode, setRecurrenceMode] = useState<"standard" | "custom" | "immediate">("standard");
   
   // Shopping list state
+  const [isImportant, setIsImportant] = useState(false);
   const [isShoppingList, setIsShoppingList] = useState(false);
   const [shoppingItems, setShoppingItems] = useState<{ text: string }[]>([]);
   const [newItemText, setNewItemText] = useState("");
@@ -246,6 +247,7 @@ export function TaskDialog({
         // Sync assigned members state
         setSelectedSharedMembers(editingTask.sharedMemberIds || []);
         // Sync shopping list state — items loaded separately via editingShoppingItems query
+        setIsImportant((editingTask as any).isImportant || false);
         setIsShoppingList((editingTask as any).isShoppingList || false);
         shoppingItemsInitialized.current = false; // Reset so the query effect can re-populate
         setShoppingItems([]);
@@ -271,7 +273,8 @@ export function TaskDialog({
         });
         // Clear assigned members state
         setSelectedSharedMembers([]);
-        // Clear shopping list state
+        // Clear important + shopping list state
+        setIsImportant(false);
         setIsShoppingList(false);
         shoppingItemsInitialized.current = false;
         setShoppingItems([]);
@@ -355,6 +358,8 @@ export function TaskDialog({
       submitData.isShoppingList = false;
       submitData.shoppingItems = [];
     }
+    
+    submitData.isImportant = isImportant;
     
     onSubmit(submitData);
   };
@@ -885,6 +890,26 @@ export function TaskDialog({
                 }}
               />
             )}
+
+            {/* Important Task Toggle */}
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <Pin className="h-4 w-4 text-amber-500" />
+                  <FormLabel className="text-base cursor-pointer">
+                    {t('tasks.important', { defaultValue: 'Wichtig' })}
+                  </FormLabel>
+                </div>
+                <FormDescription>
+                  {t('tasks.importantDesc', { defaultValue: 'Wichtige Aufgaben werden immer oben angezeigt, unabhängig vom aktiven Filter.' })}
+                </FormDescription>
+              </div>
+              <Switch
+                checked={isImportant}
+                onCheckedChange={setIsImportant}
+                data-testid="switch-important"
+              />
+            </div>
 
             {/* Shopping List Toggle - only for one-time tasks */}
             {recurrenceMode === "standard" && form.watch("recurrence") === "none" && (

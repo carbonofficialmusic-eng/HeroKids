@@ -11,7 +11,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera } from "lucide-react";
+import { ChevronDown, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -2039,7 +2039,9 @@ export default function KidDashboard() {
     return sortedGroups;
   };
 
-  const filteredKidTasks = filterKidTasksByDate(myTasks);
+  const importantMyTasks = myTasks.filter(t => (t as any).isImportant);
+  const regularMyTasks = myTasks.filter(t => !(t as any).isImportant);
+  const filteredKidTasks = filterKidTasksByDate(regularMyTasks);
   const groupedKidTasks = groupKidTasksByCategory(filteredKidTasks);
   const hasMultipleCategories = Object.keys(groupedKidTasks).length > 1;
 
@@ -2672,6 +2674,32 @@ export default function KidDashboard() {
               </Button>
             </div>
           </div>
+
+          {/* Pinned important tasks — always visible, filter-independent */}
+          {importantMyTasks.length > 0 && (
+            <div className="space-y-2 mb-4" data-testid="section-important-tasks-kid">
+              <div className="flex items-center gap-2 px-1">
+                <Pin className="h-4 w-4 text-amber-400 fill-amber-400" />
+                <span className="text-sm font-bold text-amber-300" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+                  {t("dashboard.importantTasks", { defaultValue: "Wichtig" })}
+                </span>
+                <Badge variant="secondary" className="text-xs">{importantMyTasks.length}</Badge>
+              </div>
+              <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
+                {importantMyTasks.map((task, index) => (
+                  <motion.div
+                    key={task.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="min-w-0"
+                  >
+                    <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {filteredKidTasks.length === 0 ? (
             <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">

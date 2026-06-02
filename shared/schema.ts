@@ -225,6 +225,7 @@ export const tasks = pgTable("tasks", {
   sharedMemberIds: text("shared_member_ids").array(), // Array of member IDs who must complete this shared task together
   dueDate: varchar("due_date"), // Optional due date for one-time tasks (YYYY-MM-DD format)
   isShoppingList: boolean("is_shopping_list").notNull().default(false), // Shopping list task: items can be checked off individually
+  isImportant: boolean("is_important").notNull().default(false), // Pinned important task: always visible above category groups
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -1034,7 +1034,9 @@ export default function Dashboard() {
     return sortedGroups;
   };
 
-  const filteredTasks = filterTasksByDate(activeTasks);
+  const importantActiveTasks = activeTasks.filter(t => (t as any).isImportant);
+  const regularActiveTasks = activeTasks.filter(t => !(t as any).isImportant);
+  const filteredTasks = filterTasksByDate(regularActiveTasks);
   const groupedTasks = groupTasksByCategory(filteredTasks);
   const hasMultipleCategories = Object.keys(groupedTasks).length > 1;
 
@@ -1380,23 +1382,58 @@ export default function Dashboard() {
                     {t("dashboard.createTask")}
                   </Button>
                 </Card>
-              ) : filteredTasks.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                  <h3 className="text-lg font-bold font-accent mb-2">
-                    {taskFilter === "daily" ? t("dashboard.noTasksDaily") : taskFilter === "weekly" ? t("dashboard.noTasksWeekly") : taskFilter === "onetime" ? t("dashboard.noTasksOnetime") : t("dashboard.noTasksMonthly")}
-                  </h3>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setTaskFilter("all")}
-                    data-testid="button-show-all-tasks"
-                  >
-                    {t("dashboard.filterAll")} ({activeTasks.length})
-                  </Button>
-                </Card>
-              ) : filteredTasks.length > 0 ? (
+              ) : (
                 <div className="space-y-3">
+                  {/* Pinned important tasks — always visible, filter-independent */}
+                  {importantActiveTasks.length > 0 && (
+                    <div className="space-y-2" data-testid="section-important-tasks">
+                      <div className="flex items-center gap-2 px-1">
+                        <Pin className="h-4 w-4 text-amber-500 fill-amber-500" />
+                        <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                          {t("dashboard.importantTasks", { defaultValue: "Wichtig" })}
+                        </span>
+                        <Badge variant="secondary" className="text-xs">{importantActiveTasks.length}</Badge>
+                      </div>
+                      <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
+                        {importantActiveTasks.map((task) => (
+                          <div key={task.id} className={`relative min-w-0${dashboardView === "list" ? " group min-h-[140px]" : ""}`}>
+                            <TaskCard
+                              task={task}
+                              showAssignee
+                              compact={dashboardView === "grid"}
+                              onClick={handleTaskClick}
+                              onComplete={() => { setTaskToComplete(task); setCompletionDialogOpen(true); }}
+                              isCompleting={completeTaskMutation.isPending}
+                              currentMemberId={member?.id}
+                            />
+                            {dashboardView === "list" && (
+                              <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                                  onClick={(e) => { e.stopPropagation(); setSelectedTask(task); setTaskDialogOpen(true); }}
+                                  data-testid={`button-edit-task-${task.id}`}>
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Regular tasks with filter */}
+                  {regularActiveTasks.length > 0 && filteredTasks.length === 0 ? (
+                    <Card className="p-8 text-center">
+                      <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                      <h3 className="text-lg font-bold font-accent mb-2">
+                        {taskFilter === "daily" ? t("dashboard.noTasksDaily") : taskFilter === "weekly" ? t("dashboard.noTasksWeekly") : taskFilter === "onetime" ? t("dashboard.noTasksOnetime") : t("dashboard.noTasksMonthly")}
+                      </h3>
+                      <Button variant="outline" size="sm" onClick={() => setTaskFilter("all")} data-testid="button-show-all-tasks">
+                        {t("dashboard.filterAll")} ({activeTasks.length})
+                      </Button>
+                    </Card>
+                  ) : filteredTasks.length > 0 ? (
+                  <>
                   {Object.entries(groupedTasks).map(([category, categoryTasks]) => (
                     <Collapsible
                       key={category}
@@ -1475,55 +1512,8 @@ export default function Dashboard() {
                       </CollapsibleContent>
                     </Collapsible>
                   ))}
-                </div>
-              ) : (
-                <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
-                  {filteredTasks.map((task) => (
-                    <div key={task.id} className={`relative min-w-0${dashboardView === "list" ? " group min-h-[140px]" : ""}`}>
-                      <TaskCard
-                        task={task}
-                        showAssignee
-                        compact={dashboardView === "grid"}
-                        onClick={handleTaskClick}
-                        onComplete={() => {
-                          setTaskToComplete(task);
-                          setCompletionDialogOpen(true);
-                        }}
-                        isCompleting={completeTaskMutation.isPending}
-                        currentMemberId={member?.id}
-                      />
-                      {dashboardView === "list" && (
-                        <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 bg-card/80 backdrop-blur-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedTask(task);
-                              setTaskDialogOpen(true);
-                            }}
-                            data-testid={`button-edit-task-${task.id}`}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 bg-card/80 backdrop-blur-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteTaskMutation.mutate(task.id);
-                            }}
-                            disabled={deleteTaskMutation.isPending}
-                            data-testid={`button-delete-task-${task.id}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  </>
+                  ) : null}
                 </div>
               )}
 
