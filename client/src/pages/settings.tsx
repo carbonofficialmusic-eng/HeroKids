@@ -517,7 +517,12 @@ export default function Settings() {
                 </div>
               ) : familyMembers && familyMembers.length > 0 ? (
                 <div className="space-y-2">
-                  {familyMembers.map((familyMember) => {
+                  {[...familyMembers].sort((a, b) => {
+                    if (a.role === b.role) {
+                      return new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime();
+                    }
+                    return a.role === "parent" ? -1 : 1;
+                  }).map((familyMember) => {
                     const isCurrentUser = familyMember.id === member?.id;
                     const isOverLimit = familyMember.isOverLimit === true;
                     return (
