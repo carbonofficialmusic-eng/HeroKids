@@ -293,7 +293,14 @@
       "other": "기타"
     },
     "important": "중요",
-    "importantDesc": "중요한 작업은 활성 필터에 관계없이 항상 위에 표시됩니다."
+    "importantDesc": "중요한 작업은 활성 필터에 관계없이 항상 위에 표시됩니다.",
+    "shoppingList": "쇼핑 목록",
+    "shoppingListDesc": "모든 가족 구성원이 항목을 체크할 수 있습니다. 포인트는 균등하게 분배됩니다.",
+    "shoppingListLockedDesc": "쇼핑 목록 작업을 만들려면 Family로 업그레이드하세요.",
+    "shoppingItems": "항목",
+    "shoppingItemsDone": "개 항목 완료",
+    "shoppingItemPlaceholder": "예: 우유, 빵, 달걀...",
+    "shoppingItemsEmpty": "항목이 없습니다 — 위에 입력하고 Enter를 누르세요."
   },
   "taskTemplates": {
     "cleanRoom": {

@@ -305,7 +305,14 @@
       "other": "Sonstiges"
     },
     "important": "Wichtig",
-    "importantDesc": "Wichtige Aufgaben werden immer oben angezeigt, unabhängig vom aktiven Filter."
+    "importantDesc": "Wichtige Aufgaben werden immer oben angezeigt, unabhängig vom aktiven Filter.",
+    "shoppingList": "Einkaufsliste",
+    "shoppingListDesc": "Artikel können von allen Familienmitgliedern abgehakt werden. Punkte werden aufgeteilt.",
+    "shoppingListLockedDesc": "Upgrade auf Family, um Einkaufslisten-Aufgaben zu erstellen.",
+    "shoppingItems": "Artikel",
+    "shoppingItemsDone": "Artikel erledigt",
+    "shoppingItemPlaceholder": "z.B. Milch, Brot, Eier...",
+    "shoppingItemsEmpty": "Noch keine Artikel — gib oben einen ein und drücke Enter."
   },
   "taskTemplates": {
     "cleanRoom": {

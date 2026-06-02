@@ -289,7 +289,14 @@
     "completeAndEarn": "完成并赢取积分！",
     "pts": "积分",
     "important": "重要",
-    "importantDesc": "重要任务始终显示在顶部，与当前筛选无关。"
+    "importantDesc": "重要任务始终显示在顶部，与当前筛选无关。",
+    "shoppingList": "购物清单",
+    "shoppingListDesc": "所有家庭成员都可以勾选项目，积分平均分配。",
+    "shoppingListLockedDesc": "升级到Family以创建购物清单任务。",
+    "shoppingItems": "项目",
+    "shoppingItemsDone": "个项目完成",
+    "shoppingItemPlaceholder": "例如：牛奶、面包、鸡蛋...",
+    "shoppingItemsEmpty": "还没有项目 — 在上方输入并按Enter。"
   },
   "taskTemplates": {
     "cleanRoom": {

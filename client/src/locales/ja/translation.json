@@ -289,7 +289,14 @@
       "other": "その他"
     },
     "important": "重要",
-    "importantDesc": "重要なタスクは、アクティブなフィルターに関係なく、常に上部に表示されます。"
+    "importantDesc": "重要なタスクは、アクティブなフィルターに関係なく、常に上部に表示されます。",
+    "shoppingList": "買い物リスト",
+    "shoppingListDesc": "アイテムはすべての家族がチェックできます。ポイントは均等に分けられます。",
+    "shoppingListLockedDesc": "買い物リストタスクを作成するにはFamilyにアップグレードしてください。",
+    "shoppingItems": "アイテム",
+    "shoppingItemsDone": "アイテム完了",
+    "shoppingItemPlaceholder": "例：牛乳、パン、卵...",
+    "shoppingItemsEmpty": "アイテムがありません — 上に入力してEnterを押してください。"
   },
   "taskTemplates": {
     "cleanRoom": {

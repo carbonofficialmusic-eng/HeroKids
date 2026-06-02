@@ -289,7 +289,14 @@
       "other": "Autre"
     },
     "important": "Important",
-    "importantDesc": "Les tâches importantes sont toujours affichées en haut, quel que soit le filtre actif."
+    "importantDesc": "Les tâches importantes sont toujours affichées en haut, quel que soit le filtre actif.",
+    "shoppingList": "Liste de courses",
+    "shoppingListDesc": "Les articles peuvent être cochés par tous les membres de la famille. Les points sont partagés.",
+    "shoppingListLockedDesc": "Passez à Family pour créer des tâches de liste de courses.",
+    "shoppingItems": "Articles",
+    "shoppingItemsDone": "articles faits",
+    "shoppingItemPlaceholder": "ex. Lait, Pain, Œufs...",
+    "shoppingItemsEmpty": "Aucun article — saisissez-en un ci-dessus et appuyez sur Entrée."
   },
   "taskTemplates": {
     "cleanRoom": {

@@ -295,7 +295,14 @@
     "completeAndEarn": "Complete & Earn Points!",
     "pts": "pts",
     "important": "Important",
-    "importantDesc": "Important tasks are always shown at the top, regardless of the active filter."
+    "importantDesc": "Important tasks are always shown at the top, regardless of the active filter.",
+    "shoppingList": "Shopping List",
+    "shoppingListDesc": "Items can be checked off by all family members. Points are split equally.",
+    "shoppingListLockedDesc": "Upgrade to Family to create shopping list tasks.",
+    "shoppingItems": "Items",
+    "shoppingItemsDone": "items done",
+    "shoppingItemPlaceholder": "e.g. Milk, Bread, Eggs...",
+    "shoppingItemsEmpty": "No items yet — type one above and press Enter."
   },
   "taskTemplates": {
     "cleanRoom": {

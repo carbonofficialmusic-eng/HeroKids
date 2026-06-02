@@ -294,7 +294,14 @@
     "completeAndEarn": "Slutför & tjäna poäng!",
     "pts": "p",
     "important": "Viktigt",
-    "importantDesc": "Viktiga uppgifter visas alltid överst, oavsett aktivt filter."
+    "importantDesc": "Viktiga uppgifter visas alltid överst, oavsett aktivt filter.",
+    "shoppingList": "Inköpslista",
+    "shoppingListDesc": "Artiklar kan bockas av av alla familjemedlemmar. Poängen delas lika.",
+    "shoppingListLockedDesc": "Uppgradera till Family för att skapa inköpslisteuppgifter.",
+    "shoppingItems": "Artiklar",
+    "shoppingItemsDone": "artiklar klara",
+    "shoppingItemPlaceholder": "t.ex. Mjölk, Bröd, Ägg...",
+    "shoppingItemsEmpty": "Inga artiklar ännu — skriv en ovan och tryck Enter."
   },
   "taskTemplates": {
     "cleanRoom": {
