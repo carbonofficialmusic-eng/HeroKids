@@ -51,7 +51,7 @@ import "./types";
 import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
 import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
 
-// Backend notification translations for all 8 supported languages
+// Backend notification translations for all 9 supported languages
 const notificationTranslations: Record<string, Record<string, string>> = {
   en: {
     "pinboard_posted.title": "{{name}} posted on the pinboard",
@@ -252,6 +252,31 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "task_expired.title": "Uppgift inte slutförd",
     "task_expired.message": "\"{{task}}\" slutfördes inte i tid",
     "default_reason": "Uppfyller inte förväntningarna",
+  },
+  pt: {
+    "pinboard_posted.title": "{{name}} escreveu no mural",
+    "pinboard_posted.message": "",
+    "task_pending.title": "{{name}} concluiu \"{{task}}\"",
+    "task_pending.message": "Aguardando aprovação (+{{points}} pontos)",
+    "task_completed.title": "{{name}} ganhou {{points}} pontos",
+    "task_completed.message": "Tarefa \"{{task}}\" concluída",
+    "task_approved.title": "Tarefa aprovada!",
+    "task_approved.message": "\"{{task}}\" foi aprovada. Você ganhou {{points}} pontos!",
+    "task_rejected.title": "Tarefa precisa de revisão",
+    "task_rejected.message": "\"{{task}}\" não foi aprovada: {{reason}}",
+    "reward_redeemed.title": "{{name}} resgatou uma recompensa",
+    "reward_redeemed.message": "\"{{reward}}\" por {{points}} pontos",
+    "reward_request.title": "{{name}} solicitou uma recompensa",
+    "reward_request.message": "\"{{reward}}\" ({{points}} pontos)",
+    "reward_sharing_offer.title": "{{name}} oferece uma recompensa para compartilhar",
+    "reward_sharing_offer.message": "\"{{reward}}\" está disponível para compartilhar",
+    "reward_sharing_join.title": "{{name}} entrou na sua recompensa compartilhada!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "Nova recompensa disponível!",
+    "reward_created.message": "\"{{reward}}\" por {{points}} pontos",
+    "task_expired.title": "Tarefa não concluída",
+    "task_expired.message": "\"{{task}}\" não foi concluída a tempo",
+    "default_reason": "Não atendeu às expectativas",
   },
 };
 
@@ -855,7 +880,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const updateFamilySettingsSchema = z.object({
     showLeaderboard: z.boolean().optional(),
     singleDeviceMode: z.boolean().optional(),
-    language: z.enum(["de", "en", "fr", "es", "ja", "zh", "ko", "sv"]).optional(),
+    language: z.enum(["de", "en", "fr", "es", "ja", "zh", "ko", "sv", "pt"]).optional(),
     timezone: z.string().optional(),
     weeklyPrize: z.string().nullable().optional(),
     monthlyPrize: z.string().nullable().optional(),
