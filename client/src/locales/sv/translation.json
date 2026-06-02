@@ -1556,7 +1556,8 @@
     "loading": "Laddar…",
     "placeholder": "Ditt meddelande (max 150 tecken)…",
     "error": "Kunde inte spara",
-    "actingAsError": "Inte tillåtet — den här medlemmen har ett eget konto. Du kan inte publicera för deras räkning."
+    "actingAsError": "Inte tillåtet — den här medlemmen har ett eget konto. Du kan inte publicera för deras räkning.",
+    "switchProfile": "Byt till din egen profil för att skriva på anslagstavlan."
   },
   "notifications": {
     "title": "Aviseringar",

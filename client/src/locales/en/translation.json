@@ -1572,7 +1572,8 @@
     "loading": "Loading…",
     "placeholder": "Your message (max. 150 characters)…",
     "error": "Failed to save",
-    "actingAsError": "Not allowed — this member has their own account. You cannot post on their behalf."
+    "actingAsError": "Not allowed — this member has their own account. You cannot post on their behalf.",
+    "switchProfile": "Please switch to your own profile to write on the pinboard."
   },
   "notifications": {
     "title": "Notifications",

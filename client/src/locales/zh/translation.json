@@ -1523,7 +1523,8 @@
     "loading": "加载中…",
     "placeholder": "你的留言（最多150个字符）…",
     "error": "保存失败",
-    "actingAsError": "不允许 — 该成员拥有自己的账户，无法代其发布内容。"
+    "actingAsError": "不允许 — 该成员拥有自己的账户，无法代其发布内容。",
+    "switchProfile": "请切换到您自己的个人资料以在留言板上发布。"
   },
   "notifications": {
     "title": "通知",

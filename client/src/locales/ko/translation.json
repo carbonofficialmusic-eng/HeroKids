@@ -1535,7 +1535,8 @@
     "loading": "로딩 중…",
     "placeholder": "메시지 (최대 150자)…",
     "error": "저장 실패",
-    "actingAsError": "허용되지 않습니다 — 이 멤버는 자신의 계정이 있어 대신 게시할 수 없습니다."
+    "actingAsError": "허용되지 않습니다 — 이 멤버는 자신의 계정이 있어 대신 게시할 수 없습니다.",
+    "switchProfile": "게시판에 글을 쓰려면 자신의 프로필로 전환하세요."
   },
   "notifications": {
     "title": "알림",

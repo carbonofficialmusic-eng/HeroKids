@@ -1523,7 +1523,8 @@
     "loading": "Cargando…",
     "placeholder": "Tu mensaje (máx. 150 caracteres)…",
     "error": "Error al guardar",
-    "actingAsError": "No permitido — este miembro tiene su propia cuenta. No puedes publicar en su nombre."
+    "actingAsError": "No permitido — este miembro tiene su propia cuenta. No puedes publicar en su nombre.",
+    "switchProfile": "Por favor, cambia a tu propio perfil para escribir en el tablón."
   },
   "notifications": {
     "title": "Notificaciones",

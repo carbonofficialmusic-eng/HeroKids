@@ -1523,7 +1523,8 @@
     "loading": "Chargement…",
     "placeholder": "Ton message (max. 150 caractères)…",
     "error": "Échec de l'enregistrement",
-    "actingAsError": "Interdit — ce membre a son propre compte. Impossible de publier en son nom."
+    "actingAsError": "Interdit — ce membre a son propre compte. Impossible de publier en son nom.",
+    "switchProfile": "Veuillez passer à votre propre profil pour écrire sur le tableau."
   },
   "notifications": {
     "title": "Notifications",
