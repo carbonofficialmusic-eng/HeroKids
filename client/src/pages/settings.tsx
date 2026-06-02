@@ -89,7 +89,7 @@ export default function Settings() {
     mutationFn: async (settings: { 
       showLeaderboard?: boolean;
       singleDeviceMode?: boolean;
-      language?: "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" | "sv";
+      language?: "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" | "sv" | "pt";
       timezone?: string;
       weeklyPrize?: string | null;
       monthlyPrize?: string | null;
@@ -387,7 +387,7 @@ export default function Settings() {
   };
 
   const handleLanguageChange = (language: string) => {
-    updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" | "sv" });
+    updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" | "sv" | "pt" });
   };
 
   const handleTimezoneChange = (timezone: string) => {
@@ -423,6 +423,7 @@ export default function Settings() {
     { value: "zh", label: "中文" },
     { value: "ko", label: "한국어" },
     { value: "sv", label: "Svenska" },
+    { value: "pt", label: "Português" },
   ];
 
   // Common timezones grouped by region

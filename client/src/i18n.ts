@@ -9,6 +9,7 @@ import translationJA from './locales/ja/translation.json';
 import translationZH from './locales/zh/translation.json';
 import translationKO from './locales/ko/translation.json';
 import translationSV from './locales/sv/translation.json';
+import translationPT from './locales/pt/translation.json';
 
 const resources = {
   en: { translation: translationEN },
@@ -19,9 +20,10 @@ const resources = {
   zh: { translation: translationZH },
   ko: { translation: translationKO },
   sv: { translation: translationSV },
+  pt: { translation: translationPT },
 };
 
-const SUPPORTED = ['en', 'de', 'fr', 'es', 'ja', 'zh', 'ko', 'sv'];
+const SUPPORTED = ['en', 'de', 'fr', 'es', 'ja', 'zh', 'ko', 'sv', 'pt'];
 const STORAGE_KEY = 'herokids_lang';
 
 function detectLanguage(): string {
