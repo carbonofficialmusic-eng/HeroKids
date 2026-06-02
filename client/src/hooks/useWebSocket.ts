@@ -34,6 +34,7 @@ export function useWebSocket(familyName: string | null) {
               // Invalidate tasks and pending count
               queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
               queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
               break;
 

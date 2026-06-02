@@ -2502,6 +2502,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             taskId: task.id,
             task: { ...task, status: "completed" },
           });
+        } else {
+          // Approval required: notify parents so the approvals page refreshes immediately.
+          broadcastToFamily(member.familyName, {
+            type: "task_completion_pending",
+            taskId: task.id,
+          });
         }
       }
 
