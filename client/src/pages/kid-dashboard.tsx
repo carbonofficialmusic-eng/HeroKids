@@ -1869,6 +1869,11 @@ export default function KidDashboard() {
       return false;
     }
     
+    // Shopping list tasks with approval: stay visible on all profiles until explicitly approved
+    if ((t as any).isShoppingList && t.requiresApproval && t.recurrence === "none") {
+      return t.memberCompletionStatus !== "approved";
+    }
+
     // Normal one-time tasks: Hide when member (or family) has completed
     return !t.memberHasCompleted || t.recurrence !== "none";
   });
