@@ -5061,13 +5061,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!member) return res.status(404).json({ message: "Family member not found" });
 
       // Block posting in someone else's name when acting-as,
-      // but only when the target member has their own registered web account (userId set).
-      // Device-session-only members (linked devices, no web account) are allowed.
+      // if the target member has their own web account OR active device sessions.
       // Exception: acting-as own member (parent switched to themselves) is always allowed.
       if (req.session?.actingAsMemberId) {
         const realUserId = req.user?.claims?.sub;
-        if (member.userId && member.userId !== realUserId) {
-          return res.status(403).json({ message: "acting_as_member" });
+        if (member.userId !== realUserId) {
+          if (member.userId) {
+            return res.status(403).json({ message: "acting_as_member" });
+          }
+          const deviceSessions = await storage.getActiveDeviceSessionsForMember(member.id);
+          if (deviceSessions.length > 0) {
+            return res.status(403).json({ message: "acting_as_member" });
+          }
         }
       }
 
@@ -5125,12 +5130,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!member) return res.status(404).json({ message: "Family member not found" });
 
       // Block editing in someone else's name when acting-as,
-      // but only when the target member has their own registered web account (userId set).
+      // if the target member has their own web account OR active device sessions.
       // Exception: acting-as own member is always allowed.
       if (req.session?.actingAsMemberId) {
         const realUserId = req.user?.claims?.sub;
-        if (member.userId && member.userId !== realUserId) {
-          return res.status(403).json({ message: "acting_as_member" });
+        if (member.userId !== realUserId) {
+          if (member.userId) {
+            return res.status(403).json({ message: "acting_as_member" });
+          }
+          const deviceSessions = await storage.getActiveDeviceSessionsForMember(member.id);
+          if (deviceSessions.length > 0) {
+            return res.status(403).json({ message: "acting_as_member" });
+          }
         }
       }
 
