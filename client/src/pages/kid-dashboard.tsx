@@ -742,8 +742,56 @@ function TaskCard({
     statusColor = "text-amber-600 dark:text-amber-400";
   }
 
-  // Shopping list tasks always render non-compact so item-toggle UI is visible
-  if (compact && !(task as any).isShoppingList) {
+  // Compact grid card for shopping list tasks
+  if (compact && (task as any).isShoppingList) {
+    const borderColor = showAsPending || showAsSubmitted
+      ? "border-amber-400/50"
+      : showAsApproved
+      ? "border-green-500/50"
+      : "border-border";
+
+    const bgColor = showAsPending || showAsSubmitted
+      ? "bg-amber-500/10"
+      : showAsApproved
+      ? "bg-green-500/10"
+      : "bg-card";
+
+    return (
+      <motion.div
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        className="min-w-0"
+      >
+        <div
+          className={`rounded-2xl border transition-all min-w-0 w-full cursor-pointer ${bgColor} ${borderColor}`}
+          data-testid={`task-card-${task.id}`}
+          onClick={() => setShoppingListExpanded(v => !v)}
+        >
+          {/* Header row */}
+          <div className="flex items-center gap-2 p-2.5">
+            <span className="text-2xl leading-none flex-shrink-0">
+              {task.iconEmoji || "🛒"}
+            </span>
+            <p className="font-bold text-sm leading-snug line-clamp-2 flex-1 min-w-0 text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+              {task.title}
+            </p>
+            <ChevronDown className={`h-4 w-4 text-white/70 flex-shrink-0 transition-transform ${shoppingListExpanded ? "rotate-180" : ""}`} />
+          </div>
+          {/* Progress row */}
+          <div className="px-2.5 pb-2.5">
+            <KidShoppingListSection
+              taskId={task.id}
+              expanded={shoppingListExpanded}
+              onToggle={() => setShoppingListExpanded(v => !v)}
+            />
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Standard compact card (non-shopping-list tasks)
+  if (compact) {
     const isTransparentState = showAsApproved || allSharedMembersCompleted || showAsPending || showAsSubmitted || isRejected || dueDateInfo.expired;
 
     const borderColor = showAsApproved || allSharedMembersCompleted
