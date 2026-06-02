@@ -3796,7 +3796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (redemption.memberId !== member.id) {
           return res.status(403).json({ message: "You can only cancel your own redemptions" });
         }
-        if (redemption.status === "approved" || redemption.status === "completed") {
+        if (redemption.status === "completed") {
           return res.status(403).json({ message: "Cannot cancel a fulfilled redemption" });
         }
         if (redemption.sharingStatus !== "not_shared") {

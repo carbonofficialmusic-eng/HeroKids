@@ -2499,7 +2499,7 @@ export default function KidDashboard() {
                 const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && canUseSharedRewards(familyData?.subscriptionTier);
                 const canFinalize = isSharing && participants.length > 0;
                 const canCancelSharing = isSharing; // Can cancel anytime while sharing is active
-                const canCancel = typed.status !== "approved" && typed.status !== "completed" && typed.sharingStatus === "not_shared";
+                const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
                 return (
                   <motion.div
