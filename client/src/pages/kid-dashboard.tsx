@@ -461,58 +461,69 @@ function KidShoppingListSection({ taskId }: { taskId: string | number }) {
     },
   });
 
+  const [expanded, setExpanded] = useState(false);
+
   if (items.length === 0) return null;
 
   const doneCount = items.filter((it: any) => it.completedAt !== null).length;
 
   return (
     <div className="w-full space-y-2 text-left" data-testid={`kid-shopping-list-${taskId}`}>
-      <div className="flex items-center gap-1.5">
+      {/* Collapsible header — always visible */}
+      <button
+        type="button"
+        className="flex items-center gap-1.5 w-full text-left"
+        onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
+        data-testid={`kid-shopping-list-toggle-${taskId}`}
+      >
         <ShoppingCart className="h-4 w-4 text-primary" />
-        <span className="text-sm font-semibold">
+        <span className="text-sm font-semibold flex-1">
           {doneCount}/{items.length} {t("tasks.shoppingItemsDone", { defaultValue: "Artikel erledigt" })}
         </span>
-      </div>
-      <div className="space-y-1.5">
-        {items.map((item: any) => {
-          const isDone = item.completedAt !== null;
-          return (
-            <div
-              key={item.id}
-              className={`flex items-center gap-2 rounded-xl px-3 py-2 cursor-pointer transition-colors border ${
-                isDone
-                  ? "bg-green-500/15 border-green-400/30"
-                  : "bg-white/8 border-white/15 hover-elevate"
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!toggleMutation.isPending) toggleMutation.mutate(item.id);
-              }}
-              data-testid={`kid-shopping-item-${item.id}`}
-            >
-              {isDone
-                ? <CheckSquare className="h-5 w-5 text-green-400 flex-shrink-0" />
-                : <Square className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-              }
-              <span className={`text-sm flex-1 min-w-0 font-medium ${isDone ? "line-through text-muted-foreground" : "text-white"}`}
-                style={{ textShadow: "0 1px 3px rgba(0,0,0,0.7)" }}>
-                {item.text}
-              </span>
-              {isDone && item.completedByMemberName && (
-                <span
-                  className="text-xs font-bold px-1.5 py-0.5 rounded-full shrink-0"
-                  style={{
-                    backgroundColor: item.completedByMemberColor ? `${item.completedByMemberColor}40` : "rgba(255,255,255,0.15)",
-                    color: item.completedByMemberColor ?? "rgba(255,255,255,0.8)",
-                  }}
-                >
-                  {item.completedByMemberName}
+        <ChevronDown className={`h-4 w-4 text-white/70 transition-transform ${expanded ? "rotate-180" : ""}`} />
+      </button>
+      {expanded && (
+        <div className="space-y-1.5">
+          {items.map((item: any) => {
+            const isDone = item.completedAt !== null;
+            return (
+              <div
+                key={item.id}
+                className={`flex items-center gap-2 rounded-xl px-3 py-2 cursor-pointer transition-colors border ${
+                  isDone
+                    ? "bg-green-500/15 border-green-400/30"
+                    : "bg-white/8 border-white/15 hover-elevate"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!toggleMutation.isPending) toggleMutation.mutate(item.id);
+                }}
+                data-testid={`kid-shopping-item-${item.id}`}
+              >
+                {isDone
+                  ? <CheckSquare className="h-5 w-5 text-green-400 flex-shrink-0" />
+                  : <Square className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                }
+                <span className={`text-sm flex-1 min-w-0 font-medium ${isDone ? "line-through text-muted-foreground" : "text-white"}`}
+                  style={{ textShadow: "0 1px 3px rgba(0,0,0,0.7)" }}>
+                  {item.text}
                 </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                {isDone && item.completedByMemberName && (
+                  <span
+                    className="text-xs font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                    style={{
+                      backgroundColor: item.completedByMemberColor ? `${item.completedByMemberColor}40` : "rgba(255,255,255,0.15)",
+                      color: item.completedByMemberColor ?? "rgba(255,255,255,0.8)",
+                    }}
+                  >
+                    {item.completedByMemberName}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

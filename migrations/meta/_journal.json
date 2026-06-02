@@ -50,6 +50,13 @@
       "when": 1780009720489,
       "tag": "0008_family_category_names",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1748866800000,
+      "tag": "0010_shopping_list",
+      "breakpoints": true
     }
   ]
 }

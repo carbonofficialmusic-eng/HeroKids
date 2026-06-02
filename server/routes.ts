@@ -2170,12 +2170,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parsed.requiresApproval = true;
       }
 
-      // Shopping list tasks auto-approve when all items are done — requiresApproval
-      // must be false so createTaskCompletion awards points immediately
-      if (parsed.isShoppingList) {
-        parsed.requiresApproval = false;
-      }
-      
       const task = await storage.createTask(parsed);
       
       // If this is a shopping list task, create the items
@@ -2253,6 +2247,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const updatedTask = await storage.updateTask(taskId, parsed);
+
+      // If shopping items are provided on edit, replace existing unchecked items
+      const rawShoppingItems = req.body.shoppingItems;
+      if (updatedTask.isShoppingList && Array.isArray(rawShoppingItems)) {
+        await storage.replaceShoppingListItems(taskId, rawShoppingItems
+          .filter((item: any) => item && typeof item.text === "string" && item.text.trim())
+          .map((item: any, idx: number) => ({
+            taskId,
+            text: item.text.trim(),
+            sortOrder: item.sortOrder ?? idx,
+            completedByMemberId: null,
+            completedAt: null,
+          }))
+        );
+      }
 
       // Broadcast task update to family
       broadcastToFamily(member.familyName, {

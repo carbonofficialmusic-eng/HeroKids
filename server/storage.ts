@@ -250,6 +250,7 @@ export interface IStorage {
   // Shopping list item operations
   getShoppingListItems(taskId: string): Promise<ShoppingListItem[]>;
   createShoppingListItems(items: InsertShoppingListItem[]): Promise<ShoppingListItem[]>;
+  replaceShoppingListItems(taskId: string, items: InsertShoppingListItem[]): Promise<ShoppingListItem[]>;
   toggleShoppingListItem(itemId: string, memberId: string): Promise<ShoppingListItem>;
   uncheckShoppingListItem(itemId: string): Promise<ShoppingListItem>;
   getShoppingListItem(itemId: string): Promise<ShoppingListItem | undefined>;
@@ -1084,6 +1085,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createShoppingListItems(items: InsertShoppingListItem[]): Promise<ShoppingListItem[]> {
+    if (items.length === 0) return [];
+    return await db.insert(shoppingListItems).values(items).returning();
+  }
+
+  async replaceShoppingListItems(taskId: string, items: InsertShoppingListItem[]): Promise<ShoppingListItem[]> {
+    // Delete all existing items for this task, then insert the new set
+    await db.delete(shoppingListItems).where(eq(shoppingListItems.taskId, taskId));
     if (items.length === 0) return [];
     return await db.insert(shoppingListItems).values(items).returning();
   }

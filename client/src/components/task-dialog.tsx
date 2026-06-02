@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTaskSchema, type Task, type FamilyMember } from "@shared/schema";
 import { z } from "zod";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -47,8 +47,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Sparkles, RotateCcw, CalendarIcon, X, Lock, Plus, ShoppingCart } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest, getDevHeaders } from "@/lib/queryClient";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, parse, type Locale } from "date-fns";
@@ -167,6 +167,20 @@ export function TaskDialog({
   const [isShoppingList, setIsShoppingList] = useState(false);
   const [shoppingItems, setShoppingItems] = useState<{ text: string }[]>([]);
   const [newItemText, setNewItemText] = useState("");
+  // Ref to avoid overwriting user edits with stale query re-fetches
+  const shoppingItemsInitialized = useRef(false);
+
+  // Fetch existing shopping list items when editing a shopping-list task
+  const { data: editingShoppingItems } = useQuery<any[]>({
+    queryKey: ["/api/tasks", editingTask?.id, "shopping-items"],
+    queryFn: async () => {
+      const res = await fetch(`/api/tasks/${editingTask!.id}/shopping-items`, { headers: getDevHeaders() });
+      if (!res.ok) throw new Error("Failed to fetch shopping items");
+      return res.json();
+    },
+    enabled: !!(editingTask?.id && (editingTask as any).isShoppingList && open),
+    staleTime: 0,
+  });
 
   // State for assigned member selection
   const [selectedSharedMembers, setSelectedSharedMembers] = useState<string[]>([]);
@@ -229,8 +243,9 @@ export function TaskDialog({
         });
         // Sync assigned members state
         setSelectedSharedMembers(editingTask.sharedMemberIds || []);
-        // Sync shopping list state
+        // Sync shopping list state — items loaded separately via editingShoppingItems query
         setIsShoppingList((editingTask as any).isShoppingList || false);
+        shoppingItemsInitialized.current = false; // Reset so the query effect can re-populate
         setShoppingItems([]);
         setNewItemText("");
       } else {
@@ -256,11 +271,26 @@ export function TaskDialog({
         setSelectedSharedMembers([]);
         // Clear shopping list state
         setIsShoppingList(false);
+        shoppingItemsInitialized.current = false;
         setShoppingItems([]);
         setNewItemText("");
       }
     }
   }, [open, editingTask, familyName, createdBy, totalMemberCount]);
+
+  // When existing shopping items load (edit mode), initialize the items state once
+  useEffect(() => {
+    if (
+      open &&
+      editingTask &&
+      (editingTask as any).isShoppingList &&
+      editingShoppingItems !== undefined &&
+      !shoppingItemsInitialized.current
+    ) {
+      shoppingItemsInitialized.current = true;
+      setShoppingItems(editingShoppingItems.map((item: any) => ({ text: item.text })));
+    }
+  }, [open, editingTask, editingShoppingItems]);
 
   const handleSubmit = (data: TaskFormData) => {
     const submitData: any = { ...data };
@@ -291,10 +321,9 @@ export function TaskDialog({
     
     // Add shopping list data
     const canBeShoppingList = recurrenceMode === "standard" && submitData.recurrence === "none";
-    if (canBeShoppingList && isShoppingList && shoppingItems.length > 0) {
+    const alreadyShoppingList = editingTask && (editingTask as any).isShoppingList;
+    if (canBeShoppingList && isShoppingList && (shoppingItems.length > 0 || alreadyShoppingList)) {
       submitData.isShoppingList = true;
-      // requiresApproval is forced false server-side for shopping lists;
-      // requiresProof is not forced — leave as parent configured
       submitData.shoppingItems = shoppingItems.map((item, idx) => ({
         text: item.text,
         sortOrder: idx,

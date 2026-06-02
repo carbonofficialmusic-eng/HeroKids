@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Moon, Info, ShoppingCart, Square, CheckSquare } from "lucide-react";
+import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Moon, Info, ShoppingCart, Square, CheckSquare, ChevronDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { Task, FamilyMember, ShoppingListItem } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
@@ -63,6 +63,7 @@ interface TaskCardProps {
 function ShoppingListSection({ taskId, onClick }: { taskId: string | number; onClick?: (e: React.MouseEvent) => void }) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
 
   const { data: items = [] } = useQuery<any[]>({
     queryKey: ["/api/tasks", taskId, "shopping-items"],
@@ -92,46 +93,58 @@ function ShoppingListSection({ taskId, onClick }: { taskId: string | number; onC
 
   return (
     <div
-      className="mt-3 space-y-1.5"
+      className="mt-3"
       onClick={(e) => { e.stopPropagation(); onClick?.(e); }}
       data-testid={`shopping-list-${taskId}`}
     >
-      <div className="flex items-center gap-1.5 mb-2">
+      {/* Collapsible header — always visible */}
+      <button
+        type="button"
+        className="flex items-center gap-1.5 w-full text-left mb-2 group"
+        onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
+        data-testid={`shopping-list-toggle-${taskId}`}
+      >
         <ShoppingCart className="h-3.5 w-3.5 text-muted-foreground" />
-        <span className="text-xs font-medium text-muted-foreground">
+        <span className="text-xs font-medium text-muted-foreground flex-1">
           {doneCount}/{items.length} {t("tasks.shoppingItemsDone", { defaultValue: "Artikel erledigt" })}
         </span>
-      </div>
-      {items.map((item: any) => {
-        const isDone = item.completedAt !== null;
-        return (
-          <div
-            key={item.id}
-            className={`flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer transition-colors ${isDone ? "bg-green-500/10" : "bg-muted/30 hover-elevate"}`}
-            onClick={() => { if (!toggleMutation.isPending) toggleMutation.mutate(item.id); }}
-            data-testid={`shopping-item-${item.id}`}
-          >
-            {isDone
-              ? <CheckSquare className="h-4 w-4 text-green-500 flex-shrink-0" />
-              : <Square className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            }
-            <span className={`text-sm flex-1 min-w-0 ${isDone ? "line-through text-muted-foreground" : ""}`}>
-              {item.text}
-            </span>
-            {isDone && item.completedByMemberName && (
-              <span
-                className="text-xs font-medium px-1.5 py-0.5 rounded-full shrink-0"
-                style={{
-                  backgroundColor: item.completedByMemberColor ? `${item.completedByMemberColor}30` : undefined,
-                  color: item.completedByMemberColor ?? undefined,
-                }}
+        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${expanded ? "rotate-180" : ""}`} />
+      </button>
+
+      {expanded && (
+        <div className="space-y-1.5">
+          {items.map((item: any) => {
+            const isDone = item.completedAt !== null;
+            return (
+              <div
+                key={item.id}
+                className={`flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer transition-colors ${isDone ? "bg-green-500/10" : "bg-muted/30 hover-elevate"}`}
+                onClick={(e) => { e.stopPropagation(); if (!toggleMutation.isPending) toggleMutation.mutate(item.id); }}
+                data-testid={`shopping-item-${item.id}`}
               >
-                {item.completedByMemberName}
-              </span>
-            )}
-          </div>
-        );
-      })}
+                {isDone
+                  ? <CheckSquare className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  : <Square className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                }
+                <span className={`text-sm flex-1 min-w-0 ${isDone ? "line-through text-muted-foreground" : ""}`}>
+                  {item.text}
+                </span>
+                {isDone && item.completedByMemberName && (
+                  <span
+                    className="text-xs font-medium px-1.5 py-0.5 rounded-full shrink-0"
+                    style={{
+                      backgroundColor: item.completedByMemberColor ? `${item.completedByMemberColor}30` : undefined,
+                      color: item.completedByMemberColor ?? undefined,
+                    }}
+                  >
+                    {item.completedByMemberName}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
