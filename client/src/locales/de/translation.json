@@ -321,6 +321,10 @@
       "title": "Helfen",
       "description": "Bei einer Aufgabe im Haushalt helfen"
     },
+    "shoppingList": {
+      "title": "Einkaufsliste",
+      "description": ""
+    },
     "dishes": {
       "title": "Abwaschen",
       "description": "Geschirr spülen und abtrocknen, Spüle reinigen"

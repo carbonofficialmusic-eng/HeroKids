@@ -309,6 +309,10 @@
       "title": "도와주기",
       "description": "집안일 도와주기"
     },
+    "shoppingList": {
+      "title": "쇼핑 목록",
+      "description": ""
+    },
     "dishes": {
       "title": "설거지하기",
       "description": "모든 그릇을 씻고 말리고, 싱크대 청소"

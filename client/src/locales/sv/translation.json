@@ -310,6 +310,10 @@
       "title": "Hjälpa till",
       "description": "Hjälpa till med en hushållssyssla"
     },
+    "shoppingList": {
+      "title": "Inköpslista",
+      "description": ""
+    },
     "dishes": {
       "title": "Diska",
       "description": "Diska och torka alla tallrikar, rengör diskbänken"

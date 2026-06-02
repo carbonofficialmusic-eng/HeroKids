@@ -305,6 +305,10 @@
       "title": "Ayudar",
       "description": "Ayudar con una tarea del hogar"
     },
+    "shoppingList": {
+      "title": "Lista de compras",
+      "description": ""
+    },
     "dishes": {
       "title": "Lavar los platos",
       "description": "Lavar y secar todos los platos, limpiar el fregadero"

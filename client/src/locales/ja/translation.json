@@ -305,6 +305,10 @@
       "title": "お手伝い",
       "description": "家事を手伝う"
     },
+    "shoppingList": {
+      "title": "買い物リスト",
+      "description": ""
+    },
     "dishes": {
       "title": "食器洗い",
       "description": "すべての食器を洗って乾かし、シンクを掃除"

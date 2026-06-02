@@ -305,6 +305,10 @@
       "title": "Aider",
       "description": "Aider avec une tâche ménagère"
     },
+    "shoppingList": {
+      "title": "Liste de courses",
+      "description": ""
+    },
     "dishes": {
       "title": "Faire la vaisselle",
       "description": "Laver et sécher toute la vaisselle, nettoyer l'évier"

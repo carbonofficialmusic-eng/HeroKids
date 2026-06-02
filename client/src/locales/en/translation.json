@@ -311,6 +311,10 @@
       "title": "Help Out",
       "description": "Help with a household task"
     },
+    "shoppingList": {
+      "title": "Shopping List",
+      "description": ""
+    },
     "dishes": {
       "title": "Do the Dishes",
       "description": "Wash and dry all dishes, clean the sink"

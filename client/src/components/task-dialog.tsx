@@ -97,7 +97,7 @@ const emojiCategories = {
   },
   other: {
     label: "tasks.emojiCategory.other",
-    emojis: ["⭐", "🎯", "🏆"]
+    emojis: ["⭐", "🎯", "🛒"]
   }
 };
 
@@ -151,12 +151,13 @@ export function TaskDialog({
       requiresProof: false,
     },
     {
-      id: "help-out",
-      title: t('taskTemplates.helpOut.title'),
-      description: t('taskTemplates.helpOut.description'),
+      id: "shopping-list",
+      title: t('taskTemplates.shoppingList.title'),
+      description: "",
       points: 20,
-      iconEmoji: "🌟",
+      iconEmoji: "🛒",
       requiresProof: false,
+      isShoppingList: true,
     },
   ];
   
@@ -380,6 +381,9 @@ export function TaskDialog({
     form.setValue("points", template.points);
     form.setValue("iconEmoji", template.iconEmoji);
     form.setValue("requiresProof", template.requiresProof);
+    if ((template as any).isShoppingList) {
+      setIsShoppingList(true);
+    }
   };
 
   // Manual task reset mutation
@@ -902,6 +906,7 @@ export function TaskDialog({
                       setIsShoppingList(checked);
                       if (checked) {
                         form.setValue("iconEmoji", "🛒");
+                        form.setValue("title", t('taskTemplates.shoppingList.title'));
                       }
                     }}
                     data-testid="switch-shopping-list"

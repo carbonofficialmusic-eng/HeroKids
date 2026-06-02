@@ -305,6 +305,10 @@
       "title": "帮忙",
       "description": "帮忙做家务"
     },
+    "shoppingList": {
+      "title": "购物清单",
+      "description": ""
+    },
     "dishes": {
       "title": "洗碗",
       "description": "洗碗并擦干，清洁水槽"
