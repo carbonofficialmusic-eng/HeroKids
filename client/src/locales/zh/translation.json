@@ -1522,7 +1522,8 @@
     "empty": "还没有留言 — 来第一个吧！",
     "loading": "加载中…",
     "placeholder": "你的留言（最多150个字符）…",
-    "error": "保存失败"
+    "error": "保存失败",
+    "actingAsError": "不允许 — 该成员拥有自己的账户，无法代其发布内容。"
   },
   "notifications": {
     "title": "通知",

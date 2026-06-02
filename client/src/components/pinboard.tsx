@@ -70,7 +70,12 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
       setNewText("");
       setIsAdding(false);
     },
-    onError: () => toast({ title: t("pinboard.error"), variant: "destructive" }),
+    onError: (error: any) => {
+      const description = error.message === "acting_as_member"
+        ? t("pinboard.actingAsError")
+        : undefined;
+      toast({ title: t("pinboard.error"), description, variant: "destructive" });
+    },
   });
 
   const updateMutation = useMutation({
@@ -81,7 +86,12 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
       setEditingId(null);
       setEditText("");
     },
-    onError: () => toast({ title: t("pinboard.error"), variant: "destructive" }),
+    onError: (error: any) => {
+      const description = error.message === "acting_as_member"
+        ? t("pinboard.actingAsError")
+        : undefined;
+      toast({ title: t("pinboard.error"), description, variant: "destructive" });
+    },
   });
 
   const deleteMutation = useMutation({

@@ -5060,6 +5060,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const member = result.member;
       if (!member) return res.status(404).json({ message: "Family member not found" });
 
+      // Block posting in someone else's name when acting-as:
+      // applies if the target member has a registered account OR device sessions
+      if (req.session?.actingAsMemberId) {
+        if (member.userId) {
+          return res.status(403).json({ message: "acting_as_member" });
+        }
+        const deviceSessions = await storage.getActiveDeviceSessionsForMember(member.id);
+        if (deviceSessions.length > 0) {
+          return res.status(403).json({ message: "acting_as_member" });
+        }
+      }
+
       const { message } = req.body;
       if (!message || typeof message !== "string" || message.trim().length === 0) {
         return res.status(400).json({ message: "Message is required" });
@@ -5112,6 +5124,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!result) return res.status(401).json({ message: "Unauthorized" });
       const member = result.member;
       if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      // Block editing in someone else's name when acting-as
+      if (req.session?.actingAsMemberId) {
+        if (member.userId) {
+          return res.status(403).json({ message: "acting_as_member" });
+        }
+        const deviceSessions = await storage.getActiveDeviceSessionsForMember(member.id);
+        if (deviceSessions.length > 0) {
+          return res.status(403).json({ message: "acting_as_member" });
+        }
+      }
 
       const noteId = parseInt(req.params.id);
       const { message } = req.body;

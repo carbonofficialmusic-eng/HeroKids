@@ -1534,7 +1534,8 @@
     "empty": "아직 메모가 없어요 — 첫 번째가 되어보세요!",
     "loading": "로딩 중…",
     "placeholder": "메시지 (최대 150자)…",
-    "error": "저장 실패"
+    "error": "저장 실패",
+    "actingAsError": "허용되지 않습니다 — 이 멤버는 자신의 계정이 있어 대신 게시할 수 없습니다."
   },
   "notifications": {
     "title": "알림",

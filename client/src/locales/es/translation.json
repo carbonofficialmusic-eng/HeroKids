@@ -1522,7 +1522,8 @@
     "empty": "Sin notas aún — ¡sé el primero!",
     "loading": "Cargando…",
     "placeholder": "Tu mensaje (máx. 150 caracteres)…",
-    "error": "Error al guardar"
+    "error": "Error al guardar",
+    "actingAsError": "No permitido — este miembro tiene su propia cuenta. No puedes publicar en su nombre."
   },
   "notifications": {
     "title": "Notificaciones",

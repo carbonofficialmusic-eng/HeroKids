@@ -1522,7 +1522,8 @@
     "empty": "Aucune note pour l'instant — sois le premier !",
     "loading": "Chargement…",
     "placeholder": "Ton message (max. 150 caractères)…",
-    "error": "Échec de l'enregistrement"
+    "error": "Échec de l'enregistrement",
+    "actingAsError": "Interdit — ce membre a son propre compte. Impossible de publier en son nom."
   },
   "notifications": {
     "title": "Notifications",

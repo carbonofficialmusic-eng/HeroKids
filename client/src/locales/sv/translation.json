@@ -1555,7 +1555,8 @@
     "empty": "Inga lappar ännu — var den första!",
     "loading": "Laddar…",
     "placeholder": "Ditt meddelande (max 150 tecken)…",
-    "error": "Kunde inte spara"
+    "error": "Kunde inte spara",
+    "actingAsError": "Inte tillåtet — den här medlemmen har ett eget konto. Du kan inte publicera för deras räkning."
   },
   "notifications": {
     "title": "Aviseringar",

@@ -1571,7 +1571,8 @@
     "empty": "No notes yet — be the first!",
     "loading": "Loading…",
     "placeholder": "Your message (max. 150 characters)…",
-    "error": "Failed to save"
+    "error": "Failed to save",
+    "actingAsError": "Not allowed — this member has their own account. You cannot post on their behalf."
   },
   "notifications": {
     "title": "Notifications",

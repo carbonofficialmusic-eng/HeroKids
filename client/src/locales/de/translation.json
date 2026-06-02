@@ -1581,7 +1581,8 @@
     "empty": "Noch keine Zettel — sei der Erste!",
     "loading": "Laden...",
     "placeholder": "Deine Nachricht (max. 150 Zeichen)…",
-    "error": "Fehler beim Speichern"
+    "error": "Fehler beim Speichern",
+    "actingAsError": "Nicht erlaubt — dieser Account hat eine eigene Anmeldung. Schreiben in fremdem Namen ist nicht möglich."
   },
   "notifications": {
     "title": "Benachrichtigungen",
