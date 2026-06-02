@@ -482,7 +482,8 @@
     "backgroundDisabled": "배경 비활성화됨",
     "backgroundEnabledDesc": "스킨 배경이 이제 표시됩니다",
     "backgroundDisabledDesc": "스킨 배경이 이제 숨겨졌습니다",
-    "failedToToggleBackground": "배경 전환에 실패했습니다"
+    "failedToToggleBackground": "배경 전환에 실패했습니다",
+    "cardsAvailable": "장 사용 가능"
   },
   "skinNames": {
     "junior-champion": "주니어 챔피언",

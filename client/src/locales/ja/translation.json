@@ -478,7 +478,8 @@
     "backgroundDisabled": "背景が無効",
     "backgroundEnabledDesc": "スキンの背景が表示されるようになりました",
     "backgroundDisabledDesc": "スキンの背景が非表示になりました",
-    "failedToToggleBackground": "背景の切り替えに失敗しました"
+    "failedToToggleBackground": "背景の切り替えに失敗しました",
+    "cardsAvailable": "枚利用可能"
   },
   "skinNames": {
     "junior-champion": "ジュニアチャンピオン",
