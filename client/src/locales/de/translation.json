@@ -142,7 +142,8 @@
     "sendPointsDesc": "Wähle Familienmitglieder aus und sende ihnen Bonuspunkte.",
     "selectRecipients": "Empfänger",
     "sendPointsAmount": "Anzahl Punkte",
-    "sendPointsConfirm": "Punkte senden"
+    "sendPointsConfirm": "Punkte senden",
+    "importantTasks": "Wichtig"
   },
   "tasks": {
     "title": "Aufgaben",
@@ -302,7 +303,9 @@
       "selfCare": "Selbstpflege",
       "pets": "Haustiere & Pflanzen",
       "other": "Sonstiges"
-    }
+    },
+    "important": "Wichtig",
+    "importantDesc": "Wichtige Aufgaben werden immer oben angezeigt, unabhängig vom aktiven Filter."
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -943,7 +946,93 @@
     "readyToMakeFun": "Bereit, Aufgaben zum Spaß zu machen?",
     "joinThousands": "Schließe dich tausenden Familien an, die Haushaltsaufgaben zum Abenteuer machen!",
     "getStartedFree": "Kostenlos loslegen",
-    "copyrightNotice": "© 2025 HeroKids. Familien stärken, eine Aufgabe nach der anderen."
+    "copyrightNotice": "© 2025 HeroKids. Familien stärken, eine Aufgabe nach der anderen.",
+    "nav": {
+      "connectDevice": "Gerät verbinden"
+    },
+    "hero": {
+      "badge": "Haushalt-Chaos? Nicht mehr.",
+      "title1": "Starke Kinder erziehen.",
+      "title2": "Ohne das ewige Nörgeln.",
+      "ctaPrimary": "Kostenlos starten",
+      "ctaSecondary": "So funktionierts",
+      "socialProof": "Bereits von 10.000+ Familien geliebt",
+      "done": "Erledigt",
+      "roomCleaned": "Zimmer aufgeräumt!",
+      "pointsEarned": "Punkte verdient"
+    },
+    "auth": {
+      "title": "HeroKids Konto",
+      "description": "Direkt anmelden, ohne Browser-Weiterleitung.",
+      "tabLogin": "Login",
+      "tabRegister": "Registrieren",
+      "tabPassword": "Passwort",
+      "labelEmail": "E-Mail",
+      "labelPassword": "Passwort",
+      "labelFirstName": "Vorname",
+      "labelLastName": "Nachname (optional)",
+      "termsPrefix": "Ich habe die ",
+      "termsLink": "AGB",
+      "termsMiddle": " gelesen und akzeptiere sie. Ich habe die ",
+      "privacyLink": "Datenschutzerklärung",
+      "termsSuffix": " zur Kenntnis genommen.",
+      "loginButton": "Einloggen",
+      "createAccountButton": "Konto erstellen",
+      "resetLinkButton": "Reset-Link senden",
+      "newPassword": "Neues Passwort",
+      "savePassword": "Passwort speichern",
+      "loginFailed": "Login fehlgeschlagen.",
+      "registerFailed": "Registrierung fehlgeschlagen.",
+      "accountCreated": "Konto erstellt",
+      "verificationSent": "Wir haben dir eine Bestätigungsmail gesendet.",
+      "forgotFailed": "Passwort-Reset ist noch nicht verfügbar.",
+      "passwordSaved": "Passwort wurde aktualisiert.",
+      "passwordFailed": "Passwort konnte nicht aktualisiert werden.",
+      "resetIfExists": "Wenn ein Konto existiert, erhältst du eine E-Mail.",
+      "emailInvalid": "Bitte gib eine gültige E-Mail ein.",
+      "passwordRequired": "Bitte gib dein Passwort ein.",
+      "nameRequired": "Bitte gib deinen Namen ein.",
+      "passwordMin": "Das Passwort braucht mindestens 8 Zeichen.",
+      "termsRequired": "Bitte akzeptiere die AGB und Datenschutzerklärung."
+    },
+    "features": {
+      "subtitle": "In wenigen Minuten eingerichtet. Die Magie passiert sofort.",
+      "step1Title": "1. Aufgaben festlegen",
+      "step1Desc": "Haushaltsaufgaben, Routinen oder Sonderaktionen — mit individuellen Punkten je nach Schwierigkeit.",
+      "step2Title": "2. Kinder legen los",
+      "step2Desc": "Die Kinder erledigen Aufgaben in ihrer eigenen, spielerischen App-Oberfläche.",
+      "step3Title": "3. Belohnungen freischalten",
+      "step3Desc": "Punkte werden zu echten Belohnungen: Bildschirmzeit, Taschengeld oder Familien-Kinoabend."
+    },
+    "kids": {
+      "title": "Gebaut für kleine Hände und große Fantasie.",
+      "desc": "Die Kinder-Oberfläche fühlt sich nicht wie eine Aufgabenliste an — sondern wie ein Spiel. Mit Animationen, Fortschrittsbalken und Belohnungen werden die Kinder von selbst aktiv.",
+      "feature1": "Visuelles Fortschritts-Tracking",
+      "feature2": "Coole Achievement-Abzeichen",
+      "feature3": "Anpassbare Avatare & Skins"
+    },
+    "parents": {
+      "title": "Deine Familien-Kommandozentrale.",
+      "desc": "Aufgaben genehmigen, Belohnungen festlegen und den Fortschritt aller Familienmitglieder im Blick behalten — alles in deinem eigenen Eltern-Dashboard. Volle Kontrolle, null Stress.",
+      "cta": "Eltern-Features entdecken"
+    },
+    "testimonials": {
+      "text1": "\"Mein 8-Jähriger hat mich gefragt, ob er noch mehr Aufgaben machen kann. Diese App ist echte Magie.\"",
+      "name1": "Sarah J.",
+      "role1": "Mama von 2 Kindern",
+      "text2": "\"Wir haben uns jeden Abend wegen Aufräumen gestritten. Jetzt wetteifern sie, wer die Filmauswahl fürs Wochenende bekommt.\"",
+      "name2": "Mike R.",
+      "role2": "Papa von 3 Kindern"
+    },
+    "cta": {
+      "button": "Kostenlos 14 Tage testen",
+      "noCreditCard": "Keine Kreditkarte nötig"
+    },
+    "footer": {
+      "rights": "Alle Rechte vorbehalten.",
+      "privacy": "Datenschutz",
+      "imprint": "Impressum"
+    }
   },
   "approvals": {
     "title": "Aufgabengenehmigungen",

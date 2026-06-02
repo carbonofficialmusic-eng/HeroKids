@@ -137,7 +137,8 @@
     "sendPointsDesc": "家族のメンバーを選択してボーナスポイントを送りましょう。",
     "selectRecipients": "送り先",
     "sendPointsAmount": "ポイント数",
-    "sendPointsConfirm": "ポイントを送る"
+    "sendPointsConfirm": "ポイントを送る",
+    "importantTasks": "重要"
   },
   "tasks": {
     "title": "タスク",
@@ -286,7 +287,9 @@
       "selfCare": "セルフケア",
       "pets": "ペット・植物",
       "other": "その他"
-    }
+    },
+    "important": "重要",
+    "importantDesc": "重要なタスクは、アクティブなフィルターに関係なく、常に上部に表示されます。"
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -898,7 +901,93 @@
     "readyToMakeFun": "Ready to Make Chores Fun?",
     "joinThousands": "Join thousands of families making household tasks an adventure!",
     "getStartedFree": "Get Started Free",
-    "copyrightNotice": "© 2025 HeroKids. Making families stronger, one chore at a time."
+    "copyrightNotice": "© 2025 HeroKids. Making families stronger, one chore at a time.",
+    "nav": {
+      "connectDevice": "デバイスを連携"
+    },
+    "hero": {
+      "badge": "家事の混乱？もう終わり。",
+      "title1": "強い子どもを育てよう。",
+      "title2": "小言なしで。",
+      "ctaPrimary": "無料で始める",
+      "ctaSecondary": "使い方を見る",
+      "socialProof": "10,000以上の家族に愛用",
+      "done": "完了",
+      "roomCleaned": "部屋を片付けた！",
+      "pointsEarned": "ポイント獲得"
+    },
+    "auth": {
+      "title": "HeroKidsアカウント",
+      "description": "リダイレクトなしで直接ログイン。",
+      "tabLogin": "ログイン",
+      "tabRegister": "登録",
+      "tabPassword": "パスワード",
+      "labelEmail": "メールアドレス",
+      "labelPassword": "パスワード",
+      "labelFirstName": "名前",
+      "labelLastName": "苗字（任意）",
+      "termsPrefix": "",
+      "termsLink": "利用規約",
+      "termsMiddle": "を読み、同意します。",
+      "privacyLink": "プライバシーポリシー",
+      "termsSuffix": "を確認しました。",
+      "loginButton": "ログイン",
+      "createAccountButton": "アカウントを作成",
+      "resetLinkButton": "リセットリンクを送信",
+      "newPassword": "新しいパスワード",
+      "savePassword": "パスワードを保存",
+      "loginFailed": "ログインに失敗しました。",
+      "registerFailed": "登録に失敗しました。",
+      "accountCreated": "アカウントが作成されました",
+      "verificationSent": "確認メールをお送りしました。",
+      "forgotFailed": "パスワードリセットはまだ利用できません。",
+      "passwordSaved": "パスワードが更新されました。",
+      "passwordFailed": "パスワードを更新できませんでした。",
+      "resetIfExists": "アカウントが存在する場合、メールが届きます。",
+      "emailInvalid": "有効なメールアドレスを入力してください。",
+      "passwordRequired": "パスワードを入力してください。",
+      "nameRequired": "名前を入力してください。",
+      "passwordMin": "パスワードは8文字以上必要です。",
+      "termsRequired": "利用規約とプライバシーポリシーに同意してください。"
+    },
+    "features": {
+      "subtitle": "数分で設定完了。すぐに魔法が始まります。",
+      "step1Title": "1. タスクを設定",
+      "step1Desc": "家事、ルーティン、特別な作業 — 難易度に応じた個別のポイントで。",
+      "step2Title": "2. 子どもたちがスタート",
+      "step2Desc": "子どもたちは楽しいゲーム感覚のインターフェイスでタスクをこなします。",
+      "step3Title": "3. ご褒美をアンロック",
+      "step3Desc": "ポイントが本物のご褒美に：スクリーンタイム、お小遣い、家族映画の夜。"
+    },
+    "kids": {
+      "title": "小さな手と大きな想像力のために作られました。",
+      "desc": "子ども向けインターフェイスはゲームのように感じます。アニメーション、進捗バー、ご褒美で、子どもたちが自ら行動します。",
+      "feature1": "視覚的な進捗管理",
+      "feature2": "かっこいい実績バッジ",
+      "feature3": "カスタマイズ可能なアバター＆スキン"
+    },
+    "parents": {
+      "title": "あなたの家族指令センター。",
+      "desc": "タスクを承認し、ご褒美を設定し、すべての家族の進捗を確認 — 親専用ダッシュボードで。完全なコントロール、ゼロストレス。",
+      "cta": "親向け機能を見る"
+    },
+    "testimonials": {
+      "text1": "\"8歳の息子がもっとお手伝いできるか聞いてきました。このアプリは本物の魔法です。\"",
+      "name1": "Sarah J.",
+      "role1": "2人の子どもを持つお母さん",
+      "text2": "\"毎晩片付けで喧嘩していました。今は週末の映画を選ぶ権利を競っています。\"",
+      "name2": "Mike R.",
+      "role2": "3人の子どもを持つお父さん"
+    },
+    "cta": {
+      "button": "14日間無料で試す",
+      "noCreditCard": "クレジットカード不要"
+    },
+    "footer": {
+      "rights": "全著作権所有。",
+      "privacy": "プライバシー",
+      "imprint": "会社情報"
+    }
   },
   "approvals": {
     "title": "タスクの承認",

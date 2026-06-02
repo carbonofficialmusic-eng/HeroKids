@@ -142,7 +142,8 @@
     "sendPointsDesc": "Select family members and send them bonus points.",
     "selectRecipients": "Recipients",
     "sendPointsAmount": "Number of points",
-    "sendPointsConfirm": "Send Points"
+    "sendPointsConfirm": "Send Points",
+    "importantTasks": "Important"
   },
   "tasks": {
     "title": "Tasks",
@@ -292,7 +293,9 @@
     "cameraPermissionDenied": "Camera access denied. Please enable it in your device Settings.",
     "submitting": "Submitting...",
     "completeAndEarn": "Complete & Earn Points!",
-    "pts": "pts"
+    "pts": "pts",
+    "important": "Important",
+    "importantDesc": "Important tasks are always shown at the top, regardless of the active filter."
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -933,7 +936,93 @@
     "readyToMakeFun": "Ready to Make Chores Fun?",
     "joinThousands": "Join thousands of families making household tasks an adventure!",
     "getStartedFree": "Get Started Free",
-    "copyrightNotice": "© 2025 HeroKids. Making families stronger, one chore at a time."
+    "copyrightNotice": "© 2025 HeroKids. Making families stronger, one chore at a time.",
+    "nav": {
+      "connectDevice": "Link Device"
+    },
+    "hero": {
+      "badge": "Household chaos? Not anymore.",
+      "title1": "Raise strong kids.",
+      "title2": "Without the constant nagging.",
+      "ctaPrimary": "Start for free",
+      "ctaSecondary": "How it works",
+      "socialProof": "Loved by 10,000+ families",
+      "done": "Done",
+      "roomCleaned": "Room cleaned!",
+      "pointsEarned": "Points earned"
+    },
+    "auth": {
+      "title": "HeroKids Account",
+      "description": "Sign in directly, no browser redirect.",
+      "tabLogin": "Login",
+      "tabRegister": "Register",
+      "tabPassword": "Password",
+      "labelEmail": "Email",
+      "labelPassword": "Password",
+      "labelFirstName": "First name",
+      "labelLastName": "Last name (optional)",
+      "termsPrefix": "I have read and accept the ",
+      "termsLink": "Terms",
+      "termsMiddle": ". I have acknowledged the ",
+      "privacyLink": "Privacy Policy",
+      "termsSuffix": ".",
+      "loginButton": "Log in",
+      "createAccountButton": "Create account",
+      "resetLinkButton": "Send reset link",
+      "newPassword": "New password",
+      "savePassword": "Save password",
+      "loginFailed": "Login failed.",
+      "registerFailed": "Registration failed.",
+      "accountCreated": "Account created",
+      "verificationSent": "We sent you a confirmation email.",
+      "forgotFailed": "Password reset is not available yet.",
+      "passwordSaved": "Password updated.",
+      "passwordFailed": "Could not update password.",
+      "resetIfExists": "If an account exists, you will receive an email.",
+      "emailInvalid": "Please enter a valid email.",
+      "passwordRequired": "Please enter your password.",
+      "nameRequired": "Please enter your name.",
+      "passwordMin": "Password must be at least 8 characters.",
+      "termsRequired": "Please accept the Terms and Privacy Policy."
+    },
+    "features": {
+      "subtitle": "Set up in minutes. The magic happens immediately.",
+      "step1Title": "1. Set up tasks",
+      "step1Desc": "Household chores, routines or special actions — with individual points based on difficulty.",
+      "step2Title": "2. Kids get started",
+      "step2Desc": "Kids complete tasks in their own fun, game-like interface.",
+      "step3Title": "3. Unlock rewards",
+      "step3Desc": "Points become real rewards: screen time, pocket money, or a family movie night."
+    },
+    "kids": {
+      "title": "Built for little hands and big imaginations.",
+      "desc": "The kids interface does not feel like a chore list — it feels like a game. With animations, progress bars and rewards, children become proactive on their own.",
+      "feature1": "Visual progress tracking",
+      "feature2": "Cool achievement badges",
+      "feature3": "Customizable avatars & skins"
+    },
+    "parents": {
+      "title": "Your family command center.",
+      "desc": "Approve tasks, set rewards and track every family member progress — all in your own parent dashboard. Full control, zero stress.",
+      "cta": "Discover parent features"
+    },
+    "testimonials": {
+      "text1": "\"My 8-year-old asked me if he can do more chores. This app is pure magic.\"",
+      "name1": "Sarah J.",
+      "role1": "Mom of 2 kids",
+      "text2": "\"We fought every night about tidying up. Now they compete for who gets to pick the movie on weekends.\"",
+      "name2": "Mike R.",
+      "role2": "Dad of 3 kids"
+    },
+    "cta": {
+      "button": "Try free for 14 days",
+      "noCreditCard": "No credit card required"
+    },
+    "footer": {
+      "rights": "All rights reserved.",
+      "privacy": "Privacy",
+      "imprint": "Imprint"
+    }
   },
   "approvals": {
     "title": "Task Approvals",

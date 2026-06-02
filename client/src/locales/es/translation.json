@@ -137,7 +137,8 @@
     "sendPointsDesc": "Selecciona miembros de la familia y envíales puntos bonus.",
     "selectRecipients": "Destinatarios",
     "sendPointsAmount": "Cantidad de puntos",
-    "sendPointsConfirm": "Enviar puntos"
+    "sendPointsConfirm": "Enviar puntos",
+    "importantTasks": "Importante"
   },
   "tasks": {
     "title": "Tareas",
@@ -286,7 +287,9 @@
       "selfCare": "Autocuidado",
       "pets": "Mascotas y Plantas",
       "other": "Otro"
-    }
+    },
+    "important": "Importante",
+    "importantDesc": "Las tareas importantes siempre se muestran arriba, independientemente del filtro activo."
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -898,7 +901,93 @@
     "readyToMakeFun": "Ready to Make Chores Fun?",
     "joinThousands": "Join thousands of families making household tasks an adventure!",
     "getStartedFree": "Get Started Free",
-    "copyrightNotice": "© 2025 HeroKids. Making families stronger, one chore at a time."
+    "copyrightNotice": "© 2025 HeroKids. Making families stronger, one chore at a time.",
+    "nav": {
+      "connectDevice": "Vincular dispositivo"
+    },
+    "hero": {
+      "badge": "¿Caos en el hogar? Ya no más.",
+      "title1": "Cría hijos fuertes.",
+      "title2": "Sin el regaño constante.",
+      "ctaPrimary": "Empezar gratis",
+      "ctaSecondary": "Cómo funciona",
+      "socialProof": "Amado por más de 10.000 familias",
+      "done": "Hecho",
+      "roomCleaned": "¡Habitación ordenada!",
+      "pointsEarned": "Puntos ganados"
+    },
+    "auth": {
+      "title": "Cuenta HeroKids",
+      "description": "Inicia sesión directamente, sin redirección.",
+      "tabLogin": "Iniciar sesión",
+      "tabRegister": "Registrarse",
+      "tabPassword": "Contraseña",
+      "labelEmail": "Correo electrónico",
+      "labelPassword": "Contraseña",
+      "labelFirstName": "Nombre",
+      "labelLastName": "Apellido (opcional)",
+      "termsPrefix": "He leído y acepto los ",
+      "termsLink": "Términos",
+      "termsMiddle": ". He tomado nota de la ",
+      "privacyLink": "Política de privacidad",
+      "termsSuffix": ".",
+      "loginButton": "Entrar",
+      "createAccountButton": "Crear cuenta",
+      "resetLinkButton": "Enviar enlace",
+      "newPassword": "Nueva contraseña",
+      "savePassword": "Guardar contraseña",
+      "loginFailed": "Error al iniciar sesión.",
+      "registerFailed": "Error en el registro.",
+      "accountCreated": "Cuenta creada",
+      "verificationSent": "Te enviamos un correo de confirmación.",
+      "forgotFailed": "Restablecimiento de contraseña no disponible aún.",
+      "passwordSaved": "Contraseña actualizada.",
+      "passwordFailed": "No se pudo actualizar la contraseña.",
+      "resetIfExists": "Si existe una cuenta, recibirás un correo.",
+      "emailInvalid": "Por favor ingresa un correo válido.",
+      "passwordRequired": "Por favor ingresa tu contraseña.",
+      "nameRequired": "Por favor ingresa tu nombre.",
+      "passwordMin": "La contraseña debe tener al menos 8 caracteres.",
+      "termsRequired": "Por favor acepta los Términos y la Política de privacidad."
+    },
+    "features": {
+      "subtitle": "Configurado en minutos. La magia ocurre de inmediato.",
+      "step1Title": "1. Establecer tareas",
+      "step1Desc": "Tareas del hogar, rutinas o acciones especiales — con puntos individuales según la dificultad.",
+      "step2Title": "2. Los niños comienzan",
+      "step2Desc": "Los niños completan tareas en su propia interfaz divertida.",
+      "step3Title": "3. Desbloquear recompensas",
+      "step3Desc": "Los puntos se convierten en recompensas reales: tiempo de pantalla, dinero de bolsillo o noche de cine."
+    },
+    "kids": {
+      "title": "Diseñado para manos pequeñas y grandes imaginaciones.",
+      "desc": "La interfaz infantil no parece una lista de tareas — parece un juego. Con animaciones, barras de progreso y recompensas, los niños actúan solos.",
+      "feature1": "Seguimiento visual del progreso",
+      "feature2": "Insignias de logros geniales",
+      "feature3": "Avatares y skins personalizables"
+    },
+    "parents": {
+      "title": "Tu centro de comando familiar.",
+      "desc": "Aprueba tareas, establece recompensas y sigue el progreso de cada miembro — todo en tu propio panel de padres. Control total, cero estrés.",
+      "cta": "Descubrir funciones para padres"
+    },
+    "testimonials": {
+      "text1": "\"Mi hijo de 8 años me preguntó si podía hacer más tareas. Esta app es magia pura.\"",
+      "name1": "Sarah J.",
+      "role1": "Mamá de 2 hijos",
+      "text2": "\"Peleábamos cada noche por recoger. Ahora compiten por quién elige la película del fin de semana.\"",
+      "name2": "Mike R.",
+      "role2": "Papá de 3 hijos"
+    },
+    "cta": {
+      "button": "Probar gratis 14 días",
+      "noCreditCard": "No se necesita tarjeta de crédito"
+    },
+    "footer": {
+      "rights": "Todos los derechos reservados.",
+      "privacy": "Privacidad",
+      "imprint": "Aviso legal"
+    }
   },
   "approvals": {
     "title": "Aprobaciones de Tareas",

@@ -141,7 +141,8 @@
     "sendPointsDesc": "Välj familjemedlemmar och skicka bonuspoäng till dem.",
     "selectRecipients": "Mottagare",
     "sendPointsAmount": "Antal poäng",
-    "sendPointsConfirm": "Skicka poäng"
+    "sendPointsConfirm": "Skicka poäng",
+    "importantTasks": "Viktigt"
   },
   "tasks": {
     "title": "Uppgifter",
@@ -291,7 +292,9 @@
     "cameraPermissionDenied": "Kameraåtkomst nekad. Aktivera det i Inställningar.",
     "submitting": "Skickar...",
     "completeAndEarn": "Slutför & tjäna poäng!",
-    "pts": "p"
+    "pts": "p",
+    "important": "Viktigt",
+    "importantDesc": "Viktiga uppgifter visas alltid överst, oavsett aktivt filter."
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -932,7 +935,93 @@
     "readyToMakeFun": "Redo att göra sysslor roliga?",
     "joinThousands": "Gå med tusentals familjer som gör hushållsuppgifter till ett äventyr!",
     "getStartedFree": "Kom igång gratis",
-    "copyrightNotice": "© 2025 HeroKids. Gör familjer starkare, en syssla i taget."
+    "copyrightNotice": "© 2025 HeroKids. Gör familjer starkare, en syssla i taget.",
+    "nav": {
+      "connectDevice": "Anslut enhet"
+    },
+    "hero": {
+      "badge": "Hushållskaoset? Inte längre.",
+      "title1": "Fostra starka barn.",
+      "title2": "Utan det eviga tjatandet.",
+      "ctaPrimary": "Kom igång gratis",
+      "ctaSecondary": "Hur det fungerar",
+      "socialProof": "Älskat av 10 000+ familjer",
+      "done": "Klart",
+      "roomCleaned": "Rummet städat!",
+      "pointsEarned": "Poäng intjänade"
+    },
+    "auth": {
+      "title": "HeroKids-konto",
+      "description": "Logga in direkt, utan omdirigering.",
+      "tabLogin": "Logga in",
+      "tabRegister": "Registrera",
+      "tabPassword": "Lösenord",
+      "labelEmail": "E-post",
+      "labelPassword": "Lösenord",
+      "labelFirstName": "Förnamn",
+      "labelLastName": "Efternamn (valfritt)",
+      "termsPrefix": "Jag har läst och accepterar ",
+      "termsLink": "villkoren",
+      "termsMiddle": ". Jag har tagit del av ",
+      "privacyLink": "integritetspolicyn",
+      "termsSuffix": ".",
+      "loginButton": "Logga in",
+      "createAccountButton": "Skapa konto",
+      "resetLinkButton": "Skicka återställningslänk",
+      "newPassword": "Nytt lösenord",
+      "savePassword": "Spara lösenord",
+      "loginFailed": "Inloggning misslyckades.",
+      "registerFailed": "Registrering misslyckades.",
+      "accountCreated": "Konto skapat",
+      "verificationSent": "Vi skickade ett bekräftelsemail.",
+      "forgotFailed": "Lösenordsåterställning är inte tillgänglig ännu.",
+      "passwordSaved": "Lösenord uppdaterat.",
+      "passwordFailed": "Kunde inte uppdatera lösenordet.",
+      "resetIfExists": "Om ett konto finns kommer du att få ett e-postmeddelande.",
+      "emailInvalid": "Ange en giltig e-postadress.",
+      "passwordRequired": "Ange ditt lösenord.",
+      "nameRequired": "Ange ditt namn.",
+      "passwordMin": "Lösenordet måste vara minst 8 tecken.",
+      "termsRequired": "Acceptera villkoren och integritetspolicyn."
+    },
+    "features": {
+      "subtitle": "Klar på några minuter. Magin börjar omedelbart.",
+      "step1Title": "1. Sätt upp uppgifter",
+      "step1Desc": "Hushållssysslor, rutiner eller specialaktioner — med individuella poäng efter svårighet.",
+      "step2Title": "2. Barnen sätter igång",
+      "step2Desc": "Barnen slutför uppgifter i sitt eget roliga, spelliknande gränssnitt.",
+      "step3Title": "3. Lås upp belöningar",
+      "step3Desc": "Poäng blir riktiga belöningar: skärmtid, fickpengar eller familjefilmkväll."
+    },
+    "kids": {
+      "title": "Byggt för små händer och stor fantasi.",
+      "desc": "Barnens gränssnitt känns som ett spel. Med animationer, förloppsindikatorer och belöningar agerar barnen på egen hand.",
+      "feature1": "Visuell framstegsövervakning",
+      "feature2": "Coola prestationsmärken",
+      "feature3": "Anpassningsbara avatarer och skins"
+    },
+    "parents": {
+      "title": "Ditt familjekommandocenter.",
+      "desc": "Godkänn uppgifter, ange belöningar och följ alla familjemedlemmars framsteg — allt i din föräldradashboard. Full kontroll, noll stress.",
+      "cta": "Upptäck föräldrafunktioner"
+    },
+    "testimonials": {
+      "text1": "\"Min 8-åring frågade om han kunde göra fler sysslor. Den här appen är ren magi.\"",
+      "name1": "Sarah J.",
+      "role1": "Mamma till 2 barn",
+      "text2": "\"Vi bråkade varje kväll om städning. Nu tävlar de om vem som väljer film på helgen.\"",
+      "name2": "Mike R.",
+      "role2": "Pappa till 3 barn"
+    },
+    "cta": {
+      "button": "Testa gratis i 14 dagar",
+      "noCreditCard": "Inget kreditkort krävs"
+    },
+    "footer": {
+      "rights": "Alla rättigheter förbehållna.",
+      "privacy": "Integritet",
+      "imprint": "Impressum"
+    }
   },
   "approvals": {
     "title": "Uppgiftsgodkännanden",

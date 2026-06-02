@@ -137,7 +137,8 @@
     "sendPointsDesc": "选择家庭成员并向他们发送奖励积分。",
     "selectRecipients": "收件人",
     "sendPointsAmount": "积分数量",
-    "sendPointsConfirm": "发送积分"
+    "sendPointsConfirm": "发送积分",
+    "importantTasks": "重要"
   },
   "tasks": {
     "title": "任务",
@@ -286,7 +287,9 @@
     "cameraPermissionDenied": "相机访问被拒绝，请在设置中启用。",
     "submitting": "提交中...",
     "completeAndEarn": "完成并赢取积分！",
-    "pts": "积分"
+    "pts": "积分",
+    "important": "重要",
+    "importantDesc": "重要任务始终显示在顶部，与当前筛选无关。"
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -898,7 +901,93 @@
     "readyToMakeFun": "Ready to Make Chores Fun?",
     "joinThousands": "Join thousands of families making household tasks an adventure!",
     "getStartedFree": "Get Started Free",
-    "copyrightNotice": "© 2025 HeroKids. Making families stronger, one chore at a time."
+    "copyrightNotice": "© 2025 HeroKids. Making families stronger, one chore at a time.",
+    "nav": {
+      "connectDevice": "连接设备"
+    },
+    "hero": {
+      "badge": "家务混乱？不再如此。",
+      "title1": "培养坚强的孩子。",
+      "title2": "无需不停唠叨。",
+      "ctaPrimary": "免费开始",
+      "ctaSecondary": "了解如何使用",
+      "socialProof": "已有10,000+家庭喜爱",
+      "done": "完成",
+      "roomCleaned": "房间整理好了！",
+      "pointsEarned": "获得积分"
+    },
+    "auth": {
+      "title": "HeroKids账户",
+      "description": "直接登录，无需浏览器跳转。",
+      "tabLogin": "登录",
+      "tabRegister": "注册",
+      "tabPassword": "密码",
+      "labelEmail": "电子邮件",
+      "labelPassword": "密码",
+      "labelFirstName": "名字",
+      "labelLastName": "姓氏（可选）",
+      "termsPrefix": "我已阅读并同意",
+      "termsLink": "服务条款",
+      "termsMiddle": "，并已了解",
+      "privacyLink": "隐私政策",
+      "termsSuffix": "。",
+      "loginButton": "登录",
+      "createAccountButton": "创建账户",
+      "resetLinkButton": "发送重置链接",
+      "newPassword": "新密码",
+      "savePassword": "保存密码",
+      "loginFailed": "登录失败。",
+      "registerFailed": "注册失败。",
+      "accountCreated": "账户已创建",
+      "verificationSent": "我们已向您发送确认邮件。",
+      "forgotFailed": "密码重置暂不可用。",
+      "passwordSaved": "密码已更新。",
+      "passwordFailed": "无法更新密码。",
+      "resetIfExists": "如果账户存在，您将收到一封邮件。",
+      "emailInvalid": "请输入有效的电子邮件地址。",
+      "passwordRequired": "请输入您的密码。",
+      "nameRequired": "请输入您的名字。",
+      "passwordMin": "密码至少需要8个字符。",
+      "termsRequired": "请接受服务条款和隐私政策。"
+    },
+    "features": {
+      "subtitle": "几分钟内设置完成。魔法立即开始。",
+      "step1Title": "1. 设置任务",
+      "step1Desc": "家务、日常或特殊活动 — 根据难度设置个人积分。",
+      "step2Title": "2. 孩子们开始行动",
+      "step2Desc": "孩子们在自己有趣的游戏界面中完成任务。",
+      "step3Title": "3. 解锁奖励",
+      "step3Desc": "积分变成真实奖励：屏幕时间、零花钱或家庭电影之夜。"
+    },
+    "kids": {
+      "title": "为小手和大想象力而打造。",
+      "desc": "儿童界面不像任务列表，而像游戏。通过动画、进度条和奖励，孩子们会自主行动。",
+      "feature1": "可视化进度跟踪",
+      "feature2": "酷炫成就徽章",
+      "feature3": "可定制头像和皮肤"
+    },
+    "parents": {
+      "title": "您的家庭指挥中心。",
+      "desc": "审批任务、设置奖励并跟踪每位家庭成员的进度 — 一切尽在您的家长仪表板中。完全掌控，零压力。",
+      "cta": "探索家长功能"
+    },
+    "testimonials": {
+      "text1": "\"我8岁的儿子问我他是否可以做更多家务。这个应用简直是魔法。\"",
+      "name1": "Sarah J.",
+      "role1": "两个孩子的妈妈",
+      "text2": "\"我们每天晚上都为整理而争吵。现在他们竞争谁来选周末的电影。\"",
+      "name2": "Mike R.",
+      "role2": "三个孩子的爸爸"
+    },
+    "cta": {
+      "button": "免费试用14天",
+      "noCreditCard": "无需信用卡"
+    },
+    "footer": {
+      "rights": "版权所有。",
+      "privacy": "隐私政策",
+      "imprint": "版权信息"
+    }
   },
   "approvals": {
     "title": "任务审批",

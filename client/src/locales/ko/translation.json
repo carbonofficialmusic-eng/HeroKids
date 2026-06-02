@@ -141,7 +141,8 @@
     "sendPointsDesc": "가족 구성원을 선택하고 보너스 포인트를 보내세요.",
     "selectRecipients": "받는 사람",
     "sendPointsAmount": "포인트 수",
-    "sendPointsConfirm": "포인트 보내기"
+    "sendPointsConfirm": "포인트 보내기",
+    "importantTasks": "중요"
   },
   "tasks": {
     "title": "과제",
@@ -290,7 +291,9 @@
       "selfCare": "자기 관리",
       "pets": "반려동물 및 식물",
       "other": "기타"
-    }
+    },
+    "important": "중요",
+    "importantDesc": "중요한 작업은 활성 필터에 관계없이 항상 위에 표시됩니다."
   },
   "taskTemplates": {
     "cleanRoom": {
@@ -894,7 +897,17 @@
     "earnPointsDesc": "아이들이 과제를 완료하면 포인트를 얻습니다",
     "unlockRewards": "보상 잠금 해제",
     "unlockRewardsDesc": "포인트를 멋진 보상으로 교환",
-    "features": "기능",
+    "features": {
+      "0": "기",
+      "1": "능",
+      "subtitle": "몇 분 만에 설정 완료. 마법은 즉시 시작됩니다.",
+      "step1Title": "1. 작업 설정",
+      "step1Desc": "집안일, 루틴 또는 특별 활동 — 난이도에 따른 개별 포인트로.",
+      "step2Title": "2. 아이들이 시작",
+      "step2Desc": "아이들은 자신만의 재미있는 게임 같은 인터페이스에서 작업을 완료합니다.",
+      "step3Title": "3. 보상 잠금 해제",
+      "step3Desc": "포인트가 실제 보상이 됩니다: 스크린 타임, 용돈, 또는 가족 영화의 밤."
+    },
     "gamification": "게임화",
     "gamificationDesc": "과제, 포인트, 리더보드, 캐릭터 스킨으로 집안일을 재미있게 만드세요",
     "familyFriendly": "가족 친화적",
@@ -928,7 +941,84 @@
     "isThereTrialPeriodAnswer": "무료 플랜으로 시작하여 업그레이드할 준비가 되었을 때 언제든지 업그레이드할 수 있습니다!",
     "readyToStart": "시작할 준비가 되셨나요?",
     "transformChores": "오늘 가족의 집안일을 모험으로 바꾸세요!",
-    "logInNow": "지금 로그인"
+    "logInNow": "지금 로그인",
+    "nav": {
+      "connectDevice": "기기 연결"
+    },
+    "hero": {
+      "badge": "집안일 혼란? 이제 끝.",
+      "title1": "강한 아이를 키우세요.",
+      "title2": "잔소리 없이.",
+      "ctaPrimary": "무료로 시작하기",
+      "ctaSecondary": "사용 방법",
+      "socialProof": "10,000+ 가족이 사랑합니다",
+      "done": "완료",
+      "roomCleaned": "방 정리 완료!",
+      "pointsEarned": "포인트 획득"
+    },
+    "auth": {
+      "title": "HeroKids 계정",
+      "description": "브라우저 리다이렉트 없이 직접 로그인.",
+      "tabLogin": "로그인",
+      "tabRegister": "회원가입",
+      "tabPassword": "비밀번호",
+      "labelEmail": "이메일",
+      "labelPassword": "비밀번호",
+      "labelFirstName": "이름",
+      "labelLastName": "성 (선택사항)",
+      "termsPrefix": "",
+      "termsLink": "이용약관",
+      "termsMiddle": "을 읽고 동의합니다. ",
+      "privacyLink": "개인정보처리방침",
+      "termsSuffix": "을 확인했습니다.",
+      "loginButton": "로그인",
+      "createAccountButton": "계정 만들기",
+      "resetLinkButton": "재설정 링크 보내기",
+      "newPassword": "새 비밀번호",
+      "savePassword": "비밀번호 저장",
+      "loginFailed": "로그인 실패.",
+      "registerFailed": "회원가입 실패.",
+      "accountCreated": "계정이 생성되었습니다",
+      "verificationSent": "확인 이메일을 보냈습니다.",
+      "forgotFailed": "비밀번호 재설정을 아직 사용할 수 없습니다.",
+      "passwordSaved": "비밀번호가 업데이트되었습니다.",
+      "passwordFailed": "비밀번호를 업데이트할 수 없습니다.",
+      "resetIfExists": "계정이 있으면 이메일을 받게 됩니다.",
+      "emailInvalid": "유효한 이메일을 입력해 주세요.",
+      "passwordRequired": "비밀번호를 입력해 주세요.",
+      "nameRequired": "이름을 입력해 주세요.",
+      "passwordMin": "비밀번호는 최소 8자 이상이어야 합니다.",
+      "termsRequired": "이용약관 및 개인정보처리방침에 동의해 주세요."
+    },
+    "kids": {
+      "title": "작은 손과 큰 상상력을 위해 만들어졌습니다.",
+      "desc": "어린이 인터페이스는 할 일 목록이 아니라 게임처럼 느껴집니다. 애니메이션, 진행 표시줄, 보상으로 아이들이 스스로 행동합니다.",
+      "feature1": "시각적 진행 상황 추적",
+      "feature2": "멋진 업적 배지",
+      "feature3": "맞춤형 아바타 & 스킨"
+    },
+    "parents": {
+      "title": "가족 사령부.",
+      "desc": "작업 승인, 보상 설정, 모든 가족의 진행 상황 추적 — 부모 대시보드에서 모두. 완전한 제어, 제로 스트레스.",
+      "cta": "부모 기능 살펴보기"
+    },
+    "testimonials": {
+      "text1": "\"8살 아들이 집안일을 더 할 수 있냐고 물었어요. 이 앱은 진짜 마법입니다.\"",
+      "name1": "Sarah J.",
+      "role1": "두 아이의 엄마",
+      "text2": "\"매일 밤 정리 때문에 싸웠어요. 지금은 주말 영화 선택권을 두고 경쟁합니다.\"",
+      "name2": "Mike R.",
+      "role2": "세 아이의 아빠"
+    },
+    "cta": {
+      "button": "14일 무료 체험",
+      "noCreditCard": "신용카드 불필요"
+    },
+    "footer": {
+      "rights": "모든 권리 보유.",
+      "privacy": "개인정보",
+      "imprint": "회사 정보"
+    }
   },
   "approvals": {
     "title": "과제 승인",

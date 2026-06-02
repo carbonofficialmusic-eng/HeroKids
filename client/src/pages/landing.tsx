@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Star, CheckCircle2, Shield, Heart, ArrowRight, Play, Gamepad2, Gift, Sparkles, Loader2, Mail, Lock, UserPlus, Smartphone } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "wouter";
@@ -15,32 +15,9 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient, storeDevToken } from "@/lib/queryClient";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
-// ─── Auth schemas ─────────────────────────────────────────────────────────────
-const loginSchema = z.object({
-  email: z.string().email("Bitte gib eine gültige E-Mail ein."),
-  password: z.string().min(1, "Bitte gib dein Passwort ein."),
-});
-const registerSchema = z.object({
-  firstName: z.string().min(1, "Bitte gib deinen Namen ein."),
-  lastName: z.string().optional(),
-  email: z.string().email("Bitte gib eine gültige E-Mail ein."),
-  password: z.string().min(8, "Das Passwort braucht mindestens 8 Zeichen."),
-  acceptTerms: z.literal(true, { errorMap: () => ({ message: "Bitte akzeptiere die AGB und Datenschutzerklärung." }) }),
-});
-const forgotSchema = z.object({
-  email: z.string().email("Bitte gib eine gültige E-Mail ein."),
-});
-const resetSchema = z.object({
-  password: z.string().min(8, "Das Passwort braucht mindestens 8 Zeichen."),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
-type RegisterForm = z.infer<typeof registerSchema>;
-type ForgotForm = z.infer<typeof forgotSchema>;
-type ResetForm = z.infer<typeof resetSchema>;
-
-// ─── AuthPanel — unchanged logic, unchanged JSX ───────────────────────────────
+// ─── AuthPanel ────────────────────────────────────────────────────────────────
 function AuthPanel() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [authTab, setAuthTab] = useState("login");
@@ -48,6 +25,33 @@ function AuthPanel() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useMemo(() => new URLSearchParams(window.location.search), []);
   const resetToken = searchParams.get("reset_token");
+
+  // Schemas built inside component so error messages are translated
+  const loginSchema = useMemo(() => z.object({
+    email: z.string().email(t('landing.auth.emailInvalid')),
+    password: z.string().min(1, t('landing.auth.passwordRequired')),
+  }), [t]);
+
+  const registerSchema = useMemo(() => z.object({
+    firstName: z.string().min(1, t('landing.auth.nameRequired')),
+    lastName: z.string().optional(),
+    email: z.string().email(t('landing.auth.emailInvalid')),
+    password: z.string().min(8, t('landing.auth.passwordMin')),
+    acceptTerms: z.literal(true, { errorMap: () => ({ message: t('landing.auth.termsRequired') }) }),
+  }), [t]);
+
+  const forgotSchema = useMemo(() => z.object({
+    email: z.string().email(t('landing.auth.emailInvalid')),
+  }), [t]);
+
+  const resetSchema = useMemo(() => z.object({
+    password: z.string().min(8, t('landing.auth.passwordMin')),
+  }), [t]);
+
+  type LoginForm = z.infer<typeof loginSchema>;
+  type RegisterForm = z.infer<typeof registerSchema>;
+  type ForgotForm = z.infer<typeof forgotSchema>;
+  type ResetForm = z.infer<typeof resetSchema>;
 
   const loginForm = useForm<LoginForm>({ resolver: zodResolver(loginSchema), defaultValues: { email: "", password: "" } });
   const registerForm = useForm<RegisterForm>({ resolver: zodResolver(registerSchema), defaultValues: { firstName: "", lastName: "", email: "", password: "", acceptTerms: undefined as unknown as true } });
@@ -76,7 +80,7 @@ function AuthPanel() {
       const result = await res.json();
       if (result.devToken) storeDevToken(result.devToken);
       await finishAuth(result.user);
-    } catch (e: any) { setFormMessage(e.message || "Login fehlgeschlagen."); }
+    } catch (e: any) { setFormMessage(e.message || t('landing.auth.loginFailed')); }
     finally { setIsSubmitting(false); }
   };
 
@@ -86,15 +90,15 @@ function AuthPanel() {
       const res = await apiRequest("POST", "/api/auth/register", data);
       const result = await res.json();
       if (result.emailStatus?.status === "not_configured") {
-        toast({ title: "Konto erstellt", description: result.emailStatus.message });
+        toast({ title: t('landing.auth.accountCreated'), description: result.emailStatus.message });
       } else if (result.emailStatus?.status === "failed") {
-        toast({ title: "Konto erstellt", description: result.emailStatus.message, variant: "destructive" });
+        toast({ title: t('landing.auth.accountCreated'), description: result.emailStatus.message, variant: "destructive" });
       } else {
-        toast({ title: "Konto erstellt", description: "Wir haben dir eine Bestätigungsmail gesendet." });
+        toast({ title: t('landing.auth.accountCreated'), description: t('landing.auth.verificationSent') });
       }
       sessionStorage.setItem("herokids_registration_complete", "true");
       await finishAuth(result.user, "/setup");
-    } catch (e: any) { setFormMessage(e.message || "Registrierung fehlgeschlagen."); }
+    } catch (e: any) { setFormMessage(e.message || t('landing.auth.registerFailed')); }
     finally { setIsSubmitting(false); }
   };
 
@@ -103,8 +107,8 @@ function AuthPanel() {
     try {
       const res = await apiRequest("POST", "/api/auth/forgot-password", data);
       const result = await res.json();
-      setFormMessage(result.message || "Wenn ein Konto existiert, erhältst du eine E-Mail.");
-    } catch (e: any) { setFormMessage(e.message || "Passwort-Reset ist noch nicht verfügbar."); }
+      setFormMessage(result.message || t('landing.auth.resetIfExists'));
+    } catch (e: any) { setFormMessage(e.message || t('landing.auth.forgotFailed')); }
     finally { setIsSubmitting(false); }
   };
 
@@ -114,11 +118,11 @@ function AuthPanel() {
     try {
       const res = await apiRequest("POST", "/api/auth/reset-password", { token: resetToken, password: data.password });
       const result = await res.json();
-      setFormMessage(result.message || "Passwort wurde aktualisiert.");
+      setFormMessage(result.message || t('landing.auth.passwordSaved'));
       setAuthTab("login");
       window.history.replaceState({}, "", "/");
       resetForm.reset();
-    } catch (e: any) { setFormMessage(e.message || "Passwort konnte nicht aktualisiert werden."); }
+    } catch (e: any) { setFormMessage(e.message || t('landing.auth.passwordFailed')); }
     finally { setIsSubmitting(false); }
   };
 
@@ -127,9 +131,9 @@ function AuthPanel() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-2xl font-accent">
           <Lock className="h-5 w-5" />
-          HeroKids Konto
+          {t('landing.auth.title')}
         </CardTitle>
-        <CardDescription>Direkt anmelden, ohne Browser-Weiterleitung.</CardDescription>
+        <CardDescription>{t('landing.auth.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {formMessage && (
@@ -140,26 +144,26 @@ function AuthPanel() {
         )}
         <Tabs value={authTab} onValueChange={(v) => { setAuthTab(v); setFormMessage(null); }}>
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="login" data-testid="tab-login">Login</TabsTrigger>
-            <TabsTrigger value="register" data-testid="tab-register">Registrieren</TabsTrigger>
-            <TabsTrigger value="forgot" data-testid="tab-forgot">Passwort</TabsTrigger>
+            <TabsTrigger value="login" data-testid="tab-login">{t('landing.auth.tabLogin')}</TabsTrigger>
+            <TabsTrigger value="register" data-testid="tab-register">{t('landing.auth.tabRegister')}</TabsTrigger>
+            <TabsTrigger value="forgot" data-testid="tab-forgot">{t('landing.auth.tabPassword')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login">
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
                 <FormField control={loginForm.control} name="email" render={({ field }) => (
-                  <FormItem><FormLabel>E-Mail</FormLabel><FormControl>
+                  <FormItem><FormLabel>{t('landing.auth.labelEmail')}</FormLabel><FormControl>
                     <Input type="email" autoComplete="email" data-testid="input-login-email" {...field} />
                   </FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={loginForm.control} name="password" render={({ field }) => (
-                  <FormItem><FormLabel>Passwort</FormLabel><FormControl>
+                  <FormItem><FormLabel>{t('landing.auth.labelPassword')}</FormLabel><FormControl>
                     <Input type="password" autoComplete="current-password" data-testid="input-login-password" {...field} />
                   </FormControl><FormMessage /></FormItem>
                 )} />
                 <Button type="submit" className="w-full" disabled={isSubmitting} data-testid="button-submit-login">
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Einloggen"}
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t('landing.auth.loginButton')}
                 </Button>
               </form>
             </Form>
@@ -169,22 +173,22 @@ function AuthPanel() {
             <Form {...registerForm}>
               <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                 <FormField control={registerForm.control} name="firstName" render={({ field }) => (
-                  <FormItem><FormLabel>Vorname</FormLabel><FormControl>
+                  <FormItem><FormLabel>{t('landing.auth.labelFirstName')}</FormLabel><FormControl>
                     <Input autoComplete="given-name" data-testid="input-register-first-name" {...field} />
                   </FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={registerForm.control} name="lastName" render={({ field }) => (
-                  <FormItem><FormLabel>Nachname optional</FormLabel><FormControl>
+                  <FormItem><FormLabel>{t('landing.auth.labelLastName')}</FormLabel><FormControl>
                     <Input autoComplete="family-name" data-testid="input-register-last-name" {...field} />
                   </FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={registerForm.control} name="email" render={({ field }) => (
-                  <FormItem><FormLabel>E-Mail</FormLabel><FormControl>
+                  <FormItem><FormLabel>{t('landing.auth.labelEmail')}</FormLabel><FormControl>
                     <Input type="email" autoComplete="email" data-testid="input-register-email" {...field} />
                   </FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={registerForm.control} name="password" render={({ field }) => (
-                  <FormItem><FormLabel>Passwort</FormLabel><FormControl>
+                  <FormItem><FormLabel>{t('landing.auth.labelPassword')}</FormLabel><FormControl>
                     <Input type="password" autoComplete="new-password" data-testid="input-register-password" {...field} />
                   </FormControl><FormMessage /></FormItem>
                 )} />
@@ -200,18 +204,18 @@ function AuthPanel() {
                         className="mt-1 h-4 w-4 shrink-0 rounded border border-input accent-primary cursor-pointer"
                       />
                       <label htmlFor="accept-terms-checkbox" className="text-sm text-muted-foreground leading-snug cursor-pointer">
-                        Ich habe die{" "}
-                        <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-foreground underline font-medium hover:text-primary">AGB</a>
-                        {" "}gelesen und akzeptiere sie. Ich habe die{" "}
-                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-foreground underline font-medium hover:text-primary">Datenschutzerklärung</a>
-                        {" "}zur Kenntnis genommen.
+                        {t('landing.auth.termsPrefix')}
+                        <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-foreground underline font-medium hover:text-primary">{t('landing.auth.termsLink')}</a>
+                        {t('landing.auth.termsMiddle')}
+                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-foreground underline font-medium hover:text-primary">{t('landing.auth.privacyLink')}</a>
+                        {t('landing.auth.termsSuffix')}
                       </label>
                     </div>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <Button type="submit" className="w-full" disabled={isSubmitting} data-testid="button-submit-register">
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><UserPlus className="h-4 w-4 mr-1" />Konto erstellen</>}
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><UserPlus className="h-4 w-4 mr-1" />{t('landing.auth.createAccountButton')}</>}
                 </Button>
               </form>
             </Form>
@@ -221,12 +225,12 @@ function AuthPanel() {
             <Form {...forgotForm}>
               <form onSubmit={forgotForm.handleSubmit(onForgot)} className="space-y-4">
                 <FormField control={forgotForm.control} name="email" render={({ field }) => (
-                  <FormItem><FormLabel>E-Mail</FormLabel><FormControl>
+                  <FormItem><FormLabel>{t('landing.auth.labelEmail')}</FormLabel><FormControl>
                     <Input type="email" autoComplete="email" data-testid="input-forgot-email" {...field} />
                   </FormControl><FormMessage /></FormItem>
                 )} />
                 <Button type="submit" className="w-full" disabled={isSubmitting} data-testid="button-submit-forgot">
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset-Link senden"}
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t('landing.auth.resetLinkButton')}
                 </Button>
               </form>
             </Form>
@@ -236,12 +240,12 @@ function AuthPanel() {
             <Form {...resetForm}>
               <form onSubmit={resetForm.handleSubmit(onReset)} className="space-y-4">
                 <FormField control={resetForm.control} name="password" render={({ field }) => (
-                  <FormItem><FormLabel>Neues Passwort</FormLabel><FormControl>
+                  <FormItem><FormLabel>{t('landing.auth.newPassword')}</FormLabel><FormControl>
                     <Input type="password" autoComplete="new-password" data-testid="input-reset-password" {...field} />
                   </FormControl><FormMessage /></FormItem>
                 )} />
                 <Button type="submit" className="w-full" disabled={isSubmitting || !resetToken} data-testid="button-submit-reset">
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Passwort speichern"}
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t('landing.auth.savePassword')}
                 </Button>
               </form>
             </Form>
@@ -252,7 +256,7 @@ function AuthPanel() {
   );
 }
 
-// ─── Design tokens (scoped — do not bleed into the rest of the app) ───────────
+// ─── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
   bg:        "rgb(16, 20, 34)",
   bgCard:    "rgb(22, 28, 46)",
@@ -327,6 +331,23 @@ export default function Landing() {
     );
   }
 
+  const steps = [
+    { icon: <Gamepad2 style={{ width: 28, height: 28, color: C.blue }} />, glow: C.blue, title: t('landing.features.step1Title'), desc: t('landing.features.step1Desc') },
+    { icon: <CheckCircle2 style={{ width: 28, height: 28, color: C.orange }} />, glow: C.orange, title: t('landing.features.step2Title'), desc: t('landing.features.step2Desc') },
+    { icon: <Gift style={{ width: 28, height: 28, color: C.yellow }} />, glow: C.yellow, title: t('landing.features.step3Title'), desc: t('landing.features.step3Desc') },
+  ];
+
+  const testimonials = [
+    { text: t('landing.testimonials.text1'), name: t('landing.testimonials.name1'), role: t('landing.testimonials.role1'), seed: "sarah" },
+    { text: t('landing.testimonials.text2'), name: t('landing.testimonials.name2'), role: t('landing.testimonials.role2'), seed: "mike" },
+  ];
+
+  const kidsFeatures = [
+    t('landing.kids.feature1'),
+    t('landing.kids.feature2'),
+    t('landing.kids.feature3'),
+  ];
+
   return (
     <div style={{ background: C.bg, color: C.fg, fontFamily: "'Nunito', sans-serif" }}>
       <style>{floatKeyframes}</style>
@@ -346,7 +367,7 @@ export default function Landing() {
             <Link href="/link-device">
               <Button variant="ghost" size="sm" style={{ color: C.fgMuted }}>
                 <Smartphone className="h-4 w-4 mr-1" />
-                Gerät verbinden
+                {t('landing.nav.connectDevice')}
               </Button>
             </Link>
           </div>
@@ -361,12 +382,12 @@ export default function Landing() {
           <div style={{ textAlign: "center" }} className="lg:text-left">
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 999, background: C.bgCard, border: `1px solid ${C.border}`, marginBottom: 28, color: C.fgMuted, fontSize: "0.875rem", fontWeight: 700 }}>
               <Sparkles style={{ width: 14, height: 14, color: C.yellow }} />
-              Haushalt-Chaos? Nicht mehr.
+              {t('landing.hero.badge')}
             </div>
             <h1 className="hk-display" data-testid="text-hero-title" style={{ fontSize: "clamp(2.8rem, 6vw, 4.75rem)", fontWeight: 800, lineHeight: 1.08, marginBottom: "1.5rem" }}>
-              <span style={{ color: C.fg }}>Starke Kinder<br />erziehen.</span>
+              <span style={{ color: C.fg }}>{t('landing.hero.title1')}</span>
               <br />
-              <span style={{ color: C.orange }}>Ohne das ewige Nörgeln.</span>
+              <span style={{ color: C.orange }}>{t('landing.hero.title2')}</span>
             </h1>
             <p style={{ fontSize: "1.1rem", color: C.fgMuted, marginBottom: "2rem", maxWidth: 460, lineHeight: 1.7 }} data-testid="text-hero-subtitle">
               {t('landing.heroSubtitle')}
@@ -376,13 +397,13 @@ export default function Landing() {
                 onClick={() => document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth" })}
                 style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 2rem", height: 52, borderRadius: 999, background: C.orange, color: "#fff", fontWeight: 800, fontSize: "1rem", border: "none", cursor: "pointer", boxShadow: `0 8px 24px -8px ${C.orange}88` }}
               >
-                Kostenlos starten <ArrowRight style={{ width: 18, height: 18 }} />
+                {t('landing.hero.ctaPrimary')} <ArrowRight style={{ width: 18, height: 18 }} />
               </button>
               <button
                 onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
                 style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 1.5rem", height: 52, borderRadius: 999, background: "transparent", color: C.fg, fontWeight: 700, fontSize: "1rem", border: `1px solid ${C.border}`, cursor: "pointer" }}
               >
-                <Play style={{ width: 14, height: 14, fill: C.fg }} /> So funktionierts
+                <Play style={{ width: 14, height: 14, fill: C.fg }} /> {t('landing.hero.ctaSecondary')}
               </button>
             </div>
             <div style={{ marginTop: "1.75rem", display: "flex", alignItems: "center", gap: 10, justifyContent: "center", fontSize: "0.875rem", color: C.fgMuted, fontWeight: 600 }} className="lg:justify-start">
@@ -393,18 +414,17 @@ export default function Landing() {
                   </div>
                 ))}
               </div>
-              Bereits von 10.000+ Familien geliebt
+              {t('landing.hero.socialProof')}
             </div>
           </div>
 
           {/* Right: floating image with badges */}
           <div className="hk-float" style={{ position: "relative", display: "flex", justifyContent: "center" }}>
-            {/* glow behind image */}
             <div style={{ position: "absolute", inset: "10%", background: `radial-gradient(circle, ${C.orange}30 0%, transparent 70%)`, borderRadius: "2rem", filter: "blur(32px)" }} />
             <div style={{ position: "relative", width: "100%", maxWidth: "500px" }}>
               <img
                 src="/images/herokids-hero.png"
-                alt="Glückliche Familie beim High-Five"
+                alt={t('landing.hero.title1')}
                 style={{ width: "100%", borderRadius: "1.5rem", display: "block", boxShadow: `0 24px 60px -16px rgba(0,0,0,0.5)` }}
               />
               {/* Badge: Completed task */}
@@ -413,8 +433,8 @@ export default function Landing() {
                   <CheckCircle2 style={{ width: 18, height: 18, color: "#fff" }} />
                 </div>
                 <div>
-                  <div style={{ fontSize: "0.65rem", fontWeight: 700, color: "rgb(34,197,94)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Erledigt</div>
-                  <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.fg }}>Zimmer aufgeräumt!</div>
+                  <div style={{ fontSize: "0.65rem", fontWeight: 700, color: "rgb(34,197,94)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t('landing.hero.done')}</div>
+                  <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.fg }}>{t('landing.hero.roomCleaned')}</div>
                 </div>
               </div>
               {/* Badge: Points earned */}
@@ -424,7 +444,7 @@ export default function Landing() {
                 </div>
                 <div>
                   <div style={{ fontSize: "1.1rem", fontWeight: 800, color: C.fg, fontFamily: "Fredoka, sans-serif" }}>+50</div>
-                  <div style={{ fontSize: "0.65rem", fontWeight: 700, color: C.fgMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Punkte verdient</div>
+                  <div style={{ fontSize: "0.65rem", fontWeight: 700, color: C.fgMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t('landing.hero.pointsEarned')}</div>
                 </div>
               </div>
             </div>
@@ -446,14 +466,10 @@ export default function Landing() {
             <h2 className="hk-display" style={{ fontSize: "clamp(1.8rem, 4vw, 2.75rem)", fontWeight: 800, marginBottom: "0.75rem" }} data-testid="text-features-title">
               {t('landing.howItWorks')}
             </h2>
-            <p style={{ color: C.fgMuted, fontSize: "1.1rem" }}>In wenigen Minuten eingerichtet. Die Magie passiert sofort.</p>
+            <p style={{ color: C.fgMuted, fontSize: "1.1rem" }}>{t('landing.features.subtitle')}</p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.5rem" }}>
-            {[
-              { icon: <Gamepad2 style={{ width: 28, height: 28, color: C.blue }} />, glow: C.blue, title: "1. Aufgaben festlegen", desc: "Haushaltsaufgaben, Routinen oder Sonderaktionen — mit individuellen Punkten je nach Schwierigkeit." },
-              { icon: <CheckCircle2 style={{ width: 28, height: 28, color: C.orange }} />, glow: C.orange, title: "2. Kinder legen los", desc: "Die Kinder erledigen Aufgaben in ihrer eigenen, spielerischen App-Oberfläche." },
-              { icon: <Gift style={{ width: 28, height: 28, color: C.yellow }} />, glow: C.yellow, title: "3. Belohnungen freischalten", desc: "Punkte werden zu echten Belohnungen: Bildschirmzeit, Taschengeld oder Familien-Kinoabend." },
-            ].map((step, i) => (
+            {steps.map((step, i) => (
               <div key={i} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: "2rem", transition: "transform 0.2s" }}
                 onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.02)")}
                 onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
@@ -474,20 +490,20 @@ export default function Landing() {
         <div style={{ maxWidth: 1152, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "4rem", alignItems: "center" }}>
           <div style={{ position: "relative" }}>
             <div style={{ position: "absolute", inset: 0, background: `${C.yellow}10`, borderRadius: "3rem", transform: "rotate(-2deg)" }} />
-            <img src="/images/herokids-rewards.png" alt="App Vorschau" className="hk-float2" style={{ position: "relative", width: "100%", borderRadius: "1.75rem", border: `2px solid ${C.border}`, boxShadow: `0 24px 60px -16px ${C.yellow}30` }} />
+            <img src="/images/herokids-rewards.png" alt={t('landing.kids.title')} className="hk-float2" style={{ position: "relative", width: "100%", borderRadius: "1.75rem", border: `2px solid ${C.border}`, boxShadow: `0 24px 60px -16px ${C.yellow}30` }} />
           </div>
           <div>
             <div style={{ width: 52, height: 52, borderRadius: 14, background: `${C.yellow}20`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.25rem" }}>
               <Star style={{ width: 28, height: 28, color: C.yellow, fill: C.yellow }} />
             </div>
             <h2 className="hk-display" style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 800, marginBottom: "1rem", lineHeight: 1.2 }}>
-              Gebaut für kleine Hände und große Fantasie.
+              {t('landing.kids.title')}
             </h2>
             <p style={{ color: C.fgMuted, fontSize: "1.1rem", marginBottom: "1.5rem", lineHeight: 1.65 }}>
-              Die Kinder-Oberfläche fühlt sich nicht wie eine Aufgabenliste an — sondern wie ein Spiel. Mit Animationen, Fortschrittsbalken und Belohnungen werden die Kinder von selbst aktiv.
+              {t('landing.kids.desc')}
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-              {["Visuelles Fortschritts-Tracking", "Coole Achievement-Abzeichen", "Anpassbare Avatare & Skins"].map((item, i) => (
+              {kidsFeatures.map((item, i) => (
                 <li key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 700, fontSize: "1.05rem" }}>
                   <CheckCircle2 style={{ width: 22, height: 22, color: C.orange, flexShrink: 0 }} />
                   {item}
@@ -507,21 +523,21 @@ export default function Landing() {
               <Shield style={{ width: 28, height: 28, color: C.fg }} />
             </div>
             <h2 className="hk-display" style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 800, marginBottom: "1rem", lineHeight: 1.2 }}>
-              Deine Familien-Kommandozentrale.
+              {t('landing.parents.title')}
             </h2>
             <p style={{ color: C.fgMuted, fontSize: "1.1rem", marginBottom: "1.75rem", lineHeight: 1.65 }}>
-              Aufgaben genehmigen, Belohnungen festlegen und den Fortschritt aller Familienmitglieder im Blick behalten — alles in deinem eigenen Eltern-Dashboard. Volle Kontrolle, null Stress.
+              {t('landing.parents.desc')}
             </p>
             <button
               onClick={() => document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth" })}
               style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 1.75rem", height: 48, borderRadius: 999, background: C.bg, color: C.fg, fontWeight: 700, border: `1px solid ${C.border}`, cursor: "pointer", fontSize: "1rem" }}
             >
-              Eltern-Features entdecken <ArrowRight style={{ width: 16, height: 16 }} />
+              {t('landing.parents.cta')} <ArrowRight style={{ width: 16, height: 16 }} />
             </button>
           </div>
           <div style={{ position: "relative" }}>
             <div style={{ position: "absolute", inset: 0, background: `${C.orange}08`, borderRadius: "2.5rem", transform: "rotate(2deg)" }} />
-            <img src="/images/herokids-mascot.png" alt="Eltern Dashboard" className="hk-float" style={{ position: "relative", width: "100%", borderRadius: "1.75rem", border: `2px solid ${C.border}22`, boxShadow: `0 32px 80px -24px ${C.orange}28` }} />
+            <img src="/images/herokids-mascot.png" alt={t('landing.parents.title')} className="hk-float" style={{ position: "relative", width: "100%", borderRadius: "1.75rem", border: `2px solid ${C.border}22`, boxShadow: `0 32px 80px -24px ${C.orange}28` }} />
           </div>
         </div>
       </section>
@@ -536,22 +552,19 @@ export default function Landing() {
             </h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
-            {[
-              { text: '"Mein 8-Jähriger hat mich gefragt, ob er noch mehr Aufgaben machen kann. Diese App ist echte Magie."', name: "Sarah J.", role: "Mama von 2 Kindern", seed: "sarah" },
-              { text: '"Wir haben uns jeden Abend wegen Aufräumen gestritten. Jetzt wetteifern sie, wer die Filmauswahl fürs Wochenende bekommt."', name: "Mike R.", role: "Papa von 3 Kindern", seed: "mike" },
-            ].map((t, i) => (
+            {testimonials.map((item, i) => (
               <div key={i} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: "2rem" }}>
                 <div style={{ display: "flex", marginBottom: "1rem" }}>
                   {[1,2,3,4,5].map(s => <Star key={s} style={{ width: 18, height: 18, color: C.yellow, fill: C.yellow }} />)}
                 </div>
-                <p style={{ color: "rgb(200, 210, 235)", fontSize: "1.05rem", fontStyle: "italic", lineHeight: 1.65, marginBottom: "1.25rem" }}>{t.text}</p>
+                <p style={{ color: "rgb(200, 210, 235)", fontSize: "1.05rem", fontStyle: "italic", lineHeight: 1.65, marginBottom: "1.25rem" }}>{item.text}</p>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", background: C.bgSection }}>
-                    <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${t.seed}&backgroundColor=b6e3f4`} alt={t.name} style={{ width: "100%", height: "100%" }} />
+                    <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${item.seed}&backgroundColor=b6e3f4`} alt={item.name} style={{ width: "100%", height: "100%" }} />
                   </div>
                   <div>
-                    <p style={{ fontWeight: 700, fontSize: "0.95rem" }}>{t.name}</p>
-                    <p style={{ color: C.fgMuted, fontSize: "0.85rem" }}>{t.role}</p>
+                    <p style={{ fontWeight: 700, fontSize: "0.95rem" }}>{item.name}</p>
+                    <p style={{ color: C.fgMuted, fontSize: "0.85rem" }}>{item.role}</p>
                   </div>
                 </div>
               </div>
@@ -574,9 +587,9 @@ export default function Landing() {
             onClick={() => document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth" })}
             style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 2.5rem", height: 56, borderRadius: 999, background: C.bg, color: C.fg, fontWeight: 800, fontSize: "1.1rem", border: "none", cursor: "pointer", boxShadow: "0 12px 32px -8px rgba(0,0,0,0.5)" }}
           >
-            Kostenlos 14 Tage testen
+            {t('landing.cta.button')}
           </button>
-          <p style={{ color: "rgba(255,255,255,0.55)", marginTop: "0.75rem", fontSize: "0.875rem" }}>Keine Kreditkarte nötig</p>
+          <p style={{ color: "rgba(255,255,255,0.55)", marginTop: "0.75rem", fontSize: "0.875rem" }}>{t('landing.cta.noCreditCard')}</p>
         </div>
       </section>
 
@@ -587,10 +600,10 @@ export default function Landing() {
             <img src={logoUrl} alt="HeroKids" style={{ width: 28, height: 28, borderRadius: 6 }} />
             <span className="hk-display" style={{ fontWeight: 700, color: C.fg }}>HeroKids</span>
           </div>
-          <p>© {new Date().getFullYear()} HeroKids Inc. Alle Rechte vorbehalten.</p>
+          <p>© {new Date().getFullYear()} HeroKids Inc. {t('landing.footer.rights')}</p>
           <div style={{ display: "flex", gap: "1.5rem" }}>
-            <Link href="/privacy" style={{ color: C.fgMuted, textDecoration: "none" }}>Datenschutz</Link>
-            <Link href="/impressum" style={{ color: C.fgMuted, textDecoration: "none" }}>Impressum</Link>
+            <Link href="/privacy" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.privacy')}</Link>
+            <Link href="/impressum" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.imprint')}</Link>
           </div>
         </div>
       </footer>
