@@ -1413,6 +1413,12 @@ export default function Dashboard() {
                                   data-testid={`button-edit-task-${task.id}`}>
                                   <Pencil className="h-4 w-4" />
                                 </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                                  onClick={(e) => { e.stopPropagation(); deleteTaskMutation.mutate(task.id); }}
+                                  disabled={deleteTaskMutation.isPending}
+                                  data-testid={`button-delete-task-${task.id}`}>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </div>
                             )}
                           </div>
