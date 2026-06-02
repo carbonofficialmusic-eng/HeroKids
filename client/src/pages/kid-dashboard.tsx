@@ -2157,7 +2157,7 @@ export default function KidDashboard() {
                   className="flex-shrink-0 rounded-full cursor-pointer hover-elevate"
                   data-testid="button-avatar-profile-large-kid"
                 >
-                  <Avatar className="h-20 w-20 border-4 border-primary shadow-lg">
+                  <Avatar className="h-20 w-20 shadow-lg" style={{ borderWidth: "4px", borderStyle: "solid", borderColor: member.color }}>
                     <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} />
                     <AvatarFallback style={{ backgroundColor: member.color }} className="text-3xl font-bold text-white">
                       {member.displayName[0]}
