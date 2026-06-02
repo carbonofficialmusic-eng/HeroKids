@@ -1869,8 +1869,9 @@ export default function KidDashboard() {
       return false;
     }
     
-    // Shopping list tasks with approval: stay visible on all profiles until explicitly approved
-    if ((t as any).isShoppingList && t.requiresApproval && t.recurrence === "none") {
+    // One-time tasks with approval: stay visible (yellow pending state) until parent approves
+    // One-time tasks without approval disappear immediately (task status becomes "completed" on backend)
+    if (t.recurrence === "none" && t.requiresApproval && t.memberHasCompleted) {
       return t.memberCompletionStatus !== "approved";
     }
 
