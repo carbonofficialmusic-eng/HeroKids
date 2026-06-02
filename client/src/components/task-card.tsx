@@ -366,8 +366,8 @@ export function TaskCard({
               </PopoverContent>
             </Popover>
 
-            {/* Complete button */}
-            {onComplete && (
+            {/* Complete button — hidden for shopping list tasks (they complete via item-checking) */}
+            {onComplete && !(task as any).isShoppingList && (
               isSharedTaskNotAssigned ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -717,8 +717,8 @@ export function TaskCard({
             </div>
           </div>
 
-          {/* Compact complete button on right */}
-          {onComplete && (
+          {/* Compact complete button — hidden for shopping list tasks */}
+          {onComplete && !(task as any).isShoppingList && (
             isSharedTaskNotAssigned ? (
               <Tooltip>
                 <TooltipTrigger asChild>

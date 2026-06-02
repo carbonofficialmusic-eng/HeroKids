@@ -288,7 +288,12 @@ export function TaskDialog({
       !shoppingItemsInitialized.current
     ) {
       shoppingItemsInitialized.current = true;
-      setShoppingItems(editingShoppingItems.map((item: any) => ({ text: item.text })));
+      // Only load unchecked items for editing — checked items are "in progress" and must not be re-submitted
+      setShoppingItems(
+        editingShoppingItems
+          .filter((item: any) => !item.completedAt)
+          .map((item: any) => ({ text: item.text }))
+      );
     }
   }, [open, editingTask, editingShoppingItems]);
 

@@ -2642,6 +2642,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (task.status !== "active") {
         return res.status(422).json({ message: "Validation failed: Task is not active" });
       }
+
+      // Shopping list tasks complete via item-checking — block the generic complete button
+      if (task.isShoppingList) {
+        return res.status(400).json({
+          message: "Shopping list tasks complete automatically when all items are checked",
+          code: "SHOPPING_LIST_TASK",
+        });
+      }
       
       // Due date validation for one-time tasks with a due date
       if (task.dueDate && task.recurrence === "none") {
@@ -3064,6 +3072,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (allNowApproved) {
             await storage.deleteTaskCompletionsByTask(task.id);
           }
+        }
+      }
+
+      // For shopping list tasks: finalize task only when ALL contributors' completions are approved.
+      // (Pending completions were created per-contributor when all items were checked.)
+      if (task?.isShoppingList && task.recurrence === "none") {
+        const shoppingCompletions = await storage.getTaskCompletionsByTask(task.id);
+        const stillPending = shoppingCompletions.some((c: any) => c.status === "pending");
+        if (!stillPending && shoppingCompletions.length > 0) {
+          await storage.updateTaskStatus(task.id, "completed");
+          broadcastToFamily(member.familyName, {
+            type: "shopping_list_completed",
+            taskId: task.id,
+            task: { ...task, status: "completed" },
+          });
         }
       }
 
