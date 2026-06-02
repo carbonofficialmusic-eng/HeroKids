@@ -44,6 +44,10 @@ export interface TierConfig {
     rewardRequests: boolean;
     taskComments: boolean;
     
+    // Communication & list features
+    pinboard: boolean;
+    shoppingList: boolean;
+    
     // Skin system
     maxSkins: number; // Maximum skins that can be unlocked
   };
@@ -75,6 +79,10 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
       deviceLinking: false,
       achievements: false,
       pushNotifications: false,
+      
+      // Communication & list features
+      pinboard: true,
+      shoppingList: false,
       
       // Legacy features
       taskTemplates: false,
@@ -110,6 +118,10 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
       achievements: true,
       pushNotifications: true,
       
+      // Communication & list features
+      pinboard: true,
+      shoppingList: true,
+      
       // Legacy features
       taskTemplates: true,
       advancedAnalytics: true,
@@ -144,6 +156,10 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
       deviceLinking: true,
       achievements: true,
       pushNotifications: true,
+      
+      // Communication & list features
+      pinboard: true,
+      shoppingList: true,
       
       // Legacy features
       taskTemplates: true,

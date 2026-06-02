@@ -2155,13 +2155,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parsed = insertTaskSchema.parse(req.body);
       
       // Gate: task assignment to specific members requires Family tier or higher
-      if (parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) {
+      // Gate: shopping list tasks require Family tier or higher
+      if ((parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) || parsed.isShoppingList) {
         const family = await storage.getFamily(member.familyName);
-        if (!family || family.subscriptionTier === "free") {
-          return res.status(403).json({
-            message: "Task assignment requires Family subscription or higher",
-            code: "TIER_REQUIRED",
-          });
+        if (parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) {
+          if (!family || family.subscriptionTier === "free") {
+            return res.status(403).json({
+              message: "Task assignment requires Family subscription or higher",
+              code: "TIER_REQUIRED",
+            });
+          }
+        }
+        if (parsed.isShoppingList) {
+          if (!family || !hasFeature(family.subscriptionTier as SubscriptionTier, "shoppingList")) {
+            return res.status(403).json({
+              message: "Shopping list tasks require a Family subscription or higher",
+              code: "TIER_REQUIRED",
+              feature: "shoppingList",
+            });
+          }
         }
       }
       
@@ -2230,14 +2242,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse and update the task
       const parsed = insertTaskSchema.partial().parse(req.body);
       
-      // Gate: task assignment to specific members requires Family tier or higher
-      if (parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) {
+      // Gate: task assignment / shopping list requires Family tier or higher
+      if ((parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) || parsed.isShoppingList) {
         const family = await storage.getFamily(member.familyName);
-        if (!family || family.subscriptionTier === "free") {
-          return res.status(403).json({
-            message: "Task assignment requires Family subscription or higher",
-            code: "TIER_REQUIRED",
-          });
+        if (parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) {
+          if (!family || family.subscriptionTier === "free") {
+            return res.status(403).json({
+              message: "Task assignment requires Family subscription or higher",
+              code: "TIER_REQUIRED",
+            });
+          }
+        }
+        if (parsed.isShoppingList) {
+          if (!family || !hasFeature(family.subscriptionTier as SubscriptionTier, "shoppingList")) {
+            return res.status(403).json({
+              message: "Shopping list tasks require a Family subscription or higher",
+              code: "TIER_REQUIRED",
+              feature: "shoppingList",
+            });
+          }
         }
       }
       

@@ -114,6 +114,7 @@ export function TaskDialog({
   categoryNames,
 }: TaskDialogProps) {
   const canAssignMembers = subscriptionTier !== "free";
+  const canUseShoppingList = subscriptionTier !== "free";
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -888,21 +889,31 @@ export function TaskDialog({
             {/* Shopping List Toggle - only for one-time tasks */}
             {recurrenceMode === "standard" && form.watch("recurrence") === "none" && (
               <div className="space-y-3">
-                <div className="flex items-center justify-between rounded-lg border p-4">
+                <div className={`flex items-center justify-between rounded-lg border p-4 ${!canUseShoppingList ? "opacity-60" : ""}`}>
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <ShoppingCart className="h-4 w-4 text-primary" />
                       <FormLabel className="text-base cursor-pointer">
                         {t('tasks.shoppingList', { defaultValue: 'Einkaufsliste' })}
                       </FormLabel>
+                      {!canUseShoppingList && (
+                        <Badge variant="secondary" className="text-xs gap-1">
+                          <Lock className="w-3 h-3" />
+                          Family
+                        </Badge>
+                      )}
                     </div>
                     <FormDescription>
-                      {t('tasks.shoppingListDesc', { defaultValue: 'Artikel können von allen Familienmitgliedern abgehakt werden. Punkte werden aufgeteilt.' })}
+                      {canUseShoppingList
+                        ? t('tasks.shoppingListDesc', { defaultValue: 'Artikel können von allen Familienmitgliedern abgehakt werden. Punkte werden aufgeteilt.' })
+                        : t('tasks.shoppingListLockedDesc', { defaultValue: 'Upgrade auf Family, um Einkaufslisten-Aufgaben zu erstellen.' })}
                     </FormDescription>
                   </div>
                   <Switch
                     checked={isShoppingList}
+                    disabled={!canUseShoppingList}
                     onCheckedChange={(checked) => {
+                      if (!canUseShoppingList) return;
                       setIsShoppingList(checked);
                       if (checked) {
                         form.setValue("iconEmoji", "🛒");
