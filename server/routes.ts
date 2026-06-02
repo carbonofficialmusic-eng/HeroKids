@@ -2353,6 +2353,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Shopping list: bulk update items (parent only — add/remove/reorder unchecked items)
+  app.patch("/api/tasks/:taskId/shopping-items", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const { member } = result;
+      const { taskId } = req.params;
+
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can edit shopping list items" });
+      }
+
+      const task = await storage.getTask(taskId);
+      if (!task) return res.status(404).json({ message: "Task not found" });
+      if (task.familyName !== member.familyName) return res.status(403).json({ message: "Forbidden" });
+      if (!task.isShoppingList) return res.status(400).json({ message: "Task is not a shopping list" });
+
+      const rawItems = req.body.items;
+      if (!Array.isArray(rawItems)) {
+        return res.status(400).json({ message: "items must be an array" });
+      }
+
+      const validItems = rawItems
+        .filter((item: any) => item && typeof item.text === "string" && item.text.trim())
+        .map((item: any, idx: number) => ({
+          taskId,
+          text: item.text.trim(),
+          sortOrder: item.sortOrder ?? idx,
+          completedByMemberId: null,
+          completedAt: null,
+        }));
+
+      const updatedItems = await storage.replaceShoppingListItems(taskId, validItems);
+
+      broadcastToFamily(member.familyName, {
+        type: "shopping_items_updated",
+        taskId,
+        items: updatedItems,
+      });
+
+      res.json(updatedItems);
+    } catch (error: any) {
+      console.error("Error updating shopping items:", error);
+      res.status(500).json({ message: "Failed to update shopping items" });
+    }
+  });
+
   // Shopping list: toggle an item (check/uncheck)
   app.patch("/api/shopping-items/:itemId/toggle", isAuthenticated, async (req: any, res) => {
     try {

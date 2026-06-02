@@ -46,7 +46,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Sparkles, RotateCcw, CalendarIcon, X, Lock, Plus, ShoppingCart } from "lucide-react";
+import { Sparkles, RotateCcw, CalendarIcon, X, Lock, Plus, ShoppingCart, Check, ChevronUp, ChevronDown } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getDevHeaders } from "@/lib/queryClient";
 import { Calendar } from "@/components/ui/calendar";
@@ -297,7 +297,14 @@ export function TaskDialog({
     }
   }, [open, editingTask, editingShoppingItems]);
 
-  const handleSubmit = (data: TaskFormData) => {
+  const updateItemsMutation = useMutation({
+    mutationFn: async (items: { text: string; sortOrder: number }[]) => {
+      const res = await apiRequest("PATCH", `/api/tasks/${editingTask!.id}/shopping-items`, { items });
+      return res.json();
+    },
+  });
+
+  const handleSubmit = async (data: TaskFormData) => {
     const submitData: any = { ...data };
     if (recurrenceMode === "immediate") {
       submitData.recurrence = "immediate";
@@ -329,10 +336,19 @@ export function TaskDialog({
     const alreadyShoppingList = editingTask && (editingTask as any).isShoppingList;
     if (canBeShoppingList && isShoppingList && (shoppingItems.length > 0 || alreadyShoppingList)) {
       submitData.isShoppingList = true;
-      submitData.shoppingItems = shoppingItems.map((item, idx) => ({
-        text: item.text,
-        sortOrder: idx,
-      }));
+      if (alreadyShoppingList) {
+        // Editing existing shopping list: update items via dedicated PATCH endpoint
+        await updateItemsMutation.mutateAsync(
+          shoppingItems.map((item, idx) => ({ text: item.text, sortOrder: idx }))
+        );
+        // Don't pass shoppingItems through PUT to avoid double-processing
+        submitData.shoppingItems = undefined;
+      } else {
+        submitData.shoppingItems = shoppingItems.map((item, idx) => ({
+          text: item.text,
+          sortOrder: idx,
+        }));
+      }
     } else {
       submitData.isShoppingList = false;
       submitData.shoppingItems = [];
@@ -896,11 +912,62 @@ export function TaskDialog({
                   <div className="rounded-lg border p-4 space-y-3">
                     <p className="text-sm font-medium text-muted-foreground">
                       {t('tasks.shoppingItems', { defaultValue: 'Artikel' })}
-                      {shoppingItems.length > 0 && ` (${shoppingItems.length})`}
+                      {(shoppingItems.length + (editingShoppingItems?.filter((i: any) => i.completedAt).length ?? 0)) > 0 && ` (${shoppingItems.length + (editingShoppingItems?.filter((i: any) => i.completedAt).length ?? 0)})`}
                     </p>
+
+                    {/* Checked items — read-only */}
+                    {editingTask && (editingShoppingItems?.filter((i: any) => i.completedAt) ?? []).length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs text-muted-foreground">{t('tasks.shoppingCheckedItems', { defaultValue: 'Already checked (read-only)' })}</p>
+                        {(editingShoppingItems?.filter((i: any) => i.completedAt) ?? []).map((item: any) => (
+                          <div key={item.id} className="flex items-center gap-2 opacity-60">
+                            <div className="flex items-center justify-center h-5 w-5 rounded-full bg-primary/20 shrink-0">
+                              <Check className="h-3 w-3 text-primary" />
+                            </div>
+                            <div className="flex-1 text-sm border rounded-md px-3 py-2 bg-muted/20 line-through text-muted-foreground">
+                              {item.text}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Unchecked items — editable with reorder controls */}
                     <div className="space-y-2">
                       {shoppingItems.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
+                        <div key={idx} className="flex items-center gap-1">
+                          <div className="flex flex-col gap-0.5">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5"
+                              disabled={idx === 0}
+                              onClick={() => setShoppingItems(prev => {
+                                const next = [...prev];
+                                [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+                                return next;
+                              })}
+                              data-testid={`button-move-up-${idx}`}
+                            >
+                              <ChevronUp className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5"
+                              disabled={idx === shoppingItems.length - 1}
+                              onClick={() => setShoppingItems(prev => {
+                                const next = [...prev];
+                                [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+                                return next;
+                              })}
+                              data-testid={`button-move-down-${idx}`}
+                            >
+                              <ChevronDown className="h-3 w-3" />
+                            </Button>
+                          </div>
                           <div className="flex-1 text-sm border rounded-md px-3 py-2 bg-muted/30">
                             {item.text}
                           </div>
