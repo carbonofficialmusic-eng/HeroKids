@@ -81,8 +81,25 @@ function ShoppingListSection({ taskId, onClick }: { taskId: string | number; onC
       const res = await apiRequest("PATCH", `/api/shopping-items/${itemId}/toggle`);
       return res.json();
     },
+    onMutate: async (itemId: number) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/tasks", taskId, "shopping-items"] });
+      const previous = queryClient.getQueryData<any[]>(["/api/tasks", taskId, "shopping-items"]);
+      queryClient.setQueryData(["/api/tasks", taskId, "shopping-items"], (old: any[] = []) =>
+        old.map((item) =>
+          item.id === itemId
+            ? { ...item, completedAt: item.completedAt ? null : new Date().toISOString() }
+            : item
+        )
+      );
+      return { previous };
+    },
+    onError: (_err: any, _itemId: any, context: any) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["/api/tasks", taskId, "shopping-items"], context.previous);
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks", taskId, "shopping-items"] });
+      queryClient.refetchQueries({ queryKey: ["/api/tasks", taskId, "shopping-items"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
     },

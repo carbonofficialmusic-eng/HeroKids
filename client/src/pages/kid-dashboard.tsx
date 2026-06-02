@@ -454,8 +454,25 @@ function KidShoppingListSection({ taskId }: { taskId: string | number }) {
       const res = await apiRequest("PATCH", `/api/shopping-items/${itemId}/toggle`);
       return res.json();
     },
+    onMutate: async (itemId: number) => {
+      await queryClient_local.cancelQueries({ queryKey: ["/api/tasks", taskId, "shopping-items"] });
+      const previous = queryClient_local.getQueryData<any[]>(["/api/tasks", taskId, "shopping-items"]);
+      queryClient_local.setQueryData(["/api/tasks", taskId, "shopping-items"], (old: any[] = []) =>
+        old.map((item) =>
+          item.id === itemId
+            ? { ...item, completedAt: item.completedAt ? null : new Date().toISOString() }
+            : item
+        )
+      );
+      return { previous };
+    },
+    onError: (_err: any, _itemId: any, context: any) => {
+      if (context?.previous) {
+        queryClient_local.setQueryData(["/api/tasks", taskId, "shopping-items"], context.previous);
+      }
+    },
     onSuccess: () => {
-      queryClient_local.invalidateQueries({ queryKey: ["/api/tasks", taskId, "shopping-items"] });
+      queryClient_local.refetchQueries({ queryKey: ["/api/tasks", taskId, "shopping-items"] });
       queryClient_local.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient_local.invalidateQueries({ queryKey: ["/api/family-members/current"] });
     },

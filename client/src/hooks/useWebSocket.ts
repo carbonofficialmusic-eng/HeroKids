@@ -205,9 +205,9 @@ export function useWebSocket(familyName: string | null) {
 
             case "shopping_item_toggled":
             case "shopping_list_completed":
-              // Invalidate shopping items for the specific task + task list
+              // Force-refetch shopping items immediately for the specific task (push-triggered, not stale-time)
               if (data.taskId) {
-                queryClient.invalidateQueries({ queryKey: ["/api/tasks", data.taskId, "shopping-items"] });
+                queryClient.refetchQueries({ queryKey: ["/api/tasks", data.taskId, "shopping-items"] });
               }
               queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
               queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
