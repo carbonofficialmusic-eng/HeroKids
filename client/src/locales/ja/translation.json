@@ -647,6 +647,7 @@
     "you": "あなた",
     "addMember": "メンバーを追加",
     "accountLinked": "アカウント連携済み",
+    "deviceLinked": "デバイス連携済み（アカウントなし）",
     "noAccountLinked": "アカウントなし",
     "noMembersYet": "まだ家族メンバーがいません。下に最初のメンバーを追加してください。",
     "familyJoinCodeTitle": "家族参加コード",

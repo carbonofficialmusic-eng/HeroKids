@@ -1619,7 +1619,7 @@ export default function Dashboard() {
               <div ref={panelRef} style={stickyStyle} className="space-y-6">
               {/* Pinboard */}
               <div id="pinboard">
-              <Pinboard currentMemberId={member?.id ?? null} isActingAs={member?.id !== realMember?.id && !!member?.userId} />
+              <Pinboard currentMemberId={member?.id ?? null} isActingAs={member?.id !== realMember?.id && (!!member?.userId || !!(member as any)?.hasActiveDeviceSessions)} />
               </div>
               {/* Special Achievement Rewards Section */}
               {specialRewards.length > 0 && (

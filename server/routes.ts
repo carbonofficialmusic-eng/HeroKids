@@ -964,7 +964,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if we're acting as another member
       const actingAsMember = await getValidActingAsMemberFromRequest(req);
       if (actingAsMember) {
-        return res.json(actingAsMember);
+        let hasActiveDeviceSessions = false;
+        if (!actingAsMember.userId) {
+          const sessions = await storage.getActiveDeviceSessionsForMember(actingAsMember.id);
+          hasActiveDeviceSessions = sessions.length > 0;
+        }
+        return res.json({ ...actingAsMember, hasActiveDeviceSessions });
       }
       
       // Device-linked session: fetch fresh data from DB (session member may be stale)
@@ -1173,6 +1178,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Batch-check active device sessions for child members without a web account
+      const childMembersWithoutAccount = members.filter(m => m.role === "child" && !m.userId);
+      const deviceSessionResults = await Promise.all(
+        childMembersWithoutAccount.map(m =>
+          storage.getActiveDeviceSessionsForMember(m.id).then(s => ({ id: m.id, hasActive: s.length > 0 }))
+        )
+      );
+      const deviceSessionMap = new Map(deviceSessionResults.map(r => [r.id, r.hasActive]));
+
       // Compute over-limit members based on tier
       const family = await storage.getFamily(result.member.familyName);
       if (family) {
@@ -1195,6 +1209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...m,
           isOverLimit: overLimitIds.has(m.id),
           accountEmail: isParent && m.userId ? (accountEmails[m.userId] ?? null) : undefined,
+          hasActiveDeviceSessions: deviceSessionMap.get(m.id) ?? false,
         }));
         return res.json(membersWithLimit);
       }
@@ -1202,6 +1217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(members.map(m => ({
         ...m,
         accountEmail: isParent && m.userId ? (accountEmails[m.userId] ?? null) : undefined,
+        hasActiveDeviceSessions: deviceSessionMap.get(m.id) ?? false,
       })));
     } catch (error) {
       console.error("Error fetching family members:", error);

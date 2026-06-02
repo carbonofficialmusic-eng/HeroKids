@@ -677,6 +677,7 @@
     "addMember": "Add Member",
     "linkDevice": "Link Device",
     "accountLinked": "Own account linked",
+    "deviceLinked": "Device linked (no account)",
     "noAccountLinked": "No account linked",
     "noMembersYet": "No family members yet. Add your first member below.",
     "familyJoinCodeTitle": "Family Join Code",

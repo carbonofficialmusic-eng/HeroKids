@@ -647,6 +647,7 @@
     "you": "Tú",
     "addMember": "Agregar Miembro",
     "accountLinked": "Cuenta propia vinculada",
+    "deviceLinked": "Dispositivo vinculado (sin cuenta)",
     "noAccountLinked": "Sin cuenta propia",
     "noMembersYet": "Aún no hay miembros de la familia. Agrega tu primer miembro a continuación.",
     "familyJoinCodeTitle": "Código de Unión Familiar",

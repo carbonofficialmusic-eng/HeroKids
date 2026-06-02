@@ -676,6 +676,7 @@
     "addMember": "Lägg till medlem",
     "linkDevice": "Länka enhet",
     "accountLinked": "Eget konto länkat",
+    "deviceLinked": "Enhet länkad (inget konto)",
     "noAccountLinked": "Inget konto länkat",
     "noMembersYet": "Inga familjemedlemmar ännu. Lägg till din första medlem nedan.",
     "familyJoinCodeTitle": "Familjens anslutningskod",

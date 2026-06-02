@@ -687,6 +687,7 @@
     "addMember": "Mitglied hinzufügen",
     "linkDevice": "Gerät verknüpfen",
     "accountLinked": "Eigenes Konto verknüpft",
+    "deviceLinked": "Gerät verknüpft (kein Konto)",
     "noAccountLinked": "Kein eigenes Konto",
     "noMembersYet": "Noch keine Familienmitglieder. Füge dein erstes Mitglied unten hinzu.",
     "familyJoinCodeTitle": "Familien-Beitrittscode",

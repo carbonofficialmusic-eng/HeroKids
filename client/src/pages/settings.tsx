@@ -580,9 +580,11 @@ export default function Settings() {
                                   ? (familyMember.accountEmail
                                     ? `${t('settings.accountLinked')}: ${familyMember.accountEmail}`
                                     : t('settings.accountLinked'))
-                                  : t('settings.noAccountLinked')}
+                                  : (familyMember as any).hasActiveDeviceSessions
+                                    ? t('settings.deviceLinked')
+                                    : t('settings.noAccountLinked')}
                               >
-                                <Smartphone className={`h-4 w-4 ${familyMember.userId ? 'text-green-500' : 'text-red-500'}`} />
+                                <Smartphone className={`h-4 w-4 ${familyMember.userId ? 'text-green-500' : (familyMember as any).hasActiveDeviceSessions ? 'text-yellow-500' : 'text-red-500'}`} />
                               </Button>
                             ) : (
                               <span

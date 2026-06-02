@@ -2942,7 +2942,7 @@ export default function KidDashboard() {
 
         {/* Pinboard Section — mobile only (desktop version is in right column) */}
         <div id="pinboard" className="lg:hidden">
-          <Pinboard currentMemberId={member?.id ?? null} isActingAs={member?.id !== realMember?.id && !!member?.userId} />
+          <Pinboard currentMemberId={member?.id ?? null} isActingAs={member?.id !== realMember?.id && (!!member?.userId || !!(member as any)?.hasActiveDeviceSessions)} />
         </div>
 
         {/* Leaderboard Section — mobile only (desktop version is in right column) */}
@@ -2974,7 +2974,7 @@ export default function KidDashboard() {
 
       {/* Right column — sticky (desktop only): pinboard + optional leaderboard */}
       <div className="hidden lg:flex lg:col-span-1 flex-col gap-4 self-start sticky top-4">
-        <Pinboard currentMemberId={member?.id ?? null} isActingAs={member?.id !== realMember?.id && !!member?.userId} />
+        <Pinboard currentMemberId={member?.id ?? null} isActingAs={member?.id !== realMember?.id && (!!member?.userId || !!(member as any)?.hasActiveDeviceSessions)} />
         {familyData?.showLeaderboard && (
           <div className="space-y-4">
             {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
