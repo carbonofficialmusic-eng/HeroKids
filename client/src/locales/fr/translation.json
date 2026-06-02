@@ -479,7 +479,8 @@
     "backgroundEnabledDesc": "Le fond du skin est maintenant visible",
     "backgroundDisabledDesc": "Le fond du skin est maintenant masqué",
     "failedToToggleBackground": "Impossible de changer le fond",
-    "cardsAvailable": "cartes disponibles"
+    "cardsAvailable": "cartes disponibles",
+    "nextUnlock": "Prochain déblocage à"
   },
   "skinNames": {
     "junior-champion": "Junior Champion",

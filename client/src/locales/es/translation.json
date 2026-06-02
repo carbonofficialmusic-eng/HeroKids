@@ -479,7 +479,8 @@
     "backgroundEnabledDesc": "El fondo del aspecto ahora es visible",
     "backgroundDisabledDesc": "El fondo del aspecto ahora está oculto",
     "failedToToggleBackground": "No se pudo cambiar el fondo",
-    "cardsAvailable": "tarjetas disponibles"
+    "cardsAvailable": "tarjetas disponibles",
+    "nextUnlock": "Próximo desbloqueo en"
   },
   "skinNames": {
     "junior-champion": "Campeón Junior",

@@ -479,7 +479,8 @@
     "backgroundEnabledDesc": "皮肤背景现在可见",
     "backgroundDisabledDesc": "皮肤背景现在已隐藏",
     "failedToToggleBackground": "无法切换背景",
-    "cardsAvailable": "张可用"
+    "cardsAvailable": "张可用",
+    "nextUnlock": "下一个解锁于"
   },
   "skinNames": {
     "junior-champion": "少年冠军",
