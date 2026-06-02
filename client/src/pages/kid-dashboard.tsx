@@ -726,7 +726,8 @@ function TaskCard({
     statusColor = "text-amber-600 dark:text-amber-400";
   }
 
-  if (compact) {
+  // Shopping list tasks always render non-compact so item-toggle UI is visible
+  if (compact && !(task as any).isShoppingList) {
     const isTransparentState = showAsApproved || allSharedMembersCompleted || showAsPending || showAsSubmitted || isRejected || dueDateInfo.expired;
 
     const borderColor = showAsApproved || allSharedMembersCompleted

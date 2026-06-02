@@ -2384,7 +2384,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allItems = await storage.getShoppingListItems(task.id);
       const allDone = allItems.length > 0 && allItems.every(i => i.completedByMemberId !== null);
 
-      if (allDone) {
+      if (!allDone) {
+        // Item was unchecked — remove any stale pending completions so a fresh set
+        // is created next time all items are done (transactional contributor reconciliation).
+        await storage.deletePendingTaskCompletionsByTask(task.id);
+      } else {
+        // All items are now checked.
+        // Delete stale pending completions first so the contributor set is always current.
+        await storage.deletePendingTaskCompletionsByTask(task.id);
+
         // Collect unique contributors (members who checked at least one item)
         const contributorIds = allItems
           .map(i => i.completedByMemberId!)
