@@ -60,3 +60,15 @@ id = "_Iq149XO9JyTs3-hpe06p"
 uri = "file://artifacts/mockup-sandbox/public/images/herokids-mascot.png"
 type = "image"
 title = "Kid superhero character illustration"
+
+[[generated]]
+id = "xYDwthiD5ENvMRuVFX41C"
+uri = "file://client/public/skins/backgrounds/wave-glider.png"
+type = "image"
+title = "wave-glider-legacy"
+
+[[generated]]
+id = "tK4vuB8lTdiOZvTg4R278"
+uri = "file://client/public/skins/backgrounds/forest-guard.png"
+type = "image"
+title = "forest-guard-legacy"
