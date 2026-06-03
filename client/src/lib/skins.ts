@@ -9,8 +9,11 @@ export function getSkinImageUrl(skinId: string): string {
   return `/skins/avatars/${skinId}.png`;
 }
 
+// Bump this version when background images are updated to bust the immutable cache
+const BACKGROUND_VERSION = 2;
+
 export function getSkinBackgroundUrl(skinId: string): string {
-  return `/skins/backgrounds/${skinId}.png`;
+  return `/skins/backgrounds/${skinId}.png?v=${BACKGROUND_VERSION}`;
 }
 
 // All valid skin IDs — used to check whether a URL exists.
