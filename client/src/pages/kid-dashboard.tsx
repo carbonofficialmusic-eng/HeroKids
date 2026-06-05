@@ -1446,6 +1446,8 @@ export default function KidDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
         title: t("kidDashboard.sharingStarted"),
         description: t("kidDashboard.othersCanJoin"),
@@ -1466,8 +1468,10 @@ export default function KidDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
       toast({
         title: t("kidDashboard.joinedSuccess"),
         description: t("kidDashboard.nowPartOfReward"),
@@ -1516,8 +1520,12 @@ export default function KidDashboard() {
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       toast({
         title: t("rewardsBoard.redemptionCancelled"),
         description: t("rewardsBoard.pointsRefunded", { count: data?.pointsRefunded ?? 0 }),
@@ -1535,6 +1543,7 @@ export default function KidDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       toast({
         title: t("kidDashboard.sharingCancelled"),
         description: t("kidDashboard.canRedeemSolo"),

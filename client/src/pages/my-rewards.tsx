@@ -115,6 +115,8 @@ export default function MyRewards() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       toast({
         title: t("myRewards.sharingStarted"),
         description: t("myRewards.sharingStartedDesc"),
@@ -135,8 +137,10 @@ export default function MyRewards() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
       toast({
         title: t("myRewards.joinedSharing"),
         description: t("myRewards.joinedSharingDesc"),
@@ -206,8 +210,12 @@ export default function MyRewards() {
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       toast({
         title: t("rewardsBoard.redemptionCancelled"),
         description: t("rewardsBoard.pointsRefunded", { count: data?.pointsRefunded ?? 0 }),

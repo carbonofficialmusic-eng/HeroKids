@@ -148,7 +148,10 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
     onSuccess: () => {
       confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       toast({
         title: t("kidDashboard.rewardRequested"),
@@ -457,8 +460,10 @@ export default function RewardsBoard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
       toast({
         title: t("rewardsBoard.joinedSuccess"),
         description: t("rewardsBoard.joinedSuccessDesc"),

@@ -71,6 +71,7 @@ export function useWebSocket(familyName: string | null) {
               queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] }); // For device-linked users
               queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
               queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/rewards"] }); // One-time rewards get deactivated on redeem
               break;
 
             case "member_joined":
