@@ -3,10 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, XCircle, Clock, Star, ArrowLeft, Gift, Coins, Pencil } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CheckCircle, XCircle, Clock, Star, ArrowLeft, Gift, Coins, Pencil, CheckSquare } from "lucide-react";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -27,7 +28,11 @@ export default function Approvals() {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedCompletion, setSelectedCompletion] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState("");
-  
+
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkApproving, setIsBulkApproving] = useState(false);
+
   // Edit reward request state
   const [editRewardDialogOpen, setEditRewardDialogOpen] = useState(false);
   const [editingRewardRequest, setEditingRewardRequest] = useState<any>(null);
@@ -205,15 +210,66 @@ export default function Approvals() {
     }
   };
 
+  // Bulk selection helpers
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleBulkApprove = async () => {
+    if (selectedIds.size === 0 || isBulkApproving) return;
+    setIsBulkApproving(true);
+    const ids = Array.from(selectedIds);
+    let successCount = 0;
+    let failCount = 0;
+
+    await Promise.all(
+      ids.map(async (id) => {
+        try {
+          await apiRequest("POST", `/api/tasks/completions/${id}/approve`, {});
+          successCount++;
+        } catch {
+          failCount++;
+        }
+      })
+    );
+
+    queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+
+    setSelectedIds(new Set());
+    setIsBulkApproving(false);
+
+    if (failCount === 0) {
+      toast({
+        title: t("approvals.bulkApproveSuccess", { count: successCount, defaultValue: `${successCount} Aufgaben genehmigt` }),
+      });
+    } else {
+      toast({
+        title: t("approvals.bulkApprovePartial", { success: successCount, failed: failCount, defaultValue: `${successCount} genehmigt, ${failCount} fehlgeschlagen` }),
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
         <div className="max-w-5xl mx-auto">
           <Link href="/dashboard">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+            <Button
+              variant="outline"
+              size="sm"
+              className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
               data-testid="button-back-to-dashboard"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -231,15 +287,27 @@ export default function Approvals() {
   }
 
   const completions = Array.isArray(pendingCompletions) ? pendingCompletions : [];
+  const allSelected = completions.length > 0 && completions.every((c: any) => selectedIds.has(c.id));
+  const someSelected = selectedIds.size > 0;
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(completions.map((c: any) => c.id)));
+    }
+  };
+
+  const isBusy = approveMutation.isPending || rejectMutation.isPending || isBulkApproving;
 
   return (
-    <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
+    <div className="min-h-screen p-6 pb-32" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
       <div className="max-w-5xl mx-auto">
         <Link href="/dashboard">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60" 
+          <Button
+            variant="outline"
+            size="sm"
+            className="mb-4 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
             data-testid="button-back-to-dashboard"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -272,7 +340,7 @@ export default function Approvals() {
                 return (
                   <Card key={request.id} data-testid={`card-reward-request-${request.id}`}>
                     <CardHeader>
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between gap-2 flex-wrap">
                         <div className="flex items-start gap-3">
                           <Avatar className="w-10 h-10">
                             <AvatarFallback style={{ backgroundColor: requester?.color }} className="text-white">
@@ -334,13 +402,31 @@ export default function Approvals() {
         )}
 
         {/* Pending Task Completions Section */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
           <Clock className="w-5 h-5 text-primary" />
           <h2 className="text-xl font-bold">{t("approvals.taskCompletions")}</h2>
           {completions.length > 0 && (
             <Badge className="ml-2" data-testid="badge-task-completions-count">
               {completions.length}
             </Badge>
+          )}
+          {completions.length > 1 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSelectAll}
+              className="ml-auto"
+              data-testid="button-select-all"
+            >
+              <Checkbox
+                checked={allSelected}
+                className="mr-2 pointer-events-none"
+                aria-hidden
+              />
+              {allSelected
+                ? t("approvals.deselectAll", { defaultValue: "Alle abwählen" })
+                : t("approvals.selectAll", { defaultValue: "Alle auswählen" })}
+            </Button>
           )}
         </div>
 
@@ -354,72 +440,126 @@ export default function Approvals() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {completions.map((completion: any) => (
-              <Card key={completion.id} data-testid={`card-completion-${completion.id}`}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
+            {completions.map((completion: any) => {
+              const isSelected = selectedIds.has(completion.id);
+              return (
+                <Card
+                  key={completion.id}
+                  data-testid={`card-completion-${completion.id}`}
+                  className={isSelected ? "ring-2 ring-primary" : ""}
+                  onClick={() => toggleSelection(completion.id)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <CardHeader>
                     <div className="flex items-start gap-3">
-                      <Avatar className="w-10 h-10">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleSelection(completion.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-1 shrink-0"
+                        data-testid={`checkbox-completion-${completion.id}`}
+                      />
+                      <Avatar className="w-10 h-10 shrink-0">
                         <AvatarImage src={completion.memberAvatar} />
                         <AvatarFallback>{completion.memberName?.[0]}</AvatarFallback>
                       </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 flex-wrap">
+                          <div>
+                            <CardTitle className="text-lg" data-testid={`text-task-title-${completion.id}`}>
+                              {completion.taskTitle}
+                            </CardTitle>
+                            <CardDescription>
+                              {t("approvals.completedBy", { name: completion.memberName })} • {formatDistanceToNow(new Date(completion.completedAt), { locale: dateFnsLocales[i18n.language] || enUS, addSuffix: true })}
+                            </CardDescription>
+                          </div>
+                          <Badge variant="secondary" className="flex items-center gap-1 shrink-0">
+                            <Star className="w-3 h-3" />
+                            {t("approvals.points", { count: completion.pointsEarned })}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4" onClick={(e) => e.stopPropagation()}>
+                    {completion.proofPhotoUrl && (
                       <div>
-                        <CardTitle className="text-lg" data-testid={`text-task-title-${completion.id}`}>
-                          {completion.taskTitle}
-                        </CardTitle>
-                        <CardDescription>
-                          {t("approvals.completedBy", { name: completion.memberName })} • {formatDistanceToNow(new Date(completion.completedAt), { locale: dateFnsLocales[i18n.language] || enUS, addSuffix: true })}
-                        </CardDescription>
+                        <Label className="text-sm font-medium mb-2 block">{t("approvals.photoProof")}</Label>
+                        <div className="relative rounded-md overflow-hidden border">
+                          <img
+                            src={completion.proofPhotoUrl}
+                            alt={t("approvals.photoProofAlt")}
+                            className="w-full max-w-md object-cover"
+                            data-testid={`img-proof-${completion.id}`}
+                          />
+                        </div>
                       </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleApprove(completion.id)}
+                        disabled={isBusy}
+                        className="flex-1"
+                        data-testid={`button-approve-${completion.id}`}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        {t("approvals.approve")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleRejectClick(completion)}
+                        disabled={isBusy}
+                        className="flex-1"
+                        data-testid={`button-reject-${completion.id}`}
+                      >
+                        <XCircle className="w-4 h-4 mr-2" />
+                        {t("approvals.reject")}
+                      </Button>
                     </div>
-                    <Badge variant="secondary" className="flex items-center gap-1">
-                      <Star className="w-3 h-3" />
-                      {t("approvals.points", { count: completion.pointsEarned })}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {completion.proofPhotoUrl && (
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">{t("approvals.photoProof")}</Label>
-                      <div className="relative rounded-md overflow-hidden border">
-                        <img
-                          src={completion.proofPhotoUrl}
-                          alt={t("approvals.photoProofAlt")}
-                          className="w-full max-w-md object-cover"
-                          data-testid={`img-proof-${completion.id}`}
-                        />
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => handleApprove(completion.id)}
-                      disabled={approveMutation.isPending}
-                      className="flex-1"
-                      data-testid={`button-approve-${completion.id}`}
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      {t("approvals.approve")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleRejectClick(completion)}
-                      disabled={rejectMutation.isPending}
-                      className="flex-1"
-                      data-testid={`button-reject-${completion.id}`}
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      {t("approvals.reject")}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* Sticky Bulk Action Bar */}
+      {someSelected && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 p-4 border-t bg-background/95 backdrop-blur-sm"
+          data-testid="bulk-action-bar"
+        >
+          <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+            <span className="text-sm font-medium text-muted-foreground">
+              {t("approvals.selectedCount", { count: selectedIds.size, defaultValue: `${selectedIds.size} ausgewählt` })}
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedIds(new Set())}
+                disabled={isBulkApproving}
+                data-testid="button-clear-selection"
+              >
+                {t("approvals.clearSelection", { defaultValue: "Auswahl aufheben" })}
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleBulkApprove}
+                disabled={isBulkApproving}
+                data-testid="button-bulk-approve"
+              >
+                <CheckSquare className="w-4 h-4 mr-2" />
+                {isBulkApproving
+                  ? t("approvals.approving", { defaultValue: "Wird genehmigt…" })
+                  : t("approvals.bulkApprove", { count: selectedIds.size, defaultValue: `${selectedIds.size} genehmigen` })}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogContent data-testid="dialog-reject">
