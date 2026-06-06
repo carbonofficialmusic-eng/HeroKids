@@ -1967,12 +1967,16 @@ export default function KidDashboard() {
     
     // One-time tasks with approval: stay visible (yellow pending state) until parent approves
     // One-time tasks without approval disappear immediately (task status becomes "completed" on backend)
-    if (t.recurrence === "none" && t.requiresApproval && t.memberHasCompleted) {
+    // Custom-interval tasks (recurrenceDays > 0) must be excluded — they stay visible after approval
+    if (t.recurrence === "none" && !(t as any).recurrenceDays && t.requiresApproval && t.memberHasCompleted) {
       return t.memberCompletionStatus !== "approved";
     }
 
-    // Normal one-time tasks: Hide when member (or family) has completed
-    return !t.memberHasCompleted || t.recurrence !== "none";
+    // Normal one-time tasks: Hide when member (or family) has completed.
+    // Custom-interval tasks (recurrence="none" but recurrenceDays > 0) are recurring —
+    // keep them visible even after completion so the "available again in X days" UI shows.
+    const isCustomInterval = !!(t as any).recurrenceDays;
+    return !t.memberHasCompleted || t.recurrence !== "none" || isCustomInterval;
   });
 
   // Task categorization helpers for kid dashboard
