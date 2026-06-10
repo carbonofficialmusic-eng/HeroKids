@@ -4,7 +4,10 @@ set -e
 
 echo "=== HeroKids Xcode Cloud Post-Clone ==="
 
-# Node.js is pre-installed on Xcode Cloud - no brew install needed
+# Install Node.js - skip Homebrew auto-update to keep it fast
+export HOMEBREW_NO_AUTO_UPDATE=1
+brew install node
+
 node --version
 npm --version
 
@@ -22,6 +25,6 @@ npx cap sync ios
 
 echo "Installing CocoaPods dependencies..."
 cd ios/App
-pod install --repo-update
+pod install
 
 echo "=== Post-clone complete ==="
