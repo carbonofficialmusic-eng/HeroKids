@@ -21,8 +21,11 @@ npm --version
 cd "$CI_PRIMARY_REPOSITORY_PATH"
 echo "Working directory: $(pwd)"
 
+# Use public npm registry (package-lock.json may reference Replit's internal firewall)
+npm config set registry https://registry.npmjs.org
+
 echo "Installing npm dependencies..."
-npm ci --prefer-offline || npm ci
+npm ci
 
 echo "Building web assets..."
 npm run build
@@ -32,7 +35,6 @@ npx cap sync ios
 
 echo "Installing CocoaPods dependencies..."
 cd ios/App
-export HOMEBREW_NO_AUTO_UPDATE=1
 pod install
 
 echo "=== Post-clone complete ==="
