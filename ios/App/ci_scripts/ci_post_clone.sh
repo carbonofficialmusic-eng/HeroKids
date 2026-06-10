@@ -3,7 +3,6 @@
 set -e
 
 echo "=== HeroKids Xcode Cloud Post-Clone ==="
-echo "PATH: $PATH"
 
 # Install Node.js if not already available
 export HOMEBREW_NO_AUTO_UPDATE=1
@@ -17,12 +16,15 @@ fi
 node --version
 npm --version
 
-# Navigate to repo root (ci_scripts is in ios/App/ci_scripts)
+# Navigate to repo root
 cd "$CI_PRIMARY_REPOSITORY_PATH"
 echo "Working directory: $(pwd)"
 
-# Use public npm registry (package-lock.json may reference Replit's internal firewall)
-npm config set registry https://registry.npmjs.org
+# Replace Replit's internal package firewall with public npm registry
+# package-lock.json resolved URLs point to package-firewall.replit.local
+echo "Patching package-lock.json registry URLs..."
+sed -i '' 's|https://package-firewall.replit.local/npm/|https://registry.npmjs.org/|g' package-lock.json
+sed -i '' 's|http://package-firewall.replit.local/npm/|https://registry.npmjs.org/|g' package-lock.json
 
 echo "Installing npm dependencies..."
 npm ci
