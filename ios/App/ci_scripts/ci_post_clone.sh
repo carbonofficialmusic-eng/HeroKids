@@ -4,8 +4,9 @@ set -e
 
 echo "=== HeroKids Xcode Cloud Post-Clone ==="
 
-# Install Node.js via Homebrew (Xcode Cloud has Homebrew)
-brew install node || true
+# Node.js is pre-installed on Xcode Cloud - no brew install needed
+node --version
+npm --version
 
 # Navigate to repo root (ci_scripts is in ios/App/ci_scripts)
 cd "$CI_PRIMARY_REPOSITORY_PATH"
