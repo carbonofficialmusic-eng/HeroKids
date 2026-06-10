@@ -2,3 +2,4 @@
 - [Replit Dev Auth Fix](replit-dev-auth.md) — Replit preview iframe blocks cookies; dev-token-in-localStorage + X-Dev-Token header is the fix
 - [actingAsMemberId Override in GET /api/tasks](acting-as-member-tasks.md) — GET /api/tasks had wrong condition blocking the actingAs override for local-auth users
 - [Immediate task skipApprovedReset](immediate-task-skipApprovedReset.md) — all getMemberCompletionStatus calls for immediate tasks need skipApprovedReset=true in BOTH child and parent branches
+- [APNs Push Notification Setup](apns-push-setup.md) — JWT-based APNs, device_push_tokens table, triggers on task_pending/approved/rejected, client hook in usePushNotifications.ts

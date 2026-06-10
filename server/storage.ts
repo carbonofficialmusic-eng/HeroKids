@@ -66,6 +66,7 @@ import {
   emailReadinessChecks,
   accountLinkRepairHistory,
   shoppingListItems,
+  devicePushTokens,
   type Notification,
   type InsertNotification,
   type NotificationType,
@@ -381,6 +382,12 @@ export interface IStorage {
 
   createEmailReadinessCheck(check: InsertEmailReadinessCheck): Promise<EmailReadinessCheck>;
   getRecentEmailReadinessChecks(limit?: number): Promise<EmailReadinessCheck[]>;
+
+  // Device push token operations
+  upsertDevicePushToken(memberId: string, token: string, platform?: string): Promise<void>;
+  removeDevicePushToken(token: string): Promise<void>;
+  getDevicePushTokensForMember(memberId: string): Promise<string[]>;
+  getDevicePushTokensForMembers(memberIds: string[]): Promise<string[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3827,6 +3834,37 @@ export class DatabaseStorage implements IStorage {
       .from(emailReadinessChecks)
       .orderBy(desc(emailReadinessChecks.checkedAt))
       .limit(safeLimit);
+  }
+
+  async upsertDevicePushToken(memberId: string, token: string, platform = "ios"): Promise<void> {
+    await db
+      .insert(devicePushTokens)
+      .values({ memberId, token, platform })
+      .onConflictDoUpdate({
+        target: [devicePushTokens.memberId, devicePushTokens.token],
+        set: { updatedAt: new Date() },
+      });
+  }
+
+  async removeDevicePushToken(token: string): Promise<void> {
+    await db.delete(devicePushTokens).where(eq(devicePushTokens.token, token));
+  }
+
+  async getDevicePushTokensForMember(memberId: string): Promise<string[]> {
+    const rows = await db
+      .select({ token: devicePushTokens.token })
+      .from(devicePushTokens)
+      .where(eq(devicePushTokens.memberId, memberId));
+    return rows.map((r) => r.token);
+  }
+
+  async getDevicePushTokensForMembers(memberIds: string[]): Promise<string[]> {
+    if (!memberIds.length) return [];
+    const rows = await db
+      .select({ token: devicePushTokens.token })
+      .from(devicePushTokens)
+      .where(inArray(devicePushTokens.memberId, memberIds));
+    return rows.map((r) => r.token);
   }
 }
 

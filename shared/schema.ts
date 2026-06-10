@@ -978,3 +978,24 @@ export const insertPinboardNoteSchema = createInsertSchema(pinboardNotes).omit({
 
 export type InsertPinboardNote = z.infer<typeof insertPinboardNoteSchema>;
 export type PinboardNote = typeof pinboardNotes.$inferSelect;
+
+// ===== DEVICE PUSH TOKENS =====
+export const devicePushTokens = pgTable("device_push_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  token: varchar("token", { length: 256 }).notNull(),
+  platform: varchar("platform", { length: 16 }).notNull().default("ios"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  memberTokenUnique: unique().on(table.memberId, table.token),
+}));
+
+export const insertDevicePushTokenSchema = createInsertSchema(devicePushTokens).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertDevicePushToken = z.infer<typeof insertDevicePushTokenSchema>;
+export type DevicePushToken = typeof devicePushTokens.$inferSelect;

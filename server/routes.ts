@@ -9,6 +9,7 @@ import bcrypt from "bcrypt";
 import Stripe from "stripe";
 import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 import { storage } from "./storage";
+import { sendPushToMembers } from "./apns";
 import { db } from "./db";
 import { setupAuth, isAuthenticated, isDev, setDevTokenActingAs } from "./replitAuth";
 import { generateTokenPair, refreshAccessToken, revokeRefreshToken, registerPushToken, unregisterPushToken } from "./mobileAuth";
@@ -3063,6 +3064,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           relatedTaskId: task.id,
           relatedMemberId: member.id,
         }, member.id);
+
+        // Send APNs push to all parent devices
+        try {
+          const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+          const parentIds = allMembers
+            .filter(m => m.role === "parent" && m.id !== member.id)
+            .map(m => m.id);
+          const tokens = await storage.getDevicePushTokensForMembers(parentIds);
+          await sendPushToMembers(
+            tokens,
+            translateNotification(lang, "task_pending.title", { name: member.displayName, task: task.title }),
+            translateNotification(lang, "task_pending.message", { points: task.points }),
+            { notificationType: "task_pending", memberId: member.id }
+          );
+        } catch (pushErr: any) {
+          console.error("[APNs] task_pending push error:", pushErr.message);
+        }
         
         // Broadcast notification update
         broadcastToFamily(member.familyName, { type: "notification_update" });
@@ -3273,7 +3291,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         relatedTaskId: completion.taskId,
         targetMemberId: childMember.id,
       });
-      
+
+      // Send APNs push to the child's devices
+      try {
+        const tokens = await storage.getDevicePushTokensForMember(childMember.id);
+        await sendPushToMembers(
+          tokens,
+          translateNotification(lang, "task_approved.title"),
+          translateNotification(lang, "task_approved.message", { task: task?.title || "Task", points: completion.pointsEarned }),
+          { notificationType: "task_approved", memberId: childMember.id }
+        );
+      } catch (pushErr: any) {
+        console.error("[APNs] task_approved push error:", pushErr.message);
+      }
+
       // Broadcast notification update to refresh child's bell
       broadcastToFamily(member.familyName, {
         type: 'notification_update',
@@ -3383,7 +3414,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         relatedTaskId: completion.taskId,
         targetMemberId: childMember.id,
       });
-      
+
+      // Send APNs push to the child's devices
+      try {
+        const tokens = await storage.getDevicePushTokensForMember(childMember.id);
+        await sendPushToMembers(
+          tokens,
+          translateNotification(lang, "task_rejected.title"),
+          translateNotification(lang, "task_rejected.message", { task: task?.title || "Task", reason: reason || defaultReason }),
+          { notificationType: "task_rejected", memberId: childMember.id }
+        );
+      } catch (pushErr: any) {
+        console.error("[APNs] task_rejected push error:", pushErr.message);
+      }
+
       // Broadcast notification update to refresh child's bell
       broadcastToFamily(member.familyName, {
         type: 'notification_update',
@@ -5869,6 +5913,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== Notification Routes (member-based - each member has their own notifications) =====
   
   // Get all notifications for the current member
+  // ===== DEVICE PUSH TOKEN ROUTES =====
+  app.post("/api/device-tokens/register", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const { token, platform = "ios" } = req.body;
+      if (!token || typeof token !== "string") {
+        return res.status(400).json({ message: "token is required" });
+      }
+      await storage.upsertDevicePushToken(result.member.id, token, platform);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error registering device token:", error);
+      res.status(500).json({ message: "Failed to register device token" });
+    }
+  });
+
+  app.post("/api/device-tokens/unregister", isAuthenticated, async (req: any, res) => {
+    try {
+      const { token } = req.body;
+      if (!token || typeof token !== "string") {
+        return res.status(400).json({ message: "token is required" });
+      }
+      await storage.removeDevicePushToken(token);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error unregistering device token:", error);
+      res.status(500).json({ message: "Failed to unregister device token" });
+    }
+  });
+
   app.get("/api/notifications", isAuthenticated, async (req: any, res) => {
     try {
       const result = await getCurrentMemberFromRequest(req);
