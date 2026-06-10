@@ -3714,7 +3714,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         relatedRewardId: reward.id,
         relatedMemberId: member.id,
       });
-      
+
+      // Send APNs push to all parent devices
+      try {
+        const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+        const parentIds = allMembers
+          .filter(m => m.role === "parent" && m.id !== member.id)
+          .map(m => m.id);
+        const tokens = await storage.getDevicePushTokensForMembers(parentIds);
+        await sendPushToMembers(
+          tokens,
+          translateNotification(lang, "reward_redeemed.title", { name: member.displayName }),
+          translateNotification(lang, "reward_redeemed.message", { reward: reward.title, points: reward.pointThreshold }),
+          { notificationType: "reward_redeemed", memberId: member.id }
+        );
+      } catch (pushErr: any) {
+        console.error("[APNs] reward_redeemed push error:", pushErr.message);
+      }
+
       // Broadcast notification update
       broadcastToFamily(member.familyName, { type: "notification_update" });
       
