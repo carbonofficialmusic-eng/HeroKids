@@ -35,6 +35,11 @@ npm run build
 echo "Syncing Capacitor..."
 npx cap sync ios
 
+# Restore app icon and splash screen after cap sync (which overwrites them with defaults)
+echo "Restoring app icon and splash screen..."
+git checkout -- ios/App/App/Assets.xcassets/AppIcon.appiconset/
+git checkout -- ios/App/App/Assets.xcassets/Splash.imageset/
+
 echo "Installing CocoaPods dependencies..."
 cd ios/App
 pod install
