@@ -5364,7 +5364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const definitions = await storage.getAchievementDefinitionsByFamily(member.familyName);
-      res.json(definitions.filter(d => d.slug !== "task-streak-7"));
+      res.json(definitions.filter(d => d.slug !== "task-streak-7" && d.slug !== "task-streak-14"));
     } catch (error: any) {
       console.error("Error fetching achievement definitions:", error);
       res.status(500).json({ message: "Failed to fetch achievement definitions" });
