@@ -2102,7 +2102,7 @@ export default function KidDashboard() {
           maxHeight: 'calc(4rem + var(--sat, env(safe-area-inset-top)))',
         }}
       >
-        <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
+        <div className="container mx-auto max-w-7xl h-16 flex items-center justify-between gap-4" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex-shrink-0" data-testid="avatar-header-kid">
               <Avatar className="h-10 w-10" style={{ borderWidth: "3px", borderStyle: "solid", borderColor: member.color }}>
@@ -2158,7 +2158,7 @@ export default function KidDashboard() {
 
       {/* Content — paddingTop pushes below fixed header, #root handles scrolling like parent dashboard */}
       <div style={{ paddingTop: 'calc(4rem + var(--sat, env(safe-area-inset-top)))' }}>
-      <div className="container mx-auto px-4 max-w-7xl pt-4 pb-[calc(8rem+env(safe-area-inset-bottom))] relative">
+      <div className="container mx-auto max-w-7xl pt-4 pb-[calc(8rem+env(safe-area-inset-bottom))] relative" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <div className="lg:col-span-2 space-y-8 min-w-0 overflow-hidden">
         {/* HeroKids Logo */}
@@ -3010,7 +3010,7 @@ export default function KidDashboard() {
       {/* Simplified Navigation - Fixed Bottom Bar */}
       <div
         className="fixed bottom-0 left-0 right-0 z-50 p-2"
-        style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
+        style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))', paddingLeft: 'max(0.5rem, env(safe-area-inset-left))', paddingRight: 'max(0.5rem, env(safe-area-inset-right))' }}
       >
         <motion.div
           initial={{ y: 100, opacity: 0 }}

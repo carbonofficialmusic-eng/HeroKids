@@ -1067,7 +1067,7 @@ export default function Dashboard() {
           maxHeight: 'calc(4rem + var(--sat, env(safe-area-inset-top)))',
         }}
       >
-        <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
+        <div className="container mx-auto max-w-7xl h-16 flex items-center justify-between gap-4" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex-shrink-0" data-testid="avatar-header-parent">
               <Avatar className="h-10 w-10" style={{ borderWidth: "3px", borderStyle: "solid", borderColor: member.color }}>
@@ -1122,8 +1122,8 @@ export default function Dashboard() {
       </header>
 
       <div
-        className={`container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden ${isParent ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))]" : ""}`}
-        style={{ paddingTop: 'calc(4rem + var(--sat, env(safe-area-inset-top)) + 1rem)' }}
+        className={`container mx-auto max-w-7xl py-8 overflow-x-hidden ${isParent ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))]" : ""}`}
+        style={{ paddingTop: 'calc(4rem + var(--sat, env(safe-area-inset-top)) + 1rem)', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}
       >
         {isParent ? (
           /* Parent View */
@@ -1896,7 +1896,7 @@ export default function Dashboard() {
       {isParent && (
         <div
           className="fixed bottom-0 left-0 right-0 z-50 p-2"
-          style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
+          style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))', paddingLeft: 'max(0.5rem, env(safe-area-inset-left))', paddingRight: 'max(0.5rem, env(safe-area-inset-right))' }}
         >
           <motion.div
             initial={{ y: 100, opacity: 0 }}
