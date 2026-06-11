@@ -55,6 +55,8 @@ import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
 // Backend notification translations for all 9 supported languages
 const notificationTranslations: Record<string, Record<string, string>> = {
   en: {
+    "chat_message.title": "{{name}} in Family Chat",
+    "chat_message.message": "{{preview}}",
     "pinboard_posted.title": "{{name}} posted on the pinboard",
     "pinboard_posted.message": "",
     "task_pending.title": "{{name}} completed \"{{task}}\"",
@@ -80,6 +82,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "Did not meet expectations",
   },
   de: {
+    "chat_message.title": "{{name}} im Familien-Chat",
+    "chat_message.message": "{{preview}}",
     "pinboard_posted.title": "{{name}} hat an die Pinnwand geschrieben",
     "pinboard_posted.message": "",
     "task_pending.title": "{{name}} hat \"{{task}}\" erledigt",
@@ -105,6 +109,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "Entspricht nicht den Erwartungen",
   },
   fr: {
+    "chat_message.title": "{{name}} dans le Chat Familial",
+    "chat_message.message": "{{preview}}",
     "pinboard_posted.title": "{{name}} a écrit sur le tableau d'affichage",
     "pinboard_posted.message": "",
     "task_pending.title": "{{name}} a terminé \"{{task}}\"",
@@ -130,6 +136,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "Ne répond pas aux attentes",
   },
   es: {
+    "chat_message.title": "{{name}} en el Chat Familiar",
+    "chat_message.message": "{{preview}}",
     "pinboard_posted.title": "{{name}} escribió en el tablón",
     "pinboard_posted.message": "",
     "task_pending.title": "{{name}} completó \"{{task}}\"",
@@ -155,6 +163,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "No cumple las expectativas",
   },
   ja: {
+    "chat_message.title": "{{name}}がファミリーチャットで",
+    "chat_message.message": "{{preview}}",
     "pinboard_posted.title": "{{name}}が掲示板に書きました",
     "pinboard_posted.message": "",
     "task_pending.title": "{{name}}が「{{task}}」を完了しました",
@@ -180,6 +190,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "期待に沿っていません",
   },
   zh: {
+    "chat_message.title": "{{name}} 在家庭聊天中",
+    "chat_message.message": "{{preview}}",
     "pinboard_posted.title": "{{name}}在留言板上写了内容",
     "pinboard_posted.message": "",
     "task_pending.title": "{{name}}完成了「{{task}}」",
@@ -205,6 +217,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "未达到预期",
   },
   ko: {
+    "chat_message.title": "{{name}}이(가) 가족 채팅에서",
+    "chat_message.message": "{{preview}}",
     "pinboard_posted.title": "{{name}}이(가) 게시판에 글을 남겼어요",
     "pinboard_posted.message": "",
     "task_pending.title": "{{name}}이(가) \"{{task}}\"을(를) 완료했어요",
@@ -230,6 +244,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "기대에 미치지 못함",
   },
   sv: {
+    "chat_message.title": "{{name}} i Familjechatten",
+    "chat_message.message": "{{preview}}",
     "pinboard_posted.title": "{{name}} skrev på anslagstavlan",
     "pinboard_posted.message": "",
     "task_pending.title": "{{name}} slutförde \"{{task}}\"",
@@ -255,6 +271,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "default_reason": "Uppfyller inte förväntningarna",
   },
   pt: {
+    "chat_message.title": "{{name}} no Chat Familiar",
+    "chat_message.message": "{{preview}}",
     "pinboard_posted.title": "{{name}} escreveu no mural",
     "pinboard_posted.message": "",
     "task_pending.title": "{{name}} concluiu \"{{task}}\"",
@@ -5052,7 +5070,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           memberActiveSkinId: member.activeSkinId,
         },
       });
-      
+
+      // Send APNs push to all other family members
+      try {
+        const lang = family.language || "en";
+        const allMembers = await storage.getFamilyMembers(member.familyName);
+        const otherMemberIds = allMembers
+          .filter(m => m.id !== member.id)
+          .map(m => m.id);
+        if (otherMemberIds.length > 0) {
+          const tokens = await storage.getDevicePushTokensForMembers(otherMemberIds);
+          if (tokens.length > 0) {
+            const preview = newMessage.message.length > 100
+              ? newMessage.message.slice(0, 97) + "…"
+              : newMessage.message;
+            await sendPushToMembers(
+              tokens,
+              translateNotification(lang, "chat_message.title", { name: member.displayName }),
+              translateNotification(lang, "chat_message.message", { preview }),
+              { notificationType: "chat_message", memberId: member.id }
+            );
+          }
+        }
+      } catch (pushErr: any) {
+        console.error("[APNs] chat_message push error:", pushErr.message);
+      }
+
       res.status(201).json(newMessage);
     } catch (error: any) {
       console.error("Error creating chat message:", error);
