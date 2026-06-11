@@ -2096,10 +2096,10 @@ export default function KidDashboard() {
         data-app-header
         className="fixed top-0 left-0 right-0 z-40 w-full bg-background/70 backdrop-blur-md"
         style={{
-          paddingTop: 'var(--sat, env(safe-area-inset-top))',
-          height: 'calc(var(--header-h) + var(--sat, env(safe-area-inset-top)))',
-          minHeight: 'calc(var(--header-h) + var(--sat, env(safe-area-inset-top)))',
-          maxHeight: 'calc(var(--header-h) + var(--sat, env(safe-area-inset-top)))',
+          paddingTop: 'max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px)',
+          height: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
+          minHeight: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
+          maxHeight: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
         }}
       >
         <div className="container mx-auto max-w-7xl h-full flex items-center justify-between gap-4" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
