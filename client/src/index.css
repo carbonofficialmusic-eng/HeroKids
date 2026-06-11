@@ -293,8 +293,15 @@ html, body {
     --header-h: 2rem;
   }
   .header-avatar {
-    height: 1.5rem !important;
-    width: 1.5rem !important;
+    height: 1.625rem !important;
+    width: 1.625rem !important;
+  }
+  .header-secondary-text {
+    display: none !important;
+  }
+  .header-name-text {
+    font-size: 0.8rem !important;
+    line-height: 1 !important;
   }
 }
 

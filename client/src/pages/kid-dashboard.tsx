@@ -2113,8 +2113,8 @@ export default function KidDashboard() {
               </Avatar>
             </div>
             <div className="min-w-0">
-              <div className="text-sm text-muted-foreground truncate hidden sm:block">{member.familyName}</div>
-              <div className="font-semibold truncate" data-testid="text-user-name">
+              <div className="text-sm text-muted-foreground truncate hidden sm:block header-secondary-text">{member.familyName}</div>
+              <div className="font-semibold truncate header-name-text" data-testid="text-user-name">
                 {member.displayName}
               </div>
             </div>
