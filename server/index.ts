@@ -923,6 +923,36 @@ async function ensurePinboardTable() {
         UPDATE achievement_definitions SET is_active = true
         WHERE family_name = ${familyName} AND slug = 'star-collector' AND is_active = false
       `);
+
+      // Backfill star-collector awards for members who already have 4+ stars
+      const starDef = await db.execute(
+        sql`SELECT id, bonus_points FROM achievement_definitions WHERE family_name = ${familyName} AND slug = 'star-collector'`
+      );
+      if (starDef.rows.length > 0) {
+        const defId = starDef.rows[0].id as string;
+        const bonusPoints = starDef.rows[0].bonus_points as number;
+        const eligibleMembers = await db.execute(
+          sql`SELECT id, display_name, stars_found, total_points FROM family_members WHERE family_name = ${familyName} AND stars_found >= 4`
+        );
+        for (const m of eligibleMembers.rows) {
+          const memberId = m.id as string;
+          // Atomic INSERT — only inserts if no award exists for this member+definition
+          const inserted = await db.execute(sql`
+            INSERT INTO achievement_awards (id, achievement_definition_id, member_id, bonus_points, reward_type, awarded_at)
+            SELECT gen_random_uuid(), ${defId}, ${memberId}, ${bonusPoints}, 'points', now()
+            WHERE NOT EXISTS (
+              SELECT 1 FROM achievement_awards
+              WHERE achievement_definition_id = ${defId} AND member_id = ${memberId}
+            )
+          `);
+          if ((inserted.rowCount ?? 0) > 0) {
+            await db.execute(sql`
+              UPDATE family_members SET total_points = total_points + ${bonusPoints} WHERE id = ${memberId}
+            `);
+            log(`✅ Backfilled star-collector award for ${m.display_name} (${m.stars_found} stars)`);
+          }
+        }
+      }
     }
   } catch (e) {
     console.error("Failed to backfill achievements:", e);
