@@ -18,8 +18,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AvatarSelector } from "./avatar-selector";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
-import { CheckCircle, Users, UserPlus, Smartphone } from "lucide-react";
+import { CheckCircle, Users, UserPlus, Smartphone, LogOut } from "lucide-react";
 import { Link } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 const createFamilySchema = z.object({
   familyName: z.string().min(1, "Family name is required"),
@@ -51,6 +53,14 @@ export function FamilySetup({
   initialFamilyName = "",
 }: FamilySetupProps) {
   const { t } = useTranslation();
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/auth/logout");
+    },
+    onSuccess: () => {
+      window.location.href = "/";
+    },
+  });
   const [selectedAvatar, setSelectedAvatar] = useState(avatarAssets[0].url);
   const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
   const [uploadedAvatarFile, setUploadedAvatarFile] = useState<File | null>(null);
@@ -179,6 +189,19 @@ export function FamilySetup({
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
       <Card className="w-full max-w-2xl p-8">
+        <div className="flex justify-end mb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            data-testid="button-logout-setup"
+            className="text-muted-foreground gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            {logoutMutation.isPending ? "..." : "Abmelden"}
+          </Button>
+        </div>
         <div className="text-center mb-8">
           <div className="h-16 w-16 rounded-full gradient-celebration mx-auto mb-4 flex items-center justify-center">
             <Users className="h-8 w-8 text-white" />
