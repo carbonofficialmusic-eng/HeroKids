@@ -169,16 +169,6 @@ const DEFAULT_ACHIEVEMENT_TEMPLATES = [
     isActive: false,
     config: {},
   },
-  {
-    type: "task_streak" as const,
-    slug: "task-streak-30",
-    title: "30-Day Streak",
-    description: "Complete tasks for 30 days in a row",
-    bonusPoints: 300,
-    rewardType: "custom" as const,
-    isActive: false,
-    config: { days: 30 },
-  },
 ];
 
 /**
