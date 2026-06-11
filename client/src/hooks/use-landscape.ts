@@ -1,22 +1,21 @@
 import { useState, useEffect } from 'react';
 
-const QUERY = '(orientation: landscape)';
-
-function canMatchMedia() {
-  return typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+function checkLandscape(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth > window.innerHeight;
 }
 
 export function useIsLandscape() {
-  const [isLandscape, setIsLandscape] = useState(
-    () => canMatchMedia() ? window.matchMedia(QUERY).matches : false
-  );
+  const [isLandscape, setIsLandscape] = useState(checkLandscape);
 
   useEffect(() => {
-    if (!canMatchMedia()) return;
-    const mq = window.matchMedia(QUERY);
-    const handler = (e: MediaQueryListEvent) => setIsLandscape(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    const handler = () => setIsLandscape(checkLandscape());
+    window.addEventListener('resize', handler);
+    window.addEventListener('orientationchange', handler);
+    return () => {
+      window.removeEventListener('resize', handler);
+      window.removeEventListener('orientationchange', handler);
+    };
   }, []);
 
   return isLandscape;
