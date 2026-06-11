@@ -290,7 +290,7 @@ html, body {
 
 @media (orientation: landscape) {
   :root {
-    --header-h: 2.75rem;
+    --header-h: 2rem;
   }
 }
 
