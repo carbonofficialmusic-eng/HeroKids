@@ -156,7 +156,7 @@ const DEFAULT_ACHIEVEMENT_TEMPLATES = [
     description: "Find 4 hidden stars on skin cards",
     bonusPoints: 100,
     rewardType: "custom" as const,
-    isActive: false,
+    isActive: true,
     config: { starsRequired: 4 },
   },
   {

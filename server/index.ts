@@ -917,6 +917,12 @@ async function ensurePinboardTable() {
         `);
         log(`ℹ️ monthly-leaderboard-1st already exists for family: ${familyName}`);
       }
+
+      // Ensure star-collector is active
+      await db.execute(sql`
+        UPDATE achievement_definitions SET is_active = true
+        WHERE family_name = ${familyName} AND slug = 'star-collector' AND is_active = false
+      `);
     }
   } catch (e) {
     console.error("Failed to backfill achievements:", e);
