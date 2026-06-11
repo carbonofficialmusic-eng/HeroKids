@@ -290,11 +290,11 @@ html, body {
 
 @media (orientation: landscape) and (max-height: 600px) {
   :root {
-    --header-h: 2.75rem;
+    --header-h: 2rem;
   }
   .header-avatar {
-    height: 1.875rem !important;
-    width: 1.875rem !important;
+    height: 1.5rem !important;
+    width: 1.5rem !important;
   }
 }
 
