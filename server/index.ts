@@ -904,12 +904,17 @@ async function ensurePinboardTable() {
             'Finish in 1st place on the monthly leaderboard',
             200,
             'custom',
-            false,
+            true,
             '{"rank": 1}'::jsonb
           )
         `);
         log(`✅ Added monthly-leaderboard-1st achievement for family: ${familyName}`);
       } else {
+        // Ensure existing rows have is_active = true
+        await db.execute(sql`
+          UPDATE achievement_definitions SET is_active = true
+          WHERE family_name = ${familyName} AND slug = 'monthly-leaderboard-1st' AND is_active = false
+        `);
         log(`ℹ️ monthly-leaderboard-1st already exists for family: ${familyName}`);
       }
     }

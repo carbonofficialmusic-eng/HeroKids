@@ -106,7 +106,7 @@ const DEFAULT_ACHIEVEMENT_TEMPLATES = [
     description: "Finish in 1st place on the monthly leaderboard",
     bonusPoints: 200,
     rewardType: "custom" as const,
-    isActive: false,
+    isActive: true,
     config: { rank: 1 },
   },
   {
