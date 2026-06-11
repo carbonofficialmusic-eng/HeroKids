@@ -173,6 +173,19 @@ interface AnalyticsData {
   totalParents: number;
 }
 
+interface AdminUser {
+  id: string;
+  email: string | null;
+  isEmailVerified: boolean;
+  isDisabled: boolean;
+  createdAt: string | null;
+  lastLoginAt: string | null;
+  linkedMemberId: string | null;
+  linkedMemberName: string | null;
+  linkedMemberRole: string | null;
+  linkedFamilyName: string | null;
+}
+
 interface EmailHealthResult {
   status: "healthy" | "warning" | "unhealthy";
   configured: boolean;
@@ -272,6 +285,7 @@ export default function AdminPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [emailTestRecipient, setEmailTestRecipient] = useState("");
   const [repairHistorySearch, setRepairHistorySearch] = useState("");
+  const [userSearch, setUserSearch] = useState("");
   const lastEmailAlertKeyRef = useRef<string | null>(null);
   const { toast } = useToast();
 
@@ -378,6 +392,19 @@ export default function AdminPage() {
     },
     enabled: !!token,
     staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: adminUsers, isLoading: usersLoading, refetch: refetchUsers } = useQuery<AdminUser[]>({
+    queryKey: ["/api/admin/users"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/users", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch users");
+      return res.json();
+    },
+    enabled: !!token,
+    staleTime: 2 * 60 * 1000,
   });
 
   const { data: emailHealth, isLoading: emailHealthLoading, refetch: refetchEmailHealth } = useQuery<EmailHealthResult>({
@@ -814,7 +841,7 @@ export default function AdminPage() {
         )}
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 max-w-3xl">
+          <TabsList className="grid w-full grid-cols-7 max-w-4xl">
             <TabsTrigger value="overview" data-testid="tab-overview">
               <TrendingUp className="h-4 w-4 mr-2" />
               Overview
@@ -826,6 +853,10 @@ export default function AdminPage() {
             <TabsTrigger value="families" data-testid="tab-families">
               <Home className="h-4 w-4 mr-2" />
               Families
+            </TabsTrigger>
+            <TabsTrigger value="users" data-testid="tab-users">
+              <Users className="h-4 w-4 mr-2" />
+              Users
             </TabsTrigger>
             <TabsTrigger value="skins" data-testid="tab-skins">
               <Palette className="h-4 w-4 mr-2" />
@@ -1540,6 +1571,131 @@ export default function AdminPage() {
                     </div>
                   </div>
                 ) : null}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Users Tab */}
+          <TabsContent value="users" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Registered Users
+                    </CardTitle>
+                    <CardDescription>
+                      All accounts registered in the system — {adminUsers?.length ?? 0} total
+                    </CardDescription>
+                  </div>
+                  <Button size="icon" variant="outline" onClick={() => refetchUsers()} data-testid="button-refresh-users">
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input
+                  placeholder="Search by email or family..."
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  data-testid="input-user-search"
+                />
+                {usersLoading ? (
+                  <div className="space-y-2">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="h-12 rounded-md bg-muted animate-pulse" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-md border overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/50">
+                        <tr>
+                          <th className="text-left px-4 py-2 font-medium text-muted-foreground">Email</th>
+                          <th className="text-left px-4 py-2 font-medium text-muted-foreground">Status</th>
+                          <th className="text-left px-4 py-2 font-medium text-muted-foreground">Linked Member</th>
+                          <th className="text-left px-4 py-2 font-medium text-muted-foreground">Family</th>
+                          <th className="text-left px-4 py-2 font-medium text-muted-foreground">Registered</th>
+                          <th className="text-left px-4 py-2 font-medium text-muted-foreground">Last Login</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(adminUsers ?? [])
+                          .filter((u) => {
+                            const q = userSearch.toLowerCase();
+                            if (!q) return true;
+                            return (
+                              u.email?.toLowerCase().includes(q) ||
+                              u.linkedFamilyName?.toLowerCase().includes(q) ||
+                              u.linkedMemberName?.toLowerCase().includes(q)
+                            );
+                          })
+                          .map((u, idx) => (
+                            <tr
+                              key={u.id}
+                              className={idx % 2 === 0 ? "bg-background" : "bg-muted/20"}
+                              data-testid={`row-user-${u.id}`}
+                            >
+                              <td className="px-4 py-2.5">
+                                <div className="flex items-center gap-2">
+                                  {u.isDisabled && (
+                                    <Badge variant="destructive" className="text-xs shrink-0">Disabled</Badge>
+                                  )}
+                                  <span className="font-mono text-xs truncate max-w-[220px]">{u.email ?? "—"}</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-2.5">
+                                {u.isEmailVerified ? (
+                                  <Badge variant="secondary" className="text-xs gap-1">
+                                    <CheckCircle2 className="h-3 w-3" /> Verified
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-xs gap-1 text-muted-foreground">
+                                    <AlertTriangle className="h-3 w-3" /> Unverified
+                                  </Badge>
+                                )}
+                              </td>
+                              <td className="px-4 py-2.5">
+                                {u.linkedMemberName ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-sm">{u.linkedMemberName}</span>
+                                    <Badge variant="outline" className="text-xs capitalize">{u.linkedMemberRole}</Badge>
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs">No member linked</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-2.5 text-sm">
+                                {u.linkedFamilyName ?? <span className="text-muted-foreground text-xs">—</span>}
+                              </td>
+                              <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                                {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}
+                              </td>
+                              <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                                {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : "Never"}
+                              </td>
+                            </tr>
+                          ))}
+                        {(adminUsers ?? []).filter((u) => {
+                          const q = userSearch.toLowerCase();
+                          if (!q) return true;
+                          return (
+                            u.email?.toLowerCase().includes(q) ||
+                            u.linkedFamilyName?.toLowerCase().includes(q) ||
+                            u.linkedMemberName?.toLowerCase().includes(q)
+                          );
+                        }).length === 0 && (
+                          <tr>
+                            <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground text-sm">
+                              No users found
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

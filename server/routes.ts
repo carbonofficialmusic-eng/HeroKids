@@ -7201,7 +7201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { tier: 'Free', count: allFamilies.filter(f => f.subscriptionTier === 'free').length },
         { tier: 'Family', count: allFamilies.filter(f => f.subscriptionTier === 'family').length },
         { tier: 'Family+', count: allFamilies.filter(f => f.subscriptionTier === 'family_plus').length },
-        { tier: 'Hero', count: allFamilies.filter(f => f.subscriptionTier === 'family_hero').length },
+        { tier: 'Enterprise', count: allFamilies.filter(f => f.subscriptionTier === 'family_hero').length },
       ];
       
       res.json({
@@ -7381,6 +7381,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get all registered user accounts
+  app.get("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      const allUsers = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          isEmailVerified: users.isEmailVerified,
+          isDisabled: users.isDisabled,
+          createdAt: users.createdAt,
+          lastLoginAt: users.lastLoginAt,
+          linkedMemberId: familyMembers.id,
+          linkedMemberName: familyMembers.name,
+          linkedMemberRole: familyMembers.role,
+          linkedFamilyName: familyMembers.familyName,
+        })
+        .from(users)
+        .leftJoin(familyMembers, eq(familyMembers.userId, users.id))
+        .orderBy(desc(users.createdAt));
+
+      res.json(allUsers);
+    } catch (error) {
+      console.error("Error fetching admin users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
   // ========================================
   // End of Admin Dashboard Routes
   // ========================================
