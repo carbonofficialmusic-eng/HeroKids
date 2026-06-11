@@ -389,7 +389,7 @@ export default function Landing() {
               <br />
               <span style={{ color: C.orange }}>{t('landing.hero.title2')}</span>
             </h1>
-            <p style={{ fontSize: "1.1rem", color: C.fgMuted, marginBottom: "2rem", maxWidth: 460, lineHeight: 1.7 }} data-testid="text-hero-subtitle">
+            <p style={{ fontSize: "1.1rem", color: C.fgMuted, marginBottom: "2rem", maxWidth: 460, lineHeight: 1.7, margin: "0 auto 2rem" }} className="lg:mx-0" data-testid="text-hero-subtitle">
               {t('landing.heroSubtitle')}
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }} className="lg:justify-start">
