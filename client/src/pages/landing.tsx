@@ -414,7 +414,6 @@ export default function Landing() {
                   </div>
                 ))}
               </div>
-              {t('landing.hero.socialProof')}
             </div>
           </div>
 
