@@ -8,7 +8,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import http from "http";
 import { startPointsResetScheduler } from "./scheduler";
 import { db } from "./db";
-import { skins, familyMembers, starPlacements } from "../shared/schema";
+import { skins, familyMembers, starPlacements, achievementDefinitions } from "../shared/schema";
 import { sql, eq, and, notInArray } from "drizzle-orm";
 import Stripe from "stripe";
 
@@ -854,6 +854,41 @@ async function ensurePinboardTable() {
     await db.execute(sql`ALTER TYPE achievement_type ADD VALUE IF NOT EXISTS 'legacy_collector'`);
   } catch (_e) {
     // Already exists or not supported — ignore
+  }
+
+  // Backfill legacy-collector achievement for families that already have achievements but are missing it
+  try {
+    // Use raw SQL to avoid Drizzle enum validation issues with the newly added enum value
+    const families = await db.execute(sql`SELECT DISTINCT family_name FROM achievement_definitions`);
+    log(`🔍 Backfill: found ${families.rows.length} families with achievements`);
+    for (const row of families.rows) {
+      const familyName = row.family_name as string;
+      const existing = await db.execute(
+        sql`SELECT id FROM achievement_definitions WHERE family_name = ${familyName} AND slug = 'legacy-collector'`
+      );
+      if (existing.rows.length === 0) {
+        await db.execute(sql`
+          INSERT INTO achievement_definitions (id, family_name, type, slug, title, description, bonus_points, reward_type, is_active, config)
+          VALUES (
+            gen_random_uuid(),
+            ${familyName},
+            'legacy_collector'::achievement_type,
+            'legacy-collector',
+            'Legacy Collector',
+            'Unlock 10 of 12 HeroKids Legacy skins',
+            500,
+            'custom',
+            false,
+            '{"requiredLegacySkins": 10}'::jsonb
+          )
+        `);
+        log(`✅ Added legacy-collector achievement for family: ${familyName}`);
+      } else {
+        log(`ℹ️ legacy-collector already exists for family: ${familyName}`);
+      }
+    }
+  } catch (e) {
+    console.error("Failed to backfill legacy-collector:", e);
   }
 
   // One-time migration for existing testers (starter skin + star redistribution)

@@ -320,7 +320,8 @@ export default function Achievements() {
                 "task_streak": 2,
                 "lifetime_milestone": 3,
                 "star_collector": 4,
-                "first_weekly_finisher": 5,
+                "legacy_collector": 5,
+                "first_weekly_finisher": 6,
               };
               const typeDiff = (typeOrder[a.type] ?? 99) - (typeOrder[b.type] ?? 99);
               if (typeDiff !== 0) return typeDiff;
