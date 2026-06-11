@@ -849,6 +849,13 @@ async function ensurePinboardTable() {
   // Add Nemicolopterus & Skater Kid to complete the last row
   await addNemicolopterusAndSkaterKidIfNeeded();
 
+  // Add legacy_collector enum value if it doesn't exist yet
+  try {
+    await db.execute(sql`ALTER TYPE achievement_type ADD VALUE IF NOT EXISTS 'legacy_collector'`);
+  } catch (_e) {
+    // Already exists or not supported — ignore
+  }
+
   // One-time migration for existing testers (starter skin + star redistribution)
   await migrateExistingMembersForTestPhase();
 

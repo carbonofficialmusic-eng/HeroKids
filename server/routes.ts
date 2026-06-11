@@ -4681,6 +4681,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           starsFound: starResult.totalStarsFound,
         });
       }
+
+      // Trigger legacy_collector achievement check if a legacy skin was awarded
+      if (starResult.legacySkinAwarded) {
+        await achievementEngine.processEvent({
+          type: "skin_unlocked",
+          familyName: member.familyName,
+          memberId: member.id,
+        });
+      }
       
       // Broadcast skin discovery to family (with star info if found)
       broadcastToFamily(member.familyName, {
@@ -5355,7 +5364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const definitions = await storage.getAchievementDefinitionsByFamily(member.familyName);
-      res.json(definitions);
+      res.json(definitions.filter(d => d.slug !== "task-streak-7"));
     } catch (error: any) {
       console.error("Error fetching achievement definitions:", error);
       res.status(500).json({ message: "Failed to fetch achievement definitions" });

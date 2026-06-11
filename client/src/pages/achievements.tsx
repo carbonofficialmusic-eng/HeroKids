@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ChevronLeft, Trophy, Star, Award, TrendingUp, Flame, History, Sparkles, Gift, Coins } from "lucide-react";
+import { ChevronLeft, Trophy, Star, Award, TrendingUp, Flame, History, Sparkles, Gift, Coins, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -105,7 +105,7 @@ function DebouncedNumberInput({
 interface AchievementDefinition {
   id: string;
   familyName: string;
-  type: "first_weekly_finisher" | "weekly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak" | "star_collector";
+  type: "first_weekly_finisher" | "weekly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak" | "star_collector" | "legacy_collector";
   slug: string;
   title: string;
   description: string;
@@ -261,6 +261,8 @@ export default function Achievements() {
         return <Flame className="h-5 w-5" />;
       case "star_collector":
         return <Sparkles className="h-5 w-5" />;
+      case "legacy_collector":
+        return <Shield className="h-5 w-5" />;
       default:
         return <Trophy className="h-5 w-5" />;
     }
@@ -339,7 +341,7 @@ export default function Achievements() {
               <Card 
                 key={achievement.id} 
                 data-testid={`achievement-card-${achievement.slug}`}
-                className={!achievement.isActive ? "opacity-60" : ""}
+                className={!achievement.isActive ? "opacity-75" : ""}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between gap-4">
@@ -575,7 +577,7 @@ export default function Achievements() {
         </Tabs>
 
         {/* Info Card */}
-        <Card className="bg-muted/50">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base">{t("achievements.howItWorks")}</CardTitle>
           </CardHeader>

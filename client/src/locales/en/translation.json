@@ -1492,7 +1492,9 @@
     "desc_lifetime-1000": "Earn a total of 1000 points",
     "desc_lifetime-2000": "Earn a total of 2000 points",
     "desc_weekly-leaderboard-1st": "Finish in 1st place on the weekly leaderboard",
-    "desc_star-collector": "Find 4 hidden stars on skin cards"
+    "desc_star-collector": "Find 4 hidden stars on skin cards",
+    "title_legacy-collector": "Legacy Collector",
+    "desc_legacy-collector": "Unlock 10 of 12 HeroKids Legacy skins"
   },
   "error": "Error",
   "goBack": "Go Back",

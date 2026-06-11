@@ -1,9 +1,10 @@
 import { storage } from "./storage";
 import { broadcastToFamily } from "./websocket";
 import type { AchievementDefinition, FamilyMember } from "@shared/schema";
+import { isLegacySkin } from "@shared/skin-config";
 
 export interface AchievementEvent {
-  type: "task_approved" | "task_rejected" | "midnight_reset" | "daily_check" | "star_found";
+  type: "task_approved" | "task_rejected" | "midnight_reset" | "daily_check" | "star_found" | "skin_unlocked";
   familyName: string;
   memberId?: string;
   taskId?: string;
@@ -107,6 +108,9 @@ export class AchievementEngine {
         break;
       case "star_collector":
         await this.evaluateStarCollector(definition, event);
+        break;
+      case "legacy_collector":
+        await this.evaluateLegacyCollector(definition, event);
         break;
     }
   }
@@ -423,6 +427,42 @@ export class AchievementEngine {
 
     await storage.awardAchievement(definition.id, event.memberId, definition.bonusPoints);
     console.log(`⭐ ${member.displayName} earned "${definition.title}" - collected ${starsRequired} stars! (+${definition.bonusPoints} points)`);
+
+    broadcastToFamily(event.familyName, {
+      type: "achievement_earned",
+      memberId: event.memberId,
+      memberName: member.displayName,
+      achievementTitle: definition.title,
+      bonusPoints: definition.bonusPoints,
+    });
+
+    await createAchievementNotification(
+      event.familyName,
+      member.displayName,
+      definition.title,
+      definition.bonusPoints,
+      event.memberId
+    );
+  }
+
+  private async evaluateLegacyCollector(definition: AchievementDefinition, event: AchievementEvent): Promise<void> {
+    if (event.type !== "skin_unlocked" || !event.memberId) return;
+
+    const member = await storage.getFamilyMember(event.memberId);
+    if (!member) return;
+
+    const config = definition.config as { requiredLegacySkins?: number };
+    const requiredCount = config.requiredLegacySkins ?? 10;
+
+    const legacySkinsUnlocked = (member.unlockedSkins ?? []).filter((skinId: string) => isLegacySkin(skinId)).length;
+    if (legacySkinsUnlocked < requiredCount) return;
+
+    const existingAwards = await storage.getAchievementAwardsByMember(event.memberId);
+    const alreadyAwarded = existingAwards.some(award => award.achievementDefinitionId === definition.id);
+    if (alreadyAwarded) return;
+
+    await storage.awardAchievement(definition.id, event.memberId, definition.bonusPoints);
+    console.log(`[Achievement] ${member.displayName} earned "${definition.title}" - unlocked ${legacySkinsUnlocked} Legacy skins! (+${definition.bonusPoints} points)`);
 
     broadcastToFamily(event.familyName, {
       type: "achievement_earned",

@@ -24,7 +24,7 @@ export const recurrenceEnum = pgEnum("recurrence", ["none", "daily", "weekdays",
 export const subscriptionTierEnum = pgEnum("subscription_tier", ["free", "family", "family_plus", "family_hero"]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "trialing", "past_due", "canceled", "incomplete"]);
 export const sharingStatusEnum = pgEnum("sharing_status", ["not_shared", "sharing_active", "sharing_finalized"]);
-export const achievementTypeEnum = pgEnum("achievement_type", ["first_weekly_finisher", "weekly_leaderboard", "perfect_week", "lifetime_milestone", "task_streak", "star_collector"]);
+export const achievementTypeEnum = pgEnum("achievement_type", ["first_weekly_finisher", "weekly_leaderboard", "perfect_week", "lifetime_milestone", "task_streak", "star_collector", "legacy_collector"]);
 export const contributionPeriodEnum = pgEnum("contribution_period", ["weekly", "monthly"]);
 
 // Session storage table - Required for Replit Auth

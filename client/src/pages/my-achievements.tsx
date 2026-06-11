@@ -19,7 +19,7 @@ import type { User, FamilyMember } from "@shared/schema";
 interface AchievementDefinition {
   id: string;
   familyName: string;
-  type: "first_weekly_finisher" | "weekly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak" | "star_collector";
+  type: "first_weekly_finisher" | "weekly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak" | "star_collector" | "legacy_collector";
   slug: string;
   title: string;
   description: string;

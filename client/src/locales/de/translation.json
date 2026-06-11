@@ -1502,7 +1502,9 @@
     "desc_lifetime-1000": "Verdiene insgesamt 1000 Punkte",
     "desc_lifetime-2000": "Verdiene insgesamt 2000 Punkte",
     "desc_weekly-leaderboard-1st": "Belege den 1. Platz in der wöchentlichen Bestenliste",
-    "desc_star-collector": "Finde 4 versteckte Sterne auf Skin-Karten"
+    "desc_star-collector": "Finde 4 versteckte Sterne auf Skin-Karten",
+    "title_legacy-collector": "Legacy-Sammler",
+    "desc_legacy-collector": "Schalte 10 von 12 HeroKids Legacy-Skins frei"
   },
   "error": "Fehler",
   "goBack": "Zurück",
