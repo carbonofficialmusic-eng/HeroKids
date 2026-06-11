@@ -9,7 +9,7 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  language: "en",
+  language: "de",
   isLoading: true,
 });
 
@@ -23,7 +23,7 @@ interface LanguageProviderProps {
 
 export function LanguageProvider({ children }: LanguageProviderProps) {
   const { i18n } = useTranslation();
-  const [language, setLanguage] = useState<string>("en");
+  const [language, setLanguage] = useState<string>(i18n.language || "de");
 
   const { data: family, isLoading, isError } = useQuery<Family>({
     queryKey: ["/api/families/settings"],
@@ -35,11 +35,10 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     if (family?.language && family.language !== language) {
       setLanguage(family.language);
       i18n.changeLanguage(family.language);
-    } else if (isError) {
-      setLanguage("en");
-      i18n.changeLanguage("en");
     }
-  }, [family?.language, isError, i18n, language]);
+    // On error (e.g. unauthenticated on landing page), leave the language
+    // untouched — i18n.ts already picked the correct browser/stored language.
+  }, [family?.language, i18n, language]);
 
   useEffect(() => {
     const ws = (window as any).__wsConnection;
