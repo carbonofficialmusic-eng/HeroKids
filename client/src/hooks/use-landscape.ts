@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const QUERY = '(orientation: landscape) and (max-height: 520px)';
+const QUERY = '(orientation: landscape)';
 
 function canMatchMedia() {
   return typeof window !== 'undefined' && typeof window.matchMedia === 'function';
