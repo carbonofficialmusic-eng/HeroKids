@@ -7393,7 +7393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: users.createdAt,
           lastLoginAt: users.lastLoginAt,
           linkedMemberId: familyMembers.id,
-          linkedMemberName: familyMembers.name,
+          linkedMemberName: familyMembers.displayName,
           linkedMemberRole: familyMembers.role,
           linkedFamilyName: familyMembers.familyName,
         })
