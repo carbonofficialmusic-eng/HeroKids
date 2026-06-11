@@ -1059,7 +1059,7 @@ export default function Dashboard() {
       {/* Header — position:fixed so it never scrolls away in WKWebView */}
       <header
         data-app-header
-        className="fixed top-0 left-0 right-0 z-40 w-full bg-background/70 backdrop-blur-md overflow-hidden"
+        className="fixed top-0 left-0 right-0 z-40 w-full bg-background/70 backdrop-blur-md"
         style={{
           paddingTop: 'var(--sat, env(safe-area-inset-top))',
           height: 'calc(var(--header-h) + var(--sat, env(safe-area-inset-top)))',
