@@ -412,10 +412,10 @@ export default function Approvals() {
           )}
           {completions.length > 1 && (
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={handleSelectAll}
-              className="ml-auto"
+              className="ml-auto font-medium"
               data-testid="button-select-all"
             >
               <Checkbox
