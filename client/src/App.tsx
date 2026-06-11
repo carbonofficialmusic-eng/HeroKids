@@ -163,28 +163,48 @@ function Router() {
   // Only set when value > 0 — if WKWebView hasn't resolved the inset yet it
   // returns 0, and a stored 0px would shadow the env() fallback permanently.
   useEffect(() => {
-    const cacheSafeAreaTop = () => {
+    const readSat = () => {
       const div = document.createElement('div');
       div.style.cssText = 'position:fixed;top:0;left:0;height:env(safe-area-inset-top,0px);width:0;visibility:hidden;pointer-events:none';
       document.documentElement.appendChild(div);
       const px = parseFloat(getComputedStyle(div).height) || 0;
       document.documentElement.removeChild(div);
+      return px;
+    };
+    const cacheSafeAreaTop = () => {
+      const px = readSat();
       // Guard: plausible safe-area range only (0 < px < 100).
       // Transient WKWebView spikes (e.g. UIScrollView offset leaking in) are
       // rejected so a stale large value can never corrupt --sat.
+      // Only set when > 0 on initial load — WKWebView may not have resolved
+      // the inset yet and a stored 0px would shadow the env() fallback.
       if (px > 0 && px < 100) {
         document.documentElement.style.setProperty('--sat', `${px}px`);
       }
+    };
+    // On orientation change we MUST allow resetting to 0 (landscape has no
+    // status-bar inset). Delay 350 ms so the browser has finished rotating
+    // and env(safe-area-inset-top) reflects the new orientation.
+    let orientationTimer: ReturnType<typeof setTimeout> | null = null;
+    const onOrientationChange = () => {
+      if (orientationTimer) clearTimeout(orientationTimer);
+      orientationTimer = setTimeout(() => {
+        const px = readSat();
+        if (px < 100) { // spike guard only — allow 0
+          document.documentElement.style.setProperty('--sat', `${px}px`);
+        }
+      }, 350);
     };
     cacheSafeAreaTop();
     // Retry shortly after — WKWebView may not know the inset on first paint
     const t1 = setTimeout(cacheSafeAreaTop, 100);
     const t2 = setTimeout(cacheSafeAreaTop, 500);
-    window.addEventListener('orientationchange', cacheSafeAreaTop);
+    window.addEventListener('orientationchange', onOrientationChange);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
-      window.removeEventListener('orientationchange', cacheSafeAreaTop);
+      if (orientationTimer) clearTimeout(orientationTimer);
+      window.removeEventListener('orientationchange', onOrientationChange);
     };
   }, []);
 
@@ -254,7 +274,9 @@ function Router() {
       document.documentElement.appendChild(div);
       const px = parseFloat(getComputedStyle(div).height) || 0;
       document.documentElement.removeChild(div);
-      if (px > 0) document.documentElement.style.setProperty('--sat', `${px}px`);
+      // Allow 0 here (resume/orientation): landscape legitimately has 0 inset.
+      // Spike guard < 100 prevents UIScrollView offset leaking in.
+      if (px < 100) document.documentElement.style.setProperty('--sat', `${px}px`);
     };
     const doResumeKick = () => {
       const root = document.getElementById('root');
