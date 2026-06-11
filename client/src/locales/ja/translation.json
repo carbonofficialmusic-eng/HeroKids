@@ -1433,6 +1433,7 @@
     "title_lifetime-1000": "1000ポイント達成",
     "title_lifetime-2000": "2000ポイント達成",
     "title_weekly-leaderboard-1st": "週間チャンピオン",
+    "title_monthly-leaderboard-1st": "月間チャンピオン",
     "desc_first-weekly-finisher": "家族で最初にすべての週間タスクを完了する",
     "desc_perfect-week": "拒否されることなくすべての週間タスクを完了する",
     "desc_task-streak-7": "7日間連続でタスクを完了する",
@@ -1443,7 +1444,8 @@
     "desc_lifetime-500": "合計500ポイントを獲得する",
     "desc_lifetime-1000": "合計1000ポイントを獲得する",
     "desc_lifetime-2000": "合計2000ポイントを獲得する",
-    "desc_weekly-leaderboard-1st": "週間ランキングで1位になる"
+    "desc_weekly-leaderboard-1st": "週間ランキングで1位になる",
+    "desc_monthly-leaderboard-1st": "月間ランキングで1位になる"
   },
   "error": "エラー",
   "goBack": "戻る",

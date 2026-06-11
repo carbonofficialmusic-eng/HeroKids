@@ -1433,6 +1433,7 @@
     "title_lifetime-1000": "1000积分里程碑",
     "title_lifetime-2000": "2000积分里程碑",
     "title_weekly-leaderboard-1st": "每周冠军",
+    "title_monthly-leaderboard-1st": "每月冠军",
     "desc_first-weekly-finisher": "成为第一个完成所有每周任务的家庭成员",
     "desc_perfect-week": "完成所有每周任务且没有被拒绝",
     "desc_task-streak-7": "连续7天完成任务",
@@ -1443,7 +1444,8 @@
     "desc_lifetime-500": "累计获得500积分",
     "desc_lifetime-1000": "累计获得1000积分",
     "desc_lifetime-2000": "累计获得2000积分",
-    "desc_weekly-leaderboard-1st": "在每周排行榜中获得第1名"
+    "desc_weekly-leaderboard-1st": "在每周排行榜中获得第1名",
+    "desc_monthly-leaderboard-1st": "在每月排行榜中获得第1名"
   },
   "error": "错误",
   "goBack": "返回",

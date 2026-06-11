@@ -1433,6 +1433,7 @@
     "title_lifetime-1000": "Jalon 1000 points",
     "title_lifetime-2000": "Jalon 2000 points",
     "title_weekly-leaderboard-1st": "Champion hebdomadaire",
+    "title_monthly-leaderboard-1st": "Champion du mois",
     "desc_first-weekly-finisher": "Soyez le premier membre de la famille à terminer toutes les tâches hebdomadaires",
     "desc_perfect-week": "Terminez toutes vos tâches hebdomadaires sans aucun rejet",
     "desc_task-streak-7": "Terminez des tâches pendant 7 jours consécutifs",
@@ -1443,7 +1444,8 @@
     "desc_lifetime-500": "Gagnez un total de 500 points",
     "desc_lifetime-1000": "Gagnez un total de 1000 points",
     "desc_lifetime-2000": "Gagnez un total de 2000 points",
-    "desc_weekly-leaderboard-1st": "Terminez à la 1ère place du classement hebdomadaire"
+    "desc_weekly-leaderboard-1st": "Terminez à la 1ère place du classement hebdomadaire",
+    "desc_monthly-leaderboard-1st": "Terminez à la 1ère place du classement mensuel"
   },
   "error": "Erreur",
   "goBack": "Retour",

@@ -1482,6 +1482,7 @@
     "title_lifetime-1000": "1000 Points Milestone",
     "title_lifetime-2000": "2000 Points Milestone",
     "title_weekly-leaderboard-1st": "Weekly Champion",
+    "title_monthly-leaderboard-1st": "Monthly Champion",
     "title_star-collector": "Star Collector",
     "desc_first-weekly-finisher": "Be the first family member to complete all weekly recurring tasks",
     "desc_perfect-week": "Complete all your weekly recurring tasks without any rejections",
@@ -1492,6 +1493,7 @@
     "desc_lifetime-1000": "Earn a total of 1000 points",
     "desc_lifetime-2000": "Earn a total of 2000 points",
     "desc_weekly-leaderboard-1st": "Finish in 1st place on the weekly leaderboard",
+    "desc_monthly-leaderboard-1st": "Finish in 1st place on the monthly leaderboard",
     "desc_star-collector": "Find 4 hidden stars on skin cards",
     "title_legacy-collector": "Legacy Collector",
     "desc_legacy-collector": "Unlock 10 of 12 HeroKids Legacy skins"

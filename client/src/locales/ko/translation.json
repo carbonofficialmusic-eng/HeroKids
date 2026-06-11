@@ -1386,6 +1386,7 @@
     "title_lifetime-1000": "1000포인트 달성",
     "title_lifetime-2000": "2000포인트 달성",
     "title_weekly-leaderboard-1st": "주간 챔피언",
+    "title_monthly-leaderboard-1st": "월간 챔피언",
     "desc_first-weekly-finisher": "가족 중 가장 먼저 모든 주간 과제를 완료하세요",
     "desc_perfect-week": "거부 없이 모든 주간 과제를 완료하세요",
     "desc_task-streak-7": "7일 연속으로 과제를 완료하세요",
@@ -1396,7 +1397,8 @@
     "desc_lifetime-500": "총 500 포인트를 획득하세요",
     "desc_lifetime-1000": "총 1000 포인트를 획득하세요",
     "desc_lifetime-2000": "총 2000 포인트를 획득하세요",
-    "desc_weekly-leaderboard-1st": "주간 리더보드에서 1위를 차지하세요"
+    "desc_weekly-leaderboard-1st": "주간 리더보드에서 1위를 차지하세요",
+    "desc_monthly-leaderboard-1st": "월간 리더보드에서 1위를 차지하세요"
   },
   "error": "오류",
   "goBack": "돌아가기",

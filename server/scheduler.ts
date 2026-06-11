@@ -262,6 +262,13 @@ async function resetWeeklyPointsForFamily(familyName: string) {
 
 async function resetMonthlyPointsForFamily(familyName: string) {
   try {
+    // First: award Monthly Champion using current month's data
+    await achievementEngine.processEvent({
+      type: "monthly_reset",
+      familyName,
+    });
+
+    // Then: reset monthly points
     await storage.resetMonthlyPointsForFamily(familyName);
     console.log(`✅ Monthly points reset for family "${familyName}"`);
   } catch (error) {

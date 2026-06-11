@@ -1492,6 +1492,7 @@
     "title_lifetime-1000": "1000 Punkte Bonus-Belohnung",
     "title_lifetime-2000": "2000 Punkte Bonus-Belohnung",
     "title_weekly-leaderboard-1st": "Wöchentlicher Champion",
+    "title_monthly-leaderboard-1st": "Monatlicher Champion",
     "title_star-collector": "Sterne-Sammler",
     "desc_first-weekly-finisher": "Sei das erste Familienmitglied, das alle wiederkehrenden Wochenaufgaben erledigt",
     "desc_perfect-week": "Erledige alle deine wiederkehrenden Wochenaufgaben ohne Ablehnungen",
@@ -1502,6 +1503,7 @@
     "desc_lifetime-1000": "Verdiene insgesamt 1000 Punkte",
     "desc_lifetime-2000": "Verdiene insgesamt 2000 Punkte",
     "desc_weekly-leaderboard-1st": "Belege den 1. Platz in der wöchentlichen Bestenliste",
+    "desc_monthly-leaderboard-1st": "Belege den 1. Platz in der monatlichen Bestenliste",
     "desc_star-collector": "Finde 4 versteckte Sterne auf Skin-Karten",
     "title_legacy-collector": "Legacy-Sammler",
     "desc_legacy-collector": "Schalte 10 von 12 HeroKids Legacy-Skins frei"

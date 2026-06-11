@@ -1433,6 +1433,7 @@
     "title_lifetime-1000": "Hito 1000 puntos",
     "title_lifetime-2000": "Hito 2000 puntos",
     "title_weekly-leaderboard-1st": "Campeón semanal",
+    "title_monthly-leaderboard-1st": "Campeón mensual",
     "desc_first-weekly-finisher": "Sé el primer miembro de la familia en completar todas las tareas semanales",
     "desc_perfect-week": "Completa todas tus tareas semanales sin ningún rechazo",
     "desc_task-streak-7": "Completa tareas durante 7 días seguidos",
@@ -1443,7 +1444,8 @@
     "desc_lifetime-500": "Gana un total de 500 puntos",
     "desc_lifetime-1000": "Gana un total de 1000 puntos",
     "desc_lifetime-2000": "Gana un total de 2000 puntos",
-    "desc_weekly-leaderboard-1st": "Termina en 1er lugar en la tabla semanal"
+    "desc_weekly-leaderboard-1st": "Termina en 1er lugar en la tabla semanal",
+    "desc_monthly-leaderboard-1st": "Termina en 1er lugar en la tabla mensual"
   },
   "error": "Error",
   "goBack": "Volver",

@@ -1444,6 +1444,7 @@
     "title_lifetime-1000": "1000 poäng milstolpe",
     "title_lifetime-2000": "2000 poäng milstolpe",
     "title_weekly-leaderboard-1st": "Veckans mästare",
+    "title_monthly-leaderboard-1st": "Månadens mästare",
     "desc_first-weekly-finisher": "Var den första familjemedlemmen som slutför alla veckans uppgifter",
     "desc_perfect-week": "Slutför alla dina veckoupgifter utan avslag",
     "desc_task-streak-7": "Slutför uppgifter 7 dagar i rad",
@@ -1454,7 +1455,8 @@
     "desc_lifetime-500": "Tjäna totalt 500 poäng",
     "desc_lifetime-1000": "Tjäna totalt 1000 poäng",
     "desc_lifetime-2000": "Tjäna totalt 2000 poäng",
-    "desc_weekly-leaderboard-1st": "Ta 1:a platsen på veckans topplista"
+    "desc_weekly-leaderboard-1st": "Ta 1:a platsen på veckans topplista",
+    "desc_monthly-leaderboard-1st": "Ta 1:a platsen på månadens topplista"
   },
   "myAchievements": {
     "title": "Mina Milstolpar",

@@ -4,7 +4,7 @@ import type { AchievementDefinition, FamilyMember } from "@shared/schema";
 import { isLegacySkin } from "@shared/skin-config";
 
 export interface AchievementEvent {
-  type: "task_approved" | "task_rejected" | "midnight_reset" | "daily_check" | "star_found" | "skin_unlocked";
+  type: "task_approved" | "task_rejected" | "midnight_reset" | "monthly_reset" | "daily_check" | "star_found" | "skin_unlocked";
   familyName: string;
   memberId?: string;
   taskId?: string;
@@ -111,6 +111,9 @@ export class AchievementEngine {
         break;
       case "legacy_collector":
         await this.evaluateLegacyCollector(definition, event);
+        break;
+      case "monthly_leaderboard":
+        await this.evaluateMonthlyLeaderboard(definition, event);
         break;
     }
   }
@@ -479,6 +482,44 @@ export class AchievementEngine {
       definition.bonusPoints,
       event.memberId
     );
+  }
+
+  private async evaluateMonthlyLeaderboard(definition: AchievementDefinition, event: AchievementEvent): Promise<void> {
+    if (event.type !== "monthly_reset") return;
+
+    const members = await storage.getFamilyMembersByFamily(event.familyName);
+    if (members.length === 0) return;
+
+    const sortedMembers = [...members]
+      .filter(m => !m.excludeFromLeaderboard)
+      .sort((a, b) => b.monthlyPoints - a.monthlyPoints);
+
+    const config = definition.config as { rank: number };
+    const rankIndex = (config.rank ?? 1) - 1;
+
+    if (sortedMembers.length > rankIndex) {
+      const winner = sortedMembers[rankIndex];
+      if (winner.monthlyPoints > 0) {
+        await storage.awardAchievement(definition.id, winner.id, definition.bonusPoints);
+        console.log(`🏆 ${winner.displayName} earned "${definition.title}" for rank ${config.rank} on monthly leaderboard (+${definition.bonusPoints} points)`);
+
+        broadcastToFamily(event.familyName, {
+          type: "achievement_earned",
+          memberId: winner.id,
+          memberName: winner.displayName,
+          achievementTitle: definition.title,
+          bonusPoints: definition.bonusPoints,
+        });
+
+        await createAchievementNotification(
+          event.familyName,
+          winner.displayName,
+          definition.title,
+          definition.bonusPoints,
+          winner.id
+        );
+      }
+    }
   }
 }
 

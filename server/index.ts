@@ -849,12 +849,13 @@ async function ensurePinboardTable() {
   // Add Nemicolopterus & Skater Kid to complete the last row
   await addNemicolopterusAndSkaterKidIfNeeded();
 
-  // Add legacy_collector enum value if it doesn't exist yet
+  // Add new achievement_type enum values if they don't exist yet
   try {
     await db.execute(sql`ALTER TYPE achievement_type ADD VALUE IF NOT EXISTS 'legacy_collector'`);
-  } catch (_e) {
-    // Already exists or not supported — ignore
-  }
+  } catch (_e) { /* ignore */ }
+  try {
+    await db.execute(sql`ALTER TYPE achievement_type ADD VALUE IF NOT EXISTS 'monthly_leaderboard'`);
+  } catch (_e) { /* ignore */ }
 
   // Backfill legacy-collector achievement for families that already have achievements but are missing it
   try {
@@ -886,9 +887,34 @@ async function ensurePinboardTable() {
       } else {
         log(`ℹ️ legacy-collector already exists for family: ${familyName}`);
       }
+
+      // Backfill monthly-leaderboard-1st
+      const existingMonthly = await db.execute(
+        sql`SELECT id FROM achievement_definitions WHERE family_name = ${familyName} AND slug = 'monthly-leaderboard-1st'`
+      );
+      if (existingMonthly.rows.length === 0) {
+        await db.execute(sql`
+          INSERT INTO achievement_definitions (id, family_name, type, slug, title, description, bonus_points, reward_type, is_active, config)
+          VALUES (
+            gen_random_uuid(),
+            ${familyName},
+            'monthly_leaderboard'::achievement_type,
+            'monthly-leaderboard-1st',
+            'Monthly Champion',
+            'Finish in 1st place on the monthly leaderboard',
+            200,
+            'custom',
+            false,
+            '{"rank": 1}'::jsonb
+          )
+        `);
+        log(`✅ Added monthly-leaderboard-1st achievement for family: ${familyName}`);
+      } else {
+        log(`ℹ️ monthly-leaderboard-1st already exists for family: ${familyName}`);
+      }
     }
   } catch (e) {
-    console.error("Failed to backfill legacy-collector:", e);
+    console.error("Failed to backfill achievements:", e);
   }
 
   // One-time migration for existing testers (starter skin + star redistribution)

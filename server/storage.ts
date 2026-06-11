@@ -100,6 +100,16 @@ const DEFAULT_ACHIEVEMENT_TEMPLATES = [
     config: { rank: 1 },
   },
   {
+    type: "monthly_leaderboard" as const,
+    slug: "monthly-leaderboard-1st",
+    title: "Monthly Champion",
+    description: "Finish in 1st place on the monthly leaderboard",
+    bonusPoints: 200,
+    rewardType: "custom" as const,
+    isActive: false,
+    config: { rank: 1 },
+  },
+  {
     type: "perfect_week" as const,
     slug: "perfect-week",
     title: "Perfect Week",

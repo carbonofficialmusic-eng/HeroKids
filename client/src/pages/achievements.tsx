@@ -105,7 +105,7 @@ function DebouncedNumberInput({
 interface AchievementDefinition {
   id: string;
   familyName: string;
-  type: "first_weekly_finisher" | "weekly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak" | "star_collector" | "legacy_collector";
+  type: "first_weekly_finisher" | "weekly_leaderboard" | "monthly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak" | "star_collector" | "legacy_collector";
   slug: string;
   title: string;
   description: string;
@@ -261,6 +261,8 @@ export default function Achievements() {
         return <Flame className="h-5 w-5" />;
       case "star_collector":
         return <Sparkles className="h-5 w-5" />;
+      case "monthly_leaderboard":
+        return <Trophy className="h-5 w-5" />;
       case "legacy_collector":
         return <Shield className="h-5 w-5" />;
       default:
@@ -317,11 +319,12 @@ export default function Achievements() {
               const typeOrder: Record<string, number> = {
                 "perfect_week": 0,
                 "weekly_leaderboard": 1,
-                "task_streak": 2,
-                "lifetime_milestone": 3,
-                "star_collector": 4,
-                "legacy_collector": 5,
-                "first_weekly_finisher": 6,
+                "monthly_leaderboard": 2,
+                "task_streak": 3,
+                "lifetime_milestone": 4,
+                "star_collector": 5,
+                "legacy_collector": 6,
+                "first_weekly_finisher": 7,
               };
               const typeDiff = (typeOrder[a.type] ?? 99) - (typeOrder[b.type] ?? 99);
               if (typeDiff !== 0) return typeDiff;
