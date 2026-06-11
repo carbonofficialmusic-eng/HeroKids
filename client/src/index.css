@@ -290,7 +290,7 @@ html, body {
 
 @media (orientation: landscape) and (max-height: 600px) {
   :root {
-    --header-h: 2rem;
+    --header-h: 2.5rem;
   }
   .header-avatar {
     height: 1.625rem !important;
@@ -302,6 +302,19 @@ html, body {
   .header-name-text {
     font-size: 0.8rem !important;
     line-height: 1 !important;
+  }
+  /* Scale down icon buttons inside the fixed header so they fit with breathing room */
+  [data-app-header] button {
+    height: 1.75rem !important;
+    min-height: 1.75rem !important;
+    width: 1.75rem !important;
+    min-width: 1.75rem !important;
+    padding: 0 !important;
+  }
+  /* Scale down the tier badge pill */
+  [data-app-header] [data-testid="badge-current-tier"] {
+    font-size: 0.65rem !important;
+    padding: 0.1rem 0.4rem !important;
   }
 }
 
