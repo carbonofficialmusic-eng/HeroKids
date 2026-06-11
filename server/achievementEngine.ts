@@ -3,11 +3,12 @@ import { broadcastToFamily } from "./websocket";
 import type { AchievementDefinition, FamilyMember } from "@shared/schema";
 
 export interface AchievementEvent {
-  type: "task_approved" | "task_rejected" | "midnight_reset" | "daily_check";
+  type: "task_approved" | "task_rejected" | "midnight_reset" | "daily_check" | "star_found";
   familyName: string;
   memberId?: string;
   taskId?: string;
   pointsEarned?: number;
+  starsFound?: number;
 }
 
 // Helper to create achievement notifications (for each parent and the child who earned it)
@@ -46,6 +47,16 @@ async function createAchievementNotification(
 
 export class AchievementEngine {
   async processEvent(event: AchievementEvent): Promise<void> {
+    // Always track weekly recurring-task progress regardless of which definitions are active.
+    // This ensures perfect_week can evaluate even when first_weekly_finisher is inactive.
+    if (event.type === "task_approved" && event.memberId && event.taskId) {
+      try {
+        await this.trackWeeklyCompletion(event);
+      } catch (error) {
+        console.error("Error tracking weekly completion:", error);
+      }
+    }
+
     const definitions = await storage.getAchievementDefinitionsByFamily(event.familyName);
     const activeDefinitions = definitions.filter(d => d.isActive);
 
@@ -56,6 +67,25 @@ export class AchievementEngine {
         console.error(`Error evaluating achievement ${definition.slug}:`, error);
       }
     }
+  }
+
+  /**
+   * Increment weeklyCompletionCount for recurring-task approvals.
+   * Called unconditionally so the counter is always accurate,
+   * independent of which achievement definitions are currently active.
+   */
+  private async trackWeeklyCompletion(event: AchievementEvent): Promise<void> {
+    if (!event.memberId || !event.taskId) return;
+    const familyTasks = await storage.getTasksByFamily(event.familyName);
+    const task = familyTasks.find(t => t.id === event.taskId);
+    if (!task) return;
+    const isRecurring = task.recurrence === "daily" || task.recurrence === "weekdays" || task.recurrence === "weekly";
+    if (!isRecurring) return;
+
+    const achievementMember = await storage.getOrCreateAchievementMember(event.familyName, event.memberId);
+    await storage.updateAchievementMember(achievementMember.id, {
+      weeklyCompletionCount: achievementMember.weeklyCompletionCount + 1,
+    });
   }
 
   private async evaluateAchievement(definition: AchievementDefinition, event: AchievementEvent): Promise<void> {
@@ -75,6 +105,9 @@ export class AchievementEngine {
       case "task_streak":
         await this.evaluateTaskStreak(definition, event);
         break;
+      case "star_collector":
+        await this.evaluateStarCollector(definition, event);
+        break;
     }
   }
 
@@ -84,19 +117,29 @@ export class AchievementEngine {
     const member = await storage.getFamilyMember(event.memberId);
     if (!member) return;
 
+    // weeklyCompletionCount was already incremented by trackWeeklyCompletion (recurring tasks only)
     const achievementMember = await storage.getOrCreateAchievementMember(event.familyName, event.memberId);
 
     if (achievementMember.firstWeeklyFinisher) {
       return;
     }
 
-    achievementMember.weeklyCompletionCount += 1;
-
+    // Only proceed if the approved task is a recurring one (tracked by the shared counter)
     const familyTasks = await storage.getTasksByFamily(event.familyName);
+    const approvedTask = event.taskId ? familyTasks.find(t => t.id === event.taskId) : null;
+    const isRecurringTask = approvedTask && (
+      approvedTask.recurrence === "daily" ||
+      approvedTask.recurrence === "weekdays" ||
+      approvedTask.recurrence === "weekly"
+    );
+    if (!isRecurringTask) return;
+
     const assignedTasks = await storage.getTaskAssignmentsByMember(event.memberId);
     const totalAssignedTasks = assignedTasks.filter(taskId => {
       const task = familyTasks.find(t => t.id === taskId);
-      return task && task.status === "active";
+      return task &&
+        task.status === "active" &&
+        (task.recurrence === "daily" || task.recurrence === "weekdays" || task.recurrence === "weekly");
     }).length;
 
     const allWeeklyTasksCompleted = achievementMember.weeklyCompletionCount >= totalAssignedTasks && totalAssignedTasks > 0;
@@ -117,13 +160,11 @@ export class AchievementEngine {
       if (!anyoneClaimed) {
         await storage.updateAchievementMember(achievementMember.id, {
           firstWeeklyFinisher: true,
-          weeklyCompletionCount: achievementMember.weeklyCompletionCount,
         });
 
         await storage.awardAchievement(definition.id, event.memberId, definition.bonusPoints);
         console.log(`🏆 ${member.displayName} earned "${definition.title}" (+${definition.bonusPoints} points)`);
         
-        // Broadcast achievement to family with celebration
         broadcastToFamily(event.familyName, {
           type: "achievement_earned",
           memberId: event.memberId,
@@ -132,7 +173,6 @@ export class AchievementEngine {
           bonusPoints: definition.bonusPoints,
         });
         
-        // Create notification for parents
         await createAchievementNotification(
           event.familyName,
           member.displayName,
@@ -141,10 +181,6 @@ export class AchievementEngine {
           event.memberId
         );
       }
-    } else {
-      await storage.updateAchievementMember(achievementMember.id, {
-        weeklyCompletionCount: achievementMember.weeklyCompletionCount,
-      });
     }
   }
 
@@ -193,20 +229,40 @@ export class AchievementEngine {
 
   private async evaluatePerfectWeek(definition: AchievementDefinition, event: AchievementEvent): Promise<void> {
     if (event.type === "task_rejected" && event.memberId) {
-      const achievementMember = await storage.getOrCreateAchievementMember(event.familyName, event.memberId);
-      await storage.updateAchievementMember(achievementMember.id, {
-        weeklyRejectionCount: achievementMember.weeklyRejectionCount + 1,
-      });
+      const familyTasks = await storage.getTasksByFamily(event.familyName);
+      const rejectedTask = event.taskId ? familyTasks.find(t => t.id === event.taskId) : null;
+      const isRecurringTask = rejectedTask && (
+        rejectedTask.recurrence === "daily" ||
+        rejectedTask.recurrence === "weekdays" ||
+        rejectedTask.recurrence === "weekly"
+      );
+      if (isRecurringTask) {
+        const achievementMember = await storage.getOrCreateAchievementMember(event.familyName, event.memberId);
+        await storage.updateAchievementMember(achievementMember.id, {
+          weeklyRejectionCount: achievementMember.weeklyRejectionCount + 1,
+        });
+      }
     } else if (event.type === "midnight_reset") {
       const members = await storage.getFamilyMembersByFamily(event.familyName);
+      const familyTasks = await storage.getTasksByFamily(event.familyName);
 
       for (const member of members) {
         const achievementMember = await storage.getOrCreateAchievementMember(event.familyName, member.id);
-        
-        const hasTasks = achievementMember.weeklyCompletionCount > 0;
+
+        // Count total assigned recurring tasks for this member
+        const assignedTasks = await storage.getTaskAssignmentsByMember(member.id);
+        const totalRecurringTasks = assignedTasks.filter(taskId => {
+          const task = familyTasks.find(t => t.id === taskId);
+          return task &&
+            task.status === "active" &&
+            (task.recurrence === "daily" || task.recurrence === "weekdays" || task.recurrence === "weekly");
+        }).length;
+
+        const completedAllRecurring = totalRecurringTasks > 0 &&
+          achievementMember.weeklyCompletionCount >= totalRecurringTasks;
         const noRejections = achievementMember.weeklyRejectionCount === 0;
 
-        if (hasTasks && noRejections) {
+        if (completedAllRecurring && noRejections) {
           await storage.awardAchievement(definition.id, member.id, definition.bonusPoints);
           console.log(`⭐ ${member.displayName} earned "${definition.title}" - Perfect week! (+${definition.bonusPoints} points)`);
           
@@ -347,6 +403,42 @@ export class AchievementEngine {
         }
       }
     }
+  }
+
+  private async evaluateStarCollector(definition: AchievementDefinition, event: AchievementEvent): Promise<void> {
+    if (event.type !== "star_found" || !event.memberId) return;
+
+    const member = await storage.getFamilyMember(event.memberId);
+    if (!member) return;
+
+    const config = definition.config as { starsRequired?: number };
+    const starsRequired = config.starsRequired ?? 4;
+    const totalStarsFound = event.starsFound ?? 0;
+
+    if (totalStarsFound < starsRequired) return;
+
+    const existingAwards = await storage.getAchievementAwardsByMember(event.memberId);
+    const alreadyAwarded = existingAwards.some(award => award.achievementDefinitionId === definition.id);
+    if (alreadyAwarded) return;
+
+    await storage.awardAchievement(definition.id, event.memberId, definition.bonusPoints);
+    console.log(`⭐ ${member.displayName} earned "${definition.title}" - collected ${starsRequired} stars! (+${definition.bonusPoints} points)`);
+
+    broadcastToFamily(event.familyName, {
+      type: "achievement_earned",
+      memberId: event.memberId,
+      memberName: member.displayName,
+      achievementTitle: definition.title,
+      bonusPoints: definition.bonusPoints,
+    });
+
+    await createAchievementNotification(
+      event.familyName,
+      member.displayName,
+      definition.title,
+      definition.bonusPoints,
+      event.memberId
+    );
   }
 }
 

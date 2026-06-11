@@ -105,7 +105,7 @@ function DebouncedNumberInput({
 interface AchievementDefinition {
   id: string;
   familyName: string;
-  type: "first_weekly_finisher" | "weekly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak";
+  type: "first_weekly_finisher" | "weekly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak" | "star_collector";
   slug: string;
   title: string;
   description: string;
@@ -259,6 +259,8 @@ export default function Achievements() {
         return <TrendingUp className="h-5 w-5" />;
       case "task_streak":
         return <Flame className="h-5 w-5" />;
+      case "star_collector":
+        return <Sparkles className="h-5 w-5" />;
       default:
         return <Trophy className="h-5 w-5" />;
     }
@@ -313,9 +315,10 @@ export default function Achievements() {
               const typeOrder: Record<string, number> = {
                 "perfect_week": 0,
                 "weekly_leaderboard": 1,
-                "first_weekly_finisher": 2,
+                "task_streak": 2,
                 "lifetime_milestone": 3,
-                "task_streak": 4,
+                "star_collector": 4,
+                "first_weekly_finisher": 5,
               };
               const typeDiff = (typeOrder[a.type] ?? 99) - (typeOrder[b.type] ?? 99);
               if (typeDiff !== 0) return typeDiff;

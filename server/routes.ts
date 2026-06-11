@@ -4671,6 +4671,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check for hidden star on this skin card
       const starResult = await storage.markStarAsFound(member.id, skinId);
+
+      // Trigger star_collector achievement check if a star was found
+      if (starResult.wasStarFound) {
+        await achievementEngine.processEvent({
+          type: "star_found",
+          familyName: member.familyName,
+          memberId: member.id,
+          starsFound: starResult.totalStarsFound,
+        });
+      }
       
       // Broadcast skin discovery to family (with star info if found)
       broadcastToFamily(member.familyName, {

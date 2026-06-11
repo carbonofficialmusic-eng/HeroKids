@@ -19,7 +19,7 @@ import type { User, FamilyMember } from "@shared/schema";
 interface AchievementDefinition {
   id: string;
   familyName: string;
-  type: "first_weekly_finisher" | "weekly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak";
+  type: "first_weekly_finisher" | "weekly_leaderboard" | "perfect_week" | "lifetime_milestone" | "task_streak" | "star_collector";
   slug: string;
   title: string;
   description: string;
@@ -42,6 +42,8 @@ function getAchievementIcon(type: string) {
       return TrendingUp;
     case "task_streak":
       return Flame;
+    case "star_collector":
+      return Sparkles;
     default:
       return Gift;
   }
