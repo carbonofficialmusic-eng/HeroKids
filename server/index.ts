@@ -918,11 +918,34 @@ async function ensurePinboardTable() {
         log(`ℹ️ monthly-leaderboard-1st already exists for family: ${familyName}`);
       }
 
-      // Ensure star-collector is active
-      await db.execute(sql`
-        UPDATE achievement_definitions SET is_active = true
-        WHERE family_name = ${familyName} AND slug = 'star-collector' AND is_active = false
-      `);
+      // Backfill star-collector if missing, otherwise ensure it is active
+      const existingStarCollector = await db.execute(
+        sql`SELECT id FROM achievement_definitions WHERE family_name = ${familyName} AND slug = 'star-collector'`
+      );
+      if (existingStarCollector.rows.length === 0) {
+        await db.execute(sql`
+          INSERT INTO achievement_definitions (id, family_name, type, slug, title, description, bonus_points, reward_type, is_active, config)
+          VALUES (
+            gen_random_uuid(),
+            ${familyName},
+            'star_collector'::achievement_type,
+            'star-collector',
+            'Star Collector',
+            'Find 4 hidden stars on skin cards',
+            100,
+            'custom',
+            true,
+            '{"starsRequired": 4}'::jsonb
+          )
+        `);
+        log(`✅ Added star-collector achievement for family: ${familyName}`);
+      } else {
+        await db.execute(sql`
+          UPDATE achievement_definitions SET is_active = true
+          WHERE family_name = ${familyName} AND slug = 'star-collector' AND is_active = false
+        `);
+        log(`ℹ️ star-collector already exists for family: ${familyName}`);
+      }
 
       // Backfill star-collector awards for members who already have 4+ stars
       const starDef = await db.execute(

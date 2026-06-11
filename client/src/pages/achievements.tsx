@@ -151,18 +151,20 @@ export default function Achievements() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch achievement definitions
+  // Fetch achievement definitions — always fresh on mount so new entries are never missed
   const { data: achievements = [], isLoading } = useQuery<AchievementDefinition[]>({
     queryKey: ["/api/achievements"],
     enabled: !!member,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   // Fetch achievement awards
   const { data: awards = [], isLoading: awardsLoading } = useQuery<AchievementAward[]>({
     queryKey: ["/api/achievements/awards"],
     enabled: !!member,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   // Seed default achievements mutation
