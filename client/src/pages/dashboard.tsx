@@ -1070,7 +1070,7 @@ export default function Dashboard() {
         <div className="container mx-auto max-w-7xl h-full flex items-center justify-between gap-4" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex-shrink-0" data-testid="avatar-header-parent">
-              <Avatar className="h-10 w-10" style={{ borderWidth: "3px", borderStyle: "solid", borderColor: member.color }}>
+              <Avatar style={{ height: 'var(--header-avatar, 2.5rem)', width: 'var(--header-avatar, 2.5rem)', flexShrink: 0, borderWidth: "3px", borderStyle: "solid", borderColor: member.color }}>
                 <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar)} />
                 <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
                   {member.displayName[0]}

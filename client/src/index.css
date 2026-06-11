@@ -49,6 +49,7 @@ html, body {
 /* LIGHT MODE */
 :root {
   --header-h: 4rem;
+  --header-avatar: 2.5rem;
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
 
@@ -288,9 +289,10 @@ html, body {
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
-@media (orientation: landscape) {
+@media (orientation: landscape) and (max-height: 600px) {
   :root {
-    --header-h: 2rem;
+    --header-h: 2.25rem;
+    --header-avatar: 1.75rem;
   }
 }
 
