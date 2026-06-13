@@ -16,6 +16,26 @@ import { useTranslation } from "react-i18next";
 import { Capacitor } from "@capacitor/core";
 import { isPhotoPickerCancelError, kickScrollReset, markPhotoUsed, kickHeaderRepaint } from "@/lib/cameraUtils";
 
+function useVisualViewport() {
+  const getVV = () => ({
+    height: window.visualViewport?.height ?? window.innerHeight,
+    offsetTop: window.visualViewport?.offsetTop ?? 0,
+  });
+  const [vv, setVV] = useState(getVV);
+  useEffect(() => {
+    const vvEl = window.visualViewport;
+    if (!vvEl) return;
+    const update = () => setVV({ height: vvEl.height, offsetTop: vvEl.offsetTop });
+    vvEl.addEventListener('resize', update);
+    vvEl.addEventListener('scroll', update);
+    return () => {
+      vvEl.removeEventListener('resize', update);
+      vvEl.removeEventListener('scroll', update);
+    };
+  }, []);
+  return vv;
+}
+
 interface TaskCompletionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -45,9 +65,20 @@ export function TaskCompletionDialog({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isCapturingRef = useRef(false);
+  const { height: vvHeight, offsetTop: vvOffsetTop } = useVisualViewport();
 
   const platform = Capacitor.getPlatform();
   const isNativeMobile = platform === "ios" || platform === "android";
+
+  const dialogStyle: React.CSSProperties = {
+    position: 'fixed',
+    left: '50%',
+    top: `${vvOffsetTop + vvHeight / 2}px`,
+    transform: 'translate(-50%, -50%)',
+    maxHeight: `${vvHeight - 48}px`,
+    overflowY: 'auto',
+    width: 'min(calc(100vw - 2rem), 32rem)',
+  };
 
   useEffect(() => {
     if (!open) {
@@ -192,7 +223,11 @@ export function TaskCompletionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent data-testid="dialog-complete-task" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent
+        style={dialogStyle}
+        data-testid="dialog-complete-task"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>{t("tasks.completeTask")}</DialogTitle>
           <DialogDescription>
