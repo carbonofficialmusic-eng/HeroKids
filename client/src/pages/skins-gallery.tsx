@@ -328,19 +328,18 @@ export default function SkinsGallery() {
     const hasFoundStar = starPlacements[skin.id] === true; // Star was found on this card
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-      // If it's an undiscovered skin that can be discovered, show the popup
+      // Always update the preview
+      setSelectedSkinId(skin.id);
+
       if (canDiscover && !isDiscovered) {
         e.stopPropagation();
         setDiscoverDialogSkinId(skin.id);
         setEquipDialogSkinId(null);
       } else if (isDiscovered && !isActive) {
-        // Discovered but not equipped - show equip button
         e.stopPropagation();
         setEquipDialogSkinId(skin.id);
         setDiscoverDialogSkinId(null);
       } else {
-        // Already active or not discoverable - just select for preview
-        setSelectedSkinId(skin.id);
         setEquipDialogSkinId(null);
         setDiscoverDialogSkinId(null);
       }
