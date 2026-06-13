@@ -158,13 +158,16 @@ export default function Chat() {
   // We avoid using `bottom` + calculated offset because that approach has
   // a CSS-cascade conflict with `inset` in iOS WKWebView.
   const isKeyboardOpen = vvHeight < window.innerHeight - 80;
+  // In keyboard-open mode shrink the top padding so more space is available
+  // for the message list and input. Without this, the Card header alone (~48px)
+  // consumes almost all available height in landscape and the input is clipped.
   const safeTopStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0,
     left: 0,
     right: 0,
     height: `${vvHeight}px`,
-    paddingTop: 'max(1rem, env(safe-area-inset-top))',
+    paddingTop: isKeyboardOpen ? '0.25rem' : 'max(1rem, env(safe-area-inset-top))',
     paddingBottom: isKeyboardOpen ? 0 : 'env(safe-area-inset-bottom)',
     paddingLeft: 'max(1rem, env(safe-area-inset-left))',
     paddingRight: 'max(1rem, env(safe-area-inset-right))',
@@ -257,8 +260,8 @@ export default function Chat() {
       style={safeTopStyle}
       data-testid="page-chat"
     >
-      <div className="w-full lg:max-w-3xl flex flex-col flex-1 min-h-0 mx-auto px-4 pb-4">
-        <div className="flex items-center gap-3 mb-4 shrink-0">
+      <div className={`w-full lg:max-w-3xl flex flex-col flex-1 min-h-0 mx-auto px-4 ${isKeyboardOpen ? 'pb-0' : 'pb-4'}`}>
+        <div className={`flex items-center gap-3 shrink-0 ${isKeyboardOpen ? 'mb-1' : 'mb-4'}`}>
           {backBtn}
           <h1 className="text-2xl font-bold" data-testid="heading-chat">
             {t('chat.title')}
@@ -266,17 +269,19 @@ export default function Chat() {
         </div>
 
         <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <CardHeader className="border-b shrink-0 py-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="w-5 h-5" />
-                {t('chat.messages')}
-              </CardTitle>
-              <span className="text-sm text-muted-foreground">
-                {t(messages.length === 1 ? 'chat.messageCount' : 'chat.messageCount_other', { count: messages.length })}
-              </span>
-            </div>
-          </CardHeader>
+          {!isKeyboardOpen && (
+            <CardHeader className="border-b shrink-0 py-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5" />
+                  {t('chat.messages')}
+                </CardTitle>
+                <span className="text-sm text-muted-foreground">
+                  {t(messages.length === 1 ? 'chat.messageCount' : 'chat.messageCount_other', { count: messages.length })}
+                </span>
+              </div>
+            </CardHeader>
+          )}
           <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
             {/* Messages area — scrolls independently */}
             <ScrollArea className="flex-1 min-h-0 p-4" ref={scrollAreaRef}>
@@ -328,7 +333,7 @@ export default function Chat() {
             ) : (
               <form
                 onSubmit={handleSendMessage}
-                className="border-t p-4 flex gap-2 shrink-0"
+                className={`border-t flex gap-2 shrink-0 ${isKeyboardOpen ? 'py-2 px-3' : 'p-4'}`}
                 data-testid="form-send-message"
               >
                 <EmoticonPicker onSelectEmoticon={handleSelectEmoticon} />
