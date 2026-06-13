@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -40,13 +40,30 @@ interface RewardRequestDialogProps {
   request?: { id: string; title: string; description: string | null; pointThreshold: number } | null;
 }
 
-// On iOS, tapping an input inside a fixed dialog does NOT automatically
-// scroll the view to keep the input above the keyboard. We call
-// scrollIntoView after the keyboard animation (~300 ms) finishes.
+function useVisualViewport() {
+  const getVV = () => ({
+    height: window.visualViewport?.height ?? window.innerHeight,
+    offsetTop: window.visualViewport?.offsetTop ?? 0,
+  });
+  const [vv, setVV] = useState(getVV);
+  useEffect(() => {
+    const vvEl = window.visualViewport;
+    if (!vvEl) return;
+    const update = () => setVV({ height: vvEl.height, offsetTop: vvEl.offsetTop });
+    vvEl.addEventListener('resize', update);
+    vvEl.addEventListener('scroll', update);
+    return () => {
+      vvEl.removeEventListener('resize', update);
+      vvEl.removeEventListener('scroll', update);
+    };
+  }, []);
+  return vv;
+}
+
 function scrollInputIntoView(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
   const el = e.currentTarget;
   setTimeout(() => {
-    el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, 320);
 }
 
@@ -60,7 +77,18 @@ export function RewardRequestDialog({
 }: RewardRequestDialogProps) {
   const { t } = useTranslation();
   const isEditing = !!request;
-  
+  const { height: vvHeight, offsetTop: vvOffsetTop } = useVisualViewport();
+
+  const dialogStyle: React.CSSProperties = {
+    position: 'fixed',
+    left: '50%',
+    top: `${vvOffsetTop + vvHeight / 2}px`,
+    transform: 'translate(-50%, -50%)',
+    maxHeight: `${vvHeight - 48}px`,
+    overflowY: 'auto',
+    width: 'min(calc(100vw - 2rem), 28rem)',
+  };
+
   const form = useForm<RewardRequestFormData>({
     resolver: zodResolver(rewardRequestFormSchema),
     defaultValues: {
@@ -97,7 +125,11 @@ export function RewardRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" data-testid={isEditing ? "dialog-edit-request" : "dialog-request-reward"} onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent
+        style={dialogStyle}
+        data-testid={isEditing ? "dialog-edit-request" : "dialog-request-reward"}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <div className="flex items-center gap-2">
             {isEditing ? (
@@ -110,7 +142,7 @@ export function RewardRequestDialog({
             </DialogTitle>
           </div>
           <DialogDescription>
-            {isEditing 
+            {isEditing
               ? t('rewards.adjustRewardDetails')
               : t('rewards.tellParentsWhatYouWant')
             }
