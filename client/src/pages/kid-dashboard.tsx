@@ -632,7 +632,8 @@ function TaskCard({
   const hasCompletedWithoutStatus = task.memberHasCompleted && neverAttempted;
 
   // "Available again in X days" — shown on locked recurring tasks
-  const isRecurringTask = task.recurrence !== "none" && task.recurrence !== "immediate";
+  // Custom-days tasks have recurrence="none" but recurrenceDays > 0 — treat them as recurring too
+  const isRecurringTask = (task.recurrence !== "none" && task.recurrence !== "immediate") || !!(task as any).recurrenceDays;
   const availableAgainDays = (isApproved || isPending || hasNoSlots || hasCompletedWithoutStatus) && isRecurringTask
     ? getAvailableAgainDays((task as any).nextAvailableDate ?? null)
     : null;
