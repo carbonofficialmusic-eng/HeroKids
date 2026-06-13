@@ -40,6 +40,16 @@ interface RewardRequestDialogProps {
   request?: { id: string; title: string; description: string | null; pointThreshold: number } | null;
 }
 
+// On iOS, tapping an input inside a fixed dialog does NOT automatically
+// scroll the view to keep the input above the keyboard. We call
+// scrollIntoView after the keyboard animation (~300 ms) finishes.
+function scrollInputIntoView(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  const el = e.currentTarget;
+  setTimeout(() => {
+    el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, 320);
+}
+
 export function RewardRequestDialog({
   open,
   onOpenChange,
@@ -119,6 +129,7 @@ export function RewardRequestDialog({
                     <Input
                       placeholder={t('rewards.rewardRequestPlaceholder')}
                       {...field}
+                      onFocus={scrollInputIntoView}
                       data-testid="input-request-title"
                     />
                   </FormControl>
@@ -138,6 +149,7 @@ export function RewardRequestDialog({
                       placeholder={t('rewards.tellUsMorePlaceholder')}
                       {...field}
                       value={field.value || ""}
+                      onFocus={scrollInputIntoView}
                       data-testid="input-request-description"
                     />
                   </FormControl>
@@ -155,6 +167,7 @@ export function RewardRequestDialog({
                   <FormControl>
                     <Input
                       type="number"
+                      inputMode="numeric"
                       min="1"
                       placeholder="50"
                       {...field}
@@ -163,6 +176,7 @@ export function RewardRequestDialog({
                         const val = e.target.value;
                         field.onChange(val === "" ? 0 : parseInt(val) || 0);
                       }}
+                      onFocus={scrollInputIntoView}
                       data-testid="input-request-points"
                     />
                   </FormControl>

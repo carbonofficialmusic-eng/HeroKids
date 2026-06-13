@@ -28,7 +28,11 @@ export default function Chat() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [messageText, setMessageText] = useState("");
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  // Track the visual viewport height directly — most reliable approach for
+  // iOS WKWebView keyboard avoidance. vv.height shrinks when keyboard opens.
+  const [vvHeight, setVvHeight] = useState(() =>
+    window.visualViewport ? window.visualViewport.height : window.innerHeight
+  );
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -101,20 +105,21 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Push the chat above the on-screen keyboard using the visualViewport API.
-  // Works in iOS WKWebView where the keyboard overlays fixed-position layouts.
+  // Sync container size with the visual viewport.
+  // vv.height shrinks when the iOS keyboard opens, so the container
+  // automatically stops at the top of the keyboard — no offset math needed.
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
 
+    let prevHeight = vv.height;
     const onViewportChange = () => {
-      // Keyboard height = layout viewport bottom minus visual viewport bottom
-      const offset = Math.max(0, window.innerHeight - vv.offsetTop - vv.height);
-      setKeyboardOffset(offset);
-      if (offset > 50) {
-        // Keyboard just opened — make sure the latest message is visible
-        setTimeout(scrollToBottom, 80);
+      setVvHeight(vv.height);
+      // Keyboard just opened (height shrank significantly) → scroll to newest msg
+      if (vv.height < prevHeight - 50) {
+        setTimeout(scrollToBottom, 120);
       }
+      prevHeight = vv.height;
     };
 
     vv.addEventListener("resize", onViewportChange);
@@ -147,11 +152,20 @@ export default function Chat() {
     setMessageText((prev) => prev + emoticon + " ");
   };
 
+  // Container is pinned to the top-left corner and sized to exactly the
+  // visual viewport height. When the keyboard opens, vvHeight shrinks and
+  // the container automatically "lifts" its bottom edge above the keyboard.
+  // We avoid using `bottom` + calculated offset because that approach has
+  // a CSS-cascade conflict with `inset` in iOS WKWebView.
+  const isKeyboardOpen = vvHeight < window.innerHeight - 80;
   const safeTopStyle: React.CSSProperties = {
     position: 'fixed',
-    inset: 0,
-    bottom: keyboardOffset > 0 ? `${keyboardOffset}px` : 0,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: `${vvHeight}px`,
     paddingTop: 'max(1rem, env(safe-area-inset-top))',
+    paddingBottom: isKeyboardOpen ? 0 : 'env(safe-area-inset-bottom)',
   };
   const backBtn = (
     <Link href={dashboardUrl}>
@@ -238,7 +252,7 @@ export default function Chat() {
   return (
     <div
       className="flex flex-col"
-      style={{ ...safeTopStyle, paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom)' }}
+      style={safeTopStyle}
       data-testid="page-chat"
     >
       <div className="w-full lg:max-w-3xl flex flex-col flex-1 min-h-0 mx-auto px-4 pb-4">
