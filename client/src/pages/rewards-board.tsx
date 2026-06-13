@@ -439,10 +439,6 @@ export default function RewardsBoard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
-      toast({
-        title: t("rewardsBoard.sharingStarted"),
-        description: t("rewardsBoard.sharingStartedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -464,10 +460,6 @@ export default function RewardsBoard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
-      toast({
-        title: t("rewardsBoard.joinedSuccess"),
-        description: t("rewardsBoard.joinedSuccessDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -495,10 +487,6 @@ export default function RewardsBoard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      toast({
-        title: t("rewardsBoard.sharingFinalized"),
-        description: t("rewardsBoard.sharingFinalizedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -524,10 +512,6 @@ export default function RewardsBoard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      toast({
-        title: t("kidDashboard.sharingCancelled"),
-        description: t("kidDashboard.canRedeemSolo"),
-      });
     },
     onError: (error: any) => {
       toast({

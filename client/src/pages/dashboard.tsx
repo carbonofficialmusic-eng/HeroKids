@@ -493,10 +493,6 @@ export default function Dashboard() {
         clearPhotoUsed();
         setTimeout(() => { window.location.href = window.location.pathname; }, 500);
       }
-      toast({
-        title: t("toast.profileUpdated"),
-        description: t("toast.profileUpdatedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -556,10 +552,6 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       setTaskDialogOpen(false);
       setSelectedTask(null);
-      toast({
-        title: t("tasks.taskCreated"),
-        description: t("toast.taskAdded"),
-      });
     },
   });
 
@@ -576,10 +568,6 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       setTaskDialogOpen(false);
       setSelectedTask(null);
-      toast({
-        title: t("tasks.taskUpdated"),
-        description: t("toast.taskUpdatedDesc"),
-      });
     },
   });
 
@@ -624,11 +612,6 @@ export default function Dashboard() {
         });
       }
       
-      // Show success message
-      toast({
-        title: data.autoApproved ? t("toast.taskCompletedCelebration") : t("toast.taskSubmitted"),
-        description: data.message || t("toast.awaitingApproval"),
-      });
     },
     onError: (error: any) => {
       const errorCode = error?.data?.code;
@@ -658,10 +641,6 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       setRewardDialogOpen(false);
       setSelectedReward(null);
-      toast({
-        title: t("toast.rewardCreated"),
-        description: t("toast.rewardAvailable"),
-      });
     },
   });
 
@@ -674,10 +653,6 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
       setRewardDialogOpen(false);
       setSelectedReward(null);
-      toast({
-        title: t("toast.rewardUpdated"),
-        description: t("toast.rewardUpdatedDesc"),
-      });
     },
   });
 
@@ -762,10 +737,6 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
-      toast({
-        title: t("toast.rewardDeleted"),
-        description: t("toast.rewardDeletedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -783,10 +754,6 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      toast({
-        title: t("tasks.taskDeleted"),
-        description: t("toast.taskDeletedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -805,10 +772,6 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
-      toast({
-        title: t("toast.requestSent"),
-        description: t("toast.requestSentDesc"),
-      });
     },
     onError: (error: any) => {
       toast({

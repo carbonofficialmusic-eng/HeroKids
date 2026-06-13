@@ -673,12 +673,6 @@ function TaskCard({
       });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
-      toast({
-        title: t("kidDashboard.taskCompleted"),
-        description: task.requiresApproval 
-          ? t("kidDashboard.waitingForApproval")
-          : t("kidDashboard.earnedPoints", { count: task.points }),
-      });
     },
     onError: (error: Error) => {
       toast({
@@ -1398,10 +1392,6 @@ export default function KidDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
-      toast({
-        title: t("kidDashboard.pointsContributed"),
-        description: t("kidDashboard.contributionAdded"),
-      });
       confetti({
         particleCount: 100,
         spread: 70,
@@ -1449,10 +1439,6 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
-      toast({
-        title: t("kidDashboard.sharingStarted"),
-        description: t("kidDashboard.othersCanJoin"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -1473,10 +1459,6 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
-      toast({
-        title: t("kidDashboard.joinedSuccess"),
-        description: t("kidDashboard.nowPartOfReward"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -1496,10 +1478,6 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
-      toast({
-        title: t("kidDashboard.sharingCompleted"),
-        description: t("kidDashboard.pointsSplitEvenly"),
-      });
       confetti({
         particleCount: 100,
         spread: 70,
@@ -1527,10 +1505,6 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
-      toast({
-        title: t("rewardsBoard.redemptionCancelled"),
-        description: t("rewardsBoard.pointsRefunded", { count: data?.pointsRefunded ?? 0 }),
-      });
     },
     onError: (error: any) => {
       toast({ title: t("rewardsBoard.cancelError"), description: error.message, variant: "destructive" });
@@ -1545,10 +1519,6 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      toast({
-        title: t("kidDashboard.sharingCancelled"),
-        description: t("kidDashboard.canRedeemSolo"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -1747,10 +1717,6 @@ export default function KidDashboard() {
         clearPhotoUsed();
         setTimeout(() => { window.location.href = window.location.pathname; }, 500);
       }
-      toast({
-        title: t("toast.profileUpdated"),
-        description: t("toast.profileUpdatedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -1839,12 +1805,6 @@ export default function KidDashboard() {
         clearPhotoUsed();
         setTimeout(() => { window.location.href = window.location.pathname; }, 2500);
       }
-      toast({
-        title: t("kidDashboard.taskCompleted"),
-        description: selectedTask?.requiresApproval 
-          ? t("kidDashboard.waitingForApproval")
-          : t("kidDashboard.earnedPoints", { count: selectedTask?.points || 0 }),
-      });
     },
     onError: (error: Error) => {
       toast({
