@@ -46,7 +46,7 @@ export default function Analytics() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
+      <div className="container mx-auto p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
         <Link href="/">
           <Button 
             variant="outline" 
@@ -71,7 +71,7 @@ export default function Analytics() {
     // Check if it's a tier restriction error
     if (errorMessage.includes("Family tier")) {
       return (
-        <div className="container mx-auto p-6 max-w-4xl" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
+        <div className="container mx-auto p-6 max-w-4xl" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
           <Link href="/">
             <Button 
               variant="outline" 
@@ -126,7 +126,7 @@ export default function Analytics() {
 
     // Other errors - show error state
     return (
-      <div className="container mx-auto p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
+      <div className="container mx-auto p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
         <Link href="/">
           <Button 
             variant="outline" 
@@ -153,7 +153,7 @@ export default function Analytics() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }} data-testid="page-analytics">
+    <div className="container mx-auto p-6 space-y-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }} data-testid="page-analytics">
       <div>
         <Link href="/">
           <Button 

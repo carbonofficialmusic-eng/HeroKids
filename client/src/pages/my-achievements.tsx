@@ -136,7 +136,7 @@ export default function MyAchievements() {
     });
 
   return (
-    <div className="min-h-screen p-4 pb-20" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
+    <div className="min-h-screen p-4 pb-20" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
           <Link href={member?.role === "parent" ? "/" : "/kid-dashboard"}>

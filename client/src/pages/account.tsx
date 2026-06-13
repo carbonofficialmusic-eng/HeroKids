@@ -123,7 +123,7 @@ export default function AccountPage() {
   const backHref = isParent ? "/dashboard" : "/kid-dashboard";
 
   return (
-    <div className="min-h-screen p-6" style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top))" }}>
+    <div className="min-h-screen p-6" style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top))", paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
       <div className="max-w-lg mx-auto">
         {/* Back button — pill style matching other sub-pages */}
         <Link href={backHref}>

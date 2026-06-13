@@ -481,7 +481,7 @@ export default function SkinsGallery() {
 
   return (
     <>
-      <div className="min-h-screen p-4" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
+      <div className="min-h-screen p-4" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">

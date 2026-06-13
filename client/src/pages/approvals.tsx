@@ -263,7 +263,7 @@ export default function Approvals() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
+      <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
         <div className="max-w-5xl mx-auto">
           <Link href="/dashboard">
             <Button
@@ -301,7 +301,7 @@ export default function Approvals() {
   const isBusy = approveMutation.isPending || rejectMutation.isPending || isBulkApproving;
 
   return (
-    <div className="min-h-screen p-6 pb-32" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
+    <div className="min-h-screen p-6 pb-32" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
       <div className="max-w-5xl mx-auto">
         <Link href="/dashboard">
           <Button

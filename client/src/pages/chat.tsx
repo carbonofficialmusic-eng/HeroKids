@@ -166,6 +166,8 @@ export default function Chat() {
     height: `${vvHeight}px`,
     paddingTop: 'max(1rem, env(safe-area-inset-top))',
     paddingBottom: isKeyboardOpen ? 0 : 'env(safe-area-inset-bottom)',
+    paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+    paddingRight: 'max(1rem, env(safe-area-inset-right))',
   };
   const backBtn = (
     <Link href={dashboardUrl}>
