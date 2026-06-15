@@ -31,28 +31,21 @@ const steps = [
 
 function Character({ type, size = 130 }: { type: "boy" | "girl"; size?: number }) {
   const isBoy = type === "boy";
+  // Original image: 1024×1024 square, boy left half, girl right half.
+  // Each character panel is 512×1024 → aspect ratio 1:2 (tall).
+  // Render image at size*2 × size*2 (square), clip to size × size*2.
   return (
     <div
       style={{
         width: size,
-        height: size * 1.9,
-        overflow: "hidden",
+        height: size * 2,
+        backgroundImage: `url(${IMG_URL})`,
+        backgroundSize: `${size * 2}px ${size * 2}px`,
+        backgroundPosition: isBoy ? "0 0" : `-${size}px 0`,
+        backgroundRepeat: "no-repeat",
         flexShrink: 0,
       }}
-    >
-      <img
-        src={IMG_URL}
-        alt={isBoy ? "Hero Max" : "Hero Mia"}
-        style={{
-          width: size * 2,
-          height: size * 2 * 2,
-          objectFit: "cover",
-          objectPosition: isBoy ? "left top" : "right top",
-          display: "block",
-          imageRendering: "crisp-edges",
-        }}
-      />
-    </div>
+    />
   );
 }
 
