@@ -77,8 +77,15 @@ export function OnboardingWizard() {
 
   if (!visible) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <p className="text-gray-400 text-sm">Tour abgeschlossen ✓</p>
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center gap-4">
+        <p className="text-gray-500 text-sm font-medium">Tour abgeschlossen ✓</p>
+        <button
+          onClick={() => { setCurrent(0); setVisible(true); }}
+          className="px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-md"
+          style={{ background: "#5BC4C0" }}
+        >
+          ↺ Von vorne starten
+        </button>
       </div>
     );
   }
