@@ -946,6 +946,7 @@
     "joinCode": "Beitrittscode",
     "joinCodePlaceholder": "6-stelligen Code eingeben",
     "askParentForCode": "Frage ein Elternteil in deiner Familie nach dem Beitrittscode",
+    "parentalConsentNote": "Dieser Code wurde von deinen Eltern oder Erziehungsberechtigten erstellt und bestätigt deren Einwilligung, dass du der Familie beitrittst.",
     "joinFamilyButton": "Familie beitreten",
     "joining": "Wird beigetreten...",
     "alreadyHaveAccount": "Du hast bereits ein Konto auf einem anderen Gerät?",

@@ -338,6 +338,9 @@ export function FamilySetup({
                       <p className="text-sm text-muted-foreground mt-2">
                         {t('familySetup.askParentForCode')}
                       </p>
+                      <p className="text-xs text-muted-foreground/70 mt-1">
+                        {t('familySetup.parentalConsentNote')}
+                      </p>
                     </FormItem>
                   )}
                 />

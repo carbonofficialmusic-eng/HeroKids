@@ -936,6 +936,7 @@
     "joinCode": "Join Code",
     "joinCodePlaceholder": "Enter 6-character code",
     "askParentForCode": "Ask a parent in your family for the join code",
+    "parentalConsentNote": "This code was created by your parent or guardian, confirming their consent for you to join the family.",
     "joinFamilyButton": "Join Family",
     "joining": "Joining...",
     "alreadyHaveAccount": "Already have an account on another device?",
