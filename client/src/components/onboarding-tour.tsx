@@ -63,7 +63,7 @@ const STEPS: TourStep[] = [
     key: "tour-bonus-rewards",
     character: "girl",
     bubble:
-      "Bonus-Belohnungen sind besondere Extras. Wer wird monatlicher Champion? Du kannst Punkte vergeben oder auch eigene Belohnungen eingeben — wie zum Beispiel Taschengelderhöhungen.",
+      "Hier werden dir die Bonus-Belohnungen angezeigt. Wer wird monatlicher Champion? Du kannst Punkte vergeben oder auch eigene Belohnungen eingeben — wie zum Beispiel Taschengelderhöhungen. Oben im Menü findest du die Einstellungen hierzu.",
   },
   {
     key: "tour-family-goals",
