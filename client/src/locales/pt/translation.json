@@ -1633,5 +1633,23 @@
     "placeholder": "Digite a resposta…",
     "wrong": "Resposta errada. Tente novamente!",
     "confirm": "Confirmar"
+  },
+  "tour": {
+    "skip": "Pular",
+    "next": "Próximo →",
+    "letsGo": "Vamos lá!",
+    "step0": "Oi! Sou a Mia — sua guia HeroKids! Vou te mostrar em poucos passos como tudo funciona. Você pode sair a qualquer momento e continuar depois.",
+    "step1": "Aqui você cria novas tarefas para seus filhos. Você pode atribuir pontos, definir prazo, exigir foto de comprovação e aprovações, criar listas de compras e atribuir tarefas às crianças. As tarefas marcadas como Importantes sempre aparecem no topo da lista.",
+    "step2": "As recompensas são a melhor motivação! Defina o que seus filhos podem ganhar com os pontos coletados. As recompensas também podem ser oferecidas para compartilhar.",
+    "step3": "Quando uma criança marca uma tarefa como concluída, ela aparece aqui para revisão.",
+    "step4": "Aqui você acompanha: quais recompensas seus filhos resgataram, recompensas compartilhadas e marcar recompensas como concluídas.",
+    "step5": "Nas Configurações você encontra fuso horário, código familiar, função Device Link para crianças, seu plano e muito mais. Com a troca de usuário você pode alternar rapidamente entre as contas das crianças — prático quando várias crianças usam o mesmo dispositivo.",
+    "step6": "Pelo símbolo de estrela, cada criança pode desbloquear seus próprios skins de personagem e novos fundos. Lá você também pode colecionar estrelas para desbloquear todos os HeroKids.",
+    "step7": "O mural é o quadro de avisos da sua família. Mensagens, elogios e avisos — tudo em um lugar visível para todos. Cada membro da família pode fixar 2 notas lá.",
+    "step8": "Aqui são exibidas as recompensas bônus. Quem será o campeão mensal? Você pode atribuir pontos ou inserir recompensas personalizadas — como aumentos de mesada. No menu superior você encontra as configurações.",
+    "step9": "Os objetivos familiares unem a todos! Todas as crianças trabalham juntas em direção a um objetivo — como um passeio em conjunto ou uma noite de jogos.",
+    "step10": "Aqui você pode enviar pontos para seus filhos — independente de tarefas, simplesmente como recompensa ou motivação.",
+    "step11": "O chat familiar conecta vocês todos! Apenas membros com seu próprio smartphone podem escrever lá — mas para eles fica muito animado.",
+    "step12": "É isso — você agora conhece todas as funções importantes! Comece agora e torne sua família em verdadeiros HeroKids!"
   }
 }

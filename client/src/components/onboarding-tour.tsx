@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/lib/queryClient";
 import boyImg from "@assets/hero_boy_nobg.png";
 import girlImg from "@assets/hero_girl_nobg.png";
@@ -7,88 +8,22 @@ import girlImg from "@assets/hero_girl_nobg.png";
 interface TourStep {
   key: string;
   character: "boy" | "girl";
-  bubble: string;
 }
 
 const STEPS: TourStep[] = [
-  {
-    key: "",
-    character: "girl",
-    bubble:
-      "Hei! Ich bin Mia — deine HeroKids-Führerin! Ich zeige dir in ein paar Schritten, wie alles funktioniert. Du kannst jederzeit abbrechen und später weitermachen.",
-  },
-  {
-    key: "tour-add-task",
-    character: "boy",
-    bubble:
-      "Hier erstellst du neue Aufgaben für deine Kinder. Du kannst Punkte vergeben, ein Fälligkeitsdatum setzen, Beweisfoto und Genehmigungen verlangen, Einkaufslisten erstellen und Kindern Aufgaben zuweisen. Aufgaben die du als Wichtig markierst erscheinen immer ganz oben in der Aufgabenliste.",
-  },
-  {
-    key: "tour-add-reward",
-    character: "girl",
-    bubble:
-      "Belohnungen sind der beste Antrieb! Leg fest, was sich deine Kinder mit ihren gesammelten Punkten verdienen können. Belohnungen können auch zum Teilen angeboten werden.",
-  },
-  {
-    key: "tour-approvals",
-    character: "boy",
-    bubble:
-      "Wenn ein Kind eine Aufgabe als erledigt markiert hat, landet sie hier zur Prüfung.",
-  },
-  {
-    key: "tour-rewards-board",
-    character: "girl",
-    bubble:
-      "Hier behältst du den Überblick: welche Belohnungen deine Kinder eingelöst haben, geteilte Belohnungen und Belohnungen als erledigt markieren.",
-  },
-  {
-    key: "tour-profile-menu",
-    character: "girl",
-    bubble:
-      "In den Einstellungen findest du Zeitzone, Familiencode, Device Link Funktion für Kinder, deinen Plan und vieles mehr. Mit dem Nutzerwechsel kannst du schnell zwischen den Kinderkonten wechseln — praktisch wenn mehrere Kinder dasselbe Gerät nutzen.",
-  },
-  {
-    key: "tour-skins",
-    character: "boy",
-    bubble:
-      "Über das Stern-Symbol kann jedes Kind eigene Charakter-Skins und neue Hintergründe freischalten. Dort kannst du auch Sterne sammeln um alle HeroKids freizuschalten.",
-  },
-  {
-    key: "tour-pinboard",
-    character: "girl",
-    bubble:
-      "Die Pinnwand ist euer Familien-Schwarzes Brett. Nachrichten, Lob und Ankündigungen — alles an einem Ort für alle sichtbar. Jedes Familienmitglied kann 2 Zettel dort anheften.",
-  },
-  {
-    key: "tour-bonus-rewards",
-    character: "girl",
-    bubble:
-      "Hier werden dir die Bonus-Belohnungen angezeigt. Wer wird monatlicher Champion? Du kannst Punkte vergeben oder auch eigene Belohnungen eingeben — wie zum Beispiel Taschengelderhöhungen. Oben im Menü findest du die Einstellungen hierzu.",
-  },
-  {
-    key: "tour-family-goals",
-    character: "boy",
-    bubble:
-      "Familienziele schweißen zusammen! Alle Kinder arbeiten gemeinsam auf ein Ziel hin — zum Beispiel ein gemeinsamer Ausflug oder ein Spieleabend.",
-  },
-  {
-    key: "tour-send-points",
-    character: "boy",
-    bubble:
-      "Hier kannst du deinen Kindern Punkte schicken — unabhängig von Aufgaben, einfach so als Belohnung oder Motivation.",
-  },
-  {
-    key: "tour-family-chat",
-    character: "girl",
-    bubble:
-      "Der Familien-Chat verbindet euch alle! Nur Mitglieder mit einem eigenen Smartphone können dort schreiben — aber für die wird's richtig lebendig.",
-  },
-  {
-    key: "",
-    character: "boy",
-    bubble:
-      "Das war's — du kennst jetzt alle wichtigen Funktionen! Starte jetzt durch und mach deine Familie zu echten HeroKids!",
-  },
+  { key: "", character: "girl" },
+  { key: "tour-add-task", character: "boy" },
+  { key: "tour-add-reward", character: "girl" },
+  { key: "tour-approvals", character: "boy" },
+  { key: "tour-rewards-board", character: "girl" },
+  { key: "tour-profile-menu", character: "girl" },
+  { key: "tour-skins", character: "boy" },
+  { key: "tour-pinboard", character: "girl" },
+  { key: "tour-bonus-rewards", character: "girl" },
+  { key: "tour-family-goals", character: "boy" },
+  { key: "tour-send-points", character: "boy" },
+  { key: "tour-family-chat", character: "girl" },
+  { key: "", character: "boy" },
 ];
 
 interface SpotlightRect {
@@ -111,6 +46,7 @@ interface OnboardingTourProps {
 }
 
 export function OnboardingTour({ onClose }: OnboardingTourProps) {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<SpotlightRect | null>(null);
   const queryClient = useQueryClient();
@@ -130,8 +66,6 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
     setRect(getRect(current.key));
   }, [current.key]);
 
-  // Scroll the #root container (body:fixed architecture) so the target is centered,
-  // then update the spotlight rect after the scroll settles.
   const scrollToAndUpdate = useCallback((key: string) => {
     const el = document.querySelector(`[data-tour="${key}"]`) as HTMLElement | null;
     if (!el) {
@@ -143,7 +77,6 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
     const viewH = window.innerHeight;
     const targetScroll = root.scrollTop + elRect.top - viewH / 2 + elRect.height / 2;
     root.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
-    // Wait for smooth-scroll to finish (~400 ms), then lock in the rect
     const tid = window.setTimeout(updateRect, 420);
     return tid;
   }, [updateRect]);
@@ -189,12 +122,10 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
       className="fixed inset-0 z-[9999]"
       style={{ fontFamily: "Nunito, sans-serif" }}
     >
-      {/* Dark overlay — only rendered when there is no rect (intro/outro steps) */}
       {!rect && (
         <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} />
       )}
 
-      {/* Spotlight cutout */}
       {rect && (
         <div
           className="absolute pointer-events-none"
@@ -213,12 +144,10 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
         />
       )}
 
-      {/* Character + speech bubble — fixed bottom-right, fully responsive */}
       <div
         className="absolute flex flex-col items-end"
         style={{ bottom: 0, right: 12, zIndex: 2, maxHeight: "95vh", justifyContent: "flex-end" }}
       >
-        {/* Speech bubble */}
         <div
           className="relative bg-white rounded-2xl px-4 py-3 mb-2 shadow-xl overflow-y-auto"
           style={{
@@ -228,9 +157,8 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
             borderBottomRightRadius: 4,
           }}
         >
-          <p className="text-xs text-gray-700 leading-relaxed">{current.bubble}</p>
+          <p className="text-xs text-gray-700 leading-relaxed">{t(`tour.step${step}`)}</p>
 
-          {/* Step dots */}
           <div className="flex justify-center gap-1.5 mt-2.5">
             {STEPS.map((_, i) => (
               <div
@@ -246,7 +174,6 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
             ))}
           </div>
 
-          {/* Arrow pointing toward character (bottom-right) */}
           <div
             className="absolute -bottom-2.5 right-5"
             style={{
@@ -259,7 +186,6 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
           />
         </div>
 
-        {/* Buttons + character */}
         <div className="flex items-end gap-2">
           <div className="flex flex-col gap-1.5 mb-4">
             <button
@@ -270,17 +196,16 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
                 minWidth: 100,
               }}
             >
-              {isLast ? "Los geht's!" : "Weiter →"}
+              {isLast ? t("tour.letsGo") : t("tour.next")}
             </button>
             <button
               onClick={skip}
               className="px-4 py-1.5 rounded-xl text-xs text-gray-500 bg-white/90 shadow transition-transform active:scale-95"
             >
-              Überspringen
+              {t("tour.skip")}
             </button>
           </div>
 
-          {/* Character image — scales down on short screens (landscape mobile) */}
           <img
             src={current.character === "boy" ? boyImg : girlImg}
             alt={current.character === "boy" ? "Max" : "Mia"}

@@ -1646,5 +1646,23 @@
     "placeholder": "Antwort eingeben…",
     "wrong": "Falsche Antwort. Versuch es nochmal!",
     "confirm": "Bestätigen"
+  },
+  "tour": {
+    "skip": "Überspringen",
+    "next": "Weiter →",
+    "letsGo": "Los geht's!",
+    "step0": "Hei! Ich bin Mia — deine HeroKids-Führerin! Ich zeige dir in ein paar Schritten, wie alles funktioniert. Du kannst jederzeit abbrechen und später weitermachen.",
+    "step1": "Hier erstellst du neue Aufgaben für deine Kinder. Du kannst Punkte vergeben, ein Fälligkeitsdatum setzen, Beweisfoto und Genehmigungen verlangen, Einkaufslisten erstellen und Kindern Aufgaben zuweisen. Aufgaben die du als Wichtig markierst erscheinen immer ganz oben in der Aufgabenliste.",
+    "step2": "Belohnungen sind der beste Antrieb! Leg fest, was sich deine Kinder mit ihren gesammelten Punkten verdienen können. Belohnungen können auch zum Teilen angeboten werden.",
+    "step3": "Wenn ein Kind eine Aufgabe als erledigt markiert hat, landet sie hier zur Prüfung.",
+    "step4": "Hier behältst du den Überblick: welche Belohnungen deine Kinder eingelöst haben, geteilte Belohnungen und Belohnungen als erledigt markieren.",
+    "step5": "In den Einstellungen findest du Zeitzone, Familiencode, Device Link Funktion für Kinder, deinen Plan und vieles mehr. Mit dem Nutzerwechsel kannst du schnell zwischen den Kinderkonten wechseln — praktisch wenn mehrere Kinder dasselbe Gerät nutzen.",
+    "step6": "Über das Stern-Symbol kann jedes Kind eigene Charakter-Skins und neue Hintergründe freischalten. Dort kannst du auch Sterne sammeln um alle HeroKids freizuschalten.",
+    "step7": "Die Pinnwand ist euer Familien-Schwarzes Brett. Nachrichten, Lob und Ankündigungen — alles an einem Ort für alle sichtbar. Jedes Familienmitglied kann 2 Zettel dort anheften.",
+    "step8": "Hier werden dir die Bonus-Belohnungen angezeigt. Wer wird monatlicher Champion? Du kannst Punkte vergeben oder auch eigene Belohnungen eingeben — wie zum Beispiel Taschengelderhöhungen. Oben im Menü findest du die Einstellungen hierzu.",
+    "step9": "Familienziele schweißen zusammen! Alle Kinder arbeiten gemeinsam auf ein Ziel hin — zum Beispiel ein gemeinsamer Ausflug oder ein Spieleabend.",
+    "step10": "Hier kannst du deinen Kindern Punkte schicken — unabhängig von Aufgaben, einfach so als Belohnung oder Motivation.",
+    "step11": "Der Familien-Chat verbindet euch alle! Nur Mitglieder mit einem eigenen Smartphone können dort schreiben — aber für die wird's richtig lebendig.",
+    "step12": "Das war's — du kennst jetzt alle wichtigen Funktionen! Starte jetzt durch und mach deine Familie zu echten HeroKids!"
   }
 }

@@ -1618,5 +1618,23 @@
     "placeholder": "Ange svar…",
     "wrong": "Fel svar. Försök igen!",
     "confirm": "Bekräfta"
+  },
+  "tour": {
+    "skip": "Hoppa över",
+    "next": "Nästa →",
+    "letsGo": "Kör igång!",
+    "step0": "Hej! Jag är Mia — din HeroKids-guide! Jag visar dig på några steg hur allt fungerar. Du kan avbryta när som helst och fortsätta senare.",
+    "step1": "Här skapar du nya uppgifter för dina barn. Du kan ge poäng, sätta ett förfallodatum, kräva bevisfoto och godkännanden, skapa inköpslistor och tilldela uppgifter till barn. Uppgifter markerade som Viktiga visas alltid högst upp i uppgiftslistan.",
+    "step2": "Belöningar är den bästa motivationen! Bestäm vad dina barn kan tjäna med sina insamlade poäng. Belöningar kan också erbjudas för delning.",
+    "step3": "När ett barn markerar en uppgift som klar hamnar den här för granskning.",
+    "step4": "Här har du översikten: vilka belöningar dina barn löst in, delade belöningar och markera belöningar som klara.",
+    "step5": "I Inställningar hittar du tidszon, familjekod, Device Link-funktion för barn, din plan och mycket mer. Med användarbytet kan du snabbt växla mellan barnens konton — praktiskt när flera barn använder samma enhet.",
+    "step6": "Via stjärnsymbolen kan varje barn låsa upp egna karaktärsskins och nya bakgrunder. Där kan du också samla stjärnor för att låsa upp alla HeroKids.",
+    "step7": "Anslagstavlan är familjens anslagstavla. Meddelanden, beröm och tillkännagivanden — allt på ett ställe synligt för alla. Varje familjemedlem kan fästa 2 lappar där.",
+    "step8": "Här visas bonusbelöningarna. Vem blir månadsmästare? Du kan ge poäng eller ange egna belöningar — som höjning av fickpengar. I toppmenyn hittar du inställningarna.",
+    "step9": "Familjemål håller ihop! Alla barn jobbar tillsammans mot ett mål — som en gemensam utflykt eller spelkväll.",
+    "step10": "Här kan du skicka poäng till dina barn — oberoende av uppgifter, bara som belöning eller motivation.",
+    "step11": "Familjechatten förbinder er alla! Bara medlemmar med egen smartphone kan skriva där — men för dem blir det riktigt livligt.",
+    "step12": "Det var allt — du känner nu till alla viktiga funktioner! Starta nu och gör din familj till riktiga HeroKids!"
   }
 }
