@@ -18,7 +18,7 @@ export default function Pricing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("yearly");
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [processingTier, setProcessingTier] = useState<string | null>(null);
 
   const { data: member } = useQuery<FamilyMember>({
@@ -170,15 +170,28 @@ export default function Pricing() {
               {t("pricing.billingYearly")}
             </button>
           </div>
-          <Badge
-            variant={billingCycle === "yearly" ? "default" : "outline"}
-            className="text-xs px-3 py-1"
-            data-testid="badge-yearly-discount"
-          >
-            {billingCycle === "yearly"
-              ? t("pricing.yearlyDiscount")
-              : t("pricing.yearlyDiscountTeaser")}
-          </Badge>
+
+          {/* Savings hint — prominent when monthly, subtle when yearly */}
+          {billingCycle === "monthly" ? (
+            <button
+              onClick={() => setBillingCycle("yearly")}
+              data-testid="badge-yearly-discount"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white shadow-lg transition-transform active:scale-95"
+              style={{ background: "linear-gradient(135deg, #f97316, #eab308)" }}
+            >
+              <span>🎁</span>
+              <span>{t("pricing.yearlyDiscountTeaser")}</span>
+              <span>→</span>
+            </button>
+          ) : (
+            <Badge
+              variant="default"
+              className="text-xs px-3 py-1"
+              data-testid="badge-yearly-discount"
+            >
+              ✓ {t("pricing.yearlyDiscount")}
+            </Badge>
+          )}
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
