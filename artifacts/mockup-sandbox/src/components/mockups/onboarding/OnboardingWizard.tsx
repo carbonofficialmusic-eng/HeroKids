@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
-const IMG_URL = `${import.meta.env.BASE_URL}herokids_characters.png`;
+const BOY_URL = `${import.meta.env.BASE_URL}hero_boy.png`;
+const GIRL_URL = `${import.meta.env.BASE_URL}hero_girl.png`;
 
 const steps = [
   {
@@ -29,21 +30,19 @@ const steps = [
   },
 ];
 
-function Character({ type, size = 130 }: { type: "boy" | "girl"; size?: number }) {
-  const isBoy = type === "boy";
-  // Original image: 1024×1024 square, boy left half, girl right half.
-  // Each character panel is 512×1024 → aspect ratio 1:2 (tall).
-  // Render image at size*2 × size*2 (square), clip to size × size*2.
+function Character({ type, size = 120 }: { type: "boy" | "girl"; size?: number }) {
+  const src = type === "boy" ? BOY_URL : GIRL_URL;
   return (
-    <div
+    <img
+      src={src}
+      alt={type === "boy" ? "Hero Max" : "Hero Mia"}
       style={{
         width: size,
-        height: size * 2,
-        backgroundImage: `url(${IMG_URL})`,
-        backgroundSize: `${size * 2}px ${size * 2}px`,
-        backgroundPosition: isBoy ? "0 0" : `-${size}px 0`,
-        backgroundRepeat: "no-repeat",
+        height: size,
+        objectFit: "contain",
+        objectPosition: "bottom center",
         flexShrink: 0,
+        filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.15))",
       }}
     />
   );
@@ -235,9 +234,9 @@ export function OnboardingWizard() {
             </button>
           </div>
 
-          {/* Character image - CSS-cropped */}
+          {/* Character */}
           <div style={{ transition: "all 0.35s ease" }}>
-            <Character type={step.character} size={100} />
+            <Character type={step.character} size={150} />
           </div>
         </div>
       </div>
