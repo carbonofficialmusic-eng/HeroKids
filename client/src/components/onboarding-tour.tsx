@@ -205,16 +205,17 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
         />
       )}
 
-      {/* Character + speech bubble — fixed bottom-right */}
+      {/* Character + speech bubble — fixed bottom-right, fully responsive */}
       <div
         className="absolute flex flex-col items-end"
-        style={{ bottom: 0, right: 12, zIndex: 2 }}
+        style={{ bottom: 0, right: 12, zIndex: 2, maxHeight: "95vh", justifyContent: "flex-end" }}
       >
         {/* Speech bubble */}
         <div
-          className="relative bg-white rounded-2xl px-4 py-3 mb-2 shadow-xl"
+          className="relative bg-white rounded-2xl px-4 py-3 mb-2 shadow-xl overflow-y-auto"
           style={{
-            maxWidth: 260,
+            maxWidth: "min(260px, calc(100vw - 150px))",
+            maxHeight: "min(240px, 45vh)",
             border: "1.5px solid rgba(91,196,192,0.4)",
             borderBottomRightRadius: 4,
           }}
@@ -252,7 +253,7 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
 
         {/* Buttons + character */}
         <div className="flex items-end gap-2">
-          <div className="flex flex-col gap-1.5 mb-6">
+          <div className="flex flex-col gap-1.5 mb-4">
             <button
               onClick={advance}
               className="px-4 py-2 rounded-xl text-white text-xs font-bold shadow-lg transition-transform active:scale-95"
@@ -271,17 +272,18 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
             </button>
           </div>
 
-          {/* Character image */}
+          {/* Character image — scales down on short screens (landscape mobile) */}
           <img
             src={current.character === "boy" ? boyImg : girlImg}
             alt={current.character === "boy" ? "Max" : "Mia"}
             style={{
-              width: 130,
-              height: 130,
+              width: "min(130px, 20vh)",
+              height: "min(130px, 20vh)",
               objectFit: "contain",
               objectPosition: "bottom center",
               filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.2))",
               transition: "opacity 0.2s ease",
+              flexShrink: 0,
             }}
           />
         </div>
