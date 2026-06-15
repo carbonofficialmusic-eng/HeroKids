@@ -36,6 +36,12 @@ const STEPS: TourStep[] = [
       "Wenn ein Kind eine Aufgabe als erledigt markiert hat, landet sie hier zur Prüfung.",
   },
   {
+    key: "tour-rewards-board",
+    character: "girl",
+    bubble:
+      "Hier findest du alle eingelösten Belohnungen, kannst Belohnungen zum Teilen freigeben und erledigte Einlösungen bestätigen.",
+  },
+  {
     key: "tour-profile-menu",
     character: "girl",
     bubble:

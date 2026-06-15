@@ -1243,7 +1243,7 @@ export default function Dashboard() {
                 </div>
                 <div className="relative w-full">
                   <Link href="/rewards-board" className="w-full block">
-                    <Button variant="card" data-testid="button-rewards-board" className="w-full h-14 justify-start px-4 gap-3">
+                    <Button variant="card" data-testid="button-rewards-board" data-tour="tour-rewards-board" className="w-full h-14 justify-start px-4 gap-3">
                       <span className="w-6 flex-shrink-0 flex justify-center">
                         <Gift className="h-5 w-5" />
                       </span>
