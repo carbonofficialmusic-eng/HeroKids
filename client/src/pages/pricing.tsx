@@ -145,30 +145,40 @@ export default function Pricing() {
         </p>
 
         {/* Billing toggle */}
-        <div className="flex items-center justify-center gap-2 mb-10" data-testid="billing-toggle">
-          <Button
-            variant={billingCycle === "monthly" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setBillingCycle("monthly")}
-            data-testid="button-billing-monthly"
-          >
-            {t("pricing.billingMonthly")}
-          </Button>
-          <div className="relative">
-            <Button
-              variant={billingCycle === "yearly" ? "default" : "outline"}
-              size="sm"
+        <div className="flex flex-col items-center gap-3 mb-10" data-testid="billing-toggle">
+          <div className="flex items-center bg-muted rounded-full p-1 gap-1">
+            <button
+              onClick={() => setBillingCycle("monthly")}
+              data-testid="button-billing-monthly"
+              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                billingCycle === "monthly"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t("pricing.billingMonthly")}
+            </button>
+            <button
               onClick={() => setBillingCycle("yearly")}
               data-testid="button-billing-yearly"
+              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                billingCycle === "yearly"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
               {t("pricing.billingYearly")}
-            </Button>
-            {billingCycle === "yearly" && (
-              <Badge className="absolute -top-3 -right-2 text-xs px-1.5 py-0" data-testid="badge-yearly-discount">
-                {t("pricing.yearlyDiscount")}
-              </Badge>
-            )}
+            </button>
           </div>
+          <Badge
+            variant={billingCycle === "yearly" ? "default" : "outline"}
+            className="text-xs px-3 py-1"
+            data-testid="badge-yearly-discount"
+          >
+            {billingCycle === "yearly"
+              ? t("pricing.yearlyDiscount")
+              : t("pricing.yearlyDiscountTeaser")}
+          </Badge>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
