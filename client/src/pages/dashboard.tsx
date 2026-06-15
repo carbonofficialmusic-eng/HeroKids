@@ -1531,28 +1531,9 @@ export default function Dashboard() {
               )}
 
               {/* Rewards Section */}
-              <div data-tour="tour-rewards">
-                <div className="flex items-center justify-between mb-4 gap-2">
-                  <h2 className="text-2xl font-bold font-accent">{t("dashboard.activeRewards")}</h2>
-                  {isRealParent && (
-                    <Button
-                      size="sm"
-                      onClick={() => { setSelectedReward(null); setRewardDialogOpen(true); }}
-                      data-testid="button-add-reward-header"
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      {t("dashboard.addReward")}
-                    </Button>
-                  )}
-                </div>
-                {activeRewards.length === 0 && isRealParent ? (
-                  <Card className="p-8 flex flex-col items-center gap-3 text-center">
-                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                      <Gift className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <p className="text-muted-foreground text-sm">{t("dashboard.noRewardsYet", "Noch keine Belohnungen. Erstelle eine, damit deine Kinder etwas zu gewinnen haben!")}</p>
-                  </Card>
-                ) : activeRewards.length > 0 ? (
+              {activeRewards.length > 0 && (
+                <div data-tour="tour-rewards">
+                  <h2 className="text-2xl font-bold font-accent mb-4">{t("dashboard.activeRewards")}</h2>
                   <div className="grid md:grid-cols-2 gap-4">
                     {activeRewards.map((reward) => (
                       <Card key={reward.id} className="p-6 relative overflow-visible" data-testid={`card-reward-${reward.id}`}>
