@@ -1161,6 +1161,14 @@
     "pointsBadge": "+{{count}} p",
     "noRecentActivity": "Ingen senaste aktivitet"
   },
+  "trial": {
+    "bannerTitle": "Family-provperiod aktiv — {{days}} dag(ar) kvar",
+    "bannerSubtitle": "Uppgradera till Family för att behålla alla funktioner permanent.",
+    "modalTitle": "Din 7-dagars Family-provperiod är nu aktiv!",
+    "modalDesc": "Du har nu gratis tillgång till alla Family-funktioner i 7 dagar: familjechatt, personliga enheter för barn och mer.",
+    "modalNoCreditCard": "Inget kreditkort krävs. Ingen automatisk förnyelse.",
+    "modalCta": "Kör igång!"
+  },
   "pricing": {
     "title": "Välj din plan",
     "subtitle": "Välj den perfekta planen för din familjs behov. Alla planer inkluderar grundläggande uppgiftshanteringsfunktioner.",

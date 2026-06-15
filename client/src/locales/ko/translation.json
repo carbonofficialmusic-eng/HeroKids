@@ -1456,6 +1456,14 @@
     "linkedDesc": "다시 오신 것을 환영합니다, {{name}}님! 계정이 이 기기에 연결되었습니다.",
     "backToLogin": "로그인으로 돌아가기"
   },
+  "trial": {
+    "bannerTitle": "Family 체험 중 — {{days}}일 남음",
+    "bannerSubtitle": "Family로 업그레이드하여 모든 기능을 영구적으로 유지하세요.",
+    "modalTitle": "7일 무료 Family 체험이 활성화되었습니다!",
+    "modalDesc": "7일 동안 모든 Family 기능(가족 채팅, 아이 전용 기기 등)을 무료로 이용하실 수 있습니다.",
+    "modalNoCreditCard": "신용카드 불필요. 자동 갱신 없음.",
+    "modalCta": "시작해볼까요!"
+  },
   "pricing": {
     "title": "요금제 선택",
     "subtitle": "가족의 필요에 맞는 완벽한 요금제를 선택하세요. 모든 요금제에는 기본 과제 관리 기능이 포함됩니다.",

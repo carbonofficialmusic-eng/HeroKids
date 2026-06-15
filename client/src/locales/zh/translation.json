@@ -1129,6 +1129,14 @@
     "pointsBadge": "+{{count}}分",
     "noRecentActivity": "没有最近活动"
   },
+  "trial": {
+    "bannerTitle": "Family 试用中 — 剩余 {{days}} 天",
+    "bannerSubtitle": "升级到 Family 以永久保留所有功能。",
+    "modalTitle": "您的 7 天 Family 免费试用已激活！",
+    "modalDesc": "您可以免费使用所有 Family 功能 7 天：家庭聊天、孩子的个人设备等。",
+    "modalNoCreditCard": "无需信用卡。无自动续订。",
+    "modalCta": "开始吧！"
+  },
   "pricing": {
     "title": "选择您的套餐",
     "subtitle": "为您的家庭需求选择完美的套餐。所有套餐都包含核心任务管理功能。",

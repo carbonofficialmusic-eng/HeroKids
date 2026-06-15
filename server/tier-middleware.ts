@@ -32,7 +32,13 @@ export function addTierCapabilities(
   }
 
   const legacyTier = family.subscriptionTier || "free";
-  const tier = normalizeTier(legacyTier as SubscriptionTierLegacy);
+  let tier = normalizeTier(legacyTier as SubscriptionTierLegacy);
+
+  // Active in-app trial: treat as "family" tier
+  if (tier === "free" && family.trialEndsAt && new Date(family.trialEndsAt) > new Date()) {
+    tier = "family";
+  }
+
   const config = getTierConfig(tier);
   
   req.tierCapabilities = config.features;

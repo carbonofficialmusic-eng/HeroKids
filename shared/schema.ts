@@ -108,6 +108,8 @@ export const families = pgTable("families", {
   lastWeeklyPeriod: varchar("last_weekly_period", { length: 10 }), // Family-local ISO week "RRRR-Www"
   lastMonthlyPeriod: varchar("last_monthly_period", { length: 7 }), // Family-local month "YYYY-MM"
   categoryNames: jsonb("category_names").$type<{ household?: string; school?: string; selfCare?: string; pets?: string; other?: string } | null>(), // Custom category names per family
+  trialStartedAt: timestamp("trial_started_at"), // When the 7-day free trial started (null = never trialed)
+  trialEndsAt: timestamp("trial_ends_at"), // When the trial expires
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

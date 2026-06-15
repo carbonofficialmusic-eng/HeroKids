@@ -1129,6 +1129,14 @@
     "pointsBadge": "+{{count}}ポイント",
     "noRecentActivity": "最近のアクティビティなし"
   },
+  "trial": {
+    "bannerTitle": "Familyトライアル中 — 残り{{days}}日",
+    "bannerSubtitle": "Familyにアップグレードしてすべての機能を永続的に利用しましょう。",
+    "modalTitle": "7日間のFamilyトライアルが有効になりました！",
+    "modalDesc": "7日間、すべてのFamily機能（家族チャット、子ども用個人デバイスなど）を無料でご利用いただけます。",
+    "modalNoCreditCard": "クレジットカード不要。自動更新なし。",
+    "modalCta": "さあ始めましょう！"
+  },
   "pricing": {
     "title": "プランを選択",
     "subtitle": "ご家族のニーズに最適なプランを選択してください。すべてのプランには基本的なタスク管理機能が含まれています。",

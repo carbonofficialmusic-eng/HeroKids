@@ -1129,6 +1129,14 @@
     "pointsBadge": "+{{count}} pts",
     "noRecentActivity": "Aucune activité récente"
   },
+  "trial": {
+    "bannerTitle": "Essai Family actif — {{days}} jour(s) restant(s)",
+    "bannerSubtitle": "Passez à Family pour conserver toutes les fonctionnalités définitivement.",
+    "modalTitle": "Votre essai gratuit Family de 7 jours est activé !",
+    "modalDesc": "Vous avez accès gratuitement à toutes les fonctionnalités Family pendant 7 jours : chat familial, appareils personnels pour les enfants, et plus.",
+    "modalNoCreditCard": "Aucune carte de crédit requise. Pas de renouvellement automatique.",
+    "modalCta": "C'est parti !"
+  },
   "pricing": {
     "title": "Choisissez Votre Formule",
     "subtitle": "Sélectionnez la formule parfaite pour les besoins de votre famille. Toutes les formules incluent les fonctionnalités de gestion de tâches de base.",

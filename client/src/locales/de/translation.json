@@ -1185,6 +1185,14 @@
     "pointsBadge": "+{{count}} Pkt",
     "noRecentActivity": "Keine kürzliche Aktivität"
   },
+  "trial": {
+    "bannerTitle": "Family-Test aktiv — noch {{days}} Tag(e)",
+    "bannerSubtitle": "Jetzt auf Family upgraden, um alle Features dauerhaft zu behalten.",
+    "modalTitle": "Dein 7-tägiger Family-Test wurde freigeschaltet!",
+    "modalDesc": "Du hast jetzt 7 Tage lang kostenlosen Zugang zu allen Family-Features: Familien-Chat, eigene Geräte für Kinder, und mehr.",
+    "modalNoCreditCard": "Keine Kreditkarte erforderlich. Keine automatische Verlängerung.",
+    "modalCta": "Super, los geht's!"
+  },
   "pricing": {
     "title": "Wähle deinen Plan",
     "subtitle": "Wähle den perfekten Plan für die Bedürfnisse deiner Familie. Alle Pläne beinhalten grundlegende Aufgabenverwaltungsfunktionen.",

@@ -18,7 +18,7 @@ export default function Pricing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("yearly");
   const [processingTier, setProcessingTier] = useState<string | null>(null);
 
   const { data: member } = useQuery<FamilyMember>({

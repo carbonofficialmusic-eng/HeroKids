@@ -362,6 +362,8 @@ export default function Dashboard() {
     monthlyPrize?: string | null;
     yearlyPrize?: string | null;
     categoryNames?: { household?: string; school?: string; selfCare?: string; other?: string } | null;
+    trialStartedAt?: string | null;
+    trialEndsAt?: string | null;
   }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
@@ -1091,6 +1093,32 @@ export default function Dashboard() {
         {isParent ? (
           /* Parent View */
           <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
+            {/* Trial Banner */}
+            {isParent && familyData?.trialEndsAt && familyData.subscriptionTier === "free" && (() => {
+              const daysLeft = Math.ceil((new Date(familyData.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+              return daysLeft > 0 ? (
+                <div className="lg:col-span-3">
+                  <Link href="/pricing">
+                    <button
+                      className="w-full flex items-center gap-3 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700 hover-elevate active-elevate-2 text-left"
+                      data-testid="banner-trial"
+                    >
+                      <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-emerald-900 dark:text-emerald-200">
+                          {t("trial.bannerTitle", { days: daysLeft })}
+                        </div>
+                        <div className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">
+                          {t("trial.bannerSubtitle")}
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    </button>
+                  </Link>
+                </div>
+              ) : null;
+            })()}
+
             {/* Over-limit Banner */}
             {isParent && (familyData?.overLimitCount ?? 0) > 0 && (
               <div className="lg:col-span-3">

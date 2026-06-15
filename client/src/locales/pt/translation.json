@@ -1174,6 +1174,14 @@
     "pointsBadge": "+{{count}} pts",
     "noRecentActivity": "Nenhuma atividade recente"
   },
+  "trial": {
+    "bannerTitle": "Teste Family ativo — {{days}} dia(s) restante(s)",
+    "bannerSubtitle": "Faça upgrade para Family e mantenha todos os recursos permanentemente.",
+    "modalTitle": "Seu teste gratuito de 7 dias do Family está ativo!",
+    "modalDesc": "Você tem acesso gratuito a todos os recursos do Family por 7 dias: chat familiar, dispositivos pessoais para crianças, e mais.",
+    "modalNoCreditCard": "Sem cartão de crédito. Sem renovação automática.",
+    "modalCta": "Vamos lá!"
+  },
   "pricing": {
     "title": "Escolha seu Plano",
     "subtitle": "Selecione o plano perfeito para as necessidades da sua família. Todos os planos incluem recursos básicos de gerenciamento de tarefas.",

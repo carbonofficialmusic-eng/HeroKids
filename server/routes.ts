@@ -1350,6 +1350,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...parsed,
           familyName,
         });
+
+        // Start free trial when first child is added to a free-tier family with no prior trial
+        let trialActivated = false;
+        if (
+          parsed.role === "child" &&
+          family.subscriptionTier === "free" &&
+          !family.trialStartedAt
+        ) {
+          const now = new Date();
+          const trialEndsAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+          await storage.updateFamily(familyName, { trialStartedAt: now, trialEndsAt });
+          trialActivated = true;
+        }
         
         // Broadcast new member to family
         broadcastToFamily(member.familyName, {
@@ -1357,7 +1370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           member,
         });
         
-        res.json(member);
+        res.json({ ...member, trialActivated });
       } else {
         // Initial setup - creating first member for this user
         const parsed = insertFamilyMemberSchema.parse(req.body);

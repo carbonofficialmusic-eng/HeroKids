@@ -1175,6 +1175,14 @@
     "pointsBadge": "+{{count}} pts",
     "noRecentActivity": "No recent activity"
   },
+  "trial": {
+    "bannerTitle": "Family trial active — {{days}} day(s) left",
+    "bannerSubtitle": "Upgrade to Family to keep all features permanently.",
+    "modalTitle": "Your 7-day Family trial is now active!",
+    "modalDesc": "You now have free access to all Family features for 7 days: family chat, personal devices for kids, and more.",
+    "modalNoCreditCard": "No credit card required. No automatic renewal.",
+    "modalCta": "Let's go!"
+  },
   "pricing": {
     "title": "Choose Your Plan",
     "subtitle": "Select the perfect plan for your family's needs. All plans include core task management features.",

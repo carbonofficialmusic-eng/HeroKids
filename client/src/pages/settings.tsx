@@ -42,6 +42,7 @@ export default function Settings() {
   const [, setLocation] = useLocation();
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
+  const [trialActivatedDialogOpen, setTrialActivatedDialogOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<FamilyMember | null>(null);
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
@@ -133,9 +134,10 @@ export default function Settings() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
       setAddMemberDialogOpen(false);
-      
-      // Show join code if member was created with one
-      if (data.joinCode) {
+
+      if (data.trialActivated) {
+        setTrialActivatedDialogOpen(true);
+      } else if (data.joinCode) {
         setNewMemberJoinCode(data.joinCode);
       } else {
         toast({
@@ -1247,6 +1249,24 @@ export default function Settings() {
           currentUserRole={realMember?.role}
         />
       )}
+
+      {/* Trial Activated Dialog */}
+      <AlertDialog open={trialActivatedDialogOpen} onOpenChange={setTrialActivatedDialogOpen}>
+        <AlertDialogContent data-testid="dialog-trial-activated">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('trial.modalTitle')}</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>{t('trial.modalDesc')}</p>
+              <p className="text-sm font-medium text-foreground">{t('trial.modalNoCreditCard')}</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setTrialActivatedDialogOpen(false)} data-testid="button-close-trial">
+              {t('trial.modalCta')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Join Code Alert Dialog */}
       <AlertDialog open={!!newMemberJoinCode} onOpenChange={() => setNewMemberJoinCode(null)}>
