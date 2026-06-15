@@ -39,7 +39,7 @@ const STEPS: TourStep[] = [
     key: "tour-rewards-board",
     character: "girl",
     bubble:
-      "Hier findest du alle eingelösten Belohnungen, kannst Belohnungen zum Teilen freigeben und erledigte Einlösungen bestätigen.",
+      "Hier behältst du den Überblick: welche Belohnungen deine Kinder eingelöst haben, geteilte Belohnungen und Belohnungen als erledigt markieren.",
   },
   {
     key: "tour-profile-menu",
