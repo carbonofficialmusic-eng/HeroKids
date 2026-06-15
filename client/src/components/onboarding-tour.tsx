@@ -54,6 +54,12 @@ const STEPS: TourStep[] = [
       "Über das Stern-Symbol kann jedes Kind eigene Charakter-Skins und neue Hintergründe freischalten. Dort kannst du auch Sterne sammeln um alle HeroKids freizuschalten.",
   },
   {
+    key: "tour-pinboard",
+    character: "girl",
+    bubble:
+      "Die Pinnwand ist euer Familien-Schwarzes Brett. Nachrichten, Lob und Ankündigungen — alles an einem Ort für alle sichtbar. Jedes Familienmitglied kann 2 Zettel dort anheften.",
+  },
+  {
     key: "tour-bonus-rewards",
     character: "girl",
     bubble:
@@ -64,12 +70,6 @@ const STEPS: TourStep[] = [
     character: "boy",
     bubble:
       "Familienziele schweißen zusammen! Alle Kinder arbeiten gemeinsam auf ein Ziel hin — zum Beispiel ein gemeinsamer Ausflug oder ein Spieleabend.",
-  },
-  {
-    key: "tour-pinboard",
-    character: "girl",
-    bubble:
-      "Die Pinnwand ist euer Familien-Schwarzes Brett. Nachrichten, Lob und Ankündigungen — alles an einem Ort für alle sichtbar. Jedes Familienmitglied kann 2 Zettel dort anheften.",
   },
   {
     key: "",
