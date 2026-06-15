@@ -1301,6 +1301,7 @@ export default function Dashboard() {
                     setRewardDialogOpen(true);
                   }}
                   data-testid="button-add-reward"
+                  data-tour="tour-add-reward"
                   className="w-full h-14 justify-start px-4 gap-3"
                 >
                   <span className="w-6 flex-shrink-0 flex justify-center">

@@ -24,7 +24,7 @@ const STEPS: TourStep[] = [
       "Hier erstellst du neue Aufgaben für deine Kinder. Du kannst Punkte vergeben, ein Fälligkeitsdatum setzen, Beweisfoto und Genehmigungen verlangen, Einkaufslisten erstellen und Kindern Aufgaben zuweisen. Aufgaben die du als Wichtig markierst erscheinen immer ganz oben in der Aufgabenliste.",
   },
   {
-    key: "tour-rewards",
+    key: "tour-add-reward",
     character: "girl",
     bubble:
       "Belohnungen sind der beste Antrieb! Leg fest, was sich deine Kinder mit ihren gesammelten Punkten verdienen können. Belohnungen können auch zum Teilen angeboten werden.",
