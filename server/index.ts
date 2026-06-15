@@ -903,17 +903,18 @@ async function ensurePinboardTable() {
             'Monthly Champion',
             'Finish in 1st place on the monthly leaderboard',
             200,
-            'custom',
+            'points',
             true,
             '{"rank": 1}'::jsonb
           )
         `);
         log(`✅ Added monthly-leaderboard-1st achievement for family: ${familyName}`);
       } else {
-        // Ensure existing rows have is_active = true
+        // Ensure existing rows have is_active = true and reward_type = 'points'
         await db.execute(sql`
-          UPDATE achievement_definitions SET is_active = true
-          WHERE family_name = ${familyName} AND slug = 'monthly-leaderboard-1st' AND is_active = false
+          UPDATE achievement_definitions SET is_active = true, reward_type = 'points'
+          WHERE family_name = ${familyName} AND slug = 'monthly-leaderboard-1st'
+            AND (is_active = false OR reward_type = 'custom')
         `);
         log(`ℹ️ monthly-leaderboard-1st already exists for family: ${familyName}`);
       }
@@ -933,7 +934,7 @@ async function ensurePinboardTable() {
             'Star Collector',
             'Find 4 hidden stars on skin cards',
             100,
-            'custom',
+            'points',
             true,
             '{"starsRequired": 4}'::jsonb
           )
@@ -941,8 +942,9 @@ async function ensurePinboardTable() {
         log(`✅ Added star-collector achievement for family: ${familyName}`);
       } else {
         await db.execute(sql`
-          UPDATE achievement_definitions SET is_active = true
-          WHERE family_name = ${familyName} AND slug = 'star-collector' AND is_active = false
+          UPDATE achievement_definitions SET is_active = true, reward_type = 'points'
+          WHERE family_name = ${familyName} AND slug = 'star-collector'
+            AND (is_active = false OR reward_type = 'custom')
         `);
         log(`ℹ️ star-collector already exists for family: ${familyName}`);
       }

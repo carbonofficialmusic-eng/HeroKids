@@ -620,13 +620,21 @@ export default function Dashboard() {
       );
       return { previousTasks };
     },
-    onError: (_err, _vars, context: any) => {
+    onError: (error: any, _vars: any, context: any) => {
       if (context?.previousTasks) {
         queryClient.setQueryData(["/api/tasks"], context.previousTasks);
       }
+      const errorCode = error?.data?.code;
+      let title = t("toast.error");
+      let description = error.message || t("toast.taskError");
+      if (errorCode === "TASK_NOT_YET_AVAILABLE") {
+        title = t("tasks.dueDateNotYetTooltip");
+      } else if (errorCode === "TASK_DEADLINE_EXPIRED") {
+        title = t("tasks.dueDateExpiredTooltip");
+      }
+      toast({ variant: "destructive", title, description });
     },
     onSuccess: (data: any) => {
-      // Aggressive cache invalidation - force refetch
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"], refetchType: 'active' });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"], refetchType: 'active' });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"], refetchType: 'active' });
@@ -637,8 +645,6 @@ export default function Dashboard() {
         clearPhotoUsed();
         setTimeout(() => { window.location.href = window.location.pathname; }, 2500);
       }
-      
-      // Show celebration for auto-approved tasks
       if (data.autoApproved) {
         celebrateTaskCompletion();
         setCelebration({
@@ -646,24 +652,6 @@ export default function Dashboard() {
           message: data.message || t("toast.greatJob"),
         });
       }
-      
-    },
-    onError: (error: any) => {
-      const errorCode = error?.data?.code;
-      let title = t("toast.error");
-      let description = error.message || t("toast.taskError");
-      
-      if (errorCode === "TASK_NOT_YET_AVAILABLE") {
-        title = t("tasks.dueDateNotYetTooltip");
-      } else if (errorCode === "TASK_DEADLINE_EXPIRED") {
-        title = t("tasks.dueDateExpiredTooltip");
-      }
-      
-      toast({
-        variant: "destructive",
-        title,
-        description,
-      });
     },
   });
 

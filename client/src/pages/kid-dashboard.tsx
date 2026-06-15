@@ -1828,10 +1828,15 @@ export default function KidDashboard() {
       );
       return { previousTasks };
     },
-    onError: (_err: any, _vars: any, context: any) => {
+    onError: (error: any, _vars: any, context: any) => {
       if (context?.previousTasks) {
         queryClient.setQueryData(["/api/tasks"], context.previousTasks);
       }
+      toast({
+        variant: "destructive",
+        title: t("kidDashboard.error"),
+        description: error.message || t("kidDashboard.taskError"),
+      });
     },
     onSuccess: () => {
       confetti({
@@ -1847,13 +1852,6 @@ export default function KidDashboard() {
         clearPhotoUsed();
         setTimeout(() => { window.location.href = window.location.pathname; }, 2500);
       }
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: t("kidDashboard.error"),
-        description: error.message || t("kidDashboard.taskError"),
-      });
     },
   });
 
