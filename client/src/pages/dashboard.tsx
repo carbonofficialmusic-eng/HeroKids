@@ -1915,7 +1915,7 @@ export default function Dashboard() {
           <Card className="p-1 mx-2 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl sm:mx-auto">
             <div className="flex justify-center">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px] relative">
-                <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" className="h-10 w-full px-3 sm:px-4 rounded-2xl">
+                <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 w-full px-3 sm:px-4 rounded-2xl">
                   <Link href="/chat">
                     <MessageCircle className="h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
                     <span className="font-medium text-sm truncate">{t("nav.chat")}</span>

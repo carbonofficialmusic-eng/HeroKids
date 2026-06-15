@@ -78,6 +78,12 @@ const STEPS: TourStep[] = [
       "Hier kannst du deinen Kindern Punkte schicken — unabhängig von Aufgaben, einfach so als Belohnung oder Motivation.",
   },
   {
+    key: "tour-family-chat",
+    character: "girl",
+    bubble:
+      "Der Familien-Chat verbindet euch alle! Nur Mitglieder mit einem eigenen Smartphone können dort schreiben — aber für die wird's richtig lebendig.",
+  },
+  {
     key: "",
     character: "boy",
     bubble:
