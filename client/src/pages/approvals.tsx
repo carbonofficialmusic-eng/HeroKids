@@ -230,16 +230,20 @@ export default function Approvals() {
     let successCount = 0;
     let failCount = 0;
 
-    await Promise.all(
-      ids.map(async (id) => {
-        try {
-          await apiRequest("POST", `/api/tasks/completions/${id}/approve`, {});
-          successCount++;
-        } catch {
-          failCount++;
-        }
-      })
-    );
+    const chunkSize = 3;
+    for (let i = 0; i < ids.length; i += chunkSize) {
+      const chunk = ids.slice(i, i + chunkSize);
+      await Promise.all(
+        chunk.map(async (id) => {
+          try {
+            await apiRequest("POST", `/api/tasks/completions/${id}/approve`, {});
+            successCount++;
+          } catch {
+            failCount++;
+          }
+        })
+      );
+    }
 
     queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
     queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
