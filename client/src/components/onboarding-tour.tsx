@@ -189,8 +189,10 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
       className="fixed inset-0 z-[9999]"
       style={{ fontFamily: "Nunito, sans-serif" }}
     >
-      {/* Dark overlay */}
-      <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} />
+      {/* Dark overlay — only rendered when there is no rect (intro/outro steps) */}
+      {!rect && (
+        <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} />
+      )}
 
       {/* Spotlight cutout */}
       {rect && (
