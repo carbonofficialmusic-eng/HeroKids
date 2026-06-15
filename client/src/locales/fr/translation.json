@@ -792,7 +792,10 @@
     "emailChangeSentDesc": "Vérifiez votre nouvelle boîte mail. L'ancienne adresse reste active jusqu'à confirmation.",
     "passwordChanged": "Mot de passe modifié",
     "passwordChangedDesc": "Votre mot de passe a été mis à jour avec succès.",
-    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas"
+    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+    "onboardingTourTitle": "Visite guidée",
+    "onboardingTourDesc": "Te montre étape par étape toutes les fonctions importantes de HeroKids.",
+    "restartTour": "Redémarrer la visite"
   },
   "subscription": {
     "free": "Free",

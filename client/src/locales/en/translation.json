@@ -822,7 +822,10 @@
     "emailChangeSentDesc": "Check your new inbox to confirm. Your old email stays active until confirmed.",
     "passwordChanged": "Password updated",
     "passwordChangedDesc": "Your password has been changed successfully.",
-    "passwordsDoNotMatch": "Passwords do not match"
+    "passwordsDoNotMatch": "Passwords do not match",
+    "onboardingTourTitle": "Introduction Tour",
+    "onboardingTourDesc": "Shows you all the important features of HeroKids step by step.",
+    "restartTour": "Restart tour"
   },
   "subscription": {
     "free": "Free",

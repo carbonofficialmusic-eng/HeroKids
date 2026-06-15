@@ -821,7 +821,10 @@
     "emailChangeSentDesc": "Kontrollera din nya inkorg. Den gamla adressen förblir aktiv tills du bekräftar.",
     "passwordChanged": "Lösenord bytt",
     "passwordChangedDesc": "Ditt lösenord har uppdaterats.",
-    "passwordsDoNotMatch": "Lösenorden stämmer inte överens"
+    "passwordsDoNotMatch": "Lösenorden stämmer inte överens",
+    "onboardingTourTitle": "Introduktionstur",
+    "onboardingTourDesc": "Visar dig steg för steg alla viktiga funktioner i HeroKids.",
+    "restartTour": "Starta om turen"
   },
   "subscription": {
     "free": "Gratis",

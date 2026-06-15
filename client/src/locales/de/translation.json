@@ -832,7 +832,10 @@
     "emailChangeSentDesc": "Prüfe dein neues Postfach, um die Änderung zu bestätigen. Die alte Adresse bleibt aktiv bis zur Bestätigung.",
     "passwordChanged": "Passwort geändert",
     "passwordChangedDesc": "Dein Passwort wurde erfolgreich aktualisiert.",
-    "passwordsDoNotMatch": "Passwörter stimmen nicht überein"
+    "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
+    "onboardingTourTitle": "Einführungstour",
+    "onboardingTourDesc": "Zeigt dir Schritt für Schritt alle wichtigen Funktionen von HeroKids.",
+    "restartTour": "Tour neu starten"
   },
   "subscription": {
     "free": "Free",

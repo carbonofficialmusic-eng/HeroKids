@@ -792,7 +792,10 @@
     "emailChangeSentDesc": "Revisa tu nueva bandeja de entrada. La dirección anterior seguirá activa hasta confirmar.",
     "passwordChanged": "Contraseña actualizada",
     "passwordChangedDesc": "Tu contraseña se ha actualizado correctamente.",
-    "passwordsDoNotMatch": "Las contraseñas no coinciden"
+    "passwordsDoNotMatch": "Las contraseñas no coinciden",
+    "onboardingTourTitle": "Tour de introducción",
+    "onboardingTourDesc": "Te muestra paso a paso todas las funciones importantes de HeroKids.",
+    "restartTour": "Reiniciar tour"
   },
   "subscription": {
     "free": "Free",

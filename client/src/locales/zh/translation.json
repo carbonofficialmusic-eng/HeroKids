@@ -792,7 +792,10 @@
     "emailChangeSentDesc": "请查收新邮箱。旧地址在确认前保持有效。",
     "passwordChanged": "密码已修改",
     "passwordChangedDesc": "您的密码已成功更新。",
-    "passwordsDoNotMatch": "两次输入的密码不一致"
+    "passwordsDoNotMatch": "两次输入的密码不一致",
+    "onboardingTourTitle": "入门导览",
+    "onboardingTourDesc": "逐步向你展示HeroKids的所有重要功能。",
+    "restartTour": "重新开始导览"
   },
   "subscription": {
     "free": "Free",

@@ -796,7 +796,10 @@
     "emailChangeSentDesc": "새 받은 편지함을 확인하세요. 확인 전까지 이전 주소가 활성 상태로 유지됩니다.",
     "passwordChanged": "비밀번호 변경됨",
     "passwordChangedDesc": "비밀번호가 성공적으로 업데이트되었습니다.",
-    "passwordsDoNotMatch": "비밀번호가 일치하지 않습니다"
+    "passwordsDoNotMatch": "비밀번호가 일치하지 않습니다",
+    "onboardingTourTitle": "소개 투어",
+    "onboardingTourDesc": "HeroKids의 모든 주요 기능을 단계별로 안내해드립니다.",
+    "restartTour": "투어 다시 시작"
   },
   "subscription": {
     "free": "무료",

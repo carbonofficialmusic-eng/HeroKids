@@ -822,7 +822,10 @@
     "emailChangeSentDesc": "Verifique sua nova caixa de entrada para confirmar. Seu e-mail antigo fica ativo até a confirmação.",
     "passwordChanged": "Senha atualizada",
     "passwordChangedDesc": "Sua senha foi alterada com sucesso.",
-    "passwordsDoNotMatch": "As senhas não coincidem"
+    "passwordsDoNotMatch": "As senhas não coincidem",
+    "onboardingTourTitle": "Tour de introdução",
+    "onboardingTourDesc": "Mostra passo a passo todas as funções importantes do HeroKids.",
+    "restartTour": "Reiniciar tour"
   },
   "subscription": {
     "free": "Gratuito",

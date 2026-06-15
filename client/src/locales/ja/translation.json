@@ -792,7 +792,10 @@
     "emailChangeSentDesc": "新しいメールボックスをご確認ください。確認が完了するまで旧アドレスは有効です。",
     "passwordChanged": "パスワードを変更しました",
     "passwordChangedDesc": "パスワードが正常に更新されました。",
-    "passwordsDoNotMatch": "パスワードが一致しません"
+    "passwordsDoNotMatch": "パスワードが一致しません",
+    "onboardingTourTitle": "紹介ツアー",
+    "onboardingTourDesc": "HeroKidsの重要な機能をステップごとにご案内します。",
+    "restartTour": "ツアーを再開"
   },
   "subscription": {
     "free": "Free",
