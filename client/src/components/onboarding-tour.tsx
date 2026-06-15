@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import boyImg from "@assets/Gemini_Generated_Image_i6o7f7i6o7f7i6o7_1781527770195.png";
-import girlImg from "@assets/Gemini_Generated_Image_rjvz3prjvz3prjvz_1781527787492.png";
+import boyImg from "@assets/hero_boy_nobg.png";
+import girlImg from "@assets/hero_girl_nobg.png";
 
 interface TourStep {
   key: string;
