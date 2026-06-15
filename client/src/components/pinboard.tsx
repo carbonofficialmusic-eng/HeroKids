@@ -20,7 +20,6 @@ interface PinboardNote {
 
 interface PinboardProps {
   currentMemberId?: string | null;
-  isActingAs?: boolean;
 }
 
 const ROTATIONS = [-3.2, 1.6, -2.4, 0.8, -1.6, 2.8, -0.6, 2.2, -1.8, 0.4, -2.6, 1.0, 2.6, -0.4, -1.2, 3.0];
@@ -47,7 +46,7 @@ function needsLightText(hex: string): boolean {
   }
 }
 
-export function Pinboard({ currentMemberId, isActingAs = false }: PinboardProps) {
+export function Pinboard({ currentMemberId }: PinboardProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -132,13 +131,7 @@ export function Pinboard({ currentMemberId, isActingAs = false }: PinboardProps)
             size="icon"
             variant="ghost"
             className="h-7 w-7"
-            onClick={() => {
-              if (isActingAs) {
-                toast({ title: t("pinboard.switchProfile"), variant: "destructive" });
-                return;
-              }
-              setIsAdding(true);
-            }}
+            onClick={() => setIsAdding(true)}
             data-testid="button-pinboard-add"
           >
             <Plus className="h-4 w-4" />
