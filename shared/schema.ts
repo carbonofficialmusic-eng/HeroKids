@@ -63,6 +63,7 @@ export const users = pgTable("users", {
   passwordResetTokenExpiresAt: timestamp("password_reset_token_expires_at"),
   isDisabled: boolean("is_disabled").notNull().default(false),
   lastLoginAt: timestamp("last_login_at"),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
   pendingEmail: varchar("pending_email", { length: 320 }),
   pendingEmailVerificationTokenHash: varchar("pending_email_verification_token_hash", { length: 64 }),
   pendingEmailVerificationTokenExpiresAt: timestamp("pending_email_verification_token_expires_at"),

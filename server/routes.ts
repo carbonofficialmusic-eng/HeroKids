@@ -533,6 +533,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth routes
+  // Mark onboarding tour as completed for the current user
+  app.post("/api/auth/user/onboarding-complete", isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user?.claims?.sub) return res.status(403).json({ message: "Account required" });
+      const userId = req.user.claims.sub;
+      await storage.updateUserAuthFields(userId, { onboardingCompletedAt: new Date() });
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("Error completing onboarding:", error);
+      res.status(500).json({ message: "Failed to update onboarding status" });
+    }
+  });
+
+  // Reset onboarding tour (allow restart)
+  app.delete("/api/auth/user/onboarding-complete", isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user?.claims?.sub) return res.status(403).json({ message: "Account required" });
+      const userId = req.user.claims.sub;
+      await storage.updateUserAuthFields(userId, { onboardingCompletedAt: null });
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("Error resetting onboarding:", error);
+      res.status(500).json({ message: "Failed to reset onboarding status" });
+    }
+  });
+
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
       // Check if this is a mobile JWT session

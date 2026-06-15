@@ -20,6 +20,7 @@ import { MemberPauseDialog } from "@/components/member-pause-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { ProfileMenu } from "@/components/profile-menu";
+import { OnboardingTour } from "@/components/onboarding-tour";
 import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -150,6 +151,17 @@ export default function Dashboard() {
   const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
   const [sendPointsOpen, setSendPointsOpen] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+
+  // Show onboarding tour for parents who haven't completed it yet
+  // NOTE: must live here, before any conditional returns (Rules of Hooks)
+  const tourUser = user; // alias to avoid lint warning about conditional hook
+  useEffect(() => {
+    if (tourUser && !tourUser.onboardingCompletedAt) {
+      const timer = setTimeout(() => setShowTour(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [tourUser?.id, tourUser?.onboardingCompletedAt]);
 
   // Freeze #root scroll while any dialog is open, then restore exactly (iOS keyboard shifts viewport)
   const savedRootScrollRef = useRef(0);
@@ -1071,17 +1083,19 @@ export default function Dashboard() {
               return <Link href="/pricing">{badge}</Link>;
             })()}
             <NotificationBell familyLanguage="en" memberRole={member.role} />
-            <ProfileMenu
-              member={member}
-              isParent={isParent}
-              isRealParent={isRealParent}
-              familyMemberCount={familyMembers.length}
-              onEditProfile={() => {
-                setMemberToEdit(member);
-                setEditMemberDialogOpen(true);
-              }}
-              onSwitchMember={() => setSwitchMemberDialogOpen(true)}
-            />
+            <div data-tour="tour-profile-menu">
+              <ProfileMenu
+                member={member}
+                isParent={isParent}
+                isRealParent={isRealParent}
+                familyMemberCount={familyMembers.length}
+                onEditProfile={() => {
+                  setMemberToEdit(member);
+                  setEditMemberDialogOpen(true);
+                }}
+                onSwitchMember={() => setSwitchMemberDialogOpen(true)}
+              />
+            </div>
           </div>
         </div>
       </header>
@@ -1168,7 +1182,7 @@ export default function Dashboard() {
                         </AvatarFallback>
                       </Avatar>
                     </button>
-                    <Link href="/skins" data-testid="link-stars-to-skins-parent">
+                    <Link href="/skins" data-testid="link-stars-to-skins-parent" data-tour="tour-skins">
                       <div className="flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate">
                         <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                         <span className="text-base font-semibold" data-testid="text-parent-stars-header">
@@ -1178,6 +1192,7 @@ export default function Dashboard() {
                     </Link>
                     <button
                       data-testid="button-scroll-to-pinboard"
+                      data-tour="tour-pinboard"
                       className="flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate"
                       onClick={() => {
                         const el = document.getElementById("pinboard");
@@ -1213,7 +1228,7 @@ export default function Dashboard() {
                 {/* Row 1: Approvals, Rewards Board */}
                 <div className="relative w-full">
                   <Link href="/approvals" className="w-full block">
-                    <Button variant="card" data-testid="button-approvals" className="w-full h-14 justify-start px-4 gap-3">
+                    <Button variant="card" data-testid="button-approvals" data-tour="tour-approvals" className="w-full h-14 justify-start px-4 gap-3">
                       <span className="w-6 flex-shrink-0 flex justify-center">
                         <ClipboardCheck className="h-5 w-5" />
                       </span>
@@ -1228,7 +1243,7 @@ export default function Dashboard() {
                 </div>
                 <div className="relative w-full">
                   <Link href="/rewards-board" className="w-full block">
-                    <Button variant="card" data-testid="button-rewards-board" className="w-full h-14 justify-start px-4 gap-3">
+                    <Button variant="card" data-testid="button-rewards-board" data-tour="tour-bonus-rewards" className="w-full h-14 justify-start px-4 gap-3">
                       <span className="w-6 flex-shrink-0 flex justify-center">
                         <Gift className="h-5 w-5" />
                       </span>
@@ -1243,7 +1258,7 @@ export default function Dashboard() {
                 </div>
                 {/* Row 2: Family Goals, Send Points */}
                 <Link href="/family-goals" className="w-full">
-                  <Button variant="card" data-testid="button-family-goals" className="w-full h-14 justify-start px-4 gap-3">
+                  <Button variant="card" data-testid="button-family-goals" data-tour="tour-family-goals" className="w-full h-14 justify-start px-4 gap-3">
                     <span className="w-6 flex-shrink-0 flex justify-center">
                       <Target className="h-5 w-5" />
                     </span>
@@ -1272,6 +1287,7 @@ export default function Dashboard() {
                     setTaskDialogOpen(true);
                   }}
                   data-testid="button-add-task"
+                  data-tour="tour-add-task"
                   className="w-full h-14 justify-start px-4 gap-3"
                 >
                   <span className="w-6 flex-shrink-0 flex justify-center">
@@ -1516,7 +1532,7 @@ export default function Dashboard() {
 
               {/* Rewards Section */}
               {activeRewards.length > 0 && (
-                <div>
+                <div data-tour="tour-rewards">
                   <h2 className="text-2xl font-bold font-accent mb-4">{t("dashboard.activeRewards")}</h2>
                   <div className="grid md:grid-cols-2 gap-4">
                     {activeRewards.map((reward) => (
@@ -2152,6 +2168,11 @@ export default function Dashboard() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+      )}
+
+      {/* Onboarding Tour */}
+      {showTour && isParent && (
+        <OnboardingTour onClose={() => setShowTour(false)} />
       )}
 
       {/* Debug Info Panel - activated by 5 taps on logo */}

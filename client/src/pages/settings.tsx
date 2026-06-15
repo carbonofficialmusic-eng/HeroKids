@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -1196,6 +1196,38 @@ export default function Settings() {
               </CardContent>
             </Card>
           )}
+
+          {/* Onboarding Tour */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                <CardTitle>{t('settings.onboardingTourTitle', 'Einführungstour')}</CardTitle>
+              </div>
+              <CardDescription>
+                {t('settings.onboardingTourDesc', 'Zeigt dir Schritt für Schritt alle wichtigen Funktionen von HeroKids.')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="w-full"
+                data-testid="button-restart-tour"
+                onClick={async () => {
+                  try {
+                    await apiRequest("DELETE", "/api/auth/user/onboarding-complete");
+                    queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+                    setLocation("/");
+                  } catch (e) {
+                    toast({ title: t('common.error', 'Fehler'), variant: "destructive" });
+                  }
+                }}
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                {t('settings.restartTour', 'Tour neu starten')}
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* Factory Reset Settings */}
           <Card className="border-destructive/50">
