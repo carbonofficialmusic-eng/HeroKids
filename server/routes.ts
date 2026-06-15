@@ -6379,10 +6379,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/create-checkout-session", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { tier } = req.body;
+      const { tier, billingCycle = "monthly" } = req.body;
       
       if (!tier || !["family", "family_hero"].includes(tier)) {
         return res.status(400).json({ message: "Invalid subscription tier" });
+      }
+      if (!["monthly", "yearly", "lifetime"].includes(billingCycle)) {
+        return res.status(400).json({ message: "Invalid billing cycle" });
       }
       
       const member = await storage.getFamilyMemberByUserId(userId);
@@ -6397,8 +6400,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const account = await storage.getUser(userId);
       
       const tierConfig = TIER_CONFIG[tier as SubscriptionTier];
-      if (!tierConfig.stripePriceId) {
-        return res.status(400).json({ message: "This tier is not available for purchase" });
+
+      // Pick the right Stripe Price ID based on billing cycle
+      let stripePriceId: string | undefined;
+      if (billingCycle === "yearly") {
+        stripePriceId = tierConfig.stripePriceIdYearly;
+      } else if (billingCycle === "lifetime") {
+        stripePriceId = tierConfig.stripePriceIdLifetime;
+      } else {
+        stripePriceId = tierConfig.stripePriceId;
+      }
+
+      if (!stripePriceId) {
+        return res.status(400).json({ message: "This billing option is not available for purchase" });
       }
       
       // Create or retrieve Stripe customer
@@ -6463,11 +6477,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
-        mode: "subscription",
+        mode: billingCycle === "lifetime" ? "payment" : "subscription",
         payment_method_types: ["card"],
         line_items: [
           {
-            price: tierConfig.stripePriceId,
+            price: stripePriceId,
             quantity: 1,
           },
         ],
@@ -6476,6 +6490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         metadata: {
           familyName: family.familyName,
           tier: tier,
+          billingCycle: billingCycle,
         },
       });
       

@@ -17,6 +17,8 @@ export interface TierConfig {
   id: SubscriptionTier;
   name: string;
   price: number; // Monthly price in euros
+  priceYearly?: number; // Annual price in euros (total per year)
+  priceLifetime?: number; // One-time lifetime price in euros
   maxMembers: number;
   features: {
     // Core features (available in Free)
@@ -51,7 +53,9 @@ export interface TierConfig {
     // Skin system
     maxSkins: number; // Maximum skins that can be unlocked
   };
-  stripePriceId?: string; // Stripe price ID (configured in Stripe dashboard)
+  stripePriceId?: string; // Stripe price ID – monthly (configured in Stripe dashboard)
+  stripePriceIdYearly?: string; // Stripe price ID – yearly
+  stripePriceIdLifetime?: string; // Stripe price ID – one-time lifetime payment
 }
 
 export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
@@ -96,7 +100,8 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
   family: {
     id: "family",
     name: "Family",
-    price: 2,
+    price: 3.99,
+    priceYearly: 29.99,
     maxMembers: 6,
     features: {
       // Core features
@@ -131,11 +136,14 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
       maxSkins: 999, // All skins available
     },
     stripePriceId: typeof process !== 'undefined' ? process.env.STRIPE_PRICE_FAMILY : undefined,
+    stripePriceIdYearly: typeof process !== 'undefined' ? process.env.STRIPE_PRICE_FAMILY_YEARLY : undefined,
   },
   family_hero: {
     id: "family_hero",
     name: "Enterprise",
-    price: 12,
+    price: 9.99,
+    priceYearly: 69.99,
+    priceLifetime: 149,
     maxMembers: 999, // Effectively unlimited
     features: {
       // Core features
@@ -170,6 +178,8 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
       maxSkins: 999, // All skins available
     },
     stripePriceId: typeof process !== 'undefined' ? process.env.STRIPE_PRICE_FAMILY_HERO : undefined,
+    stripePriceIdYearly: typeof process !== 'undefined' ? process.env.STRIPE_PRICE_FAMILY_HERO_YEARLY : undefined,
+    stripePriceIdLifetime: typeof process !== 'undefined' ? process.env.STRIPE_PRICE_FAMILY_HERO_LIFETIME : undefined,
   },
 };
 
