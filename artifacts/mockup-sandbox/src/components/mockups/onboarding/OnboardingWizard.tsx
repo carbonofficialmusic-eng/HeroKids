@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const IMG_URL = "/herokids_characters.png";
+const IMG_URL = `${import.meta.env.BASE_URL}herokids_characters.png`;
 
 const steps = [
   {
