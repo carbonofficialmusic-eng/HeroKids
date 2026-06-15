@@ -1411,7 +1411,10 @@ export default function Dashboard() {
                               showAssignee
                               compact={dashboardView === "grid"}
                               onClick={handleTaskClick}
-                              onComplete={() => { setTaskToComplete(task); setCompletionDialogOpen(true); }}
+                              onComplete={() => {
+                                if (task.requiresProof) { setTaskToComplete(task); setCompletionDialogOpen(true); }
+                                else { completeTaskMutation.mutate({ taskId: task.id }); }
+                              }}
                               isCompleting={completeTaskMutation.isPending}
                               currentMemberId={member?.id}
                             />
@@ -1485,8 +1488,8 @@ export default function Dashboard() {
                                 compact={dashboardView === "grid"}
                                 onClick={handleTaskClick}
                                 onComplete={() => {
-                                  setTaskToComplete(task);
-                                  setCompletionDialogOpen(true);
+                                  if (task.requiresProof) { setTaskToComplete(task); setCompletionDialogOpen(true); }
+                                  else { completeTaskMutation.mutate({ taskId: task.id }); }
                                 }}
                                 isCompleting={completeTaskMutation.isPending}
                                 currentMemberId={member?.id}
@@ -1790,8 +1793,8 @@ export default function Dashboard() {
                         key={task.id}
                         task={task}
                         onComplete={() => {
-                          setTaskToComplete(task);
-                          setCompletionDialogOpen(true);
+                          if (task.requiresProof) { setTaskToComplete(task); setCompletionDialogOpen(true); }
+                          else { completeTaskMutation.mutate({ taskId: task.id }); }
                         }}
                         isCompleting={completeTaskMutation.isPending}
                         showAssignee={false}
