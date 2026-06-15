@@ -285,7 +285,7 @@ export default function Pricing() {
                     </Button>
 
                     {/* Lifetime option — only for Enterprise, hidden if already lifetime purchaser */}
-                    {tier.lifetimePrice && !isCurrentTier && (
+                    {tier.lifetimePrice && !familyData?.isLifetimePurchase && (
                       <Button
                         className="w-full"
                         variant="outline"
