@@ -134,10 +134,31 @@ function scrollToPinboard(el: HTMLElement) {
   root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
 }
 
+function useVisualViewport() {
+  const getVV = () => ({
+    height: window.visualViewport?.height ?? window.innerHeight,
+    offsetTop: window.visualViewport?.offsetTop ?? 0,
+  });
+  const [vv, setVV] = useState(getVV);
+  useEffect(() => {
+    const vvEl = window.visualViewport;
+    if (!vvEl) return;
+    const update = () => setVV({ height: vvEl.height, offsetTop: vvEl.offsetTop });
+    vvEl.addEventListener("resize", update);
+    vvEl.addEventListener("scroll", update);
+    return () => {
+      vvEl.removeEventListener("resize", update);
+      vvEl.removeEventListener("scroll", update);
+    };
+  }, []);
+  return vv;
+}
+
 export default function Dashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { height: vvHeight, offsetTop: vvOffsetTop } = useVisualViewport();
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
@@ -2076,7 +2097,20 @@ export default function Dashboard() {
           setSendPointsOpen(open);
           if (!open) { setSelectedPointsRecipients([]); setPointsAmount(""); }
         }}>
-          <DialogContent data-testid="dialog-send-points" className="max-w-sm">
+          <DialogContent
+            data-testid="dialog-send-points"
+            className="max-w-sm"
+            style={{
+              position: "fixed",
+              left: "50%",
+              top: `${vvOffsetTop + vvHeight / 2}px`,
+              transform: "translate(-50%, -50%)",
+              maxHeight: `${vvHeight - 48}px`,
+              overflowY: "auto",
+              width: "min(calc(100vw - 2rem), 24rem)",
+            }}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-amber-500" />
