@@ -910,6 +910,7 @@
     "joinCode": "참여 코드",
     "joinCodePlaceholder": "6자리 코드 입력",
     "askParentForCode": "가족의 부모님께 참여 코드를 받으세요",
+    "parentalConsentNote": "이 코드는 부모님 또는 보호자가 만든 것으로, 가족 참가에 대한 동의를 확인합니다.",
     "joinFamilyButton": "가족 참여",
     "joining": "참여 중..."
   },
@@ -1570,5 +1571,12 @@
     "confirmDeleteAll": "모든 알림을 삭제할까요?",
     "deleteAllTitle": "모든 알림을 삭제할까요?",
     "deleteAllDescription": "모든 알림이 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없어요."
+  },
+  "parentalGate": {
+    "title": "어른을 위한 질문",
+    "description": "계속하려면 이 질문에 답해주세요.",
+    "placeholder": "답 입력…",
+    "wrong": "틀렸어요. 다시 시도해 주세요!",
+    "confirm": "확인"
   }
 }

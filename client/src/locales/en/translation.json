@@ -1610,5 +1610,12 @@
     "confirmDeleteAll": "Delete all notifications?",
     "deleteAllTitle": "Delete all notifications?",
     "deleteAllDescription": "This will permanently delete all your notifications. This action cannot be undone."
+  },
+  "parentalGate": {
+    "title": "Question for Adults",
+    "description": "Please answer this question to continue.",
+    "placeholder": "Enter answer…",
+    "wrong": "Wrong answer. Try again!",
+    "confirm": "Confirm"
   }
 }

@@ -905,7 +905,8 @@
     "creatingFamily": "Creating Family...",
     "joinCode": "Join Code",
     "joinCodePlaceholder": "Enter 6-character code",
-    "askParentForCode": "Ask a parent in your family for the join code",
+    "askParentForCode": "请向家庭中的父母索取加入码",
+    "parentalConsentNote": "此代码由您的父母或监护人创建，确认他们同意您加入家庭。",
     "joinFamilyButton": "Join Family",
     "joining": "Joining..."
   },
@@ -1558,5 +1559,12 @@
     "confirmDeleteAll": "删除所有通知？",
     "deleteAllTitle": "删除所有通知？",
     "deleteAllDescription": "所有通知将被永久删除。此操作无法撤销。"
+  },
+  "parentalGate": {
+    "title": "成人问题",
+    "description": "请回答这个问题以继续。",
+    "placeholder": "输入答案…",
+    "wrong": "答案错误，请再试一次！",
+    "confirm": "确认"
   }
 }

@@ -935,6 +935,7 @@
     "joinCode": "Anslutningskod",
     "joinCodePlaceholder": "Ange 6-teckens kod",
     "askParentForCode": "Be en förälder i din familj om anslutningskoden",
+    "parentalConsentNote": "Den här koden skapades av dina föräldrar eller vårdnadshavare, vilket bekräftar deras samtycke till att du går med i familjen.",
     "joinFamilyButton": "Gå med i familj",
     "joining": "Går med...",
     "alreadyHaveAccount": "Har du redan ett konto på en annan enhet?",
@@ -1591,5 +1592,12 @@
     "confirmDeleteAll": "Ta bort alla aviseringar?",
     "deleteAllTitle": "Ta bort alla aviseringar?",
     "deleteAllDescription": "Alla aviseringar kommer att raderas permanent. Denna åtgärd kan inte ångras."
+  },
+  "parentalGate": {
+    "title": "Fråga för vuxna",
+    "description": "Svara på den här frågan för att fortsätta.",
+    "placeholder": "Ange svar…",
+    "wrong": "Fel svar. Försök igen!",
+    "confirm": "Bekräfta"
   }
 }

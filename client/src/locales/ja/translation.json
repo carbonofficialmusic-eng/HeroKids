@@ -905,7 +905,8 @@
     "creatingFamily": "Creating Family...",
     "joinCode": "Join Code",
     "joinCodePlaceholder": "Enter 6-character code",
-    "askParentForCode": "Ask a parent in your family for the join code",
+    "askParentForCode": "家族の保護者に参加コードを聞いてください",
+    "parentalConsentNote": "このコードは保護者または後見人が作成したもので、ファミリーへの参加に対する同意を確認するものです。",
     "joinFamilyButton": "Join Family",
     "joining": "Joining..."
   },
@@ -1558,5 +1559,12 @@
     "confirmDeleteAll": "すべての通知を削除しますか？",
     "deleteAllTitle": "すべての通知を削除しますか？",
     "deleteAllDescription": "すべての通知が完全に削除されます。この操作は元に戻せません。"
+  },
+  "parentalGate": {
+    "title": "大人向けの質問",
+    "description": "続けるには、この質問に答えてください。",
+    "placeholder": "答えを入力…",
+    "wrong": "不正解です。もう一度試してください！",
+    "confirm": "確認"
   }
 }

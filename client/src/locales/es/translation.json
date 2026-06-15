@@ -905,7 +905,8 @@
     "creatingFamily": "Creating Family...",
     "joinCode": "Join Code",
     "joinCodePlaceholder": "Enter 6-character code",
-    "askParentForCode": "Ask a parent in your family for the join code",
+    "askParentForCode": "Pide a un padre de tu familia el código de acceso",
+    "parentalConsentNote": "Este código fue creado por tus padres o tutores, confirmando su consentimiento para que te unas a la familia.",
     "joinFamilyButton": "Join Family",
     "joining": "Joining..."
   },
@@ -1558,5 +1559,12 @@
     "confirmDeleteAll": "¿Eliminar todas las notificaciones?",
     "deleteAllTitle": "¿Eliminar todas las notificaciones?",
     "deleteAllDescription": "Todas las notificaciones se eliminarán permanentemente. Esta acción no se puede deshacer."
+  },
+  "parentalGate": {
+    "title": "Pregunta para adultos",
+    "description": "Por favor, responde esta pregunta para continuar.",
+    "placeholder": "Introduce la respuesta…",
+    "wrong": "Respuesta incorrecta. ¡Inténtalo de nuevo!",
+    "confirm": "Confirmar"
   }
 }

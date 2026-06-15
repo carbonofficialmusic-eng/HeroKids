@@ -936,6 +936,7 @@
     "joinCode": "Código de Entrada",
     "joinCodePlaceholder": "Digite o código de 6 caracteres",
     "askParentForCode": "Peça o código de entrada a um pai/mãe da família",
+    "parentalConsentNote": "Este código foi criado pelos seus pais ou responsáveis, confirmando o consentimento deles para você entrar na família.",
     "joinFamilyButton": "Entrar na Família",
     "joining": "Entrando...",
     "alreadyHaveAccount": "Já tem uma conta em outro dispositivo?",
@@ -1606,5 +1607,12 @@
     "confirmDeleteAll": "Excluir todas as notificações?",
     "deleteAllTitle": "Excluir todas as notificações?",
     "deleteAllDescription": "Isso excluirá permanentemente todas as suas notificações. Esta ação não pode ser desfeita."
+  },
+  "parentalGate": {
+    "title": "Pergunta para adultos",
+    "description": "Por favor, responda a esta pergunta para continuar.",
+    "placeholder": "Digite a resposta…",
+    "wrong": "Resposta errada. Tente novamente!",
+    "confirm": "Confirmar"
   }
 }
