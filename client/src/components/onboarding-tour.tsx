@@ -112,25 +112,39 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
     setRect(getRect(current.key));
   }, [current.key]);
 
-  useEffect(() => {
-    updateRect();
+  // Scroll the #root container (body:fixed architecture) so the target is centered,
+  // then update the spotlight rect after the scroll settles.
+  const scrollToAndUpdate = useCallback((key: string) => {
+    const el = document.querySelector(`[data-tour="${key}"]`) as HTMLElement | null;
+    if (!el) {
+      updateRect();
+      return;
+    }
+    const root = document.getElementById("root") ?? document.documentElement;
+    const elRect = el.getBoundingClientRect();
+    const viewH = window.innerHeight;
+    const targetScroll = root.scrollTop + elRect.top - viewH / 2 + elRect.height / 2;
+    root.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+    // Wait for smooth-scroll to finish (~400 ms), then lock in the rect
+    const tid = window.setTimeout(updateRect, 420);
+    return tid;
+  }, [updateRect]);
 
+  useEffect(() => {
+    let tid: number | undefined;
     if (current.key) {
-      const el = document.querySelector(`[data-tour="${current.key}"]`);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        rafRef.current = requestAnimationFrame(() => {
-          rafRef.current = requestAnimationFrame(updateRect);
-        });
-      }
+      tid = scrollToAndUpdate(current.key);
+    } else {
+      updateRect();
     }
 
     window.addEventListener("resize", updateRect);
     return () => {
       window.removeEventListener("resize", updateRect);
       cancelAnimationFrame(rafRef.current);
+      if (tid !== undefined) window.clearTimeout(tid);
     };
-  }, [current.key, updateRect]);
+  }, [current.key, updateRect, scrollToAndUpdate]);
 
   const handleComplete = useCallback(() => {
     completeMutation.mutate();
