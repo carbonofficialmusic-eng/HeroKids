@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { kickScrollReset, kickHeaderRepaint, isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -28,6 +28,15 @@ import {
   AlertDialogTitle,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Gift,
   Star,
@@ -1308,6 +1317,7 @@ export default function KidDashboard() {
     return period;
   };
   const { user } = useAuth();
+  const [, navigate] = useLocation();
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
@@ -1315,6 +1325,38 @@ export default function KidDashboard() {
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
   const savedScrollRef = useRef(0);
+
+  // Parental Gate state
+  const [parentalGateOpen, setParentalGateOpen] = useState(false);
+  const [parentalGateQ, setParentalGateQ] = useState({ question: "", answer: 0 });
+  const [parentalGateInput, setParentalGateInput] = useState("");
+  const [parentalGateError, setParentalGateError] = useState(false);
+
+  function generateMathQ() {
+    const ops = [
+      () => { const a = Math.floor(Math.random() * 9) + 2; const b = Math.floor(Math.random() * 9) + 2; return { question: `${a} × ${b}`, answer: a * b }; },
+      () => { const a = Math.floor(Math.random() * 50) + 20; const b = Math.floor(Math.random() * 30) + 10; return { question: `${a} + ${b}`, answer: a + b }; },
+    ];
+    return ops[Math.floor(Math.random() * ops.length)]();
+  }
+
+  function openParentalGate() {
+    setParentalGateQ(generateMathQ());
+    setParentalGateInput("");
+    setParentalGateError(false);
+    setParentalGateOpen(true);
+  }
+
+  function handleParentalGateSubmit() {
+    if (parseInt(parentalGateInput) === parentalGateQ.answer) {
+      setParentalGateOpen(false);
+      navigate("/pricing");
+    } else {
+      setParentalGateError(true);
+      setParentalGateQ(generateMathQ());
+      setParentalGateInput("");
+    }
+  }
 
   // Kick WKWebView header repaint on mount (App.tsx already owns --sat, no re-read here)
   useEffect(() => {
@@ -2099,7 +2141,7 @@ export default function KidDashboard() {
                   {tierLabel}
                 </Badge>
               );
-              return <Link href="/pricing">{badge}</Link>;
+              return <span onClick={openParentalGate} className="cursor-pointer">{badge}</span>;
             })()}
             <NotificationBell familyLanguage="en" memberRole={member.role} />
             <ProfileMenu
@@ -3056,6 +3098,45 @@ export default function KidDashboard() {
           familyName={member.familyName}
         />
       )}
+
+      {/* Parental Gate Dialog */}
+      <Dialog open={parentalGateOpen} onOpenChange={setParentalGateOpen}>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle>{t("parentalGate.title", "Frage für Erwachsene")}</DialogTitle>
+            <DialogDescription>
+              {t("parentalGate.description", "Bitte beantworte diese Frage, um fortzufahren.")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-center text-3xl font-bold tracking-wide">
+              {parentalGateQ.question} = ?
+            </p>
+            <Input
+              type="number"
+              inputMode="numeric"
+              value={parentalGateInput}
+              onChange={(e) => { setParentalGateInput(e.target.value); setParentalGateError(false); }}
+              onKeyDown={(e) => e.key === "Enter" && parentalGateInput && handleParentalGateSubmit()}
+              placeholder={t("parentalGate.placeholder", "Antwort eingeben…")}
+              className={parentalGateError ? "border-destructive" : ""}
+            />
+            {parentalGateError && (
+              <p className="text-destructive text-sm text-center">
+                {t("parentalGate.wrong", "Falsche Antwort. Versuch es nochmal!")}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setParentalGateOpen(false)}>
+              {t("common.cancel", "Abbrechen")}
+            </Button>
+            <Button onClick={handleParentalGateSubmit} disabled={!parentalGateInput}>
+              {t("parentalGate.confirm", "Bestätigen")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
