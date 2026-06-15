@@ -111,15 +111,17 @@ app.post("/api/stripe-webhook",
           const { eq } = await import("drizzle-orm");
           const { families } = await import("../shared/schema");
           
+          const isLifetime = session.metadata?.billingCycle === "lifetime";
           await db.update(families)
             .set({
               subscriptionTier: tier,
               subscriptionStatus: "active",
-              billingSubscriptionId: session.subscription as string,
+              billingSubscriptionId: isLifetime ? null : (session.subscription as string),
+              ...(isLifetime ? { isLifetimePurchase: true } : {}),
             })
             .where(eq(families.familyName, familyName));
           
-          console.log(`✅ Subscription activated for ${familyName}: ${tier}`);
+          console.log(`✅ ${isLifetime ? "Lifetime purchase" : "Subscription"} activated for ${familyName}: ${tier}`);
           
           // Auto-unpause members that now fit within the new tier's member limit
           try {
@@ -159,17 +161,20 @@ app.post("/api/stripe-webhook",
             customerId,
           });
           
-          const { eq } = await import("drizzle-orm");
+          const { eq, and } = await import("drizzle-orm");
           const { families } = await import("../shared/schema");
           
-          // Find family by billingCustomerId and reset to free tier
+          // Do NOT downgrade lifetime purchasers — they have no recurring subscription
           await db.update(families)
             .set({
               subscriptionTier: "free",
               subscriptionStatus: "canceled",
               billingSubscriptionId: null,
             })
-            .where(eq(families.billingCustomerId, customerId));
+            .where(and(
+              eq(families.billingCustomerId, customerId),
+              eq(families.isLifetimePurchase, false),
+            ));
           
           console.log(`Subscription cancelled for customer: ${customerId}`);
           break;
@@ -848,6 +853,11 @@ async function ensurePinboardTable() {
 
   // Add Nemicolopterus & Skater Kid to complete the last row
   await addNemicolopterusAndSkaterKidIfNeeded();
+
+  // Ensure is_lifetime_purchase column exists
+  try {
+    await db.execute(sql`ALTER TABLE families ADD COLUMN IF NOT EXISTS is_lifetime_purchase boolean NOT NULL DEFAULT false`);
+  } catch (_e) { /* ignore */ }
 
   // Add new achievement_type enum values if they don't exist yet
   try {

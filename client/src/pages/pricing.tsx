@@ -31,6 +31,7 @@ export default function Pricing() {
     familyName: string;
     subscriptionTier: string;
     memberCount: number;
+    isLifetimePurchase?: boolean;
   }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
@@ -283,7 +284,7 @@ export default function Pricing() {
                       )}
                     </Button>
 
-                    {/* Lifetime option — only for Enterprise */}
+                    {/* Lifetime option — only for Enterprise, hidden if already lifetime purchaser */}
                     {tier.lifetimePrice && !isCurrentTier && (
                       <Button
                         className="w-full"
@@ -306,7 +307,16 @@ export default function Pricing() {
                       </Button>
                     )}
 
-                    {isCurrentTier && tier.id !== "free" && isParent && (
+                    {/* Lifetime badge — show when this tier is active as a lifetime purchase */}
+                    {tier.lifetimePrice && isCurrentTier && familyData?.isLifetimePurchase && (
+                      <div className="flex items-center justify-center gap-2 py-1.5 text-sm text-muted-foreground">
+                        <Infinity className="w-4 h-4 text-primary" />
+                        <span className="font-medium text-primary">{t("pricing.lifetimeActive")}</span>
+                      </div>
+                    )}
+
+                    {/* Cancel link — hidden for lifetime purchasers */}
+                    {isCurrentTier && tier.id !== "free" && isParent && !familyData?.isLifetimePurchase && (
                       <Link href="/settings" data-testid={`link-cancel-${tier.id}`}>
                         <span className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                           {t("pricing.cancelToSettings")}

@@ -6323,14 +6323,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Session does not belong to your family" });
       }
       
-      // Update the family subscription
+      const isLifetime = session.metadata?.billingCycle === "lifetime";
       await storage.updateFamily(familyName, {
         subscriptionTier: tier,
         subscriptionStatus: "active",
-        billingSubscriptionId: session.subscription as string,
+        billingSubscriptionId: isLifetime ? null : (session.subscription as string),
+        ...(isLifetime ? { isLifetimePurchase: true } : {}),
       });
       
-      console.log(`✅ Subscription verified and activated for ${familyName}: ${tier}`);
+      console.log(`✅ ${isLifetime ? "Lifetime purchase" : "Subscription"} verified and activated for ${familyName}: ${tier}`);
       
       // Auto-unpause members that are now within the new tier's member limit
       await autoUnpauseMembersAfterUpgrade(familyName, tier);
@@ -6382,14 +6383,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid session metadata" });
       }
       
-      // Update the family subscription
+      const isLifetime = session.metadata?.billingCycle === "lifetime";
       await storage.updateFamily(familyName, {
         subscriptionTier: tier,
         subscriptionStatus: "active",
-        billingSubscriptionId: session.subscription as string,
+        billingSubscriptionId: isLifetime ? null : (session.subscription as string),
+        ...(isLifetime ? { isLifetimePurchase: true } : {}),
       });
       
-      console.log(`✅ Public verification: Subscription activated for ${familyName}: ${tier}`);
+      console.log(`✅ Public verification: ${isLifetime ? "Lifetime purchase" : "Subscription"} activated for ${familyName}: ${tier}`);
       
       // Auto-unpause members that are now within the new tier's member limit
       await autoUnpauseMembersAfterUpgrade(familyName, tier);

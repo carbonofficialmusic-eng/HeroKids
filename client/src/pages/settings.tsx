@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin, Infinity } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -1130,8 +1130,8 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* Subscription Management - only show if family has active paid subscription */}
-          {familyData?.billingCustomerId && familyData.subscriptionTier !== 'free' && familyData.subscriptionStatus === 'active' && (
+          {/* Subscription Management - show for active paid subscriptions and lifetime purchasers */}
+          {familyData?.subscriptionTier !== 'free' && familyData?.subscriptionStatus === 'active' && (
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -1139,20 +1139,30 @@ export default function Settings() {
                   <CardTitle>{t('settings.subscriptionTitle')}</CardTitle>
                 </div>
                 <CardDescription>
-                  {t('settings.subscriptionDesc')}
+                  {familyData?.isLifetimePurchase
+                    ? t('settings.subscriptionDescLifetime')
+                    : t('settings.subscriptionDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                     <span className="text-sm font-medium">{t('settings.currentPlan')}</span>
-                    <Badge variant="secondary">
-                      {familyData.subscriptionTier === 'family' && 'Family'}
-                      {familyData.subscriptionTier === 'family_plus' && 'Family+'}
-                      {familyData.subscriptionTier === 'family_hero' && 'Enterprise'}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {familyData?.isLifetimePurchase && (
+                        <Badge variant="default" className="gap-1" data-testid="badge-lifetime">
+                          <Infinity className="h-3 w-3" />
+                          {t('settings.lifetimeBadge')}
+                        </Badge>
+                      )}
+                      <Badge variant="secondary">
+                        {familyData?.subscriptionTier === 'family' && 'Family'}
+                        {familyData?.subscriptionTier === 'family_plus' && 'Family+'}
+                        {familyData?.subscriptionTier === 'family_hero' && 'Enterprise'}
+                      </Badge>
+                    </div>
                   </div>
-                  {!isNativePlatform() && (
+                  {!isNativePlatform() && !familyData?.isLifetimePurchase && (
                     <>
                       <Button 
                         onClick={() => manageSubscriptionMutation.mutate()}
