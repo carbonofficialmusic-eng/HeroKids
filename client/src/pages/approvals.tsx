@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle, XCircle, Clock, Star, ArrowLeft, Gift, Coins, Pencil, CheckSquare } from "lucide-react";
 import { useState } from "react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "date-fns";
@@ -230,19 +230,20 @@ export default function Approvals() {
     let successCount = 0;
     let failCount = 0;
 
-    const chunkSize = 3;
-    for (let i = 0; i < ids.length; i += chunkSize) {
-      const chunk = ids.slice(i, i + chunkSize);
-      await Promise.all(
-        chunk.map(async (id) => {
-          try {
-            await apiRequest("POST", `/api/tasks/completions/${id}/approve`, {});
-            successCount++;
-          } catch {
-            failCount++;
-          }
-        })
-      );
+    for (const id of ids) {
+      try {
+        await apiRequest("POST", `/api/tasks/completions/${id}/approve`, {});
+        successCount++;
+      } catch (err) {
+        // 422 = already approved/auto-approved by the system (e.g. shared task, immediate task)
+        // 404 = completion was deleted by backend logic when another member's approval finalized the task
+        // Both mean the completion is no longer pending → count as success, not failure
+        if (err instanceof ApiError && (err.status === 422 || err.status === 404)) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      }
     }
 
     queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
