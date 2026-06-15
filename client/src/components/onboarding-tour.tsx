@@ -72,6 +72,12 @@ const STEPS: TourStep[] = [
       "Familienziele schweißen zusammen! Alle Kinder arbeiten gemeinsam auf ein Ziel hin — zum Beispiel ein gemeinsamer Ausflug oder ein Spieleabend.",
   },
   {
+    key: "tour-send-points",
+    character: "boy",
+    bubble:
+      "Hier kannst du deinen Kindern Punkte schicken — unabhängig von Aufgaben, einfach so als Belohnung oder Motivation.",
+  },
+  {
     key: "",
     character: "boy",
     bubble:

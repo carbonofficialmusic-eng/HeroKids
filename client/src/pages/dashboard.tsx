@@ -1268,6 +1268,7 @@ export default function Dashboard() {
                 <Button
                   variant="card"
                   data-testid="button-send-points"
+                  data-tour="tour-send-points"
                   className="w-full h-14 justify-start px-4 gap-3"
                   onClick={() => {
                     setSelectedPointsRecipients([]);
