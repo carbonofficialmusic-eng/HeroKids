@@ -117,7 +117,7 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
           </TabsList>
           
           <TabsContent value="standard" className="m-0">
-            <ScrollArea className="h-64 p-2">
+            <ScrollArea className="h-[min(256px,38vh)] p-2">
               <div className="grid grid-cols-5 gap-2">
                 {STANDARD_EMOTICONS.map(({ icon: Icon, code, labelKey }) => (
                   <Button
@@ -137,7 +137,7 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
           </TabsContent>
           
           <TabsContent value="skins" className="m-0">
-            <ScrollArea className="h-64 p-2">
+            <ScrollArea className="h-[min(256px,38vh)] p-2">
               {discoveredSkins.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">
                   <p className="mb-2">{t("emoticonPicker.noUnlockedSkins")}</p>
