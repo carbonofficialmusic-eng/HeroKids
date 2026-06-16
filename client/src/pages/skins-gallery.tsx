@@ -553,7 +553,12 @@ export default function SkinsGallery() {
           <div ref={containerRef} className={`flex gap-4 relative ${isLandscapeMobile ? 'flex-row' : 'flex-col lg:flex-row'}`}>
             {/* Preview Panel - Left Side - JS-based sticky on desktop, normal on mobile */}
             <div className={`flex-shrink-0 ${isDesktop ? 'lg:w-80' : isLandscapeMobile ? 'w-36' : ''}`}>
-              <div ref={previewRef} style={stickyStyle}>
+              <div
+                ref={previewRef}
+                style={isLandscapeMobile
+                  ? { position: 'sticky', top: '1rem', alignSelf: 'flex-start' }
+                  : stickyStyle}
+              >
                 <Card className={`bg-card/90 backdrop-blur-md ${isLandscapeMobile ? 'p-2' : 'p-4'}`}>
                 {/* Preview Image */}
                 <div className={`relative rounded-lg overflow-hidden bg-gradient-to-br from-muted to-card ${isLandscapeMobile ? 'aspect-square mb-2' : 'aspect-square mb-4'}`}>
