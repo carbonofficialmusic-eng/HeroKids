@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
 import { queryClient, apiRequest, ApiError } from "@/lib/queryClient";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useIsLandscape } from "@/hooks/use-landscape";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -107,6 +108,9 @@ export default function SkinsGallery() {
     window.addEventListener('resize', checkDesktop);
     return () => window.removeEventListener('resize', checkDesktop);
   }, []);
+  const isLandscape = useIsLandscape();
+  // In landscape on a phone, show preview side-by-side with the grid (like desktop, but narrower)
+  const isLandscapeMobile = isLandscape && !isDesktop;
   
   const { containerRef, previewRef, stickyStyle } = useStickyPreview(isDesktop);
 
@@ -546,13 +550,13 @@ export default function SkinsGallery() {
           )}
 
           {/* Main Layout: Preview Left + Grid Right */}
-          <div ref={containerRef} className="flex gap-4 flex-col lg:flex-row relative">
+          <div ref={containerRef} className={`flex gap-4 relative ${isLandscapeMobile ? 'flex-row' : 'flex-col lg:flex-row'}`}>
             {/* Preview Panel - Left Side - JS-based sticky on desktop, normal on mobile */}
-            <div className="lg:w-80 flex-shrink-0">
+            <div className={`flex-shrink-0 ${isDesktop ? 'lg:w-80' : isLandscapeMobile ? 'w-36' : ''}`}>
               <div ref={previewRef} style={stickyStyle}>
-                <Card className="bg-card/90 backdrop-blur-md p-4">
+                <Card className={`bg-card/90 backdrop-blur-md ${isLandscapeMobile ? 'p-2' : 'p-4'}`}>
                 {/* Preview Image */}
-                <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-gradient-to-br from-muted to-card">
+                <div className={`relative rounded-lg overflow-hidden bg-gradient-to-br from-muted to-card ${isLandscapeMobile ? 'aspect-square mb-2' : 'aspect-square mb-4'}`}>
                   {previewSkin ? (
                     previewSkin.isDiscovered ? (
                       <>
@@ -601,8 +605,8 @@ export default function SkinsGallery() {
                 </div>
                 
                 {/* Preview Info */}
-                <div className="text-center mb-4">
-                  <h2 className="text-xl font-bold font-accent">
+                <div className={`text-center ${isLandscapeMobile ? 'mb-1' : 'mb-4'}`}>
+                  <h2 className={`font-bold font-accent ${isLandscapeMobile ? 'text-sm' : 'text-xl'}`}>
                     {previewSkin 
                       ? (previewSkin.isDiscovered ? t(`skinNames.${previewSkin.id}`) : "???")
                       : t('skins.yourPhoto')}
@@ -622,7 +626,7 @@ export default function SkinsGallery() {
                 </div>
                 
                 {/* Action Buttons */}
-                <div className="space-y-2">
+                <div className={isLandscapeMobile ? "space-y-1" : "space-y-2"}>
                   {previewSkin ? (
                     previewSkin.isDiscovered ? (
                       <Button
@@ -696,8 +700,8 @@ export default function SkinsGallery() {
                   )}
                 </div>
                 
-                {/* Progress to next unlock */}
-                <div className="mt-4 pt-4 border-t">
+                {/* Progress to next unlock — hidden in landscape mobile (no room) */}
+                <div className={`mt-4 pt-4 border-t ${isLandscapeMobile ? 'hidden' : ''}`}>
                   {previewSkin && isLegacySkin(previewSkin.id) ? (
                     // Legacy skin - show star-based info
                     (() => {
