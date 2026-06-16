@@ -874,7 +874,8 @@
     "requestUpdated": "요청 업데이트됨!",
     "requestUpdatedDesc": "보상 요청이 성공적으로 업데이트되었습니다.",
     "failedUpdate": "업데이트 실패",
-    "unableUpdate": "요청을 업데이트할 수 없습니다."
+    "unableUpdate": "요청을 업데이트할 수 없습니다.",
+    "error": "오류"
   },
   "memberDialogs": {
     "editProfile": "프로필 수정",

@@ -910,7 +910,8 @@
     "requestUpdated": "Anfrage aktualisiert!",
     "requestUpdatedDesc": "Die Belohnungsanfrage wurde erfolgreich aktualisiert.",
     "failedUpdate": "Aktualisieren fehlgeschlagen",
-    "unableUpdate": "Anfrage konnte nicht aktualisiert werden."
+    "unableUpdate": "Anfrage konnte nicht aktualisiert werden.",
+    "error": "Fehler"
   },
   "memberDialogs": {
     "editProfile": "Profil bearbeiten",

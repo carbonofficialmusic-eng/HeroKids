@@ -899,7 +899,8 @@
     "requestUpdated": "Förfrågan uppdaterad!",
     "requestUpdatedDesc": "Belöningsförfrågan har uppdaterats.",
     "failedUpdate": "Kunde inte uppdatera",
-    "unableUpdate": "Kan inte uppdatera förfrågan."
+    "unableUpdate": "Kan inte uppdatera förfrågan.",
+    "error": "Fel"
   },
   "memberDialogs": {
     "editProfile": "Redigera profil",

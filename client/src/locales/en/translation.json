@@ -900,7 +900,8 @@
     "requestUpdated": "Request updated!",
     "requestUpdatedDesc": "The reward request has been updated successfully.",
     "failedUpdate": "Failed to update",
-    "unableUpdate": "Unable to update request."
+    "unableUpdate": "Unable to update request.",
+    "error": "Error"
   },
   "memberDialogs": {
     "editProfile": "Edit Profile",

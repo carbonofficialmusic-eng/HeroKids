@@ -900,7 +900,8 @@
     "requestUpdated": "Solicitação atualizada!",
     "requestUpdatedDesc": "A solicitação de recompensa foi atualizada com sucesso.",
     "failedUpdate": "Falha ao atualizar",
-    "unableUpdate": "Não foi possível atualizar a solicitação."
+    "unableUpdate": "Não foi possível atualizar a solicitação.",
+    "error": "Erro"
   },
   "memberDialogs": {
     "editProfile": "Editar Perfil",

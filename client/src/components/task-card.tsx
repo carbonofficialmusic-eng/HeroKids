@@ -248,8 +248,8 @@ export function TaskCard({
     };
   })();
   
-  // Task should appear grayed out if it's unavailable OR completed by this member OR due date not yet reached OR expired OR weekend-only unavailable
-  const isGrayedOut = isUnavailable || isCompletedByMember || dueDateInfo.notYet || dueDateInfo.expired || isWeekendUnavailable;
+  // Task should appear grayed out if it's unavailable OR completed by this member OR due date not yet reached OR expired OR weekend-only unavailable OR awaiting approval
+  const isGrayedOut = isUnavailable || isCompletedByMember || dueDateInfo.notYet || dueDateInfo.expired || isWeekendUnavailable || task.status === "pending_approval" || task.status === "completed";
 
   // ── Compact (grid) rendering ──────────────────────────────────────────────
   if (compact) {
