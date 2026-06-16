@@ -12,19 +12,19 @@ interface TourStep {
 }
 
 const STEPS: TourStep[] = [
-  { key: "", character: "girl" },
-  { key: "tour-add-task", character: "boy" },
-  { key: "tour-add-reward", character: "girl" },
-  { key: "tour-approvals", character: "boy" },
-  { key: "tour-rewards-board", character: "girl" },
-  { key: "tour-profile-menu", character: "girl" },
-  { key: "tour-skins", character: "boy" },
-  { key: "tour-pinboard", character: "girl" },
-  { key: "tour-bonus-rewards", character: "girl" },
-  { key: "tour-family-goals", character: "boy" },
-  { key: "tour-send-points", character: "boy" },
-  { key: "tour-family-chat", character: "girl" },
-  { key: "", character: "boy" },
+  { key: "", character: "girl" },           // 0 – beide (bothImg)
+  { key: "tour-add-task", character: "girl" },      // 1 – Mia
+  { key: "tour-add-reward", character: "boy" },     // 2 – Max
+  { key: "tour-approvals", character: "girl" },     // 3 – Mia
+  { key: "tour-rewards-board", character: "boy" },  // 4 – Max
+  { key: "tour-profile-menu", character: "girl" },  // 5 – Mia
+  { key: "tour-skins", character: "boy" },          // 6 – Max
+  { key: "tour-pinboard", character: "girl" },      // 7 – Mia
+  { key: "tour-bonus-rewards", character: "boy" },  // 8 – Max
+  { key: "tour-family-goals", character: "girl" },  // 9 – Mia
+  { key: "tour-send-points", character: "boy" },    // 10 – Max
+  { key: "tour-family-chat", character: "girl" },   // 11 – Mia
+  { key: "", character: "boy" },                    // 12 – Max
 ];
 
 interface SpotlightRect {
