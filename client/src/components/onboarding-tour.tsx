@@ -211,8 +211,8 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
             src={step === 0 ? bothImg : current.character === "boy" ? boyImg : girlImg}
             alt={step === 0 ? "Mia und Max" : current.character === "boy" ? "Max" : "Mia"}
             style={{
-              width: step === 0 ? "min(160px, 24vh)" : "min(130px, 20vh)",
-              height: step === 0 ? "min(160px, 24vh)" : "min(130px, 20vh)",
+              width: "min(160px, 24vh)",
+              height: "min(160px, 24vh)",
               objectFit: "contain",
               objectPosition: "bottom center",
               filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.2))",
