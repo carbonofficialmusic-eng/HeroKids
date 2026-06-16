@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/lib/queryClient";
 import boyImg from "@assets/hero_boy_nobg.png";
 import girlImg from "@assets/hero_girl_nobg.png";
+import bothImg from "@assets/Gemini_Generated_Image_5y9p4o5y9p4o5y9p_1781620196996.png";
 
 interface TourStep {
   key: string;
@@ -207,11 +208,11 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
           </div>
 
           <img
-            src={current.character === "boy" ? boyImg : girlImg}
-            alt={current.character === "boy" ? "Max" : "Mia"}
+            src={step === 0 ? bothImg : current.character === "boy" ? boyImg : girlImg}
+            alt={step === 0 ? "Mia und Max" : current.character === "boy" ? "Max" : "Mia"}
             style={{
-              width: "min(130px, 20vh)",
-              height: "min(130px, 20vh)",
+              width: step === 0 ? "min(160px, 24vh)" : "min(130px, 20vh)",
+              height: step === 0 ? "min(160px, 24vh)" : "min(130px, 20vh)",
               objectFit: "contain",
               objectPosition: "bottom center",
               filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.2))",
