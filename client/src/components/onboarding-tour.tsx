@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/lib/queryClient";
 import boyImg from "@assets/hero_boy_nobg.png";
 import girlImg from "@assets/hero_girl_nobg.png";
-import bothImg from "@assets/Gemini_Generated_Image_5y9p4o5y9p4o5y9p_1781620196996.png";
+import bothImg from "@assets/mia_max_nobg.png";
 
 interface TourStep {
   key: string;
