@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { Link, useLocation } from "wouter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { SKIN_IMAGES, SKIN_BACKGROUNDS } from "@/lib/skins";
 import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR, LEGACY_SKIN_ORDER } from "@shared/skin-config";
 import type { FamilyMember, Family } from "@shared/schema";
@@ -100,7 +102,37 @@ export default function SkinsGallery() {
   const [selectedSkinId, setSelectedSkinId] = useState<string | null>(null);
   const [discoverDialogSkinId, setDiscoverDialogSkinId] = useState<string | null>(null);
   const [equipDialogSkinId, setEquipDialogSkinId] = useState<string | null>(null);
-  
+  const [parentalGateOpen, setParentalGateOpen] = useState(false);
+  const [parentalGateQ, setParentalGateQ] = useState({ question: "", answer: 0 });
+  const [parentalGateInput, setParentalGateInput] = useState("");
+  const [parentalGateError, setParentalGateError] = useState(false);
+
+  function generateMathQ() {
+    const ops = [
+      () => { const a = Math.floor(Math.random() * 9) + 2; const b = Math.floor(Math.random() * 9) + 2; return { question: `${a} × ${b}`, answer: a * b }; },
+      () => { const a = Math.floor(Math.random() * 50) + 20; const b = Math.floor(Math.random() * 30) + 10; return { question: `${a} + ${b}`, answer: a + b }; },
+    ];
+    return ops[Math.floor(Math.random() * ops.length)]();
+  }
+
+  function openParentalGate() {
+    setParentalGateQ(generateMathQ());
+    setParentalGateInput("");
+    setParentalGateError(false);
+    setParentalGateOpen(true);
+  }
+
+  function handleParentalGateSubmit() {
+    if (parseInt(parentalGateInput) === parentalGateQ.answer) {
+      setParentalGateOpen(false);
+      navigate("/pricing");
+    } else {
+      setParentalGateError(true);
+      setParentalGateQ(generateMathQ());
+      setParentalGateInput("");
+    }
+  }
+
   // Detect desktop for sticky behavior (lg breakpoint = 1024px)
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
@@ -198,7 +230,7 @@ export default function SkinsGallery() {
           description: t('skins.skinLimitDesc', { count: currentSkins, max: maxSkins }),
           variant: "destructive",
           action: (
-            <ToastAction altText={t('skins.skinLimitUpgrade')} onClick={() => navigate("/pricing")}>
+            <ToastAction altText={t('skins.skinLimitUpgrade')} onClick={openParentalGate}>
               {t('skins.skinLimitUpgrade')}
             </ToastAction>
           ),
@@ -550,11 +582,9 @@ export default function SkinsGallery() {
                   {t('skins.skinLimitDesc', { count: maxSkins, max: maxSkins })}
                 </p>
               </div>
-              <Link href="/pricing">
-                <Button size="sm" variant="outline" className="shrink-0 border-amber-400 text-amber-800 dark:text-amber-300 dark:border-amber-600">
-                  {t('skins.skinLimitUpgrade')}
-                </Button>
-              </Link>
+              <Button size="sm" variant="outline" onClick={openParentalGate} className="shrink-0 border-amber-400 text-amber-800 dark:text-amber-300 dark:border-amber-600">
+                {t('skins.skinLimitUpgrade')}
+              </Button>
             </div>
           )}
 
@@ -882,6 +912,45 @@ export default function SkinsGallery() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Parental Gate Dialog */}
+      <Dialog open={parentalGateOpen} onOpenChange={setParentalGateOpen}>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle>{t("parentalGate.title", "Frage für Erwachsene")}</DialogTitle>
+            <DialogDescription>
+              {t("parentalGate.description", "Bitte beantworte diese Frage, um fortzufahren.")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-center text-3xl font-bold tracking-wide">
+              {parentalGateQ.question} = ?
+            </p>
+            <Input
+              type="number"
+              inputMode="numeric"
+              value={parentalGateInput}
+              onChange={(e) => { setParentalGateInput(e.target.value); setParentalGateError(false); }}
+              onKeyDown={(e) => e.key === "Enter" && parentalGateInput && handleParentalGateSubmit()}
+              placeholder={t("parentalGate.placeholder", "Antwort eingeben…")}
+              className={parentalGateError ? "border-destructive" : ""}
+            />
+            {parentalGateError && (
+              <p className="text-destructive text-sm text-center">
+                {t("parentalGate.wrong", "Falsche Antwort. Versuch es nochmal!")}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setParentalGateOpen(false)}>
+              {t("common.cancel", "Abbrechen")}
+            </Button>
+            <Button onClick={handleParentalGateSubmit} disabled={!parentalGateInput}>
+              {t("parentalGate.confirm", "Bestätigen")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
