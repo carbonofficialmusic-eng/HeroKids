@@ -144,9 +144,9 @@ function AuthPanel() {
         )}
         <Tabs value={authTab} onValueChange={(v) => { setAuthTab(v); setFormMessage(null); }}>
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="login" data-testid="tab-login">{t('landing.auth.tabLogin')}</TabsTrigger>
-            <TabsTrigger value="register" data-testid="tab-register">{t('landing.auth.tabRegister')}</TabsTrigger>
-            <TabsTrigger value="forgot" data-testid="tab-forgot">{t('landing.auth.tabPassword')}</TabsTrigger>
+            <TabsTrigger value="login" data-testid="tab-login" className="text-xs sm:text-sm">{t('landing.auth.tabLogin')}</TabsTrigger>
+            <TabsTrigger value="register" data-testid="tab-register" className="text-xs sm:text-sm">{t('landing.auth.tabRegister')}</TabsTrigger>
+            <TabsTrigger value="forgot" data-testid="tab-forgot" className="text-xs sm:text-sm">{t('landing.auth.tabPassword')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login">

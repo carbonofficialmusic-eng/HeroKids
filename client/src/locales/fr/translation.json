@@ -955,7 +955,7 @@
       "description": "Connexion directe, sans redirection.",
       "tabLogin": "Connexion",
       "tabRegister": "S'inscrire",
-      "tabPassword": "Mot de passe oublié ?",
+      "tabPassword": "Oublié ?",
       "labelEmail": "E-mail",
       "labelPassword": "Mot de passe",
       "labelFirstName": "Prénom",

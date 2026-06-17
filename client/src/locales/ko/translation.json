@@ -995,7 +995,7 @@
       "description": "브라우저 리다이렉트 없이 직접 로그인.",
       "tabLogin": "로그인",
       "tabRegister": "회원가입",
-      "tabPassword": "비밀번호를 잊으셨나요?",
+      "tabPassword": "비밀번호 찾기",
       "labelEmail": "이메일",
       "labelPassword": "비밀번호",
       "labelFirstName": "이름",

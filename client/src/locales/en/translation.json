@@ -988,7 +988,7 @@
       "description": "Sign in directly, no browser redirect.",
       "tabLogin": "Login",
       "tabRegister": "Register",
-      "tabPassword": "Forgot password?",
+      "tabPassword": "Forgot?",
       "labelEmail": "Email",
       "labelPassword": "Password",
       "labelFirstName": "First name",

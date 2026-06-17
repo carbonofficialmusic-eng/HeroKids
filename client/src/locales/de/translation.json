@@ -998,7 +998,7 @@
       "description": "Direkt anmelden, ohne Browser-Weiterleitung.",
       "tabLogin": "Login",
       "tabRegister": "Registrieren",
-      "tabPassword": "Passwort vergessen?",
+      "tabPassword": "Vergessen?",
       "labelEmail": "E-Mail",
       "labelPassword": "Passwort",
       "labelFirstName": "Vorname",
