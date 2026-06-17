@@ -142,7 +142,8 @@
     "selectRecipients": "Mottagare",
     "sendPointsAmount": "Antal poäng",
     "sendPointsConfirm": "Skicka poäng",
-    "importantTasks": "Viktigt"
+    "importantTasks": "Viktigt",
+    "sendPointsMax": "Maximalt 1 000 poäng per överföring"
   },
   "tasks": {
     "title": "Uppgifter",

@@ -138,7 +138,8 @@
     "selectRecipients": "收件人",
     "sendPointsAmount": "积分数量",
     "sendPointsConfirm": "发送积分",
-    "importantTasks": "重要"
+    "importantTasks": "重要",
+    "sendPointsMax": "每次最多 1,000 积分"
   },
   "tasks": {
     "title": "任务",

@@ -142,7 +142,8 @@
     "selectRecipients": "받는 사람",
     "sendPointsAmount": "포인트 수",
     "sendPointsConfirm": "포인트 보내기",
-    "importantTasks": "중요"
+    "importantTasks": "중요",
+    "sendPointsMax": "이체당 최대 1,000포인트"
   },
   "tasks": {
     "title": "과제",

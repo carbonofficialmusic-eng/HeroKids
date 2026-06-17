@@ -1648,8 +1648,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!Array.isArray(memberIds) || memberIds.length === 0) {
         return res.status(400).json({ message: "At least one member must be selected" });
       }
-      if (typeof points !== "number" || !Number.isInteger(points) || points < 1 || points > 10000) {
-        return res.status(400).json({ message: "Points must be a whole number between 1 and 10,000" });
+      if (typeof points !== "number" || !Number.isInteger(points) || points < 1 || points > 1000) {
+        return res.status(400).json({ message: "Points must be a whole number between 1 and 1,000" });
       }
 
       for (const memberId of memberIds) {

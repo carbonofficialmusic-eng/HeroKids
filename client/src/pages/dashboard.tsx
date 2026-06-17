@@ -2156,14 +2156,14 @@ export default function Dashboard() {
                   id="points-amount"
                   type="number"
                   min="1"
-                  max="2000"
+                  max="1000"
                   placeholder="z. B. 50"
                   value={pointsAmount}
                   onChange={(e) => setPointsAmount(e.target.value)}
                   data-testid="input-points-amount"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  {t("dashboard.sendPointsMax", "Maximal 2.000 Punkte pro Übertragung")}
+                  {t("dashboard.sendPointsMax", "Maximal 1.000 Punkte pro Übertragung")}
                 </p>
               </div>
             </div>
@@ -2179,14 +2179,14 @@ export default function Dashboard() {
               <Button
                 onClick={() => {
                   const pts = parseInt(pointsAmount, 10);
-                  if (selectedPointsRecipients.length === 0 || !pts || pts < 1 || pts > 2000) return;
+                  if (selectedPointsRecipients.length === 0 || !pts || pts < 1 || pts > 1000) return;
                   awardPointsMutation.mutate({ memberIds: selectedPointsRecipients, points: pts });
                 }}
                 disabled={
                   selectedPointsRecipients.length === 0 ||
                   !pointsAmount ||
                   parseInt(pointsAmount, 10) < 1 ||
-                  parseInt(pointsAmount, 10) > 2000 ||
+                  parseInt(pointsAmount, 10) > 1000 ||
                   awardPointsMutation.isPending
                 }
                 data-testid="button-confirm-send-points"

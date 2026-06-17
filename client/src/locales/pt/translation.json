@@ -143,7 +143,8 @@
     "selectRecipients": "Destinatários",
     "sendPointsAmount": "Número de pontos",
     "sendPointsConfirm": "Enviar Pontos",
-    "importantTasks": "Importantes"
+    "importantTasks": "Importantes",
+    "sendPointsMax": "Máximo de 1.000 pontos por transferência"
   },
   "tasks": {
     "title": "Tarefas",

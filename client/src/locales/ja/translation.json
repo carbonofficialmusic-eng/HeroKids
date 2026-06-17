@@ -138,7 +138,8 @@
     "selectRecipients": "送り先",
     "sendPointsAmount": "ポイント数",
     "sendPointsConfirm": "ポイントを送る",
-    "importantTasks": "重要"
+    "importantTasks": "重要",
+    "sendPointsMax": "1回の転送につき最大1,000ポイント"
   },
   "tasks": {
     "title": "タスク",
