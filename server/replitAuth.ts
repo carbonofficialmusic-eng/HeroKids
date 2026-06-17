@@ -706,6 +706,11 @@ export async function setupAuth(app: Express) {
   // The WKWebView polls this with the pollKey it generated before opening the
   // browser.  Returns the exchange token once OAuth has completed and stored it.
   app.get("/api/auth/native-check", (req: any, res) => {
+    // Must never be cached — the WKWebView would otherwise serve the
+    // { ready: false } response from cache and miss the { ready: true } reply.
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+
     const pollKey = typeof req.query.pollKey === "string" ? req.query.pollKey : "";
     if (!pollKey) return res.status(400).json({ message: "pollKey required" });
     const entry = nativePollStore.get(pollKey);
