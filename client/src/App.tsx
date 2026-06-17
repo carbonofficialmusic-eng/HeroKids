@@ -13,6 +13,7 @@ import { getBackgroundUrl } from "@/lib/skins";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
+import NativeLoginScreen from "@/pages/native-login";
 import Dashboard from "@/pages/dashboard";
 import KidDashboard from "@/pages/kid-dashboard";
 import KidDashboardOld from "@/pages/kid-dashboard-old";
@@ -413,7 +414,7 @@ function Router() {
     return (
       <BackgroundWrapper>
         <Switch>
-          <Route path="/" component={Landing} />
+          <Route path="/">{isNativePlatform() ? <NativeLoginScreen /> : <Landing />}</Route>
           <Route path="/setup">
             <RedirectToLanding />
           </Route>
