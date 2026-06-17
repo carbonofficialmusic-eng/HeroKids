@@ -118,10 +118,10 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
           />
         )}
         
-        {/* Fallback background when no skin is active */}
-        {!currentBg && !previousBg && (
-          <div className="absolute inset-0 bg-background" />
-        )}
+        {/* Always-visible theme background — acts as the base layer so the
+            viewport is never bare-white when background is off or during
+            the skin-image fade transition. */}
+        <div className="absolute inset-0 bg-background" />
 
         {/* Dark vignette at the very top — ensures the status-bar area (behind
             the clock / wifi / battery icons) is always dark enough for iOS to

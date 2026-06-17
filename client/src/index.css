@@ -24,10 +24,17 @@ html, body {
   overflow-x: hidden;
   /* Ensure max width never exceeds viewport */
   max-width: 100%;
-  /* Transparent so iOS can see the web content behind the status bar.
+  /* Body stays transparent so iOS can see web content behind the status bar.
      The App.tsx skin background (position:fixed; inset:0) covers the
      full viewport — no WKWebView flash is possible once it renders. */
   background: transparent;
+}
+
+/* html gets the theme background directly (unlayered = same priority as above,
+   declared after so it wins). This ensures the viewport is never bare-white
+   when the BackgroundWrapper skin image or fallback div hasn't painted yet. */
+html {
+  background-color: hsl(var(--background));
 }
 
 #root {
