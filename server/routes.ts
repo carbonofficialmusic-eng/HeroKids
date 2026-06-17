@@ -1403,6 +1403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Check if family exists, create if not
         let family = await storage.getFamily(parsed.familyName);
+        let isNewFamily = false;
         if (!family) {
           // Generate a cryptographically secure join code for the family
           const crypto = await import('crypto');
@@ -1413,6 +1414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             joinCode,
             subscriptionTier: "free",
           });
+          isNewFamily = true;
         }
         
         // Check subscription tier limits (bypass in test/development environment)
@@ -1440,6 +1442,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId, // Associate with authenticated user
         } as any);
         
+        // Auto-seed default achievements for brand new families
+        if (isNewFamily) {
+          try {
+            await storage.seedDefaultAchievements(member.familyName);
+          } catch (seedErr) {
+            console.error("Auto-seed achievements failed (non-fatal):", seedErr);
+          }
+        }
+
         // Broadcast new member to family
         broadcastToFamily(member.familyName, {
           type: "member_joined",
