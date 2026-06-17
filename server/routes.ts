@@ -2268,8 +2268,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Gate: shopping list tasks require Family tier or higher
       if ((parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) || parsed.isShoppingList) {
         const family = await storage.getFamily(member.familyName);
+        const familyOnTrial = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
         if (parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) {
-          if (!family || family.subscriptionTier === "free") {
+          if (!family || (family.subscriptionTier === "free" && !familyOnTrial)) {
             return res.status(403).json({
               message: "Task assignment requires Family subscription or higher",
               code: "TIER_REQUIRED",
@@ -2277,7 +2278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         if (parsed.isShoppingList) {
-          if (!family || !hasFeature(family.subscriptionTier as SubscriptionTier, "shoppingList")) {
+          if (!family || (!hasFeature(family.subscriptionTier as SubscriptionTier, "shoppingList") && !familyOnTrial)) {
             return res.status(403).json({
               message: "Shopping list tasks require a Family subscription or higher",
               code: "TIER_REQUIRED",
@@ -2355,8 +2356,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Gate: task assignment / shopping list requires Family tier or higher
       if ((parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) || parsed.isShoppingList) {
         const family = await storage.getFamily(member.familyName);
+        const familyOnTrialPatch = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
         if (parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) {
-          if (!family || family.subscriptionTier === "free") {
+          if (!family || (family.subscriptionTier === "free" && !familyOnTrialPatch)) {
             return res.status(403).json({
               message: "Task assignment requires Family subscription or higher",
               code: "TIER_REQUIRED",
@@ -2364,7 +2366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         if (parsed.isShoppingList) {
-          if (!family || !hasFeature(family.subscriptionTier as SubscriptionTier, "shoppingList")) {
+          if (!family || (!hasFeature(family.subscriptionTier as SubscriptionTier, "shoppingList") && !familyOnTrialPatch)) {
             return res.status(403).json({
               message: "Shopping list tasks require a Family subscription or higher",
               code: "TIER_REQUIRED",

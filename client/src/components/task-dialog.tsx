@@ -78,6 +78,7 @@ interface TaskDialogProps {
   editingTask?: Task | null;
   familyMembers?: FamilyMember[];
   subscriptionTier?: string;
+  trialEndsAt?: string | null;
   categoryNames?: { household?: string; school?: string; selfCare?: string; other?: string } | null;
 }
 
@@ -111,10 +112,12 @@ export function TaskDialog({
   editingTask,
   familyMembers = [],
   subscriptionTier = "free",
+  trialEndsAt,
   categoryNames,
 }: TaskDialogProps) {
-  const canAssignMembers = subscriptionTier !== "free";
-  const canUseShoppingList = subscriptionTier !== "free";
+  const isOnTrial = !!(trialEndsAt && new Date(trialEndsAt) > new Date());
+  const canAssignMembers = subscriptionTier !== "free" || isOnTrial;
+  const canUseShoppingList = subscriptionTier !== "free" || isOnTrial;
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
