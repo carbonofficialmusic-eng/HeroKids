@@ -92,11 +92,6 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
           covers the native status-bar zone even when iOS sets the WKWebView
           layout viewport origin to y=safe-area-inset-top instead of y=0. */}
       <div className="fixed inset-x-0 bottom-0 pointer-events-none" style={{ zIndex: 0, top: '-60px' }}>
-        {/* Always-visible theme background — rendered FIRST so it sits behind
-            the skin images. Ensures the viewport is never bare-white when
-            background is off or during the skin-image fade transition. */}
-        <div className="absolute inset-0 bg-background" />
-
         {previousBg && (
           <img 
             src={previousBg}
@@ -121,6 +116,12 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
               opacity: showNew ? 1 : 0,
             }}
           />
+        )}
+
+        {/* Fallback when no skin background is active. The html-level
+            bg-background (index.css) also covers white-flash cases. */}
+        {!currentBg && !previousBg && (
+          <div className="absolute inset-0 bg-background" />
         )}
 
         {/* Dark vignette at the very top — ensures the status-bar area (behind
