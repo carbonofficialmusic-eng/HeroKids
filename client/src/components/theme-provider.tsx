@@ -13,7 +13,7 @@ type ThemeProviderState = {
 };
 
 const initialState: ThemeProviderState = {
-  theme: "light",
+  theme: "dark",
   setTheme: () => null,
 };
 
@@ -21,11 +21,22 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = "light",
+  defaultTheme = "dark",
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem("theme") as Theme) || defaultTheme
-  );
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem("theme") as Theme | null;
+    // One-time migration: if no preference stored, or the old default "light"
+    // was never explicitly chosen by the user, migrate to "dark".
+    // Users who intentionally switch to light via the profile menu set the
+    // "theme-user-choice" flag, so their preference is preserved.
+    const userExplicitlyChoseLight =
+      stored === "light" && localStorage.getItem("theme-user-choice") === "1";
+    if (!stored || (stored === "light" && !userExplicitlyChoseLight)) {
+      localStorage.setItem("theme", "dark");
+      return "dark";
+    }
+    return stored;
+  });
 
   useEffect(() => {
     const root = document.documentElement;
@@ -34,8 +45,14 @@ export function ThemeProvider({
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  const setThemeWithFlag = (newTheme: Theme) => {
+    // Mark that the user has made an explicit choice so we respect it on reload
+    localStorage.setItem("theme-user-choice", "1");
+    setTheme(newTheme);
+  };
+
   return (
-    <ThemeProviderContext.Provider value={{ theme, setTheme }}>
+    <ThemeProviderContext.Provider value={{ theme, setTheme: setThemeWithFlag }}>
       {children}
     </ThemeProviderContext.Provider>
   );
