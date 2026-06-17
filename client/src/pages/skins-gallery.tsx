@@ -573,20 +573,24 @@ export default function SkinsGallery() {
             </span>
           </div>
 
-          {/* Tier limit banner — shown when Free plan skin cap is reached */}
-          {tierLimitReached && maxSkins < 999 && (
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-4 py-3 mb-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                <p className="text-sm text-amber-800 dark:text-amber-300 font-medium">
-                  {t('skins.skinLimitDesc', { count: maxSkins, max: maxSkins })}
-                </p>
+          {/* Wrapper so banner can float on mobile without pushing content */}
+          <div className="relative">
+            {/* Tier limit banner — absolute on mobile (overlays skin card), static on desktop */}
+            {tierLimitReached && maxSkins < 999 && (
+              <div className="absolute top-0 left-0 right-0 z-20 lg:static lg:mb-2">
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50/90 dark:bg-amber-950/80 dark:border-amber-700 px-4 py-3 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <p className="text-sm text-amber-800 dark:text-amber-300 font-medium">
+                      {t('skins.skinLimitDesc', { count: maxSkins, max: maxSkins })}
+                    </p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={openParentalGate} className="shrink-0 border-amber-400 text-amber-800 dark:text-amber-300 dark:border-amber-600">
+                    {t('skins.skinLimitUpgrade')}
+                  </Button>
+                </div>
               </div>
-              <Button size="sm" variant="outline" onClick={openParentalGate} className="shrink-0 border-amber-400 text-amber-800 dark:text-amber-300 dark:border-amber-600">
-                {t('skins.skinLimitUpgrade')}
-              </Button>
-            </div>
-          )}
+            )}
 
           {/* Main Layout: Preview Left + Grid Right */}
           <div ref={containerRef} className={`flex gap-4 relative ${isLandscapeMobile ? 'flex-row' : 'flex-col lg:flex-row'}`}>
@@ -831,6 +835,7 @@ export default function SkinsGallery() {
               </Card>
             </div>
           </div>
+          </div>{/* end relative wrapper */}
         </div>
       </div>
 
