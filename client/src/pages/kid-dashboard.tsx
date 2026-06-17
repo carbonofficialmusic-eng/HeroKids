@@ -2281,7 +2281,7 @@ export default function KidDashboard() {
                 <Sparkles className="h-5 w-5 text-purple-500 animate-pulse" />
               </div>
               {specialRewards.length > 2 && (
-                <Button variant="ghost" size="sm" asChild className="text-white/90 bg-white/10 border border-white/15 rounded-full px-4" data-testid="button-view-all-achievements">
+                <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground" data-testid="button-view-all-achievements">
                   <Link href="/my-achievements">
                     {t("kidDashboard.viewAll")}
                   </Link>
@@ -2455,7 +2455,7 @@ export default function KidDashboard() {
               </h2>
             </div>
             {activeRewards.length > 3 && (
-              <Button variant="ghost" size="sm" asChild className="text-white/90 bg-white/10 border border-white/15 rounded-full px-4" data-testid="button-view-all-rewards-board">
+              <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground" data-testid="button-view-all-rewards-board">
                 <Link href="/rewards-board">
                   {t("kidDashboard.viewAll")}
                 </Link>
@@ -2497,7 +2497,7 @@ export default function KidDashboard() {
                   {t("kidDashboard.myRewards")}
                 </h2>
               </div>
-              <Button variant="ghost" size="sm" asChild className="text-white/90 bg-white/10 border border-white/15 rounded-full px-4" data-testid="button-view-all-rewards">
+              <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground" data-testid="button-view-all-rewards">
                 <Link href="/my-rewards">
                   {t("kidDashboard.viewAll")}
                 </Link>
@@ -2793,7 +2793,9 @@ export default function KidDashboard() {
                             {categoryTasks.length}
                           </Badge>
                         </div>
-                        <ChevronDown className={`h-5 w-5 transition-transform ${!collapsedCategories.has(category) ? "rotate-180" : ""}`} />
+                        <div className="p-1 bg-card border border-border rounded-lg flex-shrink-0">
+                          <ChevronDown className={`h-4 w-4 transition-transform ${!collapsedCategories.has(category) ? "rotate-180" : ""}`} />
+                        </div>
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
