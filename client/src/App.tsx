@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { isNativePlatform } from "@/lib/platform";
 import { getBackgroundUrl } from "@/lib/skins";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "@/pages/not-found";
@@ -207,6 +208,26 @@ function Router() {
       if (orientationTimer) clearTimeout(orientationTimer);
       window.removeEventListener('orientationchange', onOrientationChange);
     };
+  }, []);
+
+  // Google OAuth native deep-link: herokids://auth-done
+  // The server redirects here after Google auth when started from the iOS app.
+  // Closing the in-app browser and refreshing auth state is handled here because
+  // this component is always mounted (survives any page navigation).
+  useEffect(() => {
+    if (!isNativePlatform()) return;
+    let listenerHandle: { remove: () => void } | null = null;
+    (async () => {
+      const { App: CapApp } = await import("@capacitor/app");
+      const { Browser } = await import("@capacitor/browser");
+      listenerHandle = await CapApp.addListener("appUrlOpen", (event) => {
+        if (event.url.startsWith("herokids://auth-done")) {
+          Browser.close().catch(() => {});
+          queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        }
+      });
+    })();
+    return () => { listenerHandle?.remove(); };
   }, []);
 
   // iOS WKWebView architectural fix:

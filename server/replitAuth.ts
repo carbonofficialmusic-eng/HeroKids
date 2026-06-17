@@ -206,10 +206,13 @@ export async function setupAuth(app: Express) {
       )
     );
 
-    app.get(
-      "/api/auth/google",
-      passport.authenticate("google", { scope: ["profile", "email"] })
-    );
+    app.get("/api/auth/google", (req: any, res, next) => {
+      const isNative = req.query.native === "1";
+      passport.authenticate("google", {
+        scope: ["profile", "email"],
+        state: isNative ? "native" : "web",
+      } as any)(req, res, next);
+    });
 
     app.get(
       "/api/auth/google/callback",
@@ -217,7 +220,11 @@ export async function setupAuth(app: Express) {
       async (req: any, res) => {
         clearAccountSessionState(req);
         await storage.updateUserLastLogin(req.user.claims.sub);
-        res.redirect("/");
+        // If the flow was started from the native iOS app, redirect to the
+        // custom URL scheme so the app can intercept the callback and close
+        // the in-app browser automatically.
+        const isNative = (req.query.state ?? "") === "native";
+        res.redirect(isNative ? "herokids://auth-done" : "/");
       }
     );
   } else {

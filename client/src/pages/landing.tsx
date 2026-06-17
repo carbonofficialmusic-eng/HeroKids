@@ -56,7 +56,7 @@ async function startNativeGoogleLogin() {
     listener.remove();
   }, 300_000);
 
-  await Browser.open({ url: "https://herokids.app/api/auth/google" });
+  await Browser.open({ url: "https://herokids.app/api/auth/google?native=1" });
 }
 
 // ─── AuthPanel ────────────────────────────────────────────────────────────────
