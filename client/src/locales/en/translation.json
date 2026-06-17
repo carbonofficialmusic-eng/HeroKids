@@ -1183,7 +1183,7 @@
   },
   "trial": {
     "bannerTitle": "Family trial active — {{days}} day(s) left",
-    "bannerSubtitle": "Upgrade to Family to keep all features permanently.",
+    "bannerSubtitle": "Limit: 3 members & 3 skins. Upgrade to Family to keep all features permanently.",
     "modalTitle": "Your 7-day Family trial is now active!",
     "modalDesc": "You now have free access to all Family features for 7 days: family chat, personal devices for kids, and more. Your limit stays at 3 members and 3 skins — so no data is lost when the trial ends.",
     "modalNoCreditCard": "No credit card required. No automatic renewal.",
