@@ -612,7 +612,7 @@ export function TaskDialog({
                         </Badge>
                       )}
                     </div>
-                    <FormDescription>
+                    <FormDescription style={{ whiteSpace: "pre-line" }}>
                       {t('tasks.assignedToDescAll')}
                     </FormDescription>
                     
