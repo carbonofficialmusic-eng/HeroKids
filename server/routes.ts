@@ -2696,7 +2696,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const tier = family.subscriptionTier as SubscriptionTier;
-      if (!hasFeature(tier, 'photoProof')) {
+      const photoOnTrial = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(tier, 'photoProof') && !photoOnTrial) {
         return res.status(403).json({
           message: "Photo proof upload requires a Family tier subscription or higher",
           currentTier: tier,
