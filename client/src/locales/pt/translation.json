@@ -1184,7 +1184,7 @@
     "bannerTitle": "Teste Family ativo — {{days}} dia(s) restante(s)",
     "bannerSubtitle": "Faça upgrade para Family e mantenha todos os recursos permanentemente.",
     "modalTitle": "Seu teste gratuito de 7 dias do Family está ativo!",
-    "modalDesc": "Você tem acesso gratuito a todos os recursos do Family por 7 dias: chat familiar, dispositivos pessoais para crianças, e mais.",
+    "modalDesc": "Você tem acesso gratuito a todos os recursos do Family por 7 dias: chat familiar, dispositivos pessoais para crianças, e mais. Seu limite permanece em 3 membros e 3 skins — sem perda de dados ao final do teste.",
     "modalNoCreditCard": "Sem cartão de crédito. Sem renovação automática.",
     "modalCta": "Vamos lá!"
   },

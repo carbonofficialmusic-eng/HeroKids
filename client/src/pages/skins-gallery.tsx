@@ -89,6 +89,7 @@ interface Skin {
   isDiscovered: boolean;
   isActive: boolean;
   canDiscover: boolean;
+  isOverLimit: boolean;
 }
 
 export default function SkinsGallery() {
@@ -331,6 +332,8 @@ export default function SkinsGallery() {
     const isLegacy = isLegacySkin(skin.id);
     const hasFoundStar = starPlacements[skin.id] === true; // Star was found on this card
 
+    const isOverLimit = skin.isOverLimit;
+
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
       // Always update the preview
       setSelectedSkinId(skin.id);
@@ -339,7 +342,7 @@ export default function SkinsGallery() {
         e.stopPropagation();
         setDiscoverDialogSkinId(skin.id);
         setEquipDialogSkinId(null);
-      } else if (isDiscovered && !isActive) {
+      } else if (isDiscovered && !isActive && !isOverLimit) {
         e.stopPropagation();
         setEquipDialogSkinId(skin.id);
         setDiscoverDialogSkinId(null);
@@ -406,6 +409,12 @@ export default function SkinsGallery() {
         {canDiscover && !isDiscovered && (
           <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+          </div>
+        )}
+
+        {isOverLimit && isDiscovered && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-md">
+            <Lock className="h-4 w-4 text-white/90" />
           </div>
         )}
         

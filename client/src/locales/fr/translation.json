@@ -1139,7 +1139,7 @@
     "bannerTitle": "Essai Family actif — {{days}} jour(s) restant(s)",
     "bannerSubtitle": "Passez à Family pour conserver toutes les fonctionnalités définitivement.",
     "modalTitle": "Votre essai gratuit Family de 7 jours est activé !",
-    "modalDesc": "Vous avez accès gratuitement à toutes les fonctionnalités Family pendant 7 jours : chat familial, appareils personnels pour les enfants, et plus.",
+    "modalDesc": "Vous avez accès gratuitement à toutes les fonctionnalités Family pendant 7 jours : chat familial, appareils personnels pour les enfants, et plus. Votre limite reste à 3 membres et 3 skins — aucune perte de données à la fin de l'essai.",
     "modalNoCreditCard": "Aucune carte de crédit requise. Pas de renouvellement automatique.",
     "modalCta": "C'est parti !"
   },

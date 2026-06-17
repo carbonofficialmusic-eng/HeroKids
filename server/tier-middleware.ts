@@ -11,6 +11,7 @@ declare global {
     interface Request {
       tierCapabilities?: TierConfig["features"];
       familyTier?: SubscriptionTier;
+      isOnTrial?: boolean;
     }
   }
 }
@@ -34,15 +35,19 @@ export function addTierCapabilities(
   const legacyTier = family.subscriptionTier || "free";
   let tier = normalizeTier(legacyTier as SubscriptionTierLegacy);
 
-  // Active in-app trial: treat as "family" tier
+  // Active in-app trial: unlock all Family features but keep Free resource limits
+  // (max 3 members, max 3 skins) so no data is lost when the trial expires
+  let isOnTrial = false;
   if (tier === "free" && family.trialEndsAt && new Date(family.trialEndsAt) > new Date()) {
     tier = "family";
+    isOnTrial = true;
   }
 
   const config = getTierConfig(tier);
   
   req.tierCapabilities = config.features;
   req.familyTier = tier;
+  req.isOnTrial = isOnTrial;
   
   next();
 }
@@ -77,15 +82,17 @@ export function checkMemberLimit(
   next: NextFunction
 ) {
   const tier = req.familyTier || "free";
+  // During trial: enforce Free tier member limit (3) so no members are lost when trial expires
+  const limitTier = req.isOnTrial ? "free" : tier;
   const currentMemberCount = (req as any).currentMemberCount as number;
   
-  if (!canAddMember(tier, currentMemberCount)) {
-    const config = getTierConfig(tier);
+  if (!canAddMember(limitTier, currentMemberCount)) {
+    const config = getTierConfig(limitTier);
     return res.status(403).json({
       message: `Member limit reached for ${config.name} tier`,
       currentMembers: currentMemberCount,
       maxMembers: config.maxMembers,
-      upgradeTier: tier === "free" ? "family" : "family_hero",
+      upgradeTier: limitTier === "free" ? "family" : "family_hero",
     });
   }
   

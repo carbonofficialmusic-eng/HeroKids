@@ -4617,6 +4617,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Whether the tier's skin limit has been reached
       const tierLimitReached = discoveredSkinIds.length >= maxSkins;
       
+      // Skins discovered beyond the Free tier limit are "over-limit":
+      // they stay in the DB but cannot be activated until the family upgrades.
+      // discoveredSkinIds are in discovery order — the first maxSkins are kept usable.
+      const overLimitIds = new Set(discoveredSkinIds.slice(maxSkins));
+
       // Enrich skins with discovery status for this member
       const skinsWithStatus = allSkins.map(skin => {
         // Legacy skins are "discovered" if they're in earnedLegacySkinIds (via stars)
@@ -4626,6 +4631,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           : discoveredSkinIds.includes(skin.id);
         const isActive = member.activeSkinId === skin.id;
         
+        // A discovered regular skin is "over the tier limit" if it was unlocked
+        // while the family had a higher tier and is now beyond the Free cap.
+        const isOverLimit = !isLegacySkin(skin.id) && overLimitIds.has(skin.id);
+
         // Check if skin can be unlocked based on position, points, AND tier limit
         // Legacy skins cannot be discovered manually - they are unlocked via stars only
         const canDiscover = !isDiscovered && !isLegacySkin(skin.id) && !tierLimitReached && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length, skinCardCost);
@@ -4638,6 +4647,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isDiscovered,
           isActive,
           canDiscover,
+          isOverLimit,
           tier,
           position: getSkinPosition(skin.id),
         };
@@ -4814,6 +4824,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Check both discovered skins and earned legacy skins (from star collection)
         if (!discoveredSkinIds.includes(skinId) && !earnedLegacySkinIds.includes(skinId)) {
           return res.status(403).json({ message: "Skin not discovered yet - discover it first!" });
+        }
+
+        // Block activating skins that are over the current tier's skin limit
+        if (!earnedLegacySkinIds.includes(skinId)) {
+          const familyForSkin = await storage.getFamily(member.familyName);
+          const maxSkinsForTier = getMaxSkins(familyForSkin?.subscriptionTier ?? "free");
+          const overLimitIds = new Set(discoveredSkinIds.slice(maxSkinsForTier));
+          if (overLimitIds.has(skinId)) {
+            return res.status(403).json({
+              message: "This skin exceeds your tier's skin limit. Upgrade to activate it.",
+              code: "SKIN_OVER_LIMIT",
+            });
+          }
         }
       }
       
