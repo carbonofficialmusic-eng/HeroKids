@@ -1651,7 +1651,7 @@
     "step0": "Hi, we're Mia and Max. We'll show you in a few steps how HeroKids works. You can quit at any time and continue later.",
     "step1": "Here you create new tasks for your children. You can assign points, set a due date, require proof photos and approvals, create shopping lists, and assign tasks to children. Tasks marked as Important always appear at the top of the task list.",
     "step2": "Rewards are the best motivation! Set what your children can earn with their collected points. Rewards can also be offered for sharing.",
-    "step3": "When a child marks a task as done, it ends up here for review.",
+    "step3": "When a child marks a task with approval required as done, it lands here for review. Reward requests sent by your children can also be managed and approved here.",
     "step4": "Here you keep track of the rewards. You can see who has redeemed a reward, join shared rewards, and mark them as done when completed.",
     "step5": "In Settings you'll find timezone, family code, category names, Device Link for children, parent password protection, your plan and much more. You can also remove individual members from the leaderboard or turn it off entirely if you prefer less competition. With User Switch you can quickly switch between children's accounts — handy when multiple children use the same device.",
     "step6": "Through the star symbol, every player can unlock their own character skins and new backgrounds. You can also collect stars there. Every fourth star unlocks a HeroKids Legacy.",
