@@ -16,6 +16,49 @@ import { apiRequest, queryClient, storeDevToken } from "@/lib/queryClient";
 import { isNativePlatform } from "@/lib/platform";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
 
+// ─── Native Google Login (module-level, survives component unmount) ───────────
+let _nativeGooglePollInterval: ReturnType<typeof setInterval> | null = null;
+let _nativeGoogleSafetyTimer: ReturnType<typeof setTimeout> | null = null;
+
+function _clearNativeGoogleTimers() {
+  if (_nativeGooglePollInterval) { clearInterval(_nativeGooglePollInterval); _nativeGooglePollInterval = null; }
+  if (_nativeGoogleSafetyTimer) { clearTimeout(_nativeGoogleSafetyTimer); _nativeGoogleSafetyTimer = null; }
+}
+
+async function startNativeGoogleLogin() {
+  const { Browser } = await import("@capacitor/browser");
+
+  _clearNativeGoogleTimers();
+
+  // When the user manually closes the browser — still refresh auth
+  const listener = await Browser.addListener("browserFinished", () => {
+    _clearNativeGoogleTimers();
+    listener.remove();
+    queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+  });
+
+  // Poll every 1.5 s. Runs at module level → survives component unmount.
+  _nativeGooglePollInterval = setInterval(async () => {
+    try {
+      const res = await fetch("/api/auth/user", { credentials: "include" });
+      if (res.ok) {
+        _clearNativeGoogleTimers();
+        listener.remove();
+        await Browser.close();
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      }
+    } catch { /* ignore network errors */ }
+  }, 1500);
+
+  // Safety: stop polling after 5 minutes
+  _nativeGoogleSafetyTimer = setTimeout(() => {
+    _clearNativeGoogleTimers();
+    listener.remove();
+  }, 300_000);
+
+  await Browser.open({ url: "https://herokids.app/api/auth/google" });
+}
+
 // ─── AuthPanel ────────────────────────────────────────────────────────────────
 function AuthPanel() {
   const { t } = useTranslation();
@@ -127,42 +170,9 @@ function AuthPanel() {
     finally { setIsSubmitting(false); }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     if (isNativePlatform()) {
-      // On native iOS: use SFSafariViewController (shares cookies with WKWebView).
-      // Poll /api/auth/user until login is detected, then close the browser.
-      const { Browser } = await import("@capacitor/browser");
-
-      let pollInterval: ReturnType<typeof setInterval> | null = null;
-      let listenerHandle: { remove: () => void } | null = null;
-
-      const cleanup = () => {
-        if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
-        if (listenerHandle) { listenerHandle.remove(); listenerHandle = null; }
-      };
-
-      // When the user closes the browser manually, refresh auth state
-      listenerHandle = await Browser.addListener("browserFinished", () => {
-        cleanup();
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      });
-
-      // Poll every 1.5 s; when auth succeeds, close browser + refresh app
-      pollInterval = setInterval(async () => {
-        try {
-          const res = await fetch("/api/auth/user", { credentials: "include" });
-          if (res.ok) {
-            cleanup();
-            await Browser.close();
-            queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-          }
-        } catch { /* network errors are fine to ignore */ }
-      }, 1500);
-
-      // Safety cleanup after 5 minutes
-      setTimeout(() => cleanup(), 300_000);
-
-      await Browser.open({ url: "https://herokids.app/api/auth/google" });
+      startNativeGoogleLogin();
     } else {
       window.location.href = "/api/auth/google";
     }
