@@ -250,15 +250,11 @@ export default function Settings() {
       return await apiRequest("POST", "/api/family/reset", {});
     },
     onSuccess: () => {
-      // Invalidate all queries to refresh the entire app state
-      queryClient.invalidateQueries();
       setShowFactoryResetDialog(false);
-      toast({
-        title: t('settings.familyResetComplete'),
-        description: t('settings.familyResetDesc'),
-      });
-      // Redirect to dashboard
-      setLocation("/dashboard");
+      // Ensure dark theme persists after reset, then force a full page reload
+      // so the inline theme script in index.html runs fresh and avoids a white flash.
+      localStorage.setItem("theme", "dark");
+      window.location.href = "/";
     },
     onError: () => {
       toast({
