@@ -154,7 +154,7 @@ const DEFAULT_ACHIEVEMENT_TEMPLATES = [
     slug: "star-collector",
     title: "Star Collector",
     description: "Find 4 hidden stars on skin cards",
-    bonusPoints: 100,
+    bonusPoints: 40,
     rewardType: "points" as const,
     isActive: true,
     config: { starsRequired: 4 },

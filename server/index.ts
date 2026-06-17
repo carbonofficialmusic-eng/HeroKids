@@ -943,7 +943,7 @@ async function ensurePinboardTable() {
             'star-collector',
             'Star Collector',
             'Find 4 hidden stars on skin cards',
-            100,
+            40,
             'points',
             true,
             '{"starsRequired": 4}'::jsonb
