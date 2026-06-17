@@ -1705,7 +1705,7 @@ export default function KidDashboard() {
   // Fetch unread chat message count
   const { data: unreadChatData } = useQuery<{ count: number }>({
     queryKey: ["/api/chat/unread-count"],
-    enabled: !!member && hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat"),
+    enabled: !!member && (hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") || !!(familyData?.trialEndsAt && new Date(familyData.trialEndsAt) > new Date())),
     refetchInterval: 5000,
     staleTime: 5 * 60 * 1000,
   });

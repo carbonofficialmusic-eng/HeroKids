@@ -5099,8 +5099,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family not found" });
       }
       
-      // Check tier access (Family tier and above)
-      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat")) {
+      // Check tier access — also allow during active 7-day trial
+      const chatOnTrial2 = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat") && !chatOnTrial2) {
         return res.status(403).json({ 
           message: "Family chat is only available for Family tier and above",
           tier: family.subscriptionTier,
@@ -5224,8 +5225,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family not found" });
       }
       
-      // Check tier access (Family tier and above)
-      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat")) {
+      // Check tier access — also allow during active 7-day trial
+      const chatOnTrial3 = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat") && !chatOnTrial3) {
         return res.json({ count: 0 }); // Return 0 if feature not available
       }
       

@@ -406,7 +406,7 @@ export default function Dashboard() {
   // Fetch unread chat message count
   const { data: unreadChatData } = useQuery<{ count: number }>({
     queryKey: ["/api/chat/unread-count"],
-    enabled: !!member && hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat"),
+    enabled: !!member && (hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") || !!(familyData?.trialEndsAt && new Date(familyData.trialEndsAt) > new Date())),
     refetchInterval: 10000, // Refetch every 10 seconds
     staleTime: 5 * 60 * 1000,
   });
@@ -1771,7 +1771,7 @@ export default function Dashboard() {
                     <span className="text-center">{t("dashboard.familyGoals")}</span>
                   </Button>
                 </Link>
-                {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") && (
+                {(hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") || !!(familyData?.trialEndsAt && new Date(familyData.trialEndsAt) > new Date())) && (
                   <Link href="/chat" className="w-full">
                     <Button variant="card" data-testid="button-chat-child" className="relative w-full h-14 whitespace-normal leading-tight">
                       <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
