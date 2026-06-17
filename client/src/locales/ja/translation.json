@@ -955,7 +955,7 @@
       "description": "リダイレクトなしで直接ログイン。",
       "tabLogin": "ログイン",
       "tabRegister": "登録",
-      "tabPassword": "パスワード",
+      "tabPassword": "パスワードをお忘れですか？",
       "labelEmail": "メールアドレス",
       "labelPassword": "パスワード",
       "labelFirstName": "名前",

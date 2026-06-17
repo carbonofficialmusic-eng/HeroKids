@@ -987,7 +987,7 @@
       "description": "Logga in direkt, utan omdirigering.",
       "tabLogin": "Logga in",
       "tabRegister": "Registrera",
-      "tabPassword": "Lösenord",
+      "tabPassword": "Glömt lösenordet?",
       "labelEmail": "E-post",
       "labelPassword": "Lösenord",
       "labelFirstName": "Förnamn",

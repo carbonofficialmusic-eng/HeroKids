@@ -955,7 +955,7 @@
       "description": "Inicia sesión directamente, sin redirección.",
       "tabLogin": "Iniciar sesión",
       "tabRegister": "Registrarse",
-      "tabPassword": "Contraseña",
+      "tabPassword": "¿Olvidaste tu contraseña?",
       "labelEmail": "Correo electrónico",
       "labelPassword": "Contraseña",
       "labelFirstName": "Nombre",

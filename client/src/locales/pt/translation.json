@@ -988,7 +988,7 @@
       "description": "Entre diretamente, sem redirecionamento.",
       "tabLogin": "Entrar",
       "tabRegister": "Cadastrar",
-      "tabPassword": "Senha",
+      "tabPassword": "Esqueceu a senha?",
       "labelEmail": "E-mail",
       "labelPassword": "Senha",
       "labelFirstName": "Nome",

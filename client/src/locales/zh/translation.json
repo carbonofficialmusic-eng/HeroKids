@@ -955,7 +955,7 @@
       "description": "直接登录，无需浏览器跳转。",
       "tabLogin": "登录",
       "tabRegister": "注册",
-      "tabPassword": "密码",
+      "tabPassword": "忘记密码？",
       "labelEmail": "电子邮件",
       "labelPassword": "密码",
       "labelFirstName": "名字",
