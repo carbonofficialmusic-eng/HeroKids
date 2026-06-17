@@ -151,6 +151,7 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
+
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   usePushNotifications(isAuthenticated);
