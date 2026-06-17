@@ -208,29 +208,49 @@ export async function setupAuth(app: Express) {
 
     app.get("/api/auth/google", (req: any, res, next) => {
       const isNative = req.query.native === "1";
-      passport.authenticate("google", {
-        scope: ["profile", "email"],
-        state: isNative ? "native" : "web",
-      } as any)(req, res, next);
+      // Store the native flag in the session *before* redirecting so we can
+      // read it on the callback without relying on the OAuth state parameter
+      // (passport-oauth2 replaces our state value with its own random nonce).
+      req.session.googleNative = isNative;
+      req.session.save((saveErr: any) => {
+        if (saveErr) console.error("Google OAuth: session save error before redirect:", saveErr);
+        passport.authenticate("google", {
+          scope: ["profile", "email"],
+          state: true, // let passport-oauth2 manage CSRF state nonce
+        } as any)(req, res, next);
+      });
     });
 
     app.get(
       "/api/auth/google/callback",
-      passport.authenticate("google", { failureRedirect: "/?googleError=1" }),
-      async (req: any, res) => {
-        clearAccountSessionState(req);
-        await storage.updateUserLastLogin(req.user.claims.sub);
-        // If the flow was started from the native iOS app, redirect to the
-        // custom URL scheme so the app can intercept the callback and close
-        // the in-app browser automatically.
-        const isNative = (req.query.state ?? "") === "native";
-        // Explicitly save the session to the store before redirecting so the
-        // cookie is fully persisted (PostgreSQL write is async; without this
-        // the redirect can fire before the session row exists).
-        req.session.save(() => {
-          res.redirect(isNative ? "herokids://auth-done" : "/");
-        });
-      }
+      (req: any, res, next) => {
+        passport.authenticate("google", (err: any, user: any, info: any) => {
+          if (err) {
+            console.error("Google OAuth callback error:", err);
+            return res.redirect("/?googleError=1");
+          }
+          if (!user) {
+            console.error("Google OAuth callback – no user:", info?.message ?? info);
+            return res.redirect("/?googleError=1");
+          }
+          req.logIn(user, (loginErr: any) => {
+            if (loginErr) {
+              console.error("Google OAuth login error:", loginErr);
+              return res.redirect("/?googleError=1");
+            }
+            clearAccountSessionState(req);
+            storage.updateUserLastLogin(user.claims.sub).catch((e: any) =>
+              console.error("Google OAuth updateUserLastLogin error:", e),
+            );
+            const isNative = req.session.googleNative === true;
+            delete req.session.googleNative;
+            req.session.save((saveErr: any) => {
+              if (saveErr) console.error("Google OAuth: session save error after login:", saveErr);
+              res.redirect(isNative ? "herokids://auth-done" : "/");
+            });
+          });
+        })(req, res, next);
+      },
     );
   } else {
     // Placeholder routes when Google OAuth is not yet configured
