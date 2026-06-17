@@ -25,6 +25,49 @@ function _clearNativeGoogleTimers() {
   if (_nativeGoogleSafetyTimer) { clearTimeout(_nativeGoogleSafetyTimer); _nativeGoogleSafetyTimer = null; }
 }
 
+// ─── iOS PWA Google Login ─────────────────────────────────────────────────────
+// On iOS, a PWA (added to home screen) runs in a standalone WKWebView that
+// shares the SAME cookie store as Safari.  But if we do window.location.href =
+// "/api/auth/google" the PWA shell navigates away and the OAuth callback page
+// opens in regular Safari — breaking out of the standalone shell.
+//
+// Fix: open OAuth URL in a new Safari tab (?pwa=1 so the server redirects to
+// /auth/close after login, which auto-closes the tab).  Poll /api/auth/user in
+// the background — the shared cookie store means we'll see the session as soon
+// as Google finishes.
+let _pwaPollInterval: ReturnType<typeof setInterval> | null = null;
+let _pwaSafetyTimer: ReturnType<typeof setTimeout> | null = null;
+let _pwaAuthWindow: Window | null = null;
+
+function _clearPwaGoogleTimers() {
+  if (_pwaPollInterval) { clearInterval(_pwaPollInterval); _pwaPollInterval = null; }
+  if (_pwaSafetyTimer) { clearTimeout(_pwaSafetyTimer); _pwaSafetyTimer = null; }
+}
+
+function startPwaGoogleLogin() {
+  _clearPwaGoogleTimers();
+  _pwaAuthWindow?.close();
+
+  _pwaAuthWindow = window.open("/api/auth/google?pwa=1", "_blank");
+
+  _pwaPollInterval = setInterval(async () => {
+    try {
+      const res = await fetch("/api/auth/user", { credentials: "include" });
+      if (res.ok) {
+        _clearPwaGoogleTimers();
+        _pwaAuthWindow?.close();
+        _pwaAuthWindow = null;
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      }
+    } catch { /* ignore network errors during polling */ }
+  }, 1500);
+
+  _pwaSafetyTimer = setTimeout(() => {
+    _clearPwaGoogleTimers();
+    _pwaAuthWindow = null;
+  }, 300_000);
+}
+
 async function startNativeGoogleLogin() {
   const { Browser } = await import("@capacitor/browser");
 
@@ -173,9 +216,23 @@ function AuthPanel() {
   const handleGoogleLogin = () => {
     if (isNativePlatform()) {
       startNativeGoogleLogin();
-    } else {
-      window.location.href = "/api/auth/google";
+      return;
     }
+
+    // iOS PWA standalone mode: window.location.href navigates the PWA shell
+    // away and the OAuth callback opens in regular Safari instead of returning
+    // to the standalone window.  Fix: open OAuth in a new tab, poll for session,
+    // redirect the new tab to /auth/close so it closes itself automatically.
+    // (Safari and iOS PWA share the same cookie store, so the session is visible
+    // immediately from the polling side.)
+    const isIosPwa = (window.navigator as any).standalone === true;
+    if (isIosPwa) {
+      startPwaGoogleLogin();
+      return;
+    }
+
+    // Regular desktop/mobile web: full-page redirect is fine.
+    window.location.href = "/api/auth/google";
   };
 
   return (

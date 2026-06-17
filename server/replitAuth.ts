@@ -228,10 +228,12 @@ export async function setupAuth(app: Express) {
 
     app.get("/api/auth/google", (req: any, res, next) => {
       const isNative = req.query.native === "1";
-      // Store the native flag in the session *before* redirecting so we can
-      // read it on the callback without relying on the OAuth state parameter
+      const isFromPwa = req.query.pwa === "1";
+      // Store flags in the session *before* redirecting so we can read them
+      // on the callback without relying on the OAuth state parameter
       // (passport-oauth2 replaces our state value with its own random nonce).
       req.session.googleNative = isNative;
+      req.session.googleFromPwa = isFromPwa;
       req.session.save((saveErr: any) => {
         if (saveErr) console.error("Google OAuth: session save error before redirect:", saveErr);
         passport.authenticate("google", {
@@ -263,7 +265,9 @@ export async function setupAuth(app: Express) {
               console.error("Google OAuth updateUserLastLogin error:", e),
             );
             const isNative = req.session.googleNative === true;
+            const isFromPwa = req.session.googleFromPwa === true;
             delete req.session.googleNative;
+            delete req.session.googleFromPwa;
             req.session.save((saveErr: any) => {
               if (saveErr) console.error("Google OAuth: session save error after login:", saveErr);
               if (isNative) {
@@ -272,6 +276,12 @@ export async function setupAuth(app: Express) {
                 // the WKWebView can establish its own session via a POST request.
                 const exchangeToken = createNativeExchangeToken(user.claims.sub);
                 res.redirect(`herokids://auth-done?token=${exchangeToken}`);
+              } else if (isFromPwa) {
+                // iOS PWA (standalone) opens OAuth in a new Safari tab via
+                // window.open().  After login we redirect to /auth/close so the
+                // tab can close itself — the PWA polls /api/auth/user and detects
+                // the new session cookie (cookies are shared between Safari and PWA).
+                res.redirect("/auth/close");
               } else {
                 res.redirect("/");
               }

@@ -35,6 +35,7 @@ import Impressum from "@/pages/impressum";
 import Terms from "@/pages/terms";
 import IosTest from "@/pages/ios-test";
 import AccountPage from "@/pages/account";
+import AuthClose from "@/pages/auth-close";
 
 interface FamilyMember {
   id: number;
@@ -419,6 +420,7 @@ function Router() {
           <Route path="/link-device" component={LinkDevice} />
           <Route path="/kid-dashboard" component={KidDashboard} />
           <Route path="/pricing" component={Pricing} />
+          <Route path="/auth/close" component={AuthClose} />
           <Route path="/privacy" component={Privacy} />
           <Route path="/impressum" component={Impressum} />
           <Route path="/terms" component={Terms} />
