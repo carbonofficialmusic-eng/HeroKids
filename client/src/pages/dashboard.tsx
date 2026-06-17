@@ -1116,14 +1116,14 @@ export default function Dashboard() {
         {isParent ? (
           /* Parent View */
           <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
-            {/* Trial Banner */}
+            {/* Trial Banner — absolute on mobile (overlays logo, no layout push), static in grid on desktop */}
             {isParent && familyData?.trialEndsAt && familyData.subscriptionTier === "free" && (() => {
               const daysLeft = Math.ceil((new Date(familyData.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
               return daysLeft > 0 ? (
-                <div className="lg:col-span-3">
+                <div className="absolute top-0 left-0 right-0 z-20 lg:static lg:col-span-3 lg:z-auto">
                   <Link href="/pricing">
                     <button
-                      className="w-full flex items-center gap-3 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700 hover-elevate active-elevate-2 text-left"
+                      className="w-full flex items-center gap-3 p-4 rounded-lg bg-emerald-50/90 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 hover-elevate active-elevate-2 text-left backdrop-blur-sm"
                       data-testid="banner-trial"
                     >
                       <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
