@@ -4262,9 +4262,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
 
-      // Check tier — shared rewards require Family subscription
+      // Check tier — shared rewards require Family subscription (or active trial)
       const family = await storage.getFamily(member.familyName);
-      if (!hasFeature(family?.subscriptionTier ?? "free", "sharedRewards")) {
+      const sharedOnTrial1 = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(family?.subscriptionTier ?? "free", "sharedRewards") && !sharedOnTrial1) {
         return res.status(403).json({
           message: "Shared rewards require a Family subscription",
           code: "FEATURE_NOT_AVAILABLE",
@@ -4357,9 +4358,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
 
-      // Check tier — shared rewards require Family subscription
+      // Check tier — shared rewards require Family subscription (or active trial)
       const joinFamily = await storage.getFamily(member.familyName);
-      if (!hasFeature(joinFamily?.subscriptionTier ?? "free", "sharedRewards")) {
+      const sharedOnTrial2 = !!(joinFamily?.trialEndsAt && new Date(joinFamily.trialEndsAt) > new Date());
+      if (!hasFeature(joinFamily?.subscriptionTier ?? "free", "sharedRewards") && !sharedOnTrial2) {
         return res.status(403).json({
           message: "Shared rewards require a Family subscription",
           code: "FEATURE_NOT_AVAILABLE",

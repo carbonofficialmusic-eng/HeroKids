@@ -2510,7 +2510,8 @@ export default function KidDashboard() {
                 const participants = shared?.participants || [];
                 const isSharing = typed.sharingStatus === "sharing_active";
                 const isFinalized = typed.sharingStatus === "sharing_finalized";
-                const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && canUseSharedRewards(familyData?.subscriptionTier);
+                const isOnTrialKd = !!(familyData?.trialEndsAt && new Date(familyData.trialEndsAt) > new Date());
+                const canShare = typed.status !== "completed" && typed.sharingStatus === "not_shared" && (canUseSharedRewards(familyData?.subscriptionTier) || isOnTrialKd);
                 const canFinalize = isSharing && participants.length > 0;
                 const canCancelSharing = isSharing; // Can cancel anytime while sharing is active
                 const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";

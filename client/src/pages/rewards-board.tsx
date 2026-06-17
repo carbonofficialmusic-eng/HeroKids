@@ -338,12 +338,13 @@ export default function RewardsBoard() {
   });
 
   // Fetch family data for tier check
-  const { data: familyData } = useQuery<{ subscriptionTier: string }>({
+  const { data: familyData } = useQuery<{ subscriptionTier: string; trialEndsAt?: string | null }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
     staleTime: 5 * 60 * 1000,
   });
-  const canUseSharedRewardsFeature = canUseSharedRewards(familyData?.subscriptionTier);
+  const isOnTrialRb = !!(familyData?.trialEndsAt && new Date(familyData.trialEndsAt) > new Date());
+  const canUseSharedRewardsFeature = canUseSharedRewards(familyData?.subscriptionTier) || isOnTrialRb;
 
   // Fetch reward requests (parent only)
   const { data: rewardRequests = [] } = useQuery<RewardRequest[]>({
