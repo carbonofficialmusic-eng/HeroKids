@@ -1,4 +1,5 @@
 import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
@@ -169,6 +170,66 @@ export async function setupAuth(app: Express) {
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+
+  // ── Google OAuth ────────────────────────────────────────────────────────────
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+  if (googleClientId && googleClientSecret) {
+    const callbackURL = process.env.APP_BASE_URL
+      ? `${process.env.APP_BASE_URL}/api/auth/google/callback`
+      : `${process.env.PUBLIC_APP_URL || ""}/api/auth/google/callback`;
+
+    passport.use(
+      new GoogleStrategy(
+        {
+          clientID: googleClientId,
+          clientSecret: googleClientSecret,
+          callbackURL,
+        },
+        async (_accessToken, _refreshToken, profile, done) => {
+          try {
+            const email = profile.emails?.[0]?.value;
+            if (!email) return done(new Error("No email from Google"), undefined);
+            const user = await storage.upsertGoogleUser({
+              googleId: profile.id,
+              email,
+              firstName: profile.name?.givenName || profile.displayName || email,
+              lastName: profile.name?.familyName,
+              profileImageUrl: profile.photos?.[0]?.value,
+            });
+            return done(null, createSessionUser(user.id));
+          } catch (err) {
+            return done(err as Error, undefined);
+          }
+        }
+      )
+    );
+
+    app.get(
+      "/api/auth/google",
+      passport.authenticate("google", { scope: ["profile", "email"] })
+    );
+
+    app.get(
+      "/api/auth/google/callback",
+      passport.authenticate("google", { failureRedirect: "/?googleError=1" }),
+      async (req: any, res) => {
+        clearAccountSessionState(req);
+        await storage.updateUserLastLogin(req.user.claims.sub);
+        res.redirect("/");
+      }
+    );
+  } else {
+    // Placeholder routes when Google OAuth is not yet configured
+    app.get("/api/auth/google", (_req, res) => {
+      res.redirect("/?googleError=not_configured");
+    });
+    app.get("/api/auth/google/callback", (_req, res) => {
+      res.redirect("/?googleError=not_configured");
+    });
+  }
+  // ────────────────────────────────────────────────────────────────────────────
 
   app.get("/api/login", (_req, res) => {
     res.redirect("/");

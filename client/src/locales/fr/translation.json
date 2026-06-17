@@ -983,7 +983,9 @@
       "passwordRequired": "Veuillez entrer votre mot de passe.",
       "nameRequired": "Veuillez entrer votre prénom.",
       "passwordMin": "Le mot de passe doit comporter au moins 8 caractères.",
-      "termsRequired": "Veuillez accepter les CGU et la politique de confidentialité."
+      "termsRequired": "Veuillez accepter les CGU et la politique de confidentialité.",
+      "googleButton": "Se connecter avec Google",
+      "orSeparator": "ou"
     },
     "features": {
       "subtitle": "Configuré en quelques minutes. La magie commence immédiatement.",

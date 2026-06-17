@@ -1015,7 +1015,9 @@
       "passwordRequired": "Ange ditt lösenord.",
       "nameRequired": "Ange ditt namn.",
       "passwordMin": "Lösenordet måste vara minst 8 tecken.",
-      "termsRequired": "Acceptera villkoren och integritetspolicyn."
+      "termsRequired": "Acceptera villkoren och integritetspolicyn.",
+      "googleButton": "Logga in med Google",
+      "orSeparator": "eller"
     },
     "features": {
       "subtitle": "Klar på några minuter. Magin börjar omedelbart.",

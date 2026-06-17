@@ -1026,7 +1026,9 @@
       "passwordRequired": "Bitte gib dein Passwort ein.",
       "nameRequired": "Bitte gib deinen Namen ein.",
       "passwordMin": "Das Passwort braucht mindestens 8 Zeichen.",
-      "termsRequired": "Bitte akzeptiere die AGB und Datenschutzerklärung."
+      "termsRequired": "Bitte akzeptiere die AGB und Datenschutzerklärung.",
+      "googleButton": "Mit Google anmelden",
+      "orSeparator": "oder"
     },
     "features": {
       "subtitle": "In wenigen Minuten eingerichtet. Die Magie passiert sofort.",

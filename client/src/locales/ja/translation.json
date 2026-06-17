@@ -983,7 +983,9 @@
       "passwordRequired": "パスワードを入力してください。",
       "nameRequired": "名前を入力してください。",
       "passwordMin": "パスワードは8文字以上必要です。",
-      "termsRequired": "利用規約とプライバシーポリシーに同意してください。"
+      "termsRequired": "利用規約とプライバシーポリシーに同意してください。",
+      "googleButton": "Googleでサインイン",
+      "orSeparator": "または"
     },
     "features": {
       "subtitle": "数分で設定完了。すぐに魔法が始まります。",

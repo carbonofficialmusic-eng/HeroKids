@@ -1016,7 +1016,9 @@
       "passwordRequired": "Please enter your password.",
       "nameRequired": "Please enter your name.",
       "passwordMin": "Password must be at least 8 characters.",
-      "termsRequired": "Please accept the Terms and Privacy Policy."
+      "termsRequired": "Please accept the Terms and Privacy Policy.",
+      "googleButton": "Sign in with Google",
+      "orSeparator": "or"
     },
     "features": {
       "subtitle": "Set up in minutes. The magic happens immediately.",

@@ -983,7 +983,9 @@
       "passwordRequired": "Por favor ingresa tu contraseña.",
       "nameRequired": "Por favor ingresa tu nombre.",
       "passwordMin": "La contraseña debe tener al menos 8 caracteres.",
-      "termsRequired": "Por favor acepta los Términos y la Política de privacidad."
+      "termsRequired": "Por favor acepta los Términos y la Política de privacidad.",
+      "googleButton": "Iniciar sesión con Google",
+      "orSeparator": "o"
     },
     "features": {
       "subtitle": "Configurado en minutos. La magia ocurre de inmediato.",

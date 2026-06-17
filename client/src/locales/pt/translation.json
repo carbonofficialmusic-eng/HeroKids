@@ -1016,7 +1016,9 @@
       "passwordRequired": "Digite sua senha.",
       "nameRequired": "Digite seu nome.",
       "passwordMin": "A senha deve ter pelo menos 8 caracteres.",
-      "termsRequired": "Aceite os Termos e a Política de Privacidade."
+      "termsRequired": "Aceite os Termos e a Política de Privacidade.",
+      "googleButton": "Entrar com o Google",
+      "orSeparator": "ou"
     },
     "features": {
       "subtitle": "Configure em minutos. A mágica acontece imediatamente.",

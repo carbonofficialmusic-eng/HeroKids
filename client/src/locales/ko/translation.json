@@ -1023,7 +1023,9 @@
       "passwordRequired": "비밀번호를 입력해 주세요.",
       "nameRequired": "이름을 입력해 주세요.",
       "passwordMin": "비밀번호는 최소 8자 이상이어야 합니다.",
-      "termsRequired": "이용약관 및 개인정보처리방침에 동의해 주세요."
+      "termsRequired": "이용약관 및 개인정보처리방침에 동의해 주세요.",
+      "googleButton": "Google로 로그인",
+      "orSeparator": "또는"
     },
     "kids": {
       "title": "작은 손과 큰 상상력을 위해 만들어졌습니다.",

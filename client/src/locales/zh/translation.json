@@ -983,7 +983,9 @@
       "passwordRequired": "请输入您的密码。",
       "nameRequired": "请输入您的名字。",
       "passwordMin": "密码至少需要8个字符。",
-      "termsRequired": "请接受服务条款和隐私政策。"
+      "termsRequired": "请接受服务条款和隐私政策。",
+      "googleButton": "使用 Google 登录",
+      "orSeparator": "或"
     },
     "features": {
       "subtitle": "几分钟内设置完成。魔法立即开始。",

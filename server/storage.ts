@@ -198,11 +198,13 @@ export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
   getUserByEmailVerificationToken(tokenHash: string): Promise<User | undefined>;
   getUserByPendingEmailVerificationToken(tokenHash: string): Promise<User | undefined>;
   getUserByPasswordResetToken(tokenHash: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   createLocalUser(user: UpsertUser): Promise<User>;
+  upsertGoogleUser(profile: { googleId: string; email: string; firstName: string; lastName?: string; profileImageUrl?: string }): Promise<User>;
   updateUserAuthFields(id: string, updates: Partial<UpsertUser>): Promise<User>;
   updateUserLastLogin(id: string): Promise<void>;
   incrementAuthRateLimit(key: string, maxRequests: number, windowMs: number): Promise<{ allowed: boolean; retryAfter: number }>;
@@ -488,6 +490,46 @@ export class DatabaseStorage implements IStorage {
       .values({
         ...userData,
         email: userData.email?.toLowerCase(),
+      })
+      .returning();
+    return user;
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.googleId, googleId));
+    return user;
+  }
+
+  async upsertGoogleUser(profile: { googleId: string; email: string; firstName: string; lastName?: string; profileImageUrl?: string }): Promise<User> {
+    const email = profile.email.toLowerCase();
+    // Check if there's already a user with this email — link the Google ID to it
+    const existing = await this.getUserByEmail(email);
+    if (existing) {
+      const [updated] = await db
+        .update(users)
+        .set({
+          googleId: profile.googleId,
+          isEmailVerified: true,
+          profileImageUrl: profile.profileImageUrl ?? existing.profileImageUrl,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, existing.id))
+        .returning();
+      return updated;
+    }
+    // New user via Google
+    const [user] = await db
+      .insert(users)
+      .values({
+        email,
+        googleId: profile.googleId,
+        firstName: profile.firstName,
+        lastName: profile.lastName ?? null,
+        profileImageUrl: profile.profileImageUrl ?? null,
+        isEmailVerified: true,
       })
       .returning();
     return user;
