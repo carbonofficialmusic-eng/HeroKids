@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Lock, UserPlus } from "lucide-react";
+import { Loader2, Mail, Lock, UserPlus, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -102,6 +102,47 @@ async function startNativeGoogleLogin() {
   await Browser.open({
     url: `https://herokids.app/api/auth/google?native=1&pollKey=${encodeURIComponent(pollKey)}`,
   });
+}
+
+// ─── Password input with show/hide toggle ─────────────────────────────────────
+function PasswordInput({ field, testId, autoComplete }: {
+  field: any;
+  testId: string;
+  autoComplete?: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        type={show ? "text" : "password"}
+        autoComplete={autoComplete}
+        data-testid={testId}
+        className="pr-10"
+        {...field}
+      />
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label={show ? "Hide password" : "Show password"}
+        onClick={() => setShow((s) => !s)}
+        style={{
+          position: "absolute",
+          right: "0.625rem",
+          top: "50%",
+          transform: "translateY(-50%)",
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          color: "var(--muted-foreground)",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
+    </div>
+  );
 }
 
 // ─── AuthPanel ────────────────────────────────────────────────────────────────
@@ -289,7 +330,7 @@ export function AuthPanel() {
                 )} />
                 <FormField control={loginForm.control} name="password" render={({ field }) => (
                   <FormItem><FormLabel>{t('landing.auth.labelPassword')}</FormLabel><FormControl>
-                    <Input type="password" autoComplete="current-password" data-testid="input-login-password" {...field} />
+                    <PasswordInput field={field} testId="input-login-password" autoComplete="current-password" />
                   </FormControl><FormMessage /></FormItem>
                 )} />
                 <Button type="submit" className="w-full" disabled={isSubmitting} data-testid="button-submit-login">
@@ -319,7 +360,7 @@ export function AuthPanel() {
                 )} />
                 <FormField control={registerForm.control} name="password" render={({ field }) => (
                   <FormItem><FormLabel>{t('landing.auth.labelPassword')}</FormLabel><FormControl>
-                    <Input type="password" autoComplete="new-password" data-testid="input-register-password" {...field} />
+                    <PasswordInput field={field} testId="input-register-password" autoComplete="new-password" />
                   </FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={registerForm.control} name="acceptTerms" render={({ field }) => (
@@ -371,7 +412,7 @@ export function AuthPanel() {
               <form onSubmit={resetForm.handleSubmit(onReset)} className="space-y-4">
                 <FormField control={resetForm.control} name="password" render={({ field }) => (
                   <FormItem><FormLabel>{t('landing.auth.newPassword')}</FormLabel><FormControl>
-                    <Input type="password" autoComplete="new-password" data-testid="input-reset-password" {...field} />
+                    <PasswordInput field={field} testId="input-reset-password" autoComplete="new-password" />
                   </FormControl><FormMessage /></FormItem>
                 )} />
                 <Button type="submit" className="w-full" disabled={isSubmitting || !resetToken} data-testid="button-submit-reset">
