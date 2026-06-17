@@ -224,7 +224,12 @@ export async function setupAuth(app: Express) {
         // custom URL scheme so the app can intercept the callback and close
         // the in-app browser automatically.
         const isNative = (req.query.state ?? "") === "native";
-        res.redirect(isNative ? "herokids://auth-done" : "/");
+        // Explicitly save the session to the store before redirecting so the
+        // cookie is fully persisted (PostgreSQL write is async; without this
+        // the redirect can fire before the session row exists).
+        req.session.save(() => {
+          res.redirect(isNative ? "herokids://auth-done" : "/");
+        });
       }
     );
   } else {
