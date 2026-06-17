@@ -108,6 +108,26 @@ async function trySendVerificationEmail(user: any, token: string) {
 
 export const isDev = process.env.NODE_ENV !== "production";
 
+// ── Native OAuth exchange token store ────────────────────────────────────────
+// SFSafariViewController and WKWebView have separate cookie stores on iOS.
+// After Google OAuth completes in the in-app browser the WKWebView has no
+// session cookie. We bridge this by generating a short-lived (30 s), single-use
+// token that the native app POSTs back to us from the WKWebView context.
+interface NativeExchangeEntry {
+  userId: string;
+  expiresAt: Date;
+}
+const nativeExchangeStore = new Map<string, NativeExchangeEntry>();
+
+function createNativeExchangeToken(userId: string): string {
+  const token = crypto.randomBytes(32).toString("hex");
+  nativeExchangeStore.set(token, {
+    userId,
+    expiresAt: new Date(Date.now() + 30_000), // 30 seconds
+  });
+  return token;
+}
+
 // In-memory dev token store — bypasses cookie restrictions in Replit's embedded iframe preview
 interface DevTokenEntry {
   user: any;
@@ -246,7 +266,15 @@ export async function setupAuth(app: Express) {
             delete req.session.googleNative;
             req.session.save((saveErr: any) => {
               if (saveErr) console.error("Google OAuth: session save error after login:", saveErr);
-              res.redirect(isNative ? "herokids://auth-done" : "/");
+              if (isNative) {
+                // On native iOS, SFSafariViewController and WKWebView share no
+                // cookies.  Generate a short-lived single-use exchange token so
+                // the WKWebView can establish its own session via a POST request.
+                const exchangeToken = createNativeExchangeToken(user.claims.sub);
+                res.redirect(`herokids://auth-done?token=${exchangeToken}`);
+              } else {
+                res.redirect("/");
+              }
             });
           });
         })(req, res, next);
@@ -636,6 +664,37 @@ export async function setupAuth(app: Express) {
         res.json({ success: true });
       });
     });
+  });
+
+  // ── Native iOS session exchange ──────────────────────────────────────────
+  // After Google OAuth the SFSafariViewController holds the session cookie but
+  // the WKWebView does not (separate cookie stores on iOS).  The app POSTs the
+  // short-lived exchange token it received via the herokids:// deep link; this
+  // endpoint validates the token and establishes a proper session in WKWebView.
+  app.post("/api/auth/native-exchange", async (req: any, res) => {
+    const token = String(req.body?.token || "");
+    if (!token) return res.status(400).json({ message: "token required" });
+
+    const entry = nativeExchangeStore.get(token);
+    if (!entry || entry.expiresAt < new Date()) {
+      nativeExchangeStore.delete(token);
+      return res.status(401).json({ message: "Invalid or expired exchange token" });
+    }
+    nativeExchangeStore.delete(token); // single-use
+
+    const sessionUser = createSessionUser(entry.userId);
+    try {
+      await loginAsync(req, sessionUser);
+      clearAccountSessionState(req);
+      await new Promise<void>((resolve, reject) =>
+        req.session.save((err: any) => (err ? reject(err) : resolve())),
+      );
+      const user = await storage.getUser(entry.userId);
+      return res.json({ user: sanitizeUser(user) });
+    } catch (err) {
+      console.error("native-exchange login error:", err);
+      return res.status(500).json({ message: "Session setup failed" });
+    }
   });
 
   app.get("/api/logout", (req, res) => {
