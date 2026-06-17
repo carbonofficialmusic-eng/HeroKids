@@ -73,23 +73,45 @@ async function startNativeGoogleLogin() {
 
   _clearNativeGoogleTimers();
 
-  // When the user manually closes the browser — still refresh auth
+  // Random poll key — shared between this WKWebView and the server session.
+  // The server stores the exchange token under this key after OAuth completes;
+  // we retrieve it by polling /api/auth/native-check?pollKey=XXX.
+  // This works without a herokids:// deep link (no new binary required).
+  const pollKey = crypto.randomUUID();
+
+  // When the user manually closes the browser — stop polling, refresh auth
   const listener = await Browser.addListener("browserFinished", () => {
     _clearNativeGoogleTimers();
     listener.remove();
     queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
   });
 
-  // Poll every 1.5 s. Runs at module level → survives component unmount.
+  // Poll every 1.5 s for the exchange token via the pollKey endpoint.
+  // On native iOS the WKWebView and SFSafariViewController have separate cookie
+  // stores, so polling /api/auth/user would always return 401.  Instead we poll
+  // /api/auth/native-check which is session-free and returns the token as soon
+  // as the server-side OAuth callback stores it.
   _nativeGooglePollInterval = setInterval(async () => {
     try {
-      const res = await fetch("/api/auth/user", { credentials: "include" });
-      if (res.ok) {
-        _clearNativeGoogleTimers();
-        listener.remove();
-        await Browser.close();
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      }
+      const checkRes = await fetch(
+        `/api/auth/native-check?pollKey=${encodeURIComponent(pollKey)}`,
+        { credentials: "include" },
+      );
+      if (!checkRes.ok) return;
+      const data = await checkRes.json();
+      if (!data.ready || !data.token) return;
+
+      // Exchange token → WKWebView session
+      _clearNativeGoogleTimers();
+      listener.remove();
+      await fetch("/api/auth/native-exchange", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: data.token }),
+      });
+      await Browser.close();
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     } catch { /* ignore network errors */ }
   }, 1500);
 
@@ -99,7 +121,9 @@ async function startNativeGoogleLogin() {
     listener.remove();
   }, 300_000);
 
-  await Browser.open({ url: "https://herokids.app/api/auth/google?native=1" });
+  await Browser.open({
+    url: `https://herokids.app/api/auth/google?native=1&pollKey=${encodeURIComponent(pollKey)}`,
+  });
 }
 
 // ─── AuthPanel ────────────────────────────────────────────────────────────────

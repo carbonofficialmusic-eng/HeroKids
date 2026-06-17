@@ -113,11 +113,21 @@ export const isDev = process.env.NODE_ENV !== "production";
 // After Google OAuth completes in the in-app browser the WKWebView has no
 // session cookie. We bridge this by generating a short-lived (30 s), single-use
 // token that the native app POSTs back to us from the WKWebView context.
+//
+// Two delivery paths for the exchange token:
+//   A) herokids:// deep link (requires new binary with URL scheme registered)
+//   B) Poll key: the WKWebView polls /api/auth/native-check?pollKey=XXX — no
+//      binary change required.  The app generates a random pollKey before
+//      opening the browser; the server stores the exchange token under that key
+//      after OAuth completes; the WKWebView retrieves it by polling.
 interface NativeExchangeEntry {
   userId: string;
   expiresAt: Date;
 }
 const nativeExchangeStore = new Map<string, NativeExchangeEntry>();
+
+// pollKey → exchange token (2-minute TTL, consumed on first read)
+const nativePollStore = new Map<string, { token: string; expiresAt: Date }>();
 
 function createNativeExchangeToken(userId: string): string {
   const token = crypto.randomBytes(32).toString("hex");
@@ -126,6 +136,13 @@ function createNativeExchangeToken(userId: string): string {
     expiresAt: new Date(Date.now() + 30_000), // 30 seconds
   });
   return token;
+}
+
+function storePollKeyToken(pollKey: string, exchangeToken: string): void {
+  nativePollStore.set(pollKey, {
+    token: exchangeToken,
+    expiresAt: new Date(Date.now() + 120_000), // 2 minutes
+  });
 }
 
 // In-memory dev token store — bypasses cookie restrictions in Replit's embedded iframe preview
@@ -229,11 +246,13 @@ export async function setupAuth(app: Express) {
     app.get("/api/auth/google", (req: any, res, next) => {
       const isNative = req.query.native === "1";
       const isFromPwa = req.query.pwa === "1";
+      const pollKey = typeof req.query.pollKey === "string" ? req.query.pollKey : null;
       // Store flags in the session *before* redirecting so we can read them
       // on the callback without relying on the OAuth state parameter
       // (passport-oauth2 replaces our state value with its own random nonce).
       req.session.googleNative = isNative;
       req.session.googleFromPwa = isFromPwa;
+      if (pollKey) req.session.googleNativePollKey = pollKey;
       req.session.save((saveErr: any) => {
         if (saveErr) console.error("Google OAuth: session save error before redirect:", saveErr);
         passport.authenticate("google", {
@@ -266,8 +285,10 @@ export async function setupAuth(app: Express) {
             );
             const isNative = req.session.googleNative === true;
             const isFromPwa = req.session.googleFromPwa === true;
+            const nativePollKey = req.session.googleNativePollKey as string | undefined;
             delete req.session.googleNative;
             delete req.session.googleFromPwa;
+            delete req.session.googleNativePollKey;
             req.session.save((saveErr: any) => {
               if (saveErr) console.error("Google OAuth: session save error after login:", saveErr);
               if (isNative) {
@@ -275,6 +296,10 @@ export async function setupAuth(app: Express) {
                 // cookies.  Generate a short-lived single-use exchange token so
                 // the WKWebView can establish its own session via a POST request.
                 const exchangeToken = createNativeExchangeToken(user.claims.sub);
+                // Path B: store under pollKey so WKWebView can retrieve it by
+                // polling /api/auth/native-check — works without a new binary.
+                if (nativePollKey) storePollKeyToken(nativePollKey, exchangeToken);
+                // Path A: herokids:// deep link (requires binary with URL scheme).
                 res.redirect(`herokids://auth-done?token=${exchangeToken}`);
               } else if (isFromPwa) {
                 // iOS PWA (standalone) opens OAuth in a new Safari tab via
@@ -677,10 +702,26 @@ export async function setupAuth(app: Express) {
   });
 
   // ── Native iOS session exchange ──────────────────────────────────────────
+  // Poll endpoint for the native iOS app (Path B: no deep link needed).
+  // The WKWebView polls this with the pollKey it generated before opening the
+  // browser.  Returns the exchange token once OAuth has completed and stored it.
+  app.get("/api/auth/native-check", (req: any, res) => {
+    const pollKey = typeof req.query.pollKey === "string" ? req.query.pollKey : "";
+    if (!pollKey) return res.status(400).json({ message: "pollKey required" });
+    const entry = nativePollStore.get(pollKey);
+    if (!entry || entry.expiresAt < new Date()) {
+      nativePollStore.delete(pollKey);
+      return res.json({ ready: false });
+    }
+    nativePollStore.delete(pollKey); // single-use
+    return res.json({ ready: true, token: entry.token });
+  });
+
   // After Google OAuth the SFSafariViewController holds the session cookie but
   // the WKWebView does not (separate cookie stores on iOS).  The app POSTs the
-  // short-lived exchange token it received via the herokids:// deep link; this
-  // endpoint validates the token and establishes a proper session in WKWebView.
+  // short-lived exchange token it received via the herokids:// deep link or the
+  // poll check; this endpoint validates the token and establishes a proper
+  // session in WKWebView.
   app.post("/api/auth/native-exchange", async (req: any, res) => {
     const token = String(req.body?.token || "");
     if (!token) return res.status(400).json({ message: "token required" });
