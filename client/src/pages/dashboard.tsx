@@ -1323,7 +1323,7 @@ export default function Dashboard() {
 
               {/* Task Filter Tabs */}
               {activeTasks.length > 0 && (
-                <div className="flex items-center gap-2 mb-4 flex-wrap">
+                <div className="hidden flex items-center gap-2 mb-4 flex-wrap">
                   <div className="flex bg-muted rounded-lg p-1 gap-1 flex-wrap">
                     <Button
                       variant={taskFilter === "daily" ? "default" : "ghost"}
@@ -1916,7 +1916,7 @@ export default function Dashboard() {
       {/* Parent Bottom Navigation Bar */}
       {isParent && (
         <div
-          className="fixed bottom-0 left-0 right-0 z-50 p-2 hidden"
+          className="fixed bottom-0 left-0 right-0 z-50 p-2"
           style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))', paddingLeft: 'max(0.5rem, env(safe-area-inset-left))', paddingRight: 'max(0.5rem, env(safe-area-inset-right))' }}
         >
           <motion.div
