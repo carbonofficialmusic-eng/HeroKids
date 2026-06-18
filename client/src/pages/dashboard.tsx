@@ -1323,7 +1323,7 @@ export default function Dashboard() {
 
               {/* Task Filter Tabs */}
               {activeTasks.length > 0 && (
-                <div className="hidden flex items-center gap-2 mb-4 flex-wrap">
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
                   <div className="flex bg-muted rounded-lg p-1 gap-1 flex-wrap">
                     <Button
                       variant={taskFilter === "daily" ? "default" : "ghost"}
