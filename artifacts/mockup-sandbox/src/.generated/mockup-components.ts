@@ -8,9 +8,9 @@ export const modules: ModuleMap = {
   "./components/mockups/herokids-landing/PastelClouds.tsx": () => import("../components/mockups/herokids-landing/PastelClouds.tsx"),
   "./components/mockups/herokids-landing/PastelSunny.tsx": () => import("../components/mockups/herokids-landing/PastelSunny.tsx"),
   "./components/mockups/herokids-landing/WarmEnergetic.tsx": () => import("../components/mockups/herokids-landing/WarmEnergetic.tsx"),
-  "./components/mockups/onboarding/OnboardingWizard.tsx": () => import("../components/mockups/onboarding/OnboardingWizard.tsx"),
   "./components/mockups/kid-task-cards/Accessibility.tsx": () => import("../components/mockups/kid-task-cards/Accessibility.tsx"),
   "./components/mockups/kid-task-cards/InfoHierarchy.tsx": () => import("../components/mockups/kid-task-cards/InfoHierarchy.tsx"),
   "./components/mockups/kid-task-cards/InteractionAffordance.tsx": () => import("../components/mockups/kid-task-cards/InteractionAffordance.tsx"),
-  "./components/mockups/kid-task-cards/LiveDesign.tsx": () => import("../components/mockups/kid-task-cards/LiveDesign.tsx")
+  "./components/mockups/kid-task-cards/LiveDesign.tsx": () => import("../components/mockups/kid-task-cards/LiveDesign.tsx"),
+  "./components/mockups/onboarding/OnboardingWizard.tsx": () => import("../components/mockups/onboarding/OnboardingWizard.tsx")
 };
