@@ -102,6 +102,19 @@ const emojiCategories = {
   }
 };
 
+function useVisualViewportHeight() {
+  const [vvHeight, setVvHeight] = useState(() => window.visualViewport?.height ?? window.innerHeight);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => setVvHeight(vv.height);
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
+  }, []);
+  return vvHeight;
+}
+
 export function TaskDialog({
   open,
   onOpenChange,
@@ -121,6 +134,7 @@ export function TaskDialog({
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const vvHeight = useVisualViewportHeight();
   const [showResetDialog, setShowResetDialog] = useState(false);
   
   // Calculate total number of family members (parents + children)
@@ -436,7 +450,7 @@ export function TaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent className="max-w-2xl overflow-y-auto" style={{ maxHeight: `${vvHeight * 0.9}px` }} data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-accent">
             {editingTask ? t('tasks.editTask') : t('tasks.createTask')}
