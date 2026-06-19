@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronLeft, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -60,7 +60,6 @@ import { hasFeature } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { celebrateTaskCompletion } from "@/lib/confetti";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
-import { IosFloatingChat } from "@/components/ios-floating-chat";
 
 // Custom hook for sticky sidebar on desktop
 function useStickyPanel(isDesktop: boolean) {
@@ -174,6 +173,11 @@ export default function Dashboard() {
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
   const [sendPointsOpen, setSendPointsOpen] = useState(false);
   const [showTour, setShowTour] = useState(false);
+  const chatBarRef = useRef<HTMLDivElement>(null);
+  const [chatBarWidth, setChatBarWidth] = useState(0);
+  const [chatBarCollapsed, setChatBarCollapsed] = useState(() => {
+    try { return localStorage.getItem("herokids_chatbar_collapsed") === "true"; } catch { return false; }
+  });
 
   // Show onboarding tour for parents who haven't completed it yet
   // NOTE: must live here, before any conditional returns (Rules of Hooks)
@@ -479,6 +483,19 @@ export default function Dashboard() {
   useEffect(() => {
     localStorage.setItem("herokids_dashboard_view", dashboardView);
   }, [dashboardView]);
+
+  useEffect(() => {
+    localStorage.setItem("herokids_chatbar_collapsed", String(chatBarCollapsed));
+  }, [chatBarCollapsed]);
+
+  useEffect(() => {
+    const el = chatBarRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    setChatBarWidth(el.clientWidth);
+    const ro = new ResizeObserver(([entry]) => setChatBarWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Setup family member
   const setupMutation = useMutation({
@@ -1917,34 +1934,64 @@ export default function Dashboard() {
       {/* Parent Bottom Navigation Bar */}
       {isParent && (
         <div
-          className="fixed bottom-0 left-0 right-0 z-50 p-2"
-          style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))', paddingLeft: 'max(0.5rem, env(safe-area-inset-left))', paddingRight: 'max(0.5rem, env(safe-area-inset-right))' }}
+          ref={chatBarRef}
+          className="fixed bottom-0 right-0 z-50"
+          style={{
+            width: 'min(100vw, 44rem)',
+            paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
+            paddingLeft: 'max(0.5rem, env(safe-area-inset-left))',
+            paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
+            paddingTop: '0.5rem',
+          }}
         >
           <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3, type: "spring" }}
           >
-          <Card className="p-1 mx-2 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl sm:mx-auto">
-            <div className="flex justify-center">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px] relative">
-                <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 w-full px-3 sm:px-4 rounded-2xl">
-                  <Link href="/chat">
-                    <MessageCircle className="h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
-                    <span className="font-medium text-sm truncate">{t("nav.chat")}</span>
-                  </Link>
-                </Button>
-                {unreadChatData && unreadChatData.count > 0 && (
+            <motion.div
+              animate={{ x: chatBarCollapsed ? Math.max(chatBarWidth - 48, 0) : 0 }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+            >
+              <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
+                <div className="flex items-center gap-1">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 min-w-0 relative">
+                    <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 w-full px-3 sm:px-4 rounded-2xl">
+                      <Link href="/chat">
+                        <MessageCircle className="h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
+                        <span className="font-medium text-sm truncate">{t("nav.chat")}</span>
+                      </Link>
+                    </Button>
+                    {!chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
+                      <span
+                        className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                        data-testid="badge-parent-unread-chat"
+                      >
+                        {unreadChatData.count}
+                      </span>
+                    )}
+                  </motion.div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setChatBarCollapsed(c => !c)}
+                    className="flex-shrink-0 rounded-2xl"
+                    data-testid="button-chat-bar-toggle"
+                    aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
+                  >
+                    {chatBarCollapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </Button>
+                </div>
+                {chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
                   <span
-                    className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
-                    data-testid="badge-parent-unread-chat"
+                    className="absolute -top-1 right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                    data-testid="badge-parent-unread-chat-collapsed"
                   >
                     {unreadChatData.count}
                   </span>
                 )}
-              </motion.div>
-            </div>
-          </Card>
+              </Card>
+            </motion.div>
           </motion.div>
         </div>
       )}
@@ -2208,12 +2255,6 @@ export default function Dashboard() {
         <OnboardingTour onClose={() => setShowTour(false)} />
       )}
 
-      {/* iOS-only floating collapsible chat panel */}
-      <IosFloatingChat
-        subscriptionTier={familyData?.subscriptionTier}
-        trialEndsAt={familyData?.trialEndsAt}
-        memberId={member?.id}
-      />
 
       {/* Debug Info Panel - activated by 5 taps on logo */}
       <AlertDialog open={showDebugInfo} onOpenChange={setShowDebugInfo}>

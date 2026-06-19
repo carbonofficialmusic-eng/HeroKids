@@ -11,7 +11,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -108,7 +108,6 @@ import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature, canUseSharedRewards, type SubscriptionTier } from "@shared/tier-config";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
-import { IosFloatingChat } from "@/components/ios-floating-chat";
 
 // Extended Task type with metadata from API
 interface TaskWithMeta extends Task {
@@ -1326,6 +1325,11 @@ export default function KidDashboard() {
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
   const savedScrollRef = useRef(0);
+  const chatBarRef = useRef<HTMLDivElement>(null);
+  const [chatBarWidth, setChatBarWidth] = useState(0);
+  const [chatBarCollapsed, setChatBarCollapsed] = useState(() => {
+    try { return localStorage.getItem("herokids_chatbar_collapsed") === "true"; } catch { return false; }
+  });
 
   // Parental Gate state
   const [parentalGateOpen, setParentalGateOpen] = useState(false);
@@ -1403,6 +1407,19 @@ export default function KidDashboard() {
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("herokids_chatbar_collapsed", String(chatBarCollapsed));
+  }, [chatBarCollapsed]);
+
+  useEffect(() => {
+    const el = chatBarRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    setChatBarWidth(el.clientWidth);
+    const ro = new ResizeObserver(([entry]) => setChatBarWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   const [kidTaskFilter, setKidTaskFilter] = useState<"daily" | "weekly" | "monthly" | "onetime" | "all">("all");
@@ -3077,48 +3094,78 @@ export default function KidDashboard() {
       </div>{/* end container */}
       </div>{/* end paddingTop wrapper */}
 
-      {/* Simplified Navigation - Fixed Bottom Bar */}
+      {/* Simplified Navigation - Fixed Bottom Bar (collapsible to the right) */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 p-2"
-        style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))', paddingLeft: 'max(0.5rem, env(safe-area-inset-left))', paddingRight: 'max(0.5rem, env(safe-area-inset-right))' }}
+        ref={chatBarRef}
+        className="fixed bottom-0 right-0 z-50"
+        style={{
+          width: 'min(100vw, 44rem)',
+          paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
+          paddingLeft: 'max(0.5rem, env(safe-area-inset-left))',
+          paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
+          paddingTop: '0.5rem',
+        }}
       >
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, type: "spring" }}
         >
-        <Card className="p-1.5 mx-2 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl max-w-2xl sm:mx-auto">
-          <div className="flex justify-center gap-1 sm:gap-2">
-            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px]">
-              <Button 
-                variant="ghost" 
-                size="lg" 
-                onClick={() => setRequestRewardDialogOpen(true)}
-                data-testid="button-nav-request-reward" 
-                className="h-14 w-full px-3 sm:px-5 rounded-2xl"
-              >
-                <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-amber-500 flex-shrink-0" />
-                <span className="font-bold text-sm sm:text-base truncate">{t("kidDashboard.requestNewReward")}</span>
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} className="flex-1 max-w-[200px] relative">
-              <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
-                <Link href="/chat">
-                  <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
-                  <span className="font-bold text-sm sm:text-base truncate">{t("nav.chat")}</span>
-                </Link>
-              </Button>
-              {unreadChatData && unreadChatData.count > 0 && (
-                <span 
-                  className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
-                  data-testid="badge-unread-chat-count"
+          <motion.div
+            animate={{ x: chatBarCollapsed ? Math.max(chatBarWidth - 48, 0) : 0 }}
+            transition={{ type: "spring", damping: 28, stiffness: 300 }}
+          >
+            <Card className="p-1.5 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} className="flex-1 min-w-0">
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    onClick={() => setRequestRewardDialogOpen(true)}
+                    data-testid="button-nav-request-reward"
+                    className="h-14 w-full px-3 sm:px-5 rounded-2xl"
+                  >
+                    <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-amber-500 flex-shrink-0" />
+                    <span className="font-bold text-sm sm:text-base truncate">{t("kidDashboard.requestNewReward")}</span>
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} className="flex-1 min-w-0 relative">
+                  <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
+                    <Link href="/chat">
+                      <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
+                      <span className="font-bold text-sm sm:text-base truncate">{t("nav.chat")}</span>
+                    </Link>
+                  </Button>
+                  {!chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
+                    <span
+                      className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                      data-testid="badge-unread-chat-count"
+                    >
+                      {unreadChatData.count}
+                    </span>
+                  )}
+                </motion.div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setChatBarCollapsed(c => !c)}
+                  className="flex-shrink-0 rounded-2xl h-14 w-10"
+                  data-testid="button-chat-bar-toggle"
+                  aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
+                >
+                  {chatBarCollapsed ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                </Button>
+              </div>
+              {chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
+                <span
+                  className="absolute -top-1 right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                  data-testid="badge-unread-chat-count-collapsed"
                 >
                   {unreadChatData.count}
                 </span>
               )}
-            </motion.div>
-          </div>
-        </Card>
+            </Card>
+          </motion.div>
         </motion.div>
       </div>
 
@@ -3205,12 +3252,6 @@ export default function KidDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* iOS-only floating collapsible chat panel */}
-      <IosFloatingChat
-        subscriptionTier={familyData?.subscriptionTier}
-        trialEndsAt={familyData?.trialEndsAt}
-        memberId={member?.id}
-      />
     </div>
   );
 }
