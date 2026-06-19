@@ -104,8 +104,9 @@ export function useWebSocket(familyName: string | null) {
               break;
 
             case "chat_message":
-              // Invalidate chat messages to show new message
+              // Invalidate chat messages and unread count for instant badge update
               queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/chat/unread-count"] });
               break;
 
             case "achievement_earned":
