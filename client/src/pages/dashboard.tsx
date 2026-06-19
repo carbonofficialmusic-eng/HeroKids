@@ -60,6 +60,7 @@ import { hasFeature } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { celebrateTaskCompletion } from "@/lib/confetti";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
+import { IosFloatingChat } from "@/components/ios-floating-chat";
 
 // Custom hook for sticky sidebar on desktop
 function useStickyPanel(isDesktop: boolean) {
@@ -2206,6 +2207,13 @@ export default function Dashboard() {
       {showTour && isParent && (
         <OnboardingTour onClose={() => setShowTour(false)} />
       )}
+
+      {/* iOS-only floating collapsible chat panel */}
+      <IosFloatingChat
+        subscriptionTier={familyData?.subscriptionTier}
+        trialEndsAt={familyData?.trialEndsAt}
+        memberId={member?.id}
+      />
 
       {/* Debug Info Panel - activated by 5 taps on logo */}
       <AlertDialog open={showDebugInfo} onOpenChange={setShowDebugInfo}>

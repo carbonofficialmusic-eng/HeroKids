@@ -108,6 +108,7 @@ import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature, canUseSharedRewards, type SubscriptionTier } from "@shared/tier-config";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
+import { IosFloatingChat } from "@/components/ios-floating-chat";
 
 // Extended Task type with metadata from API
 interface TaskWithMeta extends Task {
@@ -3203,6 +3204,13 @@ export default function KidDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* iOS-only floating collapsible chat panel */}
+      <IosFloatingChat
+        subscriptionTier={familyData?.subscriptionTier}
+        trialEndsAt={familyData?.trialEndsAt}
+        memberId={member?.id}
+      />
     </div>
   );
 }
