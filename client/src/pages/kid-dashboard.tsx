@@ -3095,24 +3095,17 @@ export default function KidDashboard() {
         }}
       >
         <motion.div
-          initial={{
-            y: 100,
-            opacity: 0,
-            xPercent: chatBarCollapsed ? 100 : 0,
-            x: chatBarCollapsed ? -48 : 0,
-          }}
-          animate={{
-            y: 0,
-            opacity: 1,
-            xPercent: chatBarCollapsed ? 100 : 0,
-            x: chatBarCollapsed ? -48 : 0,
-          }}
-          transition={{
-            y: { delay: 0.5, type: "spring", damping: 20, stiffness: 200 },
-            opacity: { delay: 0.5, duration: 0.4 },
-            default: { type: "spring", damping: 28, stiffness: 300 },
-          }}
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5, type: "spring", damping: 20, stiffness: 200 }}
         >
+          <div
+            style={{
+              transform: chatBarCollapsed ? 'translateX(calc(100% - 48px))' : 'translateX(0)',
+              transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              willChange: 'transform',
+            }}
+          >
             <Card className="p-1.5 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
               <div className="flex items-center gap-1 sm:gap-2">
                 <Button
@@ -3163,6 +3156,7 @@ export default function KidDashboard() {
                 </span>
               )}
             </Card>
+          </div>
         </motion.div>
       </div>
 
