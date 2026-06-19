@@ -1745,6 +1745,14 @@ export default function KidDashboard() {
         })
     : [];
 
+  // Shared rewards this member has joined as participant (not initiator)
+  const joinedSharedRewards = member
+    ? sharedRewards.filter(sr =>
+        sr.memberId !== member.id &&
+        sr.participants.some(p => p.memberId === member.id)
+      )
+    : [];
+
   // Edit member mutation
   const editMemberMutation = useMutation({
     mutationFn: async ({ memberId, data }: { memberId: string; data: any }) => {
@@ -2486,7 +2494,7 @@ export default function KidDashboard() {
         </div>
 
         {/* My Redeemed Rewards Section */}
-        {myRedemptions.length > 0 && (
+        {(myRedemptions.length > 0 || joinedSharedRewards.length > 0) && (
           <div className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -2641,6 +2649,62 @@ export default function KidDashboard() {
                             )}
                           </div>
                         )}
+                      </div>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+
+              {/* Joined shared rewards (this member is a participant, not initiator) */}
+              {joinedSharedRewards.map((shared, index) => {
+                const myParticipation = shared.participants.find(p => p.memberId === member?.id);
+                const initiatorMember = familyMembers.find(m => m.id === shared.memberId);
+                const isFinalized = shared.sharingStatus === "sharing_finalized";
+
+                return (
+                  <motion.div
+                    key={`joined-${shared.id}`}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: (myRedemptions.slice(0, 2).length + index) * 0.1 }}
+                  >
+                    <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-2 border-blue-500/30 rounded-2xl">
+                      <div className="space-y-3">
+                        <div className="text-center space-y-2">
+                          <div className="flex justify-center p-3 rounded-2xl mx-auto w-fit bg-blue-500/20">
+                            <Users className="h-10 w-10 text-blue-500" />
+                          </div>
+                          <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                            {shared.reward?.title || t("kidDashboard.reward")}
+                          </h3>
+                          <div className="flex flex-wrap gap-1.5 justify-center">
+                            <Badge variant={shared.status === "completed" ? "default" : "secondary"} className="text-sm">
+                              {shared.status === "completed" ? `✓ ${t("kidDashboard.fulfilled")}` :
+                               shared.status === "approved" ? `⏳ ${t("kidDashboard.waiting")}` :
+                               `⏸️ ${t("kidDashboard.pending")}`}
+                            </Badge>
+                            <Badge variant="secondary" className="gap-1.5 text-xs">
+                              <Users className="h-3 w-3" />
+                              {isFinalized ? t("kidDashboard.shared") : t("kidDashboard.beingShared")}
+                            </Badge>
+                          </div>
+                          {myParticipation && (
+                            <p className="text-xs text-muted-foreground">
+                              {t("kidDashboard.pointsSpent", { count: myParticipation.pointsContributed })}
+                            </p>
+                          )}
+                          {initiatorMember && (
+                            <div className="flex items-center justify-center gap-2">
+                              <Avatar className="h-5 w-5 border-2 border-background">
+                                <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar, (initiatorMember as any).updatedAt)} />
+                                <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: initiatorMember.color }}>
+                                  {initiatorMember.displayName[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <p className="text-xs text-muted-foreground">{initiatorMember.displayName}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </Card>
                   </motion.div>
