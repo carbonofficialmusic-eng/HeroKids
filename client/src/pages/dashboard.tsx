@@ -1933,14 +1933,24 @@ export default function Dashboard() {
           }}
         >
           <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3, type: "spring" }}
+            initial={{
+              y: 100,
+              opacity: 0,
+              xPercent: chatBarCollapsed ? 100 : 0,
+              x: chatBarCollapsed ? -48 : 0,
+            }}
+            animate={{
+              y: 0,
+              opacity: 1,
+              xPercent: chatBarCollapsed ? 100 : 0,
+              x: chatBarCollapsed ? -48 : 0,
+            }}
+            transition={{
+              y: { delay: 0.3, type: "spring", damping: 20, stiffness: 200 },
+              opacity: { delay: 0.3, duration: 0.4 },
+              default: { type: "spring", damping: 28, stiffness: 300 },
+            }}
           >
-            <motion.div
-              animate={{ xPercent: chatBarCollapsed ? 100 : 0, x: chatBarCollapsed ? -48 : 0 }}
-              transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            >
               <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
                 <div className="flex items-center gap-1">
                   <Button
@@ -1979,7 +1989,6 @@ export default function Dashboard() {
                   </span>
                 )}
               </Card>
-            </motion.div>
           </motion.div>
         </div>
       )}
