@@ -2516,8 +2516,7 @@ export default function KidDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {myRedemptions.slice(0, 2).map((redemption, index) => {
                 const typed = redemption as RedemptionWithDetails;
-                const shared = sharedRewards.find(s => s.id === typed.id);
-                const participants = shared?.participants || [];
+                const participants: any[] = (typed as any).sharingParticipants || [];
                 const isSharing = typed.sharingStatus === "sharing_active";
                 const isFinalized = typed.sharingStatus === "sharing_finalized";
                 const isOnTrialKd = !!(familyData?.trialEndsAt && new Date(familyData.trialEndsAt) > new Date());
@@ -2573,18 +2572,18 @@ export default function KidDashboard() {
                         {participants.length > 0 && (
                           <div className="flex items-center justify-center gap-1.5 flex-wrap">
                             <p className="text-xs text-muted-foreground mr-1">{t("kidDashboard.with")}</p>
-                            {participants.map(p => (
+                            {participants.map((p: any) => (
                               <Badge key={p.id} variant="secondary" className="gap-1.5 text-xs py-1">
                                 <Avatar className="h-5 w-5">
-                                  <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar, (p.member as any).updatedAt)} />
+                                  <AvatarImage src={getAvatarUrl(p.activeSkinId, p.avatarUrl, p.useCustomAvatar, p.updatedAt)} />
                                   <AvatarFallback 
                                     className="text-xs text-white font-bold"
-                                    style={{ backgroundColor: p.member.color }}
+                                    style={{ backgroundColor: p.color }}
                                   >
-                                    {p.member.displayName[0]}
+                                    {p.displayName[0]}
                                   </AvatarFallback>
                                 </Avatar>
-                                {p.member.displayName}
+                                {p.displayName}
                               </Badge>
                             ))}
                           </div>
