@@ -3146,6 +3146,7 @@ export default function KidDashboard() {
                     </span>
                   )}
                 </motion.div>
+                <div className="w-10 flex-shrink-0" />
               </div>
               {chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
                 <span
