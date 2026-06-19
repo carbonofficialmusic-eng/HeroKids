@@ -3101,7 +3101,7 @@ export default function KidDashboard() {
         >
           <div
             style={{
-              transform: chatBarCollapsed ? 'translateX(calc(100% - 48px))' : 'translateX(0)',
+              transform: chatBarCollapsed ? 'translateX(calc(100% - 40px))' : 'translateX(0)',
               transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
               willChange: 'transform',
             }}
