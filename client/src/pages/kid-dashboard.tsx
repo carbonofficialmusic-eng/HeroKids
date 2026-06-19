@@ -2798,30 +2798,46 @@ export default function KidDashboard() {
             </div>
           </div>
 
-          {/* Pinned important tasks — always visible, filter-independent */}
+          {/* Pinned important tasks — collapsible, filter-independent */}
           {importantMyTasks.length > 0 && (
-            <div className="space-y-2 mb-4" data-testid="section-important-tasks-kid">
-              <div className="flex items-center gap-2 px-1">
-                <Pin className="h-4 w-4 text-amber-400 fill-amber-400" />
-                <span className="text-sm font-bold text-amber-300" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
-                  {t("dashboard.importantTasks", { defaultValue: "Wichtig" })}
-                </span>
-                <Badge variant="secondary" className="text-xs">{importantMyTasks.length}</Badge>
+            <Collapsible
+              open={!collapsedCategories.has("__important__")}
+              onOpenChange={() => toggleCategory("__important__")}
+              data-testid="section-important-tasks-kid"
+              className="mb-4"
+            >
+              <div>
+                <CollapsibleTrigger asChild>
+                  <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-white/8 border border-white/10 mb-1 hover-elevate">
+                    <div className="flex items-center gap-3">
+                      <Pin className="h-4 w-4 text-amber-400 fill-amber-400 flex-shrink-0" />
+                      <span className="font-bold text-base px-2.5 py-0.5 rounded-md text-amber-300" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+                        {t("dashboard.importantTasks", { defaultValue: "Wichtig" })}
+                      </span>
+                      <Badge variant="secondary" className="rounded-full">{importantMyTasks.length}</Badge>
+                    </div>
+                    <div className="p-1 bg-card border border-border rounded-lg flex-shrink-0">
+                      <ChevronDown className={`h-4 w-4 transition-transform ${!collapsedCategories.has("__important__") ? "rotate-180" : ""}`} />
+                    </div>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2 mt-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2"}>
+                    {importantMyTasks.map((task, index) => (
+                      <motion.div
+                        key={task.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="min-w-0"
+                      >
+                        <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
               </div>
-              <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
-                {importantMyTasks.map((task, index) => (
-                  <motion.div
-                    key={task.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="min-w-0"
-                  >
-                    <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
+            </Collapsible>
           )}
 
           {filteredKidTasks.length === 0 ? (
