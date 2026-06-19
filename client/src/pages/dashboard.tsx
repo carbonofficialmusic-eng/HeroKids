@@ -1244,7 +1244,7 @@ export default function Dashboard() {
                 {/* Row 1: Approvals, Rewards Board */}
                 <div className="relative w-full">
                   <Link href="/approvals" className="w-full block">
-                    <Button variant="card" data-testid="button-approvals" data-tour="tour-approvals" className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3 whitespace-normal">
+                    <Button variant="card" data-testid="button-approvals" data-tour="tour-approvals" className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3">
                       <span className="w-6 flex-shrink-0 flex justify-center">
                         <ClipboardCheck className="h-5 w-5" />
                       </span>
@@ -1259,7 +1259,7 @@ export default function Dashboard() {
                 </div>
                 <div className="relative w-full">
                   <Link href="/rewards-board" className="w-full block">
-                    <Button variant="card" data-testid="button-rewards-board" data-tour="tour-rewards-board" className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3 whitespace-normal">
+                    <Button variant="card" data-testid="button-rewards-board" data-tour="tour-rewards-board" className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3">
                       <span className="w-6 flex-shrink-0 flex justify-center">
                         <Gift className="h-5 w-5" />
                       </span>
