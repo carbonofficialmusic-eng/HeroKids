@@ -1244,11 +1244,11 @@ export default function Dashboard() {
                 {/* Row 1: Approvals, Rewards Board */}
                 <div className="relative w-full">
                   <Link href="/approvals" className="w-full block">
-                    <Button variant="card" data-testid="button-approvals" data-tour="tour-approvals" className="w-full h-14 justify-start px-4 gap-3">
+                    <Button variant="card" data-testid="button-approvals" data-tour="tour-approvals" className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3">
                       <span className="w-6 flex-shrink-0 flex justify-center">
                         <ClipboardCheck className="h-5 w-5" />
                       </span>
-                      <span className="text-left flex-1">{t("dashboard.approvals")}</span>
+                      <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.approvals")}</span>
                     </Button>
                   </Link>
                   {((pendingApprovalsData?.count || 0) + rewardRequests.filter((r: any) => r.status === "pending").length) > 0 && (
@@ -1259,11 +1259,11 @@ export default function Dashboard() {
                 </div>
                 <div className="relative w-full">
                   <Link href="/rewards-board" className="w-full block">
-                    <Button variant="card" data-testid="button-rewards-board" data-tour="tour-rewards-board" className="w-full h-14 justify-start px-4 gap-3">
+                    <Button variant="card" data-testid="button-rewards-board" data-tour="tour-rewards-board" className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3">
                       <span className="w-6 flex-shrink-0 flex justify-center">
                         <Gift className="h-5 w-5" />
                       </span>
-                      <span className="text-left flex-1">{t("dashboard.rewardsBoard")}</span>
+                      <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.rewardsBoard")}</span>
                     </Button>
                   </Link>
                   {pendingRewardsData && pendingRewardsData.count > 0 && (
@@ -1274,18 +1274,18 @@ export default function Dashboard() {
                 </div>
                 {/* Row 2: Family Goals, Send Points */}
                 <Link href="/family-goals" className="w-full">
-                  <Button variant="card" data-testid="button-family-goals" data-tour="tour-family-goals" className="w-full h-14 justify-start px-4 gap-3">
+                  <Button variant="card" data-testid="button-family-goals" data-tour="tour-family-goals" className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3">
                     <span className="w-6 flex-shrink-0 flex justify-center">
                       <Target className="h-5 w-5" />
                     </span>
-                    <span className="text-left flex-1">{t("dashboard.familyGoals")}</span>
+                    <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.familyGoals")}</span>
                   </Button>
                 </Link>
                 <Button
                   variant="card"
                   data-testid="button-send-points"
                   data-tour="tour-send-points"
-                  className="w-full h-14 justify-start px-4 gap-3"
+                  className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
                   onClick={() => {
                     setSelectedPointsRecipients([]);
                     setPointsAmount("");
@@ -1295,7 +1295,7 @@ export default function Dashboard() {
                   <span className="w-6 flex-shrink-0 flex justify-center">
                     <Zap className="h-5 w-5 text-amber-500" />
                   </span>
-                  <span className="text-left flex-1">{t("dashboard.sendPoints", "Punkte senden")}</span>
+                  <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.sendPoints", "Punkte senden")}</span>
                 </Button>
                 {/* Row 3: Add Task, Add Reward */}
                 <Button
@@ -1305,12 +1305,12 @@ export default function Dashboard() {
                   }}
                   data-testid="button-add-task"
                   data-tour="tour-add-task"
-                  className="w-full h-14 justify-start px-4 gap-3"
+                  className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
                 >
                   <span className="w-6 flex-shrink-0 flex justify-center">
                     <Plus className="h-5 w-5" />
                   </span>
-                  <span className="text-left flex-1">{t("dashboard.addTask")}</span>
+                  <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.addTask")}</span>
                 </Button>
                 <Button
                   onClick={() => {
@@ -1319,12 +1319,12 @@ export default function Dashboard() {
                   }}
                   data-testid="button-add-reward"
                   data-tour="tour-add-reward"
-                  className="w-full h-14 justify-start px-4 gap-3"
+                  className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
                 >
                   <span className="w-6 flex-shrink-0 flex justify-center">
                     <Plus className="h-5 w-5" />
                   </span>
-                  <span className="text-left flex-1">{t("dashboard.addReward")}</span>
+                  <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.addReward")}</span>
                 </Button>
               </div>
 
@@ -1336,17 +1336,17 @@ export default function Dashboard() {
                       variant={taskFilter === "daily" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskFilter("daily")}
-                      className="text-xs px-3"
+                      className="text-xs px-2"
                       data-testid="button-filter-daily"
                     >
-                      <RefreshCw className="h-3 w-3 mr-1" />
+                      <RefreshCw className="h-3 w-3 mr-1 flex-shrink-0" />
                       {t("dashboard.filterDaily")}
                     </Button>
                     <Button
                       variant={taskFilter === "weekly" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskFilter("weekly")}
-                      className="text-xs px-3"
+                      className="text-xs px-2"
                       data-testid="button-filter-weekly"
                     >
                       {t("dashboard.filterWeekly")}
@@ -1355,7 +1355,7 @@ export default function Dashboard() {
                       variant={taskFilter === "monthly" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskFilter("monthly")}
-                      className="text-xs px-3"
+                      className="text-xs px-2"
                       data-testid="button-filter-monthly"
                     >
                       {t("dashboard.filterMonthly")}
@@ -1364,17 +1364,17 @@ export default function Dashboard() {
                       variant={taskFilter === "onetime" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskFilter("onetime")}
-                      className="text-xs px-3"
+                      className="text-xs px-2"
                       data-testid="button-filter-onetime"
                     >
-                      <Target className="h-3 w-3 mr-1" />
+                      <Target className="h-3 w-3 mr-1 flex-shrink-0" />
                       {t("dashboard.filterOneTime")}
                     </Button>
                     <Button
                       variant={taskFilter === "all" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskFilter("all")}
-                      className="text-xs px-3"
+                      className="text-xs px-2"
                       data-testid="button-filter-all"
                     >
                       {t("dashboard.filterAll")}
