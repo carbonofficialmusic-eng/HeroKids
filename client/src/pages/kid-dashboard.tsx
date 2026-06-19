@@ -1325,8 +1325,6 @@ export default function KidDashboard() {
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
   const savedScrollRef = useRef(0);
-  const chatBarRef = useRef<HTMLDivElement>(null);
-  const [chatBarWidth, setChatBarWidth] = useState(0);
   const [chatBarCollapsed, setChatBarCollapsed] = useState(() => {
     try { return localStorage.getItem("herokids_chatbar_collapsed") === "true"; } catch { return false; }
   });
@@ -1412,15 +1410,6 @@ export default function KidDashboard() {
   useEffect(() => {
     localStorage.setItem("herokids_chatbar_collapsed", String(chatBarCollapsed));
   }, [chatBarCollapsed]);
-
-  useEffect(() => {
-    const el = chatBarRef.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    setChatBarWidth(el.clientWidth);
-    const ro = new ResizeObserver(([entry]) => setChatBarWidth(entry.contentRect.width));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   const [kidTaskFilter, setKidTaskFilter] = useState<"daily" | "weekly" | "monthly" | "onetime" | "all">("all");
   const [kidDashboardView, setKidDashboardView] = useState<"list" | "grid">(() => {
@@ -3096,7 +3085,6 @@ export default function KidDashboard() {
 
       {/* Simplified Navigation - Fixed Bottom Bar (collapsible to the right) */}
       <div
-        ref={chatBarRef}
         className="fixed bottom-0 right-0 z-50 overflow-x-hidden"
         style={{
           width: 'min(100vw, 44rem)',
@@ -3112,7 +3100,7 @@ export default function KidDashboard() {
           transition={{ delay: 0.5, type: "spring" }}
         >
           <motion.div
-            animate={{ x: chatBarCollapsed ? Math.max(chatBarWidth - 48, 0) : 0 }}
+            animate={{ xPercent: chatBarCollapsed ? 100 : 0, x: chatBarCollapsed ? -48 : 0 }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
           >
             <Card className="p-1.5 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
