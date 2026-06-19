@@ -1950,11 +1950,21 @@ export default function Dashboard() {
             transition={{ delay: 0.3, type: "spring" }}
           >
             <motion.div
-              animate={{ x: chatBarCollapsed ? -Math.max(chatBarWidth - 48, 0) : 0 }}
+              animate={{ x: chatBarCollapsed ? Math.max(chatBarWidth - 48, 0) : 0 }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
             >
               <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
                 <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setChatBarCollapsed(c => !c)}
+                    className="flex-shrink-0 rounded-2xl"
+                    data-testid="button-chat-bar-toggle"
+                    aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
+                  >
+                    {chatBarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                  </Button>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 min-w-0 relative">
                     <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 w-full px-3 sm:px-4 rounded-2xl">
                       <Link href="/chat">
@@ -1971,20 +1981,10 @@ export default function Dashboard() {
                       </span>
                     )}
                   </motion.div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setChatBarCollapsed(c => !c)}
-                    className="flex-shrink-0 rounded-2xl"
-                    data-testid="button-chat-bar-toggle"
-                    aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
-                  >
-                    {chatBarCollapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </Button>
                 </div>
                 {chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
                   <span
-                    className="absolute -top-1 right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                    className="absolute -top-1 left-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
                     data-testid="badge-parent-unread-chat-collapsed"
                   >
                     {unreadChatData.count}
