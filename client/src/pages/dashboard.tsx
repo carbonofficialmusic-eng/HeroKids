@@ -1935,7 +1935,7 @@ export default function Dashboard() {
       {isParent && (
         <div
           ref={chatBarRef}
-          className="fixed bottom-0 right-0 z-50"
+          className="fixed bottom-0 right-0 z-50 overflow-x-hidden"
           style={{
             width: 'min(100vw, 44rem)',
             paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
@@ -1950,7 +1950,7 @@ export default function Dashboard() {
             transition={{ delay: 0.3, type: "spring" }}
           >
             <motion.div
-              animate={{ x: chatBarCollapsed ? Math.max(chatBarWidth - 48, 0) : 0 }}
+              animate={{ x: chatBarCollapsed ? -Math.max(chatBarWidth - 48, 0) : 0 }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
             >
               <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
