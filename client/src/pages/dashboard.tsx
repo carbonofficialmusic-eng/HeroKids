@@ -1409,50 +1409,69 @@ export default function Dashboard() {
                 </Card>
               ) : (
                 <div className="space-y-3">
-                  {/* Pinned important tasks — always visible, filter-independent */}
+                  {/* Pinned important tasks — collapsible, filter-independent */}
                   {importantActiveTasks.length > 0 && (
-                    <div className="space-y-2" data-testid="section-important-tasks">
-                      <div className="flex items-center gap-2 px-1">
-                        <Pin className="h-4 w-4 text-amber-500 fill-amber-500" />
-                        <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
-                          {t("dashboard.importantTasks", { defaultValue: "Wichtig" })}
-                        </span>
-                        <Badge variant="secondary" className="text-xs">{importantActiveTasks.length}</Badge>
-                      </div>
-                      <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
-                        {importantActiveTasks.map((task) => (
-                          <div key={task.id} className={`relative min-w-0${dashboardView === "list" ? " group min-h-[140px]" : ""}`}>
-                            <TaskCard
-                              task={task}
-                              showAssignee
-                              compact={dashboardView === "grid"}
-                              onClick={handleTaskClick}
-                              onComplete={() => {
-                                if (task.requiresProof) { setTaskToComplete(task); setCompletionDialogOpen(true); }
-                                else { completeTaskMutation.mutate({ taskId: task.id }); }
-                              }}
-                              isCompleting={completeTaskMutation.isPending}
-                              currentMemberId={member?.id}
-                            />
-                            {dashboardView === "list" && (
-                              <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-card/80 backdrop-blur-sm"
-                                  onClick={(e) => { e.stopPropagation(); setSelectedTask(task); setTaskDialogOpen(true); }}
-                                  data-testid={`button-edit-task-${task.id}`}>
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-card/80 backdrop-blur-sm"
-                                  onClick={(e) => { e.stopPropagation(); deleteTaskMutation.mutate(task.id); }}
-                                  disabled={deleteTaskMutation.isPending}
-                                  data-testid={`button-delete-task-${task.id}`}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )}
+                    <Collapsible
+                      open={!collapsedCategories.has("__important__")}
+                      onOpenChange={() => toggleCategory("__important__")}
+                      data-testid="section-important-tasks"
+                    >
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-between p-3 h-auto hover-elevate"
+                          data-testid="button-category-important"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Pin className="h-4 w-4 text-amber-500 fill-amber-500" />
+                            <span className="font-semibold bg-muted px-2 py-0.5 rounded-md text-sm text-amber-600 dark:text-amber-400">
+                              {t("dashboard.importantTasks", { defaultValue: "Wichtig" })}
+                            </span>
+                            <Badge variant="secondary" className="text-xs">{importantActiveTasks.length}</Badge>
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${
+                              collapsedCategories.has("__important__") ? "-rotate-90" : ""
+                            }`}
+                          />
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-2">
+                        <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
+                          {importantActiveTasks.map((task) => (
+                            <div key={task.id} className={`relative min-w-0${dashboardView === "list" ? " group min-h-[140px]" : ""}`}>
+                              <TaskCard
+                                task={task}
+                                showAssignee
+                                compact={dashboardView === "grid"}
+                                onClick={handleTaskClick}
+                                onComplete={() => {
+                                  if (task.requiresProof) { setTaskToComplete(task); setCompletionDialogOpen(true); }
+                                  else { completeTaskMutation.mutate({ taskId: task.id }); }
+                                }}
+                                isCompleting={completeTaskMutation.isPending}
+                                currentMemberId={member?.id}
+                              />
+                              {dashboardView === "list" && (
+                                <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                                    onClick={(e) => { e.stopPropagation(); setSelectedTask(task); setTaskDialogOpen(true); }}
+                                    data-testid={`button-edit-task-${task.id}`}>
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                                    onClick={(e) => { e.stopPropagation(); deleteTaskMutation.mutate(task.id); }}
+                                    disabled={deleteTaskMutation.isPending}
+                                    data-testid={`button-delete-task-${task.id}`}>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   )}
 
                   {/* Regular tasks with filter */}
