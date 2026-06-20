@@ -417,9 +417,9 @@ export default function Settings() {
     { value: "en", label: "English" },
     { value: "fr", label: "Français" },
     { value: "es", label: "Español" },
-    { value: "ja", label: "日本語" },
-    { value: "zh", label: "中文" },
-    { value: "ko", label: "한국어" },
+    { value: "ja", label: "日本語 (Japanese)" },
+    { value: "zh", label: "中文 (Chinese)" },
+    { value: "ko", label: "한국어 (Korean)" },
     { value: "sv", label: "Svenska" },
     { value: "pt", label: "Português" },
   ];
