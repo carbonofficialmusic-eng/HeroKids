@@ -101,16 +101,25 @@ export default function Settings() {
     },
     onMutate: async (settings) => {
       await queryClient.cancelQueries({ queryKey: ["/api/families/current"] });
+      await queryClient.cancelQueries({ queryKey: ["/api/families/settings"] });
       const previousData = queryClient.getQueryData(["/api/families/current"]);
+      const previousSettings = queryClient.getQueryData(["/api/families/settings"]);
       queryClient.setQueryData(["/api/families/current"], (old: any) => {
         if (!old) return old;
         return { ...old, ...settings };
       });
-      return { previousData };
+      queryClient.setQueryData(["/api/families/settings"], (old: any) => {
+        if (!old) return old;
+        return { ...old, ...settings };
+      });
+      return { previousData, previousSettings };
     },
     onError: (_error, _variables, context) => {
       if (context?.previousData) {
         queryClient.setQueryData(["/api/families/current"], context.previousData);
+      }
+      if (context?.previousSettings) {
+        queryClient.setQueryData(["/api/families/settings"], context.previousSettings);
       }
       toast({
         title: t('errors.somethingWrong'),
@@ -385,6 +394,8 @@ export default function Settings() {
   };
 
   const handleLanguageChange = (language: string) => {
+    // Apply immediately so the UI doesn't flicker back on cache-refetch
+    i18n.changeLanguage(language);
     updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" | "sv" | "pt" });
   };
 
