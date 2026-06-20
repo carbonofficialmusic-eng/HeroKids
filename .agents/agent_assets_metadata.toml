@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "Wl6Zh0Fhfdu9HDlySH8Mb"
@@ -72,3 +71,9 @@ id = "tK4vuB8lTdiOZvTg4R278"
 uri = "file://client/public/skins/backgrounds/forest-guard.png"
 type = "image"
 title = "forest-guard-legacy"
+
+[[outputs]]
+id = "jDcqlYKu7xhdwjCsAa7Eo"
+uri = "file://client/public/skins/backgrounds/neon-droid.png"
+type = "image"
+title = "Neon Droid – Hintergrundbild"
