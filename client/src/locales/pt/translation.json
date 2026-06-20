@@ -1658,5 +1658,16 @@
     "step10": "Aqui você pode enviar pontos para seus filhos — independente de tarefas, simplesmente como recompensa ou motivação.",
     "step11": "O chat familiar conecta vocês todos! Apenas membros com seu próprio smartphone podem escrever lá — mas para eles fica muito animado.",
     "step12": "É isso – já conheces as funções mais importantes. Começa agora e transforma a tua família em verdadeiros HeroKids!"
+  },
+  "languageNames": {
+    "de": "Alemão",
+    "en": "Inglês",
+    "fr": "Francês",
+    "es": "Espanhol",
+    "ja": "Japonês",
+    "zh": "Chinês",
+    "ko": "Coreano",
+    "sv": "Sueco",
+    "pt": "Português"
   }
 }

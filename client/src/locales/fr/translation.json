@@ -1610,5 +1610,16 @@
     "step10": "Ici tu peux envoyer des points à tes enfants — indépendamment des tâches, simplement comme récompense ou motivation.",
     "step11": "Le chat familial vous connecte tous ! Seuls les membres avec leur propre smartphone peuvent y écrire — mais pour eux ça devient vraiment animé.",
     "step12": "C'est tout – tu connais maintenant les fonctions les plus importantes. Lance-toi et transforme ta famille en vrais HeroKids !"
+  },
+  "languageNames": {
+    "de": "Allemand",
+    "en": "Anglais",
+    "fr": "Français",
+    "es": "Espagnol",
+    "ja": "Japonais",
+    "zh": "Chinois",
+    "ko": "Coréen",
+    "sv": "Suédois",
+    "pt": "Portugais"
   }
 }

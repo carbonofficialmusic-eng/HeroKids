@@ -1643,5 +1643,16 @@
     "step10": "Här kan du skicka poäng till dina barn — oberoende av uppgifter, bara som belöning eller motivation.",
     "step11": "Familjechatten förbinder er alla! Bara medlemmar med egen smartphone kan skriva där — men för dem blir det riktigt livligt.",
     "step12": "Det var allt – nu känner du till de viktigaste funktionerna. Sätt igång och gör din familj till riktiga HeroKids!"
+  },
+  "languageNames": {
+    "de": "Tyska",
+    "en": "Engelska",
+    "fr": "Franska",
+    "es": "Spanska",
+    "ja": "Japanska",
+    "zh": "Kinesiska",
+    "ko": "Koreanska",
+    "sv": "Svenska",
+    "pt": "Portugisiska"
   }
 }

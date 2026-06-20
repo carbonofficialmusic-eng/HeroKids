@@ -424,15 +424,15 @@ export default function Settings() {
   };
 
   const languageOptions = [
-    { value: "de", label: "Deutsch" },
-    { value: "en", label: "English" },
-    { value: "fr", label: "Français" },
-    { value: "es", label: "Español" },
-    { value: "ja", label: "日本語 (Japanese)" },
-    { value: "zh", label: "中文 (Chinese)" },
-    { value: "ko", label: "한국어 (Korean)" },
-    { value: "sv", label: "Svenska" },
-    { value: "pt", label: "Português" },
+    { value: "de", label: `${t('languageNames.de')} · Deutsch` },
+    { value: "en", label: `${t('languageNames.en')} · English` },
+    { value: "fr", label: `${t('languageNames.fr')} · Français` },
+    { value: "es", label: `${t('languageNames.es')} · Español` },
+    { value: "ja", label: `${t('languageNames.ja')} · 日本語` },
+    { value: "zh", label: `${t('languageNames.zh')} · 中文` },
+    { value: "ko", label: `${t('languageNames.ko')} · 한국어` },
+    { value: "sv", label: `${t('languageNames.sv')} · Svenska` },
+    { value: "pt", label: `${t('languageNames.pt')} · Português` },
   ];
 
   // Common timezones grouped by region
