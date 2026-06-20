@@ -2664,7 +2664,7 @@ export default function KidDashboard() {
               })}
 
               {/* Joined shared rewards (this member is a participant, not initiator) */}
-              {joinedSharedRewards.map((joined: any, index) => {
+              {joinedSharedRewards.slice(0, Math.max(0, 2 - myRedemptions.slice(0, 2).length)).map((joined: any, index) => {
                 const myParticipation = joined.sharingParticipants?.find((p: any) => p.memberId === member?.id);
                 const initiatorMember = familyMembers.find(m => m.id === joined.memberId);
                 const isFinalized = joined.sharingStatus === "sharing_finalized";
