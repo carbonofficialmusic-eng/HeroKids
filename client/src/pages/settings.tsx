@@ -36,7 +36,7 @@ import { getAvatarUrl } from "@/lib/skins";
 type FamilyMemberWithLimit = FamilyMember & { isOverLimit?: boolean; accountEmail?: string | null };
 
 export default function Settings() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
