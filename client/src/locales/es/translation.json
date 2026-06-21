@@ -1281,7 +1281,7 @@
     "earnedPoints": "¡Has ganado {{count}} puntos!",
     "taskError": "No se pudo completar la tarea.",
     "waitingApproval": "Esperando aprobación",
-    "waitingForOthers": "Enviado – esperando a otros miembros",
+    "waitingForOthers": "Enviado – esperando aprobación",
     "completedApproved": "Completada y aprobada",
     "tryAgain": "Intentar de nuevo",
     "allSlotsTaken": "Todos los espacios ocupados",

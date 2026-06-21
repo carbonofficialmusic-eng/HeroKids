@@ -1327,7 +1327,7 @@
     "earnedPoints": "You earned {{count}} points!",
     "taskError": "Could not complete task.",
     "waitingApproval": "Waiting for approval",
-    "waitingForOthers": "Submitted – waiting for other members",
+    "waitingForOthers": "Submitted – waiting for approval",
     "completedApproved": "Completed & Approved",
     "tryAgain": "Try again",
     "allSlotsTaken": "All slots taken",
