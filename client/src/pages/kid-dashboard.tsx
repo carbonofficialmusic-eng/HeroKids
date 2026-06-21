@@ -95,6 +95,7 @@ function getDueDateStatus(dueDate: Date | string | null): { status: "overdue" | 
   return { status: "normal", daysUntil };
 }
 import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal } from "@shared/schema";
+import familyGoalsIcon from "@assets/family-goals-icon.png";
 import { queryClient, apiRequest, getDevHeaders } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileMenu } from "@/components/profile-menu";
@@ -2917,9 +2918,7 @@ export default function KidDashboard() {
         {goals.filter(g => g.isActive).length > 0 && (
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl">
-                <Target className="h-8 w-8 text-white" />
-              </div>
+              <img src={familyGoalsIcon} alt="" className="h-16 w-16 object-contain flex-shrink-0 drop-shadow-lg" />
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.familyGoals")}
               </h2>

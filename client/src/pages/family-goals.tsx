@@ -40,6 +40,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { Link } from "wouter";
+import familyGoalsIcon from "@assets/family-goals-icon.png";
 import type { FamilyGoal, GoalContribution, FamilyMember } from "@shared/schema";
 import { FamilyGoalDialog } from "@/components/family-goal-dialog";
 
@@ -282,7 +283,7 @@ export default function FamilyGoals() {
 
         {activeGoals.length === 0 && (
           <Card className="p-12 text-center">
-            <Target className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <img src={familyGoalsIcon} alt="" className="h-24 w-24 mx-auto object-contain mb-4 drop-shadow-md" />
             <h3 className="text-xl font-semibold mb-2">{t("familyGoals.noGoalsYet")}</h3>
             <p className="text-muted-foreground mb-6">
               {member?.role === "parent" 

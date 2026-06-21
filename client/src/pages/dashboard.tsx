@@ -62,6 +62,7 @@ import { hasFeature } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { celebrateTaskCompletion } from "@/lib/confetti";
 import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
+import familyGoalsIcon from "@assets/family-goals-icon.png";
 
 // Custom hook for sticky sidebar on desktop
 function useStickyPanel(isDesktop: boolean) {
@@ -1748,7 +1749,7 @@ export default function Dashboard() {
               {parentGoals.filter(g => g.isActive).length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-primary" />
+                    <img src={familyGoalsIcon} alt="" className="h-8 w-8 object-contain flex-shrink-0" />
                     <h2 className="text-lg font-bold font-accent">{t("familyGoals.title")}</h2>
                   </div>
                   {parentGoals.filter(g => g.isActive).map((goal) => {
