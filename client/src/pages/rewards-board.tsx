@@ -692,12 +692,6 @@ export default function RewardsBoard() {
         {/* Available Rewards Section (Children only) */}
         {!isParent && activeRewards.length > 0 && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="h-12 w-12 flex items-center justify-center flex-shrink-0">
-                <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
-              </div>
-              <h2 className="text-2xl font-accent font-bold">{t("kidDashboard.rewards")}</h2>
-            </div>
             <div className="grid grid-cols-1 gap-4">
               {activeRewards.map((reward) => (
                 <RewardBoardCard
