@@ -1951,7 +1951,7 @@ export default function Dashboard() {
       {/* Parent Bottom Navigation Bar */}
       {isParent && (
         <div
-          className="fixed bottom-0 right-0 z-50 overflow-x-hidden"
+          className={`fixed bottom-0 right-0 z-50 overflow-x-hidden ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
           style={{
             width: 'min(100vw, 44rem)',
             paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
@@ -1978,7 +1978,7 @@ export default function Dashboard() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setChatBarCollapsed(c => !c)}
-                    className="flex-shrink-0 rounded-2xl"
+                    className="flex-shrink-0 rounded-2xl pointer-events-auto"
                     data-testid="button-chat-bar-toggle"
                     aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
                   >
