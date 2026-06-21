@@ -72,6 +72,78 @@ uri = "file://client/public/skins/backgrounds/forest-guard.png"
 type = "image"
 title = "forest-guard-legacy"
 
+[[generated]]
+id = "IdAsN2LoJU-nInOmxSbFO"
+uri = "file://client/public/reward-icons/ice-cream.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "Yul_F2fVFacXtVxd2Zs5Q"
+uri = "file://client/public/reward-icons/cinema.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "VCmIZXkeJoReFOlukimlb"
+uri = "file://client/public/reward-icons/board-game.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "gshHeAVB5TIHe8mLBElQB"
+uri = "file://client/public/reward-icons/amusement-park.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "AsqKeG7mZZSbxpZP4cgHo"
+uri = "file://client/public/reward-icons/pizza.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "e1Ym7Dk_zcic3KMGos_Rh"
+uri = "file://client/public/reward-icons/bicycle.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "6LyK-_zWnw_BiIh5L9MOm"
+uri = "file://client/public/reward-icons/football.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "Hz0nRqdo1qBpKltLtChuw"
+uri = "file://client/public/reward-icons/books.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "COD4TGk7ZJydjlah42W0O"
+uri = "file://client/public/reward-icons/baking.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "3_7CWzf9pnocNvdxHl19q"
+uri = "file://client/public/reward-icons/trophy.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "gf5sVMVNHw8KWHIfKwlNr"
+uri = "file://client/public/reward-icons/gaming.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "IamilrheY1Px4oMaRtWyD"
+uri = "file://client/public/reward-icons/gift.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "jDcqlYKu7xhdwjCsAa7Eo"
 uri = "file://client/public/skins/backgrounds/neon-droid.png"

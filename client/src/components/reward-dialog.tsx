@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { RewardIconDisplay } from "@/lib/reward-icon";
 
 function scrollFieldIntoView(el: HTMLElement) {
   setTimeout(() => {
@@ -40,7 +41,22 @@ function scrollFieldIntoView(el: HTMLElement) {
   }, 400);
 }
 
-const REWARD_ICONS = [
+const REWARD_IMAGE_ICONS = [
+  { value: "/reward-icons/ice-cream.png",     label: "Eis" },
+  { value: "/reward-icons/cinema.png",         label: "Kino" },
+  { value: "/reward-icons/board-game.png",     label: "Brettspiel" },
+  { value: "/reward-icons/amusement-park.png", label: "Freizeitpark" },
+  { value: "/reward-icons/pizza.png",          label: "Pizza" },
+  { value: "/reward-icons/bicycle.png",        label: "Fahrrad" },
+  { value: "/reward-icons/football.png",       label: "Fußball" },
+  { value: "/reward-icons/books.png",          label: "Bücher" },
+  { value: "/reward-icons/baking.png",         label: "Backen" },
+  { value: "/reward-icons/trophy.png",         label: "Pokal" },
+  { value: "/reward-icons/gaming.png",         label: "Gaming" },
+  { value: "/reward-icons/gift.png",           label: "Geschenk" },
+];
+
+const REWARD_EMOJI_ICONS = [
   "🍦", "🎬", "🤖", "🎲", "🎢", "🚲",
   "🍕", "🏊", "🎮", "⚽", "📚", "🎡",
   "🧸", "🎯", "🏆", "🎸", "🎨", "🧁",
@@ -78,7 +94,7 @@ export function RewardDialog({
       pointThreshold: 100,
       isActive: true,
       oneTimeOnly: false,
-      iconEmoji: "🎁",
+      iconEmoji: "/reward-icons/gift.png",
     },
   });
 
@@ -91,7 +107,7 @@ export function RewardDialog({
         pointThreshold: reward.pointThreshold,
         isActive: reward.isActive,
         oneTimeOnly: reward.oneTimeOnly ?? false,
-        iconEmoji: reward.iconEmoji || "🎁",
+        iconEmoji: reward.iconEmoji || "/reward-icons/gift.png",
       });
     } else {
       form.reset({
@@ -101,7 +117,7 @@ export function RewardDialog({
         pointThreshold: 100,
         isActive: true,
         oneTimeOnly: false,
-        iconEmoji: "🎁",
+        iconEmoji: "/reward-icons/gift.png",
       });
     }
   }, [reward, familyName, form]);
@@ -133,29 +149,72 @@ export function RewardDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('rewards.icon') || 'Symbol'}</FormLabel>
-                  <div className="flex items-center gap-4 mb-2">
-                    <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-5xl leading-none">{field.value || "🎁"}</span>
+
+                  {/* Preview */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 p-2">
+                      <RewardIconDisplay
+                        icon={field.value}
+                        imgClassName="w-full h-full object-contain drop-shadow-sm"
+                        textClassName="text-5xl leading-none"
+                      />
                     </div>
                     <p className="text-sm text-muted-foreground">{t('rewards.iconPickerHint') || 'Wähle ein Symbol für diese Belohnung'}</p>
                   </div>
+
                   <FormControl>
-                    <div className="grid grid-cols-6 gap-2" data-testid="reward-icon-grid">
-                      {REWARD_ICONS.map((emoji) => (
-                        <button
-                          key={emoji}
-                          type="button"
-                          onClick={() => field.onChange(emoji)}
-                          data-testid={`button-icon-${emoji}`}
-                          className={`h-11 w-full rounded-xl text-2xl flex items-center justify-center transition-all ${
-                            field.value === emoji
-                              ? "bg-primary/20 ring-2 ring-primary scale-110"
-                              : "bg-muted hover-elevate"
-                          }`}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
+                    <div className="space-y-3" data-testid="reward-icon-grid">
+
+                      {/* 3D Image Icons */}
+                      <div className="grid grid-cols-6 gap-2">
+                        {REWARD_IMAGE_ICONS.map((icon) => (
+                          <button
+                            key={icon.value}
+                            type="button"
+                            onClick={() => field.onChange(icon.value)}
+                            title={icon.label}
+                            data-testid={`button-icon-img-${icon.label}`}
+                            className={`h-12 w-full rounded-xl p-1.5 flex items-center justify-center transition-all ${
+                              field.value === icon.value
+                                ? "bg-primary/20 ring-2 ring-primary scale-110"
+                                : "bg-muted hover-elevate"
+                            }`}
+                          >
+                            <img
+                              src={icon.value}
+                              alt={icon.label}
+                              className="w-full h-full object-contain drop-shadow-sm"
+                            />
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Divider */}
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-px bg-border" />
+                        <span className="text-xs text-muted-foreground">{t('rewards.orEmoji') || 'oder Emoji'}</span>
+                        <div className="flex-1 h-px bg-border" />
+                      </div>
+
+                      {/* Emoji Icons */}
+                      <div className="grid grid-cols-6 gap-2">
+                        {REWARD_EMOJI_ICONS.map((emoji) => (
+                          <button
+                            key={emoji}
+                            type="button"
+                            onClick={() => field.onChange(emoji)}
+                            data-testid={`button-icon-${emoji}`}
+                            className={`h-10 w-full rounded-xl text-xl flex items-center justify-center transition-all ${
+                              field.value === emoji
+                                ? "bg-primary/20 ring-2 ring-primary scale-110"
+                                : "bg-muted hover-elevate"
+                            }`}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+
                     </div>
                   </FormControl>
                   <FormMessage />

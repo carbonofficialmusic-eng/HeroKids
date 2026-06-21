@@ -12,6 +12,7 @@ import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, pars
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronLeft, ChevronRight, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin } from "lucide-react";
+import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -304,10 +305,10 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
             : "bg-card/80 border-border shadow-md shadow-black/15"
         }`}>
           <div className="flex items-center gap-4">
-            <div className={`flex-shrink-0 h-16 w-16 rounded-2xl flex items-center justify-center ${
+            <div className={`flex-shrink-0 h-16 w-16 rounded-2xl flex items-center justify-center p-1.5 ${
               isReady ? "bg-primary/20" : "bg-primary/10"
             }`}>
-              <span className="text-5xl leading-none">{reward.iconEmoji || "🎁"}</span>
+              <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-5xl leading-none" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
@@ -373,8 +374,8 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-3 text-2xl" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              <div className="h-14 w-14 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <span className="text-4xl leading-none">{reward.iconEmoji || "🎁"}</span>
+              <div className="h-14 w-14 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0 p-1.5">
+                <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-4xl leading-none" />
               </div>
               {reward.title}
             </AlertDialogTitle>

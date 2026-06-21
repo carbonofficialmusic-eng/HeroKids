@@ -12,6 +12,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
 import { RewardDialog } from "@/components/reward-dialog";
+import { RewardIconDisplay } from "@/lib/reward-icon";
 
 export default function ActiveRewards() {
   const { t } = useTranslation();
@@ -171,8 +172,8 @@ export default function ActiveRewards() {
                     </div>
                   )}
                   <div className="flex items-start gap-4">
-                    <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-4xl leading-none">{reward.iconEmoji || "🎁"}</span>
+                    <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 p-1.5">
+                      <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-4xl leading-none" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-lg mb-1" data-testid={`text-reward-title-${reward.id}`}>

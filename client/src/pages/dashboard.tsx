@@ -47,6 +47,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronLeft, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin } from "lucide-react";
+import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -1613,8 +1614,8 @@ export default function Dashboard() {
                           </div>
                         )}
                         <div className="flex items-start gap-3">
-                          <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                            <span className="text-4xl leading-none">{reward.iconEmoji || "🎁"}</span>
+                          <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 p-1.5">
+                            <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-4xl leading-none" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-bold mb-1" data-testid={`text-reward-title-${reward.id}`}>
