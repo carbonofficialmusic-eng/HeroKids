@@ -1641,10 +1641,10 @@ export default function Dashboard() {
                       </Button>
                     )}
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {activeRewards.slice(0, 3).map((reward) => (
-                      <Card key={reward.id} className="p-6 relative overflow-visible" data-testid={`card-reward-${reward.id}`}>
-                        {isRealParent && (
+                  <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
+                    {activeRewards.slice(0, dashboardView === "grid" ? 4 : 3).map((reward) => (
+                      <Card key={reward.id} className={`relative overflow-visible ${dashboardView === "grid" ? "p-3" : "p-6"}`} data-testid={`card-reward-${reward.id}`}>
+                        {isRealParent && dashboardView === "list" && (
                           <div className="absolute top-2 right-2 flex gap-1">
                             <Button
                               variant="ghost"
@@ -1670,56 +1670,70 @@ export default function Dashboard() {
                             </Button>
                           </div>
                         )}
-                        <div className="flex items-start gap-3">
-                          <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 p-1.5">
-                            <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-4xl leading-none" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold mb-1" data-testid={`text-reward-title-${reward.id}`}>
-                              {reward.title}
-                            </h3>
-                            {reward.description && (
-                              <p className="text-sm text-muted-foreground mb-2">
-                                {reward.description}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-2 mb-3">
-                              <Badge
-                                variant={
-                                  member.totalPoints >= reward.pointThreshold
-                                    ? "default"
-                                    : "secondary"
-                                }
-                                data-testid={`badge-reward-points-${reward.id}`}
-                              >
-                                {reward.pointThreshold} {t("dashboard.pointsLabel")}
-                              </Badge>
-                              {member.totalPoints >= reward.pointThreshold && (
-                                <span className="text-xs font-semibold text-green-600">
-                                  {t("dashboard.youCanClaim")}
-                                </span>
-                              )}
+                        {dashboardView === "grid" ? (
+                          <div className="flex flex-col items-center text-center gap-2">
+                            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 p-1">
+                              <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-2xl leading-none" />
                             </div>
+                            <p className="font-semibold text-xs leading-tight line-clamp-2" data-testid={`text-reward-title-${reward.id}`}>{reward.title}</p>
+                            <Badge variant={member.totalPoints >= reward.pointThreshold ? "default" : "secondary"} className="text-xs" data-testid={`badge-reward-points-${reward.id}`}>
+                              {reward.pointThreshold} {t("dashboard.pointsLabel")}
+                            </Badge>
                             <Button
                               onClick={() => redeemRewardMutation.mutate(reward.id)}
-                              disabled={
-                                member.totalPoints < reward.pointThreshold ||
-                                redeemRewardMutation.isPending
-                              }
+                              disabled={member.totalPoints < reward.pointThreshold || redeemRewardMutation.isPending}
                               size="sm"
-                              className="w-full"
+                              className="w-full text-xs"
                               data-testid={`button-redeem-${reward.id}`}
                             >
-                              {redeemRewardMutation.isPending ? (
-                                t("dashboard.redeeming")
-                              ) : member.totalPoints >= reward.pointThreshold ? (
-                                t("dashboard.redeemNow")
-                              ) : (
-                                t("dashboard.needMorePoints", { count: reward.pointThreshold - member.totalPoints })
-                              )}
+                              {redeemRewardMutation.isPending ? t("dashboard.redeeming") : member.totalPoints >= reward.pointThreshold ? t("dashboard.redeemNow") : `${reward.pointThreshold - member.totalPoints} ${t("dashboard.pointsLabel")}`}
                             </Button>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="flex items-start gap-3">
+                            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 p-1.5">
+                              <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-4xl leading-none" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold mb-1" data-testid={`text-reward-title-${reward.id}`}>
+                                {reward.title}
+                              </h3>
+                              {reward.description && (
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  {reward.description}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-2 mb-3">
+                                <Badge
+                                  variant={member.totalPoints >= reward.pointThreshold ? "default" : "secondary"}
+                                  data-testid={`badge-reward-points-${reward.id}`}
+                                >
+                                  {reward.pointThreshold} {t("dashboard.pointsLabel")}
+                                </Badge>
+                                {member.totalPoints >= reward.pointThreshold && (
+                                  <span className="text-xs font-semibold text-green-600">
+                                    {t("dashboard.youCanClaim")}
+                                  </span>
+                                )}
+                              </div>
+                              <Button
+                                onClick={() => redeemRewardMutation.mutate(reward.id)}
+                                disabled={member.totalPoints < reward.pointThreshold || redeemRewardMutation.isPending}
+                                size="sm"
+                                className="w-full"
+                                data-testid={`button-redeem-${reward.id}`}
+                              >
+                                {redeemRewardMutation.isPending ? (
+                                  t("dashboard.redeeming")
+                                ) : member.totalPoints >= reward.pointThreshold ? (
+                                  t("dashboard.redeemNow")
+                                ) : (
+                                  t("dashboard.needMorePoints", { count: reward.pointThreshold - member.totalPoints })
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                       </Card>
                     ))}
                   </div>
