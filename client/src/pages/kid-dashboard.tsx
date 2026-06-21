@@ -2451,8 +2451,8 @@ export default function KidDashboard() {
 
         {/* Rewards Section */}
         <div className="space-y-6 mb-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
                 <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-xl" />
               </div>
@@ -2461,7 +2461,7 @@ export default function KidDashboard() {
               </h2>
             </div>
             {activeRewards.length > 3 && (
-              <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground" data-testid="button-view-all-rewards-board">
+              <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-rewards-board">
                 <Link href="/rewards-board">
                   {t("kidDashboard.viewAll")}
                 </Link>
