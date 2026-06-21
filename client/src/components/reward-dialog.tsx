@@ -54,13 +54,12 @@ const REWARD_IMAGE_ICONS = [
   { value: "/reward-icons/trophy.png",         label: "Pokal" },
   { value: "/reward-icons/gaming.png",         label: "Gaming" },
   { value: "/reward-icons/gift.png",           label: "Geschenk" },
-];
-
-const REWARD_EMOJI_ICONS = [
-  "🍦", "🎬", "🤖", "🎲", "🎢", "🚲",
-  "🍕", "🏊", "🎮", "⚽", "📚", "🎡",
-  "🧸", "🎯", "🏆", "🎸", "🎨", "🧁",
-  "🦁", "🎭", "🎳", "🛹", "🎁", "🎪",
+  { value: "/reward-icons/dice.png",           label: "Würfel" },
+  { value: "/reward-icons/guitar.png",         label: "Gitarre" },
+  { value: "/reward-icons/circus.png",         label: "Zirkus" },
+  { value: "/reward-icons/bowling-pin.png",    label: "Kegel" },
+  { value: "/reward-icons/clock.png",          label: "Uhr" },
+  { value: "/reward-icons/carnival-mask.png",  label: "Maske" },
 ];
 
 type RewardFormData = z.infer<typeof insertRewardSchema>;
@@ -189,31 +188,6 @@ export function RewardDialog({
                         ))}
                       </div>
 
-                      {/* Divider */}
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-px bg-border" />
-                        <span className="text-xs text-muted-foreground">{t('rewards.orEmoji') || 'oder Emoji'}</span>
-                        <div className="flex-1 h-px bg-border" />
-                      </div>
-
-                      {/* Emoji Icons */}
-                      <div className="grid grid-cols-6 gap-2">
-                        {REWARD_EMOJI_ICONS.map((emoji) => (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => field.onChange(emoji)}
-                            data-testid={`button-icon-${emoji}`}
-                            className={`h-10 w-full rounded-xl text-xl flex items-center justify-center transition-all ${
-                              field.value === emoji
-                                ? "bg-primary/20 ring-2 ring-primary scale-110"
-                                : "bg-muted hover-elevate"
-                            }`}
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
 
                     </div>
                   </FormControl>

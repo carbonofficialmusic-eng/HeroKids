@@ -180,6 +180,48 @@ uri = "file://client/public/nav-icons/pinboard.png"
 type = "image"
 title = "pinboard-3d-icon"
 
+[[generated]]
+id = "XWml4VitIcrQgidB5GAZM"
+uri = "file://attached_assets/generated_images/a_single_3d_pixar_7d22.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "B05Gz0n8dC6JoZgllpbjK"
+uri = "file://client/public/reward-icons/dice.png"
+type = "image"
+title = "3d dice reward icon"
+
+[[generated]]
+id = "O-vo6Lh9XG9luhXe-gHmy"
+uri = "file://client/public/reward-icons/guitar.png"
+type = "image"
+title = "3d guitar reward icon"
+
+[[generated]]
+id = "JVvx7kL3o-3YMhMMFp7Y9"
+uri = "file://client/public/reward-icons/circus.png"
+type = "image"
+title = "3d circus tent reward icon"
+
+[[generated]]
+id = "D4YCqrFvuWLGlSlO6PaIA"
+uri = "file://client/public/reward-icons/bowling-pin.png"
+type = "image"
+title = "3d bowling pin reward icon"
+
+[[generated]]
+id = "X4hT3DgOceJw5dv4Ge2l0"
+uri = "file://client/public/reward-icons/clock.png"
+type = "image"
+title = "3d classic clock reward icon"
+
+[[generated]]
+id = "Ped072qs2fu1UiLPCnkoK"
+uri = "file://client/public/reward-icons/carnival-mask.png"
+type = "image"
+title = "3d carnival mask reward icon"
+
 [[outputs]]
 id = "jDcqlYKu7xhdwjCsAa7Eo"
 uri = "file://client/public/skins/backgrounds/neon-droid.png"
