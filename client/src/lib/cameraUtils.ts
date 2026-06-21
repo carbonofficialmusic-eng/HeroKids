@@ -1,3 +1,5 @@
+import { isNativePlatform } from "@/lib/platform";
+
 /**
  * Returns true when the error thrown by the Capacitor Camera plugin represents
  * the user dismissing the photo picker without making a selection.
@@ -31,8 +33,11 @@ export function isPhotoUsed(): boolean {
 /**
  * Forces WKWebView to re-sync its UIScrollView after a native photo picker
  * closes (supplementary best-effort attempt alongside the page navigation).
+ * No-op on non-native platforms — window.scrollTo causes visible jumps in
+ * desktop browsers and the Replit preview iframe.
  */
 export function kickScrollReset(delayMs = 150): void {
+  if (!isNativePlatform()) return;
   const apply = () => {
     const root = document.getElementById("root");
     const savedTop = root ? root.scrollTop : 0;
@@ -85,6 +90,7 @@ function refreshSat(): void {
  * dismiss animation window.
  */
 export function kickHeaderRepaint(): void {
+  if (!isNativePlatform()) return;
   const kick = () => {
     const root = document.getElementById("root");
     const savedTop = root ? root.scrollTop : 0;

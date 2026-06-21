@@ -343,7 +343,6 @@ export default function Dashboard() {
   const { data: unreadChatData } = useQuery<{ count: number }>({
     queryKey: ["/api/chat/unread-count"],
     enabled: !!member && (hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") || !!(familyData?.trialEndsAt && new Date(familyData.trialEndsAt) > new Date())),
-    refetchInterval: 10000, // Refetch every 10 seconds
     staleTime: 5 * 60 * 1000,
   });
 
@@ -351,7 +350,6 @@ export default function Dashboard() {
   const { data: pendingApprovalsData } = useQuery<{ count: number }>({
     queryKey: ["/api/tasks/pending-count"],
     enabled: !!member && member?.role === "parent",
-    refetchInterval: 10000, // Refetch every 10 seconds
     staleTime: 5 * 60 * 1000,
   });
 
@@ -359,7 +357,6 @@ export default function Dashboard() {
   const { data: pendingRewardsData } = useQuery<{ count: number }>({
     queryKey: ["/api/reward-redemptions/pending-count"],
     enabled: !!member && member?.role === "parent",
-    refetchInterval: 10000, // Refetch every 10 seconds
     staleTime: 5 * 60 * 1000,
   });
 
