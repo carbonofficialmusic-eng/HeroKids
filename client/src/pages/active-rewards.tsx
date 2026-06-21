@@ -71,7 +71,7 @@ export default function ActiveRewards() {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" asChild data-testid="button-back-active-rewards" className="gap-2 shrink-0">
+          <Button variant="outline" size="sm" asChild data-testid="button-back-active-rewards" className="gap-2 shrink-0 bg-background/30 backdrop-blur-sm border-border/40">
             <Link href="/">
               <ArrowLeft className="h-4 w-4" />
               {t("common.back") || "Zurück"}
