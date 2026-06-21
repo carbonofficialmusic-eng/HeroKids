@@ -25,6 +25,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
+function scrollFieldIntoView(el: HTMLElement) {
+  setTimeout(() => {
+    const scrollable = el.closest("[data-radix-scroll-area-viewport], .overflow-y-auto") as HTMLElement | null;
+    if (scrollable) {
+      const elRect = el.getBoundingClientRect();
+      const parentRect = scrollable.getBoundingClientRect();
+      const relativeTop = elRect.top - parentRect.top + scrollable.scrollTop;
+      const targetScroll = relativeTop - parentRect.height / 2 + elRect.height / 2;
+      scrollable.scrollTo({ top: targetScroll, behavior: "smooth" });
+    } else {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, 400);
+}
+
 const REWARD_ICONS = [
   "🍦", "🎬", "🤖", "🎲", "🎢", "🚲", "🍕", "🏊",
   "🎮", "🎵", "⚽", "📚", "🎡", "🧸", "🎯", "🏆",
@@ -158,6 +173,7 @@ export function RewardDialog({
                     <Input
                       placeholder={t('rewards.rewardTitlePlaceholder')}
                       {...field}
+                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-reward-title"
                     />
                   </FormControl>
@@ -177,6 +193,7 @@ export function RewardDialog({
                       placeholder={t('rewards.descriptionPlaceholder')}
                       {...field}
                       value={field.value || ""}
+                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-reward-description"
                     />
                   </FormControl>
@@ -198,10 +215,7 @@ export function RewardDialog({
                       step={10}
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      onFocus={(e) => {
-                        const el = e.currentTarget;
-                        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 350);
-                      }}
+                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-reward-points"
                     />
                   </FormControl>
