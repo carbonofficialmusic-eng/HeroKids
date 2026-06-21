@@ -1577,7 +1577,7 @@ export default function Dashboard() {
                     <h2 className="text-2xl font-bold font-accent">{t("dashboard.activeRewards")}</h2>
                     {activeRewards.length > 3 && (
                       <Button variant="ghost" size="sm" asChild className="bg-card border border-border" data-testid="button-view-all-rewards-parent">
-                        <Link href="/rewards-board">
+                        <Link href="/active-rewards">
                           {t("kidDashboard.viewAll")}
                         </Link>
                       </Button>

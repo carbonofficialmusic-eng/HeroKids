@@ -28,6 +28,7 @@ import SkinsGallery from "@/pages/skins-gallery";
 import Achievements from "@/pages/achievements";
 import FamilyGoals from "@/pages/family-goals";
 import MyRewards from "@/pages/my-rewards";
+import ActiveRewards from "@/pages/active-rewards";
 import MyAchievements from "@/pages/my-achievements";
 import LinkDevice from "@/pages/link-device";
 import Admin from "@/pages/admin";
@@ -449,6 +450,7 @@ function Router() {
         </Route>
         <Route path="/kid-dashboard-old" component={KidDashboardOld} />
         <Route path="/my-rewards" component={MyRewards} />
+        <Route path="/active-rewards" component={ActiveRewards} />
         <Route path="/my-achievements" component={MyAchievements} />
         <Route path="/tasks">
           <Dashboard key={dashboardKey} />
