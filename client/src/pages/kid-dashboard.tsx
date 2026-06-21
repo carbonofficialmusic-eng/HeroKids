@@ -2277,7 +2277,7 @@ export default function KidDashboard() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="space-y-4"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-end justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
                   <img src="/nav-icons/bonus.png" alt="" className="w-full h-full object-contain drop-shadow-xl" />
@@ -2287,7 +2287,7 @@ export default function KidDashboard() {
                 </h2>
               </div>
               {specialRewards.length > 2 && (
-                <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground" data-testid="button-view-all-achievements">
+                <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-achievements">
                   <Link href="/my-achievements">
                     {t("kidDashboard.viewAll")}
                   </Link>
@@ -2494,7 +2494,7 @@ export default function KidDashboard() {
         {/* My Redeemed Rewards Section */}
         {(myRedemptions.length > 0 || joinedSharedRewards.length > 0) && (
           <div className="space-y-4 mb-8">
-            <div className="flex items-center justify-between">
+            <div className="flex items-end justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
                   <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-xl" />
@@ -2503,7 +2503,7 @@ export default function KidDashboard() {
                   {t("kidDashboard.myRewards")}
                 </h2>
               </div>
-              <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground" data-testid="button-view-all-rewards">
+              <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-rewards">
                 <Link href="/my-rewards">
                   {t("kidDashboard.viewAll")}
                 </Link>
