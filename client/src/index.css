@@ -50,10 +50,6 @@ html {
   max-width: 100%;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
-  /* GPU-composited layer — prevents Safari/WebKit scroll flicker */
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 
