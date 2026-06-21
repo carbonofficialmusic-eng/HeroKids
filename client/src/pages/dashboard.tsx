@@ -65,67 +65,6 @@ import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.
 import familyGoalsIcon from "@assets/family-goals-icon.png";
 
 // Custom hook for sticky sidebar on desktop
-function useStickyPanel(isDesktop: boolean) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const [stickyStyle, setStickyStyle] = useState<React.CSSProperties>({});
-
-  useEffect(() => {
-    if (!isDesktop) {
-      setStickyStyle({});
-      return;
-    }
-
-    const getHeaderHeight = () => {
-      const header = document.querySelector("[data-app-header]") as HTMLElement | null;
-      return header ? header.offsetHeight : 72;
-    };
-
-    const handleScroll = () => {
-      if (!containerRef.current || !panelRef.current) return;
-
-      const headerHeight = getHeaderHeight();
-      const topOffset = headerHeight + 8; // 8px gap below header
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const panelHeight = panelRef.current.offsetHeight;
-
-      if (containerRect.top < topOffset) {
-        const maxScroll = containerRect.height - panelHeight;
-        const currentScroll = topOffset - containerRect.top;
-
-        if (currentScroll < maxScroll) {
-          setStickyStyle({
-            position: 'fixed',
-            top: `${topOffset}px`,
-            width: `${panelRef.current.offsetWidth}px`,
-          });
-        } else {
-          setStickyStyle({
-            position: 'absolute',
-            bottom: '0',
-            top: 'auto',
-          });
-        }
-      } else {
-        setStickyStyle({});
-      }
-    };
-
-    // The app scrolls on #root, not window (body is position:fixed)
-    const scrollEl = document.getElementById("root") ?? window;
-    scrollEl.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll, { passive: true });
-    handleScroll();
-
-    return () => {
-      scrollEl.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, [isDesktop]);
-
-  return { containerRef, panelRef, stickyStyle };
-}
 
 // Scrollt die Pinnwand so, dass sie direkt unterhalb des fixen Headers erscheint
 function scrollToPinboard(el: HTMLElement) {
@@ -244,16 +183,7 @@ export default function Dashboard() {
   const [showDebugInfo, setShowDebugInfo] = useState(false);
   const debugTapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Detect desktop for sticky sidebar (lg breakpoint = 1024px)
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
-    checkDesktop();
-    window.addEventListener('resize', checkDesktop);
-    return () => window.removeEventListener('resize', checkDesktop);
-  }, []);
-  
-  const { containerRef } = useStickyPanel(isDesktop);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Scroll to pinboard when navigated here from a pinboard_posted notification
   useEffect(() => {

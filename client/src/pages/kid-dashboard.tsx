@@ -300,7 +300,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
         whileTap={{ scale: 0.98 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        <Card className={`p-4 transition-all backdrop-blur-md border-2 rounded-2xl ${
+        <Card className={`p-4 transition-all border-2 rounded-2xl ${
           isReady 
             ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-4 ring-inset ring-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55" 
             : "bg-card/80 border-border shadow-md shadow-black/15"
@@ -820,7 +820,7 @@ function TaskCard({
         className="min-w-0"
       >
         <div
-          className={`p-2.5 rounded-2xl border transition-all min-w-0 w-full ${isTransparentState ? "backdrop-blur-md" : ""} ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
+          className={`p-2.5 rounded-2xl border transition-all min-w-0 w-full ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
           data-testid={`task-card-${task.id}`}
           onClick={isActionable ? handleComplete : undefined}
         >
@@ -872,23 +872,23 @@ function TaskCard({
           isActionable && !isRejected 
             ? "bg-card cursor-pointer border-border shadow-lg hover:border-primary/60 hover:shadow-xl" 
             : isActionable && isRejected 
-            ? "bg-blue-500/10 backdrop-blur-md cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15 hover:bg-blue-500/15 hover:border-blue-400/60" 
+            ? "bg-blue-500/25 cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15 hover:bg-blue-500/35 hover:border-blue-400/60" 
             : showAsApproved 
-            ? "bg-green-500/10 backdrop-blur-md border-green-500/45 shadow-md shadow-green-900/15" 
+            ? "bg-green-500/20 border-green-500/45 shadow-md shadow-green-900/15" 
             : showAsSubmitted 
-            ? "bg-amber-500/10 backdrop-blur-md border-amber-400/45 shadow-md shadow-amber-900/15" 
+            ? "bg-amber-500/20 border-amber-400/45 shadow-md shadow-amber-900/15" 
             : showAsPending 
-            ? "bg-amber-500/10 backdrop-blur-md border-amber-400/45 shadow-md shadow-amber-900/15" 
+            ? "bg-amber-500/20 border-amber-400/45 shadow-md shadow-amber-900/15" 
             : hasNoSlots 
             ? "bg-card border-border opacity-70" 
             : isSharedTaskNotAssigned 
             ? "bg-card border-border opacity-70" 
             : allSharedMembersCompleted 
-            ? "bg-green-500/10 backdrop-blur-md border-green-500/45 shadow-md shadow-green-900/15" 
+            ? "bg-green-500/20 border-green-500/45 shadow-md shadow-green-900/15" 
             : dueDateInfo.notYet 
             ? "bg-card border-border opacity-70" 
             : dueDateInfo.expired 
-            ? "bg-destructive/10 backdrop-blur-md border-destructive/40" 
+            ? "bg-destructive/20 border-destructive/40" 
             : isWeekendUnavailable 
             ? "bg-card border-border opacity-70" 
             : "bg-card border-border opacity-70"
@@ -1219,60 +1219,6 @@ function TaskCard({
   );
 }
 
-// Sticky sidebar hook (same as parent dashboard)
-function useStickyPanel(isDesktop: boolean) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const [stickyStyle, setStickyStyle] = useState<React.CSSProperties>({});
-
-  useEffect(() => {
-    if (!isDesktop) {
-      setStickyStyle({});
-      return;
-    }
-
-    const getHeaderBottom = () =>
-      (document.querySelector('[data-app-header]') as HTMLElement | null)
-        ?.getBoundingClientRect().bottom ?? 0;
-
-    const handleScroll = () => {
-      if (!containerRef.current || !panelRef.current) return;
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const panelHeight = panelRef.current.offsetHeight;
-      const topOffset = getHeaderBottom();
-      if (containerRect.top < topOffset) {
-        const maxScroll = containerRect.height - panelHeight;
-        const currentScroll = topOffset - containerRect.top;
-        if (currentScroll < maxScroll) {
-          setStickyStyle({ position: 'fixed', top: `${topOffset}px`, width: `${panelRef.current.offsetWidth}px` });
-        } else {
-          setStickyStyle({ position: 'absolute', bottom: '0', top: 'auto' });
-        }
-      } else {
-        setStickyStyle({});
-      }
-    };
-
-    // Re-run whenever the header resizes (safe-area changes, font-scale, etc.)
-    const headerEl = document.querySelector('[data-app-header]');
-    let ro: ResizeObserver | null = null;
-    if (headerEl && typeof ResizeObserver !== 'undefined') {
-      ro = new ResizeObserver(handleScroll);
-      ro.observe(headerEl);
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll, { passive: true });
-    handleScroll();
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-      ro?.disconnect();
-    };
-  }, [isDesktop]);
-
-  return { containerRef, panelRef, stickyStyle };
-}
 
 // Scrollt die Pinnwand so, dass sie direkt unterhalb des fixen Headers erscheint
 function scrollToPinboard(el: HTMLElement) {
