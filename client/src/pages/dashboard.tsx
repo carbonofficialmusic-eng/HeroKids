@@ -1573,9 +1573,18 @@ export default function Dashboard() {
               {/* Rewards Section */}
               {activeRewards.length > 0 && (
                 <div data-tour="tour-rewards">
-                  <h2 className="text-2xl font-bold font-accent mb-4">{t("dashboard.activeRewards")}</h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold font-accent">{t("dashboard.activeRewards")}</h2>
+                    {activeRewards.length > 3 && (
+                      <Button variant="ghost" size="sm" asChild className="bg-card border border-border" data-testid="button-view-all-rewards-parent">
+                        <Link href="/rewards-board">
+                          {t("kidDashboard.viewAll")}
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {activeRewards.map((reward) => (
+                    {activeRewards.slice(0, 3).map((reward) => (
                       <Card key={reward.id} className="p-6 relative overflow-visible" data-testid={`card-reward-${reward.id}`}>
                         {isRealParent && (
                           <div className="absolute top-2 right-2 flex gap-1">
