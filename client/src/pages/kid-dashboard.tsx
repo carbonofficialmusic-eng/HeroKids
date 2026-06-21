@@ -296,7 +296,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
   return (
     <>
       <div className="transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98]">
-        <Card className={`p-4 transition-all border-2 rounded-2xl ${
+        <Card className={`p-4 transition-colors border-2 rounded-2xl ${
           isReady 
             ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-4 ring-inset ring-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55" 
             : "bg-card/80 border-border shadow-md shadow-black/15"
@@ -752,7 +752,7 @@ function TaskCard({
     return (
       <div className="min-w-0 active:scale-[0.97] transition-transform duration-150">
         <div
-          className={`rounded-2xl border transition-all min-w-0 w-full cursor-pointer ${bgColor} ${borderColor}`}
+          className={`rounded-2xl border transition-colors min-w-0 w-full cursor-pointer ${bgColor} ${borderColor}`}
           data-testid={`task-card-${task.id}`}
           onClick={() => setShoppingListExpanded(v => !v)}
         >
@@ -808,13 +808,13 @@ function TaskCard({
     return (
       <div className={`min-w-0 transition-transform duration-150 ${isActionable ? "active:scale-[0.96]" : ""}`}>
         <div
-          className={`p-2.5 rounded-2xl border transition-all min-w-0 w-full ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
+          className={`p-2.5 rounded-2xl border transition-colors min-w-0 w-full ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
           data-testid={`task-card-${task.id}`}
           onClick={isActionable ? handleComplete : undefined}
         >
           {/* Emoji + title row */}
           <div className="flex items-start gap-2 min-w-0">
-            <span className="text-2xl leading-none flex-shrink-0 mt-0.5" style={{ filter: isActionable ? "grayscale(0%)" : "grayscale(80%)" }}>
+            <span className={`text-2xl leading-none flex-shrink-0 mt-0.5 ${isActionable ? "" : "opacity-50"}`}>
               {task.iconEmoji || "✅"}
             </span>
             <p className="font-bold text-sm leading-snug line-clamp-2 flex-1 min-w-0 text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
@@ -851,7 +851,7 @@ function TaskCard({
   return (
     <div className={`min-w-0 transition-transform duration-200 ${isActionable ? "hover:-translate-y-0.5 active:scale-[0.97]" : ""}`}>
       <Card
-        className={`p-5 transition-all border-2 rounded-2xl min-w-0 w-full ${
+        className={`p-5 transition-colors border-2 rounded-2xl min-w-0 w-full ${
           isActionable && !isRejected 
             ? "bg-card cursor-pointer border-border shadow-lg hover:border-primary/60 hover:shadow-xl" 
             : isActionable && isRejected 
@@ -904,8 +904,7 @@ function TaskCard({
               <CheckCircle2 className="h-12 w-12 text-green-500" />
             ) : (
               <TaskIcon
-                className="h-12 w-12 text-primary transition-all duration-300"
-                style={{ filter: isActionable ? "grayscale(0%)" : "grayscale(100%)" }}
+                className={`h-12 w-12 text-primary transition-all duration-300 ${isActionable ? "" : "opacity-40"}`}
               />
             )}
           </div>
@@ -2028,7 +2027,7 @@ export default function KidDashboard() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       {/* Header — same structure as parent dashboard: fixed, in root stacking context */}
       <header
         data-app-header
@@ -2038,6 +2037,9 @@ export default function KidDashboard() {
           height: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
           minHeight: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
           maxHeight: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
         }}
       >
         <div className="container mx-auto max-w-7xl h-full flex items-center justify-between gap-4" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
@@ -2131,18 +2133,14 @@ export default function KidDashboard() {
                 </button>
                 {streak > 0 && (
                   <div className="flex items-center gap-2">
-                    <div className="animate-pulse">
-                      <Flame className="h-6 w-6 text-orange-500" />
-                    </div>
+                    <Flame className="h-6 w-6 text-orange-500" />
                     <span className="text-base font-bold">{t("kidDashboard.dayStreak", { count: streak })}</span>
                   </div>
                 )}
                 {/* Star Counter - Links to Skins Gallery */}
                 <Link href="/skins">
                   <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/60 to-orange-500/60 px-4 py-2 rounded-xl border border-yellow-500/70 cursor-pointer hover:from-yellow-500/75 hover:to-orange-500/75 transition-colors" data-testid="link-stars-to-skins">
-                    <div className="animate-pulse">
-                      <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-                    </div>
+                    <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
                     <span className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }} data-testid="text-stars-found">
                       {member.starsFound ?? 0}/{TOTAL_HIDDEN_STARS}
                     </span>
