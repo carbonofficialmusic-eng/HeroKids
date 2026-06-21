@@ -295,11 +295,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
 
   return (
     <>
-      <motion.div
-        whileHover={{ y: -3 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      >
+      <div className="transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98]">
         <Card className={`p-4 transition-all border-2 rounded-2xl ${
           isReady 
             ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-4 ring-inset ring-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55" 
@@ -368,7 +364,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
             </div>
           </div>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Details Dialog */}
       <AlertDialog open={showDetails} onOpenChange={setShowDetails}>
@@ -754,11 +750,7 @@ function TaskCard({
       : "bg-card";
 
     return (
-      <motion.div
-        whileTap={{ scale: 0.97 }}
-        transition={{ type: "spring", stiffness: 400, damping: 20 }}
-        className="min-w-0"
-      >
+      <div className="min-w-0 active:scale-[0.97] transition-transform duration-150">
         <div
           className={`rounded-2xl border transition-all min-w-0 w-full cursor-pointer ${bgColor} ${borderColor}`}
           data-testid={`task-card-${task.id}`}
@@ -783,7 +775,7 @@ function TaskCard({
             />
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -814,11 +806,7 @@ function TaskCard({
       : "bg-card opacity-70";
 
     return (
-      <motion.div
-        whileTap={{ scale: isActionable ? 0.96 : 1 }}
-        transition={{ type: "spring", stiffness: 400, damping: 20 }}
-        className="min-w-0"
-      >
+      <div className={`min-w-0 transition-transform duration-150 ${isActionable ? "active:scale-[0.96]" : ""}`}>
         <div
           className={`p-2.5 rounded-2xl border transition-all min-w-0 w-full ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
           data-testid={`task-card-${task.id}`}
@@ -856,17 +844,12 @@ function TaskCard({
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      whileHover={{ y: isActionable ? -3 : 0 }}
-      whileTap={{ scale: isActionable ? 0.97 : 1 }}
-      transition={{ type: "spring", stiffness: 400, damping: 20 }}
-      className="min-w-0"
-    >
+    <div className={`min-w-0 transition-transform duration-200 ${isActionable ? "hover:-translate-y-0.5 active:scale-[0.97]" : ""}`}>
       <Card
         className={`p-5 transition-all border-2 rounded-2xl min-w-0 w-full ${
           isActionable && !isRejected 
@@ -1215,7 +1198,7 @@ function TaskCard({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </motion.div>
+    </div>
   );
 }
 
