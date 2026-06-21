@@ -174,6 +174,12 @@ uri = "file://client/public/nav-icons/trophy.png"
 type = "image"
 title = "leaderboard-trophy-3d"
 
+[[generated]]
+id = "qk00YM0RHrX4cUkl4VqyI"
+uri = "file://client/public/nav-icons/pinboard.png"
+type = "image"
+title = "pinboard-3d-icon"
+
 [[outputs]]
 id = "jDcqlYKu7xhdwjCsAa7Eo"
 uri = "file://client/public/skins/backgrounds/neon-droid.png"

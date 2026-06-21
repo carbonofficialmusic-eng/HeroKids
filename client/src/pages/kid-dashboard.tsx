@@ -3035,7 +3035,15 @@ export default function KidDashboard() {
         )}
 
         {/* Pinboard Section — mobile only (desktop version is in right column) */}
-        <div id="pinboard" className="lg:hidden">
+        <div id="pinboard" className="lg:hidden space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+              <img src="/nav-icons/pinboard.png" alt="" className="w-full h-full object-contain drop-shadow-xl" />
+            </div>
+            <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
+              {t("pinboard.title")}
+            </h2>
+          </div>
           <Pinboard currentMemberId={member?.id ?? null} />
         </div>
 

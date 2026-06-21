@@ -118,15 +118,9 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
 
   return (
     <div className="rounded-xl overflow-hidden shadow-lg border border-border">
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-muted border-b border-border">
-        <div className="flex items-center gap-2">
-          <Pin className="h-4 w-4 text-primary fill-primary" />
-          <span className="font-bold text-sm text-foreground" style={{ fontFamily: "Fredoka, sans-serif" }}>
-            {t("pinboard.title")}
-          </span>
-        </div>
-        {canAdd && !isAdding && editingId === null && (
+      {/* Header — only shown when add button is available */}
+      {canAdd && !isAdding && editingId === null && (
+        <div className="flex items-center justify-end px-3 py-2 bg-muted border-b border-border">
           <Button
             size="icon"
             variant="ghost"
@@ -136,8 +130,8 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
           >
             <Plus className="h-4 w-4" />
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Board surface */}
       <div className="p-3 space-y-3 min-h-[80px] bg-muted/40">
