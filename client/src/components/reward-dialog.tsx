@@ -25,6 +25,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
+const REWARD_ICONS = [
+  "🍦", "🎬", "🤖", "🎲", "🎢", "🚲", "🍕", "🏊",
+  "🎮", "🎵", "⚽", "📚", "🎡", "🧸", "🎯", "🏆",
+  "🎸", "🎨", "🧁", "🌮", "🚀", "🦁", "🎭", "🎳",
+  "🛹", "🎁", "🎀", "🎈", "🧩", "🎪",
+];
+
 type RewardFormData = z.infer<typeof insertRewardSchema>;
 
 interface RewardDialogProps {
@@ -56,10 +63,10 @@ export function RewardDialog({
       pointThreshold: 100,
       isActive: true,
       oneTimeOnly: false,
+      iconEmoji: "🎁",
     },
   });
 
-  // Reset form when reward changes
   useEffect(() => {
     if (reward) {
       form.reset({
@@ -69,6 +76,7 @@ export function RewardDialog({
         pointThreshold: reward.pointThreshold,
         isActive: reward.isActive,
         oneTimeOnly: reward.oneTimeOnly ?? false,
+        iconEmoji: reward.iconEmoji || "🎁",
       });
     } else {
       form.reset({
@@ -78,6 +86,7 @@ export function RewardDialog({
         pointThreshold: 100,
         isActive: true,
         oneTimeOnly: false,
+        iconEmoji: "🎁",
       });
     }
   }, [reward, familyName, form]);
@@ -101,6 +110,44 @@ export function RewardDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+
+            {/* Icon Picker */}
+            <FormField
+              control={form.control}
+              name="iconEmoji"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('rewards.icon') || 'Symbol'}</FormLabel>
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-5xl leading-none">{field.value || "🎁"}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{t('rewards.iconPickerHint') || 'Wähle ein Symbol für diese Belohnung'}</p>
+                  </div>
+                  <FormControl>
+                    <div className="grid grid-cols-6 gap-2" data-testid="reward-icon-grid">
+                      {REWARD_ICONS.map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => field.onChange(emoji)}
+                          data-testid={`button-icon-${emoji}`}
+                          className={`h-11 w-full rounded-xl text-2xl flex items-center justify-center transition-all ${
+                            field.value === emoji
+                              ? "bg-primary/20 ring-2 ring-primary scale-110"
+                              : "bg-muted hover-elevate"
+                          }`}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="title"

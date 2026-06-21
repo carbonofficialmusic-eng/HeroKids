@@ -360,6 +360,7 @@ export const rewards = pgTable("rewards", {
   pointThreshold: integer("point_threshold").notNull(),
   isActive: boolean("is_active").notNull().default(true),
   oneTimeOnly: boolean("one_time_only").notNull().default(false),
+  iconEmoji: varchar("icon_emoji").notNull().default("🎁"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -181,15 +181,6 @@ interface AchievementDefinition {
   config: Record<string, any>;
 }
 
-// Helper: Get generic icon for rewards
-function getRewardIcon(title: string) {
-  const lowerTitle = title.toLowerCase();
-  if (lowerTitle.includes("eis") || lowerTitle.includes("ice")) return IceCream;
-  if (lowerTitle.includes("spiel") || lowerTitle.includes("game")) return Gamepad2;
-  if (lowerTitle.includes("kino") || lowerTitle.includes("film") || lowerTitle.includes("movie")) return Film;
-  if (lowerTitle.includes("fahrrad") || lowerTitle.includes("bike")) return Bike;
-  return Gift;
-}
 
 // Helper: Get generic icon for tasks
 function getTaskIcon(title: string) {
@@ -262,8 +253,6 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
   const remaining = Math.max(reward.pointThreshold - currentPoints, 0);
   const isReady = currentPoints >= reward.pointThreshold;
   const progressColor = getProgressColor(percentage);
-  const RewardIcon = getRewardIcon(reward.title);
-
   const redeemMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/rewards/${reward.id}/redeem`, {
@@ -315,10 +304,10 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
             : "bg-card/80 border-border shadow-md shadow-black/15"
         }`}>
           <div className="flex items-center gap-4">
-            <div className={`flex-shrink-0 p-3 rounded-2xl ${
+            <div className={`flex-shrink-0 h-16 w-16 rounded-2xl flex items-center justify-center ${
               isReady ? "bg-primary/20" : "bg-primary/10"
             }`}>
-              <RewardIcon className="h-12 w-12 text-primary" />
+              <span className="text-5xl leading-none">{reward.iconEmoji || "🎁"}</span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
@@ -384,8 +373,8 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-3 text-2xl" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              <div className="p-3 bg-primary/10 rounded-2xl">
-                <RewardIcon className="h-10 w-10 text-primary" />
+              <div className="h-14 w-14 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <span className="text-4xl leading-none">{reward.iconEmoji || "🎁"}</span>
               </div>
               {reward.title}
             </AlertDialogTitle>

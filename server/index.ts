@@ -859,6 +859,11 @@ async function ensurePinboardTable() {
     await db.execute(sql`ALTER TABLE families ADD COLUMN IF NOT EXISTS is_lifetime_purchase boolean NOT NULL DEFAULT false`);
   } catch (_e) { /* ignore */ }
 
+  // Ensure icon_emoji column exists on rewards
+  try {
+    await db.execute(sql`ALTER TABLE rewards ADD COLUMN IF NOT EXISTS icon_emoji varchar NOT NULL DEFAULT '🎁'`);
+  } catch (_e) { /* ignore */ }
+
   // Add new achievement_type enum values if they don't exist yet
   try {
     await db.execute(sql`ALTER TYPE achievement_type ADD VALUE IF NOT EXISTS 'legacy_collector'`);

@@ -103,6 +103,7 @@ type Reward = {
   pointThreshold: number;
   isActive: boolean;
   familyName: string;
+  iconEmoji: string;
 };
 
 function getProgressColor(percentage: number) {
@@ -110,16 +111,6 @@ function getProgressColor(percentage: number) {
   if (percentage >= 71) return "hsl(142 69% 58%)";
   if (percentage >= 31) return "hsl(38 92% 50%)";
   return "hsl(0 72% 51%)";
-}
-
-function getRewardIcon(title: string) {
-  const lower = title?.toLowerCase() ?? "";
-  if (lower.includes("kino") || lower.includes("film") || lower.includes("movie")) return Gift;
-  if (lower.includes("eis") || lower.includes("ice")) return Gift;
-  if (lower.includes("pizza") || lower.includes("essen") || lower.includes("food")) return Gift;
-  if (lower.includes("spiel") || lower.includes("game") || lower.includes("lego")) return Gift;
-  if (lower.includes("computer") || lower.includes("tablet") || lower.includes("screen")) return Gift;
-  return Gift;
 }
 
 function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
@@ -134,8 +125,6 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
   const remaining = Math.max(reward.pointThreshold - currentPoints, 0);
   const isReady = currentPoints >= reward.pointThreshold;
   const progressColor = getProgressColor(percentage);
-  const RewardIcon = getRewardIcon(reward.title);
-
   const redeemMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/rewards/${reward.id}/redeem`, {
@@ -181,8 +170,8 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
         }`}>
           {/* Top row: icon + title */}
           <div className="flex items-start gap-3 mb-3">
-            <div className={`flex-shrink-0 p-2.5 rounded-2xl ${isReady ? "bg-primary/20" : "bg-primary/10"}`}>
-              <RewardIcon className="h-10 w-10 text-primary" />
+            <div className={`flex-shrink-0 h-14 w-14 rounded-2xl flex items-center justify-center ${isReady ? "bg-primary/20" : "bg-primary/10"}`}>
+              <span className="text-4xl leading-none">{reward.iconEmoji || "🎁"}</span>
             </div>
             <div className="flex-1 min-w-0 pt-0.5">
               <div className="flex items-center gap-1.5 min-w-0">
@@ -242,8 +231,8 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-3 text-2xl" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              <div className="p-3 bg-primary/10 rounded-2xl">
-                <RewardIcon className="h-10 w-10 text-primary" />
+              <div className="h-14 w-14 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <span className="text-4xl leading-none">{reward.iconEmoji || "🎁"}</span>
               </div>
               {reward.title}
             </AlertDialogTitle>

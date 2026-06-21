@@ -1613,8 +1613,8 @@ export default function Dashboard() {
                           </div>
                         )}
                         <div className="flex items-start gap-3">
-                          <div className="h-12 w-12 rounded-full gradient-winner flex items-center justify-center shrink-0">
-                            <Gift className="h-6 w-6 text-white" />
+                          <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <span className="text-4xl leading-none">{reward.iconEmoji || "🎁"}</span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-bold mb-1" data-testid={`text-reward-title-${reward.id}`}>
