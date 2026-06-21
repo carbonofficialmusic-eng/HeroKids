@@ -147,18 +147,17 @@ export function RewardDialog({
               name="iconEmoji"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('rewards.icon') || 'Symbol'}</FormLabel>
+                  <FormLabel className="block text-center">{t('rewards.icon')}</FormLabel>
 
                   {/* Preview */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 p-2">
+                  <div className="flex justify-center mb-3">
+                    <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center p-2">
                       <RewardIconDisplay
                         icon={field.value}
                         imgClassName="w-full h-full object-contain drop-shadow-sm"
                         textClassName="text-5xl leading-none"
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground">{t('rewards.iconPickerHint') || 'Wähle ein Symbol für diese Belohnung'}</p>
                   </div>
 
                   <FormControl>

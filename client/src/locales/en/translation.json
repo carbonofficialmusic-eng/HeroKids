@@ -378,6 +378,7 @@
     "updatedDesc": "The reward request has been updated.",
     "updateRewardDetails": "Update the details for this reward.",
     "setupNewReward": "Set up a new reward that family members can redeem with their points.",
+    "icon": "Icon",
     "rewardTitle": "Reward Title",
     "rewardTitlePlaceholder": "e.g., Ice cream trip, Movie night",
     "descriptionOptional": "Description (Optional)",

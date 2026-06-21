@@ -376,6 +376,7 @@
     "updatedDesc": "보상 요청이 업데이트되었습니다.",
     "updateRewardDetails": "이 보상의 세부 정보를 업데이트합니다.",
     "setupNewReward": "가족 구성원이 포인트로 교환할 수 있는 새 보상을 설정합니다.",
+    "icon": "아이콘",
     "rewardTitle": "보상 제목",
     "rewardTitlePlaceholder": "예: 아이스크림, 영화 관람",
     "descriptionOptional": "설명 (선택사항)",

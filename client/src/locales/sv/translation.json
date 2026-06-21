@@ -377,6 +377,7 @@
     "updatedDesc": "Belöningsförfrågan har uppdaterats.",
     "updateRewardDetails": "Uppdatera informationen för denna belöning.",
     "setupNewReward": "Skapa en ny belöning som familjemedlemmar kan lösa in med sina poäng.",
+    "icon": "Ikon",
     "rewardTitle": "Belöningstitel",
     "rewardTitlePlaceholder": "t.ex., Glassutflykt, Filmkväll",
     "descriptionOptional": "Beskrivning (Valfritt)",

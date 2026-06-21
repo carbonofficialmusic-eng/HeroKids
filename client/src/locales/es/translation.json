@@ -372,6 +372,7 @@
     "updatedDesc": "La solicitud de recompensa ha sido actualizada.",
     "updateRewardDetails": "Actualiza los detalles de esta recompensa.",
     "setupNewReward": "Configura una nueva recompensa que los miembros de la familia puedan canjear con sus puntos.",
+    "icon": "Icono",
     "rewardTitle": "Título de la Recompensa",
     "rewardTitlePlaceholder": "ej., Salida por helado, Noche de cine",
     "descriptionOptional": "Descripción (Opcional)",

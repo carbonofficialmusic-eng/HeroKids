@@ -372,6 +372,7 @@
     "updatedDesc": "La demande de récompense a été mise à jour.",
     "updateRewardDetails": "Mettez à jour les détails de cette récompense.",
     "setupNewReward": "Configurez une nouvelle récompense que les membres de la famille peuvent obtenir avec leurs points.",
+    "icon": "Icône",
     "rewardTitle": "Titre de la récompense",
     "rewardTitlePlaceholder": "ex. Sortie glace, Soirée cinéma",
     "descriptionOptional": "Description (facultatif)",

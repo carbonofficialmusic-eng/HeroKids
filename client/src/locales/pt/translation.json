@@ -378,6 +378,7 @@
     "updatedDesc": "A solicitação de recompensa foi atualizada.",
     "updateRewardDetails": "Atualize os detalhes desta recompensa.",
     "setupNewReward": "Configure uma nova recompensa que os membros podem resgatar com pontos.",
+    "icon": "Ícone",
     "rewardTitle": "Título da Recompensa",
     "rewardTitlePlaceholder": "Ex.: Sorvete, Noite de cinema",
     "descriptionOptional": "Descrição (Opcional)",

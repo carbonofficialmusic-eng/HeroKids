@@ -388,6 +388,7 @@
     "updatedDesc": "Die Belohnungsanfrage wurde aktualisiert.",
     "updateRewardDetails": "Aktualisiere die Details für diese Belohnung.",
     "setupNewReward": "Richte eine neue Belohnung ein, die Familienmitglieder mit ihren Punkten einlösen können.",
+    "icon": "Symbol",
     "rewardTitle": "Belohnungstitel",
     "rewardTitlePlaceholder": "z.B. Eis essen gehen, Filmabend",
     "descriptionOptional": "Beschreibung (Optional)",
