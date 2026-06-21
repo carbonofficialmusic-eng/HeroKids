@@ -3101,7 +3101,7 @@ export default function KidDashboard() {
 
       {/* Simplified Navigation - Fixed Bottom Bar (collapsible to the right) */}
       <div
-        className="fixed bottom-0 right-0 z-50 overflow-x-hidden"
+        className={`fixed bottom-0 right-0 z-50 overflow-x-hidden ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
         style={{
           width: 'min(100vw, 44rem)',
           paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
@@ -3128,7 +3128,7 @@ export default function KidDashboard() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setChatBarCollapsed(c => !c)}
-                  className="flex-shrink-0 rounded-2xl h-14 w-10"
+                  className="flex-shrink-0 rounded-2xl h-14 w-10 pointer-events-auto"
                   data-testid="button-chat-bar-toggle"
                   aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
                 >
