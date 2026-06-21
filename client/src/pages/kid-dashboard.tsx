@@ -2055,8 +2055,6 @@ export default function KidDashboard() {
           height: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
           minHeight: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
           maxHeight: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
-          transform: 'translateZ(0)',
-          WebkitTransform: 'translateZ(0)',
         }}
       >
         <div className="container mx-auto max-w-7xl h-full flex items-center justify-between gap-4" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
