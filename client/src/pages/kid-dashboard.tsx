@@ -1677,7 +1677,6 @@ export default function KidDashboard() {
   const { data: tasks = [] } = useQuery<TaskWithMeta[]>({
     queryKey: ["/api/tasks"],
     enabled: !!member,
-    refetchInterval: 3000,
     staleTime: 5 * 60 * 1000,
   });
 

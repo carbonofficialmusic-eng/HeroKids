@@ -261,7 +261,10 @@ function Router() {
   // is visually offset by 50-100 px. The old guard `if (scrollY !== 0)` meant
   // the fix never ran when WKWebView was lying. Fix: call scrollTo(0,0)
   // unconditionally every frame so UIScrollView is always snapped to the top.
+  // Guard: only run on native iOS — this rAF loop causes visible flicker in
+  // desktop browsers and the Replit preview iframe.
   useEffect(() => {
+    if (!isNativePlatform()) return;
     let rafId: number;
     const snapWindowScroll = () => {
       // Always call scrollTo — WKWebView may report scrollY=0 while the
