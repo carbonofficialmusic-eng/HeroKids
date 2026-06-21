@@ -151,6 +151,10 @@ export function RewardDialog({
                       step={10}
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      onFocus={(e) => {
+                        const el = e.currentTarget;
+                        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 350);
+                      }}
                       data-testid="input-reward-points"
                     />
                   </FormControl>
