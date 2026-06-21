@@ -912,26 +912,6 @@ export function TaskDialog({
               />
             )}
 
-            {/* Important Task Toggle */}
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <Pin className="h-4 w-4 text-amber-500" />
-                  <FormLabel className="text-base cursor-pointer">
-                    {t('tasks.important', { defaultValue: 'Wichtig' })}
-                  </FormLabel>
-                </div>
-                <FormDescription>
-                  {t('tasks.importantDesc', { defaultValue: 'Wichtige Aufgaben werden immer oben angezeigt, unabhängig vom aktiven Filter.' })}
-                </FormDescription>
-              </div>
-              <Switch
-                checked={isImportant}
-                onCheckedChange={setIsImportant}
-                data-testid="switch-important"
-              />
-            </div>
-
             {/* Shopping List Toggle - only for one-time tasks */}
             {recurrenceMode === "standard" && form.watch("recurrence") === "none" && (
               <div className="space-y-3">
@@ -1142,6 +1122,26 @@ export function TaskDialog({
                 );
               }}
             />
+
+            {/* Important Task Toggle */}
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <Pin className="h-4 w-4 text-amber-500" />
+                  <FormLabel className="text-base cursor-pointer">
+                    {t('tasks.important', { defaultValue: 'Wichtig' })}
+                  </FormLabel>
+                </div>
+                <FormDescription>
+                  {t('tasks.importantDesc', { defaultValue: 'Wichtige Aufgaben werden immer oben angezeigt, unabhängig vom aktiven Filter.' })}
+                </FormDescription>
+              </div>
+              <Switch
+                checked={isImportant}
+                onCheckedChange={setIsImportant}
+                data-testid="switch-important"
+              />
+            </div>
 
             <div className="flex gap-3">
               <Button
