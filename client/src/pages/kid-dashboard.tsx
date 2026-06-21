@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { kickScrollReset, kickHeaderRepaint, isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
 import { isNativePlatform } from "@/lib/platform";
 import { Link, useLocation } from "wouter";
-import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -296,7 +295,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
 
   return (
     <>
-      <div className="transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98]">
+      <div className="active:scale-[0.98] transition-transform duration-150">
         <Card className={`p-4 transition-colors border-2 rounded-2xl ${
           isReady 
             ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-4 ring-inset ring-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55" 
@@ -850,7 +849,7 @@ function TaskCard({
   }
 
   return (
-    <div className={`min-w-0 transition-transform duration-200 ${isActionable ? "hover:-translate-y-0.5 active:scale-[0.97]" : ""}`}>
+    <div className={`min-w-0 ${isActionable ? "active:scale-[0.97] transition-transform duration-150" : ""}`}>
       <Card
         className={`p-5 transition-colors border-2 rounded-2xl min-w-0 w-full ${
           isActionable && !isRejected 
@@ -2104,14 +2103,11 @@ export default function KidDashboard() {
       <div className="lg:col-span-2 space-y-8 min-w-0 overflow-hidden">
         {/* HeroKids Logo */}
         <div className="flex justify-center">
-          <motion.img 
+          <img 
             src={logoUrl} 
             alt="HeroKids Logo" 
             className="h-32 w-auto object-contain"
             data-testid="img-kid-dashboard-logo"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
           />
         </div>
 
