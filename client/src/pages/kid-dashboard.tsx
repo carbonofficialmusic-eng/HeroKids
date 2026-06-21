@@ -2779,7 +2779,7 @@ export default function KidDashboard() {
         {goals.filter(g => g.isActive).length > 0 && (
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <img src={familyGoalsIcon} alt="" className="h-24 w-24 object-contain flex-shrink-0 drop-shadow-sm -my-2" />
+              <img src={familyGoalsIcon} alt="" className="h-32 w-32 object-contain flex-shrink-0 drop-shadow-sm -my-4" />
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.familyGoals")}
               </h2>
