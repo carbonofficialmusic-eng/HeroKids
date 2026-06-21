@@ -2135,24 +2135,18 @@ export default function KidDashboard() {
                 </button>
                 {streak > 0 && (
                   <div className="flex items-center gap-2">
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                    >
+                    <div className="animate-pulse">
                       <Flame className="h-6 w-6 text-orange-500" />
-                    </motion.div>
+                    </div>
                     <span className="text-base font-bold">{t("kidDashboard.dayStreak", { count: streak })}</span>
                   </div>
                 )}
                 {/* Star Counter - Links to Skins Gallery */}
                 <Link href="/skins">
                   <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/60 to-orange-500/60 px-4 py-2 rounded-xl border border-yellow-500/70 cursor-pointer hover:from-yellow-500/75 hover:to-orange-500/75 transition-colors" data-testid="link-stars-to-skins">
-                    <motion.div
-                      animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
-                      transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                    >
+                    <div className="animate-pulse">
                       <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-                    </motion.div>
+                    </div>
                     <span className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }} data-testid="text-stars-found">
                       {member.starsFound ?? 0}/{TOTAL_HIDDEN_STARS}
                     </span>
@@ -2174,15 +2168,13 @@ export default function KidDashboard() {
                 <div className="space-y-3">
                   <div className="text-center pb-3 border-b border-white/15">
                     <p className="text-xs text-white/55 mb-1">{t("kidDashboard.totalEarned")}</p>
-                    <motion.div
+                    <div
                       className="text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ repeat: Infinity, duration: 2 }}
                       style={{ fontFamily: "Fredoka, sans-serif" }}
                       data-testid="text-total-earned"
                     >
                       {member.totalEarned.toLocaleString()}
-                    </motion.div>
+                    </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
