@@ -2108,6 +2108,8 @@ export default function KidDashboard() {
           height: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
           minHeight: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
           maxHeight: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
+          transform: 'translateZ(0)',
+          WebkitTransform: 'translateZ(0)',
         }}
       >
         <div className="container mx-auto max-w-7xl h-full flex items-center justify-between gap-4" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
@@ -3075,7 +3077,7 @@ export default function KidDashboard() {
       </div>{/* end left column */}
 
       {/* Right column — sticky (desktop only): pinboard + optional leaderboard */}
-      <div className="hidden lg:flex lg:col-span-1 flex-col gap-4 self-start sticky top-4">
+      <div className="hidden lg:flex lg:col-span-1 flex-col gap-4 self-start sticky" style={{ top: 'calc(var(--header-h) + var(--sat, env(safe-area-inset-top)) + 1rem)' }}>
         <Pinboard currentMemberId={member?.id ?? null} />
         {familyData?.showLeaderboard && (
           <div className="space-y-4">

@@ -252,7 +252,7 @@ export default function Dashboard() {
     return () => window.removeEventListener('resize', checkDesktop);
   }, []);
   
-  const { containerRef, panelRef, stickyStyle } = useStickyPanel(isDesktop);
+  const { containerRef } = useStickyPanel(isDesktop);
 
   // Scroll to pinboard when navigated here from a pinboard_posted notification
   useEffect(() => {
@@ -1114,6 +1114,8 @@ export default function Dashboard() {
           height: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
           minHeight: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
           maxHeight: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
+          transform: 'translateZ(0)',
+          WebkitTransform: 'translateZ(0)',
         }}
       >
         <div className="container mx-auto max-w-7xl h-full flex items-center justify-between gap-4" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
@@ -1727,8 +1729,7 @@ export default function Dashboard() {
             </div>
 
             {/* Sidebar - sticky on desktop */}
-            <div className="relative">
-              <div ref={panelRef} style={stickyStyle} className="space-y-6">
+            <div className="self-start sticky space-y-6" style={{ top: 'calc(var(--header-h) + var(--sat, env(safe-area-inset-top)) + 1rem)' }}>
               {/* Family Goals Widget - shown above pinboard like on kid dashboard */}
               {parentGoals.filter(g => g.isActive).length > 0 && (
                 <div className="space-y-3">
@@ -1892,7 +1893,6 @@ export default function Dashboard() {
                 weeklyPrize={familyData?.weeklyPrize}
                 monthlyPrize={familyData?.monthlyPrize}
               />
-              </div>
             </div>
           </div>
         ) : (
