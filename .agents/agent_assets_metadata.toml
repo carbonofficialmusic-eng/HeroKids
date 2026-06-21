@@ -148,7 +148,31 @@ title = "generated_image"
 id = "dEyXfN_SKmD-8IgaaPVI_"
 uri = "file://client/public/nav-icons/bonus.png"
 type = "image"
-title = "generated_image"
+title = "bonus-star-3d"
+
+[[generated]]
+id = "ZvHBptpvg1wg76lAIJidc"
+uri = "file://client/public/nav-icons/shop.png"
+type = "image"
+title = "reward-shop-3d"
+
+[[generated]]
+id = "SSkwobRw5PLP-5JIXNGpX"
+uri = "file://client/public/nav-icons/chest.png"
+type = "image"
+title = "treasure-chest-3d"
+
+[[generated]]
+id = "kA-kYNSLJU5pLK5B_9uZP"
+uri = "file://client/public/nav-icons/clipboard.png"
+type = "image"
+title = "task-clipboard-3d"
+
+[[generated]]
+id = "D0KUqxLIPgBuG735htQ7f"
+uri = "file://client/public/nav-icons/trophy.png"
+type = "image"
+title = "leaderboard-trophy-3d"
 
 [[outputs]]
 id = "jDcqlYKu7xhdwjCsAa7Eo"

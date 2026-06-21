@@ -2279,8 +2279,8 @@ export default function KidDashboard() {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-20 w-20 flex items-center justify-center flex-shrink-0">
-                  <img src="/nav-icons/bonus.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+                <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                  <img src="/nav-icons/bonus.png" alt="" className="w-full h-full object-contain drop-shadow-xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                   {t("kidDashboard.specialPrizes")}
@@ -2453,8 +2453,8 @@ export default function KidDashboard() {
         <div className="space-y-6 mb-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="h-20 w-20 flex items-center justify-center flex-shrink-0">
-                <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+              <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-xl" />
               </div>
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.rewards")}
@@ -2496,8 +2496,8 @@ export default function KidDashboard() {
           <div className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-20 w-20 flex items-center justify-center flex-shrink-0">
-                  <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+                <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                  <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                   {t("kidDashboard.myRewards")}
@@ -2716,8 +2716,8 @@ export default function KidDashboard() {
           {/* Title row: heading left, toggle right */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <div className="h-20 w-20 flex items-center justify-center flex-shrink-0">
-                <img src="/nav-icons/clipboard.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+              <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                <img src="/nav-icons/clipboard.png" alt="" className="w-full h-full object-contain drop-shadow-xl" />
               </div>
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.tasks")}
@@ -3043,8 +3043,8 @@ export default function KidDashboard() {
         {familyData?.showLeaderboard && (
           <div className="lg:hidden space-y-6">
             <div className="flex items-center gap-3">
-              <div className="h-20 w-20 flex items-center justify-center flex-shrink-0">
-                <img src="/nav-icons/trophy.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+              <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                <img src="/nav-icons/trophy.png" alt="" className="w-full h-full object-contain drop-shadow-xl" />
               </div>
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.leaderboard")}
