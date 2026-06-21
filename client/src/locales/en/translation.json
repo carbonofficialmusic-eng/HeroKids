@@ -1103,7 +1103,7 @@
     "rewardRequestUpdatedDesc": "The changes have been saved."
   },
   "rewardsBoard": {
-    "title": "Rewards Board",
+    "title": "Rewards Shop",
     "backToDashboard": "Back to Dashboard",
     "loading": "Loading...",
     "manageRedemptions": "Manage reward redemptions for your family",
@@ -1429,10 +1429,10 @@
     }
   },
   "myAchievements": {
-    "title": "My Milestones",
-    "allAchievements": "All Milestones",
-    "achievementsCount": "{{count}} milestones available",
-    "noAchievements": "No milestones active yet"
+    "title": "Bonus Rewards",
+    "allAchievements": "All Bonus Rewards",
+    "achievementsCount": "{{count}} bonus rewards available",
+    "noAchievements": "No bonus rewards active yet"
   },
   "myRewards": {
     "title": "My Rewards",

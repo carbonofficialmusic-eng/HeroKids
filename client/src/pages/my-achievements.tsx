@@ -138,12 +138,15 @@ export default function MyAchievements() {
   return (
     <div className="min-h-screen p-4 pb-20" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Link href={member?.role === "parent" ? "/" : "/kid-dashboard"}>
             <button className="p-2 rounded-full bg-card/80 backdrop-blur-md" data-testid="button-back">
               <ArrowLeft className="h-6 w-6" />
             </button>
           </Link>
+          <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
+            <img src="/nav-icons/bonus.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+          </div>
           <h1 className="text-2xl font-bold font-accent" style={{ fontFamily: "Fredoka, sans-serif" }}>
             {t("myAchievements.title")}
           </h1>
@@ -156,8 +159,8 @@ export default function MyAchievements() {
         >
           <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl">
             <div className="flex items-center gap-4">
-              <div className="p-4 rounded-2xl bg-purple-500/20">
-                <Trophy className="h-10 w-10 text-purple-500" />
+              <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
+                <img src="/nav-icons/bonus.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
               </div>
               <div>
                 <h2 className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>

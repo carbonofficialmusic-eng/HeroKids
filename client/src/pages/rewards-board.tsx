@@ -644,7 +644,9 @@ export default function RewardsBoard() {
     return (
       <div className="space-y-6 p-6">
         <div className="flex items-center gap-3">
-          <Gift className="h-8 w-8 text-primary" />
+          <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
+            <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+          </div>
           <div>
             <h1 className="text-3xl font-accent font-bold">{t("rewardsBoard.title")}</h1>
             <p className="text-muted-foreground">{t("rewardsBoard.loading")}</p>
@@ -672,7 +674,9 @@ export default function RewardsBoard() {
 
         {/* Page title */}
         <div className="flex items-center gap-3 mb-6">
-          <Gift className="h-8 w-8 text-primary" />
+          <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
+            <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+          </div>
           <div>
             <h1 className="text-3xl font-accent font-bold">{t("rewardsBoard.title")}</h1>
             <p className="text-muted-foreground">
@@ -689,7 +693,9 @@ export default function RewardsBoard() {
         {!isParent && activeRewards.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Trophy className="h-6 w-6 text-amber-500" />
+              <div className="h-12 w-12 flex items-center justify-center flex-shrink-0">
+                <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+              </div>
               <h2 className="text-2xl font-accent font-bold">{t("kidDashboard.rewards")}</h2>
             </div>
             <div className="grid grid-cols-1 gap-4">

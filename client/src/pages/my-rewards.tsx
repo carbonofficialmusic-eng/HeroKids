@@ -263,7 +263,9 @@ export default function MyRewards() {
 
         {/* Page title */}
         <div className="flex items-center gap-3 mb-2">
-          <Trophy className="h-8 w-8 text-primary" />
+          <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
+            <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+          </div>
           <h1 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
             {t("myRewards.title")}
           </h1>
@@ -276,8 +278,8 @@ export default function MyRewards() {
         >
           <Card className="p-6 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl">
             <div className="flex items-center gap-4">
-              <div className="p-4 rounded-2xl bg-green-500/20">
-                <Trophy className="h-10 w-10 text-green-500" />
+              <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
+                <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
               </div>
               <div>
                 <h2 className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>

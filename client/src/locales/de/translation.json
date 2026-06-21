@@ -1113,7 +1113,7 @@
     "rewardRequestUpdatedDesc": "Die Änderungen wurden gespeichert."
   },
   "rewardsBoard": {
-    "title": "Belohnungstafel",
+    "title": "Belohnungen Shop",
     "backToDashboard": "Zurück zum Dashboard",
     "loading": "Laden...",
     "manageRedemptions": "Verwalte die Belohnungseinlösungen deiner Familie",
@@ -1439,10 +1439,10 @@
     }
   },
   "myAchievements": {
-    "title": "Meine Meilensteine",
-    "allAchievements": "Alle Meilensteine",
-    "achievementsCount": "{{count}} Meilensteine verfügbar",
-    "noAchievements": "Noch keine Meilensteine aktiv"
+    "title": "Bonus Belohnungen",
+    "allAchievements": "Alle Bonus Belohnungen",
+    "achievementsCount": "{{count}} Bonus Belohnungen verfügbar",
+    "noAchievements": "Noch keine Bonus Belohnungen aktiv"
   },
   "myRewards": {
     "title": "Meine Belohnungen",
