@@ -1,19 +1,24 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Gift, ArrowLeft, Loader2 } from "lucide-react";
+import { Gift, ArrowLeft, Loader2, Pencil, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import type { User, FamilyMember, Reward } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
+import { RewardDialog } from "@/components/reward-dialog";
 
 export default function ActiveRewards() {
   const { t } = useTranslation();
   const { toast } = useToast();
+
+  const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
+  const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
 
   const { data: authUser } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -25,6 +30,14 @@ export default function ActiveRewards() {
     enabled: !!authUser,
     staleTime: 5 * 60 * 1000,
   });
+
+  const { data: realMember } = useQuery<FamilyMember>({
+    queryKey: ["/api/family-members/real"],
+    enabled: !!authUser,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isRealParent = realMember?.role === "parent";
 
   const { data: rewards = [], isLoading } = useQuery<Reward[]>({
     queryKey: ["/api/rewards"],
@@ -56,6 +69,32 @@ export default function ActiveRewards() {
         title: t("errors.somethingWrong"),
         variant: "destructive",
       });
+    },
+  });
+
+  const updateRewardMutation = useMutation({
+    mutationFn: async ({ rewardId, data }: { rewardId: string; data: any }) => {
+      return await apiRequest("PUT", `/api/rewards/${rewardId}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
+      setRewardDialogOpen(false);
+      setSelectedReward(null);
+    },
+    onError: () => {
+      toast({ title: t("errors.somethingWrong"), variant: "destructive" });
+    },
+  });
+
+  const deleteRewardMutation = useMutation({
+    mutationFn: async (rewardId: string) => {
+      return await apiRequest("DELETE", `/api/rewards/${rewardId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
+    },
+    onError: () => {
+      toast({ title: t("errors.somethingWrong"), variant: "destructive" });
     },
   });
 
@@ -104,7 +143,33 @@ export default function ActiveRewards() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Card className="p-5" data-testid={`card-reward-${reward.id}`}>
+                <Card className="p-5 relative overflow-visible" data-testid={`card-reward-${reward.id}`}>
+                  {isRealParent && (
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setSelectedReward(reward);
+                          setRewardDialogOpen(true);
+                        }}
+                        data-testid={`button-edit-reward-${reward.id}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => deleteRewardMutation.mutate(reward.id)}
+                        disabled={deleteRewardMutation.isPending}
+                        data-testid={`button-delete-reward-${reward.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                   <div className="flex items-start gap-4">
                     <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
                       <span className="text-4xl leading-none">{reward.iconEmoji || "🎁"}</span>
@@ -160,6 +225,24 @@ export default function ActiveRewards() {
           </div>
         )}
       </div>
+
+      {isRealParent && member && (
+        <RewardDialog
+          open={rewardDialogOpen}
+          onOpenChange={(open) => {
+            setRewardDialogOpen(open);
+            if (!open) setSelectedReward(null);
+          }}
+          onSubmit={(data) => {
+            if (selectedReward) {
+              updateRewardMutation.mutate({ rewardId: selectedReward.id, data });
+            }
+          }}
+          isSubmitting={updateRewardMutation.isPending}
+          familyName={member.familyName}
+          reward={selectedReward}
+        />
+      )}
     </div>
   );
 }
