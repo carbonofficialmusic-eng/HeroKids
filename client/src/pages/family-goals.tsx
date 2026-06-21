@@ -253,10 +253,10 @@ export default function FamilyGoals() {
           </Link>
           <h1 className="text-4xl font-black font-accent flex items-center gap-3">
             <Target className="h-10 w-10" />
-            {t("familyGoals.title")}
+            Familienziele
           </h1>
           <p className="text-muted-foreground mt-2">
-            {t("familyGoals.subtitle")}
+            Gemeinsam sparen. Gemeinsam erleben.
           </p>
         </div>
 
