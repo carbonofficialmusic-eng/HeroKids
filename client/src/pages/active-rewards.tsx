@@ -71,13 +71,14 @@ export default function ActiveRewards() {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild data-testid="button-back-active-rewards">
+          <Button variant="outline" size="sm" asChild data-testid="button-back-active-rewards" className="gap-2 shrink-0">
             <Link href="/">
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4" />
+              {t("common.back") || "Zurück"}
             </Link>
           </Button>
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-full gradient-winner flex items-center justify-center">
+            <div className="h-9 w-9 rounded-full gradient-winner flex items-center justify-center shrink-0">
               <Gift className="h-5 w-5 text-white" />
             </div>
             <h1 className="text-2xl font-bold font-accent">{t("dashboard.activeRewards")}</h1>
