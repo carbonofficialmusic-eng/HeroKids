@@ -1281,7 +1281,7 @@
     "earnedPoints": "{{count}}ポイント獲得！",
     "taskError": "タスクを完了できませんでした。",
     "waitingApproval": "承認待ち",
-    "waitingForOthers": "提出済み – 承認待ち",
+    "waitingForOthers": "提出済み – 他のメンバーを待っています",
     "completedApproved": "完了・承認済み",
     "tryAgain": "再試行",
     "allSlotsTaken": "枠がすべて埋まっています",

@@ -1281,7 +1281,7 @@
     "earnedPoints": "Tu as gagné {{count}} points !",
     "taskError": "Impossible de terminer la tâche.",
     "waitingApproval": "En attente d'approbation",
-    "waitingForOthers": "Soumis – en attente de validation",
+    "waitingForOthers": "Soumis – en attente des autres membres",
     "completedApproved": "Terminée et approuvée",
     "tryAgain": "Réessayer",
     "allSlotsTaken": "Toutes les places prises",

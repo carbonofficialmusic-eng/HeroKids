@@ -1337,7 +1337,7 @@
     "earnedPoints": "Du hast {{count}} Punkte verdient!",
     "taskError": "Aufgabe konnte nicht abgeschlossen werden.",
     "waitingApproval": "Wartet auf Freigabe",
-    "waitingForOthers": "Eingereicht – warte auf die Genehmigung",
+    "waitingForOthers": "Eingereicht – warte auf andere Mitglieder",
     "completedApproved": "Abgeschlossen & Genehmigt",
     "tryAgain": "Nochmal versuchen",
     "allSlotsTaken": "Alle Plätze belegt",

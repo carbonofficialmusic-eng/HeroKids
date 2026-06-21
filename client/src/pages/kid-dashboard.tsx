@@ -700,8 +700,10 @@ function TaskCard({
   let statusColor = "";
   
   if (showAsSubmitted) {
-    statusMessage = t("kidDashboard.waitingForOthers") || "Warte auf andere Mitglieder…";
-    statusColor = "text-muted-foreground";
+    statusMessage = task.requiresApproval
+      ? t("kidDashboard.waitingApproval")
+      : (t("kidDashboard.waitingForOthers") || "Warte auf andere Mitglieder…");
+    statusColor = task.requiresApproval ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground";
   } else if (showAsPending) {
     statusMessage = t("kidDashboard.waitingApproval");
     statusColor = "text-amber-600 dark:text-amber-400";
