@@ -2113,11 +2113,7 @@ export default function KidDashboard() {
         </div>
 
         {/* Hero Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div>
           <div className="py-4">
             <div className="flex items-center justify-between flex-wrap gap-5">
               <div className="flex items-center gap-5">
@@ -2189,16 +2185,11 @@ export default function KidDashboard() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Special Achievement Rewards Section */}
         {specialRewards.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-4"
-          >
+          <div className="space-y-4">
             <div className="flex items-end justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
@@ -2218,12 +2209,7 @@ export default function KidDashboard() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {specialRewards.slice(0, 2).map((achievement, index) => (
-                <motion.div
-                  key={achievement.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                >
+                <div key={achievement.id}>
                   <Card className="p-5 bg-gradient-to-br from-purple-100/90 to-pink-100/90 dark:from-purple-900/40 dark:to-pink-900/40 border-2 border-purple-400/40 dark:border-purple-500/30 rounded-2xl shadow-lg">
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-xl bg-purple-500/30 dark:bg-purple-500/40 flex-shrink-0">
@@ -2251,20 +2237,15 @@ export default function KidDashboard() {
                       </Popover>
                     </div>
                   </Card>
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Active Shared Rewards Section - From other family members */}
         {sharedRewards.filter(sr => sr.memberId !== member?.id).length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            className="space-y-4"
-          >
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-2xl bg-blue-500/20">
                 <Users className="h-7 w-7 text-blue-500" />
@@ -2281,12 +2262,7 @@ export default function KidDashboard() {
                   const initiatorMember = familyMembers.find(m => m.id === shared.memberId);
 
                   return (
-                    <motion.div
-                      key={shared.id}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
+                    <div key={shared.id}>
                       <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-2 border-blue-500/30 rounded-2xl">
                         <div className="space-y-3">
                           <div className="text-center space-y-2">
@@ -2364,11 +2340,11 @@ export default function KidDashboard() {
                           </div>
                         </div>
                       </Card>
-                    </motion.div>
+                    </div>
                   );
                 })}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Rewards Section */}
@@ -2400,14 +2376,9 @@ export default function KidDashboard() {
           ) : (
             <div className="space-y-4">
               {activeRewards.slice(0, 3).map((reward, index) => (
-                <motion.div
-                  key={reward.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
+                <div key={reward.id}>
                   <RewardCard reward={reward} currentPoints={currentPoints} member={member} />
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -2444,12 +2415,7 @@ export default function KidDashboard() {
                 const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
                 return (
-                  <motion.div
-                    key={redemption.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
+                  <div key={redemption.id}>
                     <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-2 border-green-500/30 rounded-2xl">
                       <div className="space-y-3">
                         <div className="text-center space-y-2">
@@ -2570,7 +2536,7 @@ export default function KidDashboard() {
                         )}
                       </div>
                     </Card>
-                  </motion.div>
+                  </div>
                 );
               })}
 
@@ -2581,12 +2547,7 @@ export default function KidDashboard() {
                 const isFinalized = joined.sharingStatus === "sharing_finalized";
 
                 return (
-                  <motion.div
-                    key={`joined-${joined.id}`}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: (myRedemptions.slice(0, 2).length + index) * 0.1 }}
-                  >
+                  <div key={`joined-${joined.id}`}>
                     <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-2 border-green-500/30 rounded-2xl">
                       <div className="space-y-3">
                         <div className="text-center space-y-2">
@@ -2626,7 +2587,7 @@ export default function KidDashboard() {
                         </div>
                       </div>
                     </Card>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -2735,15 +2696,9 @@ export default function KidDashboard() {
                 <CollapsibleContent>
                   <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2 mt-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2"}>
                     {importantMyTasks.map((task, index) => (
-                      <motion.div
-                        key={task.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="min-w-0"
-                      >
+                      <div key={task.id} className="min-w-0">
                         <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 </CollapsibleContent>
@@ -2800,15 +2755,9 @@ export default function KidDashboard() {
                     <CollapsibleContent>
                       <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2 mt-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2"}>
                         {categoryTasks.map((task, index) => (
-                          <motion.div
-                            key={task.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="min-w-0"
-                          >
+                          <div key={task.id} className="min-w-0">
                             <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
                     </CollapsibleContent>
@@ -2819,15 +2768,9 @@ export default function KidDashboard() {
           ) : (
             <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
               {filteredKidTasks.map((task, index) => (
-                <motion.div
-                  key={task.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="min-w-0"
-                >
+                <div key={task.id} className="min-w-0">
                   <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -2849,12 +2792,7 @@ export default function KidDashboard() {
               const isCompleted = goal.currentPoints >= goal.targetPoints;
               
               return (
-                <motion.div
-                  key={goal.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
+                <div key={goal.id}>
                   <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-2 border-blue-500/30 rounded-3xl">
                     <div className="space-y-4">
                       <div className="flex items-start gap-4">
@@ -2948,7 +2886,7 @@ export default function KidDashboard() {
                       </div>
                     </div>
                   </Card>
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -3027,16 +2965,11 @@ export default function KidDashboard() {
           paddingTop: '0.5rem',
         }}
       >
-        <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, type: "spring", damping: 20, stiffness: 200 }}
-        >
+        <div>
           <div
             style={{
               transform: chatBarCollapsed ? 'translateX(calc(100% - 40px))' : 'translateX(0)',
               transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              willChange: 'transform',
             }}
           >
             <Card className="p-1.5 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
@@ -3051,7 +2984,7 @@ export default function KidDashboard() {
                 >
                   {chatBarCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
                 </Button>
-                <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0">
                   <Button
                     variant="ghost"
                     size="lg"
@@ -3062,8 +2995,8 @@ export default function KidDashboard() {
                     <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-amber-500 flex-shrink-0" />
                     <span className="font-bold text-sm sm:text-base truncate">{t("kidDashboard.requestNewReward")}</span>
                   </Button>
-                </motion.div>
-                <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} className="flex-1 min-w-0 relative">
+                </div>
+                <div className="flex-1 min-w-0 relative">
                   <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
                     <Link href="/chat">
                       <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
@@ -3078,7 +3011,7 @@ export default function KidDashboard() {
                       {unreadChatData.count}
                     </span>
                   )}
-                </motion.div>
+                </div>
                 <div className="w-10 flex-shrink-0" />
               </div>
               {chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
@@ -3091,7 +3024,7 @@ export default function KidDashboard() {
               )}
             </Card>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Edit Profile Dialog - Available to all members */}
