@@ -2032,7 +2032,7 @@ export default function KidDashboard() {
       {/* Header — same structure as parent dashboard: fixed, in root stacking context */}
       <header
         data-app-header
-        className="fixed top-0 left-0 right-0 z-40 w-full bg-background/70 backdrop-blur-md"
+        className="fixed top-0 left-0 right-0 z-40 w-full bg-background/95"
         style={{
           paddingTop: 'max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px)',
           height: 'calc(var(--header-h) + max(calc(var(--sat, env(safe-area-inset-top)) - 6px), 0px))',
@@ -2163,7 +2163,7 @@ export default function KidDashboard() {
                   <MessageSquare className="h-5 w-5" />
                 </button>
               </div>
-              <div className="bg-black/30 backdrop-blur-xl p-5 rounded-2xl border border-white/20 shadow-xl shadow-black/30 min-w-[260px]">
+              <div className="bg-black/50 p-5 rounded-2xl border border-white/20 shadow-xl shadow-black/30 min-w-[260px]">
                 <p className="text-sm text-white/60 mb-3 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
                 <div className="space-y-3">
                   <div className="text-center pb-3 border-b border-white/15">
@@ -2224,7 +2224,7 @@ export default function KidDashboard() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="p-5 bg-gradient-to-br from-purple-100/90 to-pink-100/90 dark:from-purple-900/40 dark:to-pink-900/40 backdrop-blur-md border-2 border-purple-400/40 dark:border-purple-500/30 rounded-2xl shadow-lg">
+                  <Card className="p-5 bg-gradient-to-br from-purple-100/90 to-pink-100/90 dark:from-purple-900/40 dark:to-pink-900/40 border-2 border-purple-400/40 dark:border-purple-500/30 rounded-2xl shadow-lg">
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-xl bg-purple-500/30 dark:bg-purple-500/40 flex-shrink-0">
                         <Gift className="h-7 w-7 text-purple-600 dark:text-purple-300" />
@@ -2392,7 +2392,7 @@ export default function KidDashboard() {
           </div>
 
           {activeRewards.length === 0 ? (
-            <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
+            <Card className="p-8 text-center bg-card rounded-2xl">
               <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
               <p className="text-lg text-muted-foreground">{t("kidDashboard.noRewardsYet")}</p>
               <p className="text-sm text-muted-foreground mt-2">{t("kidDashboard.parentsCanCreate")}</p>
@@ -2752,7 +2752,7 @@ export default function KidDashboard() {
           )}
 
           {filteredKidTasks.length === 0 ? (
-            <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
+            <Card className="p-8 text-center bg-card rounded-2xl">
               <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-green-500" />
               {myTasks.length === 0 ? (
                 <>
