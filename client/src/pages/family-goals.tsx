@@ -20,6 +20,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { 
   Target, 
   Plus, 
@@ -29,13 +34,15 @@ import {
   CheckCircle2,
   Coins,
   Trash2,
-  ArrowLeft
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  BarChart3,
 } from "lucide-react";
 import { Link } from "wouter";
 import type { FamilyGoal, GoalContribution, FamilyMember } from "@shared/schema";
 import { FamilyGoalDialog } from "@/components/family-goal-dialog";
 
-// Extended FamilyGoal type with contributions from API
 type FamilyGoalWithContributions = FamilyGoal & {
   contributions: GoalContribution[];
   currentPeriod: string;
@@ -45,10 +52,10 @@ export default function FamilyGoals() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [selectedGoal, setSelectedGoal] = useState<FamilyGoal | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [goalToDelete, setGoalToDelete] = useState<FamilyGoal | null>(null);
+  const [historyOpenGoals, setHistoryOpenGoals] = useState<Record<string, boolean>>({});
 
   const { data: member } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
@@ -56,7 +63,6 @@ export default function FamilyGoals() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Enable real-time WebSocket updates
   useWebSocket(member?.familyName || null);
 
   const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
@@ -68,6 +74,24 @@ export default function FamilyGoals() {
   const { data: goals = [], isLoading } = useQuery<FamilyGoalWithContributions[]>({
     queryKey: ["/api/family-goals"],
     enabled: !!member,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Fetch full contribution history for each active goal
+  const activeGoalIds = goals.filter(g => g.isActive).map(g => g.id);
+  const contributionHistories = useQuery<Record<string, GoalContribution[]>>({
+    queryKey: ["/api/family-goals/all-contributions", activeGoalIds.join(",")],
+    enabled: !!member && activeGoalIds.length > 0,
+    queryFn: async () => {
+      const results: Record<string, GoalContribution[]> = {};
+      await Promise.all(
+        activeGoalIds.map(async (id) => {
+          const res = await apiRequest("GET", `/api/family-goals/${id}/contributions`);
+          results[id] = await res.json();
+        })
+      );
+      return results;
+    },
     staleTime: 5 * 60 * 1000,
   });
 
@@ -99,6 +123,7 @@ export default function FamilyGoals() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-goals/all-contributions"] });
       toast({
         title: t("familyGoals.pointsContributed"),
         description: t("familyGoals.pointsContributedDesc"),
@@ -166,26 +191,38 @@ export default function FamilyGoals() {
     }
   };
 
-  // Calculate when the next contribution period starts
   const getNextContributionDate = (contributionPeriod: "weekly" | "monthly") => {
     const now = new Date();
     if (contributionPeriod === "weekly") {
-      // Next Monday
       const daysUntilMonday = (8 - now.getDay()) % 7 || 7;
       const nextMonday = new Date(now);
       nextMonday.setDate(now.getDate() + daysUntilMonday);
       return nextMonday.toLocaleDateString();
     } else {
-      // First day of next month
       const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
       return nextMonth.toLocaleDateString();
     }
   };
 
-  // Check if current member has already contributed to a goal this period
   const hasContributedThisPeriod = (goal: FamilyGoalWithContributions) => {
     if (!member || !goal.contributions) return false;
     return goal.contributions.some(c => c.memberId === member.id);
+  };
+
+  // Group contributions by period for the history view
+  const getContributionsByPeriod = (goalId: string) => {
+    const history = contributionHistories.data?.[goalId] || [];
+    const grouped: Record<string, GoalContribution[]> = {};
+    for (const c of history) {
+      if (!grouped[c.period]) grouped[c.period] = [];
+      grouped[c.period].push(c);
+    }
+    // Sort periods descending (newest first)
+    return Object.entries(grouped).sort(([a], [b]) => b.localeCompare(a));
+  };
+
+  const toggleHistoryOpen = (goalId: string) => {
+    setHistoryOpenGoals(prev => ({ ...prev, [goalId]: !prev[goalId] }));
   };
 
   if (isLoading) {
@@ -201,7 +238,7 @@ export default function FamilyGoals() {
 
   return (
     <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <div className="mb-8">
           <Link href="/dashboard">
             <Button 
@@ -255,129 +292,234 @@ export default function FamilyGoals() {
           </Card>
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {activeGoals.map((goal) => {
             const progress = calculateProgress(goal);
             const currentPeriod = goal.currentPeriod || getCurrentPeriod(goal.contributionPeriod);
             const isCompleted = goal.currentPoints >= goal.targetPoints;
             const alreadyContributed = hasContributedThisPeriod(goal);
             const contributors = goal.contributions || [];
+            const historyByPeriod = getContributionsByPeriod(goal.id);
+            const isHistoryOpen = historyOpenGoals[goal.id] ?? false;
             
             return (
-              <Card key={goal.id} className="overflow-hidden relative" data-testid={`card-goal-${goal.id}`}>
-                <div className="p-6">
-                  {/* Delete Button - Fixed top right position */}
-                  {member?.role === "parent" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setGoalToDelete(goal);
-                        setDeleteDialogOpen(true);
-                      }}
-                      data-testid={`button-delete-goal-${goal.id}`}
-                      className="absolute top-4 right-4 z-10"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                  
-                  <div className="mb-4 pr-12">
-                    <div className="flex items-start gap-3 sm:gap-4">
-                      <div className="text-4xl sm:text-5xl flex-shrink-0">{goal.iconEmoji}</div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl sm:text-2xl font-bold mb-1">{goal.title}</h3>
-                        {goal.description && (
-                          <p className="text-muted-foreground text-sm">{goal.description}</p>
-                        )}
-                        {isCompleted && (
-                          <Badge variant="default" className="gap-1 mt-2">
-                            <CheckCircle2 className="h-3 w-3" />
-                            {t("familyGoals.achieved")}
-                          </Badge>
-                        )}
-                        <div className="flex flex-wrap items-center gap-2 mt-3">
-                          <Badge variant="secondary" className="gap-1 text-xs">
-                            <Calendar className="h-3 w-3" />
-                            {goal.contributionPeriod === "weekly" ? t("familyGoals.weekly") : t("familyGoals.monthly")}
-                          </Badge>
-                          <Badge variant="secondary" className="gap-1 text-xs">
-                            <Coins className="h-3 w-3" />
-                            {t("familyGoals.pointsAmount", { amount: goal.contributionAmount })}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">{t("familyGoals.progress")}</span>
-                        <span className="text-sm font-bold">
-                          {t("familyGoals.progressPoints", { current: goal.currentPoints, target: goal.targetPoints })}
-                        </span>
-                      </div>
-                      <Progress value={progress} className="h-3" />
-                    </div>
-
-                    {/* Contributors list - shows who has contributed this period */}
-                    {contributors.length > 0 && (
-                      <div className="flex items-center gap-2 pt-2">
-                        <span className="text-sm text-muted-foreground">{t("familyGoals.contributedThisPeriod")}:</span>
-                        <div className="flex -space-x-2">
-                          {contributors.map((contribution) => {
-                            const contributorMember = getMemberById(contribution.memberId);
-                            return (
-                              <Avatar 
-                                key={contribution.id} 
-                                className="h-7 w-7 border-2 border-background"
-                                title={contributorMember?.displayName}
-                              >
-                                <AvatarFallback 
-                                  className="text-white text-xs font-bold"
-                                  style={{ backgroundColor: contributorMember?.color || "#888" }}
-                                >
-                                  {contributorMember?.displayName?.charAt(0).toUpperCase() || "?"}
-                                </AvatarFallback>
-                              </Avatar>
-                            );
-                          })}
-                        </div>
-                      </div>
+              <div key={goal.id} className="space-y-0">
+                {/* Main Goal Card */}
+                <Card className="overflow-hidden relative" data-testid={`card-goal-${goal.id}`}>
+                  <div className="p-6">
+                    {member?.role === "parent" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setGoalToDelete(goal);
+                          setDeleteDialogOpen(true);
+                        }}
+                        data-testid={`button-delete-goal-${goal.id}`}
+                        className="absolute top-4 right-4 z-10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     )}
-
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          {formatPeriod(currentPeriod, goal.contributionPeriod)}
-                        </span>
-                      </div>
-                      
-                      {!isCompleted && member && (
-                        alreadyContributed ? (
-                          <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/50 border border-border/50">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
-                            <span className="text-sm text-muted-foreground">
-                              {t("familyGoals.nextContribution", { date: getNextContributionDate(goal.contributionPeriod) })}
-                            </span>
+                    
+                    <div className="mb-4 pr-12">
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="text-4xl sm:text-5xl flex-shrink-0">{goal.iconEmoji}</div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xl sm:text-2xl font-bold mb-1">{goal.title}</h3>
+                          {goal.description && (
+                            <p className="text-muted-foreground text-sm">{goal.description}</p>
+                          )}
+                          {isCompleted && (
+                            <Badge variant="default" className="gap-1 mt-2">
+                              <CheckCircle2 className="h-3 w-3" />
+                              {t("familyGoals.achieved")}
+                            </Badge>
+                          )}
+                          <div className="flex flex-wrap items-center gap-2 mt-3">
+                            <Badge variant="secondary" className="gap-1 text-xs">
+                              <Calendar className="h-3 w-3" />
+                              {goal.contributionPeriod === "weekly" ? t("familyGoals.weekly") : t("familyGoals.monthly")}
+                            </Badge>
+                            <Badge variant="secondary" className="gap-1 text-xs">
+                              <Coins className="h-3 w-3" />
+                              {t("familyGoals.pointsAmount", { amount: goal.contributionAmount })}
+                            </Badge>
                           </div>
-                        ) : (
-                          <Button
-                            onClick={() => contributeMutation.mutate(goal.id)}
-                            disabled={contributeMutation.isPending || member.totalPoints < goal.contributionAmount}
-                            data-testid={`button-contribute-${goal.id}`}
-                          >
-                            <TrendingUp className="h-4 w-4 mr-2" />
-                            {t("familyGoals.contributePoints", { amount: goal.contributionAmount })}
-                          </Button>
-                        )
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">{t("familyGoals.progress")}</span>
+                          <span className="text-sm font-bold">
+                            {t("familyGoals.progressPoints", { current: goal.currentPoints, target: goal.targetPoints })}
+                          </span>
+                        </div>
+                        <Progress value={progress} className="h-3" />
+                      </div>
+
+                      {contributors.length > 0 && (
+                        <div className="flex items-center gap-2 pt-2">
+                          <span className="text-sm text-muted-foreground">{t("familyGoals.contributedThisPeriod")}:</span>
+                          <div className="flex -space-x-2">
+                            {contributors.map((contribution) => {
+                              const contributorMember = getMemberById(contribution.memberId);
+                              return (
+                                <Avatar 
+                                  key={contribution.id} 
+                                  className="h-7 w-7 border-2 border-background"
+                                  title={contributorMember?.displayName}
+                                >
+                                  <AvatarFallback 
+                                    className="text-white text-xs font-bold"
+                                    style={{ backgroundColor: contributorMember?.color || "#888" }}
+                                  >
+                                    {contributorMember?.displayName?.charAt(0).toUpperCase() || "?"}
+                                  </AvatarFallback>
+                                </Avatar>
+                              );
+                            })}
+                          </div>
+                        </div>
                       )}
+
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t">
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            {formatPeriod(currentPeriod, goal.contributionPeriod)}
+                          </span>
+                        </div>
+                        
+                        {!isCompleted && member && (
+                          alreadyContributed ? (
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/50 border border-border/50">
+                              <CheckCircle2 className="h-4 w-4 text-green-500" />
+                              <span className="text-sm text-muted-foreground">
+                                {t("familyGoals.nextContribution", { date: getNextContributionDate(goal.contributionPeriod) })}
+                              </span>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={() => contributeMutation.mutate(goal.id)}
+                              disabled={contributeMutation.isPending || member.totalPoints < goal.contributionAmount}
+                              data-testid={`button-contribute-${goal.id}`}
+                            >
+                              <TrendingUp className="h-4 w-4 mr-2" />
+                              {t("familyGoals.contributePoints", { amount: goal.contributionAmount })}
+                            </Button>
+                          )
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+
+                {/* Contribution History - collapsible, shown below the goal card */}
+                {historyByPeriod.length > 0 && (
+                  <Collapsible open={isHistoryOpen} onOpenChange={() => toggleHistoryOpen(goal.id)}>
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full rounded-t-none border border-t-0 border-border/50 bg-muted/30 hover:bg-muted/50 justify-between px-5 py-3 h-auto"
+                        data-testid={`button-toggle-history-${goal.id}`}
+                      >
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <BarChart3 className="h-4 w-4" />
+                          <span className="font-medium">Einzahlungsübersicht</span>
+                          <Badge variant="secondary" className="text-xs">
+                            {historyByPeriod.length} {goal.contributionPeriod === "weekly" ? "Wochen" : "Monate"}
+                          </Badge>
+                        </div>
+                        {isHistoryOpen ? (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="border border-t-0 border-border/50 rounded-b-lg overflow-hidden">
+                        {historyByPeriod.map(([period, contributions], idx) => {
+                          const isCurrentPeriod = period === currentPeriod;
+                          const periodTotal = contributions.reduce((sum, c) => sum + c.points, 0);
+                          const contributingMemberIds = contributions.map(c => c.memberId);
+                          const missingMembers = familyMembers.filter(m => !contributingMemberIds.includes(m.id));
+
+                          return (
+                            <div
+                              key={period}
+                              className={`px-5 py-4 ${idx < historyByPeriod.length - 1 ? "border-b border-border/40" : ""} ${isCurrentPeriod ? "bg-primary/5" : "bg-background"}`}
+                            >
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-semibold">
+                                    {formatPeriod(period, goal.contributionPeriod)}
+                                  </span>
+                                  {isCurrentPeriod && (
+                                    <Badge variant="default" className="text-xs px-1.5">
+                                      Aktuell
+                                    </Badge>
+                                  )}
+                                </div>
+                                <span className="text-sm font-bold text-primary">
+                                  +{periodTotal} Pkt.
+                                </span>
+                              </div>
+
+                              {/* Who paid */}
+                              <div className="space-y-1.5">
+                                {contributions.map((c) => {
+                                  const cm = getMemberById(c.memberId);
+                                  return (
+                                    <div key={c.id} className="flex items-center gap-2">
+                                      <Avatar className="h-6 w-6 flex-shrink-0">
+                                        <AvatarFallback
+                                          className="text-white text-[10px] font-bold"
+                                          style={{ backgroundColor: cm?.color || "#888" }}
+                                        >
+                                          {cm?.displayName?.charAt(0).toUpperCase() || "?"}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <span className="text-sm">{cm?.displayName || "Unbekannt"}</span>
+                                      <span className="text-xs text-muted-foreground ml-auto">+{c.points} Pkt.</span>
+                                      <CheckCircle2 className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                                    </div>
+                                  );
+                                })}
+
+                                {/* Who hasn't paid yet (only for current period) */}
+                                {isCurrentPeriod && missingMembers.length > 0 && (
+                                  <>
+                                    {missingMembers.map((m) => (
+                                      <div key={m.id} className="flex items-center gap-2 opacity-50">
+                                        <Avatar className="h-6 w-6 flex-shrink-0">
+                                          <AvatarFallback
+                                            className="text-white text-[10px] font-bold"
+                                            style={{ backgroundColor: m.color || "#888" }}
+                                          >
+                                            {m.displayName?.charAt(0).toUpperCase() || "?"}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                        <span className="text-sm text-muted-foreground">{m.displayName}</span>
+                                        <span className="text-xs text-muted-foreground ml-auto">ausstehend</span>
+                                        <div className="h-3.5 w-3.5 rounded-full border-2 border-muted-foreground/40 flex-shrink-0" />
+                                      </div>
+                                    ))}
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </div>
             );
           })}
         </div>

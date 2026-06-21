@@ -46,7 +46,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronLeft, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronLeft, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin, TrendingUp, CheckCircle2, Coins } from "lucide-react";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
@@ -54,7 +55,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { apiRequest, queryClient, getDevHeaders } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
-import type { FamilyMember, Task, Reward, RewardRequest } from "@shared/schema";
+import type { FamilyMember, Task, Reward, RewardRequest, FamilyGoal, GoalContribution } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import { hasFeature } from "@shared/tier-config";
@@ -449,6 +450,14 @@ export default function Dashboard() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Fetch family goals for parent dashboard widget
+  type FamilyGoalWithContributions = FamilyGoal & { contributions: GoalContribution[]; currentPeriod: string };
+  const { data: parentGoals = [] } = useQuery<FamilyGoalWithContributions[]>({
+    queryKey: ["/api/family-goals"],
+    enabled: !!member,
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Filter for all active achievements
   const specialRewards = achievements
     .filter(a => a.isActive)
@@ -572,6 +581,52 @@ export default function Dashboard() {
         description: error.message || t("toast.unableSwitchMember"),
         variant: "destructive",
       });
+    },
+  });
+
+  // Family goals helpers for parent dashboard widget
+  const getGoalCurrentPeriod = (contributionPeriod: "weekly" | "monthly") => {
+    const now = new Date();
+    if (contributionPeriod === "weekly") {
+      const weekNumber = Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 604800000);
+      return `${now.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
+    }
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  };
+
+  const getGoalNextContributionDate = (contributionPeriod: "weekly" | "monthly") => {
+    const now = new Date();
+    if (contributionPeriod === "weekly") {
+      const daysUntilMonday = (8 - now.getDay()) % 7 || 7;
+      const next = new Date(now);
+      next.setDate(now.getDate() + daysUntilMonday);
+      return next.toLocaleDateString();
+    }
+    return new Date(now.getFullYear(), now.getMonth() + 1, 1).toLocaleDateString();
+  };
+
+  const formatGoalPeriod = (period: string, contributionPeriod: "weekly" | "monthly") => {
+    if (contributionPeriod === "weekly") {
+      const parts = period.split("-W");
+      return t("familyGoals.weekFormat", { week: parts[1], year: parts[0] });
+    }
+    const parts = period.split("-");
+    const monthIndex = parseInt(parts[1]) - 1;
+    return t("familyGoals.monthFormat", { month: t(`common.monthsShort.${monthIndex}`), year: parts[0] });
+  };
+
+  // Contribute to family goal (parent dashboard widget)
+  const parentContributeMutation = useMutation({
+    mutationFn: async (goalId: string) => {
+      return await apiRequest("POST", `/api/family-goals/${goalId}/contribute`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      toast({ title: t("familyGoals.pointsContributed"), description: t("familyGoals.pointsContributedDesc") });
+    },
+    onError: (error: any) => {
+      toast({ title: t("errors.error"), description: error.message || t("familyGoals.errorContribute"), variant: "destructive" });
     },
   });
 
@@ -1674,6 +1729,99 @@ export default function Dashboard() {
             {/* Sidebar - sticky on desktop */}
             <div className="relative">
               <div ref={panelRef} style={stickyStyle} className="space-y-6">
+              {/* Family Goals Widget - shown above pinboard like on kid dashboard */}
+              {parentGoals.filter(g => g.isActive).length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-bold font-accent">{t("familyGoals.title")}</h2>
+                  </div>
+                  {parentGoals.filter(g => g.isActive).map((goal) => {
+                    const progress = Math.min((goal.currentPoints / goal.targetPoints) * 100, 100);
+                    const currentPeriod = goal.currentPeriod || getGoalCurrentPeriod(goal.contributionPeriod);
+                    const isCompleted = goal.currentPoints >= goal.targetPoints;
+                    const alreadyContributed = member ? goal.contributions?.some(c => c.memberId === member.id) : false;
+
+                    return (
+                      <Card key={goal.id} className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/30" data-testid={`card-parent-goal-${goal.id}`}>
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-3">
+                            <div className="text-3xl flex-shrink-0">{goal.iconEmoji}</div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-base leading-tight">{goal.title}</h3>
+                              {isCompleted && (
+                                <Badge variant="default" className="gap-1 mt-1 text-xs">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  {t("familyGoals.achieved")}
+                                </Badge>
+                              )}
+                              <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                <Badge variant="secondary" className="gap-1 text-xs">
+                                  <Calendar className="h-3 w-3" />
+                                  {goal.contributionPeriod === "weekly" ? t("familyGoals.weekly") : t("familyGoals.monthly")}
+                                </Badge>
+                                <Badge variant="secondary" className="gap-1 text-xs">
+                                  <Coins className="h-3 w-3" />
+                                  {goal.contributionAmount}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-xs font-medium text-muted-foreground">{t("familyGoals.progress")}</span>
+                              <span className="text-xs font-bold">{goal.currentPoints} / {goal.targetPoints}</span>
+                            </div>
+                            <Progress value={progress} className="h-2" />
+                          </div>
+
+                          {goal.contributions && goal.contributions.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">{t("familyGoals.contributedThisPeriod")}:</span>
+                              <div className="flex -space-x-1.5">
+                                {goal.contributions.map((c) => {
+                                  const cm = familyMembers.find(m => m.id === c.memberId);
+                                  return (
+                                    <Avatar key={c.id} className="h-6 w-6 border-2 border-background" title={cm?.displayName}>
+                                      <AvatarFallback className="text-white text-[10px] font-bold" style={{ backgroundColor: cm?.color || "#888" }}>
+                                        {cm?.displayName?.charAt(0).toUpperCase() || "?"}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-between pt-2 border-t">
+                            <span className="text-xs text-muted-foreground">{formatGoalPeriod(currentPeriod, goal.contributionPeriod)}</span>
+                            {!isCompleted && member && (
+                              alreadyContributed ? (
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50 border border-border/50">
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                                  <span className="text-xs text-muted-foreground">{getGoalNextContributionDate(goal.contributionPeriod)}</span>
+                                </div>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  onClick={() => parentContributeMutation.mutate(goal.id)}
+                                  disabled={parentContributeMutation.isPending || member.totalPoints < goal.contributionAmount}
+                                  data-testid={`button-parent-contribute-${goal.id}`}
+                                >
+                                  <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
+                                  {t("familyGoals.contributePoints", { amount: goal.contributionAmount })}
+                                </Button>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Pinboard */}
               <div id="pinboard">
               <Pinboard currentMemberId={member?.id ?? null} />

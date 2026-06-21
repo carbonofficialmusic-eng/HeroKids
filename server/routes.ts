@@ -5932,6 +5932,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get ALL contributions for a specific goal (full history) - supports Device Sessions
+  app.get("/api/family-goals/:id/contributions", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const member = result.member;
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const goal = await storage.getFamilyGoal(id);
+      if (!goal || goal.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Family goal not found" });
+      }
+
+      const contributions = await storage.getGoalContributionsByGoal(id);
+      res.json(contributions);
+    } catch (error: any) {
+      console.error("Error fetching goal contributions:", error);
+      res.status(500).json({ message: "Failed to fetch goal contributions" });
+    }
+  });
+
   // Contribute points to a family goal - supports Device Sessions
   app.post("/api/family-goals/:id/contribute", isAuthenticated, async (req: any, res) => {
     try {
