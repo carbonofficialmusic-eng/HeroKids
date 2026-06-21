@@ -2454,8 +2454,8 @@ export default function KidDashboard() {
         <div className="space-y-6 mb-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl">
-                <Trophy className="h-8 w-8 text-white" />
+              <div className="h-12 w-12 flex items-center justify-center flex-shrink-0">
+                <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
               </div>
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.rewards")}
@@ -2497,8 +2497,8 @@ export default function KidDashboard() {
           <div className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-green-500/20">
-                  <CheckCircle2 className="h-7 w-7 text-green-500" />
+                <div className="h-12 w-12 flex items-center justify-center flex-shrink-0">
+                  <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
                 </div>
                 <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                   {t("kidDashboard.myRewards")}
@@ -2717,8 +2717,8 @@ export default function KidDashboard() {
           {/* Title row: heading left, toggle right */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
-                <Star className="h-6 w-6 text-white" />
+              <div className="h-11 w-11 flex items-center justify-center flex-shrink-0">
+                <img src="/nav-icons/clipboard.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
               </div>
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.tasks")}
@@ -3044,8 +3044,8 @@ export default function KidDashboard() {
         {familyData?.showLeaderboard && (
           <div className="lg:hidden space-y-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl">
-                <Trophy className="h-8 w-8 text-white" />
+              <div className="h-12 w-12 flex items-center justify-center flex-shrink-0">
+                <img src="/nav-icons/trophy.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
               </div>
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.leaderboard")}
