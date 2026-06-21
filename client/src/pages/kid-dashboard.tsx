@@ -2287,9 +2287,9 @@ export default function KidDashboard() {
                 </h2>
               </div>
               {specialRewards.length > 2 && (
-                <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-achievements">
+                <Button variant="ghost" size="icon" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-achievements">
                   <Link href="/my-achievements">
-                    {t("kidDashboard.viewAll")}
+                    <ChevronRight className="h-5 w-5" />
                   </Link>
                 </Button>
               )}
@@ -2461,9 +2461,9 @@ export default function KidDashboard() {
               </h2>
             </div>
             {activeRewards.length > 3 && (
-              <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-rewards-board">
+              <Button variant="ghost" size="icon" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-rewards-board">
                 <Link href="/rewards-board">
-                  {t("kidDashboard.viewAll")}
+                  <ChevronRight className="h-5 w-5" />
                 </Link>
               </Button>
             )}
@@ -2503,9 +2503,9 @@ export default function KidDashboard() {
                   {t("kidDashboard.myRewards")}
                 </h2>
               </div>
-              <Button variant="ghost" size="sm" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-rewards">
+              <Button variant="ghost" size="icon" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-rewards">
                 <Link href="/my-rewards">
-                  {t("kidDashboard.viewAll")}
+                  <ChevronRight className="h-5 w-5" />
                 </Link>
               </Button>
             </div>
