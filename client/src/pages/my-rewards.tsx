@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -6,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   CheckCircle2,
-  Trophy,
-  ArrowLeft,
   Home,
   Clock,
   Coins,
@@ -16,6 +15,7 @@ import {
   X,
   Gift,
   Sparkles,
+  Star,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -237,6 +237,27 @@ export default function MyRewards() {
         })
     : [];
 
+  // Gold sparkle confetti on enter — fires once when rewards are loaded
+  const confettiFiredRef = useRef(false);
+  useEffect(() => {
+    if (confettiFiredRef.current || myRedemptions.length === 0) return;
+    confettiFiredRef.current = true;
+    const timer = setTimeout(() => {
+      confetti({
+        particleCount: 60,
+        spread: 80,
+        origin: { y: 0.25 },
+        colors: ["#FFD700", "#FFC107", "#FFEB3B", "#FFA000", "#fff8dc"],
+        shapes: ["circle"],
+        scalar: 0.9,
+        gravity: 0.6,
+        drift: 0,
+        ticks: 180,
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [myRedemptions.length]);
+
   if (!member) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -246,8 +267,11 @@ export default function MyRewards() {
   }
 
   return (
-    <div className="min-h-screen p-4 pb-20" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
-      <div className="max-w-2xl landscape:max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen p-4 pb-20 relative overflow-x-hidden" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
+      {/* Golden atmosphere glow */}
+      <div className="pointer-events-none fixed inset-0 z-0" style={{ background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(251,191,36,0.13) 0%, rgba(245,158,11,0.06) 45%, transparent 75%)" }} />
+
+      <div className="max-w-2xl landscape:max-w-4xl mx-auto space-y-6 relative z-10">
         {/* Back button */}
         <Link href={member?.role === "parent" ? "/" : "/kid-dashboard"}>
           <Button
@@ -261,11 +285,20 @@ export default function MyRewards() {
           </Button>
         </Link>
 
-        {/* Page title — chest only, centered */}
+        {/* Floating chest */}
         <div className="flex justify-center mb-2">
-          <div className="h-32 w-32 flex items-center justify-center">
-            <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-2xl" style={{ filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.5)) drop-shadow(0 2px 6px rgba(0,0,0,0.4))" }} />
-          </div>
+          <motion.div
+            className="h-36 w-36 flex items-center justify-center"
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <img
+              src="/nav-icons/chest.png"
+              alt=""
+              className="w-full h-full object-contain"
+              style={{ filter: "drop-shadow(0 12px 32px rgba(251,191,36,0.45)) drop-shadow(0 4px 10px rgba(0,0,0,0.5))" }}
+            />
+          </motion.div>
         </div>
 
         <motion.div
@@ -273,9 +306,9 @@ export default function MyRewards() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Card className="p-6 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl">
+          <Card className="p-6 bg-gradient-to-br from-amber-500/15 to-yellow-500/10 border border-amber-400/30 rounded-2xl">
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
+              <div className="h-12 w-12 flex items-center justify-center flex-shrink-0">
                 <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
               </div>
               <div>
@@ -286,7 +319,7 @@ export default function MyRewards() {
                   {t("myRewards.rewardsCount", { count: myRedemptions.length })}
                 </p>
               </div>
-              <Sparkles className="h-6 w-6 text-green-500 ml-auto animate-pulse" />
+              <Sparkles className="h-6 w-6 text-amber-400 ml-auto animate-pulse" />
             </div>
           </Card>
         </motion.div>
@@ -327,6 +360,8 @@ export default function MyRewards() {
               const canCancelSharing = isSharing && participants.length === 0;
               const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
+              const isCompleted = redemption.status === "completed";
+
               return (
                 <motion.div
                   key={redemption.id}
@@ -334,13 +369,14 @@ export default function MyRewards() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="p-5 bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-2xl">
+                  {/* Stacked treasure card */}
+                  <Card className={`p-5 rounded-2xl border ${isCompleted ? "bg-gradient-to-br from-amber-500/25 to-yellow-500/15 border-amber-400/40" : "bg-gradient-to-br from-amber-400/15 to-orange-400/10 border-amber-400/25"}`} style={{ boxShadow: "0 6px 0 rgba(180,120,0,0.22), 0 10px 0 rgba(140,90,0,0.13)" }}>
                     <div className="flex items-start gap-4">
-                      <div className="p-3 rounded-xl flex-shrink-0 bg-green-500/20">
-                        {redemption.status === "completed" ? (
-                          <CheckCircle2 className="h-7 w-7 text-green-500" />
+                      <div className={`p-3 rounded-xl flex-shrink-0 ${isCompleted ? "bg-amber-400/25" : "bg-amber-400/15"}`}>
+                        {isCompleted ? (
+                          <Star className="h-7 w-7 text-amber-400 fill-amber-400" />
                         ) : (
-                          <Clock className="h-7 w-7 text-green-600" />
+                          <Clock className="h-7 w-7 text-amber-500" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0 space-y-2">
