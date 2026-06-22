@@ -660,7 +660,7 @@ export default function RewardsBoard() {
     <div className="min-h-screen p-6 overflow-x-hidden" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
       <div className="max-w-4xl mx-auto w-full min-w-0">
         {/* Back button */}
-        <Link href="/">
+        <Link href={isParent ? "/dashboard" : "/kid-dashboard"}>
           <Button
             variant="outline"
             size="sm"
