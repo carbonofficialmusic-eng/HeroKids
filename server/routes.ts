@@ -46,7 +46,7 @@ async function autoUnpauseMembersAfterUpgrade(familyName: string, newTier: Subsc
   console.log(`✅ Auto-unpaused ${toUnpause.length} member(s) for family "${familyName}" after upgrade to ${newTier}`);
   return toUnpause.length;
 }
-import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD } from "@shared/skin-config";
+import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, getAllSkinsInOrder, TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import { eq, inArray, and, desc } from "drizzle-orm";
 import "./types";
 import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
@@ -4798,6 +4798,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error discovering skin:", error);
       res.status(500).json({ message: "Failed to discover skin" });
+    }
+  });
+
+  app.post("/api/skins/prefetch", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      let member = result.member;
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const acting = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (acting) member = acting;
+      }
+      if (!member) return res.status(404).json({ message: "Not found" });
+      const allIds = getAllSkinsInOrder();
+      await db.update(familyMembers).set({
+        discoveredSkinIds: allIds,
+        unlockedSkins: allIds,
+        starsFound: TOTAL_HIDDEN_STARS,
+      }).where(eq(familyMembers.id, member.id));
+      res.json({ ok: true });
+    } catch {
+      res.status(500).json({ message: "Failed" });
     }
   });
 

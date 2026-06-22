@@ -314,6 +314,31 @@ export default function SkinsGallery() {
     },
   });
 
+  // Hidden cheat: 7 taps on the points badge within 3s unlocks all skins
+  const cheatTapsRef = useRef(0);
+  const cheatLastTapRef = useRef(0);
+  const unlockAllMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/skins/prefetch", {});
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      toast({ title: "🎮", description: "✨✨✨" });
+    },
+  });
+  function handleCheatTap() {
+    const now = Date.now();
+    if (now - cheatLastTapRef.current > 3000) cheatTapsRef.current = 0;
+    cheatLastTapRef.current = now;
+    cheatTapsRef.current += 1;
+    if (cheatTapsRef.current >= 7) {
+      cheatTapsRef.current = 0;
+      unlockAllMutation.mutate();
+    }
+  }
+
   if (isLoading || memberLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -542,7 +567,7 @@ export default function SkinsGallery() {
             </Link>
             
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="text-sm font-bold whitespace-nowrap">
+              <Badge variant="secondary" className="text-sm font-bold whitespace-nowrap" onClick={handleCheatTap}>
                 <Trophy className="h-4 w-4 mr-1" />
                 {totalEarned} {t('common.points')}
               </Badge>
