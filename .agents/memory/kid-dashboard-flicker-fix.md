@@ -33,5 +33,23 @@ Adding GPU transform to the scroll container (`#root`) breaks `position: fixed` 
 
 **Why:** CSS transforms create a new containing block for fixed-position descendants.
 
+## Round 2: Remaining vertical-only flicker (Safari web)
+
+**Cause:** `position: fixed` element with `-translate-x-1/2` CSS transform (used for centering).
+Safari recalculates transform positions relative to the viewport on every scroll frame → vertical jitter.
+
+**Diagnostic clue:** Parent dashboard had 0 flicker; kid dashboard had vertical-only flicker.
+Difference: kid dashboard had a `fixed bottom-0 left-1/2 -translate-x-1/2` web chat bar — parent dashboard had no fixed bottom element on web.
+
+**Fix:**
+- Replace `left-1/2 -translate-x-1/2` centering with `left-0 right-0 flex justify-center`
+- Add `transform: translateZ(0)` + `backfaceVisibility: hidden` to promote to own GPU layer
+- Add `pointer-events-none` on the full-width wrapper + `pointer-events-auto` on inner card so clicks through the invisible sides still work
+- Downgrade `shadow-2xl` → `shadow-lg` (cheaper to composite)
+
+**Rule:** Never use CSS transforms (`translate`, `translateX`, `scale` etc.) for layout/positioning of `position: fixed` elements. Use flexbox/grid centering instead. Always add `translateZ(0)` to fixed overlays to keep them on a dedicated compositor layer.
+
 ## Platform-specific patterns
 - `isNativePlatform()` from `@/lib/platform` used to conditionally render collapsible chat bar on iOS vs. centered static bar on web
+- iOS native chat bar: `fixed bottom-0 right-0` (no centering transform needed)
+- Web chat bar: `fixed bottom-0 left-0 right-0 flex justify-center` + `translateZ(0)`
