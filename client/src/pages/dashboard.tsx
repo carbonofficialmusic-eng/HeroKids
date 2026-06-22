@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
-import { motion } from "framer-motion";
+import { isNativePlatform } from "@/lib/platform";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -2038,7 +2038,8 @@ export default function Dashboard() {
       </div>
 
       {/* Parent Bottom Navigation Bar */}
-      {isParent && (
+      {isParent && (isNativePlatform() ? (
+        /* iOS native: collapsible right-anchored */
         <div
           className={`fixed bottom-0 right-0 z-50 overflow-x-hidden ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
           style={{
@@ -2049,61 +2050,85 @@ export default function Dashboard() {
             paddingTop: '0.5rem',
           }}
         >
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3, type: "spring", damping: 20, stiffness: 200 }}
+          <div
+            style={{
+              transform: chatBarCollapsed ? 'translateX(calc(100% - 40px))' : 'translateX(0)',
+              transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            }}
           >
-            <div
-              style={{
-                transform: chatBarCollapsed ? 'translateX(calc(100% - 40px))' : 'translateX(0)',
-                transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                willChange: 'transform',
-              }}
-            >
-              <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setChatBarCollapsed(c => !c)}
-                    className="flex-shrink-0 rounded-2xl pointer-events-auto"
-                    data-testid="button-chat-bar-toggle"
-                    aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
-                  >
-                    {chatBarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-lg relative">
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setChatBarCollapsed(c => !c)}
+                  className="flex-shrink-0 rounded-2xl pointer-events-auto"
+                  data-testid="button-chat-bar-toggle"
+                  aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
+                >
+                  {chatBarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                </Button>
+                <div className="flex-1 min-w-0 relative">
+                  <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 w-full px-3 sm:px-4 rounded-2xl">
+                    <Link href="/chat">
+                      <MessageCircle className="h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
+                      <span className="font-medium text-sm truncate">{t("nav.chat")}</span>
+                    </Link>
                   </Button>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 min-w-0 relative">
-                    <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 w-full px-3 sm:px-4 rounded-2xl">
-                      <Link href="/chat">
-                        <MessageCircle className="h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
-                        <span className="font-medium text-sm truncate">{t("nav.chat")}</span>
-                      </Link>
-                    </Button>
-                    {!chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
-                      <span
-                        className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
-                        data-testid="badge-parent-unread-chat"
-                      >
-                        {unreadChatData.count}
-                      </span>
-                    )}
-                  </motion.div>
-                  <div className="w-9 flex-shrink-0" />
+                  {!chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
+                    <span
+                      className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                      data-testid="badge-parent-unread-chat"
+                    >
+                      {unreadChatData.count}
+                    </span>
+                  )}
                 </div>
-                {chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
-                  <span
-                    className="absolute -top-1 left-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
-                    data-testid="badge-parent-unread-chat-collapsed"
-                  >
-                    {unreadChatData.count}
-                  </span>
-                )}
-              </Card>
-            </div>
-          </motion.div>
+                <div className="w-9 flex-shrink-0" />
+              </div>
+              {chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
+                <span
+                  className="absolute -top-1 left-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                  data-testid="badge-parent-unread-chat-collapsed"
+                >
+                  {unreadChatData.count}
+                </span>
+              )}
+            </Card>
+          </div>
         </div>
-      )}
+      ) : (
+        /* Web: centered bar, no collapse toggle */
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
+          style={{
+            paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
+            paddingTop: '0.5rem',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden' as React.CSSProperties['WebkitBackfaceVisibility'],
+          }}
+        >
+          <div className="pointer-events-auto relative">
+            <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-lg">
+              <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 px-5 rounded-2xl">
+                <Link href="/chat">
+                  <MessageCircle className="h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
+                  <span className="font-medium text-sm">{t("nav.chat")}</span>
+                </Link>
+              </Button>
+            </Card>
+            {unreadChatData && unreadChatData.count > 0 && (
+              <span
+                className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                data-testid="badge-parent-unread-chat"
+              >
+                {unreadChatData.count}
+              </span>
+            )}
+          </div>
+        </div>
+      ))}
 
       {/* Dialogs */}
       {isParent && member && (
