@@ -2653,7 +2653,7 @@ export default function KidDashboard() {
 
           {/* Filter tabs row */}
           <div className="flex items-center gap-2">
-            <div className="flex bg-muted rounded-lg p-1 gap-1 flex-wrap">
+            <div className="flex gap-1 flex-wrap">
               <Button
                 variant={kidTaskFilter === "daily" ? "default" : "ghost"}
                 size="sm"
