@@ -27,6 +27,7 @@ import { canUseSharedRewards } from "@shared/tier-config";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getAvatarUrl } from "@/lib/skins";
+import { RewardIconDisplay } from "@/lib/reward-icon";
 import confetti from "canvas-confetti";
 
 // Extended RewardRedemption type with sharing details
@@ -42,6 +43,7 @@ type SharingParticipant = {
 
 type RedemptionWithDetails = RewardRedemption & {
   rewardTitle?: string;
+  rewardIconEmoji?: string;
   sharingStatus: "not_shared" | "sharing_active" | "sharing_finalized";
   originalPointsSpent: number;
   sharingParticipants?: SharingParticipant[];
@@ -383,19 +385,17 @@ export default function MyRewards() {
                       <Sparkles className="absolute right-5 top-5 h-3 w-3 opacity-30" style={{ color: rarity.textColor }} />
                       {/* Icon with glow halo */}
                       <div
-                        className="h-16 w-16 rounded-full flex items-center justify-center"
+                        className="h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
                         style={{
                           background: rarity.iconBg,
                           boxShadow: `0 0 28px ${rarity.glow}, 0 0 8px ${rarity.glow}`,
                         }}
                       >
-                        {isCompleted ? (
-                          <Trophy className="h-8 w-8" style={{ color: rarity.textColor }} />
-                        ) : isApproved ? (
-                          <Gem className="h-8 w-8" style={{ color: rarity.textColor }} />
-                        ) : (
-                          <Hourglass className="h-8 w-8" style={{ color: rarity.textColor }} />
-                        )}
+                        <RewardIconDisplay
+                          icon={typed.rewardIconEmoji}
+                          imgClassName="w-10 h-10 object-contain drop-shadow-sm"
+                          textClassName="text-3xl leading-none"
+                        />
                       </div>
                     </div>
 

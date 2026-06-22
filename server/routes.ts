@@ -3854,6 +3854,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const base = {
           ...redemption,
           rewardTitle: rewardsMap.get(redemption.rewardId)?.title || "Belohnung",
+          rewardIconEmoji: rewardsMap.get(redemption.rewardId)?.iconEmoji || "🎁",
         };
         
         // Include participants for shared rewards (active or finalized)
