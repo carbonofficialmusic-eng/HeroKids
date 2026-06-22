@@ -1310,11 +1310,29 @@ export default function KidDashboard() {
 
   useEffect(() => {
     const target = sessionStorage.getItem("dashboardScrollTarget");
-    if (target) {
-      sessionStorage.removeItem("dashboardScrollTarget");
-      const timer = setTimeout(() => scrollToSection(target), 400);
-      return () => clearTimeout(timer);
-    }
+    if (!target) return;
+    sessionStorage.removeItem("dashboardScrollTarget");
+
+    // Retry until the section element appears in the DOM (data may still be loading)
+    let attempts = 0;
+    const maxAttempts = 10;
+    let timerId: ReturnType<typeof setTimeout>;
+
+    const tryScroll = () => {
+      const el = document.getElementById(target);
+      if (el) {
+        scrollToSection(target);
+        return;
+      }
+      attempts++;
+      if (attempts < maxAttempts) {
+        timerId = setTimeout(tryScroll, 200);
+      }
+    };
+
+    // First attempt after 400ms (App.tsx scroll-to-top runs before this)
+    timerId = setTimeout(tryScroll, 400);
+    return () => clearTimeout(timerId);
   }, []);
 
   // Lock #root scroll while any dialog is open — same pattern as parent dashboard
