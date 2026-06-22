@@ -76,6 +76,17 @@ function scrollToPinboard(el: HTMLElement) {
   root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
 }
 
+function scrollToSection(id: string) {
+  const root = document.getElementById("root") ?? document.documentElement;
+  const el = document.getElementById(id);
+  if (!el) return;
+  const header = document.querySelector("[data-app-header]") as HTMLElement | null;
+  const headerBottom = header ? header.getBoundingClientRect().bottom : 72;
+  const currentTop = el.getBoundingClientRect().top;
+  const delta = currentTop - (headerBottom + 16);
+  root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
+}
+
 function useVisualViewport() {
   const getVV = () => ({
     height: window.visualViewport?.height ?? window.innerHeight,
@@ -128,6 +139,15 @@ export default function Dashboard() {
       return () => clearTimeout(timer);
     }
   }, [tourUser?.id, tourUser?.onboardingCompletedAt]);
+
+  useEffect(() => {
+    const target = sessionStorage.getItem("dashboardScrollTarget");
+    if (target) {
+      sessionStorage.removeItem("dashboardScrollTarget");
+      const timer = setTimeout(() => scrollToSection(target), 400);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Freeze #root scroll while any dialog is open, then restore exactly (iOS keyboard shifts viewport)
   const savedRootScrollRef = useRef(0);
@@ -1556,13 +1576,13 @@ export default function Dashboard() {
 
               {/* Rewards Section */}
               {activeRewards.length > 0 && (
-                <div data-tour="tour-rewards">
+                <div data-tour="tour-rewards" id="section-active-rewards">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold font-accent">{t("dashboard.activeRewards")}</h2>
                     {activeRewards.length > 3 && (
-                      <Button variant="ghost" size="sm" asChild className="bg-card border border-border" data-testid="button-view-all-rewards-parent">
-                        <Link href="/active-rewards">
-                          {t("kidDashboard.viewAll")}
+                      <Button variant="ghost" size="icon" asChild className="bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0" data-testid="button-view-all-rewards-parent">
+                        <Link href="/active-rewards" onClick={() => sessionStorage.setItem("dashboardScrollTarget", "section-active-rewards")}>
+                          <ChevronRight className="h-5 w-5" />
                         </Link>
                       </Button>
                     )}
@@ -1769,7 +1789,7 @@ export default function Dashboard() {
               </div>
               {/* Special Achievement Rewards Section */}
               {specialRewards.length > 0 && (
-                <div className="space-y-3" data-tour="tour-bonus-rewards">
+                <div className="space-y-3" data-tour="tour-bonus-rewards" id="section-bonus-rewards">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Trophy className="h-5 w-5 text-purple-500" />
@@ -1777,9 +1797,9 @@ export default function Dashboard() {
                       <Sparkles className="h-4 w-4 text-purple-500" />
                     </div>
                     {specialRewards.length > 2 && (
-                      <Button variant="ghost" size="sm" asChild data-testid="button-view-all-achievements">
-                        <Link href="/my-achievements">
-                          {t("dashboard.viewAll")}
+                      <Button variant="ghost" size="icon" asChild className="bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0" data-testid="button-view-all-achievements">
+                        <Link href="/my-achievements" onClick={() => sessionStorage.setItem("dashboardScrollTarget", "section-bonus-rewards")}>
+                          <ChevronRight className="h-5 w-5" />
                         </Link>
                       </Button>
                     )}

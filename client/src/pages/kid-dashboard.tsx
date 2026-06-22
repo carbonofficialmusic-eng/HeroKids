@@ -1215,6 +1215,17 @@ function scrollToPinboard(el: HTMLElement) {
   root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
 }
 
+function scrollToSection(id: string) {
+  const root = document.getElementById("root") ?? document.documentElement;
+  const el = document.getElementById(id);
+  if (!el) return;
+  const header = document.querySelector("[data-app-header]") as HTMLElement | null;
+  const headerBottom = header ? header.getBoundingClientRect().bottom : 72;
+  const currentTop = el.getBoundingClientRect().top;
+  const delta = currentTop - (headerBottom + 16);
+  root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
+}
+
 export default function KidDashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -1294,6 +1305,15 @@ export default function KidDashboard() {
     const el = document.getElementById("pinboard");
     if (el) {
       setTimeout(() => scrollToPinboard(el), 300);
+    }
+  }, []);
+
+  useEffect(() => {
+    const target = sessionStorage.getItem("dashboardScrollTarget");
+    if (target) {
+      sessionStorage.removeItem("dashboardScrollTarget");
+      const timer = setTimeout(() => scrollToSection(target), 400);
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -2184,7 +2204,7 @@ export default function KidDashboard() {
 
         {/* Special Achievement Rewards Section */}
         {specialRewards.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-4" id="section-bonus-rewards">
             <div className="flex items-end justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
@@ -2195,8 +2215,8 @@ export default function KidDashboard() {
                 </h2>
               </div>
               {specialRewards.length > 2 && (
-                <Button variant="ghost" size="icon" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-achievements">
-                  <Link href="/my-achievements">
+                <Button variant="ghost" size="icon" asChild className="bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-achievements">
+                  <Link href="/my-achievements" onClick={() => sessionStorage.setItem("dashboardScrollTarget", "section-bonus-rewards")}>
                     <ChevronRight className="h-5 w-5" />
                   </Link>
                 </Button>
@@ -2343,7 +2363,7 @@ export default function KidDashboard() {
         )}
 
         {/* Rewards Section */}
-        <div className="space-y-6 mb-4">
+        <div className="space-y-6 mb-4" id="section-rewards">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
@@ -2354,8 +2374,8 @@ export default function KidDashboard() {
               </h2>
             </div>
             {activeRewards.length > 3 && (
-              <Button variant="ghost" size="icon" asChild className="bg-card border border-border text-foreground flex-shrink-0" data-testid="button-view-all-rewards-board">
-                <Link href="/rewards-board">
+              <Button variant="ghost" size="icon" asChild className="bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0" data-testid="button-view-all-rewards-board">
+                <Link href="/rewards-board" onClick={() => sessionStorage.setItem("dashboardScrollTarget", "section-rewards")}>
                   <ChevronRight className="h-5 w-5" />
                 </Link>
               </Button>
@@ -2381,7 +2401,7 @@ export default function KidDashboard() {
 
         {/* My Redeemed Rewards Section */}
         {(myRedemptions.length > 0 || joinedSharedRewards.length > 0) && (
-          <div className="space-y-4 mb-8">
+          <div className="space-y-4 mb-8" id="section-my-rewards">
             <div className="flex items-end justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
@@ -2391,8 +2411,8 @@ export default function KidDashboard() {
                   {t("kidDashboard.myRewards")}
                 </h2>
               </div>
-              <Button variant="ghost" size="icon" asChild className="bg-card border border-border text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-rewards">
-                <Link href="/my-rewards">
+              <Button variant="ghost" size="icon" asChild className="bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-rewards">
+                <Link href="/my-rewards" onClick={() => sessionStorage.setItem("dashboardScrollTarget", "section-my-rewards")}>
                   <ChevronRight className="h-5 w-5" />
                 </Link>
               </Button>
