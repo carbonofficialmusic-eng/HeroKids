@@ -889,29 +889,26 @@ function TaskCard({
       <Card
         className={`p-5 transition-colors border-2 rounded-2xl min-w-0 w-full ${
           isActionable && !isRejected 
-            ? "bg-gradient-to-br from-blue-500/10 to-cyan-500/10 cursor-pointer border-blue-500/30 shadow-lg" 
+            ? "cursor-pointer border-blue-500/30 shadow-lg" 
             : isActionable && isRejected 
-            ? "bg-blue-500/25 cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15 hover:bg-blue-500/35 hover:border-blue-400/60" 
+            ? "bg-blue-500/25 cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15" 
             : showAsApproved 
             ? "bg-green-500/20 border-green-500/45 shadow-md shadow-green-900/15" 
             : showAsSubmitted 
             ? "bg-amber-500/50 border-amber-400/70 shadow-md shadow-amber-900/20" 
             : showAsPending 
             ? "bg-amber-500/50 border-amber-400/70 shadow-md shadow-amber-900/20" 
-            : hasNoSlots 
-            ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border-blue-500/20 opacity-70" 
-            : isSharedTaskNotAssigned 
-            ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border-blue-500/20 opacity-70" 
             : allSharedMembersCompleted 
             ? "bg-green-500/20 border-green-500/45 shadow-md shadow-green-900/15" 
-            : dueDateInfo.notYet 
-            ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border-blue-500/20 opacity-70" 
             : dueDateInfo.expired 
             ? "bg-destructive/20 border-destructive/40" 
-            : isWeekendUnavailable 
-            ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border-blue-500/20 opacity-70" 
-            : "bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border-blue-500/20 opacity-70"
+            : "border-blue-500/20 opacity-70"
         }`}
+        style={
+          (isActionable && !isRejected) || (!showAsApproved && !allSharedMembersCompleted && !showAsSubmitted && !showAsPending && !isRejected && !dueDateInfo.expired)
+            ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 92%, rgb(59 130 246)), color-mix(in srgb, var(--card) 88%, rgb(6 182 212)))" }
+            : undefined
+        }
         data-testid={`task-card-${task.id}`}
         onClick={(task as any).isShoppingList
           ? () => setShoppingListExpanded(v => !v)
