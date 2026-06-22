@@ -663,14 +663,17 @@ export default function RewardsBoard() {
   }
 
   return (
-    <div className="min-h-screen p-6 overflow-x-hidden" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
-      <div className="max-w-4xl mx-auto w-full min-w-0">
+    <div className="min-h-screen pb-20 relative overflow-x-hidden" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
+      {/* Atmosphere glow */}
+      <div className="pointer-events-none fixed inset-0 z-0" style={{ background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(251,191,36,0.13) 0%, rgba(245,158,11,0.06) 45%, transparent 75%)" }} />
+
+      <div className="max-w-4xl mx-auto w-full min-w-0 relative z-10">
         {/* Back button */}
         <Link href={isParent ? "/dashboard" : "/kid-dashboard"}>
           <Button
             variant="outline"
             size="sm"
-            className="mb-4 gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
+            className="mb-6 gap-2 bg-background/30 backdrop-blur-sm border-border/40"
             data-testid="button-back-dashboard"
           >
             <Home className="h-4 w-4" />
@@ -679,13 +682,13 @@ export default function RewardsBoard() {
         </Link>
 
         {/* Page title */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
             <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
           </div>
           <div>
-            <h1 className="text-3xl font-accent font-bold">{t("rewardsBoard.title")}</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>{t("rewardsBoard.title")}</h1>
+            <p className="text-sm text-white/70" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
               {isParent
                 ? t("rewardsBoard.manageRedemptions")
                 : t("rewardsBoard.trackRewards")}
@@ -693,12 +696,12 @@ export default function RewardsBoard() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
 
         {/* Available Rewards Section (Children only) */}
         {!isParent && activeRewards.length > 0 && (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3">
               {activeRewards.map((reward) => (
                 <RewardBoardCard
                   key={reward.id}
@@ -716,9 +719,11 @@ export default function RewardsBoard() {
         {/* Pending Reward Requests Section (Parents only) */}
         {isRealParent && rewardRequests.filter(r => r.status === "pending").length > 0 && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <MessageSquarePlus className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-accent font-bold">{t("dashboard.pendingRewardRequests")}</h2>
+            <div className="flex items-center gap-3">
+              <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                <img src="/nav-icons/clipboard.png" alt="" className="w-full h-full object-contain drop-shadow-sm" />
+              </div>
+              <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>{t("dashboard.pendingRewardRequests")}</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {rewardRequests
@@ -794,9 +799,11 @@ export default function RewardsBoard() {
       {/* Shared Rewards Section */}
       {sharedRewards.length > 0 && (
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Users className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-accent font-bold">{t("rewardsBoard.sharedRewards")}</h2>
+          <div className="flex items-center gap-3">
+            <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+              <img src="/nav-icons/trophy.png" alt="" className="w-full h-full object-contain drop-shadow-sm" />
+            </div>
+            <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>{t("rewardsBoard.sharedRewards")}</h2>
           </div>
           <div className="grid grid-cols-1 gap-4">
             {sharedRewards.map((shared) => {
@@ -963,18 +970,26 @@ export default function RewardsBoard() {
       )}
 
       {/* Redemptions List — parents only; kids use /my-rewards instead */}
-      {isParent && (displayRedemptions.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Gift className="h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">{t("rewardsBoard.noRewardsYet")}</h3>
-            <p className="text-muted-foreground text-center">
-              {t("rewardsBoard.noRewardsFamilyDesc")}
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 gap-4">
+      {isParent && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+              <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-sm" />
+            </div>
+            <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>{t("rewardsBoard.redemptions", "Einlösungen")}</h2>
+          </div>
+          {displayRedemptions.length === 0 ? (
+          <Card className="rounded-2xl bg-card/80">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Gift className="h-16 w-16 text-muted-foreground mb-4" />
+              <h3 className="text-xl font-semibold mb-2">{t("rewardsBoard.noRewardsYet")}</h3>
+              <p className="text-muted-foreground text-center">
+                {t("rewardsBoard.noRewardsFamilyDesc")}
+              </p>
+            </CardContent>
+          </Card>
+          ) : (
+          <div className="grid grid-cols-1 gap-4">
           {displayRedemptions.map((redemption) => (
             <Card key={redemption.id} data-testid={`card-redemption-${redemption.id}`}>
               <CardHeader>
@@ -1137,9 +1152,11 @@ export default function RewardsBoard() {
               </CardContent>
             </Card>
           ))}
+          </div>
+          )}
         </div>
-      ))}
-        </div>{/* end space-y-6 */}
+      )}
+        </div>{/* end space-y-8 */}
       </div>{/* end max-w-4xl */}
 
       {/* Reward Request Dialog for editing */}
