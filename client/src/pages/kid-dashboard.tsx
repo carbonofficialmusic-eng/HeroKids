@@ -11,7 +11,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronLeft, ChevronRight, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin, Gem, Hourglass } from "lucide-react";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -2455,128 +2455,98 @@ export default function KidDashboard() {
                 const canCancelSharing = isSharing; // Can cancel anytime while sharing is active
                 const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
+                const isCompleted = typed.status === "completed";
+                const isApproved = typed.status === "approved";
+                const rarity = isCompleted ? "LEGENDARY" : isApproved ? "EPIC" : "RARE";
+                const rarityColors = {
+                  LEGENDARY: { banner: "linear-gradient(135deg, #92400e, #b45309, #d97706, #f59e0b, #d97706)", glow: "rgba(251,191,36,0.55)", border: "rgba(251,191,36,0.6)", icon: "#f59e0b", iconBg: "rgba(251,191,36,0.18)", chip: "rgba(251,191,36,0.2)", chipText: "#fbbf24", cardBg: "linear-gradient(160deg,#1c1008 0%,#2d1a06 40%,#1a0f04 100%)" },
+                  EPIC:      { banner: "linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed, #8b5cf6, #7c3aed)", glow: "rgba(139,92,246,0.55)", border: "rgba(139,92,246,0.6)", icon: "#a78bfa", iconBg: "rgba(139,92,246,0.18)", chip: "rgba(139,92,246,0.2)", chipText: "#c4b5fd", cardBg: "linear-gradient(160deg,#0f0a1e 0%,#1e1040 40%,#0d091a 100%)" },
+                  RARE:      { banner: "linear-gradient(135deg, #7c2d12, #c2410c, #ea580c, #f97316, #ea580c)", glow: "rgba(249,115,22,0.55)", border: "rgba(249,115,22,0.55)", icon: "#fb923c", iconBg: "rgba(249,115,22,0.18)", chip: "rgba(249,115,22,0.2)", chipText: "#fdba74", cardBg: "linear-gradient(160deg,#1a0c04 0%,#2d1508 40%,#180b04 100%)" },
+                };
+                const rc = rarityColors[rarity];
+                const RarityIcon = isCompleted ? Trophy : isApproved ? Gem : Hourglass;
+
                 return (
-                  <div key={redemption.id}>
-                    <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-2 border-green-500/30 rounded-2xl">
-                      <div className="space-y-3">
-                        <div className="text-center space-y-2">
-                          <div className="flex justify-center p-3 rounded-2xl mx-auto w-fit bg-green-500/20">
-                            <CheckCircle2 className="h-10 w-10 text-green-500" />
-                          </div>
-                          <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                            {redemption.rewardTitle || t("kidDashboard.reward")}
-                          </h3>
-                          <div className="flex flex-wrap gap-1.5 justify-center">
-                            <Badge 
-                              variant={redemption.status === "completed" ? "default" : "secondary"}
-                              className="text-sm"
-                            >
-                              {redemption.status === "completed" ? `✓ ${t("kidDashboard.fulfilled")}` : 
-                               redemption.status === "approved" ? `⏳ ${t("kidDashboard.waiting")}` : 
-                               `⏸️ ${t("kidDashboard.pending")}`}
-                            </Badge>
-                            {isSharing && (
-                              <Badge variant="secondary" className="gap-1.5 text-xs">
-                                <Users className="h-3 w-3" />
-                                {t("kidDashboard.beingShared")}
-                              </Badge>
-                            )}
-                            {isFinalized && (
-                              <Badge variant="secondary" className="gap-1.5 text-xs">
-                                <CheckCircle2 className="h-3 w-3" />
-                                {t("kidDashboard.shared")}
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {t("kidDashboard.pointsSpent", { count: typed.pointsSpent })} {isFinalized && t("kidDashboard.wasPoints", { count: typed.originalPointsSpent })}
-                          </p>
-                        </div>
-
-                        {/* Participants */}
-                        {participants.length > 0 && (
-                          <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                            <p className="text-xs text-muted-foreground mr-1">{t("kidDashboard.with")}</p>
-                            {participants.map((p: any) => (
-                              <Badge key={p.id} variant="secondary" className="gap-1.5 text-xs py-1">
-                                <Avatar className="h-5 w-5">
-                                  <AvatarImage src={getAvatarUrl(p.activeSkinId, p.avatarUrl, p.useCustomAvatar, p.updatedAt)} />
-                                  <AvatarFallback 
-                                    className="text-xs text-white font-bold"
-                                    style={{ backgroundColor: p.color }}
-                                  >
-                                    {p.displayName[0]}
-                                  </AvatarFallback>
-                                </Avatar>
-                                {p.displayName}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Cancel Redemption */}
-                        {canCancel && (
-                          <div className="pt-2 border-t border-green-500/20">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="w-full gap-1.5 text-xs text-destructive border-destructive/40 hover:bg-destructive/10"
-                              onClick={() => cancelRedemptionMutation.mutate(typed.id)}
-                              disabled={cancelRedemptionMutation.isPending}
-                              data-testid={`button-cancel-redemption-kid-${typed.id}`}
-                            >
-                              <X className="h-3.5 w-3.5" />
-                              {t("rewardsBoard.cancelRedemption")}
-                            </Button>
-                          </div>
-                        )}
-
-                        {/* Sharing Actions */}
-                        {(canShare || canFinalize || canCancelSharing) && (
-                          <div className="flex gap-2 pt-2 border-t border-green-500/20 flex-wrap">
-                            {canShare && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="flex-1 gap-1.5 text-xs"
-                                onClick={() => startSharingMutation.mutate(typed.id)}
-                                disabled={startSharingMutation.isPending}
-                                data-testid={`button-start-share-${typed.id}`}
-                              >
-                                <Share2 className="h-3.5 w-3.5" />
-                                {t("kidDashboard.startSharing")}
-                              </Button>
-                            )}
-                            {canCancelSharing && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="flex-1 gap-1.5 text-xs"
-                                onClick={() => cancelSharingMutation.mutate(typed.id)}
-                                disabled={cancelSharingMutation.isPending}
-                                data-testid={`button-cancel-share-${typed.id}`}
-                              >
-                                <X className="h-3.5 w-3.5" />
-                                {t("kidDashboard.cancelSharing")}
-                              </Button>
-                            )}
-                            {canFinalize && (
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="flex-1 gap-1.5 text-xs"
-                                onClick={() => finalizeSharingMutation.mutate(typed.id)}
-                                disabled={finalizeSharingMutation.isPending}
-                                data-testid={`button-finalize-${typed.id}`}
-                              >
-                                <CheckCircle2 className="h-3.5 w-3.5" />
-                                {t("kidDashboard.finalize")}
-                              </Button>
-                            )}
-                          </div>
-                        )}
+                  <div key={redemption.id} style={{ borderRadius: "20px", background: rc.cardBg, border: `2px solid ${rc.border}`, boxShadow: `0 0 18px ${rc.glow}, 0 6px 20px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)`, overflow: "hidden" }}>
+                    {/* Rarity banner */}
+                    <div style={{ background: rc.banner, padding: "7px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
+                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
+                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
                       </div>
-                    </Card>
+                      <span style={{ fontFamily: "Fredoka, sans-serif", fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: "0.12em", textTransform: "uppercase", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{rarity}</span>
+                      <Sparkles style={{ width: 13, height: 13, color: "#fff", opacity: 0.85 }} />
+                    </div>
+
+                    <div style={{ padding: "14px 14px 16px" }}>
+                      {/* Icon zone */}
+                      <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+                        <div style={{ position: "relative", width: 70, height: 70, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", background: rc.iconBg, border: `2px solid ${rc.border}`, boxShadow: `0 0 20px ${rc.glow}` }}>
+                          <RarityIcon style={{ width: 32, height: 32, color: rc.icon }} />
+                        </div>
+                      </div>
+
+                      {/* Title */}
+                      <h3 style={{ fontFamily: "Fredoka, sans-serif", fontSize: 17, fontWeight: 700, color: "#fff", textAlign: "center", marginBottom: 10, textShadow: "0 1px 4px rgba(0,0,0,0.7)", lineHeight: 1.2 }}>
+                        {redemption.rewardTitle || t("kidDashboard.reward")}
+                      </h3>
+
+                      {/* Stat chips */}
+                      <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
+                        <div style={{ background: rc.chip, border: `1px solid ${rc.border}`, borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}>
+                          <span style={{ fontSize: 13, color: rc.chipText, fontWeight: 700 }}>★ {typed.pointsSpent}</span>
+                        </div>
+                        {isCompleted && <div style={{ background: "rgba(34,197,94,0.18)", border: "1px solid rgba(34,197,94,0.45)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#4ade80", fontWeight: 600 }}>{t("kidDashboard.fulfilled")}</span></div>}
+                        {isApproved && !isCompleted && <div style={{ background: "rgba(251,191,36,0.15)", border: "1px solid rgba(251,191,36,0.4)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#fbbf24", fontWeight: 600 }}>{t("kidDashboard.waiting")}</span></div>}
+                        {!isCompleted && !isApproved && <div style={{ background: "rgba(148,163,184,0.15)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>{t("kidDashboard.pending")}</span></div>}
+                        {isSharing && <div style={{ background: "rgba(99,102,241,0.18)", border: "1px solid rgba(99,102,241,0.4)", borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}><Users style={{ width: 10, height: 10, color: "#a5b4fc" }} /><span style={{ fontSize: 12, color: "#a5b4fc", fontWeight: 600 }}>{t("kidDashboard.beingShared")}</span></div>}
+                        {isFinalized && <div style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.4)", borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}><CheckCircle2 style={{ width: 10, height: 10, color: "#4ade80" }} /><span style={{ fontSize: 12, color: "#4ade80", fontWeight: 600 }}>{t("kidDashboard.shared")}</span></div>}
+                      </div>
+
+                      {/* Participants */}
+                      {participants.length > 0 && (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                          <span style={{ fontSize: 11, color: "#94a3b8" }}>{t("kidDashboard.with")}</span>
+                          {participants.map((p: any) => (
+                            <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
+                              <Avatar className="h-4 w-4">
+                                <AvatarImage src={getAvatarUrl(p.activeSkinId, p.avatarUrl, p.useCustomAvatar, p.updatedAt)} />
+                                <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: p.color, fontSize: 8 }}>{p.displayName[0]}</AvatarFallback>
+                              </Avatar>
+                              <span style={{ fontSize: 11, color: "#e2e8f0", fontWeight: 600 }}>{p.displayName}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Action buttons */}
+                      {canCancel && (
+                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs text-destructive border-destructive/40 mt-1" onClick={() => cancelRedemptionMutation.mutate(typed.id)} disabled={cancelRedemptionMutation.isPending} data-testid={`button-cancel-redemption-kid-${typed.id}`} style={{ height: 38 }}>
+                          <X className="h-3.5 w-3.5" />
+                          {t("rewardsBoard.cancelRedemption")}
+                        </Button>
+                      )}
+                      {(canShare || canFinalize || canCancelSharing) && (
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+                          {canShare && (
+                            <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs" onClick={() => startSharingMutation.mutate(typed.id)} disabled={startSharingMutation.isPending} data-testid={`button-start-share-${typed.id}`} style={{ height: 38 }}>
+                              <Share2 className="h-3.5 w-3.5" />{t("kidDashboard.startSharing")}
+                            </Button>
+                          )}
+                          {canCancelSharing && (
+                            <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs" onClick={() => cancelSharingMutation.mutate(typed.id)} disabled={cancelSharingMutation.isPending} data-testid={`button-cancel-share-${typed.id}`} style={{ height: 38 }}>
+                              <X className="h-3.5 w-3.5" />{t("kidDashboard.cancelSharing")}
+                            </Button>
+                          )}
+                          {canFinalize && (
+                            <Button size="sm" variant="default" className="flex-1 gap-1.5 text-xs" onClick={() => finalizeSharingMutation.mutate(typed.id)} disabled={finalizeSharingMutation.isPending} data-testid={`button-finalize-${typed.id}`} style={{ height: 38 }}>
+                              <CheckCircle2 className="h-3.5 w-3.5" />{t("kidDashboard.finalize")}
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -2587,47 +2557,73 @@ export default function KidDashboard() {
                 const initiatorMember = familyMembers.find(m => m.id === joined.memberId);
                 const isFinalized = joined.sharingStatus === "sharing_finalized";
 
+                const jIsCompleted = joined.status === "completed";
+                const jIsApproved = joined.status === "approved";
+                const jRarity = jIsCompleted ? "LEGENDARY" : jIsApproved ? "EPIC" : "RARE";
+                const jRarityColors = {
+                  LEGENDARY: { banner: "linear-gradient(135deg, #92400e, #b45309, #d97706, #f59e0b, #d97706)", glow: "rgba(251,191,36,0.55)", border: "rgba(251,191,36,0.6)", icon: "#f59e0b", iconBg: "rgba(251,191,36,0.18)", chip: "rgba(251,191,36,0.2)", chipText: "#fbbf24", cardBg: "linear-gradient(160deg,#1c1008 0%,#2d1a06 40%,#1a0f04 100%)" },
+                  EPIC:      { banner: "linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed, #8b5cf6, #7c3aed)", glow: "rgba(139,92,246,0.55)", border: "rgba(139,92,246,0.6)", icon: "#a78bfa", iconBg: "rgba(139,92,246,0.18)", chip: "rgba(139,92,246,0.2)", chipText: "#c4b5fd", cardBg: "linear-gradient(160deg,#0f0a1e 0%,#1e1040 40%,#0d091a 100%)" },
+                  RARE:      { banner: "linear-gradient(135deg, #7c2d12, #c2410c, #ea580c, #f97316, #ea580c)", glow: "rgba(249,115,22,0.55)", border: "rgba(249,115,22,0.55)", icon: "#fb923c", iconBg: "rgba(249,115,22,0.18)", chip: "rgba(249,115,22,0.2)", chipText: "#fdba74", cardBg: "linear-gradient(160deg,#1a0c04 0%,#2d1508 40%,#180b04 100%)" },
+                };
+                const jRc = jRarityColors[jRarity];
+                const JRarityIcon = jIsCompleted ? Trophy : jIsApproved ? Gem : Hourglass;
+
                 return (
-                  <div key={`joined-${joined.id}`}>
-                    <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-2 border-green-500/30 rounded-2xl">
-                      <div className="space-y-3">
-                        <div className="text-center space-y-2">
-                          <div className="flex justify-center p-3 rounded-2xl mx-auto w-fit bg-green-500/20">
-                            <CheckCircle2 className="h-10 w-10 text-green-500" />
-                          </div>
-                          <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                            {joined.rewardTitle || t("kidDashboard.reward")}
-                          </h3>
-                          <div className="flex flex-wrap gap-1.5 justify-center">
-                            <Badge variant={joined.status === "completed" ? "default" : "secondary"} className="text-sm">
-                              {joined.status === "completed" ? `✓ ${t("kidDashboard.fulfilled")}` :
-                               joined.status === "approved" ? `⏳ ${t("kidDashboard.waiting")}` :
-                               `⏸️ ${t("kidDashboard.pending")}`}
-                            </Badge>
-                            <Badge variant="secondary" className="gap-1.5 text-xs">
-                              <Users className="h-3 w-3" />
-                              {isFinalized ? t("kidDashboard.shared") : t("kidDashboard.beingShared")}
-                            </Badge>
-                          </div>
-                          {myParticipation && (
-                            <p className="text-xs text-muted-foreground">
-                              {t("kidDashboard.pointsSpent", { count: myParticipation.pointsContributed })}
-                            </p>
-                          )}
-                          {initiatorMember && (
-                            <div className="flex items-center justify-center gap-2">
-                              <Avatar className="h-5 w-5 border-2 border-background">
-                                <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar, (initiatorMember as any).updatedAt)} />
-                                <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: initiatorMember.color }}>
-                                  {initiatorMember.displayName[0]}
-                                </AvatarFallback>
-                              </Avatar>
-                              <p className="text-xs text-muted-foreground">{initiatorMember.displayName}</p>
-                            </div>
-                          )}
+                  <div key={`joined-${joined.id}`} style={{ borderRadius: "20px", background: jRc.cardBg, border: `2px solid ${jRc.border}`, boxShadow: `0 0 18px ${jRc.glow}, 0 6px 20px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)`, overflow: "hidden" }}>
+                    {/* Rarity banner */}
+                    <div style={{ background: jRc.banner, padding: "7px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
+                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
+                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
+                      </div>
+                      <span style={{ fontFamily: "Fredoka, sans-serif", fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: "0.12em", textTransform: "uppercase", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{jRarity}</span>
+                      <Sparkles style={{ width: 13, height: 13, color: "#fff", opacity: 0.85 }} />
+                    </div>
+
+                    <div style={{ padding: "14px 14px 16px" }}>
+                      {/* Icon zone */}
+                      <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+                        <div style={{ width: 70, height: 70, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", background: jRc.iconBg, border: `2px solid ${jRc.border}`, boxShadow: `0 0 20px ${jRc.glow}` }}>
+                          <JRarityIcon style={{ width: 32, height: 32, color: jRc.icon }} />
                         </div>
                       </div>
-                    </Card>
+
+                      {/* Title */}
+                      <h3 style={{ fontFamily: "Fredoka, sans-serif", fontSize: 17, fontWeight: 700, color: "#fff", textAlign: "center", marginBottom: 10, textShadow: "0 1px 4px rgba(0,0,0,0.7)", lineHeight: 1.2 }}>
+                        {joined.rewardTitle || t("kidDashboard.reward")}
+                      </h3>
+
+                      {/* Stat chips */}
+                      <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
+                        {myParticipation && (
+                          <div style={{ background: jRc.chip, border: `1px solid ${jRc.border}`, borderRadius: 20, padding: "3px 10px" }}>
+                            <span style={{ fontSize: 13, color: jRc.chipText, fontWeight: 700 }}>★ {myParticipation.pointsContributed}</span>
+                          </div>
+                        )}
+                        {jIsCompleted && <div style={{ background: "rgba(34,197,94,0.18)", border: "1px solid rgba(34,197,94,0.45)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#4ade80", fontWeight: 600 }}>{t("kidDashboard.fulfilled")}</span></div>}
+                        {jIsApproved && !jIsCompleted && <div style={{ background: "rgba(251,191,36,0.15)", border: "1px solid rgba(251,191,36,0.4)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#fbbf24", fontWeight: 600 }}>{t("kidDashboard.waiting")}</span></div>}
+                        {!jIsCompleted && !jIsApproved && <div style={{ background: "rgba(148,163,184,0.15)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>{t("kidDashboard.pending")}</span></div>}
+                        <div style={{ background: "rgba(99,102,241,0.18)", border: "1px solid rgba(99,102,241,0.4)", borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}>
+                          <Users style={{ width: 10, height: 10, color: "#a5b4fc" }} />
+                          <span style={{ fontSize: 12, color: "#a5b4fc", fontWeight: 600 }}>{isFinalized ? t("kidDashboard.shared") : t("kidDashboard.beingShared")}</span>
+                        </div>
+                      </div>
+
+                      {/* Initiator */}
+                      {initiatorMember && (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                          <span style={{ fontSize: 11, color: "#94a3b8" }}>{t("kidDashboard.with")}</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
+                            <Avatar className="h-4 w-4">
+                              <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar, (initiatorMember as any).updatedAt)} />
+                              <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: initiatorMember.color, fontSize: 8 }}>{initiatorMember.displayName[0]}</AvatarFallback>
+                            </Avatar>
+                            <span style={{ fontSize: 11, color: "#e2e8f0", fontWeight: 600 }}>{initiatorMember.displayName}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
