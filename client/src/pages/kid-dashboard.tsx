@@ -2470,6 +2470,8 @@ export default function KidDashboard() {
                 const canCancelSharing = isSharing; // Can cancel anytime while sharing is active
                 const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
+                const isCompleted = typed.status === "completed";
+                const isApproved = typed.status === "approved";
                 // All purchased rewards are always LEGENDARY (gold)
                 const rarity = "LEGENDARY";
                 const rarityColors = {
@@ -2571,6 +2573,8 @@ export default function KidDashboard() {
                 const initiatorMember = familyMembers.find(m => m.id === joined.memberId);
                 const isFinalized = joined.sharingStatus === "sharing_finalized";
 
+                const jIsCompleted = joined.status === "completed";
+                const jIsApproved = joined.status === "approved";
                 // All joined shared rewards are always LEGENDARY (gold)
                 const jRarity = "LEGENDARY";
                 const jRarityColors = {
