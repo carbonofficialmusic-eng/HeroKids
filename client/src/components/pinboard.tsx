@@ -117,7 +117,7 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
   };
 
   return (
-    <div className="rounded-xl overflow-hidden shadow-lg border border-border">
+    <div className="rounded-xl overflow-hidden shadow-lg border border-border bg-card">
       {/* Header — only shown when add button is available */}
       {canAdd && !isAdding && editingId === null && (
         <div className="flex items-center justify-end px-3 py-2 bg-muted border-b border-border">
@@ -134,7 +134,7 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
       )}
 
       {/* Board surface */}
-      <div className="p-3 space-y-3 min-h-[80px] bg-muted/40">
+      <div className="p-3 space-y-3 min-h-[80px] bg-muted">
         {isLoading && (
           <p className="text-muted-foreground text-xs text-center py-2">{t("pinboard.loading")}</p>
         )}
