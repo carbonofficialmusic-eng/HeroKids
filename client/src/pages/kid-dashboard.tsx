@@ -2304,8 +2304,8 @@ export default function KidDashboard() {
 
                   const joinRarity = hasJoined ? "LEGENDARY" : "SPECIAL";
                   const joinRarityColors = {
-                    LEGENDARY: { banner: "linear-gradient(135deg, #92400e, #b45309, #d97706, #f59e0b, #d97706)", glow: "rgba(251,191,36,0.55)", border: "rgba(251,191,36,0.6)", icon: "#f59e0b", iconBg: "rgba(251,191,36,0.18)", chip: "rgba(251,191,36,0.2)", chipText: "#fbbf24", cardBg: "linear-gradient(160deg,#1c1008 0%,#2d1a06 40%,#1a0f04 100%)", label: "LEGENDARY" },
-                    SPECIAL:   { banner: "linear-gradient(135deg, #1e3a8a, #1d4ed8, #3b82f6, #60a5fa, #3b82f6)", glow: "rgba(96,165,250,0.5)", border: "rgba(96,165,250,0.55)", icon: "#60a5fa", iconBg: "rgba(59,130,246,0.18)", chip: "rgba(59,130,246,0.2)", chipText: "#93c5fd", cardBg: "linear-gradient(160deg,#050e1f 0%,#0c1f45 40%,#060f22 100%)", label: "SPECIAL" },
+                    LEGENDARY: { banner: "linear-gradient(135deg, #78350f, #92400e, #a16207, #92400e)", glow: "rgba(251,191,36,0.15)", border: "rgba(251,191,36,0.22)", icon: "#d97706", iconBg: "rgba(251,191,36,0.1)", chip: "rgba(251,191,36,0.12)", chipText: "#d97706", cardBg: "linear-gradient(160deg,#161008 0%,#1e1408 40%,#130e06 100%)", label: "LEGENDARY" },
+                    SPECIAL:   { banner: "linear-gradient(135deg, #172554, #1e3a8a, #1d4ed8, #1e3a8a)", glow: "rgba(96,165,250,0.13)", border: "rgba(96,165,250,0.2)", icon: "#3b82f6", iconBg: "rgba(59,130,246,0.1)", chip: "rgba(59,130,246,0.12)", chipText: "#60a5fa", cardBg: "linear-gradient(160deg,#080d18 0%,#0d1528 40%,#060a14 100%)", label: "SPECIAL" },
                   };
                   const jrc = joinRarityColors[joinRarity];
                   const JoinIcon = hasJoined ? Trophy : Users;
@@ -2474,9 +2474,9 @@ export default function KidDashboard() {
                 const isApproved = typed.status === "approved";
                 const rarity = isCompleted ? "LEGENDARY" : isApproved ? "EPIC" : "RARE";
                 const rarityColors = {
-                  LEGENDARY: { banner: "linear-gradient(135deg, #92400e, #b45309, #d97706, #f59e0b, #d97706)", glow: "rgba(251,191,36,0.55)", border: "rgba(251,191,36,0.6)", icon: "#f59e0b", iconBg: "rgba(251,191,36,0.18)", chip: "rgba(251,191,36,0.2)", chipText: "#fbbf24", cardBg: "linear-gradient(160deg,#1c1008 0%,#2d1a06 40%,#1a0f04 100%)" },
-                  EPIC:      { banner: "linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed, #8b5cf6, #7c3aed)", glow: "rgba(139,92,246,0.55)", border: "rgba(139,92,246,0.6)", icon: "#a78bfa", iconBg: "rgba(139,92,246,0.18)", chip: "rgba(139,92,246,0.2)", chipText: "#c4b5fd", cardBg: "linear-gradient(160deg,#0f0a1e 0%,#1e1040 40%,#0d091a 100%)" },
-                  RARE:      { banner: "linear-gradient(135deg, #7c2d12, #c2410c, #ea580c, #f97316, #ea580c)", glow: "rgba(249,115,22,0.55)", border: "rgba(249,115,22,0.55)", icon: "#fb923c", iconBg: "rgba(249,115,22,0.18)", chip: "rgba(249,115,22,0.2)", chipText: "#fdba74", cardBg: "linear-gradient(160deg,#1a0c04 0%,#2d1508 40%,#180b04 100%)" },
+                  LEGENDARY: { banner: "linear-gradient(135deg, #78350f, #92400e, #a16207, #92400e)", glow: "rgba(251,191,36,0.15)", border: "rgba(251,191,36,0.22)", icon: "#d97706", iconBg: "rgba(251,191,36,0.1)", chip: "rgba(251,191,36,0.12)", chipText: "#d97706", cardBg: "linear-gradient(160deg,#161008 0%,#1e1408 40%,#130e06 100%)" },
+                  EPIC:      { banner: "linear-gradient(135deg, #2e1065, #4c1d95, #5b21b6, #4c1d95)", glow: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.22)", icon: "#8b5cf6", iconBg: "rgba(139,92,246,0.1)", chip: "rgba(139,92,246,0.12)", chipText: "#a78bfa", cardBg: "linear-gradient(160deg,#0c0a18 0%,#130f28 40%,#0a0814 100%)" },
+                  RARE:      { banner: "linear-gradient(135deg, #431407, #7c2d12, #9a3412, #7c2d12)", glow: "rgba(249,115,22,0.15)", border: "rgba(249,115,22,0.2)", icon: "#ea580c", iconBg: "rgba(249,115,22,0.1)", chip: "rgba(249,115,22,0.12)", chipText: "#fb923c", cardBg: "linear-gradient(160deg,#130a04 0%,#1c1008 40%,#110804 100%)" },
                 };
                 const rc = rarityColors[rarity];
                 const RarityIcon = isCompleted ? Trophy : isApproved ? Gem : Hourglass;
@@ -2576,9 +2576,9 @@ export default function KidDashboard() {
                 const jIsApproved = joined.status === "approved";
                 const jRarity = jIsCompleted ? "LEGENDARY" : jIsApproved ? "EPIC" : "RARE";
                 const jRarityColors = {
-                  LEGENDARY: { banner: "linear-gradient(135deg, #92400e, #b45309, #d97706, #f59e0b, #d97706)", glow: "rgba(251,191,36,0.55)", border: "rgba(251,191,36,0.6)", icon: "#f59e0b", iconBg: "rgba(251,191,36,0.18)", chip: "rgba(251,191,36,0.2)", chipText: "#fbbf24", cardBg: "linear-gradient(160deg,#1c1008 0%,#2d1a06 40%,#1a0f04 100%)" },
-                  EPIC:      { banner: "linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed, #8b5cf6, #7c3aed)", glow: "rgba(139,92,246,0.55)", border: "rgba(139,92,246,0.6)", icon: "#a78bfa", iconBg: "rgba(139,92,246,0.18)", chip: "rgba(139,92,246,0.2)", chipText: "#c4b5fd", cardBg: "linear-gradient(160deg,#0f0a1e 0%,#1e1040 40%,#0d091a 100%)" },
-                  RARE:      { banner: "linear-gradient(135deg, #7c2d12, #c2410c, #ea580c, #f97316, #ea580c)", glow: "rgba(249,115,22,0.55)", border: "rgba(249,115,22,0.55)", icon: "#fb923c", iconBg: "rgba(249,115,22,0.18)", chip: "rgba(249,115,22,0.2)", chipText: "#fdba74", cardBg: "linear-gradient(160deg,#1a0c04 0%,#2d1508 40%,#180b04 100%)" },
+                  LEGENDARY: { banner: "linear-gradient(135deg, #78350f, #92400e, #a16207, #92400e)", glow: "rgba(251,191,36,0.15)", border: "rgba(251,191,36,0.22)", icon: "#d97706", iconBg: "rgba(251,191,36,0.1)", chip: "rgba(251,191,36,0.12)", chipText: "#d97706", cardBg: "linear-gradient(160deg,#161008 0%,#1e1408 40%,#130e06 100%)" },
+                  EPIC:      { banner: "linear-gradient(135deg, #2e1065, #4c1d95, #5b21b6, #4c1d95)", glow: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.22)", icon: "#8b5cf6", iconBg: "rgba(139,92,246,0.1)", chip: "rgba(139,92,246,0.12)", chipText: "#a78bfa", cardBg: "linear-gradient(160deg,#0c0a18 0%,#130f28 40%,#0a0814 100%)" },
+                  RARE:      { banner: "linear-gradient(135deg, #431407, #7c2d12, #9a3412, #7c2d12)", glow: "rgba(249,115,22,0.15)", border: "rgba(249,115,22,0.2)", icon: "#ea580c", iconBg: "rgba(249,115,22,0.1)", chip: "rgba(249,115,22,0.12)", chipText: "#fb923c", cardBg: "linear-gradient(160deg,#130a04 0%,#1c1008 40%,#110804 100%)" },
                 };
                 const jRc = jRarityColors[jRarity];
                 const JRarityIcon = jIsCompleted ? Trophy : jIsApproved ? Gem : Hourglass;
