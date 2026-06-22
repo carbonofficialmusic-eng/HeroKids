@@ -1569,7 +1569,7 @@ export default function Dashboard() {
                   </div>
                   <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
                     {activeRewards.slice(0, dashboardView === "grid" ? 4 : 3).map((reward) => (
-                      <Card key={reward.id} className={`relative overflow-visible ${dashboardView === "grid" ? "p-3" : "p-6"}`} data-testid={`card-reward-${reward.id}`}>
+                      <Card key={reward.id} className={`relative overflow-visible ${dashboardView === "grid" ? "p-2" : "p-6"}`} data-testid={`card-reward-${reward.id}`}>
                         {isRealParent && dashboardView === "list" && (
                           <div className="absolute top-2 right-2 flex gap-1">
                             <Button
@@ -1597,19 +1597,19 @@ export default function Dashboard() {
                           </div>
                         )}
                         {dashboardView === "grid" ? (
-                          <div className="flex flex-col items-center text-center gap-2">
-                            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 p-1">
-                              <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-2xl leading-none" />
+                          <div className="flex flex-col items-center text-center gap-1">
+                            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 p-0.5">
+                              <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-base leading-none" />
                             </div>
-                            <p className="font-semibold text-xs leading-tight line-clamp-2" data-testid={`text-reward-title-${reward.id}`}>{reward.title}</p>
-                            <Badge variant={member.totalPoints >= reward.pointThreshold ? "default" : "secondary"} className="text-xs" data-testid={`badge-reward-points-${reward.id}`}>
+                            <p className="font-semibold text-xs leading-tight line-clamp-1 w-full" data-testid={`text-reward-title-${reward.id}`}>{reward.title}</p>
+                            <Badge variant={member.totalPoints >= reward.pointThreshold ? "default" : "secondary"} className="text-[10px] px-1.5 py-0" data-testid={`badge-reward-points-${reward.id}`}>
                               {reward.pointThreshold} {t("dashboard.pointsLabel")}
                             </Badge>
                             <Button
                               onClick={() => redeemRewardMutation.mutate(reward.id)}
                               disabled={member.totalPoints < reward.pointThreshold || redeemRewardMutation.isPending}
                               size="sm"
-                              className="w-full text-xs"
+                              className="w-full text-[10px] h-7 px-1"
                               data-testid={`button-redeem-${reward.id}`}
                             >
                               {redeemRewardMutation.isPending ? t("dashboard.redeeming") : member.totalPoints >= reward.pointThreshold ? t("dashboard.redeemNow") : `${reward.pointThreshold - member.totalPoints} ${t("dashboard.pointsLabel")}`}
