@@ -153,19 +153,26 @@ export default function Dashboard() {
   const savedRootScrollRef = useRef(0);
   const anyDialogOpen = taskDialogOpen || rewardDialogOpen || requestRewardDialogOpen ||
     editMemberDialogOpen || switchMemberDialogOpen || completionDialogOpen || sendPointsOpen;
+  const prevAnyDialogOpenRef = useRef(false);
   useLayoutEffect(() => {
     const root = document.getElementById('root');
     if (!root) return;
     if (anyDialogOpen) {
       savedRootScrollRef.current = root.scrollTop;
       root.style.overflowY = 'hidden';
-    } else {
+      prevAnyDialogOpenRef.current = true;
+    } else if (prevAnyDialogOpenRef.current) {
+      // Only restore scroll when a dialog was actually just closed
+      prevAnyDialogOpenRef.current = false;
       root.style.overflowY = 'auto';
       const target = savedRootScrollRef.current;
       root.scrollTop = target;
       const t1 = setTimeout(() => { root.scrollTop = target; }, 350);
       const t2 = setTimeout(() => { root.scrollTop = target; }, 700);
       return () => { clearTimeout(t1); clearTimeout(t2); };
+    } else {
+      // Initial mount: just ensure overflow is auto, don't touch scrollTop
+      root.style.overflowY = 'auto';
     }
   }, [anyDialogOpen]);
   const [selectedPointsRecipients, setSelectedPointsRecipients] = useState<string[]>([]);

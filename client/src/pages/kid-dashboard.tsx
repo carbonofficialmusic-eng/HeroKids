@@ -1319,13 +1319,17 @@ export default function KidDashboard() {
 
   // Lock #root scroll while any dialog is open — same pattern as parent dashboard
   const anyKidDialogOpen = taskDialogOpen || requestRewardDialogOpen || editMemberDialogOpen || switchMemberDialogOpen;
+  const prevAnyKidDialogOpenRef = useRef(false);
   useLayoutEffect(() => {
     const root = document.getElementById('root');
     if (!root) return;
     if (anyKidDialogOpen) {
       savedScrollRef.current = root.scrollTop;
       root.style.overflowY = 'hidden';
-    } else {
+      prevAnyKidDialogOpenRef.current = true;
+    } else if (prevAnyKidDialogOpenRef.current) {
+      // Only restore scroll when a dialog was actually just closed
+      prevAnyKidDialogOpenRef.current = false;
       root.style.overflowY = 'auto';
       const target = savedScrollRef.current;
       root.scrollTop = target;
@@ -1334,6 +1338,9 @@ export default function KidDashboard() {
       const t1 = setTimeout(() => { root.scrollTop = target; }, 350);
       const t2 = setTimeout(() => { root.scrollTop = target; }, 700);
       return () => { clearTimeout(t1); clearTimeout(t2); };
+    } else {
+      // Initial mount: just ensure overflow is auto, don't touch scrollTop
+      root.style.overflowY = 'auto';
     }
   }, [anyKidDialogOpen]);
 
