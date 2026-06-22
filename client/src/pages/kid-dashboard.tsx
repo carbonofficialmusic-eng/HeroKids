@@ -1215,7 +1215,7 @@ function scrollToPinboard(el: HTMLElement) {
   root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
 }
 
-function scrollToSection(id: string) {
+function scrollToSection(id: string, behavior: ScrollBehavior = "smooth") {
   const root = document.getElementById("root") ?? document.documentElement;
   const el = document.getElementById(id);
   if (!el) return;
@@ -1223,7 +1223,7 @@ function scrollToSection(id: string) {
   const headerBottom = header ? header.getBoundingClientRect().bottom : 72;
   const currentTop = el.getBoundingClientRect().top;
   const delta = currentTop - (headerBottom + 16);
-  root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
+  root.scrollTo({ top: root.scrollTop + delta, behavior });
 }
 
 export default function KidDashboard() {
@@ -1318,14 +1318,13 @@ export default function KidDashboard() {
     const maxAttempts = 10;
     let timerId: ReturnType<typeof setTimeout>;
 
-    let correctionTimer: ReturnType<typeof setTimeout>;
+    let settleTimer: ReturnType<typeof setTimeout>;
 
     const tryScroll = () => {
       const el = document.getElementById(target);
       if (el) {
-        scrollToSection(target);
-        // Second correction after layout stabilizes (images/data may shift layout)
-        correctionTimer = setTimeout(() => scrollToSection(target), 700);
+        // Wait for layout to fully settle after data loads, then scroll once (instant = no jump)
+        settleTimer = setTimeout(() => scrollToSection(target, "instant"), 300);
         return;
       }
       attempts++;
@@ -1336,7 +1335,7 @@ export default function KidDashboard() {
 
     // First attempt after 400ms (App.tsx scroll-to-top runs before this)
     timerId = setTimeout(tryScroll, 400);
-    return () => { clearTimeout(timerId); clearTimeout(correctionTimer); };
+    return () => { clearTimeout(timerId); clearTimeout(settleTimer); };
   }, []);
 
   // Lock #root scroll while any dialog is open — same pattern as parent dashboard
