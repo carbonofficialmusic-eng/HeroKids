@@ -1215,25 +1215,15 @@ function scrollToPinboard(el: HTMLElement) {
   root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
 }
 
-function getAbsoluteOffsetTop(el: HTMLElement, container: HTMLElement): number {
-  let offset = 0;
-  let current: HTMLElement | null = el;
-  while (current && current !== container) {
-    offset += current.offsetTop;
-    current = current.offsetParent as HTMLElement | null;
-  }
-  return offset;
-}
-
 function scrollToSection(id: string) {
-  const root = document.getElementById("root");
-  if (!root) return;
+  const root = document.getElementById("root") ?? document.documentElement;
   const el = document.getElementById(id);
   if (!el) return;
   const header = document.querySelector("[data-app-header]") as HTMLElement | null;
-  const headerH = header ? header.getBoundingClientRect().height : 72;
-  const absoluteTop = getAbsoluteOffsetTop(el as HTMLElement, root);
-  root.scrollTo({ top: Math.max(0, absoluteTop - headerH - 8), behavior: "smooth" });
+  const headerBottom = header ? header.getBoundingClientRect().bottom : 72;
+  const currentTop = el.getBoundingClientRect().top;
+  const delta = currentTop - (headerBottom + 16);
+  root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
 }
 
 export default function KidDashboard() {
@@ -1365,8 +1355,6 @@ export default function KidDashboard() {
       root.style.overflowY = 'auto';
       const target = savedScrollRef.current;
       root.scrollTop = target;
-      kickScrollReset(200);
-      kickHeaderRepaint();
       const t1 = setTimeout(() => { root.scrollTop = target; }, 350);
       const t2 = setTimeout(() => { root.scrollTop = target; }, 700);
       return () => { clearTimeout(t1); clearTimeout(t2); };
