@@ -141,6 +141,7 @@ interface TaskWithMeta extends Task {
 // Extended RewardRedemption type with sharing details
 type RedemptionWithDetails = RewardRedemption & {
   rewardTitle?: string;
+  rewardIconEmoji?: string | null;
   sharingStatus: "not_shared" | "sharing_active" | "sharing_finalized";
   originalPointsSpent: number;
 };
@@ -2464,92 +2465,131 @@ export default function KidDashboard() {
 
                 const isCompleted = typed.status === "completed";
                 const isApproved = typed.status === "approved";
-                // All purchased rewards are always LEGENDARY (gold)
-                const rarity = "LEGENDARY";
-                const rarityColors = {
-                  LEGENDARY: { banner: "linear-gradient(135deg, #78350f, #92400e, #a16207, #92400e)", glow: "rgba(251,191,36,0.15)", border: "rgba(251,191,36,0.22)", icon: "#d97706", iconBg: "rgba(251,191,36,0.1)", chip: "rgba(251,191,36,0.12)", chipText: "#d97706", cardBg: "linear-gradient(160deg,#161008 0%,#1e1408 40%,#130e06 100%)" },
-                  EPIC:      { banner: "linear-gradient(135deg, #2e1065, #4c1d95, #5b21b6, #4c1d95)", glow: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.22)", icon: "#8b5cf6", iconBg: "rgba(139,92,246,0.1)", chip: "rgba(139,92,246,0.12)", chipText: "#a78bfa", cardBg: "linear-gradient(160deg,#0c0a18 0%,#130f28 40%,#0a0814 100%)" },
-                  RARE:      { banner: "linear-gradient(135deg, #431407, #7c2d12, #9a3412, #7c2d12)", glow: "rgba(249,115,22,0.15)", border: "rgba(249,115,22,0.2)", icon: "#ea580c", iconBg: "rgba(249,115,22,0.1)", chip: "rgba(249,115,22,0.12)", chipText: "#fb923c", cardBg: "linear-gradient(160deg,#130a04 0%,#1c1008 40%,#110804 100%)" },
-                };
-                const rc = rarityColors[rarity];
-                const RarityIcon = isCompleted ? Trophy : isApproved ? Gem : Hourglass;
+                // All purchased rewards are always LEGENDARY (gold) — exact Schatztruhe intensity
+                const rc = { glow: "rgba(251,191,36,0.35)", border: "rgba(251,191,36,0.55)", iconBg: "rgba(251,191,36,0.18)", textColor: "#fbbf24" };
 
                 return (
-                  <div key={redemption.id} style={{ borderRadius: "20px", background: rc.cardBg, border: `2px solid ${rc.border}`, boxShadow: `0 0 18px ${rc.glow}, 0 6px 20px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)`, overflow: "hidden" }}>
+                  <div
+                    key={redemption.id}
+                    className="rounded-2xl overflow-hidden"
+                    style={{
+                      background: "linear-gradient(160deg, rgba(30,20,10,0.92) 0%, rgba(20,15,8,0.97) 100%)",
+                      border: `1.5px solid ${rc.border}`,
+                      boxShadow: `0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 32px ${rc.glow.replace("0.35","0.28")}, 0 12px 48px ${rc.glow.replace("0.35","0.14")}, 0 4px 24px ${rc.glow}`,
+                    }}
+                  >
                     {/* Rarity banner */}
-                    <div style={{ background: rc.banner, padding: "7px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
-                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
-                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
+                    <div className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 px-4 py-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-3 w-3 fill-white text-white opacity-90" />
+                        <span className="text-white text-xs font-black tracking-widest opacity-95" style={{ fontFamily: "Fredoka, sans-serif", letterSpacing: "0.18em" }}>LEGENDARY</span>
                       </div>
-                      <span style={{ fontFamily: "Fredoka, sans-serif", fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: "0.12em", textTransform: "uppercase", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{rarity}</span>
-                      <Sparkles style={{ width: 13, height: 13, color: "#fff", opacity: 0.85 }} />
+                      <div className="flex items-center gap-1 opacity-80">
+                        <Star className="h-2.5 w-2.5 fill-white text-white" />
+                        <Star className="h-3 w-3 fill-white text-white" />
+                        <Star className="h-2.5 w-2.5 fill-white text-white" />
+                      </div>
                     </div>
 
-                    <div style={{ padding: "14px 14px 16px" }}>
-                      {/* Icon zone */}
-                      <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-                        <div style={{ position: "relative", width: 70, height: 70, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", background: rc.iconBg, border: `2px solid ${rc.border}`, boxShadow: `0 0 20px ${rc.glow}` }}>
-                          <RarityIcon style={{ width: 32, height: 32, color: rc.icon }} />
+                    {/* Icon zone */}
+                    <div className="flex justify-center pt-5 pb-3 relative">
+                      <Sparkles className="absolute left-5 top-4 h-3.5 w-3.5 opacity-40" style={{ color: rc.textColor }} />
+                      <Sparkles className="absolute right-5 top-5 h-3 w-3 opacity-30" style={{ color: rc.textColor }} />
+                      <div
+                        className="h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
+                        style={{ background: rc.iconBg, boxShadow: `0 0 28px ${rc.glow}, 0 0 8px ${rc.glow}` }}
+                      >
+                        <RewardIconDisplay icon={typed.rewardIconEmoji} imgClassName="w-10 h-10 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
+                      </div>
+                    </div>
+
+                    {/* Content zone */}
+                    <div className="px-4 pb-4 space-y-3">
+                      <h3 className="font-black text-xl text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${rc.glow}` }}>
+                        {typed.rewardTitle || t("kidDashboard.reward")}
+                      </h3>
+
+                      {/* Stats chips */}
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: rc.iconBg, color: rc.textColor, border: `1px solid ${rc.border}` }}>
+                          <Coins className="h-3.5 w-3.5" />
+                          <span>{t("myRewards.pointsSpent", { count: typed.pointsSpent })}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-white/5 text-white/60 border border-white/10">
+                          <span>{typed.redeemedAt ? new Date(typed.redeemedAt).toLocaleDateString() : "-"}</span>
                         </div>
                       </div>
 
-                      {/* Title */}
-                      <h3 style={{ fontFamily: "Fredoka, sans-serif", fontSize: 17, fontWeight: 700, color: "#fff", textAlign: "center", marginBottom: 10, textShadow: "0 1px 4px rgba(0,0,0,0.7)", lineHeight: 1.2 }}>
-                        {redemption.rewardTitle || t("kidDashboard.reward")}
-                      </h3>
-
-                      {/* Stat chips */}
-                      <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
-                        <div style={{ background: rc.chip, border: `1px solid ${rc.border}`, borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}>
-                          <span style={{ fontSize: 13, color: rc.chipText, fontWeight: 700 }}>★ {typed.pointsSpent}</span>
+                      {/* Status badges */}
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <div
+                          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                          data-testid={`badge-status-dashboard-${typed.id}`}
+                          style={{ background: isCompleted ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.08)", color: isCompleted ? "#4ade80" : "rgba(255,255,255,0.7)", border: isCompleted ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,255,255,0.15)" }}
+                        >
+                          {isCompleted ? (
+                            <><CheckCircle2 className="h-3.5 w-3.5" />{t("kidDashboard.fulfilled")}</>
+                          ) : isApproved ? (
+                            <><Clock className="h-3.5 w-3.5" />{t("kidDashboard.waiting")}</>
+                          ) : (
+                            <><Clock className="h-3.5 w-3.5" />{t("kidDashboard.pending")}</>
+                          )}
                         </div>
-                        {isCompleted && <div style={{ background: "rgba(34,197,94,0.18)", border: "1px solid rgba(34,197,94,0.45)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#4ade80", fontWeight: 600 }}>{t("kidDashboard.fulfilled")}</span></div>}
-                        {isApproved && !isCompleted && <div style={{ background: "rgba(251,191,36,0.15)", border: "1px solid rgba(251,191,36,0.4)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#fbbf24", fontWeight: 600 }}>{t("kidDashboard.waiting")}</span></div>}
-                        {!isCompleted && !isApproved && <div style={{ background: "rgba(148,163,184,0.15)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>{t("kidDashboard.pending")}</span></div>}
-                        {isSharing && <div style={{ background: "rgba(99,102,241,0.18)", border: "1px solid rgba(99,102,241,0.4)", borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}><Users style={{ width: 10, height: 10, color: "#a5b4fc" }} /><span style={{ fontSize: 12, color: "#a5b4fc", fontWeight: 600 }}>{t("kidDashboard.beingShared")}</span></div>}
-                        {isFinalized && <div style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.4)", borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}><CheckCircle2 style={{ width: 10, height: 10, color: "#4ade80" }} /><span style={{ fontSize: 12, color: "#4ade80", fontWeight: 600 }}>{t("kidDashboard.shared")}</span></div>}
+                        {isSharing && (
+                          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-violet-500/15 text-violet-300 border border-violet-400/30">
+                            <Users className="h-3.5 w-3.5" />{t("kidDashboard.beingShared")}
+                          </div>
+                        )}
+                        {isFinalized && (
+                          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-white/5 text-white/60 border border-white/10">
+                            <CheckCircle2 className="h-3.5 w-3.5" />{t("kidDashboard.shared")}
+                          </div>
+                        )}
                       </div>
 
                       {/* Participants */}
                       {participants.length > 0 && (
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-                          <span style={{ fontSize: 11, color: "#94a3b8" }}>{t("kidDashboard.with")}</span>
-                          {participants.map((p: any) => (
-                            <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
-                              <Avatar className="h-4 w-4">
-                                <AvatarImage src={getAvatarUrl(p.activeSkinId, p.avatarUrl, p.useCustomAvatar, p.updatedAt)} />
-                                <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: p.color, fontSize: 8 }}>{p.displayName[0]}</AvatarFallback>
-                              </Avatar>
-                              <span style={{ fontSize: 11, color: "#e2e8f0", fontWeight: 600 }}>{p.displayName}</span>
-                            </div>
-                          ))}
+                        <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
+                          <div className="flex items-center gap-1.5 text-xs text-white/50">
+                            <Users className="h-3.5 w-3.5" />
+                            <span>{t("kidDashboard.with")}:</span>
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {participants.map((p: any) => (
+                              <div key={p.id} className="flex items-center gap-1.5">
+                                <Avatar className="h-6 w-6 border-2 border-white/20">
+                                  <AvatarImage src={getAvatarUrl(p.activeSkinId, p.avatarUrl, p.useCustomAvatar, p.updatedAt)} />
+                                  <AvatarFallback className="text-xs font-bold text-white" style={{ backgroundColor: p.color }}>{p.displayName[0]}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm font-semibold text-white/80">{p.displayName}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
 
                       {/* Action buttons */}
                       {canCancel && (
-                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs text-destructive border-destructive/40 mt-1" onClick={() => cancelRedemptionMutation.mutate(typed.id)} disabled={cancelRedemptionMutation.isPending} data-testid={`button-cancel-redemption-kid-${typed.id}`} style={{ height: 38 }}>
-                          <X className="h-3.5 w-3.5" />
+                        <Button variant="outline" className="w-full gap-2 h-11 rounded-xl border-red-500/30 text-red-400 bg-red-500/10 font-bold" onClick={() => cancelRedemptionMutation.mutate(typed.id)} disabled={cancelRedemptionMutation.isPending} data-testid={`button-cancel-redemption-kid-${typed.id}`}>
+                          <X className="h-4 w-4" />
                           {t("rewardsBoard.cancelRedemption")}
                         </Button>
                       )}
                       {(canShare || canFinalize || canCancelSharing) && (
-                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+                        <div className="flex flex-col gap-2">
                           {canShare && (
-                            <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs" onClick={() => startSharingMutation.mutate(typed.id)} disabled={startSharingMutation.isPending} data-testid={`button-start-share-${typed.id}`} style={{ height: 38 }}>
-                              <Share2 className="h-3.5 w-3.5" />{t("kidDashboard.startSharing")}
+                            <Button className="w-full gap-2 h-11 rounded-xl font-bold" style={{ background: `linear-gradient(135deg, ${rc.textColor}33, ${rc.textColor}22)`, border: `1px solid ${rc.border}`, color: rc.textColor }} onClick={() => startSharingMutation.mutate(typed.id)} disabled={startSharingMutation.isPending} data-testid={`button-start-share-${typed.id}`}>
+                              <Share2 className="h-4 w-4" />{t("kidDashboard.startSharing")}
                             </Button>
                           )}
                           {canCancelSharing && (
-                            <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs" onClick={() => cancelSharingMutation.mutate(typed.id)} disabled={cancelSharingMutation.isPending} data-testid={`button-cancel-share-${typed.id}`} style={{ height: 38 }}>
-                              <X className="h-3.5 w-3.5" />{t("kidDashboard.cancelSharing")}
+                            <Button variant="outline" className="w-full gap-2 h-11 rounded-xl border-white/20 text-white/70 font-bold" onClick={() => cancelSharingMutation.mutate(typed.id)} disabled={cancelSharingMutation.isPending} data-testid={`button-cancel-share-${typed.id}`}>
+                              <X className="h-4 w-4" />{t("kidDashboard.cancelSharing")}
                             </Button>
                           )}
                           {canFinalize && (
-                            <Button size="sm" variant="default" className="flex-1 gap-1.5 text-xs" onClick={() => finalizeSharingMutation.mutate(typed.id)} disabled={finalizeSharingMutation.isPending} data-testid={`button-finalize-${typed.id}`} style={{ height: 38 }}>
-                              <CheckCircle2 className="h-3.5 w-3.5" />{t("kidDashboard.finalize")}
+                            <Button className="w-full gap-2 h-11 rounded-xl font-bold" onClick={() => finalizeSharingMutation.mutate(typed.id)} disabled={finalizeSharingMutation.isPending} data-testid={`button-finalize-${typed.id}`}>
+                              <CheckCircle2 className="h-4 w-4" />{t("kidDashboard.finalize")}
                             </Button>
                           )}
                         </div>
@@ -2567,68 +2607,93 @@ export default function KidDashboard() {
 
                 const jIsCompleted = joined.status === "completed";
                 const jIsApproved = joined.status === "approved";
-                // All joined shared rewards are always LEGENDARY (gold)
-                const jRarity = "LEGENDARY";
-                const jRarityColors = {
-                  LEGENDARY: { banner: "linear-gradient(135deg, #78350f, #92400e, #a16207, #92400e)", glow: "rgba(251,191,36,0.15)", border: "rgba(251,191,36,0.22)", icon: "#d97706", iconBg: "rgba(251,191,36,0.1)", chip: "rgba(251,191,36,0.12)", chipText: "#d97706", cardBg: "linear-gradient(160deg,#161008 0%,#1e1408 40%,#130e06 100%)" },
-                  EPIC:      { banner: "linear-gradient(135deg, #2e1065, #4c1d95, #5b21b6, #4c1d95)", glow: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.22)", icon: "#8b5cf6", iconBg: "rgba(139,92,246,0.1)", chip: "rgba(139,92,246,0.12)", chipText: "#a78bfa", cardBg: "linear-gradient(160deg,#0c0a18 0%,#130f28 40%,#0a0814 100%)" },
-                  RARE:      { banner: "linear-gradient(135deg, #431407, #7c2d12, #9a3412, #7c2d12)", glow: "rgba(249,115,22,0.15)", border: "rgba(249,115,22,0.2)", icon: "#ea580c", iconBg: "rgba(249,115,22,0.1)", chip: "rgba(249,115,22,0.12)", chipText: "#fb923c", cardBg: "linear-gradient(160deg,#130a04 0%,#1c1008 40%,#110804 100%)" },
-                };
-                const jRc = jRarityColors[jRarity];
-                const JRarityIcon = jIsCompleted ? Trophy : jIsApproved ? Gem : Hourglass;
+                // All joined shared rewards are always LEGENDARY (gold) — exact Schatztruhe intensity
+                const jRc = { glow: "rgba(251,191,36,0.35)", border: "rgba(251,191,36,0.55)", iconBg: "rgba(251,191,36,0.18)", textColor: "#fbbf24" };
 
                 return (
-                  <div key={`joined-${joined.id}`} style={{ borderRadius: "20px", background: jRc.cardBg, border: `2px solid ${jRc.border}`, boxShadow: `0 0 18px ${jRc.glow}, 0 6px 20px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)`, overflow: "hidden" }}>
+                  <div
+                    key={`joined-${joined.id}`}
+                    className="rounded-2xl overflow-hidden"
+                    style={{
+                      background: "linear-gradient(160deg, rgba(30,20,10,0.92) 0%, rgba(20,15,8,0.97) 100%)",
+                      border: `1.5px solid ${jRc.border}`,
+                      boxShadow: `0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 32px ${jRc.glow.replace("0.35","0.28")}, 0 12px 48px ${jRc.glow.replace("0.35","0.14")}, 0 4px 24px ${jRc.glow}`,
+                    }}
+                  >
                     {/* Rarity banner */}
-                    <div style={{ background: jRc.banner, padding: "7px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
-                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
-                        <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
+                    <div className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 px-4 py-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-3 w-3 fill-white text-white opacity-90" />
+                        <span className="text-white text-xs font-black tracking-widest opacity-95" style={{ fontFamily: "Fredoka, sans-serif", letterSpacing: "0.18em" }}>LEGENDARY</span>
                       </div>
-                      <span style={{ fontFamily: "Fredoka, sans-serif", fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: "0.12em", textTransform: "uppercase", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{jRarity}</span>
-                      <Sparkles style={{ width: 13, height: 13, color: "#fff", opacity: 0.85 }} />
+                      <div className="flex items-center gap-1 opacity-80">
+                        <Star className="h-2.5 w-2.5 fill-white text-white" />
+                        <Star className="h-3 w-3 fill-white text-white" />
+                        <Star className="h-2.5 w-2.5 fill-white text-white" />
+                      </div>
                     </div>
 
-                    <div style={{ padding: "14px 14px 16px" }}>
-                      {/* Icon zone */}
-                      <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-                        <div style={{ width: 70, height: 70, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", background: jRc.iconBg, border: `2px solid ${jRc.border}`, boxShadow: `0 0 20px ${jRc.glow}` }}>
-                          <JRarityIcon style={{ width: 32, height: 32, color: jRc.icon }} />
-                        </div>
+                    {/* Icon zone */}
+                    <div className="flex justify-center pt-5 pb-3 relative">
+                      <Sparkles className="absolute left-5 top-4 h-3.5 w-3.5 opacity-40" style={{ color: jRc.textColor }} />
+                      <Sparkles className="absolute right-5 top-5 h-3 w-3 opacity-30" style={{ color: jRc.textColor }} />
+                      <div
+                        className="h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
+                        style={{ background: jRc.iconBg, boxShadow: `0 0 28px ${jRc.glow}, 0 0 8px ${jRc.glow}` }}
+                      >
+                        <RewardIconDisplay icon={joined.rewardIconEmoji} imgClassName="w-10 h-10 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
                       </div>
+                    </div>
 
-                      {/* Title */}
-                      <h3 style={{ fontFamily: "Fredoka, sans-serif", fontSize: 17, fontWeight: 700, color: "#fff", textAlign: "center", marginBottom: 10, textShadow: "0 1px 4px rgba(0,0,0,0.7)", lineHeight: 1.2 }}>
+                    {/* Content zone */}
+                    <div className="px-4 pb-4 space-y-3">
+                      <h3 className="font-black text-xl text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${jRc.glow}` }}>
                         {joined.rewardTitle || t("kidDashboard.reward")}
                       </h3>
 
-                      {/* Stat chips */}
-                      <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
+                      {/* Stats chips */}
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
                         {myParticipation && (
-                          <div style={{ background: jRc.chip, border: `1px solid ${jRc.border}`, borderRadius: 20, padding: "3px 10px" }}>
-                            <span style={{ fontSize: 13, color: jRc.chipText, fontWeight: 700 }}>★ {myParticipation.pointsContributed}</span>
+                          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: jRc.iconBg, color: jRc.textColor, border: `1px solid ${jRc.border}` }}>
+                            <Coins className="h-3.5 w-3.5" />
+                            <span>{t("myRewards.pointsSpent", { count: myParticipation.pointsContributed })}</span>
                           </div>
                         )}
-                        {jIsCompleted && <div style={{ background: "rgba(34,197,94,0.18)", border: "1px solid rgba(34,197,94,0.45)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#4ade80", fontWeight: 600 }}>{t("kidDashboard.fulfilled")}</span></div>}
-                        {jIsApproved && !jIsCompleted && <div style={{ background: "rgba(251,191,36,0.15)", border: "1px solid rgba(251,191,36,0.4)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#fbbf24", fontWeight: 600 }}>{t("kidDashboard.waiting")}</span></div>}
-                        {!jIsCompleted && !jIsApproved && <div style={{ background: "rgba(148,163,184,0.15)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>{t("kidDashboard.pending")}</span></div>}
-                        <div style={{ background: "rgba(99,102,241,0.18)", border: "1px solid rgba(99,102,241,0.4)", borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}>
-                          <Users style={{ width: 10, height: 10, color: "#a5b4fc" }} />
-                          <span style={{ fontSize: 12, color: "#a5b4fc", fontWeight: 600 }}>{isFinalized ? t("kidDashboard.shared") : t("kidDashboard.beingShared")}</span>
+                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-violet-500/15 text-violet-300 border border-violet-400/30">
+                          <Users className="h-3.5 w-3.5" />
+                          <span>{isFinalized ? t("kidDashboard.shared") : t("kidDashboard.beingShared")}</span>
+                        </div>
+                      </div>
+
+                      {/* Status badge */}
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <div
+                          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                          style={{ background: jIsCompleted ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.08)", color: jIsCompleted ? "#4ade80" : "rgba(255,255,255,0.7)", border: jIsCompleted ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,255,255,0.15)" }}
+                        >
+                          {jIsCompleted ? (
+                            <><CheckCircle2 className="h-3.5 w-3.5" />{t("kidDashboard.fulfilled")}</>
+                          ) : jIsApproved ? (
+                            <><Clock className="h-3.5 w-3.5" />{t("kidDashboard.waiting")}</>
+                          ) : (
+                            <><Clock className="h-3.5 w-3.5" />{t("kidDashboard.pending")}</>
+                          )}
                         </div>
                       </div>
 
                       {/* Initiator */}
                       {initiatorMember && (
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                          <span style={{ fontSize: 11, color: "#94a3b8" }}>{t("kidDashboard.with")}</span>
-                          <div style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
-                            <Avatar className="h-4 w-4">
+                        <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
+                          <div className="flex items-center gap-1.5 text-xs text-white/50">
+                            <Users className="h-3.5 w-3.5" />
+                            <span>{t("kidDashboard.with")}:</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Avatar className="h-6 w-6 border-2 border-white/20">
                               <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar, (initiatorMember as any).updatedAt)} />
-                              <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: initiatorMember.color, fontSize: 8 }}>{initiatorMember.displayName[0]}</AvatarFallback>
+                              <AvatarFallback className="text-xs font-bold text-white" style={{ backgroundColor: initiatorMember.color }}>{initiatorMember.displayName[0]}</AvatarFallback>
                             </Avatar>
-                            <span style={{ fontSize: 11, color: "#e2e8f0", fontWeight: 600 }}>{initiatorMember.displayName}</span>
+                            <span className="text-sm font-semibold text-white/80">{initiatorMember.displayName}</span>
                           </div>
                         </div>
                       )}
