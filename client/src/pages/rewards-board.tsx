@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus, Lock, Trophy, Star, Zap, Info, Loader2 } from "lucide-react";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -157,82 +156,109 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
     },
   });
 
+  const cardCls = isReady
+    ? "from-amber-900/80 via-yellow-900/80 to-amber-800/80 border-amber-400/60 shadow-amber-400/20"
+    : "from-indigo-900/80 via-purple-900/80 to-violet-900/80 border-violet-500/40 shadow-violet-500/10";
+  const iconBgCls = isReady
+    ? "from-amber-500/30 to-yellow-400/20 border-amber-400/40"
+    : "from-violet-500/20 to-purple-500/20 border-violet-400/20";
+
   return (
     <>
-      <motion.div
-        whileHover={{ y: -3 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      <div
+        className={`relative rounded-2xl border bg-gradient-to-br ${cardCls} shadow-xl overflow-hidden active:scale-[0.98] transition-transform duration-150`}
       >
-        <Card className={`p-4 border-2 rounded-2xl transition-all ${
-          isReady
-            ? "bg-gradient-to-br from-amber-500/10 to-yellow-400/5 border-amber-400/40 shadow-md shadow-amber-500/10"
-            : "bg-card/80 border-border shadow-md shadow-black/10"
-        }`}>
-          {/* Top row: icon + title + info */}
-          <div className="flex items-center gap-3 mb-3">
-            <div className={`flex-shrink-0 h-14 w-14 rounded-full flex items-center justify-center overflow-hidden ${
-              isReady ? "bg-amber-500/15" : "bg-primary/10"
-            }`}>
-              <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-9 h-9 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
+        {/* Shine overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+        {/* Ready glow ring */}
+        {isReady && (
+          <div className="absolute inset-0 rounded-2xl border-2 border-amber-400/30 pointer-events-none" />
+        )}
+
+        <div className="p-4 flex items-center gap-3">
+          {/* Icon box */}
+          <div className={`relative flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br ${iconBgCls} border flex items-center justify-center shadow-inner overflow-hidden`}>
+            <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-9 h-9 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
+            {isReady && (
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center">
+                <span className="text-[8px] font-bold text-amber-900">✓</span>
+              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-bold text-base text-white truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                {reward.title}
+              </h3>
+              {isReady && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-amber-400/20 text-amber-300 border-amber-400/40 flex-shrink-0">
+                  <Sparkles className="h-2.5 w-2.5" />{t("kidDashboard.readyToRequest")}
+                </span>
+              )}
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 min-w-0 mb-0.5">
-                <h3 className="font-bold text-lg leading-tight truncate min-w-0" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                  {reward.title}
-                </h3>
-                {isReady && (
-                  <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-amber-400/20 text-amber-400 border border-amber-400/30">
-                    {t("kidDashboard.readyToRequest")}
-                  </span>
+            {/* Custom progress bar */}
+            <div className="h-3 rounded-full bg-black/30 overflow-hidden relative mb-1.5">
+              <div
+                className={`h-full rounded-full relative transition-all ${isReady ? "bg-gradient-to-r from-amber-400 to-yellow-300" : "bg-gradient-to-r from-violet-400 to-purple-300"}`}
+                style={{ width: `${percentage}%` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent rounded-full" />
+                {percentage > 15 && (
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white/60 rounded-full" />
                 )}
               </div>
-              <span className="text-xs text-muted-foreground">★ {reward.pointThreshold} Punkte</span>
             </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-white/50" style={{ fontFamily: "Nunito, sans-serif" }}>
+                {isReady ? (
+                  <span className="text-amber-300 font-semibold">✦ {t("kidDashboard.readyToRequest")}</span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <Zap className="h-3 w-3 text-amber-400" />{remaining} {t("kidDashboard.pointsRemaining", { count: remaining }).split(" ").slice(-1)[0]}
+                  </span>
+                )}
+              </span>
+              <span className="flex items-center gap-1 text-xs font-bold text-amber-300">
+                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />{reward.pointThreshold}
+              </span>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="flex-shrink-0 flex flex-col items-end gap-2">
             <button
               onClick={() => setShowDetails(true)}
-              className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+              className="text-white/30 hover:text-white/60 transition-colors"
               data-testid={`button-info-reward-${reward.id}`}
             >
               <Info className="h-4 w-4" />
             </button>
-          </div>
-
-          {/* Progress bar */}
-          <Progress value={percentage} className="h-3.5 rounded-full mb-2" />
-
-          {/* Bottom row: status text + button */}
-          <div className="flex items-center justify-between gap-3">
-            {!isReady ? (
-              <p className="text-sm text-muted-foreground flex items-center gap-1 min-w-0">
-                <Zap className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
-                <span className="truncate">{t("kidDashboard.pointsRemaining", { count: remaining })}</span>
-              </p>
+            {isReady ? (
+              <button
+                onClick={() => { if (!redeemMutation.isPending) redeemMutation.mutate(); }}
+                disabled={redeemMutation.isPending}
+                className="w-12 h-12 rounded-xl bg-gradient-to-b from-amber-400 to-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30 active:scale-95 transition-transform border border-amber-300/50 disabled:opacity-50"
+                data-testid={`button-request-reward-${reward.id}`}
+              >
+                {redeemMutation.isPending
+                  ? <Loader2 className="h-5 w-5 text-amber-900 animate-spin" />
+                  : <Gift className="h-5 w-5 text-amber-900" />
+                }
+              </button>
             ) : (
-              <p className="text-sm font-semibold text-green-500 flex items-center gap-1">
-                <Sparkles className="h-3.5 w-3.5 flex-shrink-0" />
-                {t("kidDashboard.canRequestNow")}
-              </p>
+              <button
+                className="w-12 h-12 rounded-xl bg-violet-500/20 border border-violet-400/30 flex items-center justify-center"
+                disabled
+                data-testid={`button-request-reward-${reward.id}`}
+              >
+                <Trophy className="h-5 w-5 text-violet-300" />
+              </button>
             )}
-            <Button
-              variant={isReady ? "default" : "outline"}
-              size="sm"
-              onClick={() => { if (isReady && !redeemMutation.isPending) redeemMutation.mutate(); }}
-              disabled={!isReady || redeemMutation.isPending}
-              className={`flex-shrink-0 font-bold rounded-xl ${isReady ? "shadow-sm shadow-primary/20" : "opacity-50"}`}
-              data-testid={`button-request-reward-${reward.id}`}
-            >
-              {redeemMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : isReady ? (
-                <><Gift className="h-4 w-4 mr-1.5" />{t("kidDashboard.now")}</>
-              ) : (
-                <><Trophy className="h-4 w-4 mr-1.5" />{t("kidDashboard.collect")}</>
-              )}
-            </Button>
           </div>
-        </Card>
-      </motion.div>
+        </div>
+      </div>
 
       <AlertDialog open={showDetails} onOpenChange={setShowDetails}>
         <AlertDialogContent>
