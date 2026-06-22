@@ -776,16 +776,16 @@ function TaskCard({
       : "border-blue-500/30";
 
     const bgColor = showAsPending || showAsSubmitted
-      ? "bg-amber-500/45"
+      ? "bg-amber-500/25"
       : showAsApproved
-      ? "bg-green-500/10"
+      ? "bg-green-500/[8%]"
       : "bg-card";
 
     return (
       <div className="min-w-0 active:scale-[0.97] transition-transform duration-150">
         <div
           className={`rounded-2xl border transition-colors min-w-0 w-full cursor-pointer ${bgColor} ${borderColor}`}
-          style={(!showAsPending && !showAsSubmitted && !showAsApproved) ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 92%, rgb(59 130 246)), color-mix(in srgb, var(--card) 88%, rgb(6 182 212)))" } : undefined}
+          style={(!showAsPending && !showAsSubmitted && !showAsApproved) ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))" } : undefined}
           data-testid={`task-card-${task.id}`}
           onClick={() => setShoppingListExpanded(v => !v)}
         >
@@ -827,16 +827,14 @@ function TaskCard({
       : "border-blue-500/30";
 
     const bgColor = showAsApproved || allSharedMembersCompleted
-      ? "bg-green-500/10"
+      ? "bg-green-500/[8%]"
       : showAsPending || showAsSubmitted
-      ? "bg-amber-500/45"
+      ? "bg-amber-500/25"
       : isRejected
       ? "bg-blue-500/10"
       : dueDateInfo.expired
       ? "bg-destructive/10"
-      : isActionable
-      ? "bg-card"
-      : "bg-card opacity-70";
+      : "bg-card";
 
     const isDefaultBlue = !showAsApproved && !allSharedMembersCompleted && !showAsPending && !showAsSubmitted && !isRejected && !dueDateInfo.expired;
 
@@ -844,7 +842,7 @@ function TaskCard({
       <div className={`min-w-0 transition-transform duration-150 ${isActionable ? "active:scale-[0.96]" : ""}`}>
         <div
           className={`p-2.5 rounded-2xl border transition-colors min-w-0 w-full ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
-          style={isDefaultBlue ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 92%, rgb(59 130 246)), color-mix(in srgb, var(--card) 88%, rgb(6 182 212)))" } : undefined}
+          style={isDefaultBlue ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))" } : undefined}
           data-testid={`task-card-${task.id}`}
           onClick={isActionable ? handleComplete : undefined}
         >
@@ -893,20 +891,20 @@ function TaskCard({
             : isActionable && isRejected 
             ? "bg-blue-500/25 cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15" 
             : showAsApproved 
-            ? "bg-green-500/20 border-green-500/45 shadow-md shadow-green-900/15" 
+            ? "bg-green-500/[8%] border-green-500/20" 
             : showAsSubmitted 
-            ? "bg-amber-500/50 border-amber-400/70 shadow-md shadow-amber-900/20" 
+            ? "bg-amber-500/25 border-amber-400/50 shadow-md shadow-amber-900/10" 
             : showAsPending 
-            ? "bg-amber-500/50 border-amber-400/70 shadow-md shadow-amber-900/20" 
+            ? "bg-amber-500/25 border-amber-400/50 shadow-md shadow-amber-900/10" 
             : allSharedMembersCompleted 
-            ? "bg-green-500/20 border-green-500/45 shadow-md shadow-green-900/15" 
+            ? "bg-green-500/[8%] border-green-500/20" 
             : dueDateInfo.expired 
             ? "bg-destructive/20 border-destructive/40" 
             : "border-blue-500/20 opacity-70"
         }`}
         style={
           (isActionable && !isRejected) || (!showAsApproved && !allSharedMembersCompleted && !showAsSubmitted && !showAsPending && !isRejected && !dueDateInfo.expired)
-            ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 92%, rgb(59 130 246)), color-mix(in srgb, var(--card) 88%, rgb(6 182 212)))" }
+            ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))" }
             : undefined
         }
         data-testid={`task-card-${task.id}`}
