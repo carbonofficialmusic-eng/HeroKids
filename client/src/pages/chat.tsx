@@ -188,8 +188,8 @@ export default function Chat() {
 
   if (isLoading || memberLoading) {
     return (
-      <div className="p-4 flex flex-col" style={safeTopStyle}>
-        <div className="flex items-center gap-3 mb-4 shrink-0">
+      <div className="p-4 flex flex-col items-center" style={safeTopStyle}>
+        <div className="w-full lg:max-w-3xl flex items-center gap-3 mb-4 shrink-0">
           {backBtn}
           <h1 className="text-2xl font-bold">{t('chat.title')}</h1>
         </div>
@@ -256,11 +256,11 @@ export default function Chat() {
 
   return (
     <div
-      className="flex flex-col"
+      className="flex flex-col items-center"
       style={safeTopStyle}
       data-testid="page-chat"
     >
-      <div className={`w-full lg:max-w-3xl flex flex-col flex-1 min-h-0 mx-auto px-4 ${isKeyboardOpen ? 'pb-0' : 'pb-4'}`}>
+      <div className={`w-full lg:max-w-3xl flex flex-col flex-1 min-h-0 px-4 ${isKeyboardOpen ? 'pb-0' : 'pb-4'}`}>
         <div className={`flex items-center gap-3 shrink-0 ${isKeyboardOpen ? 'mb-1' : 'mb-4'}`}>
           {backBtn}
           <h1 className="text-2xl font-bold" data-testid="heading-chat">
