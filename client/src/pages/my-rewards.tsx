@@ -340,6 +340,8 @@ export default function MyRewards() {
               const canCancelSharing = isSharing && participants.length === 0;
               const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
+              const isCompleted = redemption.status === "completed";
+              const isApproved = redemption.status === "approved";
               // All purchased rewards are always LEGENDARY (gold)
               const rarity = { label: "LEGENDARY", banner: "from-amber-500 via-yellow-400 to-amber-300", glow: "rgba(251,191,36,0.35)", border: "rgba(251,191,36,0.55)", iconBg: "rgba(251,191,36,0.18)", textColor: "#fbbf24" };
 
