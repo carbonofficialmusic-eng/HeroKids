@@ -779,7 +779,7 @@ function TaskCard({
       ? "rgba(245,158,11,0.22)"
       : showAsApproved
       ? "rgba(34,197,94,0.08)"
-      : `linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))`;
+      : `linear-gradient(to bottom right, color-mix(in srgb, hsl(var(--card)) 97%, rgb(59 130 246)), color-mix(in srgb, hsl(var(--card)) 95%, rgb(6 182 212)))`;
 
     return (
       <div className="min-w-0 active:scale-[0.97] transition-transform duration-150">
@@ -835,8 +835,8 @@ function TaskCard({
       : dueDateInfo.expired
       ? undefined
       : !isActionable
-      ? `linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))`
-      : `linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))`;
+      ? `linear-gradient(to bottom right, color-mix(in srgb, hsl(var(--card)) 97%, rgb(59 130 246)), color-mix(in srgb, hsl(var(--card)) 95%, rgb(6 182 212)))`
+      : `linear-gradient(to bottom right, color-mix(in srgb, hsl(var(--card)) 97%, rgb(59 130 246)), color-mix(in srgb, hsl(var(--card)) 95%, rgb(6 182 212)))`;
 
     return (
       <div className={`min-w-0 transition-transform duration-150 ${isActionable ? "active:scale-[0.96]" : ""}`}>
@@ -905,7 +905,7 @@ function TaskCard({
         style={{
           background:
             isActionable && !isRejected
-              ? `linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))`
+              ? `linear-gradient(to bottom right, color-mix(in srgb, hsl(var(--card)) 97%, rgb(59 130 246)), color-mix(in srgb, hsl(var(--card)) 95%, rgb(6 182 212)))`
               : isActionable && isRejected
               ? "rgba(59,130,246,0.2)"
               : showAsApproved || allSharedMembersCompleted
@@ -914,7 +914,7 @@ function TaskCard({
               ? "rgba(245,158,11,0.22)"
               : dueDateInfo.expired
               ? "rgba(239,68,68,0.15)"
-              : `linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))`
+              : `linear-gradient(to bottom right, color-mix(in srgb, hsl(var(--card)) 97%, rgb(59 130 246)), color-mix(in srgb, hsl(var(--card)) 95%, rgb(6 182 212)))`
         }}
         data-testid={`task-card-${task.id}`}
         onClick={(task as any).isShoppingList
