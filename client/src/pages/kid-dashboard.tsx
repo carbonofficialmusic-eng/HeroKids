@@ -294,69 +294,85 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
     }
   };
 
+  const rc = isReady
+    ? { bg: "linear-gradient(160deg, rgba(30,20,8,0.94) 0%, rgba(18,12,4,0.97) 100%)", border: "rgba(251,191,36,0.50)", glow: "rgba(251,191,36,0.22)", iconBg: "rgba(251,191,36,0.15)", textColor: "#fbbf24" }
+    : { bg: "linear-gradient(160deg, rgba(18,18,28,0.94) 0%, rgba(12,12,20,0.97) 100%)", border: "rgba(148,163,184,0.18)", glow: "rgba(0,0,0,0.0)", iconBg: "rgba(148,163,184,0.10)", textColor: "#94a3b8" };
+
   return (
     <>
-      <div className="active:scale-[0.98] transition-transform duration-150">
-        <Card className={`p-4 border-2 rounded-2xl transition-colors ${
-          isReady
-            ? "bg-gradient-to-br from-amber-500/10 to-yellow-400/5 border-amber-400/40 shadow-md shadow-amber-500/10"
-            : "bg-card/80 border-border shadow-md shadow-black/10"
-        }`}>
-          <div className="flex items-center gap-3">
-            {/* Icon circle */}
-            <div className={`flex-shrink-0 h-14 w-14 rounded-full flex items-center justify-center overflow-hidden ${
-              isReady ? "bg-amber-500/15" : "bg-primary/10"
-            }`}>
-              <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-9 h-9 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
-            </div>
-            {/* Title + progress */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1.5">
-                <h3 className="font-bold text-base truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                  {reward.title}
-                </h3>
-                {isReady && (
-                  <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-amber-400/20 text-amber-400 border border-amber-400/30">
-                    {t("kidDashboard.readyToRequest")}
-                  </span>
-                )}
-              </div>
-              <Progress value={percentage} className="h-3 rounded-full mb-1" />
-              {!isReady && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Zap className="h-3 w-3 text-amber-500 flex-shrink-0" />
-                  {t("kidDashboard.pointsRemaining", { count: remaining })}
-                </p>
+      <div
+        className="rounded-2xl overflow-hidden active:scale-[0.98] transition-transform duration-150"
+        style={{
+          background: rc.bg,
+          border: `1.5px solid ${rc.border}`,
+          boxShadow: isReady
+            ? `0 0 0 1px rgba(255,255,255,0.03) inset, 0 6px 20px ${rc.glow}, 0 2px 8px ${rc.glow}`
+            : `0 0 0 1px rgba(255,255,255,0.03) inset, 0 4px 12px rgba(0,0,0,0.3)`,
+        }}
+      >
+        <div className="flex items-center gap-3 p-4">
+          {/* Icon circle */}
+          <div
+            className="flex-shrink-0 h-14 w-14 rounded-full flex items-center justify-center overflow-hidden"
+            style={{ background: rc.iconBg }}
+          >
+            <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-9 h-9 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
+          </div>
+
+          {/* Title + progress */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1.5">
+              <h3 className="font-bold text-base truncate text-white/90" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                {reward.title}
+              </h3>
+              {isReady && (
+                <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md" style={{ background: "rgba(251,191,36,0.18)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.30)" }}>
+                  {t("kidDashboard.readyToRequest")}
+                </span>
               )}
             </div>
-            {/* Right: info + redeem button */}
-            <div className="flex-shrink-0 flex flex-col items-end gap-2">
-              <button
-                onClick={() => setShowDetails(true)}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                data-testid={`button-info-reward-${reward.id}`}
-              >
-                <Info className="h-4 w-4" />
-              </button>
-              <Button
-                variant={isReady ? "default" : "outline"}
-                size="sm"
-                onClick={handleRequest}
-                disabled={!isReady || redeemMutation.isPending}
-                className={`font-bold rounded-xl ${isReady ? "shadow-sm shadow-primary/20" : "opacity-50"}`}
-                data-testid={`button-request-reward-${reward.id}`}
-              >
-                {redeemMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : isReady ? (
-                  <><Gift className="h-4 w-4 mr-1" />{t("kidDashboard.now")}</>
-                ) : (
-                  <><Trophy className="h-4 w-4 mr-1" />{t("kidDashboard.collect")}</>
-                )}
-              </Button>
-            </div>
+            <Progress value={percentage} className="h-2.5 rounded-full mb-1" />
+            {!isReady && (
+              <p className="text-xs flex items-center gap-1" style={{ color: rc.textColor }}>
+                <Zap className="h-3 w-3 flex-shrink-0" style={{ color: rc.textColor }} />
+                {t("kidDashboard.pointsRemaining", { count: remaining })}
+              </p>
+            )}
+            {isReady && (
+              <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>
+                {reward.pointThreshold} {t("kidDashboard.points")}
+              </p>
+            )}
           </div>
-        </Card>
+
+          {/* Right: info + redeem button */}
+          <div className="flex-shrink-0 flex flex-col items-end gap-2">
+            <button
+              onClick={() => setShowDetails(true)}
+              className="transition-colors"
+              style={{ color: rc.textColor }}
+              data-testid={`button-info-reward-${reward.id}`}
+            >
+              <Info className="h-4 w-4" />
+            </button>
+            <Button
+              variant={isReady ? "default" : "outline"}
+              size="sm"
+              onClick={handleRequest}
+              disabled={!isReady || redeemMutation.isPending}
+              className={`font-bold rounded-xl ${!isReady ? "opacity-40" : ""}`}
+              data-testid={`button-request-reward-${reward.id}`}
+            >
+              {redeemMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isReady ? (
+                <><Gift className="h-4 w-4 mr-1" />{t("kidDashboard.now")}</>
+              ) : (
+                <><Trophy className="h-4 w-4 mr-1" />{t("kidDashboard.collect")}</>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Details Dialog */}
