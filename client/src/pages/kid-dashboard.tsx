@@ -1158,8 +1158,8 @@ function TaskCard({
 
           {/* Available-again time chip for locked recurring tasks */}
           {availableAgainDays !== null && (
-            <div className="flex items-center justify-center gap-1.5 bg-white/8 text-muted-foreground px-3 py-1 rounded-full border border-white/10 text-xs">
-              <Clock className="h-3 w-3 shrink-0" />
+            <div className="flex items-center justify-center gap-2 bg-black/40 text-white px-4 py-2 rounded-full border border-white/30 text-sm font-bold shadow-md">
+              <Clock className="h-4 w-4 shrink-0 text-white/80" />
               <span>
                 {availableAgainDays === 0
                   ? t("tasks.availableToday")
