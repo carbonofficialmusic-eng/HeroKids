@@ -3026,13 +3026,17 @@ export default function KidDashboard() {
       ) : (
         /* Web: centered bar, no collapse toggle */
         <div
-          className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50"
+          className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
           style={{
             paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
             paddingTop: '0.5rem',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden' as React.CSSProperties['WebkitBackfaceVisibility'],
           }}
         >
-          <Card className="p-1.5 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl">
+          <div className="pointer-events-auto">
+          <Card className="p-1.5 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-lg">
             <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="ghost"
@@ -3062,6 +3066,7 @@ export default function KidDashboard() {
               </div>
             </div>
           </Card>
+          </div>
         </div>
       )}
 
