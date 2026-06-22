@@ -157,63 +157,57 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
     },
   });
 
+  const rc = isReady
+    ? { cardBg: "linear-gradient(160deg,#161008 0%,#1c1208 40%,#130e06 100%)", banner: "linear-gradient(135deg,#78350f,#92400e,#a16207,#92400e)", glow: "rgba(251,191,36,0.12)", border: "rgba(251,191,36,0.22)", iconBg: "rgba(251,191,36,0.12)", label: "BEREIT" }
+    : { cardBg: "linear-gradient(160deg,#08090f 0%,#0d0f1c 40%,#06070d 100%)", banner: "linear-gradient(135deg,#1e1b4b,#312e81,#3730a3,#312e81)", glow: "rgba(99,102,241,0.1)", border: "rgba(99,102,241,0.18)", iconBg: "rgba(99,102,241,0.12)", label: "QUEST" };
+
   return (
     <>
       <motion.div
         whileHover={{ y: -3 }}
         whileTap={{ scale: 0.98 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        style={{ borderRadius: 18, overflow: "hidden", border: `1.5px solid ${rc.border}`, boxShadow: `0 4px 24px ${rc.glow}`, background: rc.cardBg }}
       >
-        <Card className={`p-4 transition-all backdrop-blur-md border-2 rounded-2xl ${
-          isReady
-            ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-4 ring-inset ring-amber-400/50 shadow-xl shadow-amber-500/20 border-amber-400/55"
-            : "bg-card/80 border-border shadow-md shadow-black/15"
-        }`}>
+        {/* Banner */}
+        <div style={{ background: rc.banner, padding: "6px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontFamily: "Fredoka, sans-serif", fontSize: 11, fontWeight: 700, color: "#fff", letterSpacing: "0.12em", textTransform: "uppercase", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{rc.label}</span>
+          <button
+            onClick={() => setShowDetails(true)}
+            style={{ background: "rgba(255,255,255,0.12)", border: "none", borderRadius: 6, padding: "2px 8px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+            data-testid={`button-info-reward-${reward.id}`}
+          >
+            <Info className="h-3 w-3" style={{ color: "rgba(255,255,255,0.7)" }} />
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>★ {reward.pointThreshold}</span>
+          </button>
+        </div>
+        {/* Card body */}
+        <div style={{ padding: "12px 14px" }}>
           {/* Top row: icon + title */}
-          <div className="flex items-start gap-3 mb-3">
-            <div className={`flex-shrink-0 h-14 w-14 rounded-2xl flex items-center justify-center p-1.5 ${isReady ? "bg-primary/20" : "bg-primary/10"}`}>
-              <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-4xl leading-none" />
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+            <div style={{ flexShrink: 0, width: 54, height: 54, borderRadius: "50%", background: rc.iconBg, boxShadow: `0 0 18px ${rc.glow}`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+              <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-9 h-9 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
             </div>
-            <div className="flex-1 min-w-0 pt-0.5">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <h3 className="font-bold text-lg leading-tight truncate min-w-0" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                  {reward.title}
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowDetails(true)}
-                  className="h-7 w-7 rounded-full flex-shrink-0"
-                  data-testid={`button-info-reward-${reward.id}`}
-                >
-                  <Info className="h-4 w-4 text-primary" />
-                </Button>
-              </div>
-            </div>
+            <h3 style={{ fontFamily: "Fredoka, sans-serif", fontWeight: 700, fontSize: 18, color: "#fff", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {reward.title}
+            </h3>
           </div>
-
           {/* Progress bar */}
-          <Progress value={percentage} className="h-4 rounded-full mb-2" />
-
-          {/* Bottom row: status text + action button */}
-          <div className="flex items-center justify-between gap-3">
-            {!isReady ? (
-              <p className="text-sm text-muted-foreground flex items-center gap-1 min-w-0">
-                <Zap className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                <span className="truncate">{t("kidDashboard.pointsRemaining", { count: remaining })}</span>
-              </p>
-            ) : (
-              <p className="text-sm font-bold text-green-500 flex items-center gap-1">
-                <Sparkles className="h-4 w-4 flex-shrink-0" />
-                {t("kidDashboard.readyToRequest")}
-              </p>
-            )}
+          <Progress value={percentage} className="h-3.5 rounded-full mb-2.5" />
+          {/* Bottom row: status + button */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+            <p style={{ fontSize: 12, color: isReady ? "#4ade80" : "rgba(255,255,255,0.4)", display: "flex", alignItems: "center", gap: 4, minWidth: 0 }}>
+              {isReady
+                ? <><Sparkles className="h-3.5 w-3.5" style={{ flexShrink: 0 }} />{t("kidDashboard.readyToRequest")}</>
+                : <><Zap className="h-3.5 w-3.5" style={{ color: "#fbbf24", flexShrink: 0 }} /><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t("kidDashboard.pointsRemaining", { count: remaining })}</span></>
+              }
+            </p>
             <Button
               variant={isReady ? "default" : "outline"}
               size="sm"
               onClick={() => { if (isReady && !redeemMutation.isPending) redeemMutation.mutate(); }}
               disabled={!isReady || redeemMutation.isPending}
-              className={`flex-shrink-0 font-bold rounded-xl ${isReady ? "shadow-md shadow-primary/30" : "opacity-55"}`}
+              className={`flex-shrink-0 font-bold rounded-xl ${isReady ? "shadow-md shadow-primary/30" : "opacity-50"}`}
               data-testid={`button-request-reward-${reward.id}`}
             >
               {redeemMutation.isPending ? (
@@ -225,7 +219,7 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
               )}
             </Button>
           </div>
-        </Card>
+        </div>
       </motion.div>
 
       <AlertDialog open={showDetails} onOpenChange={setShowDetails}>
