@@ -1032,7 +1032,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="min-h-screen overflow-x-clip">
       {/* Header — position:fixed so it never scrolls away in WKWebView */}
       <header
         data-app-header
@@ -1101,7 +1101,7 @@ export default function Dashboard() {
       </header>
 
       <div
-        className={`container mx-auto max-w-7xl py-8 overflow-x-hidden ${isParent ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))]" : ""}`}
+        className={`container mx-auto max-w-7xl py-8 overflow-x-clip ${isParent ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))]" : ""}`}
         style={{ paddingTop: 'calc(var(--header-h) + var(--sat, env(safe-area-inset-top)) + 1rem)', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}
       >
         {isParent ? (
