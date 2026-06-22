@@ -3037,7 +3037,7 @@ export default function KidDashboard() {
                       className="h-14 w-full px-3 sm:px-5 rounded-2xl"
                     >
                       <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-amber-500 flex-shrink-0" />
-                      <span className="font-bold text-sm sm:text-base truncate">{t("kidDashboard.requestNewReward")}</span>
+                      <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("kidDashboard.requestNewReward")}</span>
                     </Button>
                   </div>
                   <div className="flex-1 min-w-0 relative">
@@ -3093,7 +3093,7 @@ export default function KidDashboard() {
                 className="h-14 px-4 sm:px-6 rounded-2xl"
               >
                 <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-amber-500 flex-shrink-0" />
-                <span className="font-bold text-sm sm:text-base">{t("kidDashboard.requestNewReward")}</span>
+                <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("kidDashboard.requestNewReward")}</span>
               </Button>
               <div className="relative">
                 <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 px-4 sm:px-6 rounded-2xl">
