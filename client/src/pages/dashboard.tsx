@@ -2109,9 +2109,9 @@ export default function Dashboard() {
             WebkitBackfaceVisibility: 'hidden' as React.CSSProperties['WebkitBackfaceVisibility'],
           }}
         >
-          <div className="pointer-events-auto relative">
+          <div className="pointer-events-auto relative" style={{ width: 'min(calc(100vw - 1rem), 44rem)' }}>
             <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-lg">
-              <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 px-5 rounded-2xl">
+              <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 w-full px-5 rounded-2xl">
                 <Link href="/chat">
                   <MessageCircle className="h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
                   <span className="font-medium text-sm">{t("nav.chat")}</span>
