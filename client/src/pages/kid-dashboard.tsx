@@ -738,13 +738,13 @@ function TaskCard({
   // Compact grid card for shopping list tasks
   if (compact && (task as any).isShoppingList) {
     const borderColor = showAsPending || showAsSubmitted
-      ? "border-amber-400/60"
+      ? "border-amber-400/80"
       : showAsApproved
       ? "border-green-500/50"
       : "border-border";
 
     const bgColor = showAsPending || showAsSubmitted
-      ? "bg-amber-500/18"
+      ? "bg-amber-500/45"
       : showAsApproved
       ? "bg-green-500/10"
       : "bg-card";
@@ -786,7 +786,7 @@ function TaskCard({
     const borderColor = showAsApproved || allSharedMembersCompleted
       ? "border-green-500/50"
       : showAsPending || showAsSubmitted
-      ? "border-amber-400/60"
+      ? "border-amber-400/80"
       : isRejected
       ? "border-blue-400/40"
       : dueDateInfo.expired
@@ -796,7 +796,7 @@ function TaskCard({
     const bgColor = showAsApproved || allSharedMembersCompleted
       ? "bg-green-500/10"
       : showAsPending || showAsSubmitted
-      ? "bg-amber-500/18"
+      ? "bg-amber-500/45"
       : isRejected
       ? "bg-blue-500/10"
       : dueDateInfo.expired
@@ -859,9 +859,9 @@ function TaskCard({
             : showAsApproved 
             ? "bg-green-500/20 border-green-500/45 shadow-md shadow-green-900/15" 
             : showAsSubmitted 
-            ? "bg-amber-500/30 border-amber-400/55 shadow-md shadow-amber-900/15" 
+            ? "bg-amber-500/50 border-amber-400/70 shadow-md shadow-amber-900/20" 
             : showAsPending 
-            ? "bg-amber-500/30 border-amber-400/55 shadow-md shadow-amber-900/15" 
+            ? "bg-amber-500/50 border-amber-400/70 shadow-md shadow-amber-900/20" 
             : hasNoSlots 
             ? "bg-card border-border opacity-70" 
             : isSharedTaskNotAssigned 
@@ -884,8 +884,8 @@ function TaskCard({
         <div className="text-center space-y-3">
           <div className={`flex justify-center p-4 rounded-2xl mx-auto w-fit shadow-inner ${
             showAsApproved ? "bg-green-500/25" : 
-            showAsSubmitted ? "bg-amber-500/35" :
-            showAsPending ? "bg-amber-500/35" :
+            showAsSubmitted ? "bg-amber-500/50" :
+            showAsPending ? "bg-amber-500/50" :
             isRejected ? "bg-blue-500/20" :
             hasNoSlots ? "bg-amber-500/15" :
             allSharedMembersCompleted ? "bg-green-500/25" :
@@ -1084,8 +1084,8 @@ function TaskCard({
             <div className="space-y-1.5 w-full">
               <div 
                 className={`text-sm px-4 py-2 rounded-full text-center font-semibold border ${
-                  showAsSubmitted ? 'bg-amber-500/22 border-amber-400/40 text-amber-600 dark:text-amber-400' :
-                  showAsPending ? 'bg-amber-500/22 border-amber-400/40 text-amber-600 dark:text-amber-400' :
+                  showAsSubmitted ? 'bg-amber-500/40 border-amber-400/60 text-amber-600 dark:text-amber-400' :
+                  showAsPending ? 'bg-amber-500/40 border-amber-400/60 text-amber-600 dark:text-amber-400' :
                   showAsApproved || allSharedMembersCompleted ? 'bg-green-500/15 border-green-400/30 text-green-600 dark:text-green-400' :
                   isRejected ? 'bg-blue-500/15 border-blue-400/30 text-blue-600 dark:text-blue-400' :
                   hasNoSlots ? 'bg-amber-500/15 border-amber-400/30 text-amber-600 dark:text-amber-400' :
