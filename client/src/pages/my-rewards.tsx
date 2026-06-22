@@ -16,6 +16,9 @@ import {
   Gift,
   Sparkles,
   Star,
+  Trophy,
+  Gem,
+  Hourglass,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -361,163 +364,199 @@ export default function MyRewards() {
               const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
               const isCompleted = redemption.status === "completed";
+              const isApproved = redemption.status === "approved";
+              // Rarity tier by status
+              const rarity = isCompleted
+                ? { label: "LEGENDARY", banner: "from-amber-500 via-yellow-400 to-amber-300", glow: "rgba(251,191,36,0.35)", border: "rgba(251,191,36,0.55)", iconBg: "rgba(251,191,36,0.18)", textColor: "#fbbf24" }
+                : isApproved
+                ? { label: "EPIC", banner: "from-violet-600 via-purple-500 to-indigo-500", glow: "rgba(167,139,250,0.35)", border: "rgba(167,139,250,0.55)", iconBg: "rgba(167,139,250,0.18)", textColor: "#a78bfa" }
+                : { label: "RARE", banner: "from-orange-500 via-orange-400 to-amber-400", glow: "rgba(251,146,60,0.35)", border: "rgba(251,146,60,0.5)", iconBg: "rgba(251,146,60,0.18)", textColor: "#fb923c" };
 
               return (
                 <motion.div
                   key={redemption.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: index * 0.08, duration: 0.35, ease: "easeOut" }}
                 >
-                  {/* Stacked treasure card */}
-                  <Card className={`p-5 rounded-2xl border ${isCompleted ? "bg-gradient-to-br from-amber-500/25 to-yellow-500/15 border-amber-400/40" : "bg-gradient-to-br from-amber-400/15 to-orange-400/10 border-amber-400/25"}`} style={{ boxShadow: "0 6px 0 rgba(180,120,0,0.22), 0 10px 0 rgba(140,90,0,0.13)" }}>
-                    <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-xl flex-shrink-0 ${isCompleted ? "bg-amber-400/25" : "bg-amber-400/15"}`}>
-                        {isCompleted ? (
-                          <Star className="h-7 w-7 text-amber-400 fill-amber-400" />
-                        ) : (
-                          <Clock className="h-7 w-7 text-amber-500" />
-                        )}
+                  {/* Premium collectible treasure card */}
+                  <div
+                    className="rounded-2xl overflow-hidden"
+                    style={{
+                      background: "linear-gradient(160deg, rgba(30,20,10,0.92) 0%, rgba(20,15,8,0.97) 100%)",
+                      border: `1.5px solid ${rarity.border}`,
+                      boxShadow: `0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 0 ${rarity.glow.replace("0.35", "0.28")}, 0 12px 0 ${rarity.glow.replace("0.35", "0.14")}, 0 4px 24px ${rarity.glow}`,
+                    }}
+                  >
+                    {/* Rarity banner */}
+                    <div className={`bg-gradient-to-r ${rarity.banner} px-4 py-2 flex items-center justify-between`}>
+                      <div className="flex items-center gap-2">
+                        <Star className="h-3 w-3 fill-white text-white opacity-90" />
+                        <span className="text-white text-xs font-black tracking-widest opacity-95" style={{ fontFamily: "Fredoka, sans-serif", letterSpacing: "0.18em" }}>
+                          {rarity.label}
+                        </span>
                       </div>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                          {redemption.rewardTitle || t("myRewards.reward")}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
-                          <Coins className="h-3.5 w-3.5 flex-shrink-0" />
-                          <span>{t("myRewards.pointsSpent", { count: redemption.pointsSpent })}</span>
-                          <span>•</span>
-                          <span>{redemption.redeemedAt ? new Date(redemption.redeemedAt).toLocaleDateString() : "-"}</span>
-                        </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge 
-                            variant={redemption.status === "completed" ? "default" : "secondary"}
-                            className="gap-1.5"
-                            data-testid={`badge-status-${redemption.id}`}
-                          >
-                            {redemption.status === "completed" ? (
-                              <>
-                                <CheckCircle2 className="h-3.5 w-3.5" />
-                                {t("myRewards.fulfilled")}
-                              </>
-                            ) : redemption.status === "approved" ? (
-                              <>
-                                <Clock className="h-3.5 w-3.5" />
-                                {t("myRewards.waiting")}
-                              </>
-                            ) : (
-                              <>
-                                <Clock className="h-3.5 w-3.5" />
-                                {t("myRewards.pending")}
-                              </>
-                            )}
-                          </Badge>
-                          {isSharing && (
-                            <Badge variant="secondary" className="gap-1.5">
-                              <Users className="h-3.5 w-3.5" />
-                              {t("myRewards.beingShared")}
-                            </Badge>
-                          )}
-                          {isFinalized && (
-                            <Badge variant="outline" className="gap-1.5">
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                              {t("myRewards.shared")}
-                            </Badge>
-                          )}
-                        </div>
+                      <div className="flex items-center gap-1 opacity-80">
+                        <Star className="h-2.5 w-2.5 fill-white text-white" />
+                        <Star className="h-3 w-3 fill-white text-white" />
+                        <Star className="h-2.5 w-2.5 fill-white text-white" />
+                      </div>
+                    </div>
 
-                        {/* Participants — always shown, even for fulfilled shared rewards */}
-                        {participants.length > 0 && (
-                          <div className={`flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 mt-1 ${
-                            typed.status === "completed" ? "bg-black/10 dark:bg-white/5" : ""
-                          }`}>
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Users className="h-3.5 w-3.5" />
-                              <span>{t("myRewards.with")}:</span>
-                            </div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {participants.map(p => (
-                                <div key={p.id} className="flex items-center gap-1.5">
-                                  <Avatar className="h-6 w-6 border-2 border-background">
-                                    <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar, (p.member as any).updatedAt)} />
-                                    <AvatarFallback
-                                      className="text-xs font-bold text-white"
-                                      style={{ backgroundColor: p.member.color }}
-                                    >
-                                      {p.member.displayName[0]}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-sm font-medium">{p.member.displayName}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Cancel Redemption */}
-                        {canCancel && (
-                          <div className="pt-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="gap-1.5 text-destructive border-destructive/40 hover:bg-destructive/10"
-                              onClick={() => cancelRedemptionMutation.mutate(typed.id)}
-                              disabled={cancelRedemptionMutation.isPending}
-                              data-testid={`button-cancel-redemption-${typed.id}`}
-                            >
-                              <X className="h-3.5 w-3.5" />
-                              {t("rewardsBoard.cancelRedemption")}
-                            </Button>
-                          </div>
-                        )}
-
-                        {/* Sharing Actions */}
-                        {(canShare || canFinalize || canCancelSharing) && (
-                          <div className="pt-2 flex gap-2 flex-wrap">
-                            {canShare && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="gap-1.5"
-                                onClick={() => startSharingMutation.mutate(typed.id)}
-                                disabled={startSharingMutation.isPending}
-                                data-testid={`button-share-${typed.id}`}
-                              >
-                                <Share2 className="h-3.5 w-3.5" />
-                                {t("myRewards.share")}
-                              </Button>
-                            )}
-                            {canCancelSharing && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="gap-1.5"
-                                onClick={() => cancelSharingMutation.mutate(typed.id)}
-                                disabled={cancelSharingMutation.isPending}
-                                data-testid={`button-cancel-share-${typed.id}`}
-                              >
-                                <X className="h-3.5 w-3.5" />
-                                {t("myRewards.cancelSharing")}
-                              </Button>
-                            )}
-                            {canFinalize && (
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="gap-1.5"
-                                onClick={() => finalizeSharingMutation.mutate(typed.id)}
-                                disabled={finalizeSharingMutation.isPending}
-                                data-testid={`button-finalize-${typed.id}`}
-                              >
-                                <CheckCircle2 className="h-3.5 w-3.5" />
-                                {t("myRewards.finalize")}
-                              </Button>
-                            )}
-                          </div>
+                    {/* Icon zone */}
+                    <div className="flex justify-center pt-5 pb-3 relative">
+                      {/* Decorative sparkle dots */}
+                      <Sparkles className="absolute left-5 top-4 h-3.5 w-3.5 opacity-40" style={{ color: rarity.textColor }} />
+                      <Sparkles className="absolute right-5 top-5 h-3 w-3 opacity-30" style={{ color: rarity.textColor }} />
+                      {/* Icon with glow halo */}
+                      <div
+                        className="h-16 w-16 rounded-full flex items-center justify-center"
+                        style={{
+                          background: rarity.iconBg,
+                          boxShadow: `0 0 28px ${rarity.glow}, 0 0 8px ${rarity.glow}`,
+                        }}
+                      >
+                        {isCompleted ? (
+                          <Trophy className="h-8 w-8" style={{ color: rarity.textColor }} />
+                        ) : isApproved ? (
+                          <Gem className="h-8 w-8" style={{ color: rarity.textColor }} />
+                        ) : (
+                          <Hourglass className="h-8 w-8" style={{ color: rarity.textColor }} />
                         )}
                       </div>
                     </div>
-                  </Card>
+
+                    {/* Content zone */}
+                    <div className="px-4 pb-4 space-y-3">
+                      {/* Title */}
+                      <h3
+                        className="font-black text-xl text-center text-white leading-tight"
+                        style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${rarity.glow}` }}
+                      >
+                        {redemption.rewardTitle || t("myRewards.reward")}
+                      </h3>
+
+                      {/* Stats chips */}
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <div
+                          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                          style={{ background: rarity.iconBg, color: rarity.textColor, border: `1px solid ${rarity.border}` }}
+                        >
+                          <Coins className="h-3.5 w-3.5" />
+                          <span>{t("myRewards.pointsSpent", { count: redemption.pointsSpent })}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-white/5 text-white/60 border border-white/10">
+                          <span>{redemption.redeemedAt ? new Date(redemption.redeemedAt).toLocaleDateString() : "-"}</span>
+                        </div>
+                      </div>
+
+                      {/* Status badges */}
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <div
+                          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                          data-testid={`badge-status-${redemption.id}`}
+                          style={{ background: isCompleted ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.08)", color: isCompleted ? "#4ade80" : "rgba(255,255,255,0.7)", border: isCompleted ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,255,255,0.15)" }}
+                        >
+                          {isCompleted ? (
+                            <><CheckCircle2 className="h-3.5 w-3.5" />{t("myRewards.fulfilled")}</>
+                          ) : isApproved ? (
+                            <><Clock className="h-3.5 w-3.5" />{t("myRewards.waiting")}</>
+                          ) : (
+                            <><Clock className="h-3.5 w-3.5" />{t("myRewards.pending")}</>
+                          )}
+                        </div>
+                        {isSharing && (
+                          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-violet-500/15 text-violet-300 border border-violet-400/30">
+                            <Users className="h-3.5 w-3.5" />{t("myRewards.beingShared")}
+                          </div>
+                        )}
+                        {isFinalized && (
+                          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-white/8 text-white/60 border border-white/15">
+                            <CheckCircle2 className="h-3.5 w-3.5" />{t("myRewards.shared")}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Participants */}
+                      {participants.length > 0 && (
+                        <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
+                          <div className="flex items-center gap-1.5 text-xs text-white/50">
+                            <Users className="h-3.5 w-3.5" />
+                            <span>{t("myRewards.with")}:</span>
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {participants.map(p => (
+                              <div key={p.id} className="flex items-center gap-1.5">
+                                <Avatar className="h-6 w-6 border-2 border-white/20">
+                                  <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar, (p.member as any).updatedAt)} />
+                                  <AvatarFallback className="text-xs font-bold text-white" style={{ backgroundColor: p.member.color }}>
+                                    {p.member.displayName[0]}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm font-semibold text-white/80">{p.member.displayName}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Cancel Redemption */}
+                      {canCancel && (
+                        <Button
+                          variant="outline"
+                          className="w-full gap-2 h-11 rounded-xl border-red-500/30 text-red-400 bg-red-500/10 font-bold"
+                          onClick={() => cancelRedemptionMutation.mutate(typed.id)}
+                          disabled={cancelRedemptionMutation.isPending}
+                          data-testid={`button-cancel-redemption-${typed.id}`}
+                        >
+                          <X className="h-4 w-4" />
+                          {t("rewardsBoard.cancelRedemption")}
+                        </Button>
+                      )}
+
+                      {/* Sharing Actions */}
+                      {(canShare || canFinalize || canCancelSharing) && (
+                        <div className="flex flex-col gap-2">
+                          {canShare && (
+                            <Button
+                              className="w-full gap-2 h-11 rounded-xl font-bold"
+                              style={{ background: `linear-gradient(135deg, ${rarity.textColor}33, ${rarity.textColor}22)`, border: `1px solid ${rarity.border}`, color: rarity.textColor }}
+                              onClick={() => startSharingMutation.mutate(typed.id)}
+                              disabled={startSharingMutation.isPending}
+                              data-testid={`button-share-${typed.id}`}
+                            >
+                              <Share2 className="h-4 w-4" />
+                              {t("myRewards.share")}
+                            </Button>
+                          )}
+                          {canCancelSharing && (
+                            <Button
+                              variant="outline"
+                              className="w-full gap-2 h-11 rounded-xl border-white/20 text-white/70 font-bold"
+                              onClick={() => cancelSharingMutation.mutate(typed.id)}
+                              disabled={cancelSharingMutation.isPending}
+                              data-testid={`button-cancel-share-${typed.id}`}
+                            >
+                              <X className="h-4 w-4" />
+                              {t("myRewards.cancelSharing")}
+                            </Button>
+                          )}
+                          {canFinalize && (
+                            <Button
+                              className="w-full gap-2 h-11 rounded-xl font-bold text-white"
+                              style={{ background: "linear-gradient(135deg, #22c55e, #16a34a)", boxShadow: "0 4px 12px rgba(34,197,94,0.4)" }}
+                              onClick={() => finalizeSharingMutation.mutate(typed.id)}
+                              disabled={finalizeSharingMutation.isPending}
+                              data-testid={`button-finalize-${typed.id}`}
+                            >
+                              <CheckCircle2 className="h-4 w-4" />
+                              {t("myRewards.finalize")}
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </motion.div>
               );
             })
