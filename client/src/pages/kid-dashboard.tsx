@@ -2470,9 +2470,8 @@ export default function KidDashboard() {
                 const canCancelSharing = isSharing; // Can cancel anytime while sharing is active
                 const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
-                const isCompleted = typed.status === "completed";
-                const isApproved = typed.status === "approved";
-                const rarity = isCompleted ? "LEGENDARY" : isApproved ? "EPIC" : "RARE";
+                // All purchased rewards are always LEGENDARY (gold)
+                const rarity = "LEGENDARY";
                 const rarityColors = {
                   LEGENDARY: { banner: "linear-gradient(135deg, #78350f, #92400e, #a16207, #92400e)", glow: "rgba(251,191,36,0.15)", border: "rgba(251,191,36,0.22)", icon: "#d97706", iconBg: "rgba(251,191,36,0.1)", chip: "rgba(251,191,36,0.12)", chipText: "#d97706", cardBg: "linear-gradient(160deg,#161008 0%,#1e1408 40%,#130e06 100%)" },
                   EPIC:      { banner: "linear-gradient(135deg, #2e1065, #4c1d95, #5b21b6, #4c1d95)", glow: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.22)", icon: "#8b5cf6", iconBg: "rgba(139,92,246,0.1)", chip: "rgba(139,92,246,0.12)", chipText: "#a78bfa", cardBg: "linear-gradient(160deg,#0c0a18 0%,#130f28 40%,#0a0814 100%)" },
@@ -2572,9 +2571,8 @@ export default function KidDashboard() {
                 const initiatorMember = familyMembers.find(m => m.id === joined.memberId);
                 const isFinalized = joined.sharingStatus === "sharing_finalized";
 
-                const jIsCompleted = joined.status === "completed";
-                const jIsApproved = joined.status === "approved";
-                const jRarity = jIsCompleted ? "LEGENDARY" : jIsApproved ? "EPIC" : "RARE";
+                // All joined shared rewards are always LEGENDARY (gold)
+                const jRarity = "LEGENDARY";
                 const jRarityColors = {
                   LEGENDARY: { banner: "linear-gradient(135deg, #78350f, #92400e, #a16207, #92400e)", glow: "rgba(251,191,36,0.15)", border: "rgba(251,191,36,0.22)", icon: "#d97706", iconBg: "rgba(251,191,36,0.1)", chip: "rgba(251,191,36,0.12)", chipText: "#d97706", cardBg: "linear-gradient(160deg,#161008 0%,#1e1408 40%,#130e06 100%)" },
                   EPIC:      { banner: "linear-gradient(135deg, #2e1065, #4c1d95, #5b21b6, #4c1d95)", glow: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.22)", icon: "#8b5cf6", iconBg: "rgba(139,92,246,0.1)", chip: "rgba(139,92,246,0.12)", chipText: "#a78bfa", cardBg: "linear-gradient(160deg,#0c0a18 0%,#130f28 40%,#0a0814 100%)" },

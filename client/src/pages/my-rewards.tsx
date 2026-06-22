@@ -340,14 +340,8 @@ export default function MyRewards() {
               const canCancelSharing = isSharing && participants.length === 0;
               const canCancel = typed.status !== "completed" && typed.sharingStatus === "not_shared";
 
-              const isCompleted = redemption.status === "completed";
-              const isApproved = redemption.status === "approved";
-              // Rarity tier by status
-              const rarity = isCompleted
-                ? { label: "LEGENDARY", banner: "from-amber-500 via-yellow-400 to-amber-300", glow: "rgba(251,191,36,0.35)", border: "rgba(251,191,36,0.55)", iconBg: "rgba(251,191,36,0.18)", textColor: "#fbbf24" }
-                : isApproved
-                ? { label: "EPIC", banner: "from-violet-600 via-purple-500 to-indigo-500", glow: "rgba(167,139,250,0.35)", border: "rgba(167,139,250,0.55)", iconBg: "rgba(167,139,250,0.18)", textColor: "#a78bfa" }
-                : { label: "RARE", banner: "from-orange-500 via-orange-400 to-amber-400", glow: "rgba(251,146,60,0.35)", border: "rgba(251,146,60,0.5)", iconBg: "rgba(251,146,60,0.18)", textColor: "#fb923c" };
+              // All purchased rewards are always LEGENDARY (gold)
+              const rarity = { label: "LEGENDARY", banner: "from-amber-500 via-yellow-400 to-amber-300", glow: "rgba(251,191,36,0.35)", border: "rgba(251,191,36,0.55)", iconBg: "rgba(251,191,36,0.18)", textColor: "#fbbf24" };
 
               return (
                 <motion.div
