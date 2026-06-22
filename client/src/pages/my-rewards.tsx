@@ -242,6 +242,18 @@ export default function MyRewards() {
         })
     : [];
 
+  // Shared rewards from other family members (not initiated by me)
+  const othersSharedRewards = member
+    ? sharedRewards.filter(sr => sr.memberId !== member.id)
+    : [];
+  // Split: ones I've already joined vs ones I can still join
+  const joinedShared = othersSharedRewards.filter(sr =>
+    sr.participants.some((p: { memberId: string }) => p.memberId === member?.id)
+  );
+  const joinableShared = othersSharedRewards.filter(sr =>
+    !sr.participants.some((p: { memberId: string }) => p.memberId === member?.id)
+  );
+
   // Gold sparkle confetti on enter — fires once when rewards are loaded
   const confettiFiredRef = useRef(false);
   useEffect(() => {
@@ -305,6 +317,159 @@ export default function MyRewards() {
             />
           </motion.div>
         </div>
+
+        {/* Shared rewards from others — joinable or already joined but pending finalization */}
+        {(joinedShared.length > 0 || joinableShared.length > 0) && (
+          <div className="space-y-3">
+            {/* Section header */}
+            <div className="flex items-center gap-3">
+              <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
+                <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain" style={{ filter: "drop-shadow(0 4px 12px rgba(251,191,36,0.5))" }} />
+              </div>
+              <h2 className="text-xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6)" }}>
+                {t("rewardsBoard.sharedRewards")}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 landscape:grid-cols-2 gap-4">
+              {/* Rewards I've already joined (waiting for initiator to finalize) */}
+              {joinedShared.map((sr: any) => (
+                <motion.div
+                  key={sr.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="rounded-2xl overflow-hidden"
+                  style={{
+                    background: "linear-gradient(160deg, rgba(109,40,217,0.25) 0%, rgba(30,20,10,0.92) 100%)",
+                    border: "1.5px solid rgba(139,92,246,0.45)",
+                    boxShadow: "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 24px rgba(109,40,217,0.25)",
+                  }}
+                >
+                  {/* Violet banner: "You participate" */}
+                  <div className="bg-gradient-to-r from-violet-600 to-purple-500 px-4 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-3.5 w-3.5 text-white" />
+                      <span className="text-white text-xs font-black tracking-wider" style={{ fontFamily: "Fredoka, sans-serif", letterSpacing: "0.14em" }}>
+                        {t("rewardsBoard.youParticipate")}
+                      </span>
+                    </div>
+                    <span className="text-white/70 text-xs">{t("rewardsBoard.waitingForParticipants")}</span>
+                  </div>
+
+                  <div className="px-4 py-4 space-y-3">
+                    <h3 className="font-black text-lg text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                      {sr.reward?.title}
+                    </h3>
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-400/30">
+                        <Coins className="h-3.5 w-3.5" />
+                        <span>
+                          {t("rewardsBoard.pointsPerPerson", {
+                            count: sr.participants.length > 0
+                              ? Math.ceil((sr.originalPointsSpent ?? sr.pointsSpent) / (sr.participants.length + 1))
+                              : sr.pointsSpent,
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Initiator + participants */}
+                    <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
+                      <div className="flex items-center gap-1 text-xs text-white/50">
+                        <Users className="h-3.5 w-3.5" />
+                        <span>{t("rewardsBoard.sharedBy", { name: sr.member?.displayName })}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {sr.participants.map((p: any) => (
+                          <div key={p.id} className="flex items-center gap-1">
+                            <Avatar className="h-5 w-5 border border-white/20">
+                              <AvatarImage src={getAvatarUrl(p.member?.activeSkinId, p.member?.avatarUrl, p.member?.useCustomAvatar, p.member?.updatedAt)} />
+                              <AvatarFallback className="text-xs font-bold text-white" style={{ backgroundColor: p.member?.color }}>
+                                {p.member?.displayName?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs text-white/70">{p.member?.displayName}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+
+              {/* Rewards from others I can still join */}
+              {joinableShared.map((sr: any) => (
+                <motion.div
+                  key={sr.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="rounded-2xl overflow-hidden"
+                  style={{
+                    background: "linear-gradient(160deg, rgba(30,20,10,0.92) 0%, rgba(20,15,8,0.97) 100%)",
+                    border: "1.5px solid rgba(251,191,36,0.45)",
+                    boxShadow: "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 24px rgba(251,191,36,0.2)",
+                  }}
+                >
+                  {/* Gold banner */}
+                  <div className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 px-4 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Share2 className="h-3.5 w-3.5 text-white" />
+                      <span className="text-white text-xs font-black tracking-wider" style={{ fontFamily: "Fredoka, sans-serif", letterSpacing: "0.14em" }}>
+                        {t("rewardsBoard.sharedBy", { name: sr.member?.displayName })}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="px-4 py-4 space-y-3">
+                    <h3 className="font-black text-lg text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                      {sr.reward?.title}
+                    </h3>
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: "rgba(251,191,36,0.18)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.45)" }}>
+                        <Coins className="h-3.5 w-3.5" />
+                        <span>
+                          {t("rewardsBoard.pointsPerPerson", {
+                            count: sr.participants.length > 0
+                              ? Math.ceil((sr.originalPointsSpent ?? sr.pointsSpent) / (sr.participants.length + 2))
+                              : Math.ceil(sr.pointsSpent / 2),
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                    {sr.participants.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {sr.participants.map((p: any) => (
+                            <div key={p.id} className="flex items-center gap-1">
+                              <Avatar className="h-5 w-5 border border-white/20">
+                                <AvatarImage src={getAvatarUrl(p.member?.activeSkinId, p.member?.avatarUrl, p.member?.useCustomAvatar, p.member?.updatedAt)} />
+                                <AvatarFallback className="text-xs font-bold text-white" style={{ backgroundColor: p.member?.color }}>
+                                  {p.member?.displayName?.[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-xs text-white/70">{p.member?.displayName}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <Button
+                      className="w-full gap-2 h-11 rounded-xl font-bold text-white"
+                      style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)", boxShadow: "0 4px 12px rgba(245,158,11,0.4)" }}
+                      onClick={() => joinSharingMutation.mutate(sr.id)}
+                      disabled={joinSharingMutation.isPending}
+                      data-testid={`button-join-shared-${sr.id}`}
+                    >
+                      <Users className="h-4 w-4" />
+                      {t("rewardsBoard.joinSharing")}
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 landscape:grid-cols-2 gap-4">
           {myRedemptions.length === 0 ? (
