@@ -776,7 +776,7 @@ function TaskCard({
       : "border-blue-500/30";
 
     const cardBg = showAsPending || showAsSubmitted
-      ? "rgba(245,158,11,0.22)"
+      ? "rgba(245,158,11,0.38)"
       : showAsApproved
       ? "rgba(34,197,94,0.08)"
       : `linear-gradient(to bottom right, color-mix(in srgb, hsl(var(--card)) 97%, rgb(59 130 246)), color-mix(in srgb, hsl(var(--card)) 95%, rgb(6 182 212)))`;
@@ -829,7 +829,7 @@ function TaskCard({
     const cardBg = showAsApproved || allSharedMembersCompleted
       ? "rgba(34,197,94,0.08)"
       : showAsPending || showAsSubmitted
-      ? "rgba(245,158,11,0.22)"
+      ? "rgba(245,158,11,0.38)"
       : isRejected
       ? "rgba(59,130,246,0.15)"
       : dueDateInfo.expired
@@ -911,7 +911,7 @@ function TaskCard({
               : showAsApproved || allSharedMembersCompleted
               ? "rgba(34,197,94,0.08)"
               : showAsSubmitted || showAsPending
-              ? "rgba(245,158,11,0.22)"
+              ? "rgba(245,158,11,0.38)"
               : dueDateInfo.expired
               ? "rgba(239,68,68,0.15)"
               : `linear-gradient(to bottom right, color-mix(in srgb, hsl(var(--card)) 97%, rgb(59 130 246)), color-mix(in srgb, hsl(var(--card)) 95%, rgb(6 182 212)))`
