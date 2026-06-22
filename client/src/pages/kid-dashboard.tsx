@@ -2368,6 +2368,45 @@ export default function KidDashboard() {
               <p className="text-lg text-muted-foreground">{t("kidDashboard.noRewardsYet")}</p>
               <p className="text-sm text-muted-foreground mt-2">{t("kidDashboard.parentsCanCreate")}</p>
             </Card>
+          ) : kidDashboardView === "grid" ? (
+            <div className="grid grid-cols-2 gap-2">
+              {activeRewards.slice(0, 4).map((reward) => {
+                const isReady = currentPoints >= reward.pointThreshold;
+                const remaining = Math.max(reward.pointThreshold - currentPoints, 0);
+                return (
+                  <Card key={reward.id} className={`p-2.5 border-2 rounded-2xl ${isReady ? "bg-gradient-to-br from-amber-500/12 to-yellow-400/8 ring-2 ring-inset ring-amber-400/50 border-amber-400/55" : "bg-card/80 border-border"}`}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className={`flex-shrink-0 h-9 w-9 rounded-xl flex items-center justify-center p-1 ${isReady ? "bg-primary/20" : "bg-primary/10"}`}>
+                        <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-2xl leading-none" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-xs leading-tight line-clamp-1" style={{ fontFamily: "Fredoka, sans-serif" }}>{reward.title}</p>
+                        <p className="text-[10px] text-muted-foreground">{reward.pointThreshold} {t("kidDashboard.points")}</p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant={isReady ? "default" : "outline"}
+                      onClick={() => {
+                        if (isReady) {
+                          fetch(`/api/rewards/${reward.id}/redeem`, { method: "POST", headers: { "Content-Type": "application/json", ...getDevHeaders() } })
+                            .then(r => r.ok && queryClient.invalidateQueries({ queryKey: ["/api/rewards"] }));
+                        }
+                      }}
+                      disabled={!isReady}
+                      className={`w-full h-7 text-[11px] rounded-xl ${!isReady ? "opacity-55" : ""}`}
+                      data-testid={`button-request-reward-grid-${reward.id}`}
+                    >
+                      {isReady ? (
+                        <><Gift className="h-3 w-3 mr-1" />{t("kidDashboard.now")}</>
+                      ) : (
+                        <><Zap className="h-3 w-3 mr-1" />{remaining} {t("kidDashboard.points")}</>
+                      )}
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
           ) : (
             <div className="space-y-4">
               {activeRewards.slice(0, 3).map((reward, index) => (
