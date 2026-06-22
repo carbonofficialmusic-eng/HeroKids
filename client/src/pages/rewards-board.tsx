@@ -933,6 +933,20 @@ export default function RewardsBoard() {
                           {t("rewardsBoard.youParticipate")}
                         </Badge>
                       )}
+                      {/* Parents can always fully cancel any shared redemption and refund points */}
+                      {isParent && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2 text-destructive border-destructive/40 ml-auto"
+                          onClick={() => cancelRedemptionMutation.mutate(shared.id)}
+                          disabled={cancelRedemptionMutation.isPending}
+                          data-testid={`button-cancel-redemption-shared-${shared.id}`}
+                        >
+                          <X className="h-4 w-4" />
+                          {t("rewardsBoard.cancelRedemption")}
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
