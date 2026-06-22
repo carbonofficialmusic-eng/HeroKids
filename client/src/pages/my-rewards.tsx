@@ -247,7 +247,7 @@ export default function MyRewards() {
 
   return (
     <div className="min-h-screen p-4 pb-20" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-2xl landscape:max-w-4xl mx-auto space-y-6">
         {/* Back button */}
         <Link href={member?.role === "parent" ? "/" : "/kid-dashboard"}>
           <Button
@@ -291,7 +291,7 @@ export default function MyRewards() {
           </Card>
         </motion.div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 landscape:grid-cols-2 gap-4">
           {myRedemptions.length === 0 ? (
             <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
               <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
