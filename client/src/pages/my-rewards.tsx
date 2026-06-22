@@ -261,14 +261,11 @@ export default function MyRewards() {
           </Button>
         </Link>
 
-        {/* Page title */}
-        <div className="flex items-center gap-3 mb-2">
-          <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
-            <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+        {/* Page title — chest only, centered */}
+        <div className="flex justify-center mb-2">
+          <div className="h-32 w-32 flex items-center justify-center">
+            <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-2xl" style={{ filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.5)) drop-shadow(0 2px 6px rgba(0,0,0,0.4))" }} />
           </div>
-          <h1 className="text-3xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-            {t("myRewards.title")}
-          </h1>
         </div>
 
         <motion.div
