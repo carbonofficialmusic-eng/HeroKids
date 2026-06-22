@@ -773,13 +773,13 @@ function TaskCard({
       ? "border-amber-400/80"
       : showAsApproved
       ? "border-green-500/50"
-      : "border-border";
+      : "border-blue-500/25";
 
     const bgColor = showAsPending || showAsSubmitted
       ? "bg-amber-500/45"
       : showAsApproved
       ? "bg-green-500/10"
-      : "bg-card";
+      : "bg-gradient-to-br from-blue-900/60 to-indigo-950/70";
 
     return (
       <div className="min-w-0 active:scale-[0.97] transition-transform duration-150">
@@ -823,7 +823,7 @@ function TaskCard({
       ? "border-blue-400/40"
       : dueDateInfo.expired
       ? "border-destructive/40"
-      : "border-border";
+      : "border-blue-500/25";
 
     const bgColor = showAsApproved || allSharedMembersCompleted
       ? "bg-green-500/10"
@@ -834,8 +834,8 @@ function TaskCard({
       : dueDateInfo.expired
       ? "bg-destructive/10"
       : isActionable
-      ? "bg-card"
-      : "bg-card opacity-70";
+      ? "bg-gradient-to-br from-blue-900/60 to-indigo-950/70"
+      : "bg-gradient-to-br from-blue-950/40 to-indigo-950/50 opacity-60";
 
     return (
       <div className={`min-w-0 transition-transform duration-150 ${isActionable ? "active:scale-[0.96]" : ""}`}>
@@ -885,7 +885,7 @@ function TaskCard({
       <Card
         className={`p-5 transition-colors border-2 rounded-2xl min-w-0 w-full ${
           isActionable && !isRejected 
-            ? "bg-card cursor-pointer border-border shadow-lg hover:border-primary/60 hover:shadow-xl" 
+            ? "bg-gradient-to-br from-blue-900/70 via-indigo-900/70 to-blue-900/70 cursor-pointer border-blue-500/30 shadow-lg shadow-blue-900/20" 
             : isActionable && isRejected 
             ? "bg-blue-500/25 cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15 hover:bg-blue-500/35 hover:border-blue-400/60" 
             : showAsApproved 
@@ -895,18 +895,18 @@ function TaskCard({
             : showAsPending 
             ? "bg-amber-500/50 border-amber-400/70 shadow-md shadow-amber-900/20" 
             : hasNoSlots 
-            ? "bg-card border-border opacity-70" 
+            ? "bg-gradient-to-br from-blue-950/40 to-indigo-950/50 border-blue-500/15 opacity-70" 
             : isSharedTaskNotAssigned 
-            ? "bg-card border-border opacity-70" 
+            ? "bg-gradient-to-br from-blue-950/40 to-indigo-950/50 border-blue-500/15 opacity-70" 
             : allSharedMembersCompleted 
             ? "bg-green-500/20 border-green-500/45 shadow-md shadow-green-900/15" 
             : dueDateInfo.notYet 
-            ? "bg-card border-border opacity-70" 
+            ? "bg-gradient-to-br from-blue-950/40 to-indigo-950/50 border-blue-500/15 opacity-70" 
             : dueDateInfo.expired 
             ? "bg-destructive/20 border-destructive/40" 
             : isWeekendUnavailable 
-            ? "bg-card border-border opacity-70" 
-            : "bg-card border-border opacity-70"
+            ? "bg-gradient-to-br from-blue-950/40 to-indigo-950/50 border-blue-500/15 opacity-70" 
+            : "bg-gradient-to-br from-blue-950/40 to-indigo-950/50 border-blue-500/15 opacity-70"
         }`}
         data-testid={`task-card-${task.id}`}
         onClick={(task as any).isShoppingList
