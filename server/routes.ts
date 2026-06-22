@@ -46,7 +46,7 @@ async function autoUnpauseMembersAfterUpgrade(familyName: string, newTier: Subsc
   console.log(`✅ Auto-unpaused ${toUnpause.length} member(s) for family "${familyName}" after upgrade to ${newTier}`);
   return toUnpause.length;
 }
-import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, getAllSkinsInOrder, TOTAL_HIDDEN_STARS } from "@shared/skin-config";
+import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, getAllSkinsInOrder, TOTAL_HIDDEN_STARS, LEGACY_SKIN_ORDER } from "@shared/skin-config";
 import { eq, inArray, and, desc } from "drizzle-orm";
 import "./types";
 import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
@@ -4816,6 +4816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         discoveredSkinIds: allIds,
         unlockedSkins: allIds,
         starsFound: TOTAL_HIDDEN_STARS,
+        earnedLegacySkinIds: LEGACY_SKIN_ORDER,
       }).where(eq(familyMembers.id, member.id));
       res.json({ ok: true });
     } catch {
