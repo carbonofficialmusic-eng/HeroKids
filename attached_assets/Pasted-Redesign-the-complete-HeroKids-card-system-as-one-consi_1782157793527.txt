@@ -1,0 +1,67 @@
+Redesign the complete HeroKids card system as one consistent UI design system.
+
+Goal:
+Create a polished, colorful and gamified card design system for all reward, task and shop-related cards in HeroKids.
+
+Important:
+Keep all existing functionality, logic, database fields, actions and content unchanged.
+Do not remove or rename any existing functions.
+Only improve the visual design, layout, hierarchy, spacing, colors and card presentation.
+
+Please analyze all existing card types and states, including:
+
+Reward shop cards
+Purchased rewards / treasure chest cards
+My Rewards cards
+Task cards
+Family goal cards
+Locked / unlocked states
+Pending approval states
+Completed states
+Shared reward states
+Redeemable / already redeemed states
+Enough points / not enough points states
+Parent view and child view differences
+
+Design direction:
+
+Modern mobile game UI
+Colorful but clean
+Child-friendly and premium
+App Store screenshot quality
+Rounded cards with soft shadows and subtle 3D depth
+Clear visual hierarchy
+Large touch-friendly buttons
+Treasure, stars, coins, sparkles and adventure-inspired details
+Consistent HeroKids fantasy world style
+Avoid generic Material Design or plain business UI
+
+Color logic:
+Please create a clear and consistent color system for different card states:
+
+Available rewards should feel exciting and active
+Locked or unaffordable rewards should feel clearly disabled but still attractive
+Purchased rewards should feel valuable and collected
+Completed tasks should feel successful
+Pending items should feel calm and waiting
+Family goals should feel collaborative and motivating
+
+Preview request:
+Create a preview screen that shows all redesigned card types and states together in one overview.
+This preview should make it easy to compare:
+
+Normal card
+Locked card
+Unlocked card
+Purchased card
+Pending approval card
+Completed card
+Redeemed card
+Shared reward card
+Not enough points card
+Parent version
+Child version
+
+Please build this as a reusable design system with shared components, variants and consistent styling tokens where possible.
+
+The final result should feel like HeroKids has its own unique visual identity.
