@@ -1215,15 +1215,25 @@ function scrollToPinboard(el: HTMLElement) {
   root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
 }
 
+function getAbsoluteOffsetTop(el: HTMLElement, container: HTMLElement): number {
+  let offset = 0;
+  let current: HTMLElement | null = el;
+  while (current && current !== container) {
+    offset += current.offsetTop;
+    current = current.offsetParent as HTMLElement | null;
+  }
+  return offset;
+}
+
 function scrollToSection(id: string) {
-  const root = document.getElementById("root") ?? document.documentElement;
+  const root = document.getElementById("root");
+  if (!root) return;
   const el = document.getElementById(id);
   if (!el) return;
   const header = document.querySelector("[data-app-header]") as HTMLElement | null;
-  const headerBottom = header ? header.getBoundingClientRect().bottom : 72;
-  const currentTop = el.getBoundingClientRect().top;
-  const delta = currentTop - (headerBottom + 16);
-  root.scrollTo({ top: root.scrollTop + delta, behavior: "smooth" });
+  const headerH = header ? header.getBoundingClientRect().height : 72;
+  const absoluteTop = getAbsoluteOffsetTop(el as HTMLElement, root);
+  root.scrollTo({ top: Math.max(0, absoluteTop - headerH - 8), behavior: "smooth" });
 }
 
 export default function KidDashboard() {
@@ -1318,10 +1328,14 @@ export default function KidDashboard() {
     const maxAttempts = 10;
     let timerId: ReturnType<typeof setTimeout>;
 
+    let correctionTimer: ReturnType<typeof setTimeout>;
+
     const tryScroll = () => {
       const el = document.getElementById(target);
       if (el) {
         scrollToSection(target);
+        // Second correction after layout stabilizes (images/data may shift layout)
+        correctionTimer = setTimeout(() => scrollToSection(target), 700);
         return;
       }
       attempts++;
@@ -1332,7 +1346,7 @@ export default function KidDashboard() {
 
     // First attempt after 400ms (App.tsx scroll-to-top runs before this)
     timerId = setTimeout(tryScroll, 400);
-    return () => clearTimeout(timerId);
+    return () => { clearTimeout(timerId); clearTimeout(correctionTimer); };
   }, []);
 
   // Lock #root scroll while any dialog is open — same pattern as parent dashboard
