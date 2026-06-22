@@ -779,12 +779,13 @@ function TaskCard({
       ? "bg-amber-500/45"
       : showAsApproved
       ? "bg-green-500/10"
-      : "bg-gradient-to-br from-blue-500/10 to-cyan-500/10";
+      : "bg-card";
 
     return (
       <div className="min-w-0 active:scale-[0.97] transition-transform duration-150">
         <div
           className={`rounded-2xl border transition-colors min-w-0 w-full cursor-pointer ${bgColor} ${borderColor}`}
+          style={(!showAsPending && !showAsSubmitted && !showAsApproved) ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 92%, rgb(59 130 246)), color-mix(in srgb, var(--card) 88%, rgb(6 182 212)))" } : undefined}
           data-testid={`task-card-${task.id}`}
           onClick={() => setShoppingListExpanded(v => !v)}
         >
@@ -834,13 +835,16 @@ function TaskCard({
       : dueDateInfo.expired
       ? "bg-destructive/10"
       : isActionable
-      ? "bg-gradient-to-br from-blue-500/10 to-cyan-500/10"
-      : "bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-70";
+      ? "bg-card"
+      : "bg-card opacity-70";
+
+    const isDefaultBlue = !showAsApproved && !allSharedMembersCompleted && !showAsPending && !showAsSubmitted && !isRejected && !dueDateInfo.expired;
 
     return (
       <div className={`min-w-0 transition-transform duration-150 ${isActionable ? "active:scale-[0.96]" : ""}`}>
         <div
           className={`p-2.5 rounded-2xl border transition-colors min-w-0 w-full ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
+          style={isDefaultBlue ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 92%, rgb(59 130 246)), color-mix(in srgb, var(--card) 88%, rgb(6 182 212)))" } : undefined}
           data-testid={`task-card-${task.id}`}
           onClick={isActionable ? handleComplete : undefined}
         >
