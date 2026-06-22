@@ -304,29 +304,6 @@ export default function MyRewards() {
           </motion.div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="p-6 bg-gradient-to-br from-amber-500/15 to-yellow-500/10 border border-amber-400/30 rounded-2xl">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 flex items-center justify-center flex-shrink-0">
-                <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                  {t("myRewards.allRewards")}
-                </h2>
-                <p className="text-muted-foreground">
-                  {t("myRewards.rewardsCount", { count: myRedemptions.length })}
-                </p>
-              </div>
-              <Sparkles className="h-6 w-6 text-amber-400 ml-auto animate-pulse" />
-            </div>
-          </Card>
-        </motion.div>
-
         <div className="grid grid-cols-1 landscape:grid-cols-2 gap-4">
           {myRedemptions.length === 0 ? (
             <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
