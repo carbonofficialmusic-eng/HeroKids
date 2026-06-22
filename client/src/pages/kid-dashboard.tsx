@@ -775,17 +775,17 @@ function TaskCard({
       ? "border-green-500/50"
       : "border-blue-500/30";
 
-    const bgColor = showAsPending || showAsSubmitted
-      ? "bg-amber-500/25"
+    const cardBg = showAsPending || showAsSubmitted
+      ? "rgba(245,158,11,0.22)"
       : showAsApproved
-      ? "bg-green-500/[8%]"
-      : "bg-card";
+      ? "rgba(34,197,94,0.08)"
+      : `linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))`;
 
     return (
       <div className="min-w-0 active:scale-[0.97] transition-transform duration-150">
         <div
-          className={`rounded-2xl border transition-colors min-w-0 w-full cursor-pointer ${bgColor} ${borderColor}`}
-          style={(!showAsPending && !showAsSubmitted && !showAsApproved) ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))" } : undefined}
+          className={`rounded-2xl border transition-colors min-w-0 w-full cursor-pointer ${borderColor}`}
+          style={{ background: cardBg }}
           data-testid={`task-card-${task.id}`}
           onClick={() => setShoppingListExpanded(v => !v)}
         >
@@ -826,23 +826,23 @@ function TaskCard({
       ? "border-destructive/40"
       : "border-blue-500/30";
 
-    const bgColor = showAsApproved || allSharedMembersCompleted
-      ? "bg-green-500/[8%]"
+    const cardBg = showAsApproved || allSharedMembersCompleted
+      ? "rgba(34,197,94,0.08)"
       : showAsPending || showAsSubmitted
-      ? "bg-amber-500/25"
+      ? "rgba(245,158,11,0.22)"
       : isRejected
-      ? "bg-blue-500/10"
+      ? "rgba(59,130,246,0.15)"
       : dueDateInfo.expired
-      ? "bg-destructive/10"
-      : "bg-card";
-
-    const isDefaultBlue = !showAsApproved && !allSharedMembersCompleted && !showAsPending && !showAsSubmitted && !isRejected && !dueDateInfo.expired;
+      ? undefined
+      : !isActionable
+      ? `linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))`
+      : `linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))`;
 
     return (
       <div className={`min-w-0 transition-transform duration-150 ${isActionable ? "active:scale-[0.96]" : ""}`}>
         <div
-          className={`p-2.5 rounded-2xl border transition-colors min-w-0 w-full ${bgColor} ${borderColor} ${isActionable ? "cursor-pointer" : ""}`}
-          style={isDefaultBlue ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))" } : undefined}
+          className={`p-2.5 rounded-2xl border transition-colors min-w-0 w-full ${borderColor} ${isActionable ? "cursor-pointer" : ""} ${!isActionable && !showAsApproved && !allSharedMembersCompleted && !showAsPending && !showAsSubmitted && !isRejected && !dueDateInfo.expired ? "opacity-70" : ""}`}
+          style={cardBg ? { background: cardBg } : undefined}
           data-testid={`task-card-${task.id}`}
           onClick={isActionable ? handleComplete : undefined}
         >
@@ -889,24 +889,33 @@ function TaskCard({
           isActionable && !isRejected 
             ? "cursor-pointer border-blue-500/30 shadow-lg" 
             : isActionable && isRejected 
-            ? "bg-blue-500/25 cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15" 
+            ? "cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15" 
             : showAsApproved 
-            ? "bg-green-500/[8%] border-green-500/20" 
+            ? "border-green-500/20" 
             : showAsSubmitted 
-            ? "bg-amber-500/25 border-amber-400/50 shadow-md shadow-amber-900/10" 
+            ? "border-amber-400/50 shadow-md shadow-amber-900/10" 
             : showAsPending 
-            ? "bg-amber-500/25 border-amber-400/50 shadow-md shadow-amber-900/10" 
+            ? "border-amber-400/50 shadow-md shadow-amber-900/10" 
             : allSharedMembersCompleted 
-            ? "bg-green-500/[8%] border-green-500/20" 
+            ? "border-green-500/20" 
             : dueDateInfo.expired 
-            ? "bg-destructive/20 border-destructive/40" 
+            ? "border-destructive/40" 
             : "border-blue-500/20 opacity-70"
         }`}
-        style={
-          (isActionable && !isRejected) || (!showAsApproved && !allSharedMembersCompleted && !showAsSubmitted && !showAsPending && !isRejected && !dueDateInfo.expired)
-            ? { background: "linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))" }
-            : undefined
-        }
+        style={{
+          background:
+            isActionable && !isRejected
+              ? `linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))`
+              : isActionable && isRejected
+              ? "rgba(59,130,246,0.2)"
+              : showAsApproved || allSharedMembersCompleted
+              ? "rgba(34,197,94,0.08)"
+              : showAsSubmitted || showAsPending
+              ? "rgba(245,158,11,0.22)"
+              : dueDateInfo.expired
+              ? "rgba(239,68,68,0.15)"
+              : `linear-gradient(to bottom right, color-mix(in srgb, var(--card) 97%, rgb(59 130 246)), color-mix(in srgb, var(--card) 95%, rgb(6 182 212)))`
+        }}
         data-testid={`task-card-${task.id}`}
         onClick={(task as any).isShoppingList
           ? () => setShoppingListExpanded(v => !v)
