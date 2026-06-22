@@ -2302,85 +2302,100 @@ export default function KidDashboard() {
                   const hasJoined = shared.participants.some(p => p.memberId === member?.id);
                   const initiatorMember = familyMembers.find(m => m.id === shared.memberId);
 
+                  const joinRarity = hasJoined ? "LEGENDARY" : "SPECIAL";
+                  const joinRarityColors = {
+                    LEGENDARY: { banner: "linear-gradient(135deg, #92400e, #b45309, #d97706, #f59e0b, #d97706)", glow: "rgba(251,191,36,0.55)", border: "rgba(251,191,36,0.6)", icon: "#f59e0b", iconBg: "rgba(251,191,36,0.18)", chip: "rgba(251,191,36,0.2)", chipText: "#fbbf24", cardBg: "linear-gradient(160deg,#1c1008 0%,#2d1a06 40%,#1a0f04 100%)", label: "LEGENDARY" },
+                    SPECIAL:   { banner: "linear-gradient(135deg, #1e3a8a, #1d4ed8, #3b82f6, #60a5fa, #3b82f6)", glow: "rgba(96,165,250,0.5)", border: "rgba(96,165,250,0.55)", icon: "#60a5fa", iconBg: "rgba(59,130,246,0.18)", chip: "rgba(59,130,246,0.2)", chipText: "#93c5fd", cardBg: "linear-gradient(160deg,#050e1f 0%,#0c1f45 40%,#060f22 100%)", label: "SPECIAL" },
+                  };
+                  const jrc = joinRarityColors[joinRarity];
+                  const JoinIcon = hasJoined ? Trophy : Users;
+
                   return (
-                    <div key={shared.id}>
-                      <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-2 border-blue-500/30 rounded-2xl">
-                        <div className="space-y-3">
-                          <div className="text-center space-y-2">
-                            <div className="flex justify-center p-3 rounded-2xl mx-auto w-fit bg-blue-500/20">
-                              <Gift className="h-10 w-10 text-blue-500" />
-                            </div>
-                            <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                              {shared.reward?.title || t("kidDashboard.reward")}
-                            </h3>
-                            <div className="flex flex-col items-center gap-1.5">
-                              <div className="flex items-center gap-2">
-                                {initiatorMember && (
-                                  <Avatar className="h-6 w-6 border-2 border-background">
-                                    <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar, (initiatorMember as any).updatedAt)} />
-                                    <AvatarFallback className="text-xs">
-                                      {initiatorMember.displayName[0]}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                )}
-                                <p className="text-sm text-muted-foreground">
-                                  {initiatorMember?.displayName} {t("kidDashboard.startSharing")}
-                                </p>
-                              </div>
-                              <Badge variant="secondary" className="gap-1.5 text-xs">
-                                <Users className="h-3 w-3" />
-                                {t("kidDashboard.participants", { count: shared.participants.length + 1 })}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              {t("kidDashboard.pointsSpent", { count: shared.originalPointsSpent })}
-                            </p>
-                          </div>
+                    <div key={shared.id} style={{ borderRadius: "20px", background: jrc.cardBg, border: `2px solid ${jrc.border}`, boxShadow: `0 0 18px ${jrc.glow}, 0 6px 20px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)`, overflow: "hidden" }}>
+                      {/* Rarity banner */}
+                      <div style={{ background: jrc.banner, padding: "7px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
+                          <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
+                          <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
+                        </div>
+                        <span style={{ fontFamily: "Fredoka, sans-serif", fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: "0.12em", textTransform: "uppercase", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{jrc.label}</span>
+                        <Sparkles style={{ width: 13, height: 13, color: "#fff", opacity: 0.85 }} />
+                      </div>
 
-                          {/* Participants */}
-                          {shared.participants.length > 0 && (
-                            <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                              <p className="text-xs text-muted-foreground mr-1">{t("kidDashboard.with")}</p>
-                              {shared.participants.map(p => (
-                                <Badge key={p.id} variant="secondary" className="gap-1.5 text-xs py-1">
-                                  <Avatar className="h-5 w-5">
-                                    <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar, (p.member as any).updatedAt)} />
-                                    <AvatarFallback 
-                                      className="text-xs text-white font-bold"
-                                      style={{ backgroundColor: p.member.color }}
-                                    >
-                                      {p.member.displayName[0]}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  {p.member.displayName}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Join Button */}
-                          <div className="pt-2 border-t border-blue-500/20">
-                            {!hasJoined ? (
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="w-full gap-1.5 text-xs"
-                                onClick={() => joinSharingMutation.mutate(shared.id)}
-                                disabled={joinSharingMutation.isPending}
-                                data-testid={`button-join-${shared.id}`}
-                              >
-                                <UserPlus className="h-3.5 w-3.5" />
-                                {t("kidDashboard.joinFree")}
-                              </Button>
-                            ) : (
-                              <Badge variant="secondary" className="w-full gap-1 justify-center">
-                                <CheckCircle2 className="h-3 w-3" />
-                                {t("kidDashboard.shared")}
-                              </Badge>
-                            )}
+                      <div style={{ padding: "14px 14px 16px" }}>
+                        {/* Icon zone */}
+                        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+                          <div style={{ width: 70, height: 70, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", background: jrc.iconBg, border: `2px solid ${jrc.border}`, boxShadow: `0 0 20px ${jrc.glow}` }}>
+                            <JoinIcon style={{ width: 32, height: 32, color: jrc.icon }} />
                           </div>
                         </div>
-                      </Card>
+
+                        {/* Title */}
+                        <h3 style={{ fontFamily: "Fredoka, sans-serif", fontSize: 17, fontWeight: 700, color: "#fff", textAlign: "center", marginBottom: 10, textShadow: "0 1px 4px rgba(0,0,0,0.7)", lineHeight: 1.2 }}>
+                          {shared.reward?.title || t("kidDashboard.reward")}
+                        </h3>
+
+                        {/* Stat chips */}
+                        <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
+                          <div style={{ background: jrc.chip, border: `1px solid ${jrc.border}`, borderRadius: 20, padding: "3px 10px" }}>
+                            <span style={{ fontSize: 13, color: jrc.chipText, fontWeight: 700 }}>★ {shared.originalPointsSpent}</span>
+                          </div>
+                          <div style={{ background: "rgba(99,102,241,0.18)", border: "1px solid rgba(99,102,241,0.4)", borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}>
+                            <Users style={{ width: 10, height: 10, color: "#a5b4fc" }} />
+                            <span style={{ fontSize: 12, color: "#a5b4fc", fontWeight: 600 }}>{t("kidDashboard.participants", { count: shared.participants.length + 1 })}</span>
+                          </div>
+                          {hasJoined && <div style={{ background: "rgba(34,197,94,0.18)", border: "1px solid rgba(34,197,94,0.45)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#4ade80", fontWeight: 600 }}>{t("kidDashboard.shared")}</span></div>}
+                        </div>
+
+                        {/* Initiator */}
+                        {initiatorMember && (
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: shared.participants.length > 0 ? 8 : 0 }}>
+                            <span style={{ fontSize: 11, color: "#94a3b8" }}>{t("kidDashboard.with")}</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
+                              <Avatar className="h-4 w-4">
+                                <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar, (initiatorMember as any).updatedAt)} />
+                                <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: initiatorMember.color, fontSize: 8 }}>{initiatorMember.displayName[0]}</AvatarFallback>
+                              </Avatar>
+                              <span style={{ fontSize: 11, color: "#e2e8f0", fontWeight: 600 }}>{initiatorMember.displayName}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Participants */}
+                        {shared.participants.length > 0 && (
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                            {shared.participants.map(p => (
+                              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
+                                <Avatar className="h-4 w-4">
+                                  <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar, (p.member as any).updatedAt)} />
+                                  <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: p.member.color, fontSize: 8 }}>{p.member.displayName[0]}</AvatarFallback>
+                                </Avatar>
+                                <span style={{ fontSize: 11, color: "#e2e8f0", fontWeight: 600 }}>{p.member.displayName}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Join Button */}
+                        {!hasJoined ? (
+                          <Button
+                            className="w-full gap-2 font-bold text-white"
+                            onClick={() => joinSharingMutation.mutate(shared.id)}
+                            disabled={joinSharingMutation.isPending}
+                            data-testid={`button-join-${shared.id}`}
+                            style={{ height: 40, borderRadius: 12, background: "linear-gradient(135deg, #1d4ed8, #3b82f6)", boxShadow: "0 4px 14px rgba(59,130,246,0.45)" }}
+                          >
+                            <UserPlus className="h-4 w-4" />
+                            {t("kidDashboard.joinFree")}
+                          </Button>
+                        ) : (
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.35)", borderRadius: 12, padding: "8px 12px" }}>
+                            <CheckCircle2 style={{ width: 16, height: 16, color: "#4ade80" }} />
+                            <span style={{ fontSize: 13, color: "#4ade80", fontWeight: 700 }}>{t("kidDashboard.shared")}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
