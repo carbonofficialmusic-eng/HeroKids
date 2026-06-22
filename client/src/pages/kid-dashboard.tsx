@@ -880,289 +880,218 @@ function TaskCard({
     );
   }
 
+  // Mockup-style card bg — keep existing amber/green transparency levels
+  const cardBg = (showAsApproved || allSharedMembersCompleted)
+    ? "from-emerald-900/70 via-green-900/60 to-emerald-900/70 border-green-500/45 shadow-green-900/15"
+    : (showAsPending || showAsSubmitted)
+    ? "from-amber-900/70 via-yellow-900/60 to-amber-900/70 border-amber-400/70 shadow-amber-900/20"
+    : isRejected
+    ? "from-blue-900/60 via-indigo-900/60 to-blue-900/60 border-blue-500/30 shadow-blue-900/15"
+    : isActionable
+    ? "from-blue-900/70 via-indigo-900/70 to-blue-900/70 border-blue-500/30 shadow-blue-900/15"
+    : dueDateInfo.expired
+    ? "from-red-900/60 via-rose-900/60 to-red-900/60 border-red-500/30 shadow-black/10"
+    : "from-slate-900/70 via-slate-800/60 to-slate-900/70 border-slate-600/20 shadow-black/10";
+
+  const iconBg = (showAsApproved || allSharedMembersCompleted)
+    ? "bg-emerald-500/20 border border-emerald-400/30"
+    : (showAsPending || showAsSubmitted)
+    ? "bg-amber-500/25 border border-amber-400/30"
+    : isRejected
+    ? "bg-blue-500/20 border border-blue-400/20"
+    : isActionable
+    ? "bg-white/10 border border-white/10"
+    : "bg-white/5 border border-white/5";
+
+  const titleStateIcon = (showAsApproved || allSharedMembersCompleted)
+    ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+    : (showAsPending || showAsSubmitted)
+    ? <Clock className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+    : isRejected
+    ? <Zap className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+    : isActionable
+    ? <Flame className="w-3.5 h-3.5 text-blue-300 flex-shrink-0" />
+    : null;
+
   return (
     <div className={`min-w-0 ${isActionable ? "active:scale-[0.97] transition-transform duration-150" : ""}`}>
-      <Card
-        className={`p-5 transition-colors border-2 rounded-2xl min-w-0 w-full ${
-          isActionable && !isRejected 
-            ? "bg-card cursor-pointer border-border shadow-lg hover:border-primary/60 hover:shadow-xl" 
-            : isActionable && isRejected 
-            ? "bg-blue-500/25 cursor-pointer border-blue-400/40 shadow-md shadow-blue-900/15 hover:bg-blue-500/35 hover:border-blue-400/60" 
-            : showAsApproved 
-            ? "bg-green-500/20 border-green-500/45 shadow-md shadow-green-900/15" 
-            : showAsSubmitted 
-            ? "bg-amber-500/50 border-amber-400/70 shadow-md shadow-amber-900/20" 
-            : showAsPending 
-            ? "bg-amber-500/50 border-amber-400/70 shadow-md shadow-amber-900/20" 
-            : hasNoSlots 
-            ? "bg-card border-border opacity-70" 
-            : isSharedTaskNotAssigned 
-            ? "bg-card border-border opacity-70" 
-            : allSharedMembersCompleted 
-            ? "bg-green-500/20 border-green-500/45 shadow-md shadow-green-900/15" 
-            : dueDateInfo.notYet 
-            ? "bg-card border-border opacity-70" 
-            : dueDateInfo.expired 
-            ? "bg-destructive/20 border-destructive/40" 
-            : isWeekendUnavailable 
-            ? "bg-card border-border opacity-70" 
-            : "bg-card border-border opacity-70"
-        }`}
+      <div
+        className={`relative rounded-2xl border bg-gradient-to-br ${cardBg} shadow-lg overflow-hidden min-w-0 w-full ${isActionable ? "cursor-pointer" : ""}`}
         data-testid={`task-card-${task.id}`}
         onClick={(task as any).isShoppingList
           ? () => setShoppingListExpanded(v => !v)
           : isActionable ? handleComplete : undefined}
       >
-        <div className="text-center space-y-3">
-          <div className={`flex justify-center p-4 rounded-2xl mx-auto w-fit shadow-inner ${
-            showAsApproved ? "bg-green-500/25" : 
-            showAsSubmitted ? "bg-amber-500/50" :
-            showAsPending ? "bg-amber-500/50" :
-            isRejected ? "bg-blue-500/20" :
-            hasNoSlots ? "bg-amber-500/15" :
-            allSharedMembersCompleted ? "bg-green-500/25" :
-            isActionable ? "bg-gradient-to-br from-primary/25 to-primary/15 shadow-primary/15" :
-            "bg-white/10"
-          }`}>
+        {/* Shine overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/4 to-transparent pointer-events-none" />
+
+        <div className="p-3.5 flex items-start gap-3">
+          {/* Icon box */}
+          <div className={`relative flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${iconBg}`}>
             {completeMutation.isPending ? (
-              <Loader2 className="h-12 w-12 text-primary animate-spin" />
-            ) : showAsApproved ? (
-              <CheckCircle2 className="h-12 w-12 text-green-500" />
-            ) : showAsSubmitted ? (
-              <CheckCircle2 className="h-12 w-12 text-amber-500" />
-            ) : showAsPending ? (
-              <CheckCircle2 className="h-12 w-12 text-amber-500" />
-            ) : allSharedMembersCompleted ? (
-              <CheckCircle2 className="h-12 w-12 text-green-500" />
+              <Loader2 className="h-6 w-6 text-primary animate-spin" />
+            ) : (showAsApproved || allSharedMembersCompleted) ? (
+              <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+            ) : (showAsPending || showAsSubmitted) ? (
+              <Clock className="h-6 w-6 text-amber-400" />
+            ) : isRejected ? (
+              <TaskIcon className="h-6 w-6 text-blue-300" />
             ) : (
-              <TaskIcon
-                className={`h-12 w-12 text-primary transition-all duration-300 ${isActionable ? "" : "opacity-40"}`}
-              />
+              <TaskIcon className={`h-6 w-6 ${isActionable ? "text-white/80" : "text-white/30"}`} />
+            )}
+            {/* State dot badge */}
+            {(showAsApproved || allSharedMembersCompleted) && (
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-400 rounded-full flex items-center justify-center border-2 border-slate-900">
+                <CheckCircle2 className="w-3 h-3 text-emerald-900" />
+              </div>
+            )}
+            {(showAsPending || showAsSubmitted) && (
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center border-2 border-slate-900">
+                <Clock className="w-3 h-3 text-amber-900" />
+              </div>
             )}
           </div>
-          <div className="flex items-center justify-center gap-2">
-            <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              {task.title}
-            </h3>
-            {task.requiresProof && isActionable && (
-              <Camera className="h-4 w-4 text-sky-400 flex-shrink-0" />
-            )}
-            {/* Info Button - always visible */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDetails(true);
-              }}
-              className="h-7 w-7 rounded-full shrink-0"
-              data-testid={`button-info-task-${task.id}`}
-            >
-              <Info className="h-4 w-4 text-primary" />
-            </Button>
-            {/* Multi-Completion Counter Badge */}
-            {task.maxCompletions !== null && task.maxCompletions !== undefined && (
-              <Badge 
-                variant="secondary" 
-                className="shrink-0 text-xs font-bold"
-                data-testid={`badge-multi-completion-${task.id}`}
+
+          {/* Content */}
+          <div className="flex-1 min-w-0 space-y-1.5">
+            {/* Title row */}
+            <div className="flex items-center gap-1.5">
+              {titleStateIcon}
+              <h3 className={`font-bold text-base truncate flex-1 min-w-0 ${!isActionable && !showAsApproved && !showAsPending && !showAsSubmitted && !isRejected && !allSharedMembersCompleted ? "text-white/40" : "text-white"}`} style={{ fontFamily: "Fredoka, sans-serif" }}>
+                {task.title}
+              </h3>
+              {task.requiresProof && isActionable && (
+                <Camera className="h-3.5 w-3.5 text-sky-400 flex-shrink-0" />
+              )}
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
+                className="text-white/30 hover:text-white/60 transition-colors flex-shrink-0"
+                data-testid={`button-info-task-${task.id}`}
               >
-                {task.completionCount || 0}/{task.maxCompletions}
-              </Badge>
+                <Info className="h-3.5 w-3.5" />
+              </button>
+              {task.maxCompletions !== null && task.maxCompletions !== undefined && (
+                <Badge variant="secondary" className="shrink-0 text-xs font-bold" data-testid={`badge-multi-completion-${task.id}`}>
+                  {task.completionCount || 0}/{task.maxCompletions}
+                </Badge>
+              )}
+            </div>
+
+            {/* Status badge */}
+            {statusMessage && (
+              <span className={`inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                (showAsPending || showAsSubmitted) ? "bg-amber-400/20 text-amber-300 border-amber-400/40" :
+                (showAsApproved || allSharedMembersCompleted) ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/40" :
+                isRejected ? "bg-blue-400/20 text-blue-300 border-blue-400/40" :
+                hasNoSlots ? "bg-amber-400/20 text-amber-300 border-amber-400/40" :
+                dueDateInfo.expired ? "bg-red-400/20 text-red-300 border-red-400/40" :
+                "bg-white/10 text-white/50 border-white/20"
+              }`}>
+                {statusMessage}
+              </span>
             )}
-          </div>
-          
-          {/* Multi-Assignment Task Info - Show teammates who need to complete (new style) */}
-          {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1 && (
-            <div className="space-y-2 text-left">
-              {/* Teammates section */}
-              <div className="p-2 bg-primary/5 rounded-xl">
-                <p className="text-xs font-semibold text-muted-foreground mb-1.5">
-                  <Users className="h-3 w-3 inline mr-1" />
-                  {t("kidDashboard.sharedWith")}
+            {/* Multi-Assignment Task Info */}
+            {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1 && (
+              <div className="p-2 bg-white/5 rounded-xl border border-white/10">
+                <p className="text-xs font-semibold text-white/50 mb-1.5 flex items-center gap-1">
+                  <Users className="h-3 w-3" />{t("kidDashboard.sharedWith")}
                 </p>
-                <div className="flex flex-wrap justify-center gap-1">
+                <div className="flex flex-wrap gap-1">
                   {task.assignedMemberCompletions.map((m) => {
                     const hasSubmitted = m.hasSubmitted ?? (m.status !== null);
                     return (
-                      <Badge 
-                        key={m.memberId} 
-                        variant={hasSubmitted ? "default" : "outline"}
-                        className="gap-1 text-xs"
-                      >
+                      <Badge key={m.memberId} variant={hasSubmitted ? "default" : "outline"} className="gap-1 text-xs">
                         <Avatar className="h-4 w-4">
                           <AvatarImage src={getAvatarUrl(m.activeSkinId, m.avatarUrl, m.useCustomAvatar)} />
-                          <AvatarFallback 
-                            className="text-xs text-white font-bold"
-                            style={{ backgroundColor: m.color }}
-                          >
-                            {m.displayName[0]}
-                          </AvatarFallback>
+                          <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: m.color }}>{m.displayName[0]}</AvatarFallback>
                         </Avatar>
-                        {m.displayName}
-                        {m.status === "approved" ? " ✓" : m.status === "pending" ? " ⏳" : ""}
+                        {m.displayName}{m.status === "approved" ? " ✓" : m.status === "pending" ? " ⏳" : ""}
                       </Badge>
                     );
                   })}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("tasks.sharedProgress", {
-                    completed: task.assignedMemberCompletions.filter(m => m.hasCompleted).length,
-                    total: task.assignedMemberCompletions.length
-                  })}
-                </p>
+                <p className="text-xs text-white/40 mt-1">{t("tasks.sharedProgress", { completed: task.assignedMemberCompletions.filter(m => m.hasCompleted).length, total: task.assignedMemberCompletions.length })}</p>
+                {task.description && <p className="text-xs text-white/40 mt-1 line-clamp-2">{task.description}</p>}
               </div>
-              
-              {/* Task description */}
-              {task.description && (
-                <p className="text-xs text-muted-foreground px-2 line-clamp-2">
-                  {task.description}
-                </p>
-              )}
-            </div>
-          )}
+            )}
 
-          {/* Legacy Shared Task Info - Show teammates and description (using sharedMemberIds) */}
-          {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 1 && !task.assignedMemberCompletions && (
-            <div className="space-y-2 text-left">
-              {/* Teammates section */}
-              <div className="p-2 bg-primary/5 rounded-xl">
-                <p className="text-xs font-semibold text-muted-foreground mb-1.5">
-                  <Users className="h-3 w-3 inline mr-1" />
-                  {t("kidDashboard.sharedWith")}
+            {/* Legacy Shared Task Info */}
+            {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 1 && !task.assignedMemberCompletions && (
+              <div className="p-2 bg-white/5 rounded-xl border border-white/10">
+                <p className="text-xs font-semibold text-white/50 mb-1.5 flex items-center gap-1">
+                  <Users className="h-3 w-3" />{t("kidDashboard.sharedWith")}
                 </p>
-                <div className="flex flex-wrap justify-center gap-1">
+                <div className="flex flex-wrap gap-1">
                   {task.sharedMemberCompletions.map((m) => (
-                    <Badge 
-                      key={m.memberId} 
-                      variant={m.hasCompleted ? "default" : "outline"}
-                      className="gap-1 text-xs"
-                    >
+                    <Badge key={m.memberId} variant={m.hasCompleted ? "default" : "outline"} className="gap-1 text-xs">
                       <Avatar className="h-4 w-4">
                         <AvatarImage src={getAvatarUrl(m.activeSkinId, m.avatarUrl, m.useCustomAvatar)} />
-                        <AvatarFallback 
-                          className="text-xs text-white font-bold"
-                          style={{ backgroundColor: m.color }}
-                        >
-                          {m.displayName[0]}
-                        </AvatarFallback>
+                        <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: m.color }}>{m.displayName[0]}</AvatarFallback>
                       </Avatar>
-                      {m.displayName}
-                      {m.hasCompleted && " ✓"}
+                      {m.displayName}{m.hasCompleted && " ✓"}
                     </Badge>
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("tasks.sharedProgress", {
-                    completed: task.sharedMemberCompletions.filter(m => m.hasCompleted).length,
-                    total: task.sharedMemberCompletions.length
-                  })}
-                </p>
+                <p className="text-xs text-white/40 mt-1">{t("tasks.sharedProgress", { completed: task.sharedMemberCompletions.filter(m => m.hasCompleted).length, total: task.sharedMemberCompletions.length })}</p>
+                {task.description && <p className="text-xs text-white/40 mt-1 line-clamp-2">{task.description}</p>}
               </div>
-              
-              {/* Task description for shared tasks */}
-              {task.description && (
-                <p className="text-xs text-muted-foreground px-2 line-clamp-2">
-                  {task.description}
-                </p>
-              )}
-            </div>
-          )}
+            )}
 
-          {/* Shopping List Items */}
-          {(task as any).isShoppingList && (
-            <KidShoppingListSection taskId={task.id} expanded={shoppingListExpanded} onToggle={() => setShoppingListExpanded(v => !v)} />
-          )}
+            {/* Shopping List */}
+            {(task as any).isShoppingList && (
+              <KidShoppingListSection taskId={task.id} expanded={shoppingListExpanded} onToggle={() => setShoppingListExpanded(v => !v)} />
+            )}
 
-          {/* Due Date Display with kid-friendly warnings */}
-          {task.dueDate && (() => {
-            const { status, daysUntil } = getDueDateStatus(task.dueDate);
-            
-            if (status === "overdue") {
-              return (
-                <Badge 
-                  variant="destructive" 
-                  className="gap-1 text-xs rounded-xl"
-                  data-testid={`badge-overdue-${task.id}`}
-                >
-                  <AlertTriangle className="h-3 w-3" />
-                  {t('kidDashboard.overdueHurry')}
-                </Badge>
-              );
-            }
-            
-            if (status === "soon") {
-              return (
-                <Badge 
-                  variant="secondary" 
-                  className="gap-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 rounded-xl"
-                  data-testid={`badge-due-soon-${task.id}`}
-                >
-                  <Calendar className="h-3 w-3" />
-                  {daysUntil === 0 ? t('kidDashboard.dueTodayHurry') : t('kidDashboard.dueTomorrowHurry')}
-                </Badge>
-              );
-            }
-            
-            return (
-              <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3" />
-                <span>{t('tasks.dueBy', { date: format(new Date(task.dueDate), "MMM d") })}</span>
+            {/* Due Date */}
+            {task.dueDate && (() => {
+              const { status, daysUntil } = getDueDateStatus(task.dueDate);
+              if (status === "overdue") return <Badge variant="destructive" className="gap-1 text-xs rounded-xl" data-testid={`badge-overdue-${task.id}`}><AlertTriangle className="h-3 w-3" />{t('kidDashboard.overdueHurry')}</Badge>;
+              if (status === "soon") return <Badge variant="secondary" className="gap-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 rounded-xl" data-testid={`badge-due-soon-${task.id}`}><Calendar className="h-3 w-3" />{daysUntil === 0 ? t('kidDashboard.dueTodayHurry') : t('kidDashboard.dueTomorrowHurry')}</Badge>;
+              return <div className="flex items-center gap-1 text-xs text-white/40"><Calendar className="h-3 w-3" /><span>{t('tasks.dueBy', { date: format(new Date(task.dueDate), "MMM d") })}</span></div>;
+            })()}
+
+            {/* Available-again chip */}
+            {availableAgainDays !== null && (
+              <div className="flex items-center gap-1.5 text-xs text-white/40 px-2 py-0.5 rounded-full bg-white/5 border border-white/10 w-fit">
+                <Clock className="h-3 w-3 shrink-0" />
+                <span>{availableAgainDays === 0 ? t("tasks.availableToday") : availableAgainDays === 1 ? t("tasks.availableTomorrow") : t("tasks.availableInDays", { count: availableAgainDays })}</span>
               </div>
-            );
-          })()}
+            )}
 
-          {statusMessage ? (
-            <div className="space-y-1.5 w-full">
-              <div 
-                className={`text-sm px-4 py-2 rounded-full text-center font-semibold border ${
-                  showAsSubmitted ? 'bg-amber-500/40 border-amber-400/60 text-amber-600 dark:text-amber-400' :
-                  showAsPending ? 'bg-amber-500/40 border-amber-400/60 text-amber-600 dark:text-amber-400' :
-                  showAsApproved || allSharedMembersCompleted ? 'bg-green-500/15 border-green-400/30 text-green-600 dark:text-green-400' :
-                  isRejected ? 'bg-blue-500/15 border-blue-400/30 text-blue-600 dark:text-blue-400' :
-                  hasNoSlots ? 'bg-amber-500/15 border-amber-400/30 text-amber-600 dark:text-amber-400' :
-                  dueDateInfo.expired ? 'bg-destructive/15 border-destructive/30 text-destructive' :
-                  'bg-white/8 border-white/15 text-muted-foreground'
+            {/* No slots chip */}
+            {hasNoSlots && task.remainingSlots === 0 && (
+              <div className="flex items-center gap-1 text-xs text-amber-300/70 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-400/20 w-fit">
+                {t("kidDashboard.noSlotsLeft")}
+              </div>
+            )}
+          </div>
+
+          {/* Right column: points + CTA */}
+          <div className="flex-shrink-0 flex flex-col items-end gap-2 pt-0.5">
+            <span className="flex items-center gap-1 text-sm font-bold text-amber-300">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />+{task.points}
+            </span>
+            {isActionable && (
+              <button
+                className={`text-[11px] font-bold px-2.5 py-1 rounded-lg active:scale-95 transition-transform ${
+                  task.requiresProof
+                    ? "bg-sky-500/20 border border-sky-400/30 text-sky-200"
+                    : "bg-blue-500/25 border border-blue-400/30 text-blue-200"
                 }`}
+                onClick={handleComplete}
+                data-testid={`button-complete-task-${task.id}`}
               >
-                {statusMessage}
-              </div>
-              <div className="flex items-center justify-center gap-1.5 opacity-55">
-                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                <span className="text-sm font-bold text-muted-foreground">{task.points}</span>
-              </div>
-            </div>
-          ) : (
-            <div
-              className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500/90 to-yellow-400/90 text-white px-4 py-2 rounded-full font-bold text-base shadow-md shadow-amber-900/30"
-              onClick={(task as any).isShoppingList ? (e) => { e.stopPropagation(); setShoppingListExpanded(v => !v); } : undefined}
-            >
-              <Star className="h-4 w-4 fill-white text-white" />
-              <span>+{task.points}</span>
-            </div>
-          )}
-          
-          {hasNoSlots && task.remainingSlots === 0 && (
-            <div className="flex items-center justify-center gap-1.5 text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 px-3 py-1 rounded-full border border-amber-400/20 font-medium">
-              {t("kidDashboard.noSlotsLeft")}
-            </div>
-          )}
-
-          {/* Available-again time chip for locked recurring tasks */}
-          {availableAgainDays !== null && (
-            <div className="flex items-center justify-center gap-1.5 bg-white/8 text-muted-foreground px-3 py-1 rounded-full border border-white/10 text-xs">
-              <Clock className="h-3 w-3 shrink-0" />
-              <span>
-                {availableAgainDays === 0
-                  ? t("tasks.availableToday")
-                  : availableAgainDays === 1
-                  ? t("tasks.availableTomorrow")
-                  : t("tasks.availableInDays", { count: availableAgainDays })}
-              </span>
-            </div>
-          )}
+                {completeMutation.isPending
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : task.requiresProof
+                  ? <Camera className="h-3.5 w-3.5" />
+                  : t("kidDashboard.now") || "Start"
+                }
+              </button>
+            )}
+          </div>
         </div>
-      </Card>
+      </div>
 
       {/* Task Details Dialog */}
       <AlertDialog open={showDetails} onOpenChange={setShowDetails}>
