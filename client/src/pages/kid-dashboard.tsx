@@ -2478,19 +2478,6 @@ export default function KidDashboard() {
                       boxShadow: `0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 32px ${rc.glow.replace("0.35","0.28")}, 0 12px 48px ${rc.glow.replace("0.35","0.14")}, 0 4px 24px ${rc.glow}`,
                     }}
                   >
-                    {/* Rarity banner */}
-                    <div className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 px-4 py-2 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Star className="h-3 w-3 fill-white text-white opacity-90" />
-                        <span className="text-white text-xs font-black tracking-widest opacity-95" style={{ fontFamily: "Fredoka, sans-serif", letterSpacing: "0.18em" }}>LEGENDARY</span>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-80">
-                        <Star className="h-2.5 w-2.5 fill-white text-white" />
-                        <Star className="h-3 w-3 fill-white text-white" />
-                        <Star className="h-2.5 w-2.5 fill-white text-white" />
-                      </div>
-                    </div>
-
                     {/* Icon zone */}
                     <div className="flex justify-center pt-5 pb-3 relative">
                       <Sparkles className="absolute left-5 top-4 h-3.5 w-3.5 opacity-40" style={{ color: rc.textColor }} />
@@ -2620,19 +2607,6 @@ export default function KidDashboard() {
                       boxShadow: `0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 32px ${jRc.glow.replace("0.35","0.28")}, 0 12px 48px ${jRc.glow.replace("0.35","0.14")}, 0 4px 24px ${jRc.glow}`,
                     }}
                   >
-                    {/* Rarity banner */}
-                    <div className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 px-4 py-2 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Star className="h-3 w-3 fill-white text-white opacity-90" />
-                        <span className="text-white text-xs font-black tracking-widest opacity-95" style={{ fontFamily: "Fredoka, sans-serif", letterSpacing: "0.18em" }}>LEGENDARY</span>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-80">
-                        <Star className="h-2.5 w-2.5 fill-white text-white" />
-                        <Star className="h-3 w-3 fill-white text-white" />
-                        <Star className="h-2.5 w-2.5 fill-white text-white" />
-                      </div>
-                    </div>
-
                     {/* Icon zone */}
                     <div className="flex justify-center pt-5 pb-3 relative">
                       <Sparkles className="absolute left-5 top-4 h-3.5 w-3.5 opacity-40" style={{ color: jRc.textColor }} />
