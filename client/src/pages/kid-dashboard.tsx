@@ -2240,25 +2240,22 @@ export default function KidDashboard() {
                   <MessageSquare className="h-5 w-5" />
                 </button>
               </div>
-              <div className="bg-black/75 p-5 rounded-2xl border border-white/20 shadow-xl shadow-black/30 min-w-[260px]">
-                <p className="text-sm text-white/60 mb-3 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
-                <div className="space-y-3">
-                  <div className="text-center pb-3 border-b border-white/15">
-                    <p className="text-xs text-white/55 mb-1">{t("kidDashboard.totalEarned")}</p>
+              <div className="bg-card/80 p-4 rounded-2xl border min-w-[220px]">
+                <p className="text-xs text-muted-foreground mb-2 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
+                <div className="space-y-2">
+                  <div className="text-center pb-2 border-b border-border">
+                    <p className="text-xs text-muted-foreground mb-0.5">{t("kidDashboard.totalEarned")}</p>
                     <div
-                      className="text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
+                      className="text-3xl font-bold"
                       style={{ fontFamily: "Fredoka, sans-serif" }}
                       data-testid="text-total-earned"
                     >
                       {member.totalEarned.toLocaleString()}
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Coins className="h-4 w-4 text-green-400" />
-                      <span className="font-semibold text-sm text-white/80">{t("kidDashboard.available")}</span>
-                    </div>
-                    <span className="text-xl font-bold text-green-400" data-testid="text-total-points">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-sm text-muted-foreground">{t("kidDashboard.available")}</span>
+                    <span className="text-lg font-bold" data-testid="text-total-points">
                       {member.totalPoints.toLocaleString()}
                     </span>
                   </div>
