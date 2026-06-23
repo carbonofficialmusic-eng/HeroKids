@@ -1144,22 +1144,24 @@ export default function RewardsBoard() {
                   </div>
                 )}
 
-                {/* Parent Controls - Only when acting as parent, not when switched to child, and sharing must be finalized first */}
-                {isParent && redemption.status !== "completed" && redemption.sharingStatus !== "sharing_active" && (
+                {/* Parent Controls - Only when acting as parent, not when switched to child */}
+                {isParent && redemption.status !== "completed" && (
                   <div className="flex gap-2 pt-2 border-t">
-                    {/* Rewards are auto-approved, parents only mark as fulfilled */}
-                    <Button
-                      size="sm"
-                      variant="default"
-                      onClick={() => updateStatusMutation.mutate({ 
-                        id: redemption.id, 
-                        status: "completed" 
-                      })}
-                      disabled={updateStatusMutation.isPending}
-                      data-testid={`button-complete-${redemption.id}`}
-                    >
-                      {t("rewardsBoard.markFulfilled")}
-                    </Button>
+                    {/* Mark as fulfilled only available once sharing is finalized */}
+                    {redemption.sharingStatus !== "sharing_active" && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => updateStatusMutation.mutate({ 
+                          id: redemption.id, 
+                          status: "completed" 
+                        })}
+                        disabled={updateStatusMutation.isPending}
+                        data-testid={`button-complete-${redemption.id}`}
+                      >
+                        {t("rewardsBoard.markFulfilled")}
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="outline"
