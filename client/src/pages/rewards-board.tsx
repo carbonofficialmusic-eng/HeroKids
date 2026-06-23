@@ -188,16 +188,9 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-bold text-base text-white truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                {reward.title}
-              </h3>
-              {isReady && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-amber-400/20 text-amber-300 border-amber-400/40 flex-shrink-0">
-                  <Sparkles className="h-2.5 w-2.5" />{t("kidDashboard.readyToRequest")}
-                </span>
-              )}
-            </div>
+            <h3 className="font-bold text-base text-white leading-tight mb-1.5" style={{ fontFamily: "Fredoka, sans-serif" }}>
+              {reward.title}
+            </h3>
             {/* Custom progress bar */}
             <div className="h-3 rounded-full bg-black/30 overflow-hidden relative mb-1.5">
               <div
@@ -211,11 +204,13 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-white/50" style={{ fontFamily: "Nunito, sans-serif" }}>
+              <span className="text-xs" style={{ fontFamily: "Nunito, sans-serif" }}>
                 {isReady ? (
-                  <span className="text-amber-300 font-semibold">✦ {t("kidDashboard.readyToRequest")}</span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-amber-400/20 text-amber-300 border-amber-400/40">
+                    <Sparkles className="h-2.5 w-2.5" />{t("kidDashboard.readyToRequest")}
+                  </span>
                 ) : (
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 text-white/50">
                     <Zap className="h-3 w-3 text-amber-400" />{remaining} {t("kidDashboard.pointsRemaining", { count: remaining }).split(" ").slice(-1)[0]}
                   </span>
                 )}
