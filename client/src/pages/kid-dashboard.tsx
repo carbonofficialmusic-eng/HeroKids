@@ -2344,25 +2344,14 @@ export default function KidDashboard() {
 
                   const joinRarity = hasJoined ? "LEGENDARY" : "SPECIAL";
                   const joinRarityColors = {
-                    LEGENDARY: { banner: "linear-gradient(135deg, #78350f, #92400e, #a16207, #92400e)", glow: "rgba(251,191,36,0.15)", border: "rgba(251,191,36,0.22)", icon: "#d97706", iconBg: "rgba(251,191,36,0.1)", chip: "rgba(251,191,36,0.12)", chipText: "#d97706", cardBg: "linear-gradient(160deg,#161008 0%,#1e1408 40%,#130e06 100%)", label: "LEGENDARY" },
-                    SPECIAL:   { banner: "linear-gradient(135deg, #172554, #1e3a8a, #1d4ed8, #1e3a8a)", glow: "rgba(96,165,250,0.13)", border: "rgba(96,165,250,0.2)", icon: "#3b82f6", iconBg: "rgba(59,130,246,0.1)", chip: "rgba(59,130,246,0.12)", chipText: "#60a5fa", cardBg: "linear-gradient(160deg,#080d18 0%,#0d1528 40%,#060a14 100%)", label: "SPECIAL" },
+                    LEGENDARY: { glow: "rgba(251,191,36,0.15)", border: "rgba(251,191,36,0.22)", icon: "#d97706", iconBg: "rgba(251,191,36,0.1)", chip: "rgba(251,191,36,0.12)", chipText: "#d97706", cardBg: "linear-gradient(160deg,#161008 0%,#1e1408 40%,#130e06 100%)" },
+                    SPECIAL:   { glow: "rgba(96,165,250,0.13)", border: "rgba(96,165,250,0.2)", icon: "#3b82f6", iconBg: "rgba(59,130,246,0.1)", chip: "rgba(59,130,246,0.12)", chipText: "#60a5fa", cardBg: "linear-gradient(160deg,#080d18 0%,#0d1528 40%,#060a14 100%)" },
                   };
                   const jrc = joinRarityColors[joinRarity];
                   const JoinIcon = hasJoined ? Trophy : Users;
 
                   return (
                     <div key={shared.id} style={{ borderRadius: "20px", background: jrc.cardBg, border: `2px solid ${jrc.border}`, boxShadow: `0 0 18px ${jrc.glow}, 0 6px 20px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)`, overflow: "hidden" }}>
-                      {/* Rarity banner */}
-                      <div style={{ background: jrc.banner, padding: "7px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
-                          <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
-                          <Star style={{ width: 11, height: 11, color: "#fff", opacity: 0.85 }} />
-                        </div>
-                        <span style={{ fontFamily: "Fredoka, sans-serif", fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: "0.12em", textTransform: "uppercase", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{jrc.label}</span>
-                        <Sparkles style={{ width: 13, height: 13, color: "#fff", opacity: 0.85 }} />
-                      </div>
-
                       <div style={{ padding: "14px 14px 16px" }}>
                         {/* Icon zone */}
                         <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
