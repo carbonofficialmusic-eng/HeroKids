@@ -825,7 +825,7 @@ export default function RewardsBoard() {
         )}
 
       {/* Shared Rewards Section */}
-      {sharedRewards.length > 0 && (
+      {sharedRewards.some(sr => sr.memberId !== member?.id && !sr.participants.some(p => p.memberId === member?.id)) && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
@@ -834,7 +834,9 @@ export default function RewardsBoard() {
             <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>{t("rewardsBoard.sharedRewards")}</h2>
           </div>
           <div className="grid grid-cols-1 gap-4">
-            {sharedRewards.map((shared) => {
+            {sharedRewards
+              .filter(sr => sr.memberId !== member?.id && !sr.participants.some(p => p.memberId === member?.id))
+              .map((shared) => {
               const isInitiator = shared.memberId === member?.id;
               const hasJoined = shared.participants.some(p => p.memberId === member?.id);
               const totalParticipants = shared.participants.length + 1; // +1 for initiator
