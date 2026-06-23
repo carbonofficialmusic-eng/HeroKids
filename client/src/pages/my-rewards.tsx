@@ -312,7 +312,14 @@ export default function MyRewards() {
           };
         })
     : [];
-  const joinedShared: any[] = [...joinedFromShared, ...joinedFromRedemptions];
+  const joinedShared: any[] = [...joinedFromShared, ...joinedFromRedemptions]
+    .filter((item, idx, arr) => arr.findIndex(x => String(x.id) === String(item.id)) === idx)
+    .sort((a, b) => {
+      const da = a.redeemedAt ? new Date(a.redeemedAt).getTime() : 0;
+      const db = b.redeemedAt ? new Date(b.redeemedAt).getTime() : 0;
+      return db - da;
+    });
+  const joinedSharedIds = new Set(joinedShared.map((s: any) => String(s.id)));
 
   // Gold sparkle confetti on enter — fires once when rewards are loaded
   const confettiFiredRef = useRef(false);
@@ -381,16 +388,6 @@ export default function MyRewards() {
         {/* Shared rewards from others — joinable or already joined but pending finalization */}
         {(joinedShared.length > 0 || joinableShared.length > 0) && (
           <div className="space-y-3">
-            {/* Section header */}
-            <div className="flex items-center gap-3">
-              <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
-                <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain" style={{ filter: "drop-shadow(0 4px 12px rgba(251,191,36,0.5))" }} />
-              </div>
-              <h2 className="text-xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6)" }}>
-                {t("rewardsBoard.sharedRewards")}
-              </h2>
-            </div>
-
             <div className="grid grid-cols-1 landscape:grid-cols-2 gap-4">
               {/* Rewards I've already joined — gold Schatzkiste design */}
               {joinedShared.map((sr: any) => {
@@ -556,7 +553,7 @@ export default function MyRewards() {
               </p>
             </Card>
           ) : (
-            myRedemptions.map((redemption, index) => {
+            myRedemptions.filter(r => !joinedSharedIds.has(String(r.id))).map((redemption, index) => {
               const typed = redemption as RedemptionWithDetails;
               const shared = sharedRewards.find(s => s.id === typed.id);
               // For active shares use the /api/rewards/shared data (has join actions)

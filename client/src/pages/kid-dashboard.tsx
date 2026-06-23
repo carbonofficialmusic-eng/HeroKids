@@ -1786,6 +1786,18 @@ export default function KidDashboard() {
       )
     : [];
 
+  // Combined chronological list for dashboard "last 2 acquired" section
+  const dashboardLastTwo = [
+    ...myRedemptions.map(r => ({ ...r, _isOwn: true })),
+    ...joinedSharedRewards.map(r => ({ ...r, _isOwn: false })),
+  ]
+    .sort((a, b) => {
+      const da = a.redeemedAt ? new Date(a.redeemedAt).getTime() : 0;
+      const db = b.redeemedAt ? new Date(b.redeemedAt).getTime() : 0;
+      return db - da;
+    })
+    .slice(0, 2);
+
   // Edit member mutation
   const editMemberMutation = useMutation({
     mutationFn: async ({ memberId, data }: { memberId: string; data: any }) => {
@@ -2507,7 +2519,7 @@ export default function KidDashboard() {
               </Button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {myRedemptions.slice(0, 2).map((redemption, index) => {
+              {dashboardLastTwo.filter((r: any) => r._isOwn).map((redemption: any, index: number) => {
                 const typed = redemption as RedemptionWithDetails;
                 const participants: any[] = (typed as any).sharingParticipants || [];
                 const isSharing = typed.sharingStatus === "sharing_active";
@@ -2642,7 +2654,7 @@ export default function KidDashboard() {
               })}
 
               {/* Joined shared rewards (this member is a participant, not initiator) */}
-              {joinedSharedRewards.slice(0, Math.max(0, 2 - myRedemptions.slice(0, 2).length)).map((joined: any, index) => {
+              {dashboardLastTwo.filter((r: any) => !r._isOwn).map((joined: any, index: number) => {
                 const myParticipation = joined.sharingParticipants?.find((p: any) => p.memberId === member?.id);
                 const initiatorMember = familyMembers.find(m => m.id === joined.memberId);
                 const isFinalized = joined.sharingStatus === "sharing_finalized";
