@@ -34,6 +34,7 @@ import {
   CheckCircle2,
   Coins,
   Trash2,
+  Pencil,
   ArrowLeft,
   ChevronDown,
   ChevronRight,
@@ -56,6 +57,8 @@ export default function FamilyGoals() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [goalToDelete, setGoalToDelete] = useState<FamilyGoal | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [goalToEdit, setGoalToEdit] = useState<FamilyGoalWithContributions | null>(null);
   const [historyOpenGoals, setHistoryOpenGoals] = useState<Record<string, boolean>>({});
 
   const { data: member } = useQuery<FamilyMember>({
@@ -134,6 +137,28 @@ export default function FamilyGoals() {
       toast({
         title: t("errors.error"),
         description: error.message || t("familyGoals.errorContribute"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateGoalMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return await apiRequest("PUT", `/api/family-goals/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
+      setEditDialogOpen(false);
+      setGoalToEdit(null);
+      toast({
+        title: "Familienziel aktualisiert",
+        description: "Die Änderungen wurden gespeichert.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("errors.error"),
+        description: error.message || "Fehler beim Aktualisieren des Ziels.",
         variant: "destructive",
       });
     },
@@ -309,18 +334,30 @@ export default function FamilyGoals() {
                 <Card className="overflow-hidden relative" data-testid={`card-goal-${goal.id}`}>
                   <div className="p-6">
                     {member?.role === "parent" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setGoalToDelete(goal);
-                          setDeleteDialogOpen(true);
-                        }}
-                        data-testid={`button-delete-goal-${goal.id}`}
-                        className="absolute top-4 right-4 z-10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="absolute top-4 right-4 z-10 flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setGoalToEdit(goal);
+                            setEditDialogOpen(true);
+                          }}
+                          data-testid={`button-edit-goal-${goal.id}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setGoalToDelete(goal);
+                            setDeleteDialogOpen(true);
+                          }}
+                          data-testid={`button-delete-goal-${goal.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     )}
                     
                     <div className="mb-4 pr-12">
@@ -561,6 +598,20 @@ export default function FamilyGoals() {
           onSubmit={(data) => createGoalMutation.mutate(data)}
           isSubmitting={createGoalMutation.isPending}
           familyName={member.familyName}
+        />
+      )}
+
+      {member && goalToEdit && (
+        <FamilyGoalDialog
+          open={editDialogOpen}
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            if (!open) setGoalToEdit(null);
+          }}
+          onSubmit={(data) => updateGoalMutation.mutate({ id: goalToEdit.id, data })}
+          isSubmitting={updateGoalMutation.isPending}
+          familyName={member.familyName}
+          editingGoal={goalToEdit}
         />
       )}
 
