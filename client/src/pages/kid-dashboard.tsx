@@ -2285,34 +2285,37 @@ export default function KidDashboard() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {specialRewards.slice(0, 2).map((achievement, index) => (
-                <div key={achievement.id}>
-                  <Card className="p-5 bg-gradient-to-br from-purple-100/90 to-pink-100/90 dark:from-purple-900/40 dark:to-pink-900/40 border-2 border-purple-400/40 dark:border-purple-500/30 rounded-2xl shadow-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-xl bg-purple-500/30 dark:bg-purple-500/40 flex-shrink-0">
-                        <Gift className="h-7 w-7 text-purple-600 dark:text-purple-300" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg text-purple-900 dark:text-purple-100 truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                          {t(`achievements.title_${achievement.slug}`)}
-                        </h3>
-                        <p className="text-base text-purple-700 dark:text-purple-300 font-semibold truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                          {achievement.rewardType === "custom" && achievement.customReward
-                            ? achievement.customReward
-                            : `+${achievement.bonusPoints} ${t("points")}`}
-                        </p>
-                      </div>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0 bg-white/50 dark:bg-black/20" data-testid={`button-info-${achievement.slug}`}>
-                            <Info className="h-5 w-5 text-purple-600 dark:text-purple-300" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent side="left" className="max-w-[250px]">
-                          <p className="text-sm">{t(`achievements.desc_${achievement.slug}`)}</p>
-                        </PopoverContent>
-                      </Popover>
+                <div key={achievement.id} className="relative rounded-2xl border bg-gradient-to-br from-indigo-900/80 via-purple-900/80 to-violet-900/80 border-violet-500/40 shadow-xl shadow-violet-500/10 overflow-hidden">
+                  {/* Shine overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+                  <div className="p-4 flex items-center gap-3">
+                    {/* Icon box */}
+                    <div className="relative flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-400/20 flex items-center justify-center shadow-inner overflow-hidden">
+                      <Gift className="h-7 w-7 text-violet-300" />
                     </div>
-                  </Card>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-base text-white truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                        {t(`achievements.title_${achievement.slug}`)}
+                      </h3>
+                      <p className="text-sm text-violet-300 font-semibold truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                        {achievement.rewardType === "custom" && achievement.customReward
+                          ? achievement.customReward
+                          : `+${achievement.bonusPoints} ${t("points")}`}
+                      </p>
+                    </div>
+                    {/* Info button */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="flex-shrink-0 text-white/30 hover:text-white/60 transition-colors" data-testid={`button-info-${achievement.slug}`}>
+                          <Info className="h-4 w-4" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="left" className="max-w-[250px]">
+                        <p className="text-sm">{t(`achievements.desc_${achievement.slug}`)}</p>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
               ))}
             </div>
