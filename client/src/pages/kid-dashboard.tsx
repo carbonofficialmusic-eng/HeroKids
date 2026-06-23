@@ -2807,7 +2807,7 @@ export default function KidDashboard() {
             >
               <div>
                 <CollapsibleTrigger asChild>
-                  <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-white/8 border border-white/10 mb-1 hover-elevate">
+                  <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl border border-white/20 mb-1 hover-elevate" style={{ background: "linear-gradient(135deg, rgba(51,65,85,0.92) 0%, rgba(30,41,59,0.96) 100%)" }}>
                     <div className="flex items-center gap-3">
                       <Pin className="h-4 w-4 text-amber-400 fill-amber-400 flex-shrink-0" />
                       <span className="font-bold text-base px-2.5 py-0.5 rounded-md text-amber-300" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
@@ -2864,7 +2864,7 @@ export default function KidDashboard() {
                 >
                   <div>
                     <CollapsibleTrigger asChild>
-                      <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-white/8 border border-white/10 mb-1 hover-elevate">
+                      <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl border border-white/20 mb-1 hover-elevate" style={{ background: "linear-gradient(135deg, rgba(51,65,85,0.92) 0%, rgba(30,41,59,0.96) 100%)" }}>
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{getCategoryEmoji(category)}</span>
                           <span className="font-bold text-base bg-muted/80 px-2.5 py-0.5 rounded-md" style={{ fontFamily: "Fredoka, sans-serif" }}>
