@@ -94,6 +94,12 @@ export default function MyRewards() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
+    queryKey: ["/api/family-members"],
+    enabled: !!member,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data: sharedRewards = [] } = useQuery<SharedReward[]>({
     queryKey: ["/api/rewards/shared"],
     enabled: !!member,
@@ -241,13 +247,47 @@ export default function MyRewards() {
   const othersSharedRewards = member
     ? sharedRewards.filter(sr => sr.memberId !== member.id)
     : [];
-  // Split: ones I've already joined vs ones I can still join
-  const joinedShared = othersSharedRewards.filter(sr =>
+  // Split: ones I've already joined (from /api/rewards/shared, sharing_active) vs ones I can still join
+  const joinedFromShared = othersSharedRewards.filter(sr =>
     sr.participants.some((p: { memberId: string }) => p.memberId === member?.id)
   );
   const joinableShared = othersSharedRewards.filter(sr =>
     !sr.participants.some((p: { memberId: string }) => p.memberId === member?.id)
   );
+  // Also include joined rewards from /api/reward-redemptions (covers sharing_finalized and any
+  // that /api/rewards/shared might not return because they're already finalized)
+  const joinedFromSharedIds = new Set(joinedFromShared.map((s: any) => s.id));
+  const joinedFromRedemptions = member
+    ? (redemptions as any[])
+        .filter(r =>
+          r.memberId !== member.id &&
+          !joinedFromSharedIds.has(r.id) &&
+          Array.isArray(r.sharingParticipants) &&
+          r.sharingParticipants.some((p: any) => p.memberId === member.id)
+        )
+        .map((r: any) => {
+          const initiator = familyMembers.find((m: any) => m.id === r.memberId) ?? null;
+          return {
+            ...r,
+            reward: { id: r.rewardId, title: r.rewardTitle ?? "", description: null, pointThreshold: 0 },
+            member: initiator,
+            participants: (r.sharingParticipants || []).map((p: any) => ({
+              id: p.id,
+              memberId: p.memberId,
+              pointsContributed: p.pointsContributed,
+              joinedAt: "",
+              member: {
+                id: p.memberId,
+                displayName: p.displayName,
+                avatarUrl: p.avatarUrl,
+                activeSkinId: p.activeSkinId,
+                color: p.color,
+              },
+            })),
+          };
+        })
+    : [];
+  const joinedShared: any[] = [...joinedFromShared, ...joinedFromRedemptions];
 
   // Gold sparkle confetti on enter — fires once when rewards are loaded
   const confettiFiredRef = useRef(false);
