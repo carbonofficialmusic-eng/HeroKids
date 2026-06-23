@@ -1367,6 +1367,10 @@
     "sharingCancelled": "Delning avbruten",
     "canRedeemSolo": "Du kan nu njuta av belöningen själv.",
     "sharingCancelError": "Kunde inte avbryta delning.",
+    "leaveSharing": "Lämna delning",
+    "leftSharing": "Lämnade",
+    "leftSharingDesc": "Du lämnade den delade belöningen.",
+    "leaveError": "Kunde inte lämna delningen.",
     "joinableRewards": "Belöningar att gå med i",
     "joinableRewardsDesc": "Andra delar - gå med nu!",
     "initiated": "Startad av",
@@ -1521,7 +1525,11 @@
     "finalizeError": "Kunde inte slutföra delning.",
     "sharingCancelled": "Delning avbruten",
     "sharingCancelledDesc": "Du kan nu lösa in belöningen själv.",
-    "cancelError": "Kunde inte avbryta delning."
+    "cancelError": "Kunde inte avbryta delning.",
+    "leaveSharing": "Lämna delning",
+    "leftSharing": "Lämnade",
+    "leftSharingDesc": "Du lämnade den delade belöningen.",
+    "leaveError": "Kunde inte lämna delningen."
   },
   "familyGoals": {
     "backToDashboard": "Tillbaka till översikten",

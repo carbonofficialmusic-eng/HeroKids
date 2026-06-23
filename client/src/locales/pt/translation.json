@@ -1380,6 +1380,10 @@
     "sharingCancelled": "Compartilhamento cancelado",
     "canRedeemSolo": "Agora você pode aproveitar a recompensa sozinho.",
     "sharingCancelError": "Não foi possível cancelar o compartilhamento.",
+    "leaveSharing": "Sair do compartilhamento",
+    "leftSharing": "Saiu",
+    "leftSharingDesc": "Você saiu da recompensa compartilhada.",
+    "leaveError": "Não foi possível sair do compartilhamento.",
     "joinableRewards": "Recompensas para participar",
     "joinableRewardsDesc": "Outros estão compartilhando - participe agora!",
     "initiated": "Iniciado por",
@@ -1463,7 +1467,11 @@
     "finalizeError": "Não foi possível concluir o compartilhamento.",
     "sharingCancelled": "Compartilhamento cancelado",
     "sharingCancelledDesc": "Você agora pode resgatar a recompensa sozinho.",
-    "cancelError": "Não foi possível cancelar o compartilhamento."
+    "cancelError": "Não foi possível cancelar o compartilhamento.",
+    "leaveSharing": "Sair do compartilhamento",
+    "leftSharing": "Saiu",
+    "leftSharingDesc": "Você saiu da recompensa compartilhada.",
+    "leaveError": "Não foi possível sair do compartilhamento."
   },
   "achievements": {
     "title": "Marcos",

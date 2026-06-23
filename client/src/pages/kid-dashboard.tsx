@@ -11,7 +11,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronLeft, ChevronRight, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin, Gem, Hourglass, Lock } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin, Gem, Hourglass, Lock, LogOut } from "lucide-react";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1525,6 +1525,30 @@ export default function KidDashboard() {
     },
   });
 
+  const leaveSharingMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/leave-sharing`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
+      toast({
+        title: t("kidDashboard.leftSharing"),
+        description: t("kidDashboard.leftSharingDesc"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("kidDashboard.error"),
+        description: error.message || t("kidDashboard.leaveError"),
+        variant: "destructive",
+      });
+    },
+  });
+
   const finalizeSharingMutation = useMutation({
     mutationFn: async (redemptionId: string) => {
       return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/finalize`, {});
@@ -2690,6 +2714,20 @@ export default function KidDashboard() {
                           )}
                         </div>
                       </div>
+
+                      {/* Leave button — only when sharing is still active (not yet finalized) */}
+                      {!isFinalized && (
+                        <Button
+                          variant="outline"
+                          className="w-full gap-2 rounded-xl font-bold border-red-500/40 text-red-400 bg-red-500/10 hover:bg-red-500/20"
+                          onClick={() => leaveSharingMutation.mutate(joined.id)}
+                          disabled={leaveSharingMutation.isPending}
+                          data-testid={`button-leave-joined-${joined.id}`}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          {t("kidDashboard.leaveSharing")}
+                        </Button>
+                      )}
 
                       {/* Initiator */}
                       {initiatorMember && (

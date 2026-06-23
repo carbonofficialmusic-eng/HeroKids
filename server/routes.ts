@@ -4504,6 +4504,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cancel sharing (only works if no one joined yet) - supports Device Sessions
+  app.post("/api/rewards/redemptions/:redemptionId/leave-sharing", isAuthenticated, async (req: any, res) => {
+    try {
+      const { redemptionId } = req.params;
+
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+
+      let member = result.member;
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) member = actingMember;
+      }
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      await storage.leaveRewardSharing(redemptionId, member.id);
+
+      broadcastToFamily(member.familyName, {
+        type: "reward_sharing_left",
+        redemptionId,
+        memberId: member.id,
+        memberName: member.displayName,
+      });
+
+      res.json({ message: "You left the shared reward." });
+    } catch (error: any) {
+      console.error("Error leaving shared reward:", error);
+      res.status(500).json({ message: error.message || "Failed to leave shared reward" });
+    }
+  });
+
   app.post("/api/rewards/redemptions/:redemptionId/cancel-sharing", isAuthenticated, async (req: any, res) => {
     try {
       const { redemptionId } = req.params;

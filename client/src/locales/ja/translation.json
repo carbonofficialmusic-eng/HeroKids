@@ -1311,6 +1311,10 @@
     "pending": "保留中",
     "beingShared": "共有中",
     "cancelSharing": "共有をキャンセル",
+    "leaveSharing": "共有を退出",
+    "leftSharing": "退出しました",
+    "leftSharingDesc": "共有報酬から退出しました。",
+    "leaveError": "共有から退出できませんでした。",
     "shared": "共有済み",
     "pointsSpent": "{{count}}ポイント",
     "wasPoints": "(元は{{count}})",
@@ -1415,7 +1419,11 @@
     "finalizeError": "共有を完了できませんでした。",
     "sharingCancelled": "共有がキャンセルされました",
     "sharingCancelledDesc": "一人でご褒美を交換できるようになりました。",
-    "cancelError": "共有をキャンセルできませんでした。"
+    "cancelError": "共有をキャンセルできませんでした。",
+    "leaveSharing": "共有を退出",
+    "leftSharing": "退出しました",
+    "leftSharingDesc": "共有報酬から退出しました。",
+    "leaveError": "共有から退出できませんでした。"
   },
   "achievements": {
     "title": "マイルストーン",

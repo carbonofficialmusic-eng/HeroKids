@@ -14,6 +14,7 @@ import {
   X,
   Gift,
   Sparkles,
+  LogOut,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -156,6 +157,30 @@ export default function MyRewards() {
       toast({
         title: t("myRewards.error"),
         description: error.message || t("myRewards.joinError"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const leaveSharingMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/leave-sharing`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
+      toast({
+        title: t("myRewards.leftSharing"),
+        description: t("myRewards.leftSharingDesc"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("myRewards.error"),
+        description: error.message || t("myRewards.leaveError"),
         variant: "destructive",
       });
     },
@@ -434,6 +459,18 @@ export default function MyRewards() {
                           ))}
                         </div>
                       </div>
+                      {sr.sharingStatus === "sharing_active" && (
+                        <Button
+                          variant="outline"
+                          className="w-full gap-2 rounded-xl font-bold border-red-500/40 text-red-400 bg-red-500/10 hover:bg-red-500/20"
+                          onClick={() => leaveSharingMutation.mutate(sr.id)}
+                          disabled={leaveSharingMutation.isPending}
+                          data-testid={`button-leave-shared-${sr.id}`}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          {t("myRewards.leaveSharing")}
+                        </Button>
+                      )}
                     </div>
                   </motion.div>
                 );

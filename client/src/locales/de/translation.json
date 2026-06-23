@@ -1391,6 +1391,10 @@
     "sharingCancelled": "Teilen abgebrochen",
     "canRedeemSolo": "Du kannst die Belohnung jetzt alleine genießen.",
     "sharingCancelError": "Teilen konnte nicht abgebrochen werden.",
+    "leaveSharing": "Teilen verlassen",
+    "leftSharing": "Verlassen",
+    "leftSharingDesc": "Du hast die geteilte Belohnung verlassen.",
+    "leaveError": "Verlassen nicht möglich.",
     "joinableRewards": "Belohnungen zum Mitmachen",
     "joinableRewardsDesc": "Andere teilen gerade - jetzt mitmachen!",
     "initiated": "Gestartet von",
@@ -1474,7 +1478,11 @@
     "finalizeError": "Teilen konnte nicht abgeschlossen werden.",
     "sharingCancelled": "Teilen abgebrochen",
     "sharingCancelledDesc": "Du kannst die Belohnung jetzt alleine einlösen.",
-    "cancelError": "Teilen konnte nicht abgebrochen werden."
+    "cancelError": "Teilen konnte nicht abgebrochen werden.",
+    "leaveSharing": "Teilen verlassen",
+    "leftSharing": "Teilen verlassen",
+    "leftSharingDesc": "Du hast das Teilen verlassen.",
+    "leaveError": "Verlassen nicht möglich."
   },
   "achievements": {
     "title": "Bonus-Belohnungen",

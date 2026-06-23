@@ -312,6 +312,7 @@ export interface IStorage {
   joinRewardSharing(redemptionId: string, memberId: string): Promise<RewardSharingParticipant>;
   finalizeRewardSharing(redemptionId: string): Promise<void>;
   cancelRewardSharing(redemptionId: string): Promise<void>;
+  leaveRewardSharing(redemptionId: string, memberId: string): Promise<void>;
   getRewardSharingParticipants(redemptionId: string): Promise<Array<RewardSharingParticipant & { member: FamilyMember }>>;
   getActiveSharedRewards(familyName: string): Promise<Array<RewardRedemption & { participants: Array<RewardSharingParticipant & { member: FamilyMember }> }>>;
 
@@ -2284,7 +2285,6 @@ export class DatabaseStorage implements IStorage {
 
   async cancelRewardSharing(redemptionId: string): Promise<void> {
     await db.transaction(async (tx) => {
-      // Get redemption
       const [redemption] = await tx
         .select()
         .from(rewardRedemptions)
@@ -2314,6 +2314,49 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
+  async leaveRewardSharing(redemptionId: string, memberId: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      const [redemption] = await tx
+        .select()
+        .from(rewardRedemptions)
+        .where(eq(rewardRedemptions.id, redemptionId))
+        .limit(1);
+
+      if (!redemption) {
+        throw new Error("Redemption not found");
+      }
+
+      if (redemption.sharingStatus !== "sharing_active") {
+        throw new Error("Sharing is not active for this reward");
+      }
+
+      if (redemption.memberId === memberId) {
+        throw new Error("As the initiator, use cancel sharing instead");
+      }
+
+      const [participant] = await tx
+        .select()
+        .from(rewardSharingParticipants)
+        .where(and(
+          eq(rewardSharingParticipants.redemptionId, redemptionId),
+          eq(rewardSharingParticipants.memberId, memberId)
+        ))
+        .limit(1);
+
+      if (!participant) {
+        throw new Error("You are not a participant in this shared reward");
+      }
+
+      // Points haven't been paid yet (that happens at finalize) — just remove the record
+      await tx
+        .delete(rewardSharingParticipants)
+        .where(and(
+          eq(rewardSharingParticipants.redemptionId, redemptionId),
+          eq(rewardSharingParticipants.memberId, memberId)
+        ));
+    });
+  }
+
   async cancelRewardRedemption(redemptionId: string): Promise<{ memberId: string; pointsRefunded: number; rewardId: string }> {
     return await db.transaction(async (tx) => {
       const [redemption] = await tx
@@ -2331,10 +2374,6 @@ export class DatabaseStorage implements IStorage {
       const rewardId = redemption.rewardId;
 
       if (redemption.sharingStatus === "sharing_active" || redemption.sharingStatus === "sharing_finalized") {
-        await tx
-          .delete(rewardSharingParticipants)
-          .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
-        
         if (redemption.sharingStatus === "sharing_finalized") {
           const participants = await tx
             .select()
@@ -2352,6 +2391,9 @@ export class DatabaseStorage implements IStorage {
             }
           }
         }
+        await tx
+          .delete(rewardSharingParticipants)
+          .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
       }
 
       await tx

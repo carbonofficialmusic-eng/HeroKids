@@ -1311,6 +1311,10 @@
     "pending": "En cours",
     "beingShared": "En partage",
     "cancelSharing": "Annuler le partage",
+    "leaveSharing": "Quitter le partage",
+    "leftSharing": "Quitté",
+    "leftSharingDesc": "Tu as quitté la récompense partagée.",
+    "leaveError": "Impossible de quitter le partage.",
     "shared": "Partagé",
     "pointsSpent": "{{count}} points",
     "wasPoints": "(était {{count}})",
@@ -1415,7 +1419,11 @@
     "finalizeError": "Impossible de terminer le partage.",
     "sharingCancelled": "Partage annulé",
     "sharingCancelledDesc": "Tu peux maintenant échanger la récompense seul.",
-    "cancelError": "Impossible d'annuler le partage."
+    "cancelError": "Impossible d'annuler le partage.",
+    "leaveSharing": "Quitter le partage",
+    "leftSharing": "Quitté",
+    "leftSharingDesc": "Tu as quitté la récompense partagée.",
+    "leaveError": "Impossible de quitter le partage."
   },
   "achievements": {
     "title": "Jalons",

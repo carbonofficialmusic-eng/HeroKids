@@ -1247,6 +1247,10 @@
     "pending": "보류 중",
     "beingShared": "공유 중",
     "cancelSharing": "공유 취소",
+    "leaveSharing": "공유 나가기",
+    "leftSharing": "나갔습니다",
+    "leftSharingDesc": "공유 보상에서 나갔습니다.",
+    "leaveError": "공유를 나갈 수 없습니다.",
     "shared": "공유됨",
     "pointsSpent": "{{count}} 포인트",
     "wasPoints": "(원래 {{count}})",
@@ -1351,7 +1355,11 @@
     "finalizeError": "공유를 완료할 수 없습니다.",
     "sharingCancelled": "공유가 취소되었습니다",
     "sharingCancelledDesc": "이제 혼자서 보상을 교환할 수 있습니다.",
-    "cancelError": "공유를 취소할 수 없습니다."
+    "cancelError": "공유를 취소할 수 없습니다.",
+    "leaveSharing": "공유 나가기",
+    "leftSharing": "나갔습니다",
+    "leftSharingDesc": "공유 보상에서 나갔습니다.",
+    "leaveError": "공유를 나갈 수 없습니다."
   },
   "achievements": {
     "title": "마일스톤",

@@ -1311,6 +1311,10 @@
     "pending": "待处理",
     "beingShared": "分享中",
     "cancelSharing": "取消分享",
+    "leaveSharing": "退出分享",
+    "leftSharing": "已退出",
+    "leftSharingDesc": "你已退出共享奖励。",
+    "leaveError": "无法退出分享。",
     "shared": "已分享",
     "pointsSpent": "{{count}}积分",
     "wasPoints": "(原为{{count}})",
@@ -1415,7 +1419,11 @@
     "finalizeError": "无法完成分享。",
     "sharingCancelled": "分享已取消",
     "sharingCancelledDesc": "你现在可以独自兑换奖励了。",
-    "cancelError": "无法取消分享。"
+    "cancelError": "无法取消分享。",
+    "leaveSharing": "退出分享",
+    "leftSharing": "已退出",
+    "leftSharingDesc": "你已退出共享奖励。",
+    "leaveError": "无法退出分享。"
   },
   "achievements": {
     "title": "里程碑",

@@ -1311,6 +1311,10 @@
     "pending": "Pendiente",
     "beingShared": "Siendo compartida",
     "cancelSharing": "Cancelar compartir",
+    "leaveSharing": "Abandonar reparto",
+    "leftSharing": "Abandonado",
+    "leftSharingDesc": "Has abandonado la recompensa compartida.",
+    "leaveError": "No se pudo abandonar el reparto.",
     "shared": "Compartido",
     "pointsSpent": "{{count}} puntos",
     "wasPoints": "(era {{count}})",
@@ -1415,7 +1419,11 @@
     "finalizeError": "No se pudo completar el compartir.",
     "sharingCancelled": "Compartir cancelado",
     "sharingCancelledDesc": "Ahora puedes canjear la recompensa solo.",
-    "cancelError": "No se pudo cancelar el compartir."
+    "cancelError": "No se pudo cancelar el compartir.",
+    "leaveSharing": "Abandonar reparto",
+    "leftSharing": "Abandonado",
+    "leftSharingDesc": "Has abandonado la recompensa compartida.",
+    "leaveError": "No se pudo abandonar el reparto."
   },
   "achievements": {
     "title": "Hitos",

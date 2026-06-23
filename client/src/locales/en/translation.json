@@ -1381,6 +1381,10 @@
     "sharingCancelled": "Sharing cancelled",
     "canRedeemSolo": "You can now enjoy the reward by yourself.",
     "sharingCancelError": "Could not cancel sharing.",
+    "leaveSharing": "Leave sharing",
+    "leftSharing": "Left sharing",
+    "leftSharingDesc": "You have left the shared reward.",
+    "leaveError": "Could not leave sharing.",
     "joinableRewards": "Rewards to join",
     "joinableRewardsDesc": "Others are sharing - join now!",
     "initiated": "Started by",
@@ -1464,7 +1468,11 @@
     "finalizeError": "Could not complete sharing.",
     "sharingCancelled": "Sharing cancelled",
     "sharingCancelledDesc": "You can now redeem the reward by yourself.",
-    "cancelError": "Could not cancel sharing."
+    "cancelError": "Could not cancel sharing.",
+    "leaveSharing": "Leave sharing",
+    "leftSharing": "Left sharing",
+    "leftSharingDesc": "You have left the shared reward.",
+    "leaveError": "Could not leave sharing."
   },
   "achievements": {
     "title": "Bonus Rewards",
