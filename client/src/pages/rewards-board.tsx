@@ -239,21 +239,23 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
               <button
                 onClick={() => { if (!redeemMutation.isPending) redeemMutation.mutate(); }}
                 disabled={redeemMutation.isPending}
-                className="w-12 h-12 rounded-xl bg-gradient-to-b from-amber-400 to-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30 active:scale-95 transition-transform border border-amber-300/50 disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-gradient-to-b from-amber-400 to-amber-500 shadow-lg shadow-amber-500/30 active:scale-95 transition-transform border border-amber-300/50 disabled:opacity-50"
                 data-testid={`button-request-reward-${reward.id}`}
               >
                 {redeemMutation.isPending
-                  ? <Loader2 className="h-5 w-5 text-amber-900 animate-spin" />
-                  : <Gift className="h-5 w-5 text-amber-900" />
+                  ? <Loader2 className="h-4 w-4 text-amber-900 animate-spin" />
+                  : <Gift className="h-4 w-4 text-amber-900" />
                 }
+                <span className="text-xs font-bold text-amber-900 whitespace-nowrap">{t("kidDashboard.redeemNow")}</span>
               </button>
             ) : (
               <button
-                className="w-12 h-12 rounded-xl bg-violet-500/20 border border-violet-400/30 flex items-center justify-center"
+                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-white/5 border border-white/10 cursor-not-allowed"
                 disabled
                 data-testid={`button-request-reward-${reward.id}`}
               >
-                <Trophy className="h-5 w-5 text-violet-300" />
+                <Lock className="h-4 w-4 text-white/25" />
+                <span className="text-xs font-bold text-white/25 whitespace-nowrap">{remaining} {t("points")}</span>
               </button>
             )}
           </div>
