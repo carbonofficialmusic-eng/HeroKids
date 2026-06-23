@@ -2231,7 +2231,7 @@ export default function KidDashboard() {
                 </Link>
                 <button
                   data-testid="button-scroll-to-pinboard-kid"
-                  className="flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate"
+                  className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate"
                   onClick={() => {
                     const el = document.getElementById("pinboard");
                     if (el) scrollToPinboard(el);
@@ -2240,7 +2240,7 @@ export default function KidDashboard() {
                   <MessageSquare className="h-5 w-5" />
                 </button>
               </div>
-              <div className="bg-card/80 p-4 rounded-2xl border min-w-[220px]">
+              <div className="bg-card p-4 rounded-2xl border min-w-[220px]">
                 <p className="text-xs text-muted-foreground mb-2 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
                 <div className="space-y-2">
                   <div className="text-center pb-2 border-b border-border">
@@ -2740,7 +2740,7 @@ export default function KidDashboard() {
 
           {/* Filter tabs row */}
           <div className="flex items-center gap-2">
-            <div className="flex gap-1 flex-wrap p-1.5 rounded-xl border border-white/20" style={{ background: "linear-gradient(135deg, rgba(30,41,59,0.92) 0%, rgba(15,23,42,0.96) 100%)" }}>
+            <div className="flex gap-1 flex-wrap p-1.5 rounded-xl border border-border bg-card">
               <Button
                 variant={kidTaskFilter === "daily" ? "default" : "ghost"}
                 size="sm"

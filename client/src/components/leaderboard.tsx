@@ -123,7 +123,7 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
             return (
               <div
                 key={member.id}
-                className="flex items-center gap-3 p-3 landscape:p-2 rounded-lg bg-muted/50"
+                className="flex items-center gap-3 p-3 landscape:p-2 rounded-lg bg-card"
                 data-testid={`row-member-${member.id}`}
               >
                 <div className="w-6 text-center font-bold text-muted-foreground" data-testid={`text-rank-${rank}`}>

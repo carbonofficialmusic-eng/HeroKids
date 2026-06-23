@@ -120,7 +120,7 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
     <div className="rounded-xl overflow-hidden shadow-lg border border-border bg-card">
       {/* Header — only shown when add button is available */}
       {canAdd && !isAdding && editingId === null && (
-        <div className="flex items-center justify-end px-3 py-2 bg-muted border-b border-border">
+        <div className="flex items-center justify-end px-3 py-2 bg-card border-b border-border">
           <Button
             size="icon"
             variant="ghost"
@@ -134,7 +134,7 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
       )}
 
       {/* Board surface */}
-      <div className="p-3 space-y-3 min-h-[80px] bg-muted">
+      <div className="p-3 space-y-3 min-h-[80px] bg-card">
         {isLoading && (
           <p className="text-muted-foreground text-xs text-center py-2">{t("pinboard.loading")}</p>
         )}
