@@ -327,70 +327,77 @@ export default function MyRewards() {
             </div>
 
             <div className="grid grid-cols-1 landscape:grid-cols-2 gap-4">
-              {/* Rewards I've already joined (waiting for initiator to finalize) */}
-              {joinedShared.map((sr: any) => (
-                <motion.div
-                  key={sr.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="rounded-2xl overflow-hidden"
-                  style={{
-                    background: "linear-gradient(160deg, rgba(109,40,217,0.25) 0%, rgba(30,20,10,0.92) 100%)",
-                    border: "1.5px solid rgba(139,92,246,0.45)",
-                    boxShadow: "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 24px rgba(109,40,217,0.25)",
-                  }}
-                >
-                  {/* Violet banner: "You participate" */}
-                  <div className="bg-gradient-to-r from-violet-600 to-purple-500 px-4 py-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-3.5 w-3.5 text-white" />
-                      <span className="text-white text-xs font-black tracking-wider" style={{ fontFamily: "Fredoka, sans-serif", letterSpacing: "0.14em" }}>
-                        {t("rewardsBoard.youParticipate")}
-                      </span>
+              {/* Rewards I've already joined — gold Schatzkiste design */}
+              {joinedShared.map((sr: any) => {
+                const rc = { glow: "rgba(251,191,36,0.35)", border: "rgba(251,191,36,0.55)", iconBg: "rgba(251,191,36,0.18)", textColor: "#fbbf24" };
+                const myShare = sr.participants?.find((p: any) => p.memberId === member?.id);
+                return (
+                  <motion.div
+                    key={sr.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="rounded-2xl overflow-hidden"
+                    style={{
+                      background: "linear-gradient(160deg, rgba(30,20,10,0.92) 0%, rgba(20,15,8,0.97) 100%)",
+                      border: `1.5px solid ${rc.border}`,
+                      boxShadow: `0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 32px ${rc.glow.replace("0.35","0.28")}, 0 4px 24px ${rc.glow}`,
+                    }}
+                  >
+                    {/* Icon zone */}
+                    <div className="flex justify-center pt-5 pb-3 relative">
+                      <Sparkles className="absolute left-5 top-4 h-3.5 w-3.5 opacity-40" style={{ color: rc.textColor }} />
+                      <Sparkles className="absolute right-5 top-5 h-3 w-3 opacity-30" style={{ color: rc.textColor }} />
+                      <div
+                        className="h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
+                        style={{ background: rc.iconBg, boxShadow: `0 0 28px ${rc.glow}, 0 0 8px ${rc.glow}` }}
+                      >
+                        <RewardIconDisplay icon={sr.rewardIconEmoji} imgClassName="w-10 h-10 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
+                      </div>
                     </div>
-                    <span className="text-white/70 text-xs">{t("rewardsBoard.waitingForParticipants")}</span>
-                  </div>
 
-                  <div className="px-4 py-4 space-y-3">
-                    <h3 className="font-black text-lg text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                      {sr.reward?.title}
-                    </h3>
-                    <div className="flex items-center justify-center gap-2 flex-wrap">
-                      <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-400/30">
-                        <Coins className="h-3.5 w-3.5" />
-                        <span>
-                          {t("rewardsBoard.pointsPerPerson", {
-                            count: sr.participants.length > 0
-                              ? Math.ceil((sr.originalPointsSpent ?? sr.pointsSpent) / (sr.participants.length + 1))
-                              : sr.pointsSpent,
-                          })}
-                        </span>
+                    {/* Content zone */}
+                    <div className="px-4 pb-4 space-y-3">
+                      <h3 className="font-black text-xl text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${rc.glow}` }}>
+                        {sr.reward?.title}
+                      </h3>
+
+                      {/* Stats chips */}
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: rc.iconBg, color: rc.textColor, border: `1px solid ${rc.border}` }}>
+                          <Coins className="h-3.5 w-3.5" />
+                          <span>{t("myRewards.pointsSpent", { count: myShare?.pointsContributed ?? Math.ceil((sr.originalPointsSpent ?? sr.pointsSpent) / (sr.participants.length + 1)) })}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-violet-500/15 text-violet-300 border border-violet-400/30">
+                          <Users className="h-3.5 w-3.5" />
+                          <span>{t("kidDashboard.beingShared")}</span>
+                        </div>
+                      </div>
+
+                      {/* Initiator + participants */}
+                      <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
+                        <div className="flex items-center gap-1.5 text-xs text-white/50">
+                          <Users className="h-3.5 w-3.5" />
+                          <span>{t("rewardsBoard.sharedBy", { name: sr.member?.displayName })}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {sr.participants.map((p: any) => (
+                            <div key={p.id} className="flex items-center gap-1.5">
+                              <Avatar className="h-6 w-6 border-2 border-white/20">
+                                <AvatarImage src={getAvatarUrl(p.member?.activeSkinId, p.member?.avatarUrl, p.member?.useCustomAvatar, p.member?.updatedAt)} />
+                                <AvatarFallback className="text-xs font-bold text-white" style={{ backgroundColor: p.member?.color }}>
+                                  {p.member?.displayName?.[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm font-semibold text-white/80">{p.member?.displayName}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                    {/* Initiator + participants */}
-                    <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
-                      <div className="flex items-center gap-1 text-xs text-white/50">
-                        <Users className="h-3.5 w-3.5" />
-                        <span>{t("rewardsBoard.sharedBy", { name: sr.member?.displayName })}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {sr.participants.map((p: any) => (
-                          <div key={p.id} className="flex items-center gap-1">
-                            <Avatar className="h-5 w-5 border border-white/20">
-                              <AvatarImage src={getAvatarUrl(p.member?.activeSkinId, p.member?.avatarUrl, p.member?.useCustomAvatar, p.member?.updatedAt)} />
-                              <AvatarFallback className="text-xs font-bold text-white" style={{ backgroundColor: p.member?.color }}>
-                                {p.member?.displayName?.[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="text-xs text-white/70">{p.member?.displayName}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
 
               {/* Rewards from others I can still join */}
               {joinableShared.map((sr: any) => (
