@@ -640,11 +640,9 @@ export default function RewardsBoard() {
   });
 
   // Filter redemptions based on role
-  // Also exclude redemptions that are actively being shared (they appear in the shared rewards section)
-  const displayRedemptions = (isParent 
+  const displayRedemptions = isParent 
     ? redemptions 
-    : redemptions.filter(r => r.memberId === member?.id)
-  ).filter(r => r.sharingStatus !== "sharing_active");
+    : redemptions.filter(r => r.memberId === member?.id);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
