@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Trophy,
   ArrowLeft,
@@ -11,6 +12,7 @@ import {
   TrendingUp,
   Award,
   Sparkles,
+  Info,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -182,51 +184,46 @@ export default function MyAchievements() {
               <p className="text-lg text-muted-foreground">{t("myAchievements.noAchievements")}</p>
             </Card>
           ) : (
-            activeAchievements.map((achievement, index) => {
-              const Icon = getAchievementIcon(achievement.type);
-              const colorClass = getAchievementColor(achievement.type);
-              const iconColorClass = getIconColor(achievement.type);
-              
-              return (
+            activeAchievements.map((achievement, index) => (
                 <motion.div
                   key={achievement.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
+                  className="relative rounded-2xl border bg-gradient-to-br from-indigo-900/80 via-purple-900/80 to-violet-900/80 border-violet-500/40 shadow-xl shadow-violet-500/10 overflow-hidden"
                 >
-                  <Card className={`p-5 bg-gradient-to-br ${colorClass} border rounded-2xl`}>
-                    <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-xl ${iconColorClass} flex-shrink-0`}>
-                        <Icon className="h-7 w-7" />
-                      </div>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <h3 className="font-bold text-lg" style={{ fontFamily: "Fredoka, sans-serif" }}>
-                          {t(`achievements.title_${achievement.slug}`)}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {t(`achievements.desc_${achievement.slug}`)}
-                        </p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="secondary" className="gap-1.5">
-                            {achievement.rewardType === "custom" && achievement.customReward ? (
-                              <>
-                                <Gift className="h-3.5 w-3.5" />
-                                {achievement.customReward}
-                              </>
-                            ) : (
-                              <>
-                                <Star className="h-3.5 w-3.5" />
-                                +{achievement.bonusPoints} {t("points")}
-                              </>
-                            )}
-                          </Badge>
-                        </div>
-                      </div>
+                  {/* Shine overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+                  <div className="p-4 flex items-center gap-3">
+                    {/* Icon box */}
+                    <div className="relative flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-400/20 flex items-center justify-center shadow-inner overflow-hidden">
+                      <Gift className="h-7 w-7 text-violet-300" />
                     </div>
-                  </Card>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-base text-white truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                        {t(`achievements.title_${achievement.slug}`)}
+                      </h3>
+                      <p className="text-sm text-violet-300 font-semibold truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>
+                        {achievement.rewardType === "custom" && achievement.customReward
+                          ? achievement.customReward
+                          : `+${achievement.bonusPoints} ${t("points")}`}
+                      </p>
+                    </div>
+                    {/* Info button */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="flex-shrink-0 text-white/30 hover:text-white/60 transition-colors" data-testid={`button-info-${achievement.slug}`}>
+                          <Info className="h-4 w-4" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="left" className="max-w-[250px]">
+                        <p className="text-sm">{t(`achievements.desc_${achievement.slug}`)}</p>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </motion.div>
-              );
-            })
+              ))
           )}
         </div>
       </div>
