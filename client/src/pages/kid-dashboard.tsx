@@ -388,7 +388,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
               </button>
             ) : (
               <button
-                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-white/5 border border-white/10 cursor-not-allowed"
+                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-card border border-border cursor-not-allowed"
                 disabled
                 data-testid={`button-request-reward-${reward.id}`}
               >
@@ -537,7 +537,7 @@ function KidShoppingListSection({ taskId, expanded, onToggle }: { taskId: string
                 className={`flex items-center gap-2 rounded-xl px-3 py-2 cursor-pointer transition-colors border ${
                   isDone
                     ? "bg-green-500/15 border-green-400/30"
-                    : "bg-white/8 border-white/15 hover-elevate"
+                    : "bg-card border-border hover-elevate"
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1130,7 +1130,7 @@ function TaskCard({
                   isRejected ? 'bg-blue-500/15 border-blue-400/30 text-blue-600 dark:text-blue-400' :
                   hasNoSlots ? 'bg-amber-500/15 border-amber-400/30 text-amber-600 dark:text-amber-400' :
                   dueDateInfo.expired ? 'bg-destructive/15 border-destructive/30 text-destructive' :
-                  'bg-white/8 border-white/15 text-muted-foreground'
+                  'bg-card border-border text-muted-foreground'
                 }`}
               >
                 {statusMessage}
@@ -2381,7 +2381,7 @@ export default function KidDashboard() {
                         {initiatorMember && (
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: shared.participants.length > 0 ? 8 : 0 }}>
                             <span style={{ fontSize: 11, color: "#94a3b8" }}>{t("kidDashboard.with")}</span>
-                            <div style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
+                            <div className="flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5">
                               <Avatar className="h-4 w-4">
                                 <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar, (initiatorMember as any).updatedAt)} />
                                 <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: initiatorMember.color, fontSize: 8 }}>{initiatorMember.displayName[0]}</AvatarFallback>
@@ -2395,7 +2395,7 @@ export default function KidDashboard() {
                         {shared.participants.length > 0 && (
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
                             {shared.participants.map(p => (
-                              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
+                              <div key={p.id} className="flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5">
                                 <Avatar className="h-4 w-4">
                                   <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar, (p.member as any).updatedAt)} />
                                   <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: p.member.color, fontSize: 8 }}>{p.member.displayName[0]}</AvatarFallback>
@@ -2538,7 +2538,7 @@ export default function KidDashboard() {
                           <Coins className="h-3.5 w-3.5" />
                           <span>{t("myRewards.pointsSpent", { count: typed.pointsSpent })}</span>
                         </div>
-                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-white/5 text-white/60 border border-white/10">
+                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-card text-white/60 border border-border">
                           <span>{typed.redeemedAt ? new Date(typed.redeemedAt).toLocaleDateString() : "-"}</span>
                         </div>
                       </div>
@@ -2546,9 +2546,8 @@ export default function KidDashboard() {
                       {/* Status badges */}
                       <div className="flex items-center justify-center gap-2 flex-wrap">
                         <div
-                          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                          className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold border ${isCompleted ? "bg-green-500/15 text-green-400 border-green-400/40" : "bg-card text-white/70 border-border"}`}
                           data-testid={`badge-status-dashboard-${typed.id}`}
-                          style={{ background: isCompleted ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.08)", color: isCompleted ? "#4ade80" : "rgba(255,255,255,0.7)", border: isCompleted ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,255,255,0.15)" }}
                         >
                           {isCompleted ? (
                             <><CheckCircle2 className="h-3.5 w-3.5" />{t("kidDashboard.fulfilled")}</>
@@ -2564,7 +2563,7 @@ export default function KidDashboard() {
                           </div>
                         )}
                         {isFinalized && (
-                          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-white/5 text-white/60 border border-white/10">
+                          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-card text-white/60 border border-border">
                             <CheckCircle2 className="h-3.5 w-3.5" />{t("kidDashboard.shared")}
                           </div>
                         )}
@@ -2572,7 +2571,7 @@ export default function KidDashboard() {
 
                       {/* Participants */}
                       {participants.length > 0 && (
-                        <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
+                        <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-card border border-border">
                           <div className="flex items-center gap-1.5 text-xs text-white/50">
                             <Users className="h-3.5 w-3.5" />
                             <span>{t("kidDashboard.with")}:</span>
@@ -2678,8 +2677,7 @@ export default function KidDashboard() {
                       {/* Status badge */}
                       <div className="flex items-center justify-center gap-2 flex-wrap">
                         <div
-                          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
-                          style={{ background: jIsCompleted ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.08)", color: jIsCompleted ? "#4ade80" : "rgba(255,255,255,0.7)", border: jIsCompleted ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,255,255,0.15)" }}
+                          className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold border ${jIsCompleted ? "bg-green-500/15 text-green-400 border-green-400/40" : "bg-card text-white/70 border-border"}`}
                         >
                           {jIsCompleted ? (
                             <><CheckCircle2 className="h-3.5 w-3.5" />{t("kidDashboard.fulfilled")}</>
@@ -2693,7 +2691,7 @@ export default function KidDashboard() {
 
                       {/* Initiator */}
                       {initiatorMember && (
-                        <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
+                        <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-card border border-border">
                           <div className="flex items-center gap-1.5 text-xs text-white/50">
                             <Users className="h-3.5 w-3.5" />
                             <span>{t("kidDashboard.with")}:</span>
@@ -2801,7 +2799,7 @@ export default function KidDashboard() {
             >
               <div>
                 <CollapsibleTrigger asChild>
-                  <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-white/8 border border-white/10 mb-1 hover-elevate">
+                  <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-card border border-border mb-1 hover-elevate">
                     <div className="flex items-center gap-3">
                       <Pin className="h-4 w-4 text-amber-400 fill-amber-400 flex-shrink-0" />
                       <span className="font-bold text-base px-2.5 py-0.5 rounded-md text-amber-300" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
@@ -2858,7 +2856,7 @@ export default function KidDashboard() {
                 >
                   <div>
                     <CollapsibleTrigger asChild>
-                      <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-white/8 border border-white/10 mb-1 hover-elevate">
+                      <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-card border border-border mb-1 hover-elevate">
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{getCategoryEmoji(category)}</span>
                           <span className="font-bold text-base bg-muted/80 px-2.5 py-0.5 rounded-md" style={{ fontFamily: "Fredoka, sans-serif" }}>
