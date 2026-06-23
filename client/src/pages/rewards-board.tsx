@@ -711,9 +711,11 @@ export default function RewardsBoard() {
 
         {/* Page title */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
-            <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
-          </div>
+          {!isParent && (
+            <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+              <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
+            </div>
+          )}
           <div>
             <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>{t("rewardsBoard.title")}</h1>
             <p className="text-sm text-white/70" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
@@ -1002,12 +1004,6 @@ export default function RewardsBoard() {
       {/* Redemptions List — parents only; kids use /my-rewards instead */}
       {isParent && (
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
-              <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-sm" />
-            </div>
-            <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>{t("rewardsBoard.redemptions", "Einlösungen")}</h2>
-          </div>
           {displayRedemptions.length === 0 ? (
           <Card className="rounded-2xl bg-card/80">
             <CardContent className="flex flex-col items-center justify-center py-12">
