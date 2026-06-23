@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -15,10 +14,6 @@ import {
   X,
   Gift,
   Sparkles,
-  Star,
-  Trophy,
-  Gem,
-  Hourglass,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -510,7 +505,7 @@ export default function MyRewards() {
               const isCompleted = redemption.status === "completed";
               const isApproved = redemption.status === "approved";
               // All purchased rewards are always LEGENDARY (gold)
-              const rarity = { label: "LEGENDARY", banner: "from-amber-500 via-yellow-400 to-amber-300", glow: "rgba(251,191,36,0.35)", border: "rgba(251,191,36,0.55)", iconBg: "rgba(251,191,36,0.18)", textColor: "#fbbf24" };
+              const rarity = { glow: "rgba(251,191,36,0.35)", border: "rgba(251,191,36,0.55)", iconBg: "rgba(251,191,36,0.18)", textColor: "#fbbf24" };
 
               return (
                 <motion.div
@@ -528,22 +523,7 @@ export default function MyRewards() {
                       boxShadow: `0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 0 ${rarity.glow.replace("0.35", "0.28")}, 0 12px 0 ${rarity.glow.replace("0.35", "0.14")}, 0 4px 24px ${rarity.glow}`,
                     }}
                   >
-                    {/* Rarity banner */}
-                    <div className={`bg-gradient-to-r ${rarity.banner} px-4 py-2 flex items-center justify-between`}>
-                      <div className="flex items-center gap-2">
-                        <Star className="h-3 w-3 fill-white text-white opacity-90" />
-                        <span className="text-white text-xs font-black tracking-widest opacity-95" style={{ fontFamily: "Fredoka, sans-serif", letterSpacing: "0.18em" }}>
-                          {rarity.label}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-80">
-                        <Star className="h-2.5 w-2.5 fill-white text-white" />
-                        <Star className="h-3 w-3 fill-white text-white" />
-                        <Star className="h-2.5 w-2.5 fill-white text-white" />
-                      </div>
-                    </div>
-
-                    {/* Icon zone */}
+                      {/* Icon zone */}
                     <div className="flex justify-center pt-5 pb-3 relative">
                       {/* Decorative sparkle dots */}
                       <Sparkles className="absolute left-5 top-4 h-3.5 w-3.5 opacity-40" style={{ color: rarity.textColor }} />
