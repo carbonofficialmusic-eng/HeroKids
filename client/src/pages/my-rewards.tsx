@@ -281,12 +281,12 @@ export default function MyRewards() {
   );
   // Also include joined rewards from /api/reward-redemptions (covers sharing_finalized and any
   // that /api/rewards/shared might not return because they're already finalized)
-  const joinedFromSharedIds = new Set(joinedFromShared.map((s: any) => s.id));
+  const joinedFromSharedIds = new Set(joinedFromShared.map((s: any) => String(s.id)));
   const joinedFromRedemptions = member
     ? (redemptions as any[])
         .filter(r =>
           r.memberId !== member.id &&
-          !joinedFromSharedIds.has(r.id) &&
+          !joinedFromSharedIds.has(String(r.id)) &&
           Array.isArray(r.sharingParticipants) &&
           r.sharingParticipants.some((p: any) => p.memberId === member.id)
         )
@@ -432,10 +432,6 @@ export default function MyRewards() {
                         <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: rc.iconBg, color: rc.textColor, border: `1px solid ${rc.border}` }}>
                           <Coins className="h-3.5 w-3.5" />
                           <span>{t("myRewards.pointsSpent", { count: myShare?.pointsContributed ?? Math.ceil((sr.originalPointsSpent ?? sr.pointsSpent) / (sr.participants.length + 1)) })}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-violet-500/15 text-violet-300 border border-violet-400/30">
-                          <Users className="h-3.5 w-3.5" />
-                          <span>{t("kidDashboard.beingShared")}</span>
                         </div>
                       </div>
 
