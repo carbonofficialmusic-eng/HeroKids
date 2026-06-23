@@ -2746,12 +2746,12 @@ export default function KidDashboard() {
 
           {/* Filter tabs row */}
           <div className="flex items-center gap-2">
-            <div className="flex gap-1 flex-wrap">
+            <div className="flex gap-1 flex-wrap p-1.5 rounded-xl border border-white/20" style={{ background: "linear-gradient(135deg, rgba(30,41,59,0.92) 0%, rgba(15,23,42,0.96) 100%)" }}>
               <Button
                 variant={kidTaskFilter === "daily" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("daily")}
-                className="text-xs px-3"
+                className={`text-xs px-3 ${kidTaskFilter !== "daily" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
                 data-testid="button-kid-filter-daily"
               >
                 <RefreshCw className="h-3 w-3 mr-1" />
@@ -2761,7 +2761,7 @@ export default function KidDashboard() {
                 variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("weekly")}
-                className="text-xs px-3"
+                className={`text-xs px-3 ${kidTaskFilter !== "weekly" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
                 data-testid="button-kid-filter-weekly"
               >
                 {t("kidDashboard.filterWeekly")}
@@ -2770,7 +2770,7 @@ export default function KidDashboard() {
                 variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("monthly")}
-                className="text-xs px-3"
+                className={`text-xs px-3 ${kidTaskFilter !== "monthly" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
                 data-testid="button-kid-filter-monthly"
               >
                 {t("kidDashboard.filterMonthly")}
@@ -2779,7 +2779,7 @@ export default function KidDashboard() {
                 variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("onetime")}
-                className="text-xs px-3"
+                className={`text-xs px-3 ${kidTaskFilter !== "onetime" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
                 data-testid="button-kid-filter-onetime"
               >
                 <Target className="h-3 w-3 mr-1" />
@@ -2789,7 +2789,7 @@ export default function KidDashboard() {
                 variant={kidTaskFilter === "all" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("all")}
-                className="text-xs px-3"
+                className={`text-xs px-3 ${kidTaskFilter !== "all" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
                 data-testid="button-kid-filter-all"
               >
                 {t("kidDashboard.filterAll")}
@@ -2807,7 +2807,7 @@ export default function KidDashboard() {
             >
               <div>
                 <CollapsibleTrigger asChild>
-                  <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl border border-white/20 mb-1 hover-elevate" style={{ background: "linear-gradient(135deg, rgba(51,65,85,0.92) 0%, rgba(30,41,59,0.96) 100%)" }}>
+                  <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-white/8 border border-white/10 mb-1 hover-elevate">
                     <div className="flex items-center gap-3">
                       <Pin className="h-4 w-4 text-amber-400 fill-amber-400 flex-shrink-0" />
                       <span className="font-bold text-base px-2.5 py-0.5 rounded-md text-amber-300" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
@@ -2864,7 +2864,7 @@ export default function KidDashboard() {
                 >
                   <div>
                     <CollapsibleTrigger asChild>
-                      <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl border border-white/20 mb-1 hover-elevate" style={{ background: "linear-gradient(135deg, rgba(51,65,85,0.92) 0%, rgba(30,41,59,0.96) 100%)" }}>
+                      <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-white/8 border border-white/10 mb-1 hover-elevate">
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{getCategoryEmoji(category)}</span>
                           <span className="font-bold text-base bg-muted/80 px-2.5 py-0.5 rounded-md" style={{ fontFamily: "Fredoka, sans-serif" }}>
