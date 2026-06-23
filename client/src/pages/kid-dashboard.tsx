@@ -1301,6 +1301,8 @@ export default function KidDashboard() {
   const [parentalGateQ, setParentalGateQ] = useState({ question: "", answer: 0 });
   const [parentalGateInput, setParentalGateInput] = useState("");
   const [parentalGateError, setParentalGateError] = useState(false);
+  const [justJoinedIds, setJustJoinedIds] = useState<Set<string>>(new Set());
+  const [dismissedSharedIds, setDismissedSharedIds] = useState<Set<string>>(new Set());
 
   function generateMathQ() {
     const ops = [
@@ -2356,7 +2358,7 @@ export default function KidDashboard() {
         )}
 
         {/* Active Shared Rewards Section - From other family members */}
-        {sharedRewards.filter(sr => sr.memberId !== member?.id).length > 0 && (
+        {sharedRewards.filter(sr => sr.memberId !== member?.id && !dismissedSharedIds.has(String(sr.id))).length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-2xl bg-blue-500/20">
@@ -2368,9 +2370,9 @@ export default function KidDashboard() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {sharedRewards
-                .filter(sr => sr.memberId !== member?.id)
+                .filter(sr => sr.memberId !== member?.id && !dismissedSharedIds.has(String(sr.id)))
                 .map((shared, index) => {
-                  const hasJoined = shared.participants.some(p => p.memberId === member?.id);
+                  const hasJoined = shared.participants.some(p => p.memberId === member?.id) || justJoinedIds.has(String(shared.id));
                   const initiatorMember = familyMembers.find(m => m.id === shared.memberId);
 
                   const joinRarity = hasJoined ? "LEGENDARY" : "SPECIAL";
@@ -2441,7 +2443,14 @@ export default function KidDashboard() {
                         {!hasJoined ? (
                           <Button
                             className="w-full gap-2 font-bold text-white"
-                            onClick={() => joinSharingMutation.mutate(shared.id)}
+                            onClick={() => {
+                              const idStr = String(shared.id);
+                              setJustJoinedIds(prev => new Set([...prev, idStr]));
+                              joinSharingMutation.mutate(shared.id);
+                              setTimeout(() => {
+                                setDismissedSharedIds(prev => new Set([...prev, idStr]));
+                              }, 1000);
+                            }}
                             disabled={joinSharingMutation.isPending}
                             data-testid={`button-join-${shared.id}`}
                             style={{ height: 40, borderRadius: 12, background: "linear-gradient(135deg, #1d4ed8, #3b82f6)", boxShadow: "0 4px 14px rgba(59,130,246,0.45)" }}
