@@ -246,7 +246,7 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
                   ? <Loader2 className="h-4 w-4 text-amber-900 animate-spin" />
                   : <Gift className="h-4 w-4 text-amber-900" />
                 }
-                <span className="text-xs font-bold text-amber-900 whitespace-nowrap">{t("kidDashboard.redeemNow")}</span>
+                <span className="text-xs font-bold text-amber-900 whitespace-nowrap">{t("kidDashboard.now")}</span>
               </button>
             ) : (
               <button
