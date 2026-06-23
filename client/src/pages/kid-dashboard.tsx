@@ -2358,7 +2358,7 @@ export default function KidDashboard() {
         )}
 
         {/* Active Shared Rewards Section - From other family members */}
-        {sharedRewards.filter(sr => sr.memberId !== member?.id && !dismissedSharedIds.has(String(sr.id))).length > 0 && (
+        {sharedRewards.filter(sr => sr.memberId !== member?.id && !dismissedSharedIds.has(String(sr.id)) && !sr.participants.some(p => p.memberId === member?.id)).length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-2xl bg-blue-500/20">
@@ -2370,7 +2370,7 @@ export default function KidDashboard() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {sharedRewards
-                .filter(sr => sr.memberId !== member?.id && !dismissedSharedIds.has(String(sr.id)))
+                .filter(sr => sr.memberId !== member?.id && !dismissedSharedIds.has(String(sr.id)) && !sr.participants.some(p => p.memberId === member?.id))
                 .map((shared, index) => {
                   const hasJoined = shared.participants.some(p => p.memberId === member?.id) || justJoinedIds.has(String(shared.id));
                   const initiatorMember = familyMembers.find(m => m.id === shared.memberId);
