@@ -233,3 +233,9 @@ id = "jDcqlYKu7xhdwjCsAa7Eo"
 uri = "file://client/public/skins/backgrounds/neon-droid.png"
 type = "image"
 title = "Neon Droid – Hintergrundbild"
+
+[[outputs]]
+id = "lgjuJDieXqGd0dKwqcbrZ"
+uri = "file://client/public/skins/backgrounds/brave-explorer.png"
+type = "image"
+title = "Mutiger Entdecker – Hintergrundbild"
