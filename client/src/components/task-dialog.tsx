@@ -725,41 +725,64 @@ export function TaskDialog({
                       <FormLabel>{t('tasks.repeatSchedule')}</FormLabel>
                       <div className="space-y-3">
                         {/* Main recurrence options as tiles */}
-                        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                          {[
-                            { value: "none", label: t('tasks.oneTime') },
-                            { value: "daily", label: t('tasks.recurrenceDailyBtn') },
-                            { value: "weekly", label: t('tasks.weekly') },
-                            { value: "monthly", label: t('tasks.monthly') },
-                            { value: "yearly", label: t('tasks.yearly') },
-                          ].map((option) => {
-                            const isActive = option.value === "daily"
-                              ? (field.value === "daily" || field.value === "weekdays")
-                              : field.value === option.value;
-                            return (
-                              <button
-                                key={option.value}
-                                type="button"
-                                onClick={() => {
-                                  if (option.value === "daily") {
-                                    if (field.value !== "daily" && field.value !== "weekdays") {
-                                      field.onChange("daily");
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-6 gap-2">
+                            {[
+                              { value: "none", label: t('tasks.oneTime') },
+                              { value: "daily", label: t('tasks.recurrenceDailyBtn') },
+                              { value: "weekly", label: t('tasks.weekly') },
+                            ].map((option) => {
+                              const isActive = option.value === "daily"
+                                ? (field.value === "daily" || field.value === "weekdays")
+                                : field.value === option.value;
+                              return (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  onClick={() => {
+                                    if (option.value === "daily") {
+                                      if (field.value !== "daily" && field.value !== "weekdays") {
+                                        field.onChange("daily");
+                                      }
+                                    } else {
+                                      field.onChange(option.value);
                                     }
-                                  } else {
-                                    field.onChange(option.value);
-                                  }
-                                }}
-                                className={`flex-shrink-0 px-3 py-2 text-xs font-medium rounded-md border transition-colors ${
-                                  isActive
-                                    ? "bg-primary text-primary-foreground border-primary"
-                                    : "bg-background hover-elevate border-input"
-                                }`}
-                                data-testid={`btn-recurrence-${option.value}`}
-                              >
-                                {option.label}
-                              </button>
-                            );
-                          })}
+                                  }}
+                                  className={`col-span-2 px-2 py-2 text-xs font-medium rounded-md border transition-colors ${
+                                    isActive
+                                      ? "bg-primary text-primary-foreground border-primary"
+                                      : "bg-background hover-elevate border-input"
+                                  }`}
+                                  data-testid={`btn-recurrence-${option.value}`}
+                                >
+                                  {option.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <div className="grid grid-cols-6 gap-2">
+                            {[
+                              { value: "monthly", label: t('tasks.monthly') },
+                              { value: "yearly", label: t('tasks.yearly') },
+                            ].map((option, i) => {
+                              const isActive = field.value === option.value;
+                              return (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  onClick={() => field.onChange(option.value)}
+                                  className={`col-span-2 ${i === 0 ? "col-start-2" : ""} px-2 py-2 text-xs font-medium rounded-md border transition-colors ${
+                                    isActive
+                                      ? "bg-primary text-primary-foreground border-primary"
+                                      : "bg-background hover-elevate border-input"
+                                  }`}
+                                  data-testid={`btn-recurrence-${option.value}`}
+                                >
+                                  {option.label}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                         {/* Sub-options when Täglich is selected */}
                         {(field.value === "daily" || field.value === "weekdays") && (
