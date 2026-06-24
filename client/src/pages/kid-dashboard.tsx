@@ -775,7 +775,7 @@ function TaskCard({
     const cardBg = showAsPending || showAsSubmitted
       ? "linear-gradient(135deg, rgba(120,80,5,0.92) 0%, rgba(92,60,3,0.95) 55%, rgba(70,45,2,0.97) 100%)"
       : showAsApproved
-      ? "rgba(34,197,94,0.08)"
+      ? "rgba(34,197,94,0.20)"
       : "linear-gradient(135deg, rgba(51,65,85,0.88) 0%, rgba(30,41,59,0.92) 55%, rgba(15,23,42,0.95) 100%)";
 
     return (
@@ -824,7 +824,7 @@ function TaskCard({
       : "border-blue-500/30";
 
     const cardBg = showAsApproved || allSharedMembersCompleted
-      ? "rgba(34,197,94,0.08)"
+      ? "rgba(34,197,94,0.20)"
       : showAsPending || showAsSubmitted
       ? "linear-gradient(135deg, rgba(120,80,5,0.92) 0%, rgba(92,60,3,0.95) 55%, rgba(70,45,2,0.97) 100%)"
       : isRejected
@@ -904,7 +904,7 @@ function TaskCard({
               : isActionable && isRejected
               ? "rgba(59,130,246,0.2)"
               : showAsApproved || allSharedMembersCompleted
-              ? "rgba(34,197,94,0.08)"
+              ? "rgba(34,197,94,0.20)"
               : showAsSubmitted || showAsPending
               ? "linear-gradient(135deg, rgba(120,80,5,0.92) 0%, rgba(92,60,3,0.95) 55%, rgba(70,45,2,0.97) 100%)"
               : dueDateInfo.expired
