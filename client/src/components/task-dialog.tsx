@@ -786,11 +786,11 @@ export function TaskDialog({
                         </div>
                         {/* Sub-options when Täglich is selected */}
                         {(field.value === "daily" || field.value === "weekdays") && (
-                          <div className="flex gap-2 pl-1">
+                          <div className="grid grid-cols-6 gap-2">
                             <button
                               type="button"
                               onClick={() => field.onChange("daily")}
-                              className={`px-2 py-1.5 text-xs font-medium rounded-md border transition-colors ${
+                              className={`col-span-2 col-start-2 px-2 py-1.5 text-xs font-medium rounded-md border transition-colors ${
                                 field.value === "daily"
                                   ? "bg-primary/20 text-primary border-primary/50"
                                   : "bg-background hover-elevate border-input"
@@ -802,7 +802,7 @@ export function TaskDialog({
                             <button
                               type="button"
                               onClick={() => field.onChange("weekdays")}
-                              className={`px-2 py-1.5 text-xs font-medium rounded-md border transition-colors ${
+                              className={`col-span-2 px-2 py-1.5 text-xs font-medium rounded-md border transition-colors ${
                                 field.value === "weekdays"
                                   ? "bg-primary/20 text-primary border-primary/50"
                                   : "bg-background hover-elevate border-input"
