@@ -725,7 +725,7 @@ export function TaskDialog({
                       <FormLabel>{t('tasks.repeatSchedule')}</FormLabel>
                       <div className="space-y-3">
                         {/* Main recurrence options as tiles */}
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-5 gap-2">
                           {[
                             { value: "none", label: t('tasks.oneTime') },
                             { value: "daily", label: t('tasks.recurrenceDailyBtn') },
