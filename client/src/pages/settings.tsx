@@ -1165,7 +1165,7 @@ export default function Settings() {
                       <Badge variant="secondary">
                         {familyData?.subscriptionTier === 'family' && 'Family'}
                         {familyData?.subscriptionTier === 'family_plus' && 'Family+'}
-                        {familyData?.subscriptionTier === 'family_hero' && 'Enterprise'}
+                        {familyData?.subscriptionTier === 'family_hero' && 'FamilyPro'}
                       </Badge>
                     </div>
                   </div>

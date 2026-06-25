@@ -54,7 +54,7 @@ export default function Terms() {
                 und wird als Software-as-a-Service (SaaS) angeboten.
               </p>
               <p className="mt-2">
-                Es werden verschiedene Abonnement-Pläne angeboten (Free, Family, Enterprise).
+                Es werden verschiedene Abonnement-Pläne angeboten (Free, Family, FamilyPro).
                 Der Funktionsumfang richtet sich nach dem gewählten Plan.
               </p>
             </section>

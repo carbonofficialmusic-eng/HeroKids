@@ -140,7 +140,7 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
   },
   family_hero: {
     id: "family_hero",
-    name: "Enterprise",
+    name: "FamilyPro",
     price: 9.99,
     priceYearly: 69.99,
     priceLifetime: 149,

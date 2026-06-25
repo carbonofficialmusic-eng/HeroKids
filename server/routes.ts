@@ -7425,7 +7425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { tier: 'Free', count: allFamilies.filter(f => f.subscriptionTier === 'free').length },
         { tier: 'Family', count: allFamilies.filter(f => f.subscriptionTier === 'family').length },
         { tier: 'Family+', count: allFamilies.filter(f => f.subscriptionTier === 'family_plus').length },
-        { tier: 'Enterprise', count: allFamilies.filter(f => f.subscriptionTier === 'family_hero').length },
+        { tier: 'FamilyPro', count: allFamilies.filter(f => f.subscriptionTier === 'family_hero').length },
       ];
       
       res.json({

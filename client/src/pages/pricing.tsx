@@ -108,7 +108,7 @@ export default function Pricing() {
     },
     {
       id: "family_hero",
-      name: "Enterprise",
+      name: "FamilyPro",
       icon: Crown,
       memberLimit: 999,
       price: billingCycle === "monthly" ? "€9,99" : "€69,99",
