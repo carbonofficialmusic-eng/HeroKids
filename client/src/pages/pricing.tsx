@@ -1,16 +1,24 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { isNativePlatform } from "@/lib/platform";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Trophy, Users, Crown, Loader2, Infinity } from "lucide-react";
+import { Check, Trophy, Users, Crown, Loader2, Infinity, RefreshCw } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { FamilyMember } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import {
+  initRevenueCat,
+  getRCOfferings,
+  purchaseRCPackage,
+  restoreRCPurchases,
+  getEntitlementTier,
+  getPackagePrice,
+} from "@/lib/revenuecat";
 
 type BillingCycle = "monthly" | "yearly";
 
@@ -18,8 +26,14 @@ export default function Pricing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const qc = useQueryClient();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [processingTier, setProcessingTier] = useState<string | null>(null);
+
+  // RevenueCat state (iOS only)
+  const [rcOfferings, setRcOfferings] = useState<any>(null);
+  const [rcLoading, setRcLoading] = useState(isNativePlatform());
+  const [rcRestoring, setRcRestoring] = useState(false);
 
   const { data: member } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/current"],
@@ -38,6 +52,26 @@ export default function Pricing() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Initialize RevenueCat and load offerings on iOS
+  useEffect(() => {
+    if (!isNativePlatform() || !familyData?.familyName) return;
+    let cancelled = false;
+    (async () => {
+      setRcLoading(true);
+      try {
+        await initRevenueCat(familyData.familyName);
+        const offerings = await getRCOfferings();
+        if (!cancelled) setRcOfferings(offerings);
+      } catch (err) {
+        console.error("[RevenueCat] Failed to load offerings:", err);
+      } finally {
+        if (!cancelled) setRcLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [familyData?.familyName]);
+
+  // Stripe checkout (web only)
   const checkoutMutation = useMutation({
     mutationFn: async ({ tier, cycle }: { tier: string; cycle: string }) => {
       const res = await apiRequest("POST", "/api/create-checkout-session", { tier, billingCycle: cycle });
@@ -46,36 +80,97 @@ export default function Pricing() {
     onSuccess: (data: { sessionId: string; url: string }) => {
       if (!data.url) {
         setProcessingTier(null);
-        toast({
-          title: t("pricing.toastCheckoutError"),
-          description: t("pricing.toastNoCheckoutUrl"),
-          variant: "destructive",
-        });
+        toast({ title: t("pricing.toastCheckoutError"), description: t("pricing.toastNoCheckoutUrl"), variant: "destructive" });
         return;
       }
       window.location.href = data.url;
     },
     onError: (error: any) => {
       setProcessingTier(null);
-      toast({
-        title: t("pricing.toastCheckoutError"),
-        description: error.message || t("pricing.toastCheckoutFailed"),
-        variant: "destructive",
-      });
+      toast({ title: t("pricing.toastCheckoutError"), description: error.message || t("pricing.toastCheckoutFailed"), variant: "destructive" });
     },
   });
 
   const handleUpgrade = (tierId: string, cycle: string) => {
     if (!member || member.role !== "parent") {
-      toast({
-        title: t("pricing.toastPermissionDenied"),
-        description: t("pricing.toastOnlyParents"),
-        variant: "destructive",
-      });
+      toast({ title: t("pricing.toastPermissionDenied"), description: t("pricing.toastOnlyParents"), variant: "destructive" });
       return;
     }
     setProcessingTier(`${tierId}-${cycle}`);
     checkoutMutation.mutate({ tier: tierId, cycle });
+  };
+
+  // iOS native purchase via RevenueCat
+  const handleIOSPurchase = async (tierId: string, cycle: "monthly" | "yearly" | "lifetime") => {
+    if (!member || member.role !== "parent") {
+      toast({ title: t("pricing.toastPermissionDenied"), description: t("pricing.toastOnlyParents"), variant: "destructive" });
+      return;
+    }
+
+    const offeringKey = tierId === "family_hero" ? "family_pro" : "family";
+    const entitlementKey = tierId === "family_hero" ? "family_pro" : "family";
+    const offering = rcOfferings?.all?.[offeringKey];
+    if (!offering) {
+      toast({ title: t("pricing.toastCheckoutError"), description: "Angebote nicht verfügbar. Bitte versuche es später.", variant: "destructive" });
+      return;
+    }
+
+    const identifierMap: Record<string, string> = {
+      monthly: "$rc_monthly",
+      yearly: "$rc_annual",
+      lifetime: "$rc_lifetime",
+    };
+    const pkgIdentifier = identifierMap[cycle];
+    const pkg = offering.availablePackages?.find((p: any) => p.identifier === pkgIdentifier);
+    if (!pkg) {
+      toast({ title: t("pricing.toastCheckoutError"), description: "Paket nicht gefunden.", variant: "destructive" });
+      return;
+    }
+
+    setProcessingTier(`${tierId}-${cycle}`);
+    try {
+      const customerInfo = await purchaseRCPackage(pkg);
+      const grantedTier = getEntitlementTier(customerInfo);
+
+      // Sync to backend
+      await apiRequest("POST", "/api/revenuecat-sync", { entitlementId: entitlementKey });
+
+      // Refresh family data
+      await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
+
+      toast({
+        title: "Abonnement aktiviert!",
+        description: `Du hast ${grantedTier === "family_hero" ? "FamilyPro" : "Family"} erfolgreich abonniert.`,
+      });
+    } catch (err: any) {
+      if (err?.code === "1" || err?.message?.includes("cancel")) {
+        // User cancelled — no toast needed
+      } else {
+        toast({ title: t("pricing.toastCheckoutError"), description: err?.message || "Kauf fehlgeschlagen.", variant: "destructive" });
+      }
+    } finally {
+      setProcessingTier(null);
+    }
+  };
+
+  const handleRestorePurchases = async () => {
+    setRcRestoring(true);
+    try {
+      const customerInfo = await restoreRCPurchases();
+      const tier = getEntitlementTier(customerInfo);
+      if (tier) {
+        const entitlementKey = tier === "family_hero" ? "family_pro" : "family";
+        await apiRequest("POST", "/api/revenuecat-sync", { entitlementId: entitlementKey });
+        await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
+        toast({ title: "Käufe wiederhergestellt!", description: "Dein Abonnement wurde erfolgreich wiederhergestellt." });
+      } else {
+        toast({ title: "Keine Käufe gefunden", description: "Es wurden keine früheren Käufe gefunden.", variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Fehler", description: err?.message || "Wiederherstellung fehlgeschlagen.", variant: "destructive" });
+    } finally {
+      setRcRestoring(false);
+    }
   };
 
   const isParent = member?.role === "parent";
@@ -93,6 +188,8 @@ export default function Pricing() {
       features: t("pricing.tierFreeFeatures", { returnObjects: true }) as string[],
       popular: false,
       lifetimePrice: null,
+      rcOfferingKey: null,
+      rcEntitlementKey: null,
     },
     {
       id: "family",
@@ -105,6 +202,8 @@ export default function Pricing() {
       features: t("pricing.tierFamilyFeatures", { returnObjects: true }) as string[],
       popular: true,
       lifetimePrice: null,
+      rcOfferingKey: "family",
+      rcEntitlementKey: "family",
     },
     {
       id: "family_hero",
@@ -117,8 +216,19 @@ export default function Pricing() {
       features: t("pricing.tierFamilyHeroFeatures", { returnObjects: true }) as string[],
       popular: false,
       lifetimePrice: "€149",
+      rcOfferingKey: "family_pro",
+      rcEntitlementKey: "family_pro",
     },
   ];
+
+  // Helper: get a package price string from RevenueCat offerings
+  const getRcPrice = (offeringKey: string | null, packageId: string): string | null => {
+    if (!offeringKey || !rcOfferings?.all?.[offeringKey]) return null;
+    const pkg = rcOfferings.all[offeringKey]?.availablePackages?.find(
+      (p: any) => p.identifier === packageId,
+    );
+    return pkg ? getPackagePrice(pkg) : null;
+  };
 
   return (
     <div className="min-h-screen">
@@ -145,7 +255,7 @@ export default function Pricing() {
           {t("pricing.subtitle")}
         </p>
 
-        {/* Billing toggle */}
+        {/* Billing toggle (web only or iOS with RevenueCat) */}
         <div className="flex flex-col items-center gap-3 mb-10" data-testid="billing-toggle">
           <div className="flex items-center bg-muted rounded-full p-1 gap-1">
             <button
@@ -172,7 +282,6 @@ export default function Pricing() {
             </button>
           </div>
 
-          {/* Savings hint — prominent when monthly, subtle when yearly */}
           {billingCycle === "monthly" ? (
             <button
               onClick={() => setBillingCycle("yearly")}
@@ -185,11 +294,7 @@ export default function Pricing() {
               <span>→</span>
             </button>
           ) : (
-            <Badge
-              variant="default"
-              className="text-xs px-3 py-1"
-              data-testid="badge-yearly-discount"
-            >
+            <Badge variant="default" className="text-xs px-3 py-1" data-testid="badge-yearly-discount">
               ✓ {t("pricing.yearlyDiscount")}
             </Badge>
           )}
@@ -205,29 +310,28 @@ export default function Pricing() {
             const isProcessing = processingTier === processingKey;
             const isProcessingLifetime = processingTier === lifetimeProcessingKey;
 
+            // RevenueCat prices (iOS) — fall back to hardcoded if not available
+            const rcMonthlyPrice = getRcPrice(tier.rcOfferingKey, "$rc_monthly");
+            const rcYearlyPrice = getRcPrice(tier.rcOfferingKey, "$rc_annual");
+            const rcLifetimePrice = getRcPrice(tier.rcOfferingKey, "$rc_lifetime");
+            const displayPrice = isNativePlatform()
+              ? (billingCycle === "monthly" ? (rcMonthlyPrice ?? tier.price) : (rcYearlyPrice ?? tier.price))
+              : tier.price;
+
             return (
               <Card
                 key={tier.id}
-                className={`relative p-6 flex flex-col ${
-                  tier.popular ? "ring-2 ring-primary shadow-lg" : ""
-                }`}
+                className={`relative p-6 flex flex-col ${tier.popular ? "ring-2 ring-primary shadow-lg" : ""}`}
                 data-testid={`card-tier-${tier.id}`}
               >
                 {tier.popular && (
-                  <Badge
-                    className="absolute -top-3 left-1/2 -translate-x-1/2"
-                    data-testid="badge-most-popular"
-                  >
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2" data-testid="badge-most-popular">
                     {t("pricing.mostPopular")}
                   </Badge>
                 )}
 
                 <div className="flex items-center gap-3 mb-4">
-                  <div
-                    className={`h-12 w-12 rounded-full ${
-                      tier.popular ? "gradient-winner" : "bg-primary/10"
-                    } flex items-center justify-center`}
-                  >
+                  <div className={`h-12 w-12 rounded-full ${tier.popular ? "gradient-winner" : "bg-primary/10"} flex items-center justify-center`}>
                     <Icon className={`h-6 w-6 ${tier.popular ? "text-white" : "text-primary"}`} />
                   </div>
                   <div>
@@ -238,7 +342,7 @@ export default function Pricing() {
 
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-black">{tier.price}</span>
+                    <span className="text-4xl font-black">{displayPrice}</span>
                     <span className="text-sm text-muted-foreground">/{tier.period}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -258,10 +362,70 @@ export default function Pricing() {
                 </ul>
 
                 {isNativePlatform() ? (
-                  <p className="text-xs text-muted-foreground text-center py-2">
-                    {t("pricing.manageOnWeb")}
-                  </p>
+                  /* ── iOS native: RevenueCat purchase buttons ── */
+                  <div className="flex flex-col gap-2">
+                    {tier.id === "free" || isCurrentTier ? (
+                      <Button className="w-full" variant="outline" disabled>
+                        {t("pricing.currentPlan")}
+                      </Button>
+                    ) : rcLoading ? (
+                      <Button className="w-full" variant="outline" disabled>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Lädt...
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          className="w-full"
+                          variant={tier.popular ? "default" : "outline"}
+                          disabled={!isParent || isProcessing || isProcessingLifetime}
+                          onClick={() => handleIOSPurchase(tier.id, billingCycle)}
+                          data-testid={`button-select-${tier.id}`}
+                        >
+                          {isProcessing ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              {t("pricing.processing")}
+                            </>
+                          ) : (
+                            t("pricing.choosePlan", { name: tier.name })
+                          )}
+                        </Button>
+
+                        {/* Lifetime option (FamilyPro only) */}
+                        {tier.lifetimePrice && !familyData?.isLifetimePurchase && (
+                          <Button
+                            className="w-full"
+                            variant="outline"
+                            disabled={!isParent || isProcessing || isProcessingLifetime}
+                            onClick={() => handleIOSPurchase(tier.id, "lifetime")}
+                            data-testid={`button-select-${tier.id}-lifetime`}
+                          >
+                            {isProcessingLifetime ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                {t("pricing.processing")}
+                              </>
+                            ) : (
+                              <>
+                                <Infinity className="w-4 h-4 mr-2" />
+                                {t("pricing.lifetimeOption", { price: rcLifetimePrice ?? tier.lifetimePrice })}
+                              </>
+                            )}
+                          </Button>
+                        )}
+
+                        {tier.lifetimePrice && isCurrentTier && familyData?.isLifetimePurchase && (
+                          <div className="flex items-center justify-center gap-2 py-1.5 text-sm text-muted-foreground">
+                            <Infinity className="w-4 h-4 text-primary" />
+                            <span className="font-medium text-primary">{t("pricing.lifetimeActive")}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 ) : (
+                  /* ── Web: Stripe checkout buttons ── */
                   <div className="flex flex-col gap-2">
                     <Button
                       className="w-full"
@@ -275,16 +439,13 @@ export default function Pricing() {
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           {t("pricing.processing")}
                         </>
-                      ) : tier.id === "free" ? (
-                        t("pricing.currentPlan")
-                      ) : isCurrentTier ? (
+                      ) : tier.id === "free" || isCurrentTier ? (
                         t("pricing.currentPlan")
                       ) : (
                         t("pricing.choosePlan", { name: tier.name })
                       )}
                     </Button>
 
-                    {/* Lifetime option — only for Enterprise, hidden if already lifetime purchaser */}
                     {tier.lifetimePrice && !familyData?.isLifetimePurchase && (
                       <Button
                         className="w-full"
@@ -307,7 +468,6 @@ export default function Pricing() {
                       </Button>
                     )}
 
-                    {/* Lifetime badge — show when this tier is active as a lifetime purchase */}
                     {tier.lifetimePrice && isCurrentTier && familyData?.isLifetimePurchase && (
                       <div className="flex items-center justify-center gap-2 py-1.5 text-sm text-muted-foreground">
                         <Infinity className="w-4 h-4 text-primary" />
@@ -315,7 +475,6 @@ export default function Pricing() {
                       </div>
                     )}
 
-                    {/* Cancel link — hidden for lifetime purchasers */}
                     {isCurrentTier && tier.id !== "free" && isParent && !familyData?.isLifetimePurchase && (
                       <Link href="/settings" data-testid={`link-cancel-${tier.id}`}>
                         <span className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
@@ -330,13 +489,31 @@ export default function Pricing() {
           })}
         </div>
 
+        {/* Restore purchases (iOS only) */}
+        {isNativePlatform() && (
+          <div className="mt-8 flex justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRestorePurchases}
+              disabled={rcRestoring}
+              data-testid="button-restore-purchases"
+            >
+              {rcRestoring ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              Käufe wiederherstellen
+            </Button>
+          </div>
+        )}
+
         <div className="mt-16 text-center max-w-2xl mx-auto">
           <h2 className="text-2xl font-bold font-accent mb-4">{t("pricing.questionsTitle")}</h2>
           <p className="text-muted-foreground mb-6">{t("pricing.questionsDesc")}</p>
           <p className="text-sm text-muted-foreground">
-            {billingCycle === "yearly"
-              ? t("pricing.paymentInfoYearly")
-              : t("pricing.paymentInfo")}
+            {billingCycle === "yearly" ? t("pricing.paymentInfoYearly") : t("pricing.paymentInfo")}
           </p>
         </div>
       </div>

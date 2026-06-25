@@ -6387,6 +6387,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // RevenueCat: post-purchase sync (iOS native purchases)
+  app.post("/api/revenuecat-sync", isAuthenticated, async (req: any, res) => {
+    try {
+      const { entitlementId } = req.body as { entitlementId?: string };
+
+      const userId = req.user.claims?.sub ?? req.user.id;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+      if (member.role !== "parent") return res.status(403).json({ message: "Only parents can manage subscriptions" });
+
+      const tierMap: Record<string, string> = {
+        family: "family",
+        family_pro: "family_hero",
+      };
+      const newTier = entitlementId ? tierMap[entitlementId] : null;
+      if (!newTier) return res.status(400).json({ message: "Unknown entitlement" });
+
+      const { eq } = await import("drizzle-orm");
+      const { families } = await import("../shared/schema");
+      await db.update(families)
+        .set({ subscriptionTier: newTier, subscriptionStatus: "active" })
+        .where(eq(families.familyName, member.familyName));
+
+      console.log(`[RevenueCat] Synced: ${member.familyName} → ${newTier}`);
+
+      // Auto-unpause members that now fit within the new tier limit
+      try {
+        const { getMaxMembers } = await import("../shared/tier-config");
+        const allMembers = await db.select().from(familyMembers)
+          .where(eq(familyMembers.familyName, member.familyName));
+        const pausedMembers = allMembers.filter((m: any) => m.isPaused);
+        if (pausedMembers.length > 0) {
+          const maxMembers = getMaxMembers(newTier as any);
+          const activeCount = allMembers.filter((m: any) => !m.isPaused).length;
+          const canUnpause = maxMembers === Infinity ? pausedMembers.length : Math.max(0, maxMembers - activeCount);
+          const toUnpause = pausedMembers.slice(0, canUnpause);
+          if (toUnpause.length > 0) {
+            const { inArray } = await import("drizzle-orm");
+            await db.update(familyMembers)
+              .set({ isPaused: false })
+              .where(inArray(familyMembers.id, toUnpause.map((m: any) => m.id)));
+          }
+        }
+      } catch (_) {}
+
+      res.json({ ok: true, tier: newTier });
+    } catch (error: any) {
+      console.error("[RevenueCat] Sync error:", error);
+      res.status(500).json({ message: "Sync failed" });
+    }
+  });
+
+  // RevenueCat webhook (Apple server-to-server notifications forwarded by RevenueCat)
+  app.post("/api/revenuecat-webhook", async (req: any, res) => {
+    try {
+      const secret = process.env.REVENUECAT_WEBHOOK_SECRET;
+      if (secret) {
+        const auth = req.headers.authorization;
+        if (auth !== secret) {
+          console.warn("[RevenueCat] Webhook: invalid authorization header");
+          return res.status(401).send("Unauthorized");
+        }
+      }
+
+      const event = req.body?.event ?? req.body;
+      const eventType: string = event?.type ?? "";
+      const appUserId: string = event?.app_user_id ?? "";
+      const entitlementIds: string[] = event?.entitlement_ids ?? [];
+      const productId: string = event?.product_id ?? "";
+
+      console.log(`[RevenueCat] Webhook: ${eventType} | user: ${appUserId} | entitlements: ${entitlementIds.join(",")} | product: ${productId}`);
+
+      if (!appUserId) {
+        return res.status(400).send("Missing app_user_id");
+      }
+
+      const { eq, and } = await import("drizzle-orm");
+      const { families } = await import("../shared/schema");
+
+      const tierMap: Record<string, string> = {
+        family: "family",
+        family_pro: "family_hero",
+      };
+
+      const isLifetime = productId.includes("lifetime");
+
+      switch (eventType) {
+        case "INITIAL_PURCHASE":
+        case "NON_RENEWING_PURCHASE":
+        case "RENEWAL":
+        case "UNCANCELLATION": {
+          const entId = entitlementIds.find((e) => tierMap[e]);
+          if (!entId) break;
+          const newTier = tierMap[entId];
+          await db.update(families)
+            .set({
+              subscriptionTier: newTier,
+              subscriptionStatus: "active",
+              ...(isLifetime ? { isLifetimePurchase: true } : {}),
+            })
+            .where(eq(families.familyName, appUserId));
+          console.log(`[RevenueCat] ${eventType}: ${appUserId} → ${newTier}`);
+          break;
+        }
+        case "EXPIRATION":
+        case "BILLING_ISSUE": {
+          await db.update(families)
+            .set({
+              subscriptionTier: "free",
+              subscriptionStatus: eventType === "EXPIRATION" ? "canceled" : "past_due",
+            })
+            .where(and(
+              eq(families.familyName, appUserId),
+              eq(families.isLifetimePurchase, false),
+            ));
+          console.log(`[RevenueCat] ${eventType}: ${appUserId} → free`);
+          break;
+        }
+        default:
+          console.log(`[RevenueCat] Unhandled event: ${eventType}`);
+      }
+
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error("[RevenueCat] Webhook error:", error);
+      res.status(500).send("Internal server error");
+    }
+  });
+
   // Verify checkout session and update subscription (workaround for webhook issues)
   app.post("/api/verify-checkout-session", isAuthenticated, async (req: any, res) => {
     try {
