@@ -5738,10 +5738,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
+      // Get family to check tier + timezone
+      const family = await storage.getFamily(member.familyName);
+      const goalsOnTrial = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(family?.subscriptionTier as SubscriptionTier, "familyGoals") && !goalsOnTrial) {
+        return res.json([]);
+      }
+
       const goals = await storage.getFamilyGoalsByFamily(member.familyName);
       
       // Get family timezone for correct period calculation
-      const family = await storage.getFamily(member.familyName);
       const familyTimezone = family?.timezone || "Europe/Berlin";
       const now = new Date();
       
@@ -5822,6 +5828,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Only parents can create family goals
       if (member.role !== "parent") {
         return res.status(403).json({ message: "Only parents can create family goals" });
+      }
+
+      // Check tier access
+      const familyForTier = await storage.getFamily(member.familyName);
+      const createOnTrial = !!(familyForTier?.trialEndsAt && new Date(familyForTier.trialEndsAt) > new Date());
+      if (!hasFeature(familyForTier?.subscriptionTier as SubscriptionTier, "familyGoals") && !createOnTrial) {
+        return res.status(403).json({ message: "Family goals require a Family subscription", requiredTier: "family" });
       }
       
       // Validate request body with Zod
@@ -6037,6 +6050,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!goal || goal.familyName !== member.familyName) {
         return res.status(404).json({ message: "Family goal not found" });
+      }
+
+      // Check tier access
+      const familyForContribute = await storage.getFamily(member.familyName);
+      const contributeOnTrial = !!(familyForContribute?.trialEndsAt && new Date(familyForContribute.trialEndsAt) > new Date());
+      if (!hasFeature(familyForContribute?.subscriptionTier as SubscriptionTier, "familyGoals") && !contributeOnTrial) {
+        return res.status(403).json({ message: "Family goals require a Family subscription", requiredTier: "family" });
       }
       
       if (!goal.isActive) {

@@ -42,8 +42,9 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import familyGoalsIcon from "@assets/family-goals-icon.png";
-import type { FamilyGoal, GoalContribution, FamilyMember } from "@shared/schema";
+import type { FamilyGoal, GoalContribution, FamilyMember, Family } from "@shared/schema";
 import { FamilyGoalDialog } from "@/components/family-goal-dialog";
+import { hasFeature, type SubscriptionTier } from "@shared/tier-config";
 
 type FamilyGoalWithContributions = FamilyGoal & {
   contributions: GoalContribution[];
@@ -75,9 +76,18 @@ export default function FamilyGoals() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: familyData } = useQuery<Family>({
+    queryKey: ["/api/family"],
+    enabled: !!member,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isOnTrial = !!(familyData?.trialEndsAt && new Date(familyData.trialEndsAt) > new Date());
+  const hasGoalsFeature = hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyGoals") || isOnTrial;
+
   const { data: goals = [], isLoading } = useQuery<FamilyGoalWithContributions[]>({
     queryKey: ["/api/family-goals"],
-    enabled: !!member,
+    enabled: !!member && hasGoalsFeature,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -250,6 +260,31 @@ export default function FamilyGoals() {
   const toggleHistoryOpen = (goalId: string) => {
     setHistoryOpenGoals(prev => ({ ...prev, [goalId]: !prev[goalId] }));
   };
+
+  if (!hasGoalsFeature && familyData) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
+        <div className="max-w-md w-full text-center space-y-4">
+          <Link href="/dashboard">
+            <Button variant="outline" size="sm" className="mb-2 bg-background/30 backdrop-blur-sm border-border/40">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {t("common.back")}
+            </Button>
+          </Link>
+          <div className="text-5xl mb-4">🎯</div>
+          <h2 className="text-2xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+            Familienziele
+          </h2>
+          <p className="text-muted-foreground">
+            Familienziele sind ab dem <strong>Family-Abo</strong> verfügbar. Setzt gemeinsame Ziele und arbeitet als Familie darauf hin.
+          </p>
+          <Link href="/settings">
+            <Button className="mt-4">Jetzt upgraden</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
