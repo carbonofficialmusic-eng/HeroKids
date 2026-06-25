@@ -598,7 +598,7 @@
     "typeMessage": "Escribe un mensaje...",
     "readOnlyActingAs": "Solo lectura — estás viendo como {{name}}. Inicia sesión con tu propia cuenta para escribir.",
     "noMessages": "Aún no hay mensajes",
-    "upgradeRequired": "El Chat Familiar requiere suscripción Family o Enterprise",
+    "upgradeRequired": "El Chat Familiar requiere suscripción Family o FamilyPro",
     "loadingChat": "Cargando chat...",
     "connectRealtime": "Conéctate con toda tu familia en tiempo real",
     "upgradeToUnlock": "Mejora para desbloquear el Chat Familiar",

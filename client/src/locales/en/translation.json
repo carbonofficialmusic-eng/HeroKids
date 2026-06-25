@@ -627,7 +627,7 @@
     "typeMessage": "Type a message...",
     "readOnlyActingAs": "Read only — you are viewing as {{name}}. Sign in with your own account to write messages.",
     "noMessages": "No messages yet",
-    "upgradeRequired": "Family Chat requires a Family or Enterprise subscription",
+    "upgradeRequired": "Family Chat requires a Family or FamilyPro subscription",
     "loadingChat": "Loading chat...",
     "connectRealtime": "Connect with your whole family in real-time",
     "upgradeToUnlock": "Upgrade to unlock Family Chat",

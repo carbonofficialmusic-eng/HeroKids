@@ -626,7 +626,7 @@
     "typeMessage": "Skriv ett meddelande...",
     "readOnlyActingAs": "Skrivskyddat — du visar som {{name}}. Logga in med ditt eget konto för att skriva.",
     "noMessages": "Inga meddelanden ännu",
-    "upgradeRequired": "Familjechatt kräver Family- eller Enterprise-prenumeration",
+    "upgradeRequired": "Familjechatt kräver Family- eller FamilyPro-prenumeration",
     "loadingChat": "Laddar chatt...",
     "connectRealtime": "Anslut med hela din familj i realtid",
     "upgradeToUnlock": "Uppgradera för att låsa upp familjechatt",

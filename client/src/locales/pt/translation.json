@@ -627,7 +627,7 @@
     "typeMessage": "Digite uma mensagem...",
     "readOnlyActingAs": "Somente leitura — você está visualizando como {{name}}. Entre com sua própria conta para escrever.",
     "noMessages": "Nenhuma mensagem ainda",
-    "upgradeRequired": "O Chat Familiar requer assinatura Family ou Enterprise",
+    "upgradeRequired": "O Chat Familiar requer assinatura Family ou FamilyPro",
     "loadingChat": "Carregando chat...",
     "connectRealtime": "Conecte-se com toda a família em tempo real",
     "upgradeToUnlock": "Faça upgrade para desbloquear o Chat Familiar",

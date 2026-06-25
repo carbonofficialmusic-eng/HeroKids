@@ -598,7 +598,7 @@
     "typeMessage": "メッセージを入力...",
     "readOnlyActingAs": "読み取り専用 — {{name}} として表示中です。メッセージを送るには自分のアカウントでログインしてください。",
     "noMessages": "まだメッセージがありません",
-    "upgradeRequired": "ファミリーチャットにはFamilyまたはEnterpriseサブスクリプションが必要です",
+    "upgradeRequired": "ファミリーチャットにはFamilyまたはFamilyProサブスクリプションが必要です",
     "loadingChat": "チャットを読み込み中...",
     "connectRealtime": "家族全員とリアルタイムでつながりましょう",
     "upgradeToUnlock": "アップグレードしてファミリーチャットのロックを解除",

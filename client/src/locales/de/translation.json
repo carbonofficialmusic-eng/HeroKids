@@ -637,7 +637,7 @@
     "typeMessage": "Nachricht eingeben...",
     "readOnlyActingAs": "Nur lesen — du bist als {{name}} angemeldet. Melde dich mit eigenem Account an, um zu schreiben.",
     "noMessages": "Noch keine Nachrichten",
-    "upgradeRequired": "Familien-Chat erfordert Family- oder Enterprise-Abonnement",
+    "upgradeRequired": "Familien-Chat erfordert Family- oder FamilyPro-Abonnement",
     "loadingChat": "Chat wird geladen...",
     "connectRealtime": "Verbinde dich in Echtzeit mit deiner ganzen Familie",
     "upgradeToUnlock": "Upgrade, um Familien-Chat freizuschalten",

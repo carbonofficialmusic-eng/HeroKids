@@ -598,7 +598,7 @@
     "typeMessage": "输入消息...",
     "readOnlyActingAs": "只读模式 — 你正在以 {{name}} 的身份查看。请用自己的账号登录才能发消息。",
     "noMessages": "还没有消息",
-    "upgradeRequired": "家庭聊天需要Family或Enterprise订阅",
+    "upgradeRequired": "家庭聊天需要Family或FamilyPro订阅",
     "loadingChat": "正在加载聊天...",
     "connectRealtime": "与整个家庭实时连接",
     "upgradeToUnlock": "升级以解锁家庭聊天",
