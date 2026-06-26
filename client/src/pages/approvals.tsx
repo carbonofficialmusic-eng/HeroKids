@@ -242,11 +242,7 @@ export default function Approvals() {
     setSelectedIds(new Set());
     setIsBulkApproving(false);
 
-    if (failCount === 0) {
-      toast({
-        title: t("approvals.bulkApproveSuccess", { count: successCount, defaultValue: `${successCount} Aufgaben genehmigt` }),
-      });
-    } else {
+    if (failCount > 0) {
       toast({
         title: t("approvals.bulkApprovePartial", { success: successCount, failed: failCount, defaultValue: `${successCount} genehmigt, ${failCount} fehlgeschlagen` }),
         variant: "destructive",
