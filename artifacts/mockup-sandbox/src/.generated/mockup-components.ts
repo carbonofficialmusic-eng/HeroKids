@@ -13,5 +13,8 @@ export const modules: ModuleMap = {
   "./components/mockups/kid-task-cards/InfoHierarchy.tsx": () => import("../components/mockups/kid-task-cards/InfoHierarchy.tsx"),
   "./components/mockups/kid-task-cards/InteractionAffordance.tsx": () => import("../components/mockups/kid-task-cards/InteractionAffordance.tsx"),
   "./components/mockups/kid-task-cards/LiveDesign.tsx": () => import("../components/mockups/kid-task-cards/LiveDesign.tsx"),
+  "./components/mockups/leaderboard/Arcade.tsx": () => import("../components/mockups/leaderboard/Arcade.tsx"),
+  "./components/mockups/leaderboard/FireLeague.tsx": () => import("../components/mockups/leaderboard/FireLeague.tsx"),
+  "./components/mockups/leaderboard/Podium.tsx": () => import("../components/mockups/leaderboard/Podium.tsx"),
   "./components/mockups/onboarding/OnboardingWizard.tsx": () => import("../components/mockups/onboarding/OnboardingWizard.tsx")
 };
