@@ -34,19 +34,34 @@ function scrollFieldIntoView(el: HTMLElement) {
       return;
     }
     const elRect = el.getBoundingClientRect();
-    const parentRect = scrollable.getBoundingClientRect();
-    // Use visualViewport height to account for iOS keyboard overlay
-    const visibleHeight = (window.visualViewport?.height ?? window.innerHeight);
-    const visibleContainerBottom = Math.min(parentRect.bottom, visibleHeight);
-    const visibleContainerHeight = Math.max(visibleContainerBottom - parentRect.top, 120);
-    const relativeTop = elRect.top - parentRect.top + scrollable.scrollTop;
-    // Position field at ~35% from top of visible area
-    const targetScroll = relativeTop - visibleContainerHeight * 0.35;
-    scrollable.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+    const visibleHeight = window.visualViewport?.height ?? window.innerHeight;
+    // If the field's bottom is already safely above the keyboard, do nothing
+    if (elRect.bottom < visibleHeight - 20) return;
+    // Scroll just enough to show the field 80px above the keyboard
+    const scrollNeeded = elRect.bottom - visibleHeight + 80;
+    scrollable.scrollBy({ top: scrollNeeded, behavior: "smooth" });
   };
-  // Fire at 350ms (fast keyboards) and again at 700ms (slow iOS keyboards)
-  setTimeout(doScroll, 350);
-  setTimeout(doScroll, 700);
+
+  if (window.visualViewport) {
+    const vv = window.visualViewport;
+    const initialHeight = vv.height;
+    let fired = false;
+    const onResize = () => {
+      if (vv.height < initialHeight && !fired) {
+        fired = true;
+        vv.removeEventListener("resize", onResize);
+        setTimeout(doScroll, 60);
+      }
+    };
+    vv.addEventListener("resize", onResize);
+    // Fallback: keyboard was already open or resize never fires
+    setTimeout(() => {
+      vv.removeEventListener("resize", onResize);
+      if (!fired) doScroll();
+    }, 700);
+  } else {
+    setTimeout(doScroll, 500);
+  }
 }
 
 const REWARD_IMAGE_ICONS = [
