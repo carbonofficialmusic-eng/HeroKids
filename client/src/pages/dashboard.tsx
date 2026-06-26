@@ -61,7 +61,7 @@ import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import { hasFeature } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { celebrateTaskCompletion } from "@/lib/confetti";
-import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
+import logoUrl from "@assets/herokids_logo_neu.png";
 import familyGoalsIcon from "@assets/family-goals-icon.png";
 
 // Custom hook for sticky sidebar on desktop
