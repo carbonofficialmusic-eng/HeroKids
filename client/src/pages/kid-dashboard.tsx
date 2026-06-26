@@ -3174,7 +3174,7 @@ export default function KidDashboard() {
                     <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
                       <Link href="/chat">
                         <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
-                        <span className="font-bold text-sm sm:text-base truncate">{t("nav.chat")}</span>
+                        <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("nav.chat")}</span>
                       </Link>
                     </Button>
                     {!chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
@@ -3229,7 +3229,7 @@ export default function KidDashboard() {
                 <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 px-4 sm:px-6 rounded-2xl">
                   <Link href="/chat">
                     <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
-                    <span className="font-bold text-sm sm:text-base">{t("nav.chat")}</span>
+                    <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("nav.chat")}</span>
                   </Link>
                 </Button>
                 {unreadChatData && unreadChatData.count > 0 && (
