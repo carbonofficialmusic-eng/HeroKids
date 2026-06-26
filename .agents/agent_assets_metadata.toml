@@ -244,4 +244,10 @@ title = "Mutiger Entdecker – Hintergrundbild"
 id = "NPg128LAV2Htggw48V_VU"
 uri = "file://ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png"
 type = "image"
-title = "HeroKids Splash Screen (korrigierte Farben)"
+title = "Splash Screen (neu)"
+
+[[outputs]]
+id = "LLBrQ-QkaoLMCAvL80b41"
+uri = "file://ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
+type = "image"
+title = "App Icon (neu)"
