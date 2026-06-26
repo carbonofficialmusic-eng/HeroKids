@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useTranslation } from "react-i18next";
 import { isNativePlatform } from "@/lib/platform";
 import { getBackgroundUrl } from "@/lib/skins";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -502,6 +503,7 @@ function Router() {
 }
 
 function ServerStatusGuard({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const [serverDown, setServerDown] = useState(false);
   const [retrying, setRetrying] = useState(false);
 
@@ -559,10 +561,10 @@ function ServerStatusGuard({ children }: { children: React.ReactNode }) {
         />
         <div style={{ textAlign: "center", color: "white" }}>
           <p style={{ fontSize: 22, fontWeight: 800, margin: "0 0 8px" }}>
-            Gleich zurück!
+            {t("maintenance.title")}
           </p>
           <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", margin: 0, maxWidth: 260 }}>
-            Wir aktualisieren die App gerade für dich. Das dauert nur einen Moment.
+            {t("maintenance.desc")}
           </p>
         </div>
         <button
@@ -580,7 +582,7 @@ function ServerStatusGuard({ children }: { children: React.ReactNode }) {
             opacity: retrying ? 0.6 : 1,
           }}
         >
-          {retrying ? "Prüfe…" : "Erneut versuchen"}
+          {retrying ? t("maintenance.checking") : t("maintenance.retry")}
         </button>
       </div>
     );

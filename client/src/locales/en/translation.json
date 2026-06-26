@@ -1681,5 +1681,11 @@
     "ko": "Korean",
     "sv": "Swedish",
     "pt": "Portuguese"
+  },
+  "maintenance": {
+    "title": "Back in a Minute!",
+    "desc": "We're updating the app for you right now. This will only take a moment.",
+    "retry": "Try Again",
+    "checking": "Checking…"
   }
 }

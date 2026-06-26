@@ -1663,5 +1663,11 @@
     "ko": "Koreanska",
     "sv": "Svenska",
     "pt": "Portugisiska"
+  },
+  "maintenance": {
+    "title": "Strax tillbaka!",
+    "desc": "Vi uppdaterar appen åt dig just nu. Det tar bara ett ögonblick.",
+    "retry": "Försök igen",
+    "checking": "Kontrollerar…"
   }
 }

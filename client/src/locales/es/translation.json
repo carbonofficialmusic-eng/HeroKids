@@ -1630,5 +1630,11 @@
     "ko": "Coreano",
     "sv": "Sueco",
     "pt": "Portugués"
+  },
+  "maintenance": {
+    "title": "¡Volvemos enseguida!",
+    "desc": "Estamos actualizando la app para ti. Solo tomará un momento.",
+    "retry": "Intentar de nuevo",
+    "checking": "Comprobando…"
   }
 }

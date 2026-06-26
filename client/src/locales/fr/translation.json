@@ -1630,5 +1630,11 @@
     "ko": "Coréen",
     "sv": "Suédois",
     "pt": "Portugais"
+  },
+  "maintenance": {
+    "title": "Revenons vite !",
+    "desc": "Nous mettons l'application à jour pour toi. Cela ne prendra qu'un moment.",
+    "retry": "Réessayer",
+    "checking": "Vérification…"
   }
 }
