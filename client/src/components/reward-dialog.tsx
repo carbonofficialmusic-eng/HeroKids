@@ -26,25 +26,52 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 
-function scrollFieldIntoView(el: HTMLElement) {
-  // WKWebView (Capacitor) does NOT resize visualViewport when the keyboard appears —
-  // the keyboard overlays the content. Use a fixed iOS keyboard height estimate instead.
-  setTimeout(() => {
-    const scrollable = el.closest("[data-radix-scroll-area-viewport], .overflow-y-auto") as HTMLElement | null;
-    if (!scrollable) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
+const KEYBOARD_HEIGHT = 350; // iOS keyboard + accessory bar estimate
+
+function findScrollableAncestor(el: HTMLElement): HTMLElement | null {
+  let parent = el.parentElement;
+  while (parent && parent !== document.body) {
+    const style = getComputedStyle(parent);
+    if (style.overflowY === "auto" || style.overflowY === "scroll") {
+      return parent;
     }
+    parent = parent.parentElement;
+  }
+  return null;
+}
+
+function scrollFieldIntoView(el: HTMLElement) {
+  // WKWebView does NOT resize window.innerHeight when keyboard appears —
+  // find the scrollable dialog container and scroll manually.
+  const scrollable = findScrollableAncestor(el);
+
+  if (scrollable) {
+    // Temporarily add bottom padding so there's always room to scroll
+    // past the keyboard, even if the content would otherwise fit exactly.
+    scrollable.style.paddingBottom = `${KEYBOARD_HEIGHT}px`;
+
+    el.addEventListener(
+      "blur",
+      () => {
+        scrollable.style.paddingBottom = "";
+      },
+      { once: true }
+    );
+  }
+
+  setTimeout(() => {
     const elRect = el.getBoundingClientRect();
-    // iOS keyboard + input accessory bar ≈ 350px on most iPhones
-    const estimatedKeyboardHeight = 350;
-    const visibleBottom = window.innerHeight - estimatedKeyboardHeight;
-    // If the field is already safely above the keyboard, do nothing
+    const visibleBottom = window.innerHeight - KEYBOARD_HEIGHT;
+    // Already visible above keyboard — nothing to do
     if (elRect.bottom < visibleBottom - 20) return;
-    // Scroll just enough to put the field 80px above the keyboard
-    const scrollNeeded = elRect.bottom - visibleBottom + 80;
-    scrollable.scrollBy({ top: scrollNeeded, behavior: "smooth" });
-  }, 450);
+    if (scrollable) {
+      // Scroll just enough to show field 60 px above keyboard
+      const scrollNeeded = elRect.bottom - visibleBottom + 60;
+      scrollable.scrollBy({ top: scrollNeeded, behavior: "smooth" });
+    } else {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, 400);
 }
 
 const REWARD_IMAGE_ICONS = [
