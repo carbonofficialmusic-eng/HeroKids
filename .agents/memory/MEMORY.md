@@ -5,3 +5,4 @@
 - [APNs Push Notification Setup](apns-push-setup.md) — JWT-based APNs, device_push_tokens table, triggers on task_pending/approved/rejected, client hook in usePushNotifications.ts
 - [Xcode Cloud Setup Lessons](xcode-cloud-setup.md) — full checklist of what's required for Xcode Cloud to build and export a Capacitor iOS app successfully
 - [Kid Dashboard Flicker Fix](kid-dashboard-flicker-fix.md) — 7 confirmed causes of scroll flicker; never put translateZ(0) on #root scroll container
+- [iOS Keyboard Scroll Fix for Dialogs](ios-keyboard-scroll.md) — getComputedStyle ancestor search + paddingBottom + visualViewport detection avoids over-scroll on regular browsers
