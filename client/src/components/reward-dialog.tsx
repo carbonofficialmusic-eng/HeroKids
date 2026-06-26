@@ -27,18 +27,26 @@ import { Switch } from "@/components/ui/switch";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 
 function scrollFieldIntoView(el: HTMLElement) {
-  setTimeout(() => {
+  const doScroll = () => {
     const scrollable = el.closest("[data-radix-scroll-area-viewport], .overflow-y-auto") as HTMLElement | null;
-    if (scrollable) {
-      const elRect = el.getBoundingClientRect();
-      const parentRect = scrollable.getBoundingClientRect();
-      const relativeTop = elRect.top - parentRect.top + scrollable.scrollTop;
-      const targetScroll = relativeTop - parentRect.height / 2 + elRect.height / 2;
-      scrollable.scrollTo({ top: targetScroll, behavior: "smooth" });
-    } else {
+    if (!scrollable) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
     }
-  }, 400);
+    const elRect = el.getBoundingClientRect();
+    const parentRect = scrollable.getBoundingClientRect();
+    // Use visualViewport height to account for iOS keyboard overlay
+    const visibleHeight = (window.visualViewport?.height ?? window.innerHeight);
+    const visibleContainerBottom = Math.min(parentRect.bottom, visibleHeight);
+    const visibleContainerHeight = Math.max(visibleContainerBottom - parentRect.top, 120);
+    const relativeTop = elRect.top - parentRect.top + scrollable.scrollTop;
+    // Position field at ~35% from top of visible area
+    const targetScroll = relativeTop - visibleContainerHeight * 0.35;
+    scrollable.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+  };
+  // Fire at 350ms (fast keyboards) and again at 700ms (slow iOS keyboards)
+  setTimeout(doScroll, 350);
+  setTimeout(doScroll, 700);
 }
 
 const REWARD_IMAGE_ICONS = [
