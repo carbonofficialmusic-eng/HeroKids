@@ -27,41 +27,24 @@ import { Switch } from "@/components/ui/switch";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 
 function scrollFieldIntoView(el: HTMLElement) {
-  const doScroll = () => {
+  // WKWebView (Capacitor) does NOT resize visualViewport when the keyboard appears —
+  // the keyboard overlays the content. Use a fixed iOS keyboard height estimate instead.
+  setTimeout(() => {
     const scrollable = el.closest("[data-radix-scroll-area-viewport], .overflow-y-auto") as HTMLElement | null;
     if (!scrollable) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
     const elRect = el.getBoundingClientRect();
-    const visibleHeight = window.visualViewport?.height ?? window.innerHeight;
-    // If the field's bottom is already safely above the keyboard, do nothing
-    if (elRect.bottom < visibleHeight - 20) return;
-    // Scroll just enough to show the field 80px above the keyboard
-    const scrollNeeded = elRect.bottom - visibleHeight + 80;
+    // iOS keyboard + input accessory bar ≈ 350px on most iPhones
+    const estimatedKeyboardHeight = 350;
+    const visibleBottom = window.innerHeight - estimatedKeyboardHeight;
+    // If the field is already safely above the keyboard, do nothing
+    if (elRect.bottom < visibleBottom - 20) return;
+    // Scroll just enough to put the field 80px above the keyboard
+    const scrollNeeded = elRect.bottom - visibleBottom + 80;
     scrollable.scrollBy({ top: scrollNeeded, behavior: "smooth" });
-  };
-
-  if (window.visualViewport) {
-    const vv = window.visualViewport;
-    const initialHeight = vv.height;
-    let fired = false;
-    const onResize = () => {
-      if (vv.height < initialHeight && !fired) {
-        fired = true;
-        vv.removeEventListener("resize", onResize);
-        setTimeout(doScroll, 60);
-      }
-    };
-    vv.addEventListener("resize", onResize);
-    // Fallback: keyboard was already open or resize never fires
-    setTimeout(() => {
-      vv.removeEventListener("resize", onResize);
-      if (!fired) doScroll();
-    }, 700);
-  } else {
-    setTimeout(doScroll, 500);
-  }
+  }, 450);
 }
 
 const REWARD_IMAGE_ICONS = [
