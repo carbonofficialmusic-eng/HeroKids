@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/lib/queryClient";
-import boyImg from "@assets/hero_boy_nobg.png";
-import girlImg from "@assets/hero_girl_nobg.png";
-import bothImg from "@assets/mia_max_nobg.png";
+import boyImg from "@assets/herokids_tour_boy.png";
+import girlImg from "@assets/herokids_tour_girl.png";
+import bothImg from "@assets/herokids_tour_both.png";
 
 interface TourStep {
   key: string;
