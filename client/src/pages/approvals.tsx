@@ -65,10 +65,6 @@ export default function Approvals() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
-      toast({
-        title: t("approvals.rewardRequestApproved"),
-        description: t("approvals.rewardRequestApprovedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -86,10 +82,6 @@ export default function Approvals() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
-      toast({
-        title: t("approvals.rewardRequestDeclined"),
-        description: t("approvals.rewardRequestDeclinedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -109,10 +101,6 @@ export default function Approvals() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setEditRewardDialogOpen(false);
       setEditingRewardRequest(null);
-      toast({
-        title: t("approvals.rewardRequestUpdated"),
-        description: t("approvals.rewardRequestUpdatedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({

@@ -148,11 +148,6 @@ export default function Settings() {
         setTrialActivatedDialogOpen(true);
       } else if (data.joinCode) {
         setNewMemberJoinCode(data.joinCode);
-      } else {
-        toast({
-          title: t('common.confirm'),
-          description: t('settings.memberAddedSuccess'),
-        });
       }
     },
     onError: (error: any) => {
@@ -181,10 +176,6 @@ export default function Settings() {
       queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
-      toast({
-        title: t('settings.memberUpdated'),
-        description: t('settings.memberUpdatedDesc'),
-      });
     },
     onError: (error: any) => {
       const description = error instanceof ApiError && error.data?.message
@@ -209,10 +200,6 @@ export default function Settings() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
       setMemberToDelete(null);
-      toast({
-        title: t('settings.memberRemoved'),
-        description: t('settings.memberRemovedDesc'),
-      });
     },
     onError: () => {
       toast({
@@ -416,11 +403,7 @@ export default function Settings() {
     if (localCategoryNames.school.trim()) names.school = localCategoryNames.school.trim();
     if (localCategoryNames.selfCare.trim()) names.selfCare = localCategoryNames.selfCare.trim();
     if (localCategoryNames.other.trim()) names.other = localCategoryNames.other.trim();
-    updateSettingsMutation.mutate({ categoryNames: Object.keys(names).length > 0 ? names : null }, {
-      onSuccess: () => {
-        toast({ title: t('settings.categoryNamesSaved') });
-      },
-    });
+    updateSettingsMutation.mutate({ categoryNames: Object.keys(names).length > 0 ? names : null });
   };
 
   const languageOptions = [

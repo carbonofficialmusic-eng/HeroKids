@@ -420,10 +420,6 @@ export function TaskDialog({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      toast({
-        title: t('tasks.resetSuccess'),
-        description: t('tasks.resetSuccessDesc'),
-      });
       setShowResetDialog(false);
       onOpenChange(false);
     },

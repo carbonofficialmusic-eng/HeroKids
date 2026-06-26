@@ -852,10 +852,6 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
-      toast({
-        title: t("toast.requestDeclined"),
-        description: t("toast.requestDeclinedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -875,10 +871,6 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
       setRequestToEdit(null);
-      toast({
-        title: t("toast.requestUpdated"),
-        description: t("toast.requestUpdatedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
