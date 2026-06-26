@@ -73,9 +73,12 @@ export function TaskCompletionDialog({
   const dialogStyle: React.CSSProperties = {
     position: 'fixed',
     left: '50%',
-    top: `${vvOffsetTop + vvHeight / 2}px`,
+    // Shift center down by half the safe-area difference so the dialog sits
+    // in the middle of the truly visible area (below Dynamic Island / status
+    // bar and above the home indicator).
+    top: `calc(${vvOffsetTop + vvHeight / 2}px + (env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) / 2)`,
     transform: 'translate(-50%, -50%)',
-    maxHeight: `${vvHeight - 48}px`,
+    maxHeight: `calc(${vvHeight - 24}px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))`,
     overflowY: 'auto',
     width: 'min(calc(100vw - 2rem), 32rem)',
   };
