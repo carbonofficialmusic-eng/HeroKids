@@ -446,7 +446,7 @@ export function TaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl overflow-y-auto" style={{ maxHeight: `${vvHeight * 0.9}px` }} data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent className="max-w-2xl overflow-y-auto [&>button.absolute]:hidden" style={{ maxHeight: `${vvHeight * 0.9}px` }} data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-accent">
             {editingTask ? t('tasks.editTask') : t('tasks.createTask')}
