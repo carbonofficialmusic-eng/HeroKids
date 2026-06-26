@@ -65,8 +65,8 @@ function scrollFieldIntoView(el: HTMLElement) {
     // Already visible above keyboard — nothing to do
     if (elRect.bottom < visibleBottom - 20) return;
     if (scrollable) {
-      // Scroll just enough to show field 60 px above keyboard
-      const scrollNeeded = elRect.bottom - visibleBottom + 60;
+      // Scroll just enough to show field 20 px above keyboard
+      const scrollNeeded = elRect.bottom - visibleBottom + 20;
       scrollable.scrollBy({ top: scrollNeeded, behavior: "smooth" });
     } else {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
