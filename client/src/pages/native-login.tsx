@@ -12,7 +12,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient, storeDevToken } from "@/lib/queryClient";
 import { isNativePlatform } from "@/lib/platform";
-import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
+import logoUrl from "@assets/herokids_logo_neu.png";
 
 // ─── module-level timers (survive component unmount) ─────────────────────────
 let _pollInterval: ReturnType<typeof setInterval> | null = null;
