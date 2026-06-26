@@ -252,7 +252,7 @@ export function TaskCard({
   const isGrayedOut = isUnavailable || isCompletedByMember || dueDateInfo.notYet || dueDateInfo.expired || isWeekendUnavailable || task.status === "pending_approval" || task.status === "completed";
 
   // True when requiresApproval and at least one submission is still pending approval.
-  // Used to show a yellow (amber) checkmark instead of green on the parent dashboard.
+  // Used to show a yellow (amber) checkmark on the parent dashboard.
   const hasPendingApproval = (() => {
     if (!task.requiresApproval) return false;
     // Multi-member assigned tasks: check per-member status
@@ -263,7 +263,11 @@ export function TaskCard({
     if (task.completions && task.completions.length > 0) {
       return task.completions.some(c => c.status === "pending");
     }
-    // Single / unassigned task: pending_approval status
+    // Single/family-wide tasks: the API sets memberCompletionStatus to the family-wide status.
+    // For daily/recurring tasks this is "pending" while waiting for approval — use it directly.
+    const memberStatus = (task as any).memberCompletionStatus;
+    if (memberStatus === "pending") return true;
+    // Fallback: task's own status field (set for one-time tasks)
     return task.status === "pending_approval";
   })();
 
@@ -359,6 +363,9 @@ export function TaskCard({
                   isWeekendUnavailable
                     ? <Moon className="h-3 w-3 text-muted-foreground shrink-0" />
                     : <CheckCircle className={`h-3 w-3 shrink-0 ${hasPendingApproval ? "text-amber-400" : "text-green-500"}`} />
+                )}
+                {!isGrayedOut && hasPendingApproval && (
+                  <CheckCircle className="h-3 w-3 shrink-0 text-amber-400" data-testid={`icon-pending-compact-${task.id}`} />
                 )}
               </div>
               {compactDateText && (
@@ -536,6 +543,15 @@ export function TaskCard({
                     ? <Moon className="h-5 w-5 text-muted-foreground shrink-0" data-testid={`icon-weekend-${task.id}`} />
                     : <CheckCircle className={`h-5 w-5 shrink-0 ${hasPendingApproval ? "text-amber-400" : "text-green-500"}`} data-testid={`icon-done-${task.id}`} />
                   }
+                </motion.div>
+              )}
+              {!isGrayedOut && hasPendingApproval && (
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                >
+                  <CheckCircle className="h-5 w-5 shrink-0 text-amber-400" data-testid={`icon-pending-approval-${task.id}`} />
                 </motion.div>
               )}
               {/* Multi-Completion Counter Badge */}
