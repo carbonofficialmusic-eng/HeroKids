@@ -3,7 +3,9 @@ import { queryClient } from "@/lib/queryClient";
 import confetti from "canvas-confetti";
 import { toast } from "@/hooks/use-toast";
 
-export function useWebSocket(familyName: string | null) {
+const DEV_TOKEN_KEY = "__hk_dev_token";
+
+export function useWebSocket(familyName: string | null, mobileToken?: string) {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -19,8 +21,15 @@ export function useWebSocket(familyName: string | null) {
 
       ws.onopen = () => {
         console.log("WebSocket connected");
-        // Join family room
-        ws.send(JSON.stringify({ type: "join_family", familyName }));
+        const joinMsg: Record<string, string> = { type: "join_family", familyName };
+        if (mobileToken) {
+          joinMsg.token = mobileToken;
+        }
+        if (import.meta.env.DEV) {
+          const devToken = localStorage.getItem(DEV_TOKEN_KEY);
+          if (devToken) joinMsg.devToken = devToken;
+        }
+        ws.send(JSON.stringify(joinMsg));
       };
 
       ws.onmessage = (event) => {

@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
+import * as cookieSignature from "cookie-signature";
 import { z } from "zod";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
@@ -171,10 +172,12 @@ export function deleteDevToken(token: string): void {
   devTokenStore.delete(token);
 }
 
+let _wsSessionStore: session.Store;
+
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000;
 
-  let store: session.Store | undefined = undefined;
+  let store: session.Store;
   if (!isDev) {
     const pgStore = connectPg(session);
     store = new pgStore({
@@ -183,7 +186,11 @@ export function getSession() {
       ttl: sessionTtl,
       tableName: "sessions",
     });
+  } else {
+    store = new session.MemoryStore();
   }
+
+  _wsSessionStore = store;
 
   return session({
     secret: process.env.SESSION_SECRET || "dev-secret-fallback",
@@ -197,6 +204,87 @@ export function getSession() {
       maxAge: sessionTtl,
     },
   });
+}
+
+function parseCookieValue(cookieHeader: string, cookieName: string): string | null {
+  const pairs = cookieHeader.split(";");
+  for (const pair of pairs) {
+    const idx = pair.indexOf("=");
+    if (idx < 0) continue;
+    const name = pair.slice(0, idx).trim();
+    if (name !== cookieName) continue;
+    return decodeURIComponent(pair.slice(idx + 1).trim());
+  }
+  return null;
+}
+
+function parseSessionId(cookieHeader: string): string | null {
+  const secret = process.env.SESSION_SECRET || "dev-secret-fallback";
+  const raw = parseCookieValue(cookieHeader, "connect.sid");
+  if (!raw || !raw.startsWith("s:")) return null;
+  const unsigned = cookieSignature.unsign(raw.slice(2), secret);
+  return unsigned || null;
+}
+
+async function sessionUserIdFromStore(sessionId: string): Promise<string | null> {
+  if (!_wsSessionStore) return null;
+  return new Promise((resolve) => {
+    _wsSessionStore.get(sessionId, (err, sess) => {
+      if (err || !sess) return resolve(null);
+      const sub = (sess as any)?.passport?.user?.claims?.sub;
+      resolve(typeof sub === "string" ? sub : null);
+    });
+  });
+}
+
+export async function resolveWsUserId(opts: {
+  cookieHeader?: string;
+  mobileToken?: string;
+  devToken?: string;
+}): Promise<string | null> {
+  if (opts.mobileToken) {
+    try {
+      const payload = verifyAccessToken(opts.mobileToken);
+      if (payload) {
+        const member = await storage.getFamilyMember(payload.memberId);
+        if (member) return `mobile:${member.id}`;
+      }
+    } catch (_) {}
+  }
+
+  if (isDev && opts.devToken) {
+    const entry = getDevTokenEntry(opts.devToken);
+    if (entry?.user?.claims?.sub) {
+      try {
+        const account = await storage.getUser(entry.user.claims.sub);
+        if (account && !account.isDisabled) return entry.user.claims.sub as string;
+      } catch (_) {}
+    }
+  }
+
+  if (opts.cookieHeader) {
+    const deviceToken = parseCookieValue(opts.cookieHeader, "child_device_token");
+    if (deviceToken) {
+      try {
+        const session = await storage.findValidChildDeviceSession(deviceToken);
+        if (session) {
+          const member = await storage.getFamilyMember(session.memberId);
+          if (member) {
+            await storage.updateDeviceSessionLastSeen(session.id);
+            return `device:${member.id}`;
+          }
+        }
+      } catch (_) {}
+    }
+
+    const sessionId = parseSessionId(opts.cookieHeader);
+    if (sessionId) {
+      const userId = await sessionUserIdFromStore(sessionId);
+      if (userId) return userId;
+    }
+  }
+
+  return null;
 }
 
 export async function setupAuth(app: Express) {

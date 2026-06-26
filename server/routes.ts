@@ -11,7 +11,7 @@ import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 import { storage } from "./storage";
 import { sendPushToMembers } from "./apns";
 import { db } from "./db";
-import { setupAuth, isAuthenticated, isDev, setDevTokenActingAs } from "./replitAuth";
+import { setupAuth, isAuthenticated, isDev, setDevTokenActingAs, resolveWsUserId } from "./replitAuth";
 import { generateTokenPair, refreshAccessToken, revokeRefreshToken, registerPushToken, unregisterPushToken } from "./mobileAuth";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
@@ -7788,24 +7788,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
 
   wss.on("connection", (ws: WebSocket, req: any) => {
-    console.log("WebSocket client connected");
-    
+    const cookieHeader = req.headers?.cookie as string | undefined;
     let familyName: string | null = null;
+    let joined = false;
 
-    ws.on("message", (message: string) => {
+    ws.on("message", async (message: string) => {
       try {
         const data = JSON.parse(message.toString());
-        
-        if (data.type === "join_family" && typeof data.familyName === "string") {
-          const family = data.familyName;
-          familyName = family;
-          
-          if (!wsClients.has(family)) {
-            wsClients.set(family, new Set());
+
+        if (data.type === "join_family" && typeof data.familyName === "string" && !joined) {
+          const requestedFamily = data.familyName;
+          const mobileToken = typeof data.token === "string" ? data.token : undefined;
+          const devToken = typeof data.devToken === "string" ? data.devToken : undefined;
+
+          const userId = await resolveWsUserId({
+            cookieHeader,
+            mobileToken,
+            devToken,
+          });
+
+          if (!userId) {
+            ws.close(4401, "Unauthorized");
+            return;
           }
-          wsClients.get(family)!.add(ws);
-          
-          console.log(`Client joined family: ${family}`);
+
+          let authorizedFamily: string | null = null;
+
+          if (userId.startsWith("mobile:")) {
+            const memberId = userId.slice("mobile:".length);
+            const member = await storage.getFamilyMember(memberId);
+            if (member?.familyName === requestedFamily) {
+              authorizedFamily = requestedFamily;
+            }
+          } else if (userId.startsWith("device:")) {
+            const memberId = userId.slice("device:".length);
+            const member = await storage.getFamilyMember(memberId);
+            if (member?.familyName === requestedFamily) {
+              authorizedFamily = requestedFamily;
+            }
+          } else {
+            const member = await storage.getFamilyMemberByUserId(userId);
+            if (member?.familyName === requestedFamily) {
+              authorizedFamily = requestedFamily;
+            }
+          }
+
+          if (!authorizedFamily) {
+            ws.close(4403, "Forbidden");
+            return;
+          }
+
+          familyName = authorizedFamily;
+          joined = true;
+
+          if (!wsClients.has(familyName)) {
+            wsClients.set(familyName, new Set());
+          }
+          wsClients.get(familyName)!.add(ws);
+
+          console.log(`Client joined family: ${familyName}`);
         }
       } catch (error) {
         console.error("Error handling WebSocket message:", error);
