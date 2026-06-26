@@ -61,7 +61,12 @@ function scrollFieldIntoView(el: HTMLElement) {
 
   setTimeout(() => {
     const elRect = el.getBoundingClientRect();
-    const visibleBottom = window.innerHeight - KEYBOARD_HEIGHT;
+    // visualViewport.height shrinks when keyboard opens on regular browsers (Chrome, Safari desktop).
+    // On iOS WKWebView (Capacitor) it does NOT shrink — fall back to fixed keyboard estimate.
+    const vvHeight = window.visualViewport?.height ?? window.innerHeight;
+    const visibleBottom = vvHeight < window.innerHeight - 50
+      ? vvHeight          // browser already accounts for keyboard
+      : window.innerHeight - KEYBOARD_HEIGHT; // WKWebView: apply manual estimate
     // Already visible above keyboard — nothing to do
     if (elRect.bottom < visibleBottom - 20) return;
     if (scrollable) {
