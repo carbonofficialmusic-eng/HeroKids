@@ -7142,10 +7142,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin Dashboard Routes
   // ========================================
 
+  // Server-side admin session store: token -> expiry timestamp
+  const adminSessions = new Map<string, number>();
+  const ADMIN_SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
+
+  // Periodically evict expired admin sessions
+  setInterval(() => {
+    const now = Date.now();
+    for (const [tok, exp] of adminSessions.entries()) {
+      if (exp < now) adminSessions.delete(tok);
+    }
+  }, 15 * 60 * 1000);
+
   // Admin authentication middleware
   const isAdmin = (req: any, res: any, next: any) => {
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    if (!adminPassword) {
+    if (!process.env.ADMIN_PASSWORD) {
       return res.status(500).json({ message: "Admin password not configured" });
     }
 
@@ -7155,33 +7166,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const token = authHeader.substring(7);
-    if (token !== adminPassword) {
-      return res.status(401).json({ message: "Invalid admin credentials" });
+    const expiry = adminSessions.get(token);
+    if (!expiry || expiry < Date.now()) {
+      adminSessions.delete(token);
+      return res.status(401).json({ message: "Invalid or expired admin session" });
     }
 
     next();
   };
 
-  // Admin login verification
-  app.post("/api/admin/login", async (req, res) => {
+  // Admin login verification — rate-limited to prevent brute-force
+  app.post("/api/admin/login", rateLimit(5, 15 * 60 * 1000), async (req, res) => {
     try {
       const { password } = req.body;
       const adminPassword = process.env.ADMIN_PASSWORD;
-
-      console.log("Admin login attempt, password length:", password?.length, "expected length:", adminPassword?.length);
 
       if (!adminPassword) {
         return res.status(500).json({ message: "Admin password not configured" });
       }
 
-      // Trim whitespace from both passwords for comparison
       const trimmedPassword = (password || "").trim();
       const trimmedAdminPassword = adminPassword.trim();
 
       if (trimmedPassword === trimmedAdminPassword) {
-        res.json({ success: true, token: adminPassword });
+        const sessionToken = crypto.randomBytes(32).toString("hex");
+        adminSessions.set(sessionToken, Date.now() + ADMIN_SESSION_TTL_MS);
+        res.json({ success: true, token: sessionToken });
       } else {
-        console.log("Password mismatch - received:", JSON.stringify(password), "expected:", JSON.stringify(adminPassword));
         res.status(401).json({ message: "Invalid admin password" });
       }
     } catch (error) {
