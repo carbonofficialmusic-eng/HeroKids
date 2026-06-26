@@ -6410,6 +6410,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newTier = entitlementId ? tierMap[entitlementId] : null;
       if (!newTier) return res.status(400).json({ message: "Unknown entitlement" });
 
+      // Verify the entitlement with RevenueCat's server before trusting the client claim
+      const rcApiKey = process.env.REVENUECAT_API_KEY;
+      if (!rcApiKey) {
+        console.error("[RevenueCat] REVENUECAT_API_KEY not set; rejecting sync request to prevent bypass");
+        return res.status(503).json({ message: "Purchase verification unavailable" });
+      }
+
+      const rcVerifyRes = await fetch(
+        `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(member.familyName)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${rcApiKey}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!rcVerifyRes.ok) {
+        console.error(`[RevenueCat] Subscriber API returned ${rcVerifyRes.status} for ${member.familyName}`);
+        return res.status(402).json({ message: "Purchase verification failed" });
+      }
+
+      const rcData = await rcVerifyRes.json();
+      const entitlements: Record<string, { expires_date: string | null }> =
+        rcData?.subscriber?.entitlements ?? {};
+      const ent = entitlementId ? entitlements[entitlementId] : undefined;
+      const isEntitlementActive =
+        ent !== undefined &&
+        (ent.expires_date === null || new Date(ent.expires_date) > new Date());
+
+      if (!isEntitlementActive) {
+        console.warn(`[RevenueCat] Entitlement '${entitlementId}' not active for ${member.familyName}`);
+        return res.status(403).json({ message: "Entitlement not active" });
+      }
+
       const { eq } = await import("drizzle-orm");
       const { families } = await import("../shared/schema");
       await db.update(families)
@@ -6537,7 +6572,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
       }
-      
+
+      // Reject replayed checkout sessions using the dedicated consumed-session table
+      const { verifiedCheckoutSessions } = await import("../shared/schema");
+      const { eq: eqVCS } = await import("drizzle-orm");
+      const [existingConsumed] = await db
+        .select({ sessionId: verifiedCheckoutSessions.sessionId })
+        .from(verifiedCheckoutSessions)
+        .where(eqVCS(verifiedCheckoutSessions.sessionId, sessionId))
+        .limit(1);
+      if (existingConsumed) {
+        return res.status(409).json({ message: "Checkout session already processed" });
+      }
+
       // Fetch the checkout session from Stripe
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       
@@ -6565,11 +6612,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const isLifetime = session.metadata?.billingCycle === "lifetime";
+
+      // For non-lifetime subscriptions, confirm the Stripe subscription is currently active
+      if (!isLifetime) {
+        const stripeSubId = session.subscription as string | null;
+        if (!stripeSubId) {
+          return res.status(400).json({ message: "Missing subscription reference" });
+        }
+        const stripeSub = await stripe.subscriptions.retrieve(stripeSubId);
+        if (!["active", "trialing"].includes(stripeSub.status)) {
+          console.warn(`[Stripe] Subscription ${stripeSubId} status='${stripeSub.status}' — rejecting activation`);
+          return res.status(402).json({ message: "Subscription is not active" });
+        }
+      }
+
       await storage.updateFamily(familyName, {
         subscriptionTier: tier,
         subscriptionStatus: "active",
         billingSubscriptionId: isLifetime ? null : (session.subscription as string),
         ...(isLifetime ? { isLifetimePurchase: true } : {}),
+      });
+
+      // Mark session as consumed so it cannot be replayed
+      await db.insert(verifiedCheckoutSessions).values({
+        sessionId,
+        familyName,
+        tier,
       });
       
       console.log(`✅ ${isLifetime ? "Lifetime purchase" : "Subscription"} verified and activated for ${familyName}: ${tier}`);
@@ -6603,7 +6671,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Session ID required" });
       }
       
-      // Fetch the checkout session from Stripe
+      // Fetch the checkout session from Stripe first to get the familyName from metadata
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       
       console.log("🔍 Public verification of checkout session:", {
@@ -6623,13 +6691,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!familyName || !tier) {
         return res.status(400).json({ message: "Invalid session metadata" });
       }
-      
+
+      // Reject replayed checkout sessions using the dedicated consumed-session table
+      const { verifiedCheckoutSessions: vcsTable } = await import("../shared/schema");
+      const { eq: eqVCS2 } = await import("drizzle-orm");
+      const [alreadyConsumed] = await db
+        .select({ sessionId: vcsTable.sessionId })
+        .from(vcsTable)
+        .where(eqVCS2(vcsTable.sessionId, sessionId))
+        .limit(1);
+      if (alreadyConsumed) {
+        return res.status(409).json({ message: "Checkout session already processed" });
+      }
+
       const isLifetime = session.metadata?.billingCycle === "lifetime";
+
+      // For non-lifetime subscriptions, confirm the Stripe subscription is currently active
+      if (!isLifetime) {
+        const stripeSubId = session.subscription as string | null;
+        if (!stripeSubId) {
+          return res.status(400).json({ message: "Missing subscription reference" });
+        }
+        const stripeSub = await stripe.subscriptions.retrieve(stripeSubId);
+        if (!["active", "trialing"].includes(stripeSub.status)) {
+          console.warn(`[Stripe] Public verify: subscription ${stripeSubId} status='${stripeSub.status}' — rejecting`);
+          return res.status(402).json({ message: "Subscription is not active" });
+        }
+      }
+
       await storage.updateFamily(familyName, {
         subscriptionTier: tier,
         subscriptionStatus: "active",
         billingSubscriptionId: isLifetime ? null : (session.subscription as string),
         ...(isLifetime ? { isLifetimePurchase: true } : {}),
+      });
+
+      // Mark session as consumed so it cannot be replayed
+      await db.insert(vcsTable).values({
+        sessionId,
+        familyName,
+        tier,
       });
       
       console.log(`✅ Public verification: ${isLifetime ? "Lifetime purchase" : "Subscription"} activated for ${familyName}: ${tier}`);

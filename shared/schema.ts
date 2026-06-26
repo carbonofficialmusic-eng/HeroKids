@@ -121,6 +121,14 @@ export const familiesRelations = relations(families, ({ many }) => ({
   members: many(familyMembers),
 }));
 
+// Verified checkout sessions - tracks consumed Stripe checkout session IDs to prevent replay attacks
+export const verifiedCheckoutSessions = pgTable("verified_checkout_sessions", {
+  sessionId: varchar("session_id").primaryKey(), // Stripe checkout session ID (cs_...)
+  familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
+  tier: varchar("tier").notNull(), // tier that was activated
+  verifiedAt: timestamp("verified_at").defaultNow().notNull(),
+});
+
 export const insertFamilySchema = createInsertSchema(families).omit({
   createdAt: true,
   updatedAt: true,
