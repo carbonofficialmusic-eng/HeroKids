@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { AuthPanel } from "@/components/AuthPanel";
-import logoUrl from "@assets/ChatGPT Image 7. Nov. 2025, 19_19_07_1762539654932.png";
+import logoUrl from "@assets/herokids_logo_neu.png";
 
 // ─── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
