@@ -1405,9 +1405,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let family = await storage.getFamily(parsed.familyName);
         let isNewFamily = false;
         if (!family) {
-          // Generate a cryptographically secure join code for the family
+          // Generate a cryptographically secure join code for the family.
+          // Uses a 32-character alphanumeric set (no visually ambiguous chars like 0/O/1/I/L).
+          // 32^6 ≈ 1 billion possible codes — ~63× stronger than the prior hex scheme.
           const crypto = await import('crypto');
-          const joinCode = crypto.randomBytes(4).toString('hex').substring(0, 6).toUpperCase();
+          const JOIN_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+          const joinCodeBytes = crypto.randomBytes(6);
+          const joinCode = Array.from(joinCodeBytes).map(b => JOIN_CODE_CHARS[b % 32]).join('').substring(0, 6);
           
           family = await storage.createFamily({
             familyName: parsed.familyName,
@@ -1466,17 +1470,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Join family with join code
-  app.post("/api/join-family", isAuthenticated, async (req: any, res) => {
+  app.post("/api/join-family", isAuthenticated, rateLimit(10, 60 * 1000), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       
       // Validate and parse request body
+      // NOTE: role is intentionally omitted — join-code users are always assigned
+      // the "child" role server-side to prevent privilege escalation.
       const joinFamilySchema = z.object({
         joinCode: z.string().length(6, "Join code must be 6 characters"),
         displayName: z.string().min(1, "Display name is required"),
         avatarUrl: z.string().min(1, "Avatar is required"),
         color: z.string().min(1, "Color is required"),
-        role: z.enum(["parent", "child"]).optional().default("child"),
       });
       
       const parsed = joinFamilySchema.parse(req.body);
@@ -1516,13 +1521,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Create new member linked to the user
+      // Create new member linked to the user.
+      // Role is always "child" — the join-code flow does not grant parent access.
       const newMember = await storage.createFamilyMember({
         familyName: family.familyName,
         displayName: parsed.displayName,
         avatarUrl: parsed.avatarUrl,
         color: parsed.color,
-        role: parsed.role,
+        role: "child",
         userId,
       } as any);
       
