@@ -255,16 +255,20 @@ export function TaskCard({
   // Used to show a yellow (amber) checkmark on the parent dashboard.
   const hasPendingApproval = (() => {
     if (!task.requiresApproval) return false;
-    // Multi-member assigned tasks: check per-member status
+    // New-style multi-assignment (taskAssignments table)
     if (task.assignedMemberCompletions && task.assignedMemberCompletions.length > 0) {
       return task.assignedMemberCompletions.some(m => m.status === "pending");
+    }
+    // Legacy shared tasks (sharedMemberIds field) — API returns sharedMemberCompletions
+    if (task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0) {
+      return task.sharedMemberCompletions.some(m => m.status === "pending");
     }
     // Multi-completion tasks: check completions array
     if (task.completions && task.completions.length > 0) {
       return task.completions.some(c => c.status === "pending");
     }
-    // Single/family-wide tasks: the API sets memberCompletionStatus to the family-wide status.
-    // For daily/recurring tasks this is "pending" while waiting for approval — use it directly.
+    // Single/family-wide: API sets memberCompletionStatus to family-wide status.
+    // For daily/recurring tasks this is "pending" while waiting for approval.
     const memberStatus = (task as any).memberCompletionStatus;
     if (memberStatus === "pending") return true;
     // Fallback: task's own status field (set for one-time tasks)
