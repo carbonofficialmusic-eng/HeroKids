@@ -239,3 +239,9 @@ id = "lgjuJDieXqGd0dKwqcbrZ"
 uri = "file://client/public/skins/backgrounds/brave-explorer.png"
 type = "image"
 title = "Mutiger Entdecker – Hintergrundbild"
+
+[[outputs]]
+id = "NPg128LAV2Htggw48V_VU"
+uri = "file://ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png"
+type = "image"
+title = "HeroKids Splash Screen (neues Logo)"
