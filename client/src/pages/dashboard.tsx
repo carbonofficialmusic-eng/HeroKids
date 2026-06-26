@@ -1175,7 +1175,7 @@ export default function Dashboard() {
                   <img 
                     src={logoUrl} 
                     alt="HeroKids Logo" 
-                    className="h-44 w-auto object-contain cursor-pointer"
+                    className="h-36 w-auto object-contain cursor-pointer"
                     data-testid="img-dashboard-logo"
                     onClick={handleDebugTap}
                   />
@@ -1860,7 +1860,7 @@ export default function Dashboard() {
                 <img 
                   src={logoUrl} 
                   alt="HeroKids Logo" 
-                  className="h-52 w-auto object-contain cursor-pointer"
+                  className="h-44 w-auto object-contain cursor-pointer"
                   data-testid="img-dashboard-logo-child"
                   onClick={handleDebugTap}
                 />

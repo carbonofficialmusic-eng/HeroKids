@@ -2222,7 +2222,7 @@ export default function KidDashboard() {
           <img 
             src={logoUrl} 
             alt="HeroKids Logo" 
-            className="h-44 w-auto object-contain"
+            className="h-36 w-auto object-contain"
             data-testid="img-kid-dashboard-logo"
           />
         </div>
