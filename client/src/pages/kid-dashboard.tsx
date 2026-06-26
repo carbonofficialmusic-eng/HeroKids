@@ -1903,10 +1903,7 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setTaskDialogOpen(false);
       setSelectedTask(null);
-      if (isPhotoUsed()) {
-        clearPhotoUsed();
-        setTimeout(() => { window.location.href = window.location.pathname; }, 2500);
-      }
+      clearPhotoUsed();
     },
   });
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
+import { clearPhotoUsed } from "@/lib/cameraUtils";
 import { isNativePlatform } from "@/lib/platform";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -496,10 +496,7 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setEditMemberDialogOpen(false);
       setMemberToEdit(null);
-      if (isPhotoUsed()) {
-        clearPhotoUsed();
-        setTimeout(() => { window.location.href = window.location.pathname; }, 500);
-      }
+      clearPhotoUsed();
     },
     onError: (error: any) => {
       toast({
@@ -659,10 +656,7 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"], refetchType: 'active' });
       setCompletionDialogOpen(false);
       setTaskToComplete(null);
-      if (isPhotoUsed()) {
-        clearPhotoUsed();
-        setTimeout(() => { window.location.href = window.location.pathname; }, 2500);
-      }
+      clearPhotoUsed();
       if (data.autoApproved) {
         celebrateTaskCompletion();
         setCelebration({
