@@ -251,6 +251,22 @@ export function TaskCard({
   // Task should appear grayed out if it's unavailable OR completed by this member OR due date not yet reached OR expired OR weekend-only unavailable OR awaiting approval
   const isGrayedOut = isUnavailable || isCompletedByMember || dueDateInfo.notYet || dueDateInfo.expired || isWeekendUnavailable || task.status === "pending_approval" || task.status === "completed";
 
+  // True when requiresApproval and at least one submission is still pending approval.
+  // Used to show a yellow (amber) checkmark instead of green on the parent dashboard.
+  const hasPendingApproval = (() => {
+    if (!task.requiresApproval) return false;
+    // Multi-member assigned tasks: check per-member status
+    if (task.assignedMemberCompletions && task.assignedMemberCompletions.length > 0) {
+      return task.assignedMemberCompletions.some(m => m.status === "pending");
+    }
+    // Multi-completion tasks: check completions array
+    if (task.completions && task.completions.length > 0) {
+      return task.completions.some(c => c.status === "pending");
+    }
+    // Single / unassigned task: pending_approval status
+    return task.status === "pending_approval";
+  })();
+
   // ── Compact (grid) rendering ──────────────────────────────────────────────
   if (compact) {
     // Date label shown directly on the compact card
@@ -342,7 +358,7 @@ export function TaskCard({
                 {isGrayedOut && (
                   isWeekendUnavailable
                     ? <Moon className="h-3 w-3 text-muted-foreground shrink-0" />
-                    : <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />
+                    : <CheckCircle className={`h-3 w-3 shrink-0 ${hasPendingApproval ? "text-amber-400" : "text-green-500"}`} />
                 )}
               </div>
               {compactDateText && (
@@ -518,7 +534,7 @@ export function TaskCard({
                 >
                   {isWeekendUnavailable
                     ? <Moon className="h-5 w-5 text-muted-foreground shrink-0" data-testid={`icon-weekend-${task.id}`} />
-                    : <CheckCircle className="h-5 w-5 text-green-500 shrink-0" data-testid={`icon-done-${task.id}`} />
+                    : <CheckCircle className={`h-5 w-5 shrink-0 ${hasPendingApproval ? "text-amber-400" : "text-green-500"}`} data-testid={`icon-done-${task.id}`} />
                   }
                 </motion.div>
               )}
