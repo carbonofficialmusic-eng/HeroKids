@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
+import logoUrl from "@assets/herokids_logo_neu.png";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -500,14 +501,104 @@ function Router() {
   );
 }
 
+function ServerStatusGuard({ children }: { children: React.ReactNode }) {
+  const [serverDown, setServerDown] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+
+  const check = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/user", { credentials: "include" });
+      if (res.status >= 500) {
+        setServerDown(true);
+      } else {
+        setServerDown(false);
+      }
+    } catch {
+      setServerDown(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    check();
+  }, [check]);
+
+  // Auto-retry every 8 seconds while server is down
+  useEffect(() => {
+    if (!serverDown) return;
+    const id = setInterval(check, 8000);
+    return () => clearInterval(id);
+  }, [serverDown, check]);
+
+  const handleRetry = async () => {
+    setRetrying(true);
+    await check();
+    setRetrying(false);
+  };
+
+  if (serverDown) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgb(16, 20, 34)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 24,
+          fontFamily: "Nunito, sans-serif",
+          padding: "2rem",
+          paddingTop: "env(safe-area-inset-top)",
+        }}
+      >
+        <img
+          src={logoUrl}
+          alt="HeroKids"
+          style={{ width: 160, height: 160, objectFit: "contain" }}
+        />
+        <div style={{ textAlign: "center", color: "white" }}>
+          <p style={{ fontSize: 22, fontWeight: 800, margin: "0 0 8px" }}>
+            Gleich zurück!
+          </p>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", margin: 0, maxWidth: 260 }}>
+            Wir aktualisieren die App gerade für dich. Das dauert nur einen Moment.
+          </p>
+        </div>
+        <button
+          onClick={handleRetry}
+          disabled={retrying}
+          style={{
+            background: "#5BC4C0",
+            color: "white",
+            border: "none",
+            borderRadius: 12,
+            padding: "10px 28px",
+            fontSize: 14,
+            fontWeight: 700,
+            cursor: "pointer",
+            opacity: retrying ? 0.6 : 1,
+          }}
+        >
+          {retrying ? "Prüfe…" : "Erneut versuchen"}
+        </button>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <LanguageProvider>
-            <Toaster />
-            <Router />
+            <ServerStatusGuard>
+              <Toaster />
+              <Router />
+            </ServerStatusGuard>
           </LanguageProvider>
         </TooltipProvider>
       </ThemeProvider>
