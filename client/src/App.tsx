@@ -524,12 +524,25 @@ function ServerStatusGuard({ children }: { children: React.ReactNode }) {
     check();
   }, [check]);
 
-  // Auto-retry every 8 seconds while server is down
+  // While server is down: retry every 8 seconds
   useEffect(() => {
     if (!serverDown) return;
     const id = setInterval(check, 8000);
     return () => clearInterval(id);
   }, [serverDown, check]);
+
+  // Always: re-check every 45 seconds (catches deploys mid-session)
+  useEffect(() => {
+    const id = setInterval(check, 45000);
+    return () => clearInterval(id);
+  }, [check]);
+
+  // Re-check when user switches back to the tab
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === "visible") check(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [check]);
 
   const handleRetry = async () => {
     setRetrying(true);
