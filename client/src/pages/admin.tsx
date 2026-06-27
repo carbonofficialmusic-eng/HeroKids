@@ -49,6 +49,7 @@ import {
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/skins";
 import { queryClient } from "@/lib/queryClient";
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import {
   BarChart,
@@ -2179,6 +2180,7 @@ export default function AdminPage() {
                 placeholder="parent@example.com"
                 value={accountEmailToLink}
                 onChange={(event) => setAccountEmailToLink(event.target.value)}
+                onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                 data-testid="input-link-account-email"
               />
               <p className="text-sm text-muted-foreground" data-testid="text-link-account-audit-help">
@@ -2304,6 +2306,7 @@ export default function AdminPage() {
                 placeholder="Anzahl Punkte (z.B. 100, 500, 1000)"
                 value={pointsToAdd}
                 onChange={(e) => setPointsToAdd(e.target.value)}
+                onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                 min="1"
                 data-testid="input-points-amount"
               />

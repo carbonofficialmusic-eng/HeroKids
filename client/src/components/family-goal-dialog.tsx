@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertFamilyGoalSchema } from "@shared/schema";
 import { z } from "zod";
 import { useEffect } from "react";
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import {
   Dialog,
   DialogContent,
@@ -147,6 +148,7 @@ export function FamilyGoalDialog({
                     <Input
                       placeholder="z.B. Tierpark-Besuch, Schwimmbad, Freizeitpark"
                       {...field}
+                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-goal-title"
                     />
                   </FormControl>
@@ -170,6 +172,7 @@ export function FamilyGoalDialog({
                       {...field}
                       value={field.value || ""}
                       maxLength={200}
+                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-goal-description"
                     />
                   </FormControl>

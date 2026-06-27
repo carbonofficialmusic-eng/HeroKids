@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -125,6 +126,7 @@ export function SwitchMemberDialog({
                       pattern="[0-9]*"
                       maxLength={4}
                       value={pinCode}
+                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       onChange={(e) => {
                         const value = e.target.value.replace(/[^0-9]/g, '');
                         setPinCode(value);

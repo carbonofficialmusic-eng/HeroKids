@@ -53,6 +53,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { apiRequest, queryClient, getDevHeaders } from "@/lib/queryClient";
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import type { FamilyMember, Task, Reward, RewardRequest, FamilyGoal, GoalContribution } from "@shared/schema";
@@ -2360,6 +2361,7 @@ export default function Dashboard() {
                   placeholder="z. B. 50"
                   value={pointsAmount}
                   onChange={(e) => setPointsAmount(e.target.value)}
+                  onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                   data-testid="input-points-amount"
                 />
                 <p className="text-xs text-muted-foreground mt-1">

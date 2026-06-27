@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { isNativePlatform } from "@/lib/platform";
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -1376,6 +1377,7 @@ export default function Settings() {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={4}
+                onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                 value={newPin}
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^0-9]/g, '');

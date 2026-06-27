@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -221,6 +222,7 @@ export function EditMemberDialog({
                     <Input
                       placeholder={t('memberDialogs.displayNamePlaceholder')}
                       {...field}
+                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-edit-member-name"
                     />
                   </FormControl>

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle, XCircle, Clock, Star, ArrowLeft, Gift, Coins, Pencil, CheckSquare } from "lucide-react";
 import { useState } from "react";
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -566,6 +567,7 @@ export default function Approvals() {
                 placeholder={t("approvals.reasonPlaceholder")}
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
+                onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                 rows={4}
                 data-testid="input-rejection-reason"
               />
@@ -602,6 +604,7 @@ export default function Approvals() {
                 id="edit-title"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
+                onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                 data-testid="input-edit-reward-title"
               />
             </div>
@@ -611,6 +614,7 @@ export default function Approvals() {
                 id="edit-description"
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
+                onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                 rows={3}
                 data-testid="input-edit-reward-description"
               />
@@ -623,6 +627,7 @@ export default function Approvals() {
                 min="1"
                 value={editPoints}
                 onChange={(e) => setEditPoints(e.target.value)}
+                onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                 data-testid="input-edit-reward-points"
               />
             </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
 import { queryClient, apiRequest, ApiError } from "@/lib/queryClient";
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useIsLandscape } from "@/hooks/use-landscape";
 import { Card } from "@/components/ui/card";
@@ -962,6 +963,7 @@ export default function SkinsGallery() {
               value={parentalGateInput}
               onChange={(e) => { setParentalGateInput(e.target.value); setParentalGateError(false); }}
               onKeyDown={(e) => e.key === "Enter" && parentalGateInput && handleParentalGateSubmit()}
+              onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
               placeholder={t("parentalGate.placeholder", "Antwort eingeben…")}
               className={parentalGateError ? "border-destructive" : ""}
             />

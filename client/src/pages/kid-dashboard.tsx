@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { kickScrollReset, kickHeaderRepaint, isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
 import { isNativePlatform } from "@/lib/platform";
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { Link, useLocation } from "wouter";
 import confetti from "canvas-confetti";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -3310,6 +3311,7 @@ export default function KidDashboard() {
               value={parentalGateInput}
               onChange={(e) => { setParentalGateInput(e.target.value); setParentalGateError(false); }}
               onKeyDown={(e) => e.key === "Enter" && parentalGateInput && handleParentalGateSubmit()}
+              onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
               placeholder={t("parentalGate.placeholder", "Antwort eingeben…")}
               className={parentalGateError ? "border-destructive" : ""}
             />
