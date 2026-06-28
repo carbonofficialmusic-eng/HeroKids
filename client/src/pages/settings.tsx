@@ -412,9 +412,9 @@ export default function Settings() {
     { value: "en", label: "English" },
     { value: "fr", label: "Français" },
     { value: "es", label: "Español" },
-    { value: "ja", label: `${t('languageNames.ja')} · 日本語` },
-    { value: "zh", label: `${t('languageNames.zh')} · 中文` },
-    { value: "ko", label: `${t('languageNames.ko')} · 한국어` },
+    { value: "ja", label: `Japanese · 日本語` },
+    { value: "zh", label: `Chinese · 中文` },
+    { value: "ko", label: `Korean · 한국어` },
     { value: "sv", label: "Svenska" },
     { value: "pt", label: "Português" },
   ];
