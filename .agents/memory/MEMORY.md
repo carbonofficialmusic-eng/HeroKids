@@ -7,3 +7,4 @@
 - [Kid Dashboard Flicker Fix](kid-dashboard-flicker-fix.md) — 7 confirmed causes of scroll flicker; never put translateZ(0) on #root scroll container
 - [iOS Keyboard Scroll Fix for Dialogs](ios-keyboard-scroll.md) — getComputedStyle ancestor search + paddingBottom + visualViewport detection avoids over-scroll on regular browsers
 - [iOS Photo Upload — No Reload Needed](ios-photo-no-reload.md) — kickHeaderRepaint()+kickScrollReset() fully fix WKWebView GPU displacement after camera; full page reload is unnecessary and was removed
+- [Period-blind hasActiveMemberCompletion bug](recurring-task-period-guard.md) — hasActiveMemberCompletion must filter by nextAvailableDate for recurrenceDays/weekly/monthly/yearly tasks or old-period completions block new-period submissions

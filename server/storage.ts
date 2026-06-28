@@ -1218,11 +1218,13 @@ export class DatabaseStorage implements IStorage {
   async hasActiveMemberCompletion(taskId: string, memberId: string, txClient?: any): Promise<boolean> {
     const client = txClient || db;
     
-    // Get task info to check if it's a daily recurring task or immediate task
+    // Get task info to check recurrence type and period boundaries
     const [task] = await client
       .select({
         recurrence: tasks.recurrence,
-        familyName: tasks.familyName
+        recurrenceDays: tasks.recurrenceDays,
+        familyName: tasks.familyName,
+        nextAvailableDate: tasks.nextAvailableDate,
       })
       .from(tasks)
       .where(eq(tasks.id, taskId));
@@ -1271,7 +1273,34 @@ export class DatabaseStorage implements IStorage {
       return completions.some((c: { completedAt: Date }) => isToday(c.completedAt, familyTimezone));
     }
     
-    // For non-daily tasks, use the original logic (any active completion)
+    // For recurring tasks (recurrenceDays, weekly, monthly, yearly):
+    // Be period-aware — if nextAvailableDate has passed, a new period started
+    // and old completions from before the period boundary should NOT block.
+    const isRecurring = task.recurrence !== 'none' || task.recurrenceDays != null;
+    if (isRecurring && task.nextAvailableDate) {
+      const now = new Date();
+      const nextDate = new Date(task.nextAvailableDate);
+      
+      if (nextDate <= now) {
+        // New period has started — only count completions that happened IN this new period
+        // (i.e. completedAt >= nextAvailableDate)
+        const [result] = await client
+          .select({ count: sql<number>`count(*)` })
+          .from(taskCompletions)
+          .where(
+            and(
+              eq(taskCompletions.taskId, taskId),
+              eq(taskCompletions.memberId, memberId),
+              inArray(taskCompletions.status, ["pending", "approved"]),
+              gte(taskCompletions.completedAt, nextDate)
+            )
+          );
+        return Number(result?.count || 0) > 0;
+      }
+      // nextAvailableDate is still in the future — task is locked, any active completion blocks
+    }
+    
+    // Fallback: any active completion for this member blocks re-submission
     const [result] = await client
       .select({ count: sql<number>`count(*)` })
       .from(taskCompletions)
