@@ -1095,6 +1095,38 @@ export default function RewardsBoard() {
                   </div>
                 )}
 
+                {/* Finalize / Cancel Sharing - for own active shared redemptions */}
+                {redemption.memberId === member?.id &&
+                 redemption.sharingStatus === "sharing_active" &&
+                 redemption.status !== "completed" && (
+                  <div className="flex gap-2 pt-2 border-t flex-wrap">
+                    {redemption.sharingParticipants && redemption.sharingParticipants.length > 0 && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="gap-2"
+                        onClick={() => finalizeSharingMutation.mutate(redemption.id)}
+                        disabled={finalizeSharingMutation.isPending}
+                        data-testid={`button-finalize-${redemption.id}`}
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        {t("rewardsBoard.finalizeSharing")}
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-2"
+                      onClick={() => cancelSharingMutation.mutate(redemption.id)}
+                      disabled={cancelSharingMutation.isPending}
+                      data-testid={`button-cancel-sharing-${redemption.id}`}
+                    >
+                      <X className="h-4 w-4" />
+                      {t("kidDashboard.cancelSharing")}
+                    </Button>
+                  </div>
+                )}
+
                 {/* Sharing Button - Only for own redemptions that are not yet shared and not completed */}
                 {redemption.memberId === member?.id && 
                  redemption.sharingStatus === "not_shared" && 

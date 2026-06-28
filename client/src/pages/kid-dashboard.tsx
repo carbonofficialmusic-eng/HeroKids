@@ -2743,19 +2743,38 @@ export default function KidDashboard() {
                         </Button>
                       )}
 
-                      {/* Initiator */}
+                      {/* All participants: initiator + other participants (excluding current member) */}
                       {initiatorMember && (
                         <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
                           <div className="flex items-center gap-1.5 text-xs text-white/50">
                             <Users className="h-3.5 w-3.5" />
                             <span>{t("kidDashboard.with")}:</span>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <Avatar className="h-6 w-6 border-2 border-white/20">
-                              <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar, (initiatorMember as any).updatedAt)} />
-                              <AvatarFallback className="text-xs font-bold text-white" style={{ backgroundColor: initiatorMember.color }}>{initiatorMember.displayName[0]}</AvatarFallback>
-                            </Avatar>
-                            <span className="text-sm font-semibold text-white/80">{initiatorMember.displayName}</span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {/* Initiator */}
+                            <div className="flex items-center gap-1.5">
+                              <Avatar className="h-6 w-6 border-2 border-white/20">
+                                <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar, (initiatorMember as any).updatedAt)} />
+                                <AvatarFallback className="text-xs font-bold text-white" style={{ backgroundColor: initiatorMember.color }}>{initiatorMember.displayName[0]}</AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm font-semibold text-white/80">{initiatorMember.displayName}</span>
+                            </div>
+                            {/* Other participants (not the current member, not the initiator) */}
+                            {(joined.sharingParticipants || [])
+                              .filter((p: any) => p.memberId !== member?.id && p.memberId !== joined.memberId)
+                              .map((p: any) => {
+                                const pm = familyMembers.find(m => m.id === p.memberId);
+                                if (!pm) return null;
+                                return (
+                                  <div key={p.id} className="flex items-center gap-1.5">
+                                    <Avatar className="h-6 w-6 border-2 border-white/20">
+                                      <AvatarImage src={getAvatarUrl(pm.activeSkinId, pm.avatarUrl, (pm as any).useCustomAvatar, (pm as any).updatedAt)} />
+                                      <AvatarFallback className="text-xs font-bold text-white" style={{ backgroundColor: pm.color }}>{pm.displayName[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-sm font-semibold text-white/80">{pm.displayName}</span>
+                                  </div>
+                                );
+                              })}
                           </div>
                         </div>
                       )}
