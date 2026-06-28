@@ -2946,12 +2946,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pointsPerMember = task.points;
       
       // Create completion record (handles approval, points, and completionCount in transaction)
-      const completion = await storage.createTaskCompletion({
-        taskId: task.id,
-        memberId: member.id,
-        pointsEarned: pointsPerMember,
-        proofPhotoUrl: proofPhotoUrl || null,
-      });
+      let completion: Awaited<ReturnType<typeof storage.createTaskCompletion>>;
+      try {
+        completion = await storage.createTaskCompletion({
+          taskId: task.id,
+          memberId: member.id,
+          pointsEarned: pointsPerMember,
+          proofPhotoUrl: proofPhotoUrl || null,
+        });
+      } catch (err: any) {
+        const msg: string = err?.message || "";
+        if (msg === "Member already completed this task") {
+          return res.status(422).json({ message: "Du hast diese Aufgabe bereits erledigt." });
+        }
+        if (msg === "All completion slots filled") {
+          return res.status(422).json({ message: "Alle Plätze für diese Aufgabe sind bereits vergeben." });
+        }
+        throw err;
+      }
       
       // Handle recurring tasks
       if (task.recurrenceDays || task.recurrence !== "none") {
