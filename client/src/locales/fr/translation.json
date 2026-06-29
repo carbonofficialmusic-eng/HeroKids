@@ -1643,11 +1643,12 @@
     "option1Title": "Partager le code famille",
     "option1Desc": "Partagez votre code famille avec quelqu'un qui souhaite créer son propre compte et rejoindre votre famille.",
     "option2Title": "Lier un appareil",
-    "option2Desc": "Vous partagez un appareil avec un enfant ? Créez un membre et générez un code de liaison à saisir sur l'autre appareil.",
+    "option2Desc": "Paramètres → Lier un appareil : sélectionnez un membre, copiez le code de liaison, puis saisissez-le sur l'appareil de l'enfant.",
     "option3Title": "Ajouter directement",
-    "option3Desc": "Créez un membre directement sur cet appareil – idéal pour les jeunes enfants sans compte propre.",
+    "option3Desc": "Paramètres → Ajouter un membre : créez un profil directement sur cet appareil, puis utilisez Changer d'utilisateur pour basculer.",
     "gotIt": "Compris !",
     "toSettings": "Aller aux paramètres",
-    "helpButtonLabel": "Comment ajouter des membres"
+    "helpButtonLabel": "Comment ajouter des membres",
+    "copyCode": "Copier le code"
   }
 }

@@ -1691,11 +1691,12 @@
     "option1Title": "Partilhar código familiar",
     "option1Desc": "Partilhe o seu código familiar com alguém que queira criar a sua própria conta e juntar-se à sua família.",
     "option2Title": "Vincular um dispositivo",
-    "option2Desc": "Partilha um dispositivo com uma criança? Crie um membro e gere um código de vinculação para inserir no outro dispositivo.",
+    "option2Desc": "Definições → Vincular dispositivo: selecione um membro, copie o código de vinculação e insira-o no dispositivo da criança na página de vinculação.",
     "option3Title": "Adicionar diretamente",
-    "option3Desc": "Crie um membro diretamente neste dispositivo – ideal para crianças pequenas sem conta própria.",
+    "option3Desc": "Definições → Adicionar membro: crie um perfil diretamente neste dispositivo e use Trocar utilizador para alternar.",
     "gotIt": "Entendido!",
     "toSettings": "Ir para definições",
-    "helpButtonLabel": "Como adicionar membros"
+    "helpButtonLabel": "Como adicionar membros",
+    "copyCode": "Copiar código"
   }
 }

@@ -1676,11 +1676,12 @@
     "option1Title": "Dela familjekod",
     "option1Desc": "Dela din familjekod med någon som vill skapa ett eget konto och gå med i din familj.",
     "option2Title": "Koppla en enhet",
-    "option2Desc": "Delar du en enhet med ett barn? Skapa en medlem och generera en länkkod att ange på den andra enheten.",
+    "option2Desc": "Inställningar → Koppla enhet: välj en medlem, kopiera länkkoden och ange den på barnets enhet på länksidan.",
     "option3Title": "Lägg till direkt",
-    "option3Desc": "Skapa en medlem direkt på den här enheten – perfekt för små barn utan eget konto.",
+    "option3Desc": "Inställningar → Lägg till medlem: skapa en profil direkt på den här enheten och använd Användarbyte för att växla.",
     "gotIt": "Förstått!",
     "toSettings": "Gå till inställningar",
-    "helpButtonLabel": "Hur man lägger till medlemmar"
+    "helpButtonLabel": "Hur man lägger till medlemmar",
+    "copyCode": "Kopiera kod"
   }
 }

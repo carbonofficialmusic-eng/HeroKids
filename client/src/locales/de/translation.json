@@ -1704,11 +1704,12 @@
     "option1Title": "Familiencode teilen",
     "option1Desc": "Teile deinen Familiencode mit jemandem, der sich ein eigenes Konto erstellen und deiner Familie beitreten möchte.",
     "option2Title": "Gerät verknüpfen",
-    "option2Desc": "Teilst du ein Gerät mit einem Kind? Erstelle ein Mitglied und generiere einen Link-Code, den du auf dem anderen Gerät eingibst.",
+    "option2Desc": "Einstellungen → Gerät verknüpfen: Mitglied auswählen, Code kopieren, dann auf dem Gerät des Kindes auf der Verknüpfungsseite eingeben.",
     "option3Title": "Direkt hinzufügen",
-    "option3Desc": "Erstelle ein Mitglied direkt auf diesem Gerät – ideal für kleine Kinder ohne eigenes Konto.",
+    "option3Desc": "Einstellungen → Mitglied hinzufügen: Profil direkt anlegen, dann mit Nutzerwechsel zwischen Mitgliedern wechseln.",
     "gotIt": "Verstanden!",
     "toSettings": "Zu den Einstellungen",
-    "helpButtonLabel": "Mitglieder hinzufügen – Hilfe"
+    "helpButtonLabel": "Mitglieder hinzufügen – Hilfe",
+    "copyCode": "Code kopieren"
   }
 }

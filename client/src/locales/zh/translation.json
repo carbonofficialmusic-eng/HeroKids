@@ -1643,11 +1643,12 @@
     "option1Title": "分享家庭码",
     "option1Desc": "将您的家庭码分享给想要创建账户并加入家庭的人。",
     "option2Title": "关联设备",
-    "option2Desc": "与孩子共用设备？创建成员并生成关联码，在另一台设备上输入即可。",
+    "option2Desc": "设置 → 关联设备：选择成员，复制关联码，然后在孩子的设备上的关联页面输入。",
     "option3Title": "直接添加",
-    "option3Desc": "直接在此设备上创建成员——适合没有自己账户的小孩。",
+    "option3Desc": "设置 → 添加成员：直接在此设备上创建档案，然后使用切换用户功能切换。",
     "gotIt": "明白了！",
     "toSettings": "前往设置",
-    "helpButtonLabel": "如何添加成员"
+    "helpButtonLabel": "如何添加成员",
+    "copyCode": "复制代码"
   }
 }

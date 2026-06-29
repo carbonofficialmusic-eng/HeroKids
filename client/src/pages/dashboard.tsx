@@ -144,16 +144,6 @@ export default function Dashboard() {
     }
   }, [tourUser?.id, tourUser?.onboardingCompletedAt]);
 
-  // Show member-onboarding modal for parents who completed the tour but haven't seen this hint yet.
-  // Guard: only fires when onboardingCompletedAt IS set, so it never collides with the tour above.
-  useEffect(() => {
-    if (!tourUser?.onboardingCompletedAt) return; // tour not done yet – skip to avoid collision
-    try {
-      if (localStorage.getItem("herokids_seen_member_onboarding")) return;
-    } catch { return; }
-    const timer = setTimeout(() => setShowMemberOnboarding(true), 800);
-    return () => clearTimeout(timer);
-  }, [tourUser?.id, tourUser?.onboardingCompletedAt]);
 
   useEffect(() => {
     const target = sessionStorage.getItem("dashboardScrollTarget");
@@ -313,11 +303,27 @@ export default function Dashboard() {
   useMidnightRefresh();
 
   // Fetch all family members
-  const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
+  const { data: familyMembers = [], isLoading: familyMembersLoading } = useQuery<FamilyMember[]>({
     queryKey: ["/api/family-members"],
     enabled: !!member,
     staleTime: 5 * 60 * 1000,
   });
+
+  // Show member-onboarding modal for parents who completed the tour and have no children yet.
+  // Guard 1: only fires when onboardingCompletedAt IS set → never collides with the tour.
+  // Guard 2: only fires when familyMembers is loaded and contains no non-parent members.
+  useEffect(() => {
+    if (!tourUser?.onboardingCompletedAt) return;
+    if (familyMembersLoading) return;
+    // Skip if family already has at least one child member
+    if (familyMembers.some(m => m.role !== "parent")) return;
+    try {
+      if (localStorage.getItem("herokids_seen_member_onboarding")) return;
+    } catch { return; }
+    const timer = setTimeout(() => setShowMemberOnboarding(true), 800);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourUser?.id, tourUser?.onboardingCompletedAt, familyMembersLoading, familyMembers.length]);
 
   // Fetch tasks
   const { data: tasks = [] } = useQuery<Task[]>({
@@ -2438,6 +2444,7 @@ export default function Dashboard() {
       {isParent && (
         <MemberOnboardingModal
           open={showMemberOnboarding}
+          joinCode={familyData?.joinCode}
           onClose={() => {
             try { localStorage.setItem("herokids_seen_member_onboarding", "true"); } catch {}
             setShowMemberOnboarding(false);

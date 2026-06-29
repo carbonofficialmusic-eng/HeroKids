@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "wouter";
 import {
@@ -8,42 +9,25 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { QrCode, Smartphone, UserPlus, ArrowRight } from "lucide-react";
+import { QrCode, Smartphone, UserPlus, ArrowRight, Copy, Check } from "lucide-react";
 
 interface MemberOnboardingModalProps {
   open: boolean;
   onClose: () => void;
+  joinCode?: string;
 }
 
-export function MemberOnboardingModal({ open, onClose }: MemberOnboardingModalProps) {
+export function MemberOnboardingModal({ open, onClose, joinCode }: MemberOnboardingModalProps) {
   const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
 
-  const options = [
-    {
-      icon: QrCode,
-      iconColor: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-      titleKey: "memberOnboarding.option1Title",
-      descKey: "memberOnboarding.option1Desc",
-      testId: "card-onboarding-family-code",
-    },
-    {
-      icon: Smartphone,
-      iconColor: "text-orange-500",
-      bgColor: "bg-orange-500/10",
-      titleKey: "memberOnboarding.option2Title",
-      descKey: "memberOnboarding.option2Desc",
-      testId: "card-onboarding-device-link",
-    },
-    {
-      icon: UserPlus,
-      iconColor: "text-green-500",
-      bgColor: "bg-green-500/10",
-      titleKey: "memberOnboarding.option3Title",
-      descKey: "memberOnboarding.option3Desc",
-      testId: "card-onboarding-add-direct",
-    },
-  ];
+  const handleCopyCode = () => {
+    if (!joinCode) return;
+    navigator.clipboard.writeText(joinCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
@@ -62,28 +46,80 @@ export function MemberOnboardingModal({ open, onClose }: MemberOnboardingModalPr
         </DialogHeader>
 
         <div className="space-y-3 py-2">
-          {options.map((opt, i) => {
-            const Icon = opt.icon;
-            return (
-              <div
-                key={i}
-                className="flex items-start gap-3 p-3 rounded-lg border bg-card"
-                data-testid={opt.testId}
-              >
-                <div className={`p-2 rounded-lg ${opt.bgColor} flex-shrink-0 mt-0.5`}>
-                  <Icon className={`h-5 w-5 ${opt.iconColor}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm leading-snug">
-                    {t(opt.titleKey)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                    {t(opt.descKey)}
-                  </p>
-                </div>
+          {/* Option 1: Family Code */}
+          <div
+            className="p-3 rounded-lg border bg-card"
+            data-testid="card-onboarding-family-code"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10 flex-shrink-0 mt-0.5">
+                <QrCode className="h-5 w-5 text-blue-500" />
               </div>
-            );
-          })}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm leading-snug">
+                  {t("memberOnboarding.option1Title")}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                  {t("memberOnboarding.option1Desc")}
+                </p>
+                {joinCode && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex-1 bg-muted rounded px-3 py-1.5 font-mono font-bold text-base tracking-widest text-primary select-all" data-testid="text-onboarding-join-code">
+                      {joinCode}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleCopyCode}
+                      className="flex-shrink-0"
+                      data-testid="button-onboarding-copy-code"
+                      aria-label={t("memberOnboarding.copyCode")}
+                    >
+                      {copied
+                        ? <Check className="h-4 w-4 text-green-500" />
+                        : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Option 2: Device Link */}
+          <div
+            className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+            data-testid="card-onboarding-device-link"
+          >
+            <div className="p-2 rounded-lg bg-orange-500/10 flex-shrink-0 mt-0.5">
+              <Smartphone className="h-5 w-5 text-orange-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm leading-snug">
+                {t("memberOnboarding.option2Title")}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                {t("memberOnboarding.option2Desc")}
+              </p>
+            </div>
+          </div>
+
+          {/* Option 3: Add Directly */}
+          <div
+            className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+            data-testid="card-onboarding-add-direct"
+          >
+            <div className="p-2 rounded-lg bg-green-500/10 flex-shrink-0 mt-0.5">
+              <UserPlus className="h-5 w-5 text-green-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm leading-snug">
+                {t("memberOnboarding.option3Title")}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                {t("memberOnboarding.option3Desc")}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2 pt-1">

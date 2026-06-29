@@ -1694,11 +1694,12 @@
     "option1Title": "Share Family Code",
     "option1Desc": "Share your family code with someone who wants to create their own account and join your family.",
     "option2Title": "Link a Device",
-    "option2Desc": "Sharing a device with a child? Create a member and generate a link code to enter on the other device.",
+    "option2Desc": "Settings → Device Link: select a member, copy the link code, then enter it on the child's device at the link page.",
     "option3Title": "Add Directly",
-    "option3Desc": "Create a member directly on this device – perfect for young children without their own account.",
+    "option3Desc": "Settings → Add Member: create a profile directly on this device, then switch between members using User Switch.",
     "gotIt": "Got it!",
     "toSettings": "Go to Settings",
-    "helpButtonLabel": "How to add members"
+    "helpButtonLabel": "How to add members",
+    "copyCode": "Copy code"
   }
 }
