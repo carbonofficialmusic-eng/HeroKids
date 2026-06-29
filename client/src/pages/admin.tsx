@@ -287,6 +287,7 @@ export default function AdminPage() {
   const [emailTestRecipient, setEmailTestRecipient] = useState("");
   const [repairHistorySearch, setRepairHistorySearch] = useState("");
   const [userSearch, setUserSearch] = useState("");
+  const [userToDelete, setUserToDelete] = useState<{ id: string; email: string | null; name: string | null } | null>(null);
   const lastEmailAlertKeyRef = useRef<string | null>(null);
   const { toast } = useToast();
 
@@ -322,6 +323,25 @@ export default function AdminPage() {
     },
     onError: () => {
       toast({ title: "Invalid password", variant: "destructive" });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to delete user");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setUserToDelete(null);
+      toast({ title: "Account deleted", description: "The login account has been removed." });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete account", variant: "destructive" });
     },
   });
 
@@ -1619,6 +1639,7 @@ export default function AdminPage() {
                           <th className="text-left px-4 py-2 font-medium text-muted-foreground">Family</th>
                           <th className="text-left px-4 py-2 font-medium text-muted-foreground">Registered</th>
                           <th className="text-left px-4 py-2 font-medium text-muted-foreground">Last Login</th>
+                          <th className="px-4 py-2 font-medium text-muted-foreground">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1676,6 +1697,16 @@ export default function AdminPage() {
                               <td className="px-4 py-2.5 text-xs text-muted-foreground">
                                 {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : "Never"}
                               </td>
+                              <td className="px-4 py-2.5 text-right">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => setUserToDelete({ id: u.id, email: u.email, name: u.linkedMemberName ?? null })}
+                                  data-testid={`button-delete-user-${u.id}`}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </td>
                             </tr>
                           ))}
                         {(adminUsers ?? []).filter((u) => {
@@ -1688,7 +1719,7 @@ export default function AdminPage() {
                           );
                         }).length === 0 && (
                           <tr>
-                            <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground text-sm">
+                            <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground text-sm">
                               No users found
                             </td>
                           </tr>
@@ -1700,6 +1731,47 @@ export default function AdminPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <AlertDialog open={!!userToDelete} onOpenChange={(open) => { if (!open && !deleteUserMutation.isPending) setUserToDelete(null); }}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Login Account</AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div>
+                    {userToDelete?.name && (
+                      <p className="mb-1">
+                        <span className="font-semibold">{userToDelete.name}</span>
+                        {" — "}
+                        <span className="font-mono">{userToDelete.email ?? "—"}</span>
+                      </p>
+                    )}
+                    {!userToDelete?.name && userToDelete?.email && (
+                      <p className="mb-1 font-mono font-semibold">{userToDelete.email}</p>
+                    )}
+                    <p>
+                      This will permanently delete the login account. The linked family member record and the family itself will remain untouched. This action cannot be undone.
+                    </p>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleteUserMutation.isPending}>Cancel</AlertDialogCancel>
+                <Button
+                  variant="destructive"
+                  disabled={deleteUserMutation.isPending}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (userToDelete) deleteUserMutation.mutate(userToDelete.id);
+                  }}
+                  data-testid="button-confirm-delete-user"
+                >
+                  {deleteUserMutation.isPending ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" />Deleting…</>
+                  ) : "Delete Account"}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* Data Migration Tab */}
           <TabsContent value="migration" className="space-y-6">
