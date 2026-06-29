@@ -1637,6 +1637,27 @@
     "retry": "重试",
     "checking": "检查中…"
   },
+  "paywall": {
+    "title": "充分利用 HeroKids",
+    "subtitle": "免费开始 — 随时升级。",
+    "freeTitle": "免费",
+    "familyTitle": "家庭版",
+    "freeHighlights": [
+      "最多3名家庭成员",
+      "任务和奖励",
+      "排行榜和仪表板",
+      "3个可解锁皮肤"
+    ],
+    "familyHighlights": [
+      "最多6名家庭成员",
+      "任务照片证明",
+      "家庭聊天和目标",
+      "所有皮肤可解锁"
+    ],
+    "startFree": "免费开始",
+    "upgradeFamily": "升级到家庭版",
+    "maybeLater": "以后再说"
+  },
   "memberOnboarding": {
     "title": "添加家庭成员",
     "subtitle": "有3种方式邀请新成员加入您的家庭：",

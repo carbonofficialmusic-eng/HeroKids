@@ -22,6 +22,7 @@ import { SuccessCelebration } from "@/components/success-celebration";
 import { ProfileMenu } from "@/components/profile-menu";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { MemberOnboardingModal } from "@/components/member-onboarding-modal";
+import { FirstOpenPaywall } from "@/components/first-open-paywall";
 import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -128,6 +129,7 @@ export default function Dashboard() {
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
   const [sendPointsOpen, setSendPointsOpen] = useState(false);
   const [showTour, setShowTour] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [showMemberOnboarding, setShowMemberOnboarding] = useState(false);
   const [chatBarCollapsed, setChatBarCollapsed] = useState(() => {
     try { return localStorage.getItem("herokids_chatbar_collapsed") === "true"; } catch { return false; }
@@ -157,7 +159,7 @@ export default function Dashboard() {
   // Freeze #root scroll while any dialog is open, then restore exactly (iOS keyboard shifts viewport)
   const savedRootScrollRef = useRef(0);
   const anyDialogOpen = taskDialogOpen || rewardDialogOpen || requestRewardDialogOpen ||
-    editMemberDialogOpen || switchMemberDialogOpen || completionDialogOpen || sendPointsOpen || showMemberOnboarding;
+    editMemberDialogOpen || switchMemberDialogOpen || completionDialogOpen || sendPointsOpen || showMemberOnboarding || showPaywall;
   const prevAnyDialogOpenRef = useRef(false);
   useLayoutEffect(() => {
     const root = document.getElementById('root');
@@ -312,18 +314,20 @@ export default function Dashboard() {
   // Show member-onboarding modal for parents who completed the tour and have no children yet.
   // Guard 1: only fires when onboardingCompletedAt IS set → never collides with the tour.
   // Guard 2: only fires when familyMembers is loaded and contains no non-parent members.
+  // Guard 3: waits until the paywall is dismissed (no simultaneous overlays).
   useEffect(() => {
     if (!tourUser?.onboardingCompletedAt) return;
     if (familyMembersLoading) return;
+    if (showPaywall) return; // paywall takes precedence — wait until it's dismissed
     // Skip if family already has at least one child member
     if (familyMembers.some(m => m.role !== "parent")) return;
     try {
       if (localStorage.getItem("herokids_seen_member_onboarding")) return;
     } catch { return; }
-    const timer = setTimeout(() => setShowMemberOnboarding(true), 800);
+    const timer = setTimeout(() => setShowMemberOnboarding(true), 1200);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tourUser?.id, tourUser?.onboardingCompletedAt, familyMembersLoading, familyMembers.length]);
+  }, [tourUser?.id, tourUser?.onboardingCompletedAt, familyMembersLoading, familyMembers.length, showPaywall]);
 
   // Fetch tasks
   const { data: tasks = [] } = useQuery<Task[]>({
@@ -381,6 +385,7 @@ export default function Dashboard() {
     categoryNames?: { household?: string; school?: string; selfCare?: string; other?: string } | null;
     trialStartedAt?: string | null;
     trialEndsAt?: string | null;
+    joinCode?: string;
   }>({
     queryKey: ["/api/families/current"],
     enabled: !!member,
@@ -388,6 +393,21 @@ export default function Dashboard() {
   });
 
   // Fetch unread chat message count
+  // Show first-open paywall for parents on Free tier who haven't seen it yet.
+  // Guard: only fires when tour is done (onboardingCompletedAt set) to avoid collision.
+  useEffect(() => {
+    if (!tourUser?.onboardingCompletedAt) return;
+    if (!familyData) return; // wait until family data is loaded
+    if (familyData.subscriptionTier !== "free") return; // already paid – skip
+    if (member?.role !== "parent") return; // only parents see the paywall
+    try {
+      if (localStorage.getItem("herokids_seen_paywall")) return;
+    } catch { return; }
+    const timer = setTimeout(() => setShowPaywall(true), 600);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourUser?.id, tourUser?.onboardingCompletedAt, familyData?.subscriptionTier, member?.role]);
+
   const { data: unreadChatData } = useQuery<{ count: number }>({
     queryKey: ["/api/chat/unread-count"],
     enabled: !!member && (hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "familyChat") || !!(familyData?.trialEndsAt && new Date(familyData.trialEndsAt) > new Date())),
@@ -2438,6 +2458,18 @@ export default function Dashboard() {
       {/* Onboarding Tour */}
       {showTour && isParent && (
         <OnboardingTour onClose={() => setShowTour(false)} />
+      )}
+
+      {/* First-Open Paywall — shown once after tour, only for Free-tier parents */}
+      {isParent && (
+        <FirstOpenPaywall
+          open={showPaywall}
+          familyName={familyData?.familyName}
+          onClose={() => {
+            try { localStorage.setItem("herokids_seen_paywall", "true"); } catch {}
+            setShowPaywall(false);
+          }}
+        />
       )}
 
       {/* Member Onboarding Modal — only shown after tour is done, never at the same time */}

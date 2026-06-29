@@ -1670,6 +1670,27 @@
     "retry": "Försök igen",
     "checking": "Kontrollerar…"
   },
+  "paywall": {
+    "title": "Få ut mer av HeroKids",
+    "subtitle": "Börja gratis — uppgradera när du är redo.",
+    "freeTitle": "Gratis",
+    "familyTitle": "Familj",
+    "freeHighlights": [
+      "Upp till 3 familjemedlemmar",
+      "Uppgifter och belöningar",
+      "Rankinglistor och instrumentpaneler",
+      "3 upplåsbara skins"
+    ],
+    "familyHighlights": [
+      "Upp till 6 familjemedlemmar",
+      "Fotobewis för uppgifter",
+      "Familjechatt och mål",
+      "Alla skins upplåsbara"
+    ],
+    "startFree": "Börja gratis",
+    "upgradeFamily": "Uppgradera till Familj",
+    "maybeLater": "Kanske senare"
+  },
   "memberOnboarding": {
     "title": "Lägg till familjemedlemmar",
     "subtitle": "Det finns 3 sätt att bjuda in nya medlemmar till din familj:",

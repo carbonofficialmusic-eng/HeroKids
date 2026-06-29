@@ -1637,6 +1637,27 @@
     "retry": "Réessayer",
     "checking": "Vérification…"
   },
+  "paywall": {
+    "title": "Tirez le meilleur de HeroKids",
+    "subtitle": "Commencez gratuitement – mettez à niveau quand vous êtes prêt.",
+    "freeTitle": "Gratuit",
+    "familyTitle": "Famille",
+    "freeHighlights": [
+      "Jusqu'à 3 membres",
+      "Tâches et récompenses",
+      "Classements et tableaux de bord",
+      "3 skins débloquables"
+    ],
+    "familyHighlights": [
+      "Jusqu'à 6 membres",
+      "Preuve photo pour les tâches",
+      "Chat famille et objectifs",
+      "Tous les skins débloquables"
+    ],
+    "startFree": "Commencer gratuitement",
+    "upgradeFamily": "Passer à Famille",
+    "maybeLater": "Peut-être plus tard"
+  },
   "memberOnboarding": {
     "title": "Ajouter des membres",
     "subtitle": "Il y a 3 façons d'inviter de nouveaux membres dans votre famille :",

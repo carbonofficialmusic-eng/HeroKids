@@ -1637,6 +1637,27 @@
     "retry": "再試行",
     "checking": "確認中…"
   },
+  "paywall": {
+    "title": "HeroKidsをもっと活用しよう",
+    "subtitle": "無料で始めて、準備ができたらアップグレード。",
+    "freeTitle": "無料",
+    "familyTitle": "ファミリー",
+    "freeHighlights": [
+      "最大3人のメンバー",
+      "タスクと報酬",
+      "ランキングとダッシュボード",
+      "3つのアンロック可能スキン"
+    ],
+    "familyHighlights": [
+      "最大6人のメンバー",
+      "タスクの写真証明",
+      "ファミリーチャットと目標",
+      "すべてのスキンをアンロック可能"
+    ],
+    "startFree": "無料で始める",
+    "upgradeFamily": "ファミリーにアップグレード",
+    "maybeLater": "後で"
+  },
   "memberOnboarding": {
     "title": "家族メンバーを追加",
     "subtitle": "家族に新しいメンバーを招待する方法は3つあります：",

@@ -1649,6 +1649,27 @@
     "retry": "다시 시도",
     "checking": "확인 중…"
   },
+  "paywall": {
+    "title": "HeroKids를 더 활용하세요",
+    "subtitle": "무료로 시작하고 준비되면 업그레이드하세요.",
+    "freeTitle": "무료",
+    "familyTitle": "패밀리",
+    "freeHighlights": [
+      "최대 3명의 가족",
+      "할 일 및 보상",
+      "순위표 및 대시보드",
+      "3개의 잠금 해제 가능한 스킨"
+    ],
+    "familyHighlights": [
+      "최대 6명의 가족",
+      "할 일 사진 증명",
+      "가족 채팅 및 목표",
+      "모든 스킨 잠금 해제 가능"
+    ],
+    "startFree": "무료로 시작",
+    "upgradeFamily": "패밀리로 업그레이드",
+    "maybeLater": "나중에"
+  },
   "memberOnboarding": {
     "title": "가족 구성원 추가",
     "subtitle": "가족에 새 구성원을 초대하는 방법은 3가지입니다:",

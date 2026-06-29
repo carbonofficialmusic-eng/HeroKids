@@ -1698,6 +1698,27 @@
     "retry": "Erneut versuchen",
     "checking": "Prüfe…"
   },
+  "paywall": {
+    "title": "Mehr aus HeroKids herausholen",
+    "subtitle": "Starte kostenlos – upgrade jederzeit, wenn du bereit bist.",
+    "freeTitle": "Free",
+    "familyTitle": "Family",
+    "freeHighlights": [
+      "Bis zu 3 Familienmitglieder",
+      "Aufgaben & Belohnungen",
+      "Bestenliste & Dashboards",
+      "3 freischaltbare Skins"
+    ],
+    "familyHighlights": [
+      "Bis zu 6 Familienmitglieder",
+      "Foto-Nachweis für Aufgaben",
+      "Familien-Chat & Familienziele",
+      "Alle Skins freischaltbar"
+    ],
+    "startFree": "Kostenlos starten",
+    "upgradeFamily": "Auf Family upgraden",
+    "maybeLater": "Vielleicht später"
+  },
   "memberOnboarding": {
     "title": "Familienmitglieder hinzufügen",
     "subtitle": "Es gibt 3 Möglichkeiten, neue Mitglieder zu deiner Familie einzuladen:",
