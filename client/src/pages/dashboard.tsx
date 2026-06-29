@@ -182,6 +182,16 @@ export default function Dashboard() {
       root.style.overflowY = 'auto';
     }
   }, [anyDialogOpen]);
+
+  // When the dashboard unmounts (e.g. user navigates to Settings while a dialog is open)
+  // make sure the #root scroll-freeze is always released so the next page can scroll normally.
+  useEffect(() => {
+    return () => {
+      const root = document.getElementById('root');
+      if (root) root.style.overflowY = 'auto';
+    };
+  }, []);
+
   const [selectedPointsRecipients, setSelectedPointsRecipients] = useState<string[]>([]);
   const [pointsAmount, setPointsAmount] = useState("");
   const [celebration, setCelebration] = useState<{
