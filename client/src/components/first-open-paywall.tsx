@@ -34,7 +34,7 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
   const { t } = useTranslation();
   const { toast } = useToast();
   const qc = useQueryClient();
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("yearly");
   const [processing, setProcessing] = useState(false);
   const [rcOfferings, setRcOfferings] = useState<any>(null);
   const [rcLoading, setRcLoading] = useState(false);
@@ -173,18 +173,16 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
             <button
               onClick={() => setBillingCycle("yearly")}
               data-testid="button-paywall-billing-yearly"
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 ${
                 billingCycle === "yearly"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {t("pricing.billingYearly")}
-              {billingCycle === "yearly" && (
-                <span className="ml-1.5 text-xs font-bold text-green-600">
-                  {t("pricing.yearlyDiscount")}
-                </span>
-              )}
+              <Badge className="text-xs px-1.5 py-0 bg-green-500 hover:bg-green-500 text-white border-0 no-default-active-elevate">
+                {t("pricing.yearlyDiscount")}
+              </Badge>
             </button>
           </div>
         </div>
