@@ -731,7 +731,7 @@
     "timezoneNote": "Nota:",
     "timezoneMismatch": "Tu zona horaria seleccionada ({{set}}) difiere de la zona horaria de tu navegador ({{browser}}).",
     "singleDeviceTitle": "Protección por contraseña al cambiar de perfil",
-    "singleDeviceDesc": "Protege los perfiles de padres con un código PIN cuando los niños quieran cambiar al perfil de un padre",
+    "singleDeviceDesc": "Protege los perfiles de padres con un código PIN cuando los niños quieran cambiar al perfil de un padre. Especialmente útil al compartir un dispositivo mediante el cambio de perfil y al configurar el enlace de dispositivo para niños sin cuenta propia.",
     "singleDeviceMode": "Protección por PIN",
     "singleDeviceModeEnabled": "Los niños necesitan código PIN para cambiar a perfiles de padres",
     "singleDeviceModeDisabled": "Los niños pueden cambiar libremente entre todos los perfiles",

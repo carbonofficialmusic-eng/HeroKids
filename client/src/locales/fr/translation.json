@@ -731,7 +731,7 @@
     "timezoneNote": "Note :",
     "timezoneMismatch": "Votre fuseau horaire sélectionné ({{set}}) diffère du fuseau horaire de votre navigateur ({{browser}}).",
     "singleDeviceTitle": "Protection par mot de passe pour le changement de profil",
-    "singleDeviceDesc": "Protégez les profils parents avec un code PIN lorsque les enfants souhaitent accéder au profil parent",
+    "singleDeviceDesc": "Protégez les profils parents avec un code PIN lorsque les enfants souhaitent accéder au profil parent. Particulièrement utile lors de l'utilisation d'un appareil partagé via le changement de profil, et lors de la configuration du lien d'appareil pour les enfants sans compte.",
     "singleDeviceMode": "Protection par PIN",
     "singleDeviceModeEnabled": "Les enfants ont besoin d'un code PIN pour accéder aux profils parents",
     "singleDeviceModeDisabled": "Les enfants peuvent basculer librement entre tous les profils",

@@ -761,7 +761,7 @@
     "timezoneNote": "Nota:",
     "timezoneMismatch": "Seu fuso horário selecionado ({{set}}) difere do fuso do navegador ({{browser}}).",
     "singleDeviceTitle": "Proteção por PIN para Troca de Perfil",
-    "singleDeviceDesc": "Proteja perfis de pais com um PIN quando crianças quiserem trocar",
+    "singleDeviceDesc": "Proteja perfis de pais com um PIN quando crianças quiserem trocar para um perfil de pai. Especialmente importante ao compartilhar um dispositivo via troca de perfil e ao configurar o link de dispositivo para crianças sem conta própria.",
     "singleDeviceMode": "Proteção por PIN",
     "singleDeviceModeEnabled": "Crianças precisam de PIN para trocar para perfis de pais",
     "singleDeviceModeDisabled": "Crianças podem trocar livremente entre todos os perfis",

@@ -761,7 +761,7 @@
     "timezoneNote": "Note:",
     "timezoneMismatch": "Your selected timezone ({{set}}) differs from your browser timezone ({{browser}}).",
     "singleDeviceTitle": "Password Protection for Profile Switch",
-    "singleDeviceDesc": "Protect parent profiles with a PIN code when children want to switch to a parent profile",
+    "singleDeviceDesc": "Protect parent profiles with a PIN code when children want to switch to a parent profile. Especially useful when sharing one device via profile switching, and when setting up Device Link for children without their own account.",
     "singleDeviceMode": "PIN Protection",
     "singleDeviceModeEnabled": "Children need a PIN code to switch to parent profiles",
     "singleDeviceModeDisabled": "Children can freely switch between all profiles",

@@ -771,7 +771,7 @@
     "timezoneNote": "Hinweis:",
     "timezoneMismatch": "Ihre eingestellte Zeitzone ({{set}}) unterscheidet sich von Ihrer Browser-Zeitzone ({{browser}}).",
     "singleDeviceTitle": "Passwort-Schutz beim Profil-Wechsel",
-    "singleDeviceDesc": "Schütze Elternprofile mit einem PIN-Code, wenn Kinder zum Elternprofil wechseln möchten",
+    "singleDeviceDesc": "Schütze Elternprofile mit einem PIN-Code, wenn Kinder zum Elternprofil wechseln möchten. Besonders wichtig bei der gemeinsamen Gerätenutzung via Profil-Wechsel sowie beim Einrichten der Geräte-Verknüpfung für Kinder ohne eigene Registrierung.",
     "singleDeviceMode": "Passwort-Schutz",
     "singleDeviceModeEnabled": "Kinder benötigen einen PIN-Code um zu Elternprofilen zu wechseln",
     "singleDeviceModeDisabled": "Kinder können frei zwischen allen Profilen wechseln",

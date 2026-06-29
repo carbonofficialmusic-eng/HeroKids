@@ -731,7 +731,7 @@
     "timezoneNote": "注意：",
     "timezoneMismatch": "您选择的时区（{{set}}）与浏览器时区（{{browser}}）不同。",
     "singleDeviceTitle": "切换档案时的密码保护",
-    "singleDeviceDesc": "当孩子想切换到家长档案时，使用PIN码保护家长档案",
+    "singleDeviceDesc": "当孩子想切换到家长档案时，使用PIN码保护家长档案。在通过配置文件切换共享设备时，以及为没有独立账户的孩子设置设备关联时尤为重要。",
     "singleDeviceMode": "PIN保护",
     "singleDeviceModeEnabled": "孩子需要PIN码才能切换到家长档案",
     "singleDeviceModeDisabled": "孩子可以在所有档案之间自由切换",
