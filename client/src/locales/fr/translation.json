@@ -1636,5 +1636,18 @@
     "desc": "Nous mettons l'application à jour pour toi. Cela ne prendra qu'un moment.",
     "retry": "Réessayer",
     "checking": "Vérification…"
+  },
+  "memberOnboarding": {
+    "title": "Ajouter des membres",
+    "subtitle": "Il y a 3 façons d'inviter de nouveaux membres dans votre famille :",
+    "option1Title": "Partager le code famille",
+    "option1Desc": "Partagez votre code famille avec quelqu'un qui souhaite créer son propre compte et rejoindre votre famille.",
+    "option2Title": "Lier un appareil",
+    "option2Desc": "Vous partagez un appareil avec un enfant ? Créez un membre et générez un code de liaison à saisir sur l'autre appareil.",
+    "option3Title": "Ajouter directement",
+    "option3Desc": "Créez un membre directement sur cet appareil – idéal pour les jeunes enfants sans compte propre.",
+    "gotIt": "Compris !",
+    "toSettings": "Aller aux paramètres",
+    "helpButtonLabel": "Comment ajouter des membres"
   }
 }

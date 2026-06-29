@@ -21,6 +21,7 @@ import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { SuccessCelebration } from "@/components/success-celebration";
 import { ProfileMenu } from "@/components/profile-menu";
 import { OnboardingTour } from "@/components/onboarding-tour";
+import { MemberOnboardingModal } from "@/components/member-onboarding-modal";
 import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -47,7 +48,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronLeft, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin, TrendingUp, CheckCircle2, Coins } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronLeft, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin, TrendingUp, CheckCircle2, Coins, HelpCircle } from "lucide-react";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
@@ -127,6 +128,7 @@ export default function Dashboard() {
   const [taskToComplete, setTaskToComplete] = useState<Task | null>(null);
   const [sendPointsOpen, setSendPointsOpen] = useState(false);
   const [showTour, setShowTour] = useState(false);
+  const [showMemberOnboarding, setShowMemberOnboarding] = useState(false);
   const [chatBarCollapsed, setChatBarCollapsed] = useState(() => {
     try { return localStorage.getItem("herokids_chatbar_collapsed") === "true"; } catch { return false; }
   });
@@ -137,8 +139,20 @@ export default function Dashboard() {
   useEffect(() => {
     if (tourUser && !tourUser.onboardingCompletedAt) {
       const timer = setTimeout(() => setShowTour(true), 800);
+
       return () => clearTimeout(timer);
     }
+  }, [tourUser?.id, tourUser?.onboardingCompletedAt]);
+
+  // Show member-onboarding modal for parents who completed the tour but haven't seen this hint yet.
+  // Guard: only fires when onboardingCompletedAt IS set, so it never collides with the tour above.
+  useEffect(() => {
+    if (!tourUser?.onboardingCompletedAt) return; // tour not done yet – skip to avoid collision
+    try {
+      if (localStorage.getItem("herokids_seen_member_onboarding")) return;
+    } catch { return; }
+    const timer = setTimeout(() => setShowMemberOnboarding(true), 800);
+    return () => clearTimeout(timer);
   }, [tourUser?.id, tourUser?.onboardingCompletedAt]);
 
   useEffect(() => {
@@ -153,7 +167,7 @@ export default function Dashboard() {
   // Freeze #root scroll while any dialog is open, then restore exactly (iOS keyboard shifts viewport)
   const savedRootScrollRef = useRef(0);
   const anyDialogOpen = taskDialogOpen || rewardDialogOpen || requestRewardDialogOpen ||
-    editMemberDialogOpen || switchMemberDialogOpen || completionDialogOpen || sendPointsOpen;
+    editMemberDialogOpen || switchMemberDialogOpen || completionDialogOpen || sendPointsOpen || showMemberOnboarding;
   const prevAnyDialogOpenRef = useRef(false);
   useLayoutEffect(() => {
     const root = document.getElementById('root');
@@ -1326,6 +1340,18 @@ export default function Dashboard() {
                 </Button>
               </div>
 
+              {/* Help: how to add family members */}
+              <div className="flex justify-end -mt-3">
+                <button
+                  onClick={() => setShowMemberOnboarding(true)}
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="button-help-add-members"
+                >
+                  <HelpCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                  {t("memberOnboarding.helpButtonLabel")}
+                </button>
+              </div>
+
               {/* Task Filter Tabs */}
               {activeTasks.length > 0 && (
                 <div className="flex items-center gap-2 mb-4 flex-wrap">
@@ -2406,6 +2432,17 @@ export default function Dashboard() {
       {/* Onboarding Tour */}
       {showTour && isParent && (
         <OnboardingTour onClose={() => setShowTour(false)} />
+      )}
+
+      {/* Member Onboarding Modal — only shown after tour is done, never at the same time */}
+      {isParent && (
+        <MemberOnboardingModal
+          open={showMemberOnboarding}
+          onClose={() => {
+            try { localStorage.setItem("herokids_seen_member_onboarding", "true"); } catch {}
+            setShowMemberOnboarding(false);
+          }}
+        />
       )}
 
 

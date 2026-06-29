@@ -1648,5 +1648,18 @@
     "desc": "앱을 업데이트 중입니다. 잠시만 기다려 주세요.",
     "retry": "다시 시도",
     "checking": "확인 중…"
+  },
+  "memberOnboarding": {
+    "title": "가족 구성원 추가",
+    "subtitle": "가족에 새 구성원을 초대하는 방법은 3가지입니다:",
+    "option1Title": "가족 코드 공유",
+    "option1Desc": "계정을 만들고 가족에 참여하려는 사람과 가족 코드를 공유하세요.",
+    "option2Title": "기기 연결",
+    "option2Desc": "아이와 기기를 공유하고 있나요? 구성원을 만들고 링크 코드를 생성하여 다른 기기에 입력하세요.",
+    "option3Title": "직접 추가",
+    "option3Desc": "이 기기에서 직접 구성원을 만드세요 – 자체 계정이 없는 어린 아이에게 적합합니다.",
+    "gotIt": "알겠습니다!",
+    "toSettings": "설정으로 이동",
+    "helpButtonLabel": "구성원 추가 방법"
   }
 }

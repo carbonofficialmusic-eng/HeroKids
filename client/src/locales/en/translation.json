@@ -1687,5 +1687,18 @@
     "desc": "We're updating the app for you right now. This will only take a moment.",
     "retry": "Try Again",
     "checking": "Checking…"
+  },
+  "memberOnboarding": {
+    "title": "Add Family Members",
+    "subtitle": "There are 3 ways to invite new members to your family:",
+    "option1Title": "Share Family Code",
+    "option1Desc": "Share your family code with someone who wants to create their own account and join your family.",
+    "option2Title": "Link a Device",
+    "option2Desc": "Sharing a device with a child? Create a member and generate a link code to enter on the other device.",
+    "option3Title": "Add Directly",
+    "option3Desc": "Create a member directly on this device – perfect for young children without their own account.",
+    "gotIt": "Got it!",
+    "toSettings": "Go to Settings",
+    "helpButtonLabel": "How to add members"
   }
 }

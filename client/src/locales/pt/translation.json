@@ -1684,5 +1684,18 @@
     "desc": "Estamos atualizando o app para você. Vai demorar só um momento.",
     "retry": "Tentar novamente",
     "checking": "Verificando…"
+  },
+  "memberOnboarding": {
+    "title": "Adicionar membros da família",
+    "subtitle": "Há 3 formas de convidar novos membros para a sua família:",
+    "option1Title": "Partilhar código familiar",
+    "option1Desc": "Partilhe o seu código familiar com alguém que queira criar a sua própria conta e juntar-se à sua família.",
+    "option2Title": "Vincular um dispositivo",
+    "option2Desc": "Partilha um dispositivo com uma criança? Crie um membro e gere um código de vinculação para inserir no outro dispositivo.",
+    "option3Title": "Adicionar diretamente",
+    "option3Desc": "Crie um membro diretamente neste dispositivo – ideal para crianças pequenas sem conta própria.",
+    "gotIt": "Entendido!",
+    "toSettings": "Ir para definições",
+    "helpButtonLabel": "Como adicionar membros"
   }
 }

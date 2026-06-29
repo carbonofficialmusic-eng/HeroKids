@@ -1697,5 +1697,18 @@
     "desc": "Wir aktualisieren die App gerade für dich. Das dauert nur einen Moment.",
     "retry": "Erneut versuchen",
     "checking": "Prüfe…"
+  },
+  "memberOnboarding": {
+    "title": "Familienmitglieder hinzufügen",
+    "subtitle": "Es gibt 3 Möglichkeiten, neue Mitglieder zu deiner Familie einzuladen:",
+    "option1Title": "Familiencode teilen",
+    "option1Desc": "Teile deinen Familiencode mit jemandem, der sich ein eigenes Konto erstellen und deiner Familie beitreten möchte.",
+    "option2Title": "Gerät verknüpfen",
+    "option2Desc": "Teilst du ein Gerät mit einem Kind? Erstelle ein Mitglied und generiere einen Link-Code, den du auf dem anderen Gerät eingibst.",
+    "option3Title": "Direkt hinzufügen",
+    "option3Desc": "Erstelle ein Mitglied direkt auf diesem Gerät – ideal für kleine Kinder ohne eigenes Konto.",
+    "gotIt": "Verstanden!",
+    "toSettings": "Zu den Einstellungen",
+    "helpButtonLabel": "Mitglieder hinzufügen – Hilfe"
   }
 }
