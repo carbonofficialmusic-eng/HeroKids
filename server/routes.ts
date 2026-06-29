@@ -7499,6 +7499,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/users/:replitUserId", isAdmin, async (req, res) => {
     try {
       const { replitUserId } = req.params;
+      // Detach the login account from any family member before deleting, so the
+      // member record (and the family) are preserved after account removal.
+      await db
+        .update(familyMembers)
+        .set({ userId: null })
+        .where(eq(familyMembers.userId, replitUserId));
       await db.delete(users).where(eq(users.id, replitUserId));
       res.json({ success: true, deleted: replitUserId });
     } catch (error) {
