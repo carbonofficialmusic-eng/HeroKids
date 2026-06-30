@@ -111,9 +111,17 @@ export default function FamilyGoals() {
 
   const createGoalMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/family-goals", data);
+      const res = await apiRequest("POST", "/api/family-goals", data);
+      return res.json() as Promise<FamilyGoal>;
     },
-    onSuccess: () => {
+    onSuccess: (newGoal) => {
+      queryClient.setQueryData<FamilyGoalWithContributions[]>(
+        ["/api/family-goals"],
+        (old = []) => [
+          ...old,
+          { ...newGoal, contributions: [], currentPeriod: getCurrentPeriod(newGoal.contributionPeriod) },
+        ]
+      );
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
       setCreateDialogOpen(false);
       toast({
