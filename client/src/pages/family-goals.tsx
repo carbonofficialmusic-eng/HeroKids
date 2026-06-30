@@ -146,10 +146,6 @@ export default function FamilyGoals() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals/all-contributions"] });
-      toast({
-        title: t("familyGoals.pointsContributed"),
-        description: t("familyGoals.pointsContributedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
