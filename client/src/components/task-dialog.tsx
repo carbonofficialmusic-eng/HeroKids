@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTaskSchema, type Task, type FamilyMember } from "@shared/schema";
 import { z } from "zod";
 import { useEffect, useState, useRef, useMemo } from "react";
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -102,17 +103,20 @@ const emojiCategories = {
   }
 };
 
-function useVisualViewportHeight() {
-  const [vvHeight, setVvHeight] = useState(() => window.visualViewport?.height ?? window.innerHeight);
+function useVisualViewport() {
+  const [vp, setVp] = useState(() => ({
+    height: window.visualViewport?.height ?? window.innerHeight,
+    offsetTop: window.visualViewport?.offsetTop ?? 0,
+  }));
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const update = () => setVvHeight(vv.height);
+    const update = () => setVp({ height: vv.height, offsetTop: vv.offsetTop });
     vv.addEventListener("resize", update);
     vv.addEventListener("scroll", update);
     return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
   }, []);
-  return vvHeight;
+  return vp;
 }
 
 export function TaskDialog({
@@ -134,7 +138,7 @@ export function TaskDialog({
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const vvHeight = useVisualViewportHeight();
+  const { height: vvHeight, offsetTop: vvOffsetTop } = useVisualViewport();
   const [showResetDialog, setShowResetDialog] = useState(false);
   
   // Calculate total number of family members (parents + children)
@@ -446,7 +450,7 @@ export function TaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl overflow-y-auto [&>button.absolute]:hidden" style={{ maxHeight: `${vvHeight * 0.9}px` }} data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent className="max-w-2xl overflow-y-auto [&>button.absolute]:hidden" style={{ maxHeight: `${vvHeight * 0.9}px`, top: `${vvOffsetTop + vvHeight / 2}px`, transform: 'translateX(-50%) translateY(-50%)' }} data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-accent">
             {editingTask ? t('tasks.editTask') : t('tasks.createTask')}
@@ -549,6 +553,7 @@ export function TaskDialog({
                     <Input
                       placeholder={t('tasks.taskTitlePlaceholder')}
                       {...field}
+                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-task-title"
                     />
                   </FormControl>
@@ -569,6 +574,7 @@ export function TaskDialog({
                       {...field}
                       value={field.value || ""}
                       maxLength={100}
+                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-task-description"
                     />
                   </FormControl>
@@ -841,6 +847,7 @@ export function TaskDialog({
                           {...field}
                           value={field.value ?? ""}
                           onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                           data-testid="input-recurrence-days"
                         />
                       </FormControl>
@@ -1049,6 +1056,7 @@ export function TaskDialog({
                         value={newItemText}
                         onChange={(e) => setNewItemText(e.target.value)}
                         placeholder={t('tasks.shoppingItemPlaceholder', { defaultValue: 'z.B. Milch, Brot, Eier...' })}
+                        onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
