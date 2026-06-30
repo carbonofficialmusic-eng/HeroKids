@@ -168,7 +168,7 @@ export function RewardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto [&>button.absolute]:hidden" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"}>
+      <DialogContent className="max-w-md overflow-y-auto [&>button.absolute]:hidden" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"} onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-accent">{isEditing ? t('rewards.editReward') : t('rewards.createReward')}</DialogTitle>
           <DialogDescription>
