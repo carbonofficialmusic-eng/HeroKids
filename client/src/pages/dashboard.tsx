@@ -1181,19 +1181,14 @@ export default function Dashboard() {
                 <div className="absolute top-0 left-0 right-0 z-20 lg:static lg:col-span-3 lg:z-auto">
                   <Link href="/pricing">
                     <button
-                      className="w-full flex items-center gap-3 p-4 rounded-lg bg-emerald-50/90 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 hover-elevate active-elevate-2 text-left backdrop-blur-sm"
+                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/10 border border-emerald-500/25 dark:border-emerald-500/20 hover-elevate text-left backdrop-blur-sm"
                       data-testid="banner-trial"
                     >
-                      <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm text-emerald-900 dark:text-emerald-200">
-                          {t("trial.bannerTitle", { days: daysLeft })}
-                        </div>
-                        <div className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">
-                          {t("trial.bannerSubtitle")}
-                        </div>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span className="flex-1 min-w-0 text-xs text-emerald-800 dark:text-emerald-300 truncate">
+                        {t("trial.bannerTitle", { days: daysLeft })} · {t("trial.bannerSubtitle")}
+                      </span>
+                      <ChevronRight className="h-3.5 w-3.5 text-emerald-600/60 dark:text-emerald-400/60 shrink-0" />
                     </button>
                   </Link>
                 </div>
