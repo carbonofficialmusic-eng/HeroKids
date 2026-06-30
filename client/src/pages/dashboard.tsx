@@ -799,11 +799,6 @@ export default function Dashboard() {
       const pointsSpent = data?.redemption?.pointsSpent || 0;
       const rewardTitle = data?.redemption?.rewardTitle || 'Reward';
       
-      toast({
-        title: t("toast.rewardRedeemed"),
-        description: data?.message || `Successfully redeemed ${rewardTitle}!`,
-      });
-      
       setCelebration({
         points: -pointsSpent,
         message: `${rewardTitle} - ${pointsSpent} ${t("dashboard.pointsLabel")}`,
