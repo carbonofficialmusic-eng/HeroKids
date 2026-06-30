@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, Smartphone } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient, storeDevToken } from "@/lib/queryClient";
@@ -530,6 +530,26 @@ export default function NativeLoginScreen() {
             </Form>
           )}
         </div>
+
+        {/* Device Link — for children joining without their own account */}
+        {!keyboardOpen && (
+          <button
+            type="button"
+            data-testid="link-device-link"
+            onClick={() => setLocation("/link-device")}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+              width: "100%", maxWidth: 400,
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 14, padding: "0.65rem 1rem",
+              color: C.fgMuted, fontFamily: "'Nunito', sans-serif", fontWeight: 600, fontSize: "0.88rem",
+              cursor: "pointer",
+            }}
+          >
+            <Smartphone style={{ width: 16, height: 16, flexShrink: 0 }} />
+            {t("landing.linkDevice", "Link Child Device")}
+          </button>
+        )}
 
         {/* footer links */}
         {!keyboardOpen && (
