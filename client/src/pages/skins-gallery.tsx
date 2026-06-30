@@ -296,13 +296,7 @@ export default function SkinsGallery() {
       const res = await apiRequest("POST", "/api/skins/background", { useThemeBackground });
       return await res.json();
     },
-    onSuccess: (_, useThemeBackground) => {
-      toast({
-        title: useThemeBackground ? t('skins.backgroundEnabled') : t('skins.backgroundDisabled'),
-        description: useThemeBackground 
-          ? t('skins.backgroundEnabledDesc') 
-          : t('skins.backgroundDisabledDesc'),
-      });
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
     },
