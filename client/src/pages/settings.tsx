@@ -382,6 +382,8 @@ export default function Settings() {
   };
 
   const handleLanguageChange = (language: string) => {
+    // Persist as an explicit user choice so it survives page reloads.
+    localStorage.setItem('herokids_lang_user', language);
     // Apply immediately so the UI doesn't flicker back on cache-refetch
     i18n.changeLanguage(language);
     updateSettingsMutation.mutate({ language: language as "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" | "sv" | "pt" });

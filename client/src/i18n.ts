@@ -24,12 +24,19 @@ const resources = {
 };
 
 const SUPPORTED = ['en', 'de', 'fr', 'es', 'ja', 'zh', 'ko', 'sv', 'pt'];
-const STORAGE_KEY = 'herokids_lang';
+
+// Separate key for *explicit* user choice (set only via Settings page).
+// The old key 'herokids_lang' was also written by the family-language sync,
+// which could override browser detection with the family's app language.
+// Using a new key means those stale values are ignored automatically.
+export const LANG_USER_KEY = 'herokids_lang_user';
 
 function detectLanguage(): string {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored && SUPPORTED.includes(stored)) return stored;
+  // Only trust an explicit user choice, not auto-set values.
+  const explicit = localStorage.getItem(LANG_USER_KEY);
+  if (explicit && SUPPORTED.includes(explicit)) return explicit;
 
+  // Fall back to browser language.
   const candidates = navigator.languages?.length
     ? navigator.languages
     : [navigator.language];
@@ -38,7 +45,7 @@ function detectLanguage(): string {
     const code = raw.split('-')[0].toLowerCase();
     if (SUPPORTED.includes(code)) return code;
   }
-  return 'de';
+  return 'en';
 }
 
 i18n
@@ -46,15 +53,9 @@ i18n
   .init({
     resources,
     lng: detectLanguage(),
-    fallbackLng: 'de',
+    fallbackLng: 'en',
     interpolation: { escapeValue: false },
     react: { useSuspense: false },
   });
-
-i18n.on('languageChanged', (lng) => {
-  if (SUPPORTED.includes(lng)) {
-    localStorage.setItem(STORAGE_KEY, lng);
-  }
-});
 
 export default i18n;
