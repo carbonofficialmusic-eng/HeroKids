@@ -8,18 +8,18 @@ import { Button } from "@/components/ui/button";
 import { AuthPanel } from "@/components/AuthPanel";
 import logoUrl from "@assets/herokids_logo_neu.png";
 
-// ─── Design tokens ─────────────────────────────────────────────────────────────
+// ─── Design tokens — Warm & Energetic ──────────────────────────────────────────
 const C = {
-  bg:        "rgb(16, 20, 34)",
-  bgCard:    "rgb(22, 28, 46)",
-  bgSection: "rgb(19, 24, 40)",
-  border:    "rgb(42, 52, 80)",
-  fg:        "rgb(225, 232, 248)",
-  fgMuted:   "rgb(130, 148, 185)",
-  orange:    "rgb(248, 107, 28)",
-  orangeD:   "rgb(200, 82, 16)",
-  yellow:    "rgb(250, 185, 40)",
-  blue:      "rgb(52, 178, 220)",
+  bg:        "rgb(255, 252, 245)",   // warm cream  hsl(40 100% 98%)
+  bgCard:    "rgb(255, 255, 255)",   // white
+  bgSection: "rgb(255, 255, 255)",   // white
+  border:    "rgb(236, 217, 198)",   // warm light  hsl(30 50% 85%)
+  fg:        "rgb(31, 36, 46)",      // dark charcoal  hsl(220 20% 15%)
+  fgMuted:   "rgb(87, 97, 117)",     // slate  hsl(220 15% 40%)
+  orange:    "rgb(255, 93, 0)",      // vibrant orange  hsl(22 100% 50%)
+  orangeD:   "rgb(210, 69, 0)",      // deep orange
+  yellow:    "rgb(255, 185, 5)",     // warm yellow  hsl(45 100% 51%)
+  blue:      "rgb(13, 170, 229)",    // playful blue  hsl(199 89% 48%)
 } as const;
 
 const floatKeyframes = `
@@ -105,8 +105,8 @@ export default function Landing() {
       <style>{floatKeyframes}</style>
 
       {/* Ambient blobs */}
-      <div style={{ position: "fixed", top: "-15%", left: "-10%", width: "50%", height: "50%", background: `radial-gradient(circle, ${C.orange}22 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", bottom: "5%", right: "-10%", width: "40%", height: "40%", background: `radial-gradient(circle, ${C.blue}18 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", top: "-15%", left: "-10%", width: "50%", height: "50%", background: `radial-gradient(circle, ${C.yellow}30 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", bottom: "5%", right: "-10%", width: "40%", height: "40%", background: `radial-gradient(circle, ${C.orange}20 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
 
       {/* ── Navigation ── */}
       <nav style={{ position: "sticky", top: 0, zIndex: 50, background: `${C.bg}dd`, backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.border}`, paddingTop: "env(safe-area-inset-top)" }}>
@@ -266,11 +266,11 @@ export default function Landing() {
       </section>
 
       {/* ── Parents Feature ── */}
-      <section style={{ margin: "0 1rem 3rem", borderRadius: "2rem", padding: "4rem 2rem", position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${C.bgCard} 0%, rgb(28, 20, 18) 100%)`, border: `1px solid ${C.border}`, zIndex: 1 }}>
+      <section style={{ margin: "0 1rem 3rem", borderRadius: "2rem", padding: "4rem 2rem", position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${C.bgCard} 0%, rgb(255, 235, 210) 100%)`, border: `1px solid ${C.border}`, zIndex: 1 }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: 500, height: 500, background: `radial-gradient(circle, ${C.orange}12 0%, transparent 65%)`, pointerEvents: "none", transform: "translate(30%, -30%)" }} />
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "4rem", alignItems: "center", position: "relative" }}>
           <div>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.25rem" }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.25rem" }}>
               <Shield style={{ width: 28, height: 28, color: C.fg }} />
             </div>
             <h2 className="hk-display" style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 800, marginBottom: "1rem", lineHeight: 1.2 }}>
@@ -308,7 +308,7 @@ export default function Landing() {
                 <div style={{ display: "flex", marginBottom: "1rem" }}>
                   {[1,2,3,4,5].map(s => <Star key={s} style={{ width: 18, height: 18, color: C.yellow, fill: C.yellow }} />)}
                 </div>
-                <p style={{ color: "rgb(200, 210, 235)", fontSize: "1.05rem", fontStyle: "italic", lineHeight: 1.65, marginBottom: "1.25rem" }}>{item.text}</p>
+                <p style={{ color: C.fg, fontSize: "1.05rem", fontStyle: "italic", lineHeight: 1.65, marginBottom: "1.25rem" }}>{item.text}</p>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", background: C.bgSection }}>
                     <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${item.seed}&backgroundColor=b6e3f4`} alt={item.name} style={{ width: "100%", height: "100%" }} />
