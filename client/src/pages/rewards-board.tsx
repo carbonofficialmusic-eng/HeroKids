@@ -437,10 +437,6 @@ export default function RewardsBoard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
-      toast({
-        title: t("rewardsBoard.toastStatusUpdated"),
-        description: t("rewardsBoard.toastStatusUpdatedDesc"),
-      });
     },
     onError: () => {
       toast({
