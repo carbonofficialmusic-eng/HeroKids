@@ -73,7 +73,7 @@ function PasswordInput({ field, testId, autoComplete }: {
         type={show ? "text" : "password"}
         autoComplete={autoComplete}
         data-testid={testId}
-        style={{ paddingRight: "2.5rem", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#e1e8f8" }}
+        style={{ paddingRight: "2.5rem", background: "rgba(0,0,0,0.04)", border: "1px solid rgb(236,217,198)", color: "rgb(31,36,46)" }}
         {...field}
       />
       <button
@@ -89,22 +89,22 @@ function PasswordInput({ field, testId, autoComplete }: {
   );
 }
 
-// ─── colours ─────────────────────────────────────────────────────────────────
+// ─── colours — Warm & Energetic ──────────────────────────────────────────────
 const C = {
-  bg:      "rgb(16, 20, 34)",
-  card:    "rgba(255,255,255,0.05)",
-  cardBorder: "rgba(255,255,255,0.1)",
-  fg:      "rgb(225, 232, 248)",
-  fgMuted: "rgb(130, 148, 185)",
-  orange:  "rgb(248, 107, 28)",
-  blue:    "rgb(52, 178, 220)",
-  pill:    "rgba(255,255,255,0.08)",
-  pillActive: "rgba(255,255,255,0.18)",
+  bg:         "rgb(255, 252, 245)",   // warm cream
+  card:       "rgba(255,255,255,0.85)",
+  cardBorder: "rgb(236, 217, 198)",   // warm border
+  fg:         "rgb(31, 36, 46)",      // dark charcoal
+  fgMuted:    "rgb(87, 97, 117)",     // slate
+  orange:     "rgb(255, 93, 0)",      // vibrant orange
+  blue:       "rgb(13, 170, 229)",    // playful blue
+  pill:       "rgba(0,0,0,0.06)",
+  pillActive: "rgba(0,0,0,0.12)",
 } as const;
 
 const inputStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(0,0,0,0.04)",
+  border: "1px solid rgb(236, 217, 198)",
   color: C.fg,
   borderRadius: 10,
 };
@@ -262,8 +262,8 @@ export default function NativeLoginScreen() {
       }}
     >
       {/* ambient glows */}
-      <div style={{ position: "absolute", top: "-15%", left: "-10%", width: "55%", height: "55%", background: `radial-gradient(circle, ${C.orange}22 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "absolute", bottom: "5%", right: "-10%", width: "45%", height: "45%", background: `radial-gradient(circle, ${C.blue}18 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "absolute", top: "-15%", left: "-10%", width: "55%", height: "55%", background: `radial-gradient(circle, rgb(255,185,5,0.3) 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "absolute", bottom: "5%", right: "-10%", width: "45%", height: "45%", background: `radial-gradient(circle, ${C.orange}20 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
 
       {/* scrollable body */}
       <div
@@ -333,7 +333,7 @@ export default function NativeLoginScreen() {
             style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem",
               width: "100%", padding: "0.7rem 1rem", borderRadius: 12, cursor: "pointer",
-              background: "rgba(255,255,255,0.09)", border: "1px solid rgba(255,255,255,0.15)",
+              background: "rgba(0,0,0,0.04)", border: "1px solid rgb(236,217,198)",
               color: C.fg, fontFamily: "'Nunito', sans-serif", fontWeight: 600, fontSize: "0.9rem",
             }}
           >
@@ -348,11 +348,11 @@ export default function NativeLoginScreen() {
 
           {/* divider */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }} />
+            <div style={{ flex: 1, height: 1, background: "rgb(236,217,198)" }} />
             <span style={{ fontSize: "0.75rem", color: C.fgMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>
               {t("landing.auth.orSeparator", "or")}
             </span>
-            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }} />
+            <div style={{ flex: 1, height: 1, background: "rgb(236,217,198)" }} />
           </div>
 
           {/* form message */}
@@ -540,7 +540,7 @@ export default function NativeLoginScreen() {
             style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
               width: "100%", maxWidth: 400,
-              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(0,0,0,0.04)", border: "1px solid rgb(236,217,198)",
               borderRadius: 14, padding: "0.65rem 1rem",
               color: C.fgMuted, fontFamily: "'Nunito', sans-serif", fontWeight: 600, fontSize: "0.88rem",
               cursor: "pointer",
