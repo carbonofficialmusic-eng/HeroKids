@@ -124,10 +124,6 @@ export default function FamilyGoals() {
       );
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
       setCreateDialogOpen(false);
-      toast({
-        title: t("familyGoals.goalCreated"),
-        description: t("familyGoals.goalCreatedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -164,10 +160,6 @@ export default function FamilyGoals() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
       setEditDialogOpen(false);
       setGoalToEdit(null);
-      toast({
-        title: "Familienziel aktualisiert",
-        description: "Die Änderungen wurden gespeichert.",
-      });
     },
     onError: (error: any) => {
       toast({
@@ -188,10 +180,6 @@ export default function FamilyGoals() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setDeleteDialogOpen(false);
       setGoalToDelete(null);
-      toast({
-        title: t("familyGoals.goalDeleted"),
-        description: t("familyGoals.goalDeletedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({

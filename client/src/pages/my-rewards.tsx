@@ -124,10 +124,6 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
-      toast({
-        title: t("myRewards.sharingStarted"),
-        description: t("myRewards.sharingStartedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -148,10 +144,6 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
-      toast({
-        title: t("myRewards.joinedSharing"),
-        description: t("myRewards.joinedSharingDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -172,10 +164,6 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
-      toast({
-        title: t("myRewards.leftSharing"),
-        description: t("myRewards.leftSharingDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -195,10 +183,6 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
-      toast({
-        title: t("myRewards.sharingFinalized"),
-        description: t("myRewards.sharingFinalizedDesc"),
-      });
       confetti({
         particleCount: 100,
         spread: 70,
@@ -221,10 +205,6 @@ export default function MyRewards() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
-      toast({
-        title: t("myRewards.sharingCancelled"),
-        description: t("myRewards.sharingCancelledDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -247,10 +227,6 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
-      toast({
-        title: t("rewardsBoard.redemptionCancelled"),
-        description: t("rewardsBoard.pointsRefunded", { count: data?.pointsRefunded ?? 0 }),
-      });
     },
     onError: (error: any) => {
       toast({ title: t("rewardsBoard.cancelError"), description: error.message, variant: "destructive" });

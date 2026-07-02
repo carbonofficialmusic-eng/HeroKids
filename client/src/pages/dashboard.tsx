@@ -629,7 +629,6 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/family-goals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
-      toast({ title: t("familyGoals.pointsContributed"), description: t("familyGoals.pointsContributedDesc") });
     },
     onError: (error: any) => {
       toast({ title: t("errors.error"), description: error.message || t("familyGoals.errorContribute"), variant: "destructive" });
@@ -874,10 +873,6 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
-      toast({
-        title: t("toast.requestApproved"),
-        description: t("toast.requestApprovedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -933,10 +928,6 @@ export default function Dashboard() {
       setSendPointsOpen(false);
       setSelectedPointsRecipients([]);
       setPointsAmount("");
-      toast({
-        title: t("dashboard.pointsSent", "Punkte gesendet!"),
-        description: t("dashboard.pointsSentDesc", "Die Punkte wurden erfolgreich übertragen."),
-      });
     },
     onError: (error: any) => {
       toast({

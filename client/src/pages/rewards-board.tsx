@@ -142,10 +142,6 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions/pending-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
-      toast({
-        title: t("kidDashboard.rewardRequested"),
-        description: t("kidDashboard.rewardRequestedDesc", { title: reward.title }),
-      });
     },
     onError: () => {
       toast({
@@ -550,10 +546,6 @@ export default function RewardsBoard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
-      toast({
-        title: t("rewardsBoard.redemptionCancelled"),
-        description: t("rewardsBoard.pointsRefunded", { count: data.pointsRefunded }),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -572,10 +564,6 @@ export default function RewardsBoard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
-      toast({
-        title: t("rewards.approved"),
-        description: t("rewards.approvedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -593,10 +581,6 @@ export default function RewardsBoard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
-      toast({
-        title: t("rewards.declined"),
-        description: t("rewards.declinedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -616,10 +600,6 @@ export default function RewardsBoard() {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
       setRequestToEdit(null);
-      toast({
-        title: t("rewards.updated"),
-        description: t("rewards.updatedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({

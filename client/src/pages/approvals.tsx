@@ -141,10 +141,6 @@ export default function Approvals() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      toast({
-        title: t("approvals.toastApproved"),
-        description: t("approvals.toastAwardedPoints", { points: data.pointsAwarded, name: data.updatedMember?.displayName }),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -167,10 +163,6 @@ export default function Approvals() {
       setRejectDialogOpen(false);
       setSelectedCompletion(null);
       setRejectionReason("");
-      toast({
-        title: t("approvals.toastRejected"),
-        description: t("approvals.toastRejectedDesc"),
-      });
     },
     onError: (error: any) => {
       toast({

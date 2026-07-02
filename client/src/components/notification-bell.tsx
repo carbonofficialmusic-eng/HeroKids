@@ -163,9 +163,6 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
-      toast({
-        title: t("notifications.allMarkedRead", "All notifications marked as read"),
-      });
     },
   });
 
@@ -176,9 +173,6 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
-      toast({
-        title: t("notifications.allDeleted", "All notifications deleted"),
-      });
     },
   });
 

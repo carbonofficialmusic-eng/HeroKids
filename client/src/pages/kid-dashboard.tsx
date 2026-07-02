@@ -275,10 +275,6 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rewards"] });
-      toast({
-        title: t("kidDashboard.rewardRequested"),
-        description: t("kidDashboard.rewardRequestedDesc", { title: reward.title }),
-      });
     },
     onError: () => {
       toast({
@@ -1469,10 +1465,6 @@ export default function KidDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
-      toast({
-        title: t("kidDashboard.wishSent"),
-        description: t("kidDashboard.wishSentDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
@@ -1533,10 +1525,6 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
-      toast({
-        title: t("kidDashboard.leftSharing"),
-        description: t("kidDashboard.leftSharingDesc"),
-      });
     },
     onError: (error: any) => {
       toast({
