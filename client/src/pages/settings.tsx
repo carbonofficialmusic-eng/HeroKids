@@ -1259,6 +1259,24 @@ export default function Settings() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Legal links */}
+          <div className="flex justify-center gap-6 pt-2 pb-4">
+            <a
+              href="/privacy"
+              data-testid="link-settings-privacy"
+              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+            >
+              {t('landing.footer.privacy')}
+            </a>
+            <a
+              href="/impressum"
+              data-testid="link-settings-impressum"
+              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+            >
+              {t('landing.footer.imprint')}
+            </a>
+          </div>
         </div>
       </div>
 
