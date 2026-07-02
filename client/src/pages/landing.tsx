@@ -185,7 +185,7 @@ export default function Landing() {
                 </div>
                 <div>
                   <div style={{ fontSize: "0.65rem", fontWeight: 700, color: "rgb(34,197,94)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t('landing.hero.done')}</div>
-                  <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.fg }}>{t('landing.hero.roomCleaned')}</div>
+                  <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#fff" }}>{t('landing.hero.roomCleaned')}</div>
                 </div>
               </div>
               {/* Badge: Points earned */}
@@ -194,8 +194,8 @@ export default function Landing() {
                   <Star style={{ width: 20, height: 20, color: "#fff", fill: "#fff" }} />
                 </div>
                 <div>
-                  <div style={{ fontSize: "1.1rem", fontWeight: 800, color: C.fg, fontFamily: "Fredoka, sans-serif" }}>+50</div>
-                  <div style={{ fontSize: "0.65rem", fontWeight: 700, color: C.fgMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t('landing.hero.pointsEarned')}</div>
+                  <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "#fff", fontFamily: "Fredoka, sans-serif" }}>+50</div>
+                  <div style={{ fontSize: "0.65rem", fontWeight: 700, color: "rgba(255,255,255,0.65)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t('landing.hero.pointsEarned')}</div>
                 </div>
               </div>
             </div>
