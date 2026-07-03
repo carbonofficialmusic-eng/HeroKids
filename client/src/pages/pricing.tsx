@@ -57,6 +57,12 @@ export default function Pricing() {
     if (!isNativePlatform() || !familyData?.familyName) return;
     let cancelled = false;
     setRcLoading(true);
+
+    // Safety timeout: never show spinner longer than 8 seconds
+    const safetyTimer = setTimeout(() => {
+      if (!cancelled) setRcLoading(false);
+    }, 8000);
+
     (async () => {
       try {
         await initRevenueCat(familyData.familyName);
@@ -65,10 +71,11 @@ export default function Pricing() {
       } catch (err) {
         console.error("[RevenueCat] Failed to load offerings:", err);
       } finally {
+        clearTimeout(safetyTimer);
         if (!cancelled) setRcLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; clearTimeout(safetyTimer); };
   }, [familyData?.familyName]);
 
   // Stripe checkout (web only)
