@@ -912,9 +912,10 @@ export const notificationTypeEnum = pgEnum("notification_type", [
   "task_expired",        // Task not completed within grace period
   "reward_redeemed",     // Child redeemed a reward
   "reward_request",      // Child requests a new reward
-  "reward_created",      // Parent created a new reward
-  "reward_sharing",      // Child offers to share a reward
-  "achievement_earned",  // Child earned an achievement
+  "reward_created",           // Parent created a new reward
+  "reward_request_approved",  // Parent approved child's reward request
+  "reward_sharing",           // Child offers to share a reward
+  "achievement_earned",       // Child earned an achievement
   "points_milestone",    // Child reached a points milestone
   "member_joined",       // New member joined the family
   "pinboard_posted",     // Member posted a note on the pinboard

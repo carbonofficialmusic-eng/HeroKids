@@ -77,6 +77,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "New reward available!",
     "reward_created.message": "\"{{reward}}\" for {{points}} points",
+    "reward_request_approved.title": "Reward request approved!",
+    "reward_request_approved.message": "\"{{reward}}\" is now available to redeem!",
     "task_expired.title": "Task not completed",
     "task_expired.message": "\"{{task}}\" was not completed in time",
     "default_reason": "Did not meet expectations",
@@ -104,6 +106,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "Neue Belohnung verfügbar!",
     "reward_created.message": "\"{{reward}}\" für {{points}} Punkte",
+    "reward_request_approved.title": "Belohnungsanfrage genehmigt!",
+    "reward_request_approved.message": "\"{{reward}}\" kann jetzt eingelöst werden!",
     "task_expired.title": "Aufgabe nicht erledigt",
     "task_expired.message": "\"{{task}}\" wurde nicht rechtzeitig erledigt",
     "default_reason": "Entspricht nicht den Erwartungen",
@@ -131,6 +135,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "Nouvelle récompense disponible !",
     "reward_created.message": "\"{{reward}}\" pour {{points}} points",
+    "reward_request_approved.title": "Demande de récompense approuvée !",
+    "reward_request_approved.message": "\"{{reward}}\" peut maintenant être réclamée !",
     "task_expired.title": "Tâche non terminée",
     "task_expired.message": "\"{{task}}\" n'a pas été terminée à temps",
     "default_reason": "Ne répond pas aux attentes",
@@ -158,6 +164,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "¡Nueva recompensa disponible!",
     "reward_created.message": "\"{{reward}}\" por {{points}} puntos",
+    "reward_request_approved.title": "¡Solicitud de recompensa aprobada!",
+    "reward_request_approved.message": "\"{{reward}}\" ya está disponible para canjear.",
     "task_expired.title": "Tarea no completada",
     "task_expired.message": "\"{{task}}\" no se completó a tiempo",
     "default_reason": "No cumple las expectativas",
@@ -185,6 +193,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "「{{reward}}」",
     "reward_created.title": "新しいご褒美が追加されました！",
     "reward_created.message": "「{{reward}}」（{{points}}ポイント）",
+    "reward_request_approved.title": "ご褒美リクエストが承認されました！",
+    "reward_request_approved.message": "「{{reward}}」を今すぐ交換できます！",
     "task_expired.title": "タスク未完了",
     "task_expired.message": "「{{task}}」は期限内に完了しませんでした",
     "default_reason": "期待に沿っていません",
@@ -212,6 +222,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "「{{reward}}」",
     "reward_created.title": "新奖励可用！",
     "reward_created.message": "「{{reward}}」{{points}}积分",
+    "reward_request_approved.title": "奖励申请已批准！",
+    "reward_request_approved.message": "「{{reward}}」现在可以兑换了！",
     "task_expired.title": "任务未完成",
     "task_expired.message": "「{{task}}」未在规定时间内完成",
     "default_reason": "未达到预期",
@@ -239,6 +251,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "새로운 보상 등록!",
     "reward_created.message": "\"{{reward}}\" {{points}}포인트",
+    "reward_request_approved.title": "보상 요청이 승인되었어요!",
+    "reward_request_approved.message": "\"{{reward}}\"을(를) 이제 교환할 수 있어요!",
     "task_expired.title": "작업 미완료",
     "task_expired.message": "\"{{task}}\"이(가) 기한 내에 완료되지 않았어요",
     "default_reason": "기대에 미치지 못함",
@@ -266,6 +280,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "Ny belöning tillgänglig!",
     "reward_created.message": "\"{{reward}}\" för {{points}} poäng",
+    "reward_request_approved.title": "Belöningsbegäran godkänd!",
+    "reward_request_approved.message": "\"{{reward}}\" kan nu lösas in!",
     "task_expired.title": "Uppgift inte slutförd",
     "task_expired.message": "\"{{task}}\" slutfördes inte i tid",
     "default_reason": "Uppfyller inte förväntningarna",
@@ -293,6 +309,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_sharing_join.message": "\"{{reward}}\"",
     "reward_created.title": "Nova recompensa disponível!",
     "reward_created.message": "\"{{reward}}\" por {{points}} pontos",
+    "reward_request_approved.title": "Solicitação de recompensa aprovada!",
+    "reward_request_approved.message": "\"{{reward}}\" já pode ser resgatada!",
     "task_expired.title": "Tarefa não concluída",
     "task_expired.message": "\"{{task}}\" não foi concluída a tempo",
     "default_reason": "Não atendeu às expectativas",
@@ -4239,6 +4257,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: "reward_created",
           reward,
         });
+
+        // Notify the child who made the request
+        try {
+          const family = await storage.getFamily(member.familyName);
+          const lang = family?.language || "en";
+          await storage.createNotification({
+            familyName: member.familyName,
+            type: "reward_request_approved",
+            title: translateNotification(lang, "reward_request_approved.title"),
+            message: translateNotification(lang, "reward_request_approved.message", { reward: request.title }),
+            targetMemberId: request.requestedBy,
+            relatedMemberId: member.id,
+          });
+          // Broadcast notification update so the child's bell refreshes in real time
+          broadcastToFamily(member.familyName, { type: "notification_update" });
+        } catch (notifErr: any) {
+          console.error("[reward_request_approved] notification error:", notifErr.message);
+        }
       }
       
       // Broadcast the request update

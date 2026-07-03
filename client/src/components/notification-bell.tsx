@@ -66,6 +66,7 @@ const notificationIcons: Record<string, typeof Bell> = {
   reward_redeemed: Gift,
   reward_sharing: Share2,
   reward_request: Gift,
+  reward_request_approved: Gift,
   achievement_earned: Trophy,
   points_milestone: Star,
   member_joined: UserPlus,
@@ -105,6 +106,9 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
       case "reward_request":
         // Parents go to approvals for reward requests, children go to kid-dashboard
         return memberRole === "parent" ? "/approvals" : childDashboard;
+      case "reward_request_approved":
+        // Child gets this — go to rewards board to see the new reward
+        return "/rewards-board";
       case "pinboard_posted":
         return memberRole === "parent" ? `${parentDashboard}#pinboard` : `${childDashboard}#pinboard`;
       case "points_milestone":
