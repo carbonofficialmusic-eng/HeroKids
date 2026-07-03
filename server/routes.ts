@@ -79,6 +79,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_created.message": "\"{{reward}}\" for {{points}} points",
     "reward_request_approved.title": "Reward request approved!",
     "reward_request_approved.message": "\"{{reward}}\" is now available to redeem!",
+    "reward_request_declined.title": "Reward request declined",
+    "reward_request_declined.message": "\"{{reward}}\" was not approved",
     "task_expired.title": "Task not completed",
     "task_expired.message": "\"{{task}}\" was not completed in time",
     "default_reason": "Did not meet expectations",
@@ -108,6 +110,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_created.message": "\"{{reward}}\" für {{points}} Punkte",
     "reward_request_approved.title": "Belohnungsanfrage genehmigt!",
     "reward_request_approved.message": "\"{{reward}}\" kann jetzt eingelöst werden!",
+    "reward_request_declined.title": "Belohnungsanfrage abgelehnt",
+    "reward_request_declined.message": "\"{{reward}}\" wurde nicht genehmigt",
     "task_expired.title": "Aufgabe nicht erledigt",
     "task_expired.message": "\"{{task}}\" wurde nicht rechtzeitig erledigt",
     "default_reason": "Entspricht nicht den Erwartungen",
@@ -137,6 +141,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_created.message": "\"{{reward}}\" pour {{points}} points",
     "reward_request_approved.title": "Demande de récompense approuvée !",
     "reward_request_approved.message": "\"{{reward}}\" peut maintenant être réclamée !",
+    "reward_request_declined.title": "Demande de récompense refusée",
+    "reward_request_declined.message": "\"{{reward}}\" n'a pas été approuvée",
     "task_expired.title": "Tâche non terminée",
     "task_expired.message": "\"{{task}}\" n'a pas été terminée à temps",
     "default_reason": "Ne répond pas aux attentes",
@@ -166,6 +172,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_created.message": "\"{{reward}}\" por {{points}} puntos",
     "reward_request_approved.title": "¡Solicitud de recompensa aprobada!",
     "reward_request_approved.message": "\"{{reward}}\" ya está disponible para canjear.",
+    "reward_request_declined.title": "Solicitud de recompensa rechazada",
+    "reward_request_declined.message": "\"{{reward}}\" no fue aprobada",
     "task_expired.title": "Tarea no completada",
     "task_expired.message": "\"{{task}}\" no se completó a tiempo",
     "default_reason": "No cumple las expectativas",
@@ -195,6 +203,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_created.message": "「{{reward}}」（{{points}}ポイント）",
     "reward_request_approved.title": "ご褒美リクエストが承認されました！",
     "reward_request_approved.message": "「{{reward}}」を今すぐ交換できます！",
+    "reward_request_declined.title": "ご褒美リクエストが却下されました",
+    "reward_request_declined.message": "「{{reward}}」は承認されませんでした",
     "task_expired.title": "タスク未完了",
     "task_expired.message": "「{{task}}」は期限内に完了しませんでした",
     "default_reason": "期待に沿っていません",
@@ -224,6 +234,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_created.message": "「{{reward}}」{{points}}积分",
     "reward_request_approved.title": "奖励申请已批准！",
     "reward_request_approved.message": "「{{reward}}」现在可以兑换了！",
+    "reward_request_declined.title": "奖励申请已拒绝",
+    "reward_request_declined.message": "「{{reward}}」未获批准",
     "task_expired.title": "任务未完成",
     "task_expired.message": "「{{task}}」未在规定时间内完成",
     "default_reason": "未达到预期",
@@ -253,6 +265,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_created.message": "\"{{reward}}\" {{points}}포인트",
     "reward_request_approved.title": "보상 요청이 승인되었어요!",
     "reward_request_approved.message": "\"{{reward}}\"을(를) 이제 교환할 수 있어요!",
+    "reward_request_declined.title": "보상 요청이 거절되었어요",
+    "reward_request_declined.message": "\"{{reward}}\"이(가) 승인되지 않았어요",
     "task_expired.title": "작업 미완료",
     "task_expired.message": "\"{{task}}\"이(가) 기한 내에 완료되지 않았어요",
     "default_reason": "기대에 미치지 못함",
@@ -282,6 +296,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_created.message": "\"{{reward}}\" för {{points}} poäng",
     "reward_request_approved.title": "Belöningsbegäran godkänd!",
     "reward_request_approved.message": "\"{{reward}}\" kan nu lösas in!",
+    "reward_request_declined.title": "Belöningsbegäran nekad",
+    "reward_request_declined.message": "\"{{reward}}\" godkändes inte",
     "task_expired.title": "Uppgift inte slutförd",
     "task_expired.message": "\"{{task}}\" slutfördes inte i tid",
     "default_reason": "Uppfyller inte förväntningarna",
@@ -311,6 +327,8 @@ const notificationTranslations: Record<string, Record<string, string>> = {
     "reward_created.message": "\"{{reward}}\" por {{points}} pontos",
     "reward_request_approved.title": "Solicitação de recompensa aprovada!",
     "reward_request_approved.message": "\"{{reward}}\" já pode ser resgatada!",
+    "reward_request_declined.title": "Solicitação de recompensa recusada",
+    "reward_request_declined.message": "\"{{reward}}\" não foi aprovada",
     "task_expired.title": "Tarefa não concluída",
     "task_expired.message": "\"{{task}}\" não foi concluída a tempo",
     "default_reason": "Não atendeu às expectativas",
@@ -4277,6 +4295,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // If declined, notify the child who made the request
+      if (action === "decline") {
+        try {
+          const family = await storage.getFamily(member.familyName);
+          const lang = family?.language || "en";
+          await storage.createNotification({
+            familyName: member.familyName,
+            type: "reward_request_declined",
+            title: translateNotification(lang, "reward_request_declined.title"),
+            message: translateNotification(lang, "reward_request_declined.message", { reward: request.title }),
+            targetMemberId: request.requestedBy,
+            relatedMemberId: member.id,
+          });
+          broadcastToFamily(member.familyName, { type: "notification_update" });
+        } catch (notifErr: any) {
+          console.error("[reward_request_declined] notification error:", notifErr.message);
+        }
+      }
+
       // Broadcast the request update
       broadcastToFamily(member.familyName, {
         type: "reward_request_updated",
