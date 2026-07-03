@@ -86,19 +86,9 @@ import { TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR } from "@shared/skin-config
 
 /**
  * Default achievement templates - used by both seedDefaultAchievements and resetFamilyToFactory
- * Active by default: Weekly Leader, Perfect Week, 7-Day Streak, Lifetime Milestones (500/1000/2000), Star Collector
+ * Active by default: Monthly Champion, Perfect Week, 7-Day Streak, Lifetime Milestones (500/1000/2000), Star Collector
  */
 const DEFAULT_ACHIEVEMENT_TEMPLATES = [
-  {
-    type: "weekly_leaderboard" as const,
-    slug: "weekly-leaderboard-1st",
-    title: "Weekly Leader",
-    description: "Finish in 1st place on the weekly leaderboard",
-    bonusPoints: 75,
-    rewardType: "custom" as const,
-    isActive: false,
-    config: { rank: 1 },
-  },
   {
     type: "monthly_leaderboard" as const,
     slug: "monthly-leaderboard-1st",

@@ -94,9 +94,6 @@ export class AchievementEngine {
       case "first_weekly_finisher":
         await this.evaluateFirstWeeklyFinisher(definition, event);
         break;
-      case "weekly_leaderboard":
-        await this.evaluateWeeklyLeaderboard(definition, event);
-        break;
       case "perfect_week":
         await this.evaluatePerfectWeek(definition, event);
         break;
@@ -186,49 +183,6 @@ export class AchievementEngine {
           definition.title,
           definition.bonusPoints,
           event.memberId
-        );
-      }
-    }
-  }
-
-  private async evaluateWeeklyLeaderboard(definition: AchievementDefinition, event: AchievementEvent): Promise<void> {
-    if (event.type !== "midnight_reset") return;
-
-    const members = await storage.getFamilyMembersByFamily(event.familyName);
-    if (members.length === 0) return;
-
-    const sortedMembers = [...members]
-      .filter(m => !m.excludeFromLeaderboard)
-      .sort((a, b) => b.weeklyPoints - a.weeklyPoints);
-
-    const config = definition.config as { rank: number | "gold" | "silver" | "bronze" };
-    // Support both numeric rank (1, 2, 3) and string rank ("gold", "silver", "bronze")
-    const rankMap: Record<string, number> = { gold: 0, silver: 1, bronze: 2 };
-    const rankIndex = typeof config.rank === "number" 
-      ? config.rank - 1  // Convert 1-based to 0-based index
-      : (rankMap[config.rank] ?? 0);
-
-    if (sortedMembers.length > rankIndex) {
-      const winner = sortedMembers[rankIndex];
-      if (winner.weeklyPoints > 0) {
-        await storage.awardAchievement(definition.id, winner.id, definition.bonusPoints);
-        console.log(`🥇 ${winner.displayName} earned "${definition.title}" for ${config.rank} rank (+${definition.bonusPoints} points)`);
-        
-        broadcastToFamily(event.familyName, {
-          type: "achievement_earned",
-          memberId: winner.id,
-          memberName: winner.displayName,
-          achievementTitle: definition.title,
-          bonusPoints: definition.bonusPoints,
-        });
-        
-        // Create notification for parents
-        await createAchievementNotification(
-          event.familyName,
-          winner.displayName,
-          definition.title,
-          definition.bonusPoints,
-          winner.id
         );
       }
     }
