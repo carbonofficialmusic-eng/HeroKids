@@ -45,7 +45,8 @@ import {
   AlertTriangle,
   XCircle,
   Link as LinkIcon,
-  Unlink
+  Unlink,
+  KeyRound
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/skins";
 import { queryClient } from "@/lib/queryClient";
@@ -288,6 +289,10 @@ export default function AdminPage() {
   const [repairHistorySearch, setRepairHistorySearch] = useState("");
   const [userSearch, setUserSearch] = useState("");
   const [userToDelete, setUserToDelete] = useState<{ id: string; email: string | null; name: string | null } | null>(null);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [changePwCurrent, setChangePwCurrent] = useState("");
+  const [changePwNew, setChangePwNew] = useState("");
+  const [changePwConfirm, setChangePwConfirm] = useState("");
   const lastEmailAlertKeyRef = useRef<string | null>(null);
   const { toast } = useToast();
 
@@ -342,6 +347,31 @@ export default function AdminPage() {
     },
     onError: () => {
       toast({ title: "Failed to delete account", variant: "destructive" });
+    },
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) => {
+      const res = await fetch("/api/admin/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to change password");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Password changed", description: "Your admin password has been updated." });
+      setShowChangePassword(false);
+      setChangePwCurrent("");
+      setChangePwNew("");
+      setChangePwConfirm("");
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Failed to change password", variant: "destructive" });
     },
   });
 
@@ -825,6 +855,10 @@ export default function AdminPage() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
+            <Button variant="outline" onClick={() => setShowChangePassword(true)} data-testid="button-change-admin-password">
+              <KeyRound className="h-4 w-4 mr-2" />
+              Change Password
+            </Button>
             <Button variant="outline" onClick={logout} data-testid="button-admin-logout">
               <LogOut className="h-4 w-4 mr-2" />
               Logout
@@ -832,6 +866,66 @@ export default function AdminPage() {
           </div>
         </div>
       </header>
+
+      <Dialog open={showChangePassword} onOpenChange={(open) => {
+        setShowChangePassword(open);
+        if (!open) { setChangePwCurrent(""); setChangePwNew(""); setChangePwConfirm(""); }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Admin Password</DialogTitle>
+            <DialogDescription>Enter your current password and choose a new one (min. 8 characters).</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Current Password</label>
+              <Input
+                type="password"
+                value={changePwCurrent}
+                onChange={(e) => setChangePwCurrent(e.target.value)}
+                autoComplete="current-password"
+                data-testid="input-current-password"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">New Password</label>
+              <Input
+                type="password"
+                value={changePwNew}
+                onChange={(e) => setChangePwNew(e.target.value)}
+                autoComplete="new-password"
+                data-testid="input-new-password"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Confirm New Password</label>
+              <Input
+                type="password"
+                value={changePwConfirm}
+                onChange={(e) => setChangePwConfirm(e.target.value)}
+                autoComplete="new-password"
+                data-testid="input-confirm-password"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowChangePassword(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                if (changePwNew !== changePwConfirm) {
+                  toast({ title: "Passwords don't match", description: "New password and confirmation must be identical.", variant: "destructive" });
+                  return;
+                }
+                changePasswordMutation.mutate({ currentPassword: changePwCurrent, newPassword: changePwNew });
+              }}
+              disabled={changePasswordMutation.isPending || !changePwCurrent || !changePwNew || !changePwConfirm}
+              data-testid="button-confirm-change-password"
+            >
+              {changePasswordMutation.isPending ? "Saving..." : "Save Password"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <main className="container mx-auto px-4 py-6">
         {emailHealth && emailHealth.status !== "healthy" && (

@@ -7371,16 +7371,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/login", rateLimit(5, 15 * 60 * 1000), async (req, res) => {
     try {
       const { password } = req.body;
-      const adminPassword = process.env.ADMIN_PASSWORD;
+      const envPassword = process.env.ADMIN_PASSWORD;
 
-      if (!adminPassword) {
+      if (!envPassword) {
         return res.status(500).json({ message: "Admin password not configured" });
       }
 
       const trimmedPassword = (password || "").trim();
-      const trimmedAdminPassword = adminPassword.trim();
 
-      if (trimmedPassword === trimmedAdminPassword) {
+      // Check DB-stored bcrypt hash first, fall back to plain env var comparison
+      const storedHash = await storage.getAppConfig("admin_password_hash");
+      let isValid = false;
+      if (storedHash) {
+        isValid = await bcrypt.compare(trimmedPassword, storedHash);
+      } else {
+        isValid = trimmedPassword === envPassword.trim();
+      }
+
+      if (isValid) {
         const sessionToken = crypto.randomBytes(32).toString("hex");
         adminSessions.set(sessionToken, Date.now() + ADMIN_SESSION_TTL_MS);
         res.json({ success: true, token: sessionToken });
@@ -7390,6 +7398,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Admin login error:", error);
       res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Change admin password
+  app.post("/api/admin/change-password", isAdmin, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+
+      if (!newPassword || typeof newPassword !== "string" || newPassword.trim().length < 8) {
+        return res.status(400).json({ message: "New password must be at least 8 characters" });
+      }
+
+      // Verify current password
+      const envPassword = process.env.ADMIN_PASSWORD;
+      const storedHash = await storage.getAppConfig("admin_password_hash");
+      const trimmedCurrent = (currentPassword || "").trim();
+
+      let currentValid = false;
+      if (storedHash) {
+        currentValid = await bcrypt.compare(trimmedCurrent, storedHash);
+      } else {
+        currentValid = trimmedCurrent === (envPassword || "").trim();
+      }
+
+      if (!currentValid) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+
+      // Hash and store new password
+      const newHash = await bcrypt.hash(newPassword.trim(), 12);
+      await storage.setAppConfig("admin_password_hash", newHash);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Admin change-password error:", error);
+      res.status(500).json({ message: "Failed to change password" });
     }
   });
 

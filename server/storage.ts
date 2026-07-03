@@ -67,6 +67,7 @@ import {
   accountLinkRepairHistory,
   shoppingListItems,
   devicePushTokens,
+  appConfig,
   type Notification,
   type InsertNotification,
   type NotificationType,
@@ -390,6 +391,10 @@ export interface IStorage {
   removeDevicePushToken(token: string): Promise<void>;
   getDevicePushTokensForMember(memberId: string): Promise<string[]>;
   getDevicePushTokensForMembers(memberIds: string[]): Promise<string[]>;
+
+  // App config operations
+  getAppConfig(key: string): Promise<string | null>;
+  setAppConfig(key: string, value: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3977,6 +3982,18 @@ export class DatabaseStorage implements IStorage {
       .from(devicePushTokens)
       .where(inArray(devicePushTokens.memberId, memberIds));
     return rows.map((r) => r.token);
+  }
+
+  async getAppConfig(key: string): Promise<string | null> {
+    const [row] = await db.select().from(appConfig).where(eq(appConfig.key, key));
+    return row?.value ?? null;
+  }
+
+  async setAppConfig(key: string, value: string): Promise<void> {
+    await db
+      .insert(appConfig)
+      .values({ key, value, updatedAt: new Date() })
+      .onConflictDoUpdate({ target: appConfig.key, set: { value, updatedAt: new Date() } });
   }
 }
 

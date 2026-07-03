@@ -1015,3 +1015,10 @@ export const insertDevicePushTokenSchema = createInsertSchema(devicePushTokens).
 
 export type InsertDevicePushToken = z.infer<typeof insertDevicePushTokenSchema>;
 export type DevicePushToken = typeof devicePushTokens.$inferSelect;
+
+// ===== APP CONFIG =====
+export const appConfig = pgTable("app_config", {
+  key: varchar("key", { length: 128 }).primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
