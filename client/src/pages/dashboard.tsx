@@ -49,7 +49,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronLeft, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin, TrendingUp, CheckCircle2, Coins, HelpCircle } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronLeft, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin, TrendingUp, CheckCircle2, Coins } from "lucide-react";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
@@ -1360,17 +1360,6 @@ export default function Dashboard() {
                 </Button>
               </div>
 
-              {/* Help: how to add family members */}
-              <div className="flex justify-end -mt-3">
-                <button
-                  onClick={() => setShowMemberOnboarding(true)}
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  data-testid="button-help-add-members"
-                >
-                  <HelpCircle className="h-3.5 w-3.5 flex-shrink-0" />
-                  {t("memberOnboarding.helpButtonLabel")}
-                </button>
-              </div>
 
               {/* Task Filter Tabs */}
               {activeTasks.length > 0 && (

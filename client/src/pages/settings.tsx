@@ -12,9 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { AddMemberDialog } from "@/components/add-member-dialog";
+import { MemberOnboardingModal } from "@/components/member-onboarding-modal";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin, Infinity } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin, Infinity, HelpCircle } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +43,7 @@ export default function Settings() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
+  const [memberOnboardingOpen, setMemberOnboardingOpen] = useState(false);
   const [newMemberJoinCode, setNewMemberJoinCode] = useState<string | null>(null);
   const [trialActivatedDialogOpen, setTrialActivatedDialogOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<FamilyMember | null>(null);
@@ -640,6 +642,14 @@ export default function Settings() {
                 <UserPlus className="h-4 w-4 mr-2" />
                 {t('settings.addMember')}
               </Button>
+              <button
+                onClick={() => setMemberOnboardingOpen(true)}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full justify-center mt-1"
+                data-testid="button-help-add-members"
+              >
+                <HelpCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                {t("memberOnboarding.helpButtonLabel")}
+              </button>
             </CardContent>
           </Card>
 
@@ -1508,6 +1518,14 @@ export default function Settings() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Member Onboarding Help Modal */}
+      <MemberOnboardingModal
+        open={memberOnboardingOpen}
+        onClose={() => setMemberOnboardingOpen(false)}
+        joinCode={familyData?.joinCode ?? undefined}
+        fromSettings
+      />
 
       {/* Device Link Dialog */}
       <DeviceLinkDialog

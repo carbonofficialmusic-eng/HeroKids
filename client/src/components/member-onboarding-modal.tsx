@@ -15,9 +15,10 @@ interface MemberOnboardingModalProps {
   open: boolean;
   onClose: () => void;
   joinCode?: string;
+  fromSettings?: boolean;
 }
 
-export function MemberOnboardingModal({ open, onClose, joinCode }: MemberOnboardingModalProps) {
+export function MemberOnboardingModal({ open, onClose, joinCode, fromSettings = false }: MemberOnboardingModalProps) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
@@ -123,23 +124,35 @@ export function MemberOnboardingModal({ open, onClose, joinCode }: MemberOnboard
         </div>
 
         <div className="flex flex-col gap-2 pt-1">
-          <Link href="/settings" onClick={onClose}>
+          {fromSettings ? (
             <Button
-              variant="outline"
-              className="w-full gap-2"
-              data-testid="button-onboarding-to-settings"
+              className="w-full"
+              onClick={onClose}
+              data-testid="button-onboarding-got-it"
             >
-              {t("memberOnboarding.toSettings")}
-              <ArrowRight className="h-4 w-4" />
+              {t("memberOnboarding.gotIt")}
             </Button>
-          </Link>
-          <Button
-            className="w-full"
-            onClick={onClose}
-            data-testid="button-onboarding-got-it"
-          >
-            {t("memberOnboarding.gotIt")}
-          </Button>
+          ) : (
+            <>
+              <Link href="/settings" onClick={onClose}>
+                <Button
+                  variant="outline"
+                  className="w-full gap-2"
+                  data-testid="button-onboarding-to-settings"
+                >
+                  {t("memberOnboarding.toSettings")}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Button
+                className="w-full"
+                onClick={onClose}
+                data-testid="button-onboarding-got-it"
+              >
+                {t("memberOnboarding.gotIt")}
+              </Button>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
