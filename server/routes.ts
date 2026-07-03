@@ -4285,7 +4285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type: "reward_request_approved",
             title: translateNotification(lang, "reward_request_approved.title"),
             message: translateNotification(lang, "reward_request_approved.message", { reward: request.title }),
-            targetMemberId: request.requestedBy,
+            targetMemberId: request.requester.id,
             relatedMemberId: member.id,
           });
           // Broadcast notification update so the child's bell refreshes in real time
@@ -4305,7 +4305,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type: "reward_request_declined",
             title: translateNotification(lang, "reward_request_declined.title"),
             message: translateNotification(lang, "reward_request_declined.message", { reward: request.title }),
-            targetMemberId: request.requestedBy,
+            targetMemberId: request.requester.id,
             relatedMemberId: member.id,
           });
           broadcastToFamily(member.familyName, { type: "notification_update" });
