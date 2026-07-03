@@ -160,16 +160,6 @@ const DEFAULT_ACHIEVEMENT_TEMPLATES = [
     isActive: false,
     config: { requiredLegacySkins: 10 },
   },
-  {
-    type: "first_weekly_finisher" as const,
-    slug: "first-weekly-finisher",
-    title: "Weekly Champion",
-    description: "Be the first family member to complete all weekly recurring tasks",
-    bonusPoints: 50,
-    rewardType: "custom" as const,
-    isActive: false,
-    config: {},
-  },
 ];
 
 /**

@@ -592,7 +592,6 @@ export default function Achievements() {
               {t("achievements.howItWorksDesc")}
             </p>
             <ul className="list-disc list-inside space-y-1 mt-2">
-              <li>{t("achievements.firstWeeklyFinisher")}</li>
               <li>{t("achievements.weeklyLeaderboard")}</li>
               <li>{t("achievements.perfectWeek")}</li>
               <li>{t("achievements.lifetimeMilestones")}</li>
