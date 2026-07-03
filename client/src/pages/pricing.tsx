@@ -32,7 +32,7 @@ export default function Pricing() {
 
   // RevenueCat state (iOS only)
   const [rcOfferings, setRcOfferings] = useState<any>(null);
-  const [rcLoading, setRcLoading] = useState(isNativePlatform());
+  const [rcLoading, setRcLoading] = useState(false);
   const [rcRestoring, setRcRestoring] = useState(false);
 
   const { data: member } = useQuery<FamilyMember>({
@@ -56,8 +56,8 @@ export default function Pricing() {
   useEffect(() => {
     if (!isNativePlatform() || !familyData?.familyName) return;
     let cancelled = false;
+    setRcLoading(true);
     (async () => {
-      setRcLoading(true);
       try {
         await initRevenueCat(familyData.familyName);
         const offerings = await getRCOfferings();
