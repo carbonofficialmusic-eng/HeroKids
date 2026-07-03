@@ -376,12 +376,9 @@ export default function RewardsBoard() {
   });
 
   const activeRewards = allRewards.filter(r => r.isActive).sort((a, b) => {
-    const currentPoints = member?.totalPoints ?? 0;
-    const aReady = currentPoints >= a.pointThreshold;
-    const bReady = currentPoints >= b.pointThreshold;
-    if (aReady && !bReady) return -1;
-    if (!bReady && aReady) return 1;
-    return Math.abs(currentPoints - a.pointThreshold) - Math.abs(currentPoints - b.pointThreshold);
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateB - dateA;
   });
 
   // Dialog states for reward request editing

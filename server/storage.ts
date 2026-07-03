@@ -2039,7 +2039,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(rewards)
       .where(eq(rewards.familyName, familyName))
-      .orderBy(rewards.pointThreshold);
+      .orderBy(desc(rewards.createdAt));
   }
 
   async getRewardById(id: string): Promise<Reward | undefined> {

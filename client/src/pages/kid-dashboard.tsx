@@ -1936,15 +1936,13 @@ export default function KidDashboard() {
   const isParent = member?.role === "parent";
   const isRealParent = realMember?.role === "parent";
 
-  // Filter active rewards and sort by proximity
+  // Filter active rewards and sort newest first
   const activeRewards = rewards
     .filter(r => r.isActive)
     .sort((a, b) => {
-      const aReady = currentPoints >= a.pointThreshold;
-      const bReady = currentPoints >= b.pointThreshold;
-      if (aReady && !bReady) return -1;
-      if (!aReady && bReady) return 1;
-      return Math.abs(currentPoints - a.pointThreshold) - Math.abs(currentPoints - b.pointThreshold);
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
     });
 
   // Filter tasks: different logic for multi-completion vs multi-assignment vs normal tasks
