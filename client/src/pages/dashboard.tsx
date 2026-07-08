@@ -1815,7 +1815,7 @@ export default function Dashboard() {
               {/* Pinboard */}
               <div id="pinboard" className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <img src="/nav-icons/pinboard.png" alt="" className="w-11 h-11 object-contain drop-shadow-sm" />
+                  <img src="/nav-icons/pinboard.png" alt="" className="w-10 h-10 object-contain drop-shadow-sm" />
                   <h2 className="text-lg font-bold font-accent">{t("pinboard.title")}</h2>
                 </div>
                 <Pinboard currentMemberId={member?.id ?? null} />
