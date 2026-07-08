@@ -1723,7 +1723,7 @@ export default function Dashboard() {
               {parentGoals.filter(g => g.isActive).length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <img src={familyGoalsIcon} alt="" className="h-8 w-8 object-contain flex-shrink-0" />
+                    <img src={familyGoalsIcon} alt="" className="h-11 w-11 object-contain flex-shrink-0" />
                     <h2 className="text-lg font-bold font-accent">{t("familyGoals.title")}</h2>
                   </div>
                   {parentGoals.filter(g => g.isActive).map((goal) => {
