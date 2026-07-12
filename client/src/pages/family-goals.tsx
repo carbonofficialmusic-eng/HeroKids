@@ -302,7 +302,7 @@ export default function FamilyGoals() {
                 <p className="text-sm text-muted-foreground mb-4">
                   Familienziele sind ab dem <strong>Family-Abo</strong> verfügbar. Upgrade, um gemeinsame Ziele zu erstellen.
                 </p>
-                <Link href={isNativePlatform() ? "/settings" : "/pricing"}>
+                <Link href="/pricing">
                   <Button data-testid="button-goals-upgrade">
                     <Lock className="h-4 w-4 mr-2" />
                     Jetzt upgraden

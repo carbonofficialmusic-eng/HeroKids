@@ -279,7 +279,7 @@ export default function Achievements() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Link href={isNativePlatform() ? "/settings" : "/pricing"}>
+            <Link href="/pricing">
               <Button className="w-full" data-testid="button-achievements-upgrade">
                 <Lock className="h-4 w-4 mr-2" />
                 Jetzt upgraden
