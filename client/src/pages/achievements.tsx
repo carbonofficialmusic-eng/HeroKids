@@ -155,7 +155,7 @@ export default function Achievements() {
 
   // Fetch family data for tier check
   const { data: familyData } = useQuery<{ subscriptionTier?: string; trialEndsAt?: string | null }>({
-    queryKey: ["/api/family"],
+    queryKey: ["/api/families/current"],
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
   });

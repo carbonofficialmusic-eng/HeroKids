@@ -79,7 +79,7 @@ export default function FamilyGoals() {
   });
 
   const { data: familyData } = useQuery<Family>({
-    queryKey: ["/api/family"],
+    queryKey: ["/api/families/current"],
     enabled: !!member,
     staleTime: 5 * 60 * 1000,
   });
