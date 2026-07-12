@@ -39,7 +39,9 @@ import {
   ChevronDown,
   ChevronRight,
   BarChart3,
+  Lock,
 } from "lucide-react";
+import { isNativePlatform } from "@/lib/platform";
 import { Link } from "wouter";
 import familyGoalsIcon from "@assets/family-goals-icon.png";
 import type { FamilyGoal, GoalContribution, FamilyMember, Family } from "@shared/schema";
@@ -253,30 +255,6 @@ export default function FamilyGoals() {
     setHistoryOpenGoals(prev => ({ ...prev, [goalId]: !prev[goalId] }));
   };
 
-  if (!hasGoalsFeature && familyData) {
-    return (
-      <div className="min-h-screen p-6 flex items-center justify-center" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
-        <div className="max-w-md w-full text-center space-y-4">
-          <Link href="/dashboard">
-            <Button variant="outline" size="sm" className="mb-2 bg-background/30 backdrop-blur-sm border-border/40">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {t("common.back")}
-            </Button>
-          </Link>
-          <div className="text-5xl mb-4">🎯</div>
-          <h2 className="text-2xl font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
-            Familienziele
-          </h2>
-          <p className="text-muted-foreground">
-            Familienziele sind ab dem <strong>Family-Abo</strong> verfügbar. Setzt gemeinsame Ziele und arbeitet als Familie darauf hin.
-          </p>
-          <Link href="/settings">
-            <Button className="mt-4">Jetzt upgraden</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -313,7 +291,29 @@ export default function FamilyGoals() {
           </p>
         </div>
 
-        {member?.role === "parent" && (
+        {member?.role === "parent" && !hasGoalsFeature && !!familyData && (
+          <Card className="p-6 bg-card" data-testid="card-goals-upgrade-prompt">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-muted rounded-lg">
+                <Lock className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-1">{t("familyGoals.createNewGoal")}</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Familienziele sind ab dem <strong>Family-Abo</strong> verfügbar. Upgrade, um gemeinsame Ziele zu erstellen.
+                </p>
+                <Link href={isNativePlatform() ? "/settings" : "/pricing"}>
+                  <Button data-testid="button-goals-upgrade">
+                    <Lock className="h-4 w-4 mr-2" />
+                    Jetzt upgraden
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {member?.role === "parent" && hasGoalsFeature && (
           <Card className="p-6 bg-card border-2 border-primary/20">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-primary/10 rounded-lg">
