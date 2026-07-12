@@ -389,11 +389,12 @@ export function TaskDialog({
   };
 
   const applyTemplate = (template: typeof taskTemplates[0]) => {
+    if ((template as any).isShoppingList && !canUseShoppingList) return;
     form.setValue("title", template.title);
     form.setValue("description", template.description);
     form.setValue("points", template.points);
     form.setValue("iconEmoji", template.iconEmoji);
-    form.setValue("requiresProof", template.requiresProof);
+    form.setValue("requiresProof", template.requiresProof && canUsePhotoProof);
     if ((template as any).recurrence) {
       form.setValue("recurrence", (template as any).recurrence);
     }
@@ -466,19 +467,23 @@ export function TaskDialog({
                   <h3 className="font-semibold text-sm">{t('tasks.quickTemplates')}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
-                  {taskTemplates.map((template) => (
-                    <Card
-                      key={template.id}
-                      className="p-2 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                      onClick={() => applyTemplate(template)}
-                      data-testid={`template-${template.id}`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-lg">{template.iconEmoji}</span>
-                        <span className="font-medium text-xs truncate">{template.title}</span>
-                      </div>
-                    </Card>
-                  ))}
+                  {taskTemplates.map((template) => {
+                    const isLocked = (template as any).isShoppingList && !canUseShoppingList;
+                    return (
+                      <Card
+                        key={template.id}
+                        className={`p-2 transition-all ${isLocked ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover-elevate active-elevate-2"}`}
+                        onClick={() => applyTemplate(template)}
+                        data-testid={`template-${template.id}`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-lg">{template.iconEmoji}</span>
+                          <span className="font-medium text-xs truncate">{template.title}</span>
+                          {isLocked && <Lock className="h-3 w-3 text-muted-foreground ml-auto shrink-0" />}
+                        </div>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
 
