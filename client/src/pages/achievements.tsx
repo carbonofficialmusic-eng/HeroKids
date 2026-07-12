@@ -10,12 +10,14 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ChevronLeft, Trophy, Star, Award, TrendingUp, Flame, History, Sparkles, Gift, Coins, Shield } from "lucide-react";
-import { useLocation } from "wouter";
+import { ChevronLeft, Trophy, Star, Award, TrendingUp, Flame, History, Sparkles, Gift, Coins, Shield, Lock } from "lucide-react";
+import { useLocation, Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { FamilyMember } from "@shared/schema";
+import { hasFeature, type SubscriptionTier } from "@shared/tier-config";
+import { isNativePlatform } from "@/lib/platform";
 
 // Debounced input component for text fields
 function DebouncedInput({ 
@@ -151,6 +153,13 @@ export default function Achievements() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Fetch family data for tier check
+  const { data: familyData } = useQuery<{ subscriptionTier?: string; trialEndsAt?: string | null }>({
+    queryKey: ["/api/family"],
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Fetch achievement definitions — always fresh on mount so new entries are never missed
   const { data: achievements = [], isLoading } = useQuery<AchievementDefinition[]>({
     queryKey: ["/api/achievements"],
@@ -228,6 +237,8 @@ export default function Achievements() {
   });
 
   const isParent = realMember?.role === "parent";
+  const isOnTrial = !!(familyData?.trialEndsAt && new Date(familyData.trialEndsAt) > new Date());
+  const hasAchievementsFeature = hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "achievements") || isOnTrial;
 
   if (!isParent) {
     return (
@@ -241,6 +252,40 @@ export default function Achievements() {
           </CardHeader>
           <CardContent>
             <Button onClick={() => setLocation("/dashboard")} className="w-full" data-testid="button-back">
+              {t("goBack")}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!hasAchievementsFeature && !!familyData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
+        <Card className="max-w-md w-full">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-3">
+              <div className="p-4 bg-muted rounded-full">
+                <Lock className="h-8 w-8 text-muted-foreground" />
+              </div>
+            </div>
+            <CardTitle className="flex items-center justify-center gap-2">
+              <Trophy className="h-5 w-5" />
+              {t("achievements.title")}
+            </CardTitle>
+            <CardDescription>
+              Bonus-Belohnungen und Achievements sind ab dem <strong>Family-Abo</strong> verfügbar. Belohne deine Kinder für besondere Leistungen.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Link href={isNativePlatform() ? "/settings" : "/pricing"}>
+              <Button className="w-full" data-testid="button-achievements-upgrade">
+                <Lock className="h-4 w-4 mr-2" />
+                Jetzt upgraden
+              </Button>
+            </Link>
+            <Button variant="outline" className="w-full" onClick={() => setLocation("/dashboard")} data-testid="button-back">
               {t("goBack")}
             </Button>
           </CardContent>

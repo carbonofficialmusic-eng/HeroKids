@@ -120,6 +120,7 @@ export function TaskDialog({
   const isOnTrial = !!(trialEndsAt && new Date(trialEndsAt) > new Date());
   const canAssignMembers = subscriptionTier !== "free" || isOnTrial;
   const canUseShoppingList = subscriptionTier !== "free" || isOnTrial;
+  const canUsePhotoProof = subscriptionTier !== "free" || isOnTrial;
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -1081,17 +1082,31 @@ export function TaskDialog({
               control={form.control}
               name="requiresProof"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                <FormItem className={`flex items-center justify-between rounded-lg border p-4 ${!canUsePhotoProof ? "opacity-60" : ""}`}>
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">{t('tasks.photoProof')}</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <FormLabel className="text-base">{t('tasks.photoProof')}</FormLabel>
+                      {!canUsePhotoProof && (
+                        <Badge variant="secondary" className="text-xs gap-1">
+                          <Lock className="w-3 h-3" />
+                          Family
+                        </Badge>
+                      )}
+                    </div>
                     <FormDescription>
-                      {t('tasks.photoProofDesc')}
+                      {canUsePhotoProof
+                        ? t('tasks.photoProofDesc')
+                        : t('tasks.photoProofLockedDesc', { defaultValue: 'Upgrade auf Family, um Foto-Nachweis zu nutzen.' })}
                     </FormDescription>
                   </div>
                   <FormControl>
                     <Switch
                       checked={field.value}
-                      onCheckedChange={field.onChange}
+                      disabled={!canUsePhotoProof}
+                      onCheckedChange={(checked) => {
+                        if (!canUsePhotoProof) return;
+                        field.onChange(checked);
+                      }}
                       data-testid="switch-requires-proof"
                     />
                   </FormControl>
