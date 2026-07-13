@@ -2759,9 +2759,9 @@ export default function KidDashboard() {
                               </Avatar>
                               <span className="text-sm font-semibold text-white/80">{initiatorMember.displayName}</span>
                             </div>
-                            {/* Other participants (not the current member, not the initiator) */}
+                            {/* Other participants (not the initiator — self is included) */}
                             {(joined.sharingParticipants || [])
-                              .filter((p: any) => p.memberId !== member?.id && p.memberId !== joined.memberId)
+                              .filter((p: any) => p.memberId !== joined.memberId)
                               .map((p: any) => {
                                 const pm = familyMembers.find(m => m.id === p.memberId);
                                 if (!pm) return null;
