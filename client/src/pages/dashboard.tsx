@@ -2127,7 +2127,7 @@ export default function Dashboard() {
           <div
             className="overflow-x-hidden"
             style={{
-              width: '100vw',
+              width: 'min(100vw, 44rem)',
               paddingLeft: 'max(0.5rem, env(safe-area-inset-left))',
               paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
             }}
