@@ -1132,25 +1132,6 @@ export default function RewardsBoard() {
                   </div>
                 )}
 
-                {/* Leave Sharing - for participants (not the initiator) in an active share */}
-                {redemption.memberId !== member?.id &&
-                 redemption.sharingStatus === "sharing_active" &&
-                 redemption.status !== "completed" &&
-                 redemption.sharingParticipants?.some((p: any) => p.memberId === member?.id) && (
-                  <div className="flex gap-2 pt-2 border-t">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-2 text-destructive border-destructive/40"
-                      onClick={() => leaveSharingMutation.mutate(redemption.id)}
-                      disabled={leaveSharingMutation.isPending}
-                      data-testid={`button-leave-redemption-${redemption.id}`}
-                    >
-                      <LogOut className="h-4 w-4" />
-                      {t("kidDashboard.leaveSharing")}
-                    </Button>
-                  </div>
-                )}
 
                 {/* Sharing Button - Only for own redemptions that are not yet shared and not completed */}
                 {redemption.memberId === member?.id && 
@@ -1198,7 +1179,23 @@ export default function RewardsBoard() {
 
                 {/* Parent Controls - Only when acting as parent, not when switched to child */}
                 {isParent && redemption.status !== "completed" && (
-                  <div className="flex gap-2 pt-2 border-t">
+                  <div className="flex gap-2 pt-2 border-t flex-wrap">
+                    {/* Leave Sharing - for parent participants (not the initiator) in an active share */}
+                    {redemption.memberId !== member?.id &&
+                     redemption.sharingStatus === "sharing_active" &&
+                     redemption.sharingParticipants?.some((p: any) => p.memberId === member?.id) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-2 text-destructive border-destructive/40"
+                        onClick={() => leaveSharingMutation.mutate(redemption.id)}
+                        disabled={leaveSharingMutation.isPending}
+                        data-testid={`button-leave-redemption-${redemption.id}`}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        {t("kidDashboard.leaveSharing")}
+                      </Button>
+                    )}
                     {/* Mark as fulfilled only available once sharing is finalized */}
                     {redemption.sharingStatus !== "sharing_active" && (
                       <Button
