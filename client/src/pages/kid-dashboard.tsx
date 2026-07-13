@@ -3148,22 +3148,17 @@ export default function KidDashboard() {
 
       {/* Navigation Bottom Bar — Web: centered, no collapse / iOS native: collapsible right */}
       {isNativePlatform() ? (
-        /* iOS native: collapsible bar — centered in all orientations */
+        /* iOS native: collapsible right-anchored */
         <div
-          className={`fixed bottom-0 left-0 right-0 z-50 flex justify-center ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
+          className={`fixed bottom-0 right-0 z-50 overflow-x-hidden ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
           style={{
+            width: 'min(100vw, 44rem)',
             paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
+            paddingLeft: 'max(0.5rem, env(safe-area-inset-left))',
+            paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
             paddingTop: '0.5rem',
           }}
         >
-          <div
-            className="overflow-x-hidden"
-            style={{
-              width: 'min(100vw, 44rem)',
-              paddingLeft: 'max(0.5rem, env(safe-area-inset-left))',
-              paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
-            }}
-          >
             <div
               style={{
                 transform: chatBarCollapsed ? 'translateX(calc(100% - 40px))' : 'translateX(0)',
@@ -3222,7 +3217,6 @@ export default function KidDashboard() {
                 )}
               </Card>
             </div>
-          </div>
         </div>
       ) : (
         /* Web: centered bar, no collapse toggle */
