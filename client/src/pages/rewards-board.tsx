@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus, Lock, Trophy, Star, Zap, Info, Loader2 } from "lucide-react";
+import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus, Lock, Trophy, Star, Zap, Info, Loader2, LogOut } from "lucide-react";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -506,6 +506,26 @@ export default function RewardsBoard() {
     },
   });
 
+  // Leave a shared reward (participant steps out)
+  const leaveSharingMutation = useMutation({
+    mutationFn: async (redemptionId: string) => {
+      return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/leave-sharing`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("rewardsBoard.toastError"),
+        description: error.message || t("rewardsBoard.joinError"),
+        variant: "destructive",
+      });
+    },
+  });
+
   // Cancel sharing (when no participants have joined)
   const cancelSharingMutation = useMutation({
     mutationFn: async (redemptionId: string) => {
@@ -951,10 +971,23 @@ export default function RewardsBoard() {
                         );
                       })()}
                       {!isInitiator && hasJoined && (
-                        <Badge variant="secondary" className="gap-1">
-                          <CheckCircle2 className="h-3 w-3" />
-                          {t("rewardsBoard.youParticipate")}
-                        </Badge>
+                        <>
+                          <Badge variant="secondary" className="gap-1">
+                            <CheckCircle2 className="h-3 w-3" />
+                            {t("rewardsBoard.youParticipate")}
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-2 text-destructive border-destructive/40"
+                            onClick={() => leaveSharingMutation.mutate(shared.id)}
+                            disabled={leaveSharingMutation.isPending}
+                            data-testid={`button-leave-shared-${shared.id}`}
+                          >
+                            <LogOut className="h-4 w-4" />
+                            {t("kidDashboard.leaveSharing")}
+                          </Button>
+                        </>
                       )}
                       {/* Parents can always fully cancel any shared redemption and refund points */}
                       {isParent && (
