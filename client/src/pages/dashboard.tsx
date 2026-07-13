@@ -2176,18 +2176,19 @@ export default function Dashboard() {
           </div>
         </div>
       ) : (
-        /* Web: centered bar, no collapse toggle */
+        /* Web: right-aligned bar, no collapse toggle */
         <div
-          className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
+          className="fixed bottom-0 right-0 z-50 pointer-events-none"
           style={{
             paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
             paddingTop: '0.5rem',
+            paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden' as React.CSSProperties['WebkitBackfaceVisibility'],
           }}
         >
-          <div className="pointer-events-auto relative" style={{ width: 'min(calc(100vw - 1rem), 44rem)' }}>
+          <div className="pointer-events-auto relative">
             <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-lg">
               <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 w-full px-5 rounded-2xl">
                 <Link href="/chat">
