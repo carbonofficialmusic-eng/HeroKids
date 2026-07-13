@@ -971,23 +971,10 @@ export default function RewardsBoard() {
                         );
                       })()}
                       {!isInitiator && hasJoined && (
-                        <>
-                          <Badge variant="secondary" className="gap-1">
-                            <CheckCircle2 className="h-3 w-3" />
-                            {t("rewardsBoard.youParticipate")}
-                          </Badge>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-2 text-destructive border-destructive/40"
-                            onClick={() => leaveSharingMutation.mutate(shared.id)}
-                            disabled={leaveSharingMutation.isPending}
-                            data-testid={`button-leave-shared-${shared.id}`}
-                          >
-                            <LogOut className="h-4 w-4" />
-                            {t("kidDashboard.leaveSharing")}
-                          </Button>
-                        </>
+                        <Badge variant="secondary" className="gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          {t("rewardsBoard.youParticipate")}
+                        </Badge>
                       )}
                       {/* Parents can always fully cancel any shared redemption and refund points */}
                       {isParent && (
