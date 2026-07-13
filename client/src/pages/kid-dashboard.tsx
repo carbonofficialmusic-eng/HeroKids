@@ -3150,11 +3150,10 @@ export default function KidDashboard() {
       {isNativePlatform() ? (
         /* iOS native: collapsible bar — centered in all orientations */
         <div
-          className={`fixed bottom-0 left-0 right-0 z-50 flex justify-end ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
+          className={`fixed bottom-0 right-0 z-50 flex justify-end ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
           style={{
             paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
             paddingTop: '0.5rem',
-            paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
           }}
         >
           <div
