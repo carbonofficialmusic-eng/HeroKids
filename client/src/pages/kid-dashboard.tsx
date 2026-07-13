@@ -3146,111 +3146,55 @@ export default function KidDashboard() {
       </div>{/* end container */}
       </div>{/* end paddingTop wrapper */}
 
-      {/* Navigation Bottom Bar — Web: centered, no collapse / iOS native: collapsible right */}
-      {isNativePlatform() ? (
-        /* iOS native: collapsible right-anchored */
+      {/* Navigation Bottom Bar — collapsible on all platforms */}
+      <div
+        className={`fixed bottom-0 right-0 z-50 overflow-x-hidden ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
+        style={{
+          width: 'min(100vw, 44rem)',
+          paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
+          paddingLeft: 'max(0.5rem, env(safe-area-inset-left))',
+          paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
+          paddingTop: '0.5rem',
+        }}
+      >
         <div
-          className={`fixed bottom-0 right-0 z-50 overflow-x-hidden ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
           style={{
-            width: 'min(100vw, 44rem)',
-            paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
-            paddingLeft: 'max(0.5rem, env(safe-area-inset-left))',
-            paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
-            paddingTop: '0.5rem',
+            transform: chatBarCollapsed ? 'translateX(calc(100% - 40px))' : 'translateX(0)',
+            transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-            <div
-              style={{
-                transform: chatBarCollapsed ? 'translateX(calc(100% - 40px))' : 'translateX(0)',
-                transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              }}
-            >
-              <Card className="p-1.5 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setChatBarCollapsed(c => !c)}
-                    className="flex-shrink-0 rounded-2xl h-14 w-10 pointer-events-auto"
-                    data-testid="button-chat-bar-toggle"
-                    aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
-                  >
-                    {chatBarCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-                  </Button>
-                  <div className="flex-1 min-w-0">
-                    <Button
-                      variant="ghost"
-                      size="lg"
-                      onClick={() => setRequestRewardDialogOpen(true)}
-                      data-testid="button-nav-request-reward"
-                      className="h-14 w-full px-3 sm:px-5 rounded-2xl"
-                    >
-                      <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-amber-500 flex-shrink-0" />
-                      <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("kidDashboard.requestNewReward")}</span>
-                    </Button>
-                  </div>
-                  <div className="flex-1 min-w-0 relative">
-                    <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
-                      <Link href="/chat">
-                        <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
-                        <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("nav.chat")}</span>
-                      </Link>
-                    </Button>
-                    {!chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
-                      <span
-                        className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
-                        data-testid="badge-unread-chat-count"
-                      >
-                        {unreadChatData.count}
-                      </span>
-                    )}
-                  </div>
-                  <div className="w-10 flex-shrink-0" />
-                </div>
-                {chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
-                  <span
-                    className="absolute -top-1 left-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
-                    data-testid="badge-unread-chat-count-collapsed"
-                  >
-                    {unreadChatData.count}
-                  </span>
-                )}
-              </Card>
-            </div>
-        </div>
-      ) : (
-        /* Web: centered bar, no collapse toggle */
-        <div
-          className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
-          style={{
-            paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
-            paddingTop: '0.5rem',
-            transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden' as React.CSSProperties['WebkitBackfaceVisibility'],
-          }}
-        >
-          <div className="pointer-events-auto">
-          <Card className="p-1.5 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-lg">
+          <Card className="p-1.5 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
             <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="ghost"
-                size="lg"
-                onClick={() => setRequestRewardDialogOpen(true)}
-                data-testid="button-nav-request-reward"
-                className="h-14 px-4 sm:px-6 rounded-2xl"
+                size="icon"
+                onClick={() => setChatBarCollapsed(c => !c)}
+                className="flex-shrink-0 rounded-2xl h-14 w-10 pointer-events-auto"
+                data-testid="button-chat-bar-toggle"
+                aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
               >
-                <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-amber-500 flex-shrink-0" />
-                <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("kidDashboard.requestNewReward")}</span>
+                {chatBarCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
               </Button>
-              <div className="relative">
-                <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 px-4 sm:px-6 rounded-2xl">
+              <div className="flex-1 min-w-0">
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => setRequestRewardDialogOpen(true)}
+                  data-testid="button-nav-request-reward"
+                  className="h-14 w-full px-3 sm:px-5 rounded-2xl"
+                >
+                  <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-amber-500 flex-shrink-0" />
+                  <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("kidDashboard.requestNewReward")}</span>
+                </Button>
+              </div>
+              <div className="flex-1 min-w-0 relative">
+                <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
                   <Link href="/chat">
                     <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
                     <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("nav.chat")}</span>
                   </Link>
                 </Button>
-                {unreadChatData && unreadChatData.count > 0 && (
+                {!chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
                   <span
                     className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
                     data-testid="badge-unread-chat-count"
@@ -3259,11 +3203,19 @@ export default function KidDashboard() {
                   </span>
                 )}
               </div>
+              <div className="w-10 flex-shrink-0" />
             </div>
+            {chatBarCollapsed && unreadChatData && unreadChatData.count > 0 && (
+              <span
+                className="absolute -top-1 left-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+                data-testid="badge-unread-chat-count-collapsed"
+              >
+                {unreadChatData.count}
+              </span>
+            )}
           </Card>
-          </div>
         </div>
-      )}
+      </div>
 
       {/* Edit Profile Dialog - Available to all members */}
       {member && (

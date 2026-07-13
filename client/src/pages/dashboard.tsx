@@ -2114,9 +2114,8 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Parent Bottom Navigation Bar */}
-      {isParent && (isNativePlatform() ? (
-        /* iOS native: collapsible right-anchored */
+      {/* Parent Bottom Navigation Bar — collapsible on all platforms */}
+      {isParent && (
         <div
           className={`fixed bottom-0 right-0 z-50 overflow-x-hidden ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
           style={{
@@ -2174,38 +2173,7 @@ export default function Dashboard() {
             </Card>
           </div>
         </div>
-      ) : (
-        /* Web: centered bar, no collapse toggle */
-        <div
-          className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
-          style={{
-            paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
-            paddingTop: '0.5rem',
-            transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden' as React.CSSProperties['WebkitBackfaceVisibility'],
-          }}
-        >
-          <div className="pointer-events-auto relative" style={{ width: 'min(calc(100vw - 1rem), 44rem)' }}>
-            <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-lg">
-              <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 w-full px-5 rounded-2xl">
-                <Link href="/chat">
-                  <MessageCircle className="h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
-                  <span className="font-medium text-sm">{t("nav.chat")}</span>
-                </Link>
-              </Button>
-            </Card>
-            {unreadChatData && unreadChatData.count > 0 && (
-              <span
-                className="absolute -top-1 -right-1 z-50 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
-                data-testid="badge-parent-unread-chat"
-              >
-                {unreadChatData.count}
-              </span>
-            )}
-          </div>
-        </div>
-      ))}
+      )}
 
       {/* Dialogs */}
       {isParent && member && (
