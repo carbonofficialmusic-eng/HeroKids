@@ -2118,19 +2118,15 @@ export default function Dashboard() {
       {isParent && (isNativePlatform() ? (
         /* iOS native: collapsible bar — centered in all orientations */
         <div
-          className={`fixed bottom-0 left-0 right-0 z-50 flex justify-center ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
+          className={`fixed bottom-0 left-0 right-0 z-50 flex justify-end ${chatBarCollapsed ? 'pointer-events-none' : ''}`}
           style={{
             paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
             paddingTop: '0.5rem',
+            paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
           }}
         >
           <div
             className="overflow-x-hidden"
-            style={{
-              width: 'min(100vw, 44rem)',
-              paddingLeft: 'max(0.5rem, env(safe-area-inset-left))',
-              paddingRight: 'max(0.5rem, env(safe-area-inset-right))',
-            }}
           >
           <div
             style={{
