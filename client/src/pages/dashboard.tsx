@@ -683,9 +683,22 @@ export default function Dashboard() {
     onMutate: async ({ taskId }) => {
       await queryClient.cancelQueries({ queryKey: ["/api/tasks"] });
       const previousTasks = queryClient.getQueryData<Task[]>(["/api/tasks"]);
-      queryClient.setQueryData<Task[]>(["/api/tasks"], (old) =>
-        old ? old.map((t) => t.id === taskId ? { ...t, memberHasCompleted: true } : t) : old
-      );
+      queryClient.setQueryData<Task[]>(["/api/tasks"], (old) => {
+        if (!old) return old;
+        return old.map((t) => {
+          if (t.id !== taskId) return t;
+          const needsApproval = (t as any).requiresApproval;
+          return {
+            ...t,
+            memberHasCompleted: true,
+            // Immediately show yellow pending state for approval tasks
+            ...(needsApproval ? {
+              memberCompletionStatus: "pending",
+              status: "pending_approval",
+            } : {}),
+          };
+        });
+      });
       return { previousTasks };
     },
     onError: (error: any, _vars: any, context: any) => {
