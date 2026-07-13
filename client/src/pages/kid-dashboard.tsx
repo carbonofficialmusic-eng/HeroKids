@@ -1499,14 +1499,18 @@ export default function KidDashboard() {
     mutationFn: async (redemptionId: string) => {
       return await apiRequest("POST", `/api/rewards/redemptions/${redemptionId}/join`, {});
     },
-    onSuccess: () => {
+    onSuccess: (_data, redemptionId) => {
+      const idStr = String(redemptionId);
+      setDismissedSharedIds(prev => new Set([...prev, idStr]));
       queryClient.invalidateQueries({ queryKey: ["/api/rewards/shared"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/device-link/session"] });
     },
-    onError: (error: any) => {
+    onError: (error: any, redemptionId) => {
+      const idStr = String(redemptionId);
+      setJustJoinedIds(prev => { const next = new Set(prev); next.delete(idStr); return next; });
       toast({
         title: t("kidDashboard.error"),
         description: error.message || t("kidDashboard.joinError"),
@@ -2424,25 +2428,35 @@ export default function KidDashboard() {
                         )}
 
                         {/* Join Button */}
-                        {!hasJoined ? (
-                          <Button
-                            className="w-full gap-2 font-bold text-white"
-                            onClick={() => {
-                              const idStr = String(shared.id);
-                              setJustJoinedIds(prev => new Set([...prev, idStr]));
-                              joinSharingMutation.mutate(shared.id);
-                              setTimeout(() => {
-                                setDismissedSharedIds(prev => new Set([...prev, idStr]));
-                              }, 1000);
-                            }}
-                            disabled={joinSharingMutation.isPending}
-                            data-testid={`button-join-${shared.id}`}
-                            style={{ height: 40, borderRadius: 12, background: "linear-gradient(135deg, #1d4ed8, #3b82f6)", boxShadow: "0 4px 14px rgba(59,130,246,0.45)" }}
-                          >
-                            <UserPlus className="h-4 w-4" />
-                            {t("kidDashboard.joinFree")}
-                          </Button>
-                        ) : (
+                        {!hasJoined ? (() => {
+                          const totalParticipants = shared.participants.length + 2;
+                          const pointsPerPerson = Math.ceil(((shared as any).originalPointsSpent ?? shared.reward.pointThreshold) / totalParticipants);
+                          const myPoints = member?.totalPoints ?? 0;
+                          const canAfford = myPoints >= pointsPerPerson;
+                          return (
+                            <div className="space-y-1.5">
+                              {!canAfford && (
+                                <p style={{ fontSize: 11, color: "#f87171", textAlign: "center", fontWeight: 600 }}>
+                                  {`Nicht genug Punkte — du brauchst ${pointsPerPerson}, hast ${myPoints}.`}
+                                </p>
+                              )}
+                              <Button
+                                className="w-full gap-2 font-bold text-white"
+                                onClick={() => {
+                                  const idStr = String(shared.id);
+                                  setJustJoinedIds(prev => new Set([...prev, idStr]));
+                                  joinSharingMutation.mutate(shared.id);
+                                }}
+                                disabled={joinSharingMutation.isPending || !canAfford}
+                                data-testid={`button-join-${shared.id}`}
+                                style={{ height: 40, borderRadius: 12, background: canAfford ? "linear-gradient(135deg, #1d4ed8, #3b82f6)" : "rgba(100,100,120,0.4)", boxShadow: canAfford ? "0 4px 14px rgba(59,130,246,0.45)" : "none" }}
+                              >
+                                <UserPlus className="h-4 w-4" />
+                                {canAfford ? t("kidDashboard.joinFree") : `${pointsPerPerson} Punkte nötig`}
+                              </Button>
+                            </div>
+                          );
+                        })() : (
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.35)", borderRadius: 12, padding: "8px 12px" }}>
                             <CheckCircle2 style={{ width: 16, height: 16, color: "#4ade80" }} />
                             <span style={{ fontSize: 13, color: "#4ade80", fontWeight: 700 }}>{t("kidDashboard.shared")}</span>

@@ -925,19 +925,31 @@ export default function RewardsBoard() {
                           {t("kidDashboard.cancelSharing")}
                         </Button>
                       )}
-                      {!isInitiator && !hasJoined && (
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="gap-2"
-                          onClick={() => joinSharingMutation.mutate(shared.id)}
-                          disabled={joinSharingMutation.isPending}
-                          data-testid={`button-join-${shared.id}`}
-                        >
-                          <UserPlus className="h-4 w-4" />
-                          {t("rewardsBoard.joinSharing")}
-                        </Button>
-                      )}
+                      {!isInitiator && !hasJoined && (() => {
+                        const joinPointsNeeded = Math.ceil(shared.originalPointsSpent / (shared.participants.length + 2));
+                        const myPoints = member?.totalPoints ?? 0;
+                        const canAfford = myPoints >= joinPointsNeeded;
+                        return (
+                          <div className="flex flex-col gap-1">
+                            {!canAfford && (
+                              <p className="text-xs text-destructive font-semibold">
+                                {`Nicht genug Punkte — du brauchst ${joinPointsNeeded}, hast ${myPoints}.`}
+                              </p>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="default"
+                              className="gap-2"
+                              onClick={() => joinSharingMutation.mutate(shared.id)}
+                              disabled={joinSharingMutation.isPending || !canAfford}
+                              data-testid={`button-join-${shared.id}`}
+                            >
+                              <UserPlus className="h-4 w-4" />
+                              {canAfford ? t("rewardsBoard.joinSharing") : `${joinPointsNeeded} Punkte nötig`}
+                            </Button>
+                          </div>
+                        );
+                      })()}
                       {!isInitiator && hasJoined && (
                         <Badge variant="secondary" className="gap-1">
                           <CheckCircle2 className="h-3 w-3" />
