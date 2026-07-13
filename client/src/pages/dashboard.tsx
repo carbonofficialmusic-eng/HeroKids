@@ -835,10 +835,21 @@ export default function Dashboard() {
     mutationFn: async (taskId: string) => {
       return await apiRequest("DELETE", `/api/tasks/${taskId}`, {});
     },
+    onMutate: async (taskId: string) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/tasks"] });
+      const previousTasks = queryClient.getQueryData(["/api/tasks"]);
+      queryClient.setQueryData(["/api/tasks"], (old: any[]) =>
+        Array.isArray(old) ? old.filter((t: any) => t.id !== taskId) : old
+      );
+      return { previousTasks };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
     },
-    onError: (error: any) => {
+    onError: (error: any, _taskId, context: any) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(["/api/tasks"], context.previousTasks);
+      }
       toast({
         title: t("toast.failedDelete"),
         description: error.message || t("toast.couldNotDeleteTask"),
