@@ -238,11 +238,11 @@ export function TaskCompletionDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
-            <div className="text-4xl">{task.iconEmoji}</div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg">{task.title}</h3>
+        <div className="space-y-4 landscape:space-y-2">
+          <div className="flex items-center gap-3 landscape:gap-2 p-4 landscape:p-2 rounded-lg bg-muted/50">
+            <div className="text-4xl landscape:text-2xl">{task.iconEmoji}</div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg landscape:text-base truncate">{task.title}</h3>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className="gradient-achievement text-white border-0">
                   +{task.points} {t("dashboard.pointsLabel")}
@@ -258,11 +258,11 @@ export function TaskCompletionDialog({
           </div>
 
           {task.requiresProof && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="text-sm font-medium">{t("tasks.uploadPhotoProof")}</div>
 
               {!previewUrl ? (
-                <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <div className="border-2 border-dashed rounded-lg p-8 landscape:p-3 text-center">
                   {!isNativeMobile && (
                     <input
                       ref={fileInputRef}
@@ -273,12 +273,12 @@ export function TaskCompletionDialog({
                       data-testid="input-photo-upload"
                     />
                   )}
-                  <Camera className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-3">
+                  <Camera className="h-12 w-12 landscape:h-6 landscape:w-6 mx-auto mb-3 landscape:mb-1 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mb-3 landscape:mb-2 landscape:hidden">
                     {t("tasks.takePhoto")}
                   </p>
                   {cameraError && (
-                    <p className="text-sm text-destructive mb-3" data-testid="text-camera-error">
+                    <p className="text-sm text-destructive mb-3 landscape:mb-1" data-testid="text-camera-error">
                       {cameraError}
                     </p>
                   )}
@@ -297,7 +297,7 @@ export function TaskCompletionDialog({
                   <img
                     src={previewUrl}
                     alt={t("tasks.choosePhoto")}
-                    className="w-full h-48 object-cover rounded-lg"
+                    className="w-full h-48 landscape:h-24 object-cover rounded-lg"
                     data-testid="img-photo-preview"
                   />
                   <Button
