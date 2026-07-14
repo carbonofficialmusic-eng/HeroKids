@@ -1680,7 +1680,8 @@ export default function KidDashboard() {
   const [completedGoal, setCompletedGoal] = useState<{ id: number; title: string } | null>(null);
   useWebSocket(member?.familyName || null, undefined, {
     onGoalCompleted: (goalId, goalTitle) => {
-      const key = `herokids_goal_celebrated_${goalId}_${member?.id ?? 0}`;
+      if (!member) return;
+      const key = `herokids_goal_celebrated_${goalId}_${member.id}`;
       if (!localStorage.getItem(key)) {
         localStorage.setItem(key, '1');
         setCompletedGoal({ id: goalId, title: goalTitle });
@@ -1728,13 +1729,13 @@ export default function KidDashboard() {
   // Show celebration modal for recently completed goals that haven't been celebrated yet.
   // This catches members who missed the live WS event (e.g. were on a sub-page).
   useEffect(() => {
-    if (!goals.length) return;
+    if (!goals.length || !member) return;
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     for (const goal of goals) {
       if (!goal.isActive && goal.completedAt) {
         const completedTime = new Date(goal.completedAt).getTime();
         if (completedTime > sevenDaysAgo) {
-          const key = `herokids_goal_celebrated_${goal.id}_${member?.id ?? 0}`;
+          const key = `herokids_goal_celebrated_${goal.id}_${member.id}`;
           if (!localStorage.getItem(key)) {
             localStorage.setItem(key, '1');
             setCompletedGoal({ id: goal.id, title: goal.title });
@@ -1743,7 +1744,7 @@ export default function KidDashboard() {
         }
       }
     }
-  }, [goals]);
+  }, [goals, member]);
 
   // Fetch reward redemptions (child's redeemed rewards)
   const { data: redemptions = [] } = useQuery<(RewardRedemption & { rewardTitle?: string })[]>({
