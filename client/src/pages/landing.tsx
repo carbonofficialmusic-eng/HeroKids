@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star, CheckCircle2, Shield, Heart, ArrowRight, Play, Gamepad2, Gift, Sparkles, Loader2, Smartphone } from "lucide-react";
+import { Star, CheckCircle2, Shield, Heart, ArrowRight, Play, Gamepad2, Gift, Sparkles, Loader2, Smartphone, Check, Trophy, Users, Crown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +41,7 @@ export default function Landing() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [verifyingPayment, setVerifyingPayment] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
@@ -116,11 +117,14 @@ export default function Landing() {
             <span className="hk-display" style={{ fontWeight: 800, fontSize: "1.35rem", color: C.fg }} data-testid="text-app-name">HeroKids</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <Link href="/pricing">
-              <Button variant="ghost" size="sm" style={{ color: C.fgMuted }}>
-                {t('landing.nav.pricing') || 'Pricing'}
-              </Button>
-            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              style={{ color: C.fgMuted }}
+              onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              {t('landing.nav.pricing') || 'Pricing'}
+            </Button>
             <Link href="/link-device">
               <Button variant="ghost" size="sm" style={{ color: C.fgMuted }}>
                 <Smartphone className="h-4 w-4 mr-1" />
@@ -329,6 +333,173 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── Pricing ── */}
+      <section id="pricing" style={{ padding: "5rem 1rem", background: C.bgSection, position: "relative", zIndex: 1 }}>
+        <div style={{ maxWidth: 1152, margin: "0 auto" }}>
+
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+            <h2 className="hk-display" style={{ fontSize: "clamp(1.8rem, 4vw, 2.75rem)", fontWeight: 800, marginBottom: "0.75rem" }} data-testid="heading-pricing-landing">
+              {t("pricing.title")}
+            </h2>
+            <p style={{ color: C.fgMuted, fontSize: "1.1rem", maxWidth: 480, margin: "0 auto" }}>
+              {t("pricing.subtitle")}
+            </p>
+          </div>
+
+          {/* Billing toggle */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, marginBottom: 40 }}>
+            <div style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.06)", borderRadius: 999, padding: 4, gap: 4 }}>
+              {(["monthly", "yearly"] as const).map(cycle => (
+                <button
+                  key={cycle}
+                  onClick={() => setBillingCycle(cycle)}
+                  data-testid={`button-billing-${cycle}-landing`}
+                  style={{
+                    padding: "8px 20px", borderRadius: 999, fontSize: "0.875rem", fontWeight: 700,
+                    border: "none", cursor: "pointer", transition: "all 0.2s",
+                    background: billingCycle === cycle ? C.bgCard : "transparent",
+                    color: billingCycle === cycle ? C.fg : C.fgMuted,
+                    boxShadow: billingCycle === cycle ? "0 1px 6px rgba(0,0,0,0.12)" : "none",
+                  }}
+                >
+                  {cycle === "monthly" ? t("pricing.billingMonthly") : t("pricing.billingYearly")}
+                </button>
+              ))}
+            </div>
+            {billingCycle === "monthly" ? (
+              <button
+                onClick={() => setBillingCycle("yearly")}
+                style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 20px", borderRadius: 999, fontSize: "0.875rem", fontWeight: 700, color: "#fff", border: "none", cursor: "pointer", background: `linear-gradient(135deg, ${C.orange}, ${C.yellow})`, boxShadow: `0 4px 16px -4px ${C.orange}60` }}
+              >
+                <span>🎁</span> {t("pricing.yearlyDiscountTeaser")}
+              </button>
+            ) : (
+              <span style={{ fontSize: "0.85rem", fontWeight: 700, color: C.orange, background: `${C.orange}15`, padding: "6px 16px", borderRadius: 999 }}>
+                ✓ {t("pricing.yearlyDiscount")}
+              </span>
+            )}
+          </div>
+
+          {/* Tier cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
+            {[
+              {
+                id: "free", name: "Free", Icon: Users,
+                price: "€0", period: t("pricing.forever"),
+                description: t("pricing.tierFreeDesc"),
+                features: t("pricing.tierFreeFeatures", { returnObjects: true }) as string[],
+                popular: false, memberLimit: 3,
+                cta: t("landing.hero.ctaPrimary"),
+                accent: C.blue,
+              },
+              {
+                id: "family", name: "Family", Icon: Trophy,
+                price: billingCycle === "monthly" ? "€3,99" : "€29,99",
+                period: billingCycle === "monthly" ? t("pricing.perMonth") : t("pricing.perYear"),
+                description: t("pricing.tierFamilyDesc"),
+                features: t("pricing.tierFamilyFeatures", { returnObjects: true }) as string[],
+                popular: true, memberLimit: 6,
+                cta: t("pricing.choosePlan", { name: "Family" }),
+                accent: C.orange,
+              },
+              {
+                id: "family_hero", name: "FamilyPro", Icon: Crown,
+                price: billingCycle === "monthly" ? "€9,99" : "€69,99",
+                period: billingCycle === "monthly" ? t("pricing.perMonth") : t("pricing.perYear"),
+                description: t("pricing.tierFamilyHeroDesc"),
+                features: t("pricing.tierFamilyHeroFeatures", { returnObjects: true }) as string[],
+                popular: false, memberLimit: 999,
+                cta: t("pricing.choosePlan", { name: "FamilyPro" }),
+                accent: C.yellow,
+              },
+            ].map(tier => (
+              <div
+                key={tier.id}
+                data-testid={`card-tier-${tier.id}-landing`}
+                style={{
+                  position: "relative",
+                  background: C.bgCard,
+                  border: tier.popular ? `2px solid ${C.orange}` : `1px solid ${C.border}`,
+                  borderRadius: 20,
+                  padding: "2rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: tier.popular ? `0 8px 32px -8px ${C.orange}40` : "0 2px 8px rgba(0,0,0,0.06)",
+                }}
+              >
+                {tier.popular && (
+                  <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", background: C.orange, color: "#fff", fontSize: "0.75rem", fontWeight: 800, padding: "4px 16px", borderRadius: 999, whiteSpace: "nowrap" }}>
+                    {t("pricing.mostPopular")}
+                  </div>
+                )}
+
+                {/* Icon + name */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${tier.accent}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <tier.Icon style={{ width: 24, height: 24, color: tier.accent }} />
+                  </div>
+                  <div>
+                    <div className="hk-display" style={{ fontWeight: 800, fontSize: "1.15rem" }}>{tier.name}</div>
+                    <div style={{ fontSize: "0.8rem", color: C.fgMuted }}>{tier.description}</div>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                    <span className="hk-display" style={{ fontSize: "2.5rem", fontWeight: 800 }}>{tier.price}</span>
+                    <span style={{ color: C.fgMuted, fontSize: "0.875rem" }}>/{tier.period}</span>
+                  </div>
+                  <div style={{ fontSize: "0.85rem", color: C.fgMuted, marginTop: 2 }}>
+                    {tier.memberLimit === 999 ? t("pricing.unlimitedMembers") : t("pricing.upToMembers", { count: tier.memberLimit })}
+                  </div>
+                </div>
+
+                {/* Features */}
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 auto", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {tier.features.map((f, i) => (
+                    <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: "0.9rem" }}>
+                      <Check style={{ width: 16, height: 16, color: "rgb(34,197,94)", flexShrink: 0, marginTop: 2 }} />
+                      <span style={{ color: C.fg, lineHeight: 1.5 }}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA */}
+                <button
+                  data-testid={`button-pricing-cta-${tier.id}`}
+                  onClick={() => document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth" })}
+                  style={{
+                    marginTop: 24,
+                    width: "100%",
+                    padding: "12px 0",
+                    borderRadius: 999,
+                    fontWeight: 800,
+                    fontSize: "0.95rem",
+                    border: tier.popular ? "none" : `1.5px solid ${C.border}`,
+                    cursor: "pointer",
+                    background: tier.popular ? C.orange : "transparent",
+                    color: tier.popular ? "#fff" : C.fg,
+                    boxShadow: tier.popular ? `0 6px 20px -6px ${C.orange}70` : "none",
+                    transition: "opacity 0.15s",
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+                >
+                  {tier.id === "free" ? t("landing.hero.ctaPrimary") : tier.cta}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Fine print */}
+          <p style={{ textAlign: "center", marginTop: "2.5rem", fontSize: "0.85rem", color: C.fgMuted }}>
+            {billingCycle === "yearly" ? t("pricing.paymentInfoYearly") : t("pricing.paymentInfo")}
+          </p>
+        </div>
+      </section>
+
       {/* ── CTA ── */}
       <section style={{ margin: "0 1rem 3rem", borderRadius: "2rem", padding: "5rem 2rem", textAlign: "center", background: `linear-gradient(135deg, ${C.orangeD} 0%, ${C.orange} 55%, ${C.yellow} 100%)`, position: "relative", overflow: "hidden", zIndex: 1 }} data-testid="text-cta-title">
         <div style={{ position: "absolute", inset: 0, backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')", opacity: 0.07, borderRadius: "2rem" }} />
@@ -358,7 +529,7 @@ export default function Landing() {
           </div>
           <p>© {new Date().getFullYear()} HeroKids Inc. {t('landing.footer.rights')}</p>
           <div style={{ display: "flex", gap: "1.5rem" }}>
-            <Link href="/pricing" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.nav.pricing') || 'Pricing'}</Link>
+            <button onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })} style={{ background: "none", border: "none", color: C.fgMuted, cursor: "pointer", fontSize: "0.875rem", padding: 0 }}>{t('landing.nav.pricing') || 'Pricing'}</button>
             <Link href="/privacy" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.privacy')}</Link>
             <Link href="/impressum" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.imprint')}</Link>
           </div>
