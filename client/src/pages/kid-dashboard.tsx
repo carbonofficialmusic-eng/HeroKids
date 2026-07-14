@@ -104,6 +104,7 @@ import { NotificationBell } from "@/components/notification-bell";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
+import { GoalCompletedModal } from "@/components/GoalCompletedModal";
 import { RewardRequestDialog } from "@/components/reward-request-dialog";
 import { Leaderboard } from "@/components/leaderboard";
 import { Pinboard } from "@/components/pinboard";
@@ -1676,7 +1677,16 @@ export default function KidDashboard() {
   const memberLoading = memberApiLoading || deviceSessionLoading;
 
   // WebSocket connection for real-time updates
-  useWebSocket(member?.familyName || null);
+  const [completedGoal, setCompletedGoal] = useState<{ id: number; title: string } | null>(null);
+  useWebSocket(member?.familyName || null, undefined, {
+    onGoalCompleted: (goalId, goalTitle) => {
+      const key = `herokids_goal_celebrated_${goalId}`;
+      if (!localStorage.getItem(key)) {
+        localStorage.setItem(key, '1');
+        setCompletedGoal({ id: goalId, title: goalTitle });
+      }
+    },
+  });
 
   const { data: realMember } = useQuery<FamilyMember>({
     queryKey: ["/api/family-members/real"],
@@ -3300,6 +3310,10 @@ export default function KidDashboard() {
         </DialogContent>
       </Dialog>
 
+      <GoalCompletedModal
+        goal={completedGoal}
+        onClose={() => setCompletedGoal(null)}
+      />
     </div>
   );
 }

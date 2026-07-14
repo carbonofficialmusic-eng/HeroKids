@@ -14,6 +14,7 @@ import { Pinboard } from "@/components/pinboard";
 import { TaskDialog } from "@/components/task-dialog";
 import { RewardDialog } from "@/components/reward-dialog";
 import { RewardRequestDialog } from "@/components/reward-request-dialog";
+import { GoalCompletedModal } from "@/components/GoalCompletedModal";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { MemberPauseDialog } from "@/components/member-pause-dialog";
@@ -312,7 +313,16 @@ export default function Dashboard() {
   });
 
   // WebSocket connection for real-time updates
-  useWebSocket(member?.familyName || null);
+  const [completedGoal, setCompletedGoal] = useState<{ id: number; title: string } | null>(null);
+  useWebSocket(member?.familyName || null, undefined, {
+    onGoalCompleted: (goalId, goalTitle) => {
+      const key = `herokids_goal_celebrated_${goalId}`;
+      if (!localStorage.getItem(key)) {
+        localStorage.setItem(key, '1');
+        setCompletedGoal({ id: goalId, title: goalTitle });
+      }
+    },
+  });
 
   // Automatic midnight refresh for recurring tasks
   useMidnightRefresh();
@@ -2485,6 +2495,10 @@ export default function Dashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <GoalCompletedModal
+        goal={completedGoal}
+        onClose={() => setCompletedGoal(null)}
+      />
     </div>
   );
 }

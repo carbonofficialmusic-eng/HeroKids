@@ -6207,6 +6207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         broadcastToFamily(member.familyName, {
           type: 'family-goal-completed',
           goalId: id,
+          goalTitle: goal.title,
         });
       }
       

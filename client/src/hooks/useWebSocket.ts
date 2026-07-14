@@ -5,9 +5,15 @@ import { toast } from "@/hooks/use-toast";
 
 const DEV_TOKEN_KEY = "__hk_dev_token";
 
-export function useWebSocket(familyName: string | null, mobileToken?: string) {
+interface UseWebSocketOptions {
+  onGoalCompleted?: (goalId: number, goalTitle: string) => void;
+}
+
+export function useWebSocket(familyName: string | null, mobileToken?: string, options?: UseWebSocketOptions) {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const onGoalCompletedRef = useRef(options?.onGoalCompleted);
+  onGoalCompletedRef.current = options?.onGoalCompleted;
 
   const connect = useCallback(() => {
     if (!familyName) return;
@@ -210,8 +216,9 @@ export function useWebSocket(familyName: string | null, mobileToken?: string) {
                     origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
                   });
                 }, 250);
-                
-                console.log(`🎯 Familie hat ein Ziel erreicht!`);
+
+                // Notify dashboard so it can show the celebration modal
+                onGoalCompletedRef.current?.(data.goalId, data.goalTitle ?? '');
               }
               break;
 
