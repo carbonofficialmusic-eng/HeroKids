@@ -1725,6 +1725,26 @@ export default function KidDashboard() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Show celebration modal for recently completed goals that haven't been celebrated yet.
+  // This catches members who missed the live WS event (e.g. were on a sub-page).
+  useEffect(() => {
+    if (!goals.length) return;
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    for (const goal of goals) {
+      if (!goal.isActive && goal.completedAt) {
+        const completedTime = new Date(goal.completedAt).getTime();
+        if (completedTime > sevenDaysAgo) {
+          const key = `herokids_goal_celebrated_${goal.id}`;
+          if (!localStorage.getItem(key)) {
+            localStorage.setItem(key, '1');
+            setCompletedGoal({ id: goal.id, title: goal.title });
+            break;
+          }
+        }
+      }
+    }
+  }, [goals]);
+
   // Fetch reward redemptions (child's redeemed rewards)
   const { data: redemptions = [] } = useQuery<(RewardRedemption & { rewardTitle?: string })[]>({
     queryKey: ["/api/reward-redemptions"],
