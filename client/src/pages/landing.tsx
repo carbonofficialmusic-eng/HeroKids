@@ -116,6 +116,11 @@ export default function Landing() {
             <span className="hk-display" style={{ fontWeight: 800, fontSize: "1.35rem", color: C.fg }} data-testid="text-app-name">HeroKids</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <Link href="/pricing">
+              <Button variant="ghost" size="sm" style={{ color: C.fgMuted }}>
+                {t('landing.nav.pricing') || 'Pricing'}
+              </Button>
+            </Link>
             <Link href="/link-device">
               <Button variant="ghost" size="sm" style={{ color: C.fgMuted }}>
                 <Smartphone className="h-4 w-4 mr-1" />
@@ -353,6 +358,7 @@ export default function Landing() {
           </div>
           <p>© {new Date().getFullYear()} HeroKids Inc. {t('landing.footer.rights')}</p>
           <div style={{ display: "flex", gap: "1.5rem" }}>
+            <Link href="/pricing" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.nav.pricing') || 'Pricing'}</Link>
             <Link href="/privacy" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.privacy')}</Link>
             <Link href="/impressum" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.imprint')}</Link>
           </div>
