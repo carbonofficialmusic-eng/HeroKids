@@ -158,6 +158,15 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   usePushNotifications(isAuthenticated);
+
+  // Safety valve: if the auth check hasn't resolved after 3 s (slow network,
+  // hanging fetch), stop blocking and render the unauthenticated branch.
+  const [authTimedOut, setAuthTimedOut] = useState(false);
+  useEffect(() => {
+    if (!isLoading) { setAuthTimedOut(false); return; }
+    const t = setTimeout(() => setAuthTimedOut(true), 3000);
+    return () => clearTimeout(t);
+  }, [isLoading]);
   // Use location-based key to force complete remount when navigating between dashboards
   const [location] = useLocation();
   const dashboardKey = `dashboard-${location}`;
@@ -404,8 +413,9 @@ function Router() {
   }, []);
 
 
-  // Show nothing while loading to prevent 404 flash
-  if (isLoading) {
+  // Show nothing while loading to prevent 404 flash.
+  // authTimedOut is the safety valve for slow/hanging networks.
+  if (isLoading && !authTimedOut) {
     return (
       <BackgroundWrapper>
         <div className="min-h-screen flex items-center justify-center">
