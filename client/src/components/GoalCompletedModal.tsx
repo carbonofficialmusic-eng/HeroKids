@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trophy, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -22,9 +22,9 @@ export function GoalCompletedModal({ goal, onClose }: GoalCompletedModalProps) {
           <div className="w-20 h-20 rounded-full bg-white/25 flex items-center justify-center">
             <Trophy className="h-10 w-10 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-white leading-tight">
+          <DialogTitle className="text-2xl font-bold text-white leading-tight">
             {t("familyGoals.completedTitle", "Familienziel erreicht!")}
-          </h2>
+          </DialogTitle>
           <div className="flex gap-1.5">
             <Star className="h-5 w-5 text-white fill-white" />
             <Star className="h-5 w-5 text-white fill-white" />
@@ -33,9 +33,9 @@ export function GoalCompletedModal({ goal, onClose }: GoalCompletedModalProps) {
         </div>
 
         <div className="px-6 py-6 flex flex-col items-center text-center gap-3">
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription className="text-sm text-muted-foreground">
             {t("familyGoals.completedSubtitle", "Eure Familie hat gemeinsam das Ziel erfüllt:")}
-          </p>
+          </DialogDescription>
           <p className="text-lg font-bold text-foreground leading-snug">
             "{goal?.title}"
           </p>
