@@ -81,3 +81,6 @@ VITE_REVENUECAT_IOS_KEY = "appl_gzIXiKvJqKZFhpWZzgMaIMXBAJT"
 [userenv.production]
 APP_BASE_URL = "https://herokids.app"
 EMAIL_FROM = "HeroKids <noreply@herokids.app>"
+
+[objectStorage]
+defaultBucketID = "replit-objstore-985f36e6-158d-4316-8d22-5e4228a8f037"
