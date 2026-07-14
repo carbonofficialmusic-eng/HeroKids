@@ -8,6 +8,53 @@ import { nanoid } from "nanoid";
 
 const viteLogger = createLogger();
 
+const SPA_ROUTES = new Set([
+  "/",
+  "/setup",
+  "/link-device",
+  "/kid-dashboard",
+  "/kid-dashboard-old",
+  "/pricing",
+  "/auth/close",
+  "/privacy",
+  "/impressum",
+  "/terms",
+  "/admin",
+  "/dashboard",
+  "/my-rewards",
+  "/active-rewards",
+  "/my-achievements",
+  "/tasks",
+  "/rewards",
+  "/leaderboard",
+  "/skins",
+  "/skins-gallery",
+  "/analytics",
+  "/chat",
+  "/approvals",
+  "/rewards-board",
+  "/settings",
+  "/achievements",
+  "/account",
+  "/family-goals",
+  "/ios-test",
+]);
+
+// Matches /ios-test/<single-segment> for the `:variant` route param only.
+const IOS_TEST_VARIANT_RE = /^\/ios-test\/[^/]+$/;
+
+function isSpaRoute(url: string): boolean {
+  // Strip query string, hash, and normalize a trailing slash to the bare path.
+  let pathname = url.split("?")[0].split("#")[0];
+  if (pathname !== "/" && pathname.endsWith("/")) {
+    pathname = pathname.slice(0, -1);
+  }
+  if (SPA_ROUTES.has(pathname)) return true;
+  // Allow the single parameterised route: /ios-test/:variant
+  if (IOS_TEST_VARIANT_RE.test(pathname)) return true;
+  return false;
+}
+
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -44,6 +91,11 @@ export async function setupVite(app: Express, server: Server) {
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
+    if (!isSpaRoute(url)) {
+      res.status(404).set({ "Content-Type": "text/plain" }).end("Not Found");
+      return;
+    }
+
     try {
       const clientTemplate = path.resolve(
         import.meta.dirname,
@@ -78,8 +130,12 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
+  // fall through to index.html for known SPA routes; return 404 for everything else
+  app.use("*", (req, res) => {
+    if (!isSpaRoute(req.originalUrl)) {
+      res.status(404).set({ "Content-Type": "text/plain" }).end("Not Found");
+      return;
+    }
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }

@@ -1,0 +1,19 @@
+# HeroKids
+
+> HeroKids is a gamified family task management app that turns household chores into adventures. Children earn points, unlock character skins, and compete on leaderboards by completing tasks, while parents manage assignments and approve completions in real time.
+
+## Key pages
+
+- Home / Landing: https://herokids.app/
+- Pricing: https://herokids.app/pricing
+- Privacy Policy: https://herokids.app/privacy
+- Terms of Service: https://herokids.app/terms
+- Impressum: https://herokids.app/impressum
+
+## Product summary
+
+HeroKids helps families build responsibility habits by making chores fun. Parents create tasks with optional photo-proof requirements and set rewards children can redeem with earned points. Features include monthly leaderboards, unlockable avatar skins, a family chat, shared goals, and real-time updates across all family devices. Three subscription tiers (Free, Family, Enterprise) unlock progressively richer gamification options.
+
+## Intended audience
+
+Families with children aged approximately 5–16 who want a structured but playful system for managing household responsibilities.
