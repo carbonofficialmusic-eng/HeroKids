@@ -2,9 +2,11 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 
 export default function Privacy() {
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -16,7 +18,7 @@ export default function Privacy() {
           data-testid="button-back"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Zurück
+          {t('common.back')}
         </Button>
 
         <Card data-testid="card-privacy-policy">
