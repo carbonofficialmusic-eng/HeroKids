@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
@@ -21,9 +21,9 @@ export default function Terms() {
 
         <Card data-testid="card-terms">
           <CardHeader>
-            <CardTitle className="text-2xl md:text-3xl" data-testid="title-terms">
+            <h1 className="text-2xl md:text-3xl font-semibold" data-testid="title-terms">
               Allgemeine Geschäftsbedingungen (AGB)
-            </CardTitle>
+            </h1>
           </CardHeader>
           <CardContent className="prose dark:prose-invert max-w-none space-y-6 text-sm leading-relaxed">
             <p className="text-muted-foreground">Stand: Juni 2026</p>

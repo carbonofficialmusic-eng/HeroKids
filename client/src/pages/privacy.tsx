@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
@@ -21,9 +21,9 @@ export default function Privacy() {
 
         <Card data-testid="card-privacy-policy">
           <CardHeader>
-            <CardTitle className="text-2xl md:text-3xl" data-testid="title-privacy-policy">
+            <h1 className="text-2xl md:text-3xl font-semibold" data-testid="title-privacy-policy">
               Datenschutzerklärung / Privacy Policy
-            </CardTitle>
+            </h1>
           </CardHeader>
           <CardContent className="prose dark:prose-invert max-w-none space-y-6 text-sm leading-relaxed">
             <p className="text-muted-foreground" data-testid="text-last-updated">Stand: Juni 2026</p>
