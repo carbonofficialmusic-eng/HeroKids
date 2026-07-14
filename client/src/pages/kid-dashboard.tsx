@@ -1681,7 +1681,7 @@ export default function KidDashboard() {
   useWebSocket(member?.familyName || null, undefined, {
     onGoalCompleted: (goalId, goalTitle) => {
       if (!member) return;
-      const key = `herokids_goal_celebrated_${goalId}_${member.id}`;
+      const key = `herokids_goal_celebrated_${goalId}`;
       if (!localStorage.getItem(key)) {
         localStorage.setItem(key, '1');
         setCompletedGoal({ id: goalId, title: goalTitle });
@@ -1735,7 +1735,7 @@ export default function KidDashboard() {
       if (!goal.isActive && goal.completedAt) {
         const completedTime = new Date(goal.completedAt).getTime();
         if (completedTime > sevenDaysAgo) {
-          const key = `herokids_goal_celebrated_${goal.id}_${member.id}`;
+          const key = `herokids_goal_celebrated_${goal.id}`;
           if (!localStorage.getItem(key)) {
             localStorage.setItem(key, '1');
             setCompletedGoal({ id: goal.id, title: goal.title });
