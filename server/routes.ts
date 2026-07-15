@@ -7380,13 +7380,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const trimmedPassword = (password || "").trim();
 
-      // Check DB-stored bcrypt hash first, fall back to plain env var comparison
+      // Env var is always a master override (plain text match).
+      // DB-stored bcrypt hash is a fallback for UI-changed passwords only when
+      // the plain env var does NOT match (prevents stale DB hash from blocking
+      // a newly rotated secret).
       const storedHash = await storage.getAppConfig("admin_password_hash");
       let isValid = false;
-      if (storedHash) {
+      if (trimmedPassword === envPassword.trim()) {
+        isValid = true;
+      } else if (storedHash) {
         isValid = await bcrypt.compare(trimmedPassword, storedHash);
-      } else {
-        isValid = trimmedPassword === envPassword.trim();
       }
 
       if (isValid) {
