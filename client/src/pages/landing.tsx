@@ -34,6 +34,7 @@ const floatKeyframes = `
 .hk-float  { animation: hk-float  6s ease-in-out infinite; }
 .hk-float2 { animation: hk-float2 7s ease-in-out infinite 1s; }
 .hk-display { font-family: 'Bricolage Grotesque', 'Nunito', sans-serif; letter-spacing: -0.02em; }
+@media (max-width: 540px) { .hk-nav-pricing { display: none !important; } }
 `;
 
 // ─── Landing page ─────────────────────────────────────────────────────────────
@@ -120,6 +121,7 @@ export default function Landing() {
             <Button
               variant="ghost"
               size="sm"
+              className="hk-nav-pricing"
               style={{ color: C.fgMuted }}
               onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
             >
