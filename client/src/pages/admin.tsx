@@ -956,7 +956,7 @@ export default function AdminPage() {
         )}
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 max-w-4xl">
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 h-auto max-w-4xl">
             <TabsTrigger value="overview" data-testid="tab-overview">
               <TrendingUp className="h-4 w-4 mr-2" />
               Overview
