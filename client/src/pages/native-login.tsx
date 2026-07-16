@@ -237,7 +237,7 @@ export default function NativeLoginScreen() {
     setIsSubmitting(true);
     setFormMessage(null);
     try {
-      const { SignInWithApple } = await import("capacitor-sign-in-with-apple");
+      const { SignInWithApple } = await import(/* @vite-ignore */ "capacitor-sign-in-with-apple");
       const result = await SignInWithApple.authorize({
         clientId: "app.herokids.com",
         redirectURI: "https://herokids.app",
