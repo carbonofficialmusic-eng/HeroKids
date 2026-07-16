@@ -1296,7 +1296,7 @@ export default function Settings() {
                     </p>
                     <Button
                       variant="outline"
-                      onClick={() => { setDeleteAccountConfirmText(""); setShowDeleteAccountDialog(true); }}
+                      onClick={() => { setDeleteAccountConfirmed(false); setShowDeleteAccountDialog(true); }}
                       disabled={deleteAccountMutation.isPending}
                       data-testid="button-delete-account"
                       className="w-full border-destructive/50 text-destructive"
