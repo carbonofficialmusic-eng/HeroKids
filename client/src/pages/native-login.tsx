@@ -237,8 +237,8 @@ export default function NativeLoginScreen() {
     setIsSubmitting(true);
     setFormMessage(null);
     try {
-      const { Capacitor } = await import(/* @vite-ignore */ "@capacitor/core");
-      const AppleSignInPlugin = (Capacitor.Plugins as any).AppleSignInPlugin;
+      const { registerPlugin } = await import(/* @vite-ignore */ "@capacitor/core");
+      const AppleSignInPlugin = registerPlugin<{ signIn: (options: { nonce: string }) => Promise<{ identityToken: string; user: string; email?: string; givenName?: string; familyName?: string }> }>("AppleSignInPlugin");
       const response = await AppleSignInPlugin.signIn({ nonce: crypto.randomUUID() });
       const res = await apiRequest("POST", "/api/auth/apple", {
         identityToken: response.identityToken,
