@@ -237,15 +237,9 @@ export default function NativeLoginScreen() {
     setIsSubmitting(true);
     setFormMessage(null);
     try {
-      const { SignInWithApple } = await import(/* @vite-ignore */ "capacitor-sign-in-with-apple");
-      const result = await SignInWithApple.authorize({
-        clientId: "app.herokids.com",
-        redirectURI: "https://herokids.app",
-        scopes: "email name",
-        state: "",
-        nonce: crypto.randomUUID(),
-      });
-      const { response } = result;
+      const { Capacitor } = await import(/* @vite-ignore */ "@capacitor/core");
+      const AppleSignInPlugin = (Capacitor.Plugins as any).AppleSignInPlugin;
+      const response = await AppleSignInPlugin.signIn({ nonce: crypto.randomUUID() });
       const res = await apiRequest("POST", "/api/auth/apple", {
         identityToken: response.identityToken,
         email: response.email ?? undefined,
@@ -253,7 +247,7 @@ export default function NativeLoginScreen() {
         lastName: response.familyName ?? undefined,
       });
       const data = await res.json();
-      if (result.response.identityToken && data.user) {
+      if (response.identityToken && data.user) {
         if (data.devToken) storeDevToken(data.devToken);
         await finishAuth(data.user);
       } else {
