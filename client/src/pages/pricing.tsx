@@ -369,66 +369,21 @@ export default function Pricing() {
                 </ul>
 
                 {isNativePlatform() ? (
-                  /* ── iOS native: RevenueCat purchase buttons ── */
+                  /* ── iOS: no in-app purchase — direct to web ── */
                   <div className="flex flex-col gap-2">
                     {tier.id === "free" || isCurrentTier ? (
                       <Button className="w-full" variant="outline" disabled>
                         {t("pricing.currentPlan")}
                       </Button>
-                    ) : rcLoading ? (
-                      <Button className="w-full" variant="outline" disabled>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Lädt...
-                      </Button>
                     ) : (
-                      <>
-                        <Button
-                          className="w-full"
-                          variant={tier.popular ? "default" : "outline"}
-                          disabled={!isParent || isProcessing || isProcessingLifetime}
-                          onClick={() => handleIOSPurchase(tier.id, billingCycle)}
-                          data-testid={`button-select-${tier.id}`}
-                        >
-                          {isProcessing ? (
-                            <>
-                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              {t("pricing.processing")}
-                            </>
-                          ) : (
-                            t("pricing.choosePlan", { name: tier.name })
-                          )}
-                        </Button>
-
-                        {/* Lifetime option (FamilyPro only) */}
-                        {tier.lifetimePrice && !familyData?.isLifetimePurchase && (
-                          <Button
-                            className="w-full"
-                            variant="outline"
-                            disabled={!isParent || isProcessing || isProcessingLifetime}
-                            onClick={() => handleIOSPurchase(tier.id, "lifetime")}
-                            data-testid={`button-select-${tier.id}-lifetime`}
-                          >
-                            {isProcessingLifetime ? (
-                              <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                {t("pricing.processing")}
-                              </>
-                            ) : (
-                              <>
-                                <Infinity className="w-4 h-4 mr-2" />
-                                {t("pricing.lifetimeOption", { price: rcLifetimePrice ?? tier.lifetimePrice })}
-                              </>
-                            )}
-                          </Button>
-                        )}
-
-                        {tier.lifetimePrice && isCurrentTier && familyData?.isLifetimePurchase && (
-                          <div className="flex items-center justify-center gap-2 py-1.5 text-sm text-muted-foreground">
-                            <Infinity className="w-4 h-4 text-primary" />
-                            <span className="font-medium text-primary">{t("pricing.lifetimeActive")}</span>
-                          </div>
-                        )}
-                      </>
+                      <div className="rounded-lg border border-border bg-muted/50 p-3 text-center space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          {t("pricing.subscribeOnWeb", "Abonniere unter herokids.app")}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          herokids.app
+                        </p>
+                      </div>
                     )}
                   </div>
                 ) : (
@@ -496,25 +451,6 @@ export default function Pricing() {
           })}
         </div>
 
-        {/* Restore purchases (iOS only) */}
-        {isNativePlatform() && (
-          <div className="mt-8 flex justify-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRestorePurchases}
-              disabled={rcRestoring}
-              data-testid="button-restore-purchases"
-            >
-              {rcRestoring ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4 mr-2" />
-              )}
-              Käufe wiederherstellen
-            </Button>
-          </div>
-        )}
 
         <div className="mt-16 text-center max-w-2xl mx-auto">
           <h2 className="text-2xl font-bold font-accent mb-4">{t("pricing.questionsTitle")}</h2>
