@@ -50,6 +50,8 @@ export default function Settings() {
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false);
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
+  const [deleteAccountConfirmText, setDeleteAccountConfirmText] = useState("");
   const [joinCodeCopied, setJoinCodeCopied] = useState(false);
   const [weeklyPrize, setWeeklyPrize] = useState("");
   const [monthlyPrize, setMonthlyPrize] = useState("");
@@ -244,6 +246,23 @@ export default function Settings() {
   });
 
   // Factory reset mutation
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("DELETE", "/api/auth/user/account", {});
+    },
+    onSuccess: () => {
+      setShowDeleteAccountDialog(false);
+      window.location.href = "/";
+    },
+    onError: () => {
+      toast({
+        title: t('errors.somethingWrong'),
+        description: t('settings.errorDeleteAccount', 'Konto konnte nicht gelöscht werden.'),
+        variant: "destructive",
+      });
+    },
+  });
+
   const factoryResetMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", "/api/family/reset", {});
@@ -1253,8 +1272,8 @@ export default function Settings() {
                 {t('settings.resetAllData')}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="bg-destructive/10 p-4 rounded-lg mb-4">
+            <CardContent className="space-y-3">
+              <div className="bg-destructive/10 p-4 rounded-lg">
                 <p className="text-sm font-medium mb-2">{t('settings.factoryResetWarning')}</p>
               </div>
               <Button
@@ -1267,6 +1286,27 @@ export default function Settings() {
                 <RotateCcw className="h-4 w-4 mr-2" />
                 {t('settings.factoryReset')}
               </Button>
+
+              {/* Account deletion — only for users with an email account */}
+              {user?.email && (
+                <>
+                  <div className="border-t border-destructive/20 pt-3">
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {t('settings.deleteAccountDesc', 'Dein Login-Konto dauerhaft löschen. Deine Familienmitglieder und deren Daten bleiben erhalten.')}
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => { setDeleteAccountConfirmText(""); setShowDeleteAccountDialog(true); }}
+                      disabled={deleteAccountMutation.isPending}
+                      data-testid="button-delete-account"
+                      className="w-full border-destructive/50 text-destructive"
+                    >
+                      <UserX className="h-4 w-4 mr-2" />
+                      {t('settings.deleteAccount', 'Login-Konto löschen')}
+                    </Button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -1514,6 +1554,47 @@ export default function Settings() {
               data-testid="button-confirm-reset"
             >
               {factoryResetMutation.isPending ? t('settings.resetting') : t('settings.yesResetEverything')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Account Deletion Confirmation Dialog */}
+      <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+        <AlertDialogContent data-testid="dialog-delete-account">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">
+              {t('settings.deleteAccount', 'Login-Konto löschen')}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>{t('settings.deleteAccountConfirmDesc', 'Dein Login-Konto wird dauerhaft gelöscht. Du kannst dich danach nicht mehr mit dieser E-Mail-Adresse anmelden.')}</p>
+              <p className="text-sm">{t('settings.deleteAccountDataKept', 'Deine Familienmitglieder, Aufgaben und Punkte bleiben erhalten — nur der Zugang über dieses Konto wird entfernt.')}</p>
+              <p className="text-sm font-semibold text-foreground">
+                {t('settings.deleteAccountType', 'Tippe "LÖSCHEN" zur Bestätigung:')}
+              </p>
+              <Input
+                value={deleteAccountConfirmText}
+                onChange={(e) => setDeleteAccountConfirmText(e.target.value)}
+                placeholder="LÖSCHEN"
+                data-testid="input-delete-account-confirm"
+              />
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => setShowDeleteAccountDialog(false)}
+              disabled={deleteAccountMutation.isPending}
+              data-testid="button-cancel-delete-account"
+            >
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteAccountMutation.mutate()}
+              disabled={deleteAccountMutation.isPending || deleteAccountConfirmText.trim().toUpperCase() !== "LÖSCHEN"}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete-account"
+            >
+              {deleteAccountMutation.isPending ? t('common.loading') : t('settings.deleteAccount', 'Konto löschen')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

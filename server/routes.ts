@@ -583,6 +583,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reset onboarding tour (allow restart)
+  // Self-service account deletion (Apple Guideline 5.1.1v)
+  app.delete("/api/auth/user/account", isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user?.claims?.sub) return res.status(403).json({ message: "Account required" });
+      const userId = req.user.claims.sub;
+
+      // Detach user from any family member record (preserves family/member data)
+      await db.update(familyMembers).set({ userId: null }).where(eq(familyMembers.userId, userId));
+
+      // Delete the user account
+      await db.delete(users).where(eq(users.id, userId));
+
+      // Destroy session
+      req.session?.destroy?.(() => {});
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ message: "Failed to delete account" });
+    }
+  });
+
   app.delete("/api/auth/user/onboarding-complete", isAuthenticated, async (req: any, res) => {
     try {
       if (!req.user?.claims?.sub) return res.status(403).json({ message: "Account required" });
