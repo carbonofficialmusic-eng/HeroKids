@@ -417,6 +417,73 @@ export async function setupAuth(app: Express) {
   }
   // ────────────────────────────────────────────────────────────────────────────
 
+  // ── Apple Sign In (native iOS — Guideline 4.8) ──────────────────────────────
+  // The client sends the Apple identity token (JWT); we verify it using Apple's
+  // public keys and create/link a local account.
+  app.post("/api/auth/apple", authRateLimit(10, 60 * 1000), async (req: any, res) => {
+    try {
+      const { identityToken, firstName, lastName, email } = req.body;
+      if (!identityToken || typeof identityToken !== "string") {
+        return res.status(400).json({ message: "Missing identityToken" });
+      }
+
+      // Decode the JWT header to get the key ID (kid)
+      const [headerB64] = identityToken.split(".");
+      const header = JSON.parse(Buffer.from(headerB64, "base64url").toString("utf8"));
+      const kid = header.kid;
+
+      // Fetch Apple's public keys
+      const jwksRes = await fetch("https://appleid.apple.com/auth/keys");
+      if (!jwksRes.ok) {
+        return res.status(502).json({ message: "Failed to fetch Apple public keys" });
+      }
+      const { keys } = await jwksRes.json() as { keys: any[] };
+      const jwk = keys.find((k: any) => k.kid === kid);
+      if (!jwk) {
+        return res.status(401).json({ message: "Apple key not found" });
+      }
+
+      // Import the JWK and verify the token
+      const { createPublicKey } = await import("crypto");
+      const { jwtVerify, importJWK } = await import("jose");
+      const publicKey = await importJWK(jwk, "RS256");
+      const { payload } = await jwtVerify(identityToken, publicKey, {
+        issuer: "https://appleid.apple.com",
+        audience: "app.herokids.com", // must match your App Store bundle ID
+      });
+
+      const appleId = payload.sub as string;
+      if (!appleId) {
+        return res.status(401).json({ message: "Invalid Apple token: no sub" });
+      }
+
+      // Find or create user
+      const user = await storage.upsertAppleUser({
+        appleId,
+        email: (email as string) || (payload.email as string | undefined),
+        firstName: firstName as string | undefined,
+        lastName: lastName as string | undefined,
+      });
+
+      // Create session
+      const sessionUser = createSessionUser(user.id);
+      clearAccountSessionState(req);
+      req.session.passport = { user: sessionUser };
+      await storage.updateUserLastLogin(user.id);
+
+      req.session.save((err: any) => {
+        if (err) {
+          console.error("Apple sign-in session save error:", err);
+          return res.status(500).json({ message: "Session error" });
+        }
+        res.json({ user: sanitizeUser(user) });
+      });
+    } catch (error: any) {
+      console.error("Apple sign-in error:", error?.message ?? error);
+      res.status(401).json({ message: "Apple Sign In failed" });
+    }
+  });
+
   app.get("/api/login", (_req, res) => {
     res.redirect("/");
   });

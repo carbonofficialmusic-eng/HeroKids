@@ -57,6 +57,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   passwordHash: varchar("password_hash", { length: 255 }),
   googleId: varchar("google_id", { length: 255 }),
+  appleId: varchar("apple_id", { length: 255 }),
   isEmailVerified: boolean("is_email_verified").notNull().default(false),
   emailVerificationTokenHash: varchar("email_verification_token_hash", { length: 64 }),
   emailVerificationTokenExpiresAt: timestamp("email_verification_token_expires_at"),

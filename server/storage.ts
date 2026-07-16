@@ -180,6 +180,8 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByGoogleId(googleId: string): Promise<User | undefined>;
+  getUserByAppleId(appleId: string): Promise<User | undefined>;
+  upsertAppleUser(profile: { appleId: string; email?: string; firstName?: string; lastName?: string }): Promise<User>;
   getUserByEmailVerificationToken(tokenHash: string): Promise<User | undefined>;
   getUserByPendingEmailVerificationToken(tokenHash: string): Promise<User | undefined>;
   getUserByPasswordResetToken(tokenHash: string): Promise<User | undefined>;
@@ -516,6 +518,52 @@ export class DatabaseStorage implements IStorage {
         lastName: profile.lastName ?? null,
         profileImageUrl: profile.profileImageUrl ?? null,
         isEmailVerified: true,
+      })
+      .returning();
+    return user;
+  }
+
+  async getUserByAppleId(appleId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.appleId, appleId));
+    return user;
+  }
+
+  async upsertAppleUser(profile: { appleId: string; email?: string; firstName?: string; lastName?: string }): Promise<User> {
+    // If we have an email, try to link to existing user
+    if (profile.email) {
+      const email = profile.email.toLowerCase();
+      const existing = await this.getUserByEmail(email);
+      if (existing) {
+        const [updated] = await db
+          .update(users)
+          .set({ appleId: profile.appleId, isEmailVerified: true, updatedAt: new Date() })
+          .where(eq(users.id, existing.id))
+          .returning();
+        return updated;
+      }
+      // New user with email
+      const [user] = await db
+        .insert(users)
+        .values({
+          email,
+          appleId: profile.appleId,
+          firstName: profile.firstName ?? "Apple",
+          lastName: profile.lastName ?? null,
+          isEmailVerified: true,
+        })
+        .returning();
+      return user;
+    }
+    // No email (Apple hides it after first sign-in) — create/return by appleId only
+    const existing = await this.getUserByAppleId(profile.appleId);
+    if (existing) return existing;
+    const [user] = await db
+      .insert(users)
+      .values({
+        appleId: profile.appleId,
+        firstName: profile.firstName ?? "Apple User",
+        lastName: profile.lastName ?? null,
+        isEmailVerified: false,
       })
       .returning();
     return user;
