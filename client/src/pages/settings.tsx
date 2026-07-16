@@ -51,7 +51,7 @@ export default function Settings() {
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
-  const [deleteAccountConfirmText, setDeleteAccountConfirmText] = useState("");
+  const [deleteAccountConfirmed, setDeleteAccountConfirmed] = useState(false);
   const [joinCodeCopied, setJoinCodeCopied] = useState(false);
   const [weeklyPrize, setWeeklyPrize] = useState("");
   const [monthlyPrize, setMonthlyPrize] = useState("");
@@ -1560,8 +1560,8 @@ export default function Settings() {
       </AlertDialog>
 
       {/* Account Deletion Confirmation Dialog */}
-      <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
-        <AlertDialogContent data-testid="dialog-delete-account">
+      <AlertDialog open={showDeleteAccountDialog} onOpenChange={(open) => { setShowDeleteAccountDialog(open); if (!open) setDeleteAccountConfirmed(false); }}>
+        <AlertDialogContent data-testid="dialog-delete-account" onOpenAutoFocus={(e) => e.preventDefault()}>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-destructive">
               {t('settings.deleteAccount', 'Login-Konto löschen')}
@@ -1569,20 +1569,22 @@ export default function Settings() {
             <AlertDialogDescription className="space-y-3">
               <p>{t('settings.deleteAccountConfirmDesc', 'Dein Login-Konto wird dauerhaft gelöscht. Du kannst dich danach nicht mehr mit dieser E-Mail-Adresse anmelden.')}</p>
               <p className="text-sm">{t('settings.deleteAccountDataKept', 'Deine Familienmitglieder, Aufgaben und Punkte bleiben erhalten — nur der Zugang über dieses Konto wird entfernt.')}</p>
-              <p className="text-sm font-semibold text-foreground">
-                {t('settings.deleteAccountType', 'Tippe "LÖSCHEN" zur Bestätigung:')}
-              </p>
-              <Input
-                value={deleteAccountConfirmText}
-                onChange={(e) => setDeleteAccountConfirmText(e.target.value)}
-                placeholder="LÖSCHEN"
-                data-testid="input-delete-account-confirm"
-              />
+              <label className="flex items-start gap-3 pt-1 cursor-pointer" data-testid="checkbox-delete-account-confirm">
+                <input
+                  type="checkbox"
+                  checked={deleteAccountConfirmed}
+                  onChange={(e) => setDeleteAccountConfirmed(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-destructive cursor-pointer"
+                />
+                <span className="text-sm font-semibold text-foreground">
+                  {t('settings.deleteAccountCheckbox', 'Ich verstehe, dass mein Login-Konto dauerhaft gelöscht wird.')}
+                </span>
+              </label>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
-              onClick={() => setShowDeleteAccountDialog(false)}
+              onClick={() => { setShowDeleteAccountDialog(false); setDeleteAccountConfirmed(false); }}
               disabled={deleteAccountMutation.isPending}
               data-testid="button-cancel-delete-account"
             >
@@ -1590,7 +1592,7 @@ export default function Settings() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteAccountMutation.mutate()}
-              disabled={deleteAccountMutation.isPending || deleteAccountConfirmText.trim().toUpperCase() !== "LÖSCHEN"}
+              disabled={deleteAccountMutation.isPending || !deleteAccountConfirmed}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               data-testid="button-confirm-delete-account"
             >
