@@ -73,7 +73,7 @@ export function filterTasksByDate<T extends FilterableTask>(
     }
 
     if (taskFilter === "monthly") {
-      return task.recurrence === "monthly" || task.recurrence === "yearly";
+      return task.recurrence === "monthly";
     }
 
     return true;
@@ -137,7 +137,7 @@ export function filterKidTasksByDate<T extends FilterableTask>(
     }
 
     if (kidTaskFilter === "monthly") {
-      return task.recurrence === "monthly" || task.recurrence === "yearly";
+      return task.recurrence === "monthly";
     }
 
     return true;
