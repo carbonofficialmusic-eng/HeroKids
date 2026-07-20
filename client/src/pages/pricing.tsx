@@ -52,9 +52,10 @@ export default function Pricing() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Initialize RevenueCat and load offerings on iOS
+  // Initialize RevenueCat and load offerings — web only
+  // On iOS we show "subscribe at herokids.app" so no RC init needed (avoids native spinner)
   useEffect(() => {
-    if (!isNativePlatform() || !familyData?.familyName) return;
+    if (isNativePlatform() || !familyData?.familyName) return;
     let cancelled = false;
     setRcLoading(true);
 
