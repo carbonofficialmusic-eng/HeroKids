@@ -39,12 +39,16 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
   const [rcOfferings, setRcOfferings] = useState<any>(null);
   const [rcLoading, setRcLoading] = useState(false);
 
-  // Load RevenueCat offerings on iOS when modal opens
+  // RevenueCat offerings are no longer loaded on iOS — the paywall directs
+  // iOS users to herokids.app instead of offering in-app purchases.
   useEffect(() => {
-    if (!open || !isNativePlatform() || !familyName) return;
+    if (!open || isNativePlatform() || !familyName) return;
     let cancelled = false;
     (async () => {
       setRcLoading(true);
+      const safetyTimer = setTimeout(() => {
+        if (!cancelled) setRcLoading(false);
+      }, 8000);
       try {
         await initRevenueCat(familyName);
         const offerings = await getRCOfferings();
@@ -52,6 +56,7 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
       } catch (err) {
         console.error("[RevenueCat] Failed to load offerings in paywall:", err);
       } finally {
+        clearTimeout(safetyTimer);
         if (!cancelled) setRcLoading(false);
       }
     })();
@@ -244,13 +249,21 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
 
         {/* CTAs */}
         <div className="flex flex-col gap-2 pt-1">
+          {isNativePlatform() ? (
+            <div className="rounded-lg border border-border bg-muted/50 p-3 text-center space-y-1">
+              <p className="text-sm text-muted-foreground">
+                {t("pricing.subscribeOnWeb", "Abonniere unter herokids.app")}
+              </p>
+              <p className="text-xs text-muted-foreground font-medium">herokids.app</p>
+            </div>
+          ) : (
           <Button
             className="w-full"
             onClick={handleUpgrade}
-            disabled={processing || (isNativePlatform() && rcLoading)}
+            disabled={processing || rcLoading}
             data-testid="button-paywall-upgrade"
           >
-            {processing || (isNativePlatform() && rcLoading) ? (
+            {processing || rcLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 {t("pricing.processing")}
@@ -259,6 +272,7 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
               t("paywall.upgradeFamily")
             )}
           </Button>
+          )}
           <Button
             variant="outline"
             className="w-full"
