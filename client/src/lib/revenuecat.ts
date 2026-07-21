@@ -61,6 +61,17 @@ export function getEntitlementTier(customerInfo: any): string | null {
   return null;
 }
 
+/**
+ * Returns true if the given entitlement is active and is a lifetime (non-renewing)
+ * purchase — identified by a null expirationDate from RevenueCat.
+ */
+export function isLifetimeEntitlement(customerInfo: any, entitlementId: string): boolean {
+  const ent = customerInfo?.entitlements?.active?.[entitlementId];
+  if (!ent?.isActive) return false;
+  // RevenueCat sets expirationDate to null for non-renewing (lifetime) products
+  return ent.expirationDate === null || ent.expirationDate === undefined;
+}
+
 export function getPackagePrice(pkg: any): string {
   return pkg?.storeProduct?.priceString ?? pkg?.product?.priceString ?? '';
 }

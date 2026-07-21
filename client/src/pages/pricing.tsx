@@ -14,9 +14,11 @@ import { useTranslation } from "react-i18next";
 import {
   initRevenueCat,
   getRCOfferings,
+  getRCCustomerInfo,
   purchaseRCPackage,
   restoreRCPurchases,
   getEntitlementTier,
+  isLifetimeEntitlement,
   getPackagePrice,
 } from "@/lib/revenuecat";
 
@@ -68,6 +70,30 @@ export default function Pricing() {
         await initRevenueCat(familyData.familyName);
         const offerings = await getRCOfferings();
         if (!cancelled) setRcOfferings(offerings);
+
+        // Auto-recover mid-transaction loss: if RC already granted a lifetime
+        // entitlement but the server hasn't been notified yet (e.g. the app
+        // crashed between the StoreKit confirmation and the /api/revenuecat-sync
+        // call), silently re-sync on every launch until the server agrees.
+        if (!familyData.isLifetimePurchase) {
+          try {
+            const customerInfo = await getRCCustomerInfo();
+            if (customerInfo && isLifetimeEntitlement(customerInfo, "family_pro")) {
+              console.log("[RevenueCat] Detected unsynced lifetime purchase — auto-syncing...");
+              await apiRequest("POST", "/api/revenuecat-sync", {
+                entitlementId: "family_pro",
+                isLifetime: true,
+              });
+              if (!cancelled) {
+                await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
+                console.log("[RevenueCat] Auto-sync complete: lifetime activated on server.");
+              }
+            }
+          } catch (autoSyncErr) {
+            // Non-fatal: user can still use Restore Purchases manually
+            console.warn("[RevenueCat] Auto-sync failed (will retry next launch):", autoSyncErr);
+          }
+        }
       } catch (err) {
         console.error("[RevenueCat] Failed to load offerings:", err);
       } finally {
@@ -173,9 +199,18 @@ export default function Pricing() {
       const tier = getEntitlementTier(customerInfo);
       if (tier) {
         const entitlementKey = tier === "family_hero" ? "family_pro" : "family";
-        await apiRequest("POST", "/api/revenuecat-sync", { entitlementId: entitlementKey });
+        const isLifetime = isLifetimeEntitlement(customerInfo, entitlementKey);
+        await apiRequest("POST", "/api/revenuecat-sync", {
+          entitlementId: entitlementKey,
+          ...(isLifetime ? { isLifetime: true } : {}),
+        });
         await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
-        toast({ title: "Käufe wiederhergestellt!", description: "Dein Abonnement wurde erfolgreich wiederhergestellt." });
+        toast({
+          title: "Käufe wiederhergestellt!",
+          description: isLifetime
+            ? "Dein Lifetime-Zugang wurde erfolgreich wiederhergestellt."
+            : "Dein Abonnement wurde erfolgreich wiederhergestellt.",
+        });
       } else {
         toast({ title: "Keine Käufe gefunden", description: "Es wurden keine früheren Käufe gefunden.", variant: "destructive" });
       }
