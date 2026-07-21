@@ -6503,7 +6503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // RevenueCat: post-purchase sync (iOS native purchases)
   app.post("/api/revenuecat-sync", isAuthenticated, async (req: any, res) => {
     try {
-      const { entitlementId } = req.body as { entitlementId?: string };
+      const { entitlementId, isLifetime: clientClaimsLifetime } = req.body as { entitlementId?: string; isLifetime?: boolean };
 
       const userId = req.user.claims?.sub ?? req.user.id;
       const member = await storage.getFamilyMemberByUserId(userId);
@@ -6552,13 +6552,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Entitlement not active" });
       }
 
+      // Cross-verify lifetime claim: RC returns expires_date=null for non-consumable (lifetime) entitlements
+      const isLifetime = clientClaimsLifetime === true && ent.expires_date === null;
+
       const { eq } = await import("drizzle-orm");
       const { families } = await import("../shared/schema");
       await db.update(families)
-        .set({ subscriptionTier: newTier, subscriptionStatus: "active" })
+        .set({
+          subscriptionTier: newTier,
+          subscriptionStatus: "active",
+          ...(isLifetime ? { isLifetimePurchase: true } : {}),
+        })
         .where(eq(families.familyName, member.familyName));
 
-      console.log(`[RevenueCat] Synced: ${member.familyName} → ${newTier}`);
+      console.log(`[RevenueCat] Synced: ${member.familyName} → ${newTier}${isLifetime ? " (lifetime)" : ""}`);
 
       // Auto-unpause members that now fit within the new tier limit
       try {

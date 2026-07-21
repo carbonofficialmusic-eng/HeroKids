@@ -138,16 +138,22 @@ export default function Pricing() {
     try {
       const customerInfo = await purchaseRCPackage(pkg);
       const grantedTier = getEntitlementTier(customerInfo);
+      const isLifetimePurchase = cycle === "lifetime";
 
       // Sync to backend
-      await apiRequest("POST", "/api/revenuecat-sync", { entitlementId: entitlementKey });
+      await apiRequest("POST", "/api/revenuecat-sync", {
+        entitlementId: entitlementKey,
+        ...(isLifetimePurchase ? { isLifetime: true } : {}),
+      });
 
       // Refresh family data
       await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
 
       toast({
-        title: "Abonnement aktiviert!",
-        description: `Du hast ${grantedTier === "family_hero" ? "FamilyPro" : "Family"} erfolgreich abonniert.`,
+        title: isLifetimePurchase ? "Lifetime-Zugang aktiviert!" : "Abonnement aktiviert!",
+        description: isLifetimePurchase
+          ? "Du hast FamilyPro Lifetime erfolgreich freigeschaltet."
+          : `Du hast ${grantedTier === "family_hero" ? "FamilyPro" : "Family"} erfolgreich abonniert.`,
       });
     } catch (err: any) {
       if (err?.code === "1" || err?.message?.includes("cancel")) {
@@ -371,32 +377,70 @@ export default function Pricing() {
                 {isNativePlatform() ? (
                   /* ── iOS: RevenueCat in-app purchase ── */
                   <div className="flex flex-col gap-2">
-                    {tier.id === "free" || isCurrentTier ? (
+                    {tier.id === "free" || (isCurrentTier && !tier.lifetimePrice) ? (
                       <Button className="w-full" variant="outline" disabled data-testid={`button-select-${tier.id}`}>
                         {t("pricing.currentPlan")}
                       </Button>
                     ) : tier.rcOfferingKey === null ? null : (
-                      <Button
-                        className="w-full"
-                        variant={tier.popular ? "default" : "outline"}
-                        disabled={!isParent || isProcessing || rcLoading}
-                        onClick={() => handleIOSPurchase(tier.id, cycleKey as "monthly" | "yearly")}
-                        data-testid={`button-select-${tier.id}`}
-                      >
-                        {isProcessing ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            {t("pricing.processing")}
-                          </>
-                        ) : rcLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            {t("pricing.processing")}
-                          </>
-                        ) : (
-                          t("pricing.choosePlan", { name: tier.name })
+                      <>
+                        {/* Subscription button — hidden if already on this tier with lifetime */}
+                        {!(isCurrentTier && familyData?.isLifetimePurchase) && (
+                          <Button
+                            className="w-full"
+                            variant={tier.popular ? "default" : "outline"}
+                            disabled={!isParent || isProcessing || isProcessingLifetime || rcLoading || isCurrentTier}
+                            onClick={() => handleIOSPurchase(tier.id, cycleKey as "monthly" | "yearly")}
+                            data-testid={`button-select-${tier.id}`}
+                          >
+                            {isProcessing ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                {t("pricing.processing")}
+                              </>
+                            ) : rcLoading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                {t("pricing.processing")}
+                              </>
+                            ) : isCurrentTier ? (
+                              t("pricing.currentPlan")
+                            ) : (
+                              t("pricing.choosePlan", { name: tier.name })
+                            )}
+                          </Button>
                         )}
-                      </Button>
+
+                        {/* Lifetime button — only for family_hero tier */}
+                        {tier.lifetimePrice && !familyData?.isLifetimePurchase && (
+                          <Button
+                            className="w-full"
+                            variant="outline"
+                            disabled={!isParent || isProcessing || isProcessingLifetime || rcLoading}
+                            onClick={() => handleIOSPurchase(tier.id, "lifetime")}
+                            data-testid={`button-select-${tier.id}-lifetime`}
+                          >
+                            {isProcessingLifetime ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                {t("pricing.processing")}
+                              </>
+                            ) : (
+                              <>
+                                <Infinity className="w-4 h-4 mr-2" />
+                                {t("pricing.lifetimeOption", { price: rcLifetimePrice ?? tier.lifetimePrice })}
+                              </>
+                            )}
+                          </Button>
+                        )}
+
+                        {/* Lifetime active indicator */}
+                        {tier.lifetimePrice && isCurrentTier && familyData?.isLifetimePurchase && (
+                          <div className="flex items-center justify-center gap-2 py-1.5 text-sm text-muted-foreground">
+                            <Infinity className="w-4 h-4 text-primary" />
+                            <span className="font-medium text-primary">{t("pricing.lifetimeActive")}</span>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 ) : (
