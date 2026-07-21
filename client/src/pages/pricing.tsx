@@ -52,10 +52,9 @@ export default function Pricing() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Initialize RevenueCat and load offerings — web only
-  // On iOS we show "subscribe at herokids.app" so no RC init needed (avoids native spinner)
+  // Initialize RevenueCat and load offerings on iOS
   useEffect(() => {
-    if (isNativePlatform() || !familyData?.familyName) return;
+    if (!isNativePlatform() || !familyData?.familyName) return;
     let cancelled = false;
     setRcLoading(true);
 
@@ -370,21 +369,34 @@ export default function Pricing() {
                 </ul>
 
                 {isNativePlatform() ? (
-                  /* ── iOS: no in-app purchase — direct to web ── */
+                  /* ── iOS: RevenueCat in-app purchase ── */
                   <div className="flex flex-col gap-2">
                     {tier.id === "free" || isCurrentTier ? (
-                      <Button className="w-full" variant="outline" disabled>
+                      <Button className="w-full" variant="outline" disabled data-testid={`button-select-${tier.id}`}>
                         {t("pricing.currentPlan")}
                       </Button>
-                    ) : (
-                      <div className="rounded-lg border border-border bg-muted/50 p-3 text-center space-y-2">
-                        <p className="text-sm text-muted-foreground">
-                          {t("pricing.subscribeOnWeb", "Abonniere unter herokids.app")}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          herokids.app
-                        </p>
-                      </div>
+                    ) : tier.rcOfferingKey === null ? null : (
+                      <Button
+                        className="w-full"
+                        variant={tier.popular ? "default" : "outline"}
+                        disabled={!isParent || isProcessing || rcLoading}
+                        onClick={() => handleIOSPurchase(tier.id, cycleKey as "monthly" | "yearly")}
+                        data-testid={`button-select-${tier.id}`}
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            {t("pricing.processing")}
+                          </>
+                        ) : rcLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            {t("pricing.processing")}
+                          </>
+                        ) : (
+                          t("pricing.choosePlan", { name: tier.name })
+                        )}
+                      </Button>
                     )}
                   </div>
                 ) : (
@@ -452,6 +464,30 @@ export default function Pricing() {
           })}
         </div>
 
+
+        {/* iOS: Restore Purchases */}
+        {isNativePlatform() && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleRestorePurchases}
+              disabled={rcRestoring}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5"
+              data-testid="button-restore-purchases"
+            >
+              {rcRestoring ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Wiederherstellen…
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Käufe wiederherstellen
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
         <div className="mt-16 text-center max-w-2xl mx-auto">
           <h2 className="text-2xl font-bold font-accent mb-4">{t("pricing.questionsTitle")}</h2>
