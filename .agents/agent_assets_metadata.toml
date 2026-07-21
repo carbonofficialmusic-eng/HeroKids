@@ -251,3 +251,9 @@ id = "LLBrQ-QkaoLMCAvL80b41"
 uri = "file://ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
 type = "image"
 title = "App Icon (neu)"
+
+[[outputs]]
+id = "5BnPfBDCsaaPaAVIJQKlB"
+uri = "file://IOS_SANDBOX_PURCHASE_GUIDE.md"
+type = "text"
+title = "Anleitung: iOS Sandbox-Kauf testen (Task #149)"
