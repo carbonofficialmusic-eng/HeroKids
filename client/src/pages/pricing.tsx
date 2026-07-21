@@ -459,10 +459,12 @@ export default function Pricing() {
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                 {t("pricing.processing")}
                               </>
+                            ) : rcLoading ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
                               <>
                                 <Infinity className="w-4 h-4 mr-2" />
-                                {t("pricing.lifetimeOption", { price: rcLifetimePrice ?? tier.lifetimePrice })}
+                                {t("pricing.lifetimeOption", { price: rcLifetimePrice })}
                               </>
                             )}
                           </Button>
