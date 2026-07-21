@@ -445,8 +445,8 @@ export default function Pricing() {
                           </Button>
                         )}
 
-                        {/* Lifetime button — only for family_hero tier */}
-                        {tier.lifetimePrice && !familyData?.isLifetimePurchase && (
+                        {/* Lifetime button — only for family_hero tier, only if RC has the product */}
+                        {tier.lifetimePrice && !familyData?.isLifetimePurchase && (!rcLoading && rcLifetimePrice) && (
                           <Button
                             className="w-full"
                             variant="outline"
