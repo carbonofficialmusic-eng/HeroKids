@@ -114,8 +114,8 @@ export default function Landing() {
       <nav style={{ position: "sticky", top: 0, zIndex: 50, background: `${C.bg}dd`, backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.border}`, paddingTop: "env(safe-area-inset-top)" }}>
         <div style={{ maxWidth: 1152, margin: "0 auto", padding: "0 1rem", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <img src={logoUrl} alt="HeroKids" style={{ width: 40, height: 40, borderRadius: 10 }} data-testid="img-logo" />
-            <span className="hk-display" style={{ fontWeight: 800, fontSize: "1.35rem", color: C.fg }} data-testid="text-app-name">HeroKids</span>
+            <img src={logoUrl} alt="Little Champs" style={{ width: 40, height: 40, borderRadius: 10 }} data-testid="img-logo" />
+            <span className="hk-display" style={{ fontWeight: 800, fontSize: "1.35rem", color: C.fg }} data-testid="text-app-name">Little Champs</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <Button
@@ -526,10 +526,10 @@ export default function Landing() {
       <footer style={{ borderTop: `1px solid ${C.border}`, padding: "2.5rem 1rem", zIndex: 1, position: "relative" }}>
         <div style={{ maxWidth: 1152, margin: "0 auto", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem", color: C.fgMuted, fontSize: "0.875rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <img src={logoUrl} alt="HeroKids" style={{ width: 28, height: 28, borderRadius: 6 }} />
-            <span className="hk-display" style={{ fontWeight: 700, color: C.fg }}>HeroKids</span>
+            <img src={logoUrl} alt="Little Champs" style={{ width: 28, height: 28, borderRadius: 6 }} />
+            <span className="hk-display" style={{ fontWeight: 700, color: C.fg }}>Little Champs</span>
           </div>
-          <p>© {new Date().getFullYear()} HeroKids Inc. {t('landing.footer.rights')}</p>
+          <p>© {new Date().getFullYear()} Little Champs {t('landing.footer.rights')}</p>
           <div style={{ display: "flex", gap: "1.5rem" }}>
             <button onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })} style={{ background: "none", border: "none", color: C.fgMuted, cursor: "pointer", fontSize: "0.875rem", padding: 0 }}>{t('landing.nav.pricing') || 'Pricing'}</button>
             <Link href="/privacy" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.privacy')}</Link>

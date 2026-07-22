@@ -34,12 +34,12 @@ export default function Terms() {
               <h2 className="text-xl font-semibold mt-6 mb-3">§ 1 Geltungsbereich</h2>
               <p>
                 Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der
-                webbasierten Anwendung <strong>HeroKids</strong>, betrieben von:
+                webbasierten Anwendung <strong>Little Champs</strong>, betrieben von:
               </p>
               <p className="mt-2">
                 Sonoa · Riewert Petersen<br />
                 Warnstedtstr. 59a · 22525 Hamburg<br />
-                E-Mail: <a href="mailto:info@herokids.app" className="underline">info@herokids.app</a>
+                E-Mail: <a href="mailto:info@littlechamps.net" className="underline">info@littlechamps.net</a>
               </p>
               <p className="mt-2">
                 Mit der Registrierung eines Kontos erklärt sich der Nutzer mit diesen AGB
@@ -50,7 +50,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold mt-6 mb-3">§ 2 Leistungsbeschreibung</h2>
               <p>
-                HeroKids ist eine Familien-Aufgabenverwaltungs-App, die Kindern durch
+                Little Champs ist eine Familien-Aufgabenverwaltungs-App, die Kindern durch
                 Gamification-Elemente (Punkte, Belohnungen, Leaderboards) dabei hilft,
                 Haushaltsaufgaben zu erledigen. Die App richtet sich an Familien mit Kindern
                 und wird als Software-as-a-Service (SaaS) angeboten.
@@ -112,7 +112,7 @@ export default function Terms() {
               </p>
               <p className="mt-2">
                 Um das Widerrufsrecht auszuüben, müssen Sie uns (Sonoa, Riewert Petersen,
-                Warnstedtstr. 59a, 22525 Hamburg, E-Mail: info@herokids.app) mittels einer
+                Warnstedtstr. 59a, 22525 Hamburg, E-Mail: info@littlechamps.net) mittels einer
                 eindeutigen Erklärung über Ihren Entschluss, diesen Vertrag zu widerrufen,
                 informieren.
               </p>
@@ -156,7 +156,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold mt-6 mb-3">§ 8 Haftungsbeschränkung</h2>
               <p>
-                HeroKids haftet nicht für Schäden, die durch höhere Gewalt, technische Ausfälle
+                Little Champs haftet nicht für Schäden, die durch höhere Gewalt, technische Ausfälle
                 Dritter (z.B. Hosting-Anbieter) oder durch missbräuchliche Nutzung entstehen.
               </p>
               <p className="mt-2">
@@ -200,7 +200,7 @@ export default function Terms() {
             </section>
 
             <div className="pt-6 border-t border-border text-xs text-muted-foreground">
-              <p>Sonoa · Riewert Petersen · Warnstedtstr. 59a · 22525 Hamburg · info@herokids.app</p>
+              <p>Sonoa · Riewert Petersen · Warnstedtstr. 59a · 22525 Hamburg · info@littlechamps.net</p>
             </div>
           </CardContent>
         </Card>

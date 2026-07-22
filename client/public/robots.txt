@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://herokids.app/sitemap.xml
+Sitemap: https://littlechamps.net/sitemap.xml

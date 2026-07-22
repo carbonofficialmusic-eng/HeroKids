@@ -2,21 +2,21 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.herokids.com',
-  appName: 'HeroKids',
+  appName: 'Little Champs',
   webDir: 'dist/public',
   server: {
-    // TESTMODUS: App lädt direkt von herokids.app (kein lokaler Build nötig).
+    // TESTMODUS: App lädt direkt von littlechamps.net (kein lokaler Build nötig).
     // Für App-Store-Release: Diese beiden Zeilen auskommentieren,
     // dann `npm run build && npx cap sync` ausführen.
-    url: 'https://herokids.app',
-    allowNavigation: ['herokids.app'],
+    url: 'https://littlechamps.net',
+    allowNavigation: ['littlechamps.net'],
     androidScheme: 'https',
     iosScheme: 'https',
   },
   ios: {
     contentInset: 'never',
     preferredContentMode: 'mobile',
-    scheme: 'HeroKids',
+    scheme: 'LittleChamps',
   },
   plugins: {
     StatusBar: {
@@ -26,7 +26,7 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 2000,
       launchAutoHide: true,
-      backgroundColor: '#14b8a6',
+      backgroundColor: '#4a4a4a',
       showSpinner: false,
       splashFullScreen: true,
       splashImmersive: true,

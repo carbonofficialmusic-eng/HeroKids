@@ -57,7 +57,7 @@ const KNOWN_SKIN_IDS = new Set([
   // Tier 13 - Pterosaur Sky
   "pteranodon", "quetzalcoatlus", "rhamphorhynchus", "pterodactylus",
   "dimorphodon", "tapejara", "anhanguera", "dsungaripterus", "nemicolopterus",
-  // Tier 14 - HeroKids Legacy
+  // Tier 14 - Little Champs Legacy
   "shield-blaze", "comet-dash", "wave-glider", "forest-guard",
   "luna-beacon", "sunrise-spark", "bloom-guardian", "breeze-captain",
   "storm-runner", "star-guardian", "thunder-bolt", "heart-shield",

@@ -46,7 +46,7 @@
   "auth": {
     "login": "使用 Replit 登录",
     "logout": "退出登录",
-    "welcome": "欢迎来到 HeroKids！",
+    "welcome": "欢迎来到 Little Champs！",
     "selectFamily": "选择您的家庭",
     "createFamily": "创建新家庭",
     "joinFamily": "加入家庭",
@@ -57,7 +57,7 @@
     "verificationEmailFailed": "无法发送验证邮件",
     "tryAgainLater": "请稍后再试。",
     "emailVerifiedTitle": "邮箱已验证",
-    "emailVerifiedDescription": "你的 HeroKids 账户现已验证。",
+    "emailVerifiedDescription": "你的 Little Champs 账户现已验证。",
     "verificationFailedTitle": "验证失败",
     "verificationFailedDescription": "链接无效或已过期。"
   },
@@ -471,7 +471,7 @@
     "pterosaurSky": "翼龙天空",
     "unlockAtPoints": "🔒 累计{{points}}积分解锁",
     "starFound": "你发现了一颗星！",
-    "legacyUnlocked": "HeroKids Legacy头像已解锁！",
+    "legacyUnlocked": "Little Champs Legacy头像已解锁！",
     "unlockAtStars": "{{count}}颗星解锁",
     "unlockedWithStars": "已用{{count}}颗星解锁",
     "hideBackground": "隐藏背景",
@@ -640,7 +640,7 @@
     "factoryResetWarning": "这将删除所有任务、奖励和积分历史。此操作无法撤销！",
     "confirmReset": "输入 RESET 确认",
     "settingsSaved": "设置保存成功",
-    "manageExperience": "管理你家庭的 HeroKids 体验",
+    "manageExperience": "管理你家庭的 Little Champs 体验",
     "manageMembersDesc": "管理你的家庭成员。添加新成员或移除现有成员。",
     "loadingMembers": "加载成员中...",
     "overLimitTitle": "成员数量超出限制",
@@ -796,7 +796,7 @@
     "passwordChangedDesc": "您的密码已成功更新。",
     "passwordsDoNotMatch": "两次输入的密码不一致",
     "onboardingTourTitle": "入门导览",
-    "onboardingTourDesc": "逐步向你展示HeroKids的所有重要功能。",
+    "onboardingTourDesc": "逐步向你展示Little Champs的所有重要功能。",
     "restartTour": "重新开始导览"
   },
   "subscription": {
@@ -897,7 +897,7 @@
     "enterPinFor": "请输入{{name}}的PIN码"
   },
   "familySetup": {
-    "welcomeToHeroKids": "Welcome to HeroKids!",
+    "welcomeToLittle Champs": "Welcome to Little Champs!",
     "setupProfile": "最后一步：创建你的家庭和家长资料。",
     "createFamily": "Create Family",
     "joinFamily": "Join Family",
@@ -921,16 +921,16 @@
   "landing": {
     "getStarted": "Get Started",
     "heroTitle": "Turn Chores into Adventures!",
-    "heroSubtitle": "HeroKids makes household tasks fun for the whole family. Kids earn points, climb leaderboards, and win awesome rewards!",
+    "heroSubtitle": "Little Champs makes household tasks fun for the whole family. Kids earn points, climb leaderboards, and win awesome rewards!",
     "startYourAdventure": "Start Your Adventure",
-    "howItWorks": "How HeroKids Works",
+    "howItWorks": "How Little Champs Works",
     "createTasks": "Create Tasks",
     "createTasksDesc": "Parents assign household chores with point values and optional photo proof for completion.",
     "earnPoints": "Earn Points",
     "earnPointsDesc": "Kids complete tasks and watch their points grow. Each completed chore brings them closer to rewards!",
     "winRewards": "Win Rewards",
     "winRewardsDesc": "Climb the family leaderboard and earn prizes! Weekly and monthly winners get special rewards.",
-    "whyFamiliesLove": "Why Families Love HeroKids",
+    "whyFamiliesLove": "Why Families Love Little Champs",
     "getEveryoneInvolved": "Get everyone involved in household chores",
     "motivateWithPoints": "Motivate kids with points and achievements",
     "friendlyCompetition": "Friendly competition brings families together",
@@ -938,7 +938,7 @@
     "readyToMakeFun": "Ready to Make Chores Fun?",
     "joinThousands": "加入数千个将家务变成冒险的家庭！",
     "getStartedFree": "免费开始",
-    "copyrightNotice": "© 2025 HeroKids. 让家庭更强大，一项任务一步一步。",
+    "copyrightNotice": "© 2025 Little Champs. 让家庭更强大，一项任务一步一步。",
     "nav": {
       "pricing": "价格",
       "connectDevice": "连接设备"
@@ -954,7 +954,7 @@
       "pointsEarned": "获得积分"
     },
     "auth": {
-      "title": "HeroKids账户",
+      "title": "Little Champs账户",
       "description": "直接登录，无需浏览器跳转。",
       "tabLogin": "登录",
       "tabRegister": "注册",
@@ -1163,7 +1163,7 @@
     "questionsTitle": "有问题？",
     "questionsDesc": "所有套餐包括无限任务、积分跟踪和实时更新。随时升级或降级。随时取消，不问问题。",
     "paymentInfo": "付款由Stripe安全处理。您的订阅将每月自动续订。",
-    "manageOnWeb": "订阅在herokids.app上管理。",
+    "manageOnWeb": "订阅在littlechamps.net上管理。",
     "cancelToSettings": "取消订阅 → 设置",
     "toastPermissionDenied": "权限被拒绝",
     "toastOnlyParents": "只有家长可以管理订阅",
@@ -1477,7 +1477,7 @@
     "desc_task-streak-14": "连续14天完成任务",
     "desc_task-streak-30": "连续30天完成任务",
     "title_legacy-collector": "传奇收藏家",
-    "desc_legacy-collector": "解锁12个HeroKids传奇皮肤中的10个",
+    "desc_legacy-collector": "解锁12个Little Champs传奇皮肤中的10个",
     "desc_lifetime-500": "累计获得500积分",
     "desc_lifetime-1000": "累计获得1000积分",
     "desc_lifetime-2000": "累计获得2000积分",
@@ -1607,19 +1607,19 @@
     "skip": "跳过",
     "next": "下一步 →",
     "letsGo": "出发吧！",
-    "step0": "你好，我们是米娅和马克斯。我们将用几个步骤向你展示HeroKids的使用方法。你可以随时退出，稍后继续。",
+    "step0": "你好，我们是米娅和马克斯。我们将用几个步骤向你展示Little Champs的使用方法。你可以随时退出，稍后继续。",
     "step1": "在这里你为孩子们创建新任务。你可以分配积分、设置截止日期、要求证明照片和审批、创建购物清单并为孩子分配任务。标记为重要的任务总是显示在任务列表顶部。",
     "step2": "奖励是最好的动力！设置你的孩子可以用积分兑换什么。奖励也可以提供给大家分享。",
     "step3": "当孩子将需要审批的任务标记为完成时，它会出现在这里供审核。孩子们发送的奖励申请也可以在这里管理和批准。",
     "step4": "在这里你可以了解奖励全局。你可以看到谁兑换了奖励，参与共享奖励，并最终将它们标记为已完成。",
     "step5": "在设置中你会找到时区、家庭代码、分类名称、孩子的设备连接功能、家长密码保护、你的计划等更多内容。你还可以将个别成员从排行榜中移除，或者如果不喜欢太多竞争，可以完全关闭排行榜。通过用户切换，你可以快速在孩子的账户之间切换 — 当多个孩子使用同一设备时非常方便。",
-    "step6": "通过星星图标，每位玩家都可以解锁自己的角色皮肤和新背景。在那里你也可以收集星星。每第四颗星会解锁一个HeroKids Legacy。",
+    "step6": "通过星星图标，每位玩家都可以解锁自己的角色皮肤和新背景。在那里你也可以收集星星。每第四颗星会解锁一个Little Champs Legacy。",
     "step7": "留言板是你家庭的公告栏。消息、表扬和公告 — 所有人都能看到的一个地方。每个家庭成员可以在那里贴2张便条。",
     "step8": "这里显示奖励加成。谁将成为月度冠军？你可以奖励积分或输入自定义奖励 — 比如零花钱增加。在顶部菜单中可以找到相关设置。",
     "step9": "家庭目标凝聚大家！所有孩子共同努力实现一个目标 — 比如一次共同出游或游戏之夜。",
     "step10": "在这里你可以向孩子们发送积分 — 与任务无关，仅作为奖励或激励。",
     "step11": "家庭聊天将大家连接起来！只有拥有自己智能手机的成员才能在那里写消息 — 但对他们来说会非常热闹。",
-    "step12": "就这些了——你现在已经了解了最重要的功能。快开始吧，让你的家人成为真正的HeroKids！"
+    "step12": "就这些了——你现在已经了解了最重要的功能。快开始吧，让你的家人成为真正的Little Champs！"
   },
   "languageNames": {
     "de": "德语",
@@ -1639,7 +1639,7 @@
     "checking": "检查中…"
   },
   "paywall": {
-    "title": "充分利用 HeroKids",
+    "title": "充分利用 Little Champs",
     "subtitle": "免费开始 — 随时升级。",
     "freeTitle": "免费",
     "familyTitle": "家庭版",

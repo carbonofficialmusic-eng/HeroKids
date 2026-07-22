@@ -46,7 +46,7 @@
   "auth": {
     "login": "Replit으로 로그인",
     "logout": "로그아웃",
-    "welcome": "HeroKids에 오신 것을 환영합니다!",
+    "welcome": "Little Champs에 오신 것을 환영합니다!",
     "selectFamily": "가족 선택",
     "createFamily": "새 가족 만들기",
     "joinFamily": "가족 참여하기",
@@ -57,7 +57,7 @@
     "verificationEmailFailed": "인증 이메일을 보낼 수 없습니다",
     "tryAgainLater": "나중에 다시 시도하세요.",
     "emailVerifiedTitle": "이메일 인증 완료",
-    "emailVerifiedDescription": "HeroKids 계정이 인증되었습니다.",
+    "emailVerifiedDescription": "Little Champs 계정이 인증되었습니다.",
     "verificationFailedTitle": "인증 실패",
     "verificationFailedDescription": "링크가 잘못되었거나 만료되었습니다."
   },
@@ -475,7 +475,7 @@
     "pterosaurSky": "익룡의 하늘",
     "unlockAtPoints": "🔒 총 {{points}} 포인트에서 잠금 해제",
     "starFound": "별을 찾았어요!",
-    "legacyUnlocked": "HeroKids Legacy 아바타 획득!",
+    "legacyUnlocked": "Little Champs Legacy 아바타 획득!",
     "unlockAtStars": "{{count}}개의 별에서 잠금 해제",
     "unlockedWithStars": "{{count}}개의 별로 획득함",
     "hideBackground": "배경 숨기기",
@@ -644,7 +644,7 @@
     "factoryResetWarning": "모든 과제, 보상, 포인트 기록이 삭제됩니다. 이 작업은 되돌릴 수 없습니다!",
     "confirmReset": "'RESET'을 입력하여 확인",
     "settingsSaved": "설정이 저장되었습니다",
-    "manageExperience": "가족의 HeroKids 경험을 관리하세요",
+    "manageExperience": "가족의 Little Champs 경험을 관리하세요",
     "manageMembersDesc": "가족 구성원을 관리합니다. 새 구성원을 추가하거나 기존 구성원을 제거합니다.",
     "loadingMembers": "구성원 로딩 중...",
     "overLimitTitle": "구성원 한도 초과",
@@ -800,7 +800,7 @@
     "passwordChangedDesc": "비밀번호가 성공적으로 업데이트되었습니다.",
     "passwordsDoNotMatch": "비밀번호가 일치하지 않습니다",
     "onboardingTourTitle": "소개 투어",
-    "onboardingTourDesc": "HeroKids의 모든 주요 기능을 단계별로 안내해드립니다.",
+    "onboardingTourDesc": "Little Champs의 모든 주요 기능을 단계별로 안내해드립니다.",
     "restartTour": "투어 다시 시작"
   },
   "subscription": {
@@ -901,7 +901,7 @@
     "enterPinFor": "{{name}}의 PIN 코드를 입력하세요"
   },
   "familySetup": {
-    "welcomeToHeroKids": "HeroKids에 오신 것을 환영합니다!",
+    "welcomeToLittle Champs": "Little Champs에 오신 것을 환영합니다!",
     "setupProfile": "마지막 단계: 가족과 부모 프로필을 만들어 주세요.",
     "createFamily": "가족 만들기",
     "joinFamily": "가족 참여하기",
@@ -925,7 +925,7 @@
   "landing": {
     "getStarted": "시작하기",
     "heroTitle": "집안일을 모험으로 바꾸세요!",
-    "heroSubtitle": "HeroKids는 온 가족을 위한 재미있는 가사 관리입니다. 아이들은 포인트를 얻고, 리더보드에 올라가며, 멋진 보상을 받습니다!",
+    "heroSubtitle": "Little Champs는 온 가족을 위한 재미있는 가사 관리입니다. 아이들은 포인트를 얻고, 리더보드에 올라가며, 멋진 보상을 받습니다!",
     "startYourAdventure": "모험 시작하기",
     "howItWorks": "작동 방식",
     "createTasks": "과제 만들기",
@@ -968,8 +968,8 @@
     "choosePlan": "플랜 선택",
     "contactUs": "문의하기",
     "faq": "자주 묻는 질문",
-    "whatIsHeroKids": "HeroKids는 무엇인가요?",
-    "whatIsHeroKidsAnswer": "HeroKids는 아이들이 게임화된 과제와 보상 시스템을 통해 책임감을 배우도록 돕는 가족 과제 관리 앱입니다.",
+    "whatIsLittle Champs": "Little Champs는 무엇인가요?",
+    "whatIsLittle ChampsAnswer": "Little Champs는 아이들이 게임화된 과제와 보상 시스템을 통해 책임감을 배우도록 돕는 가족 과제 관리 앱입니다.",
     "howDoesPhotoProofWork": "사진 증빙은 어떻게 작동하나요?",
     "howDoesPhotoProofWorkAnswer": "Family 플랜 이상에서는 과제를 사진 증빙이 필요하도록 설정할 수 있습니다. 아이들이 과제를 완료했음을 보여주는 사진을 업로드하면 부모가 검토하고 승인합니다.",
     "canISwitchPlans": "플랜을 전환할 수 있나요?",
@@ -981,7 +981,7 @@
     "logInNow": "지금 로그인",
     "joinThousands": "수천 가족과 함께 집안일을 모험으로 만들어 보세요!",
     "getStartedFree": "무료로 시작하기",
-    "copyrightNotice": "© 2025 HeroKids. 한 번에 하나씩, 가족을 더 강하게.",
+    "copyrightNotice": "© 2025 Little Champs. 한 번에 하나씩, 가족을 더 강하게.",
     "nav": {
       "pricing": "요금제",
       "connectDevice": "기기 연결"
@@ -997,7 +997,7 @@
       "pointsEarned": "포인트 획득"
     },
     "auth": {
-      "title": "HeroKids 계정",
+      "title": "Little Champs 계정",
       "description": "브라우저 리다이렉트 없이 직접 로그인.",
       "tabLogin": "로그인",
       "tabRegister": "회원가입",
@@ -1416,7 +1416,7 @@
     "desc_task-streak-14": "14일 연속으로 과제를 완료하세요",
     "desc_task-streak-30": "30일 연속으로 과제를 완료하세요",
     "title_legacy-collector": "레거시 컬렉터",
-    "desc_legacy-collector": "HeroKids 레거시 스킨 12개 중 10개를 잠금 해제하세요",
+    "desc_legacy-collector": "Little Champs 레거시 스킨 12개 중 10개를 잠금 해제하세요",
     "desc_lifetime-500": "총 500 포인트를 획득하세요",
     "desc_lifetime-1000": "총 1000 포인트를 획득하세요",
     "desc_lifetime-2000": "총 2000 포인트를 획득하세요",
@@ -1501,7 +1501,7 @@
     "questionsTitle": "질문이 있으신가요?",
     "questionsDesc": "모든 요금제에는 무제한 과제, 포인트 추적 및 실시간 업데이트가 포함됩니다. 언제든지 업그레이드하거나 다운그레이드하세요. 질문 없이 언제든지 취소할 수 있습니다.",
     "paymentInfo": "결제는 Stripe를 통해 안전하게 처리됩니다. 구독은 매월 자동으로 갱신됩니다.",
-    "manageOnWeb": "구독은 herokids.app에서 관리됩니다.",
+    "manageOnWeb": "구독은 littlechamps.net에서 관리됩니다.",
     "cancelToSettings": "구독 취소 → 설정",
     "toastPermissionDenied": "권한 거부됨",
     "toastOnlyParents": "부모만 구독을 관리할 수 있습니다",
@@ -1622,19 +1622,19 @@
     "skip": "건너뛰기",
     "next": "다음 →",
     "letsGo": "시작해요!",
-    "step0": "안녕하세요, 저희는 미아와 맥스예요. 몇 가지 단계로 HeroKids가 어떻게 작동하는지 보여드릴게요. 언제든지 중단하고 나중에 계속할 수 있어요.",
+    "step0": "안녕하세요, 저희는 미아와 맥스예요. 몇 가지 단계로 Little Champs가 어떻게 작동하는지 보여드릴게요. 언제든지 중단하고 나중에 계속할 수 있어요.",
     "step1": "여기서 자녀를 위한 새 과제를 만들어요. 점수 부여, 마감일 설정, 증거 사진 및 승인 요구, 쇼핑 목록 작성, 자녀에게 과제 배정이 가능해요. 중요로 표시한 과제는 항상 과제 목록 맨 위에 표시돼요.",
     "step2": "보상은 최고의 동기부여예요! 자녀가 모은 점수로 무엇을 얻을 수 있는지 설정하세요. 보상은 공유로 제공될 수도 있어요.",
     "step3": "자녀가 승인이 필요한 과제를 완료로 표시하면 여기서 검토할 수 있어요. 자녀들이 보내는 보상 요청도 여기서 관리하고 승인할 수 있어요.",
     "step4": "여기서 보상 전체 현황을 파악해요. 누가 보상을 교환했는지 볼 수 있고, 공유 보상에 참여하고 완료로 표시할 수 있어요.",
     "step5": "설정에서 시간대, 가족 코드, 카테고리 이름, 자녀를 위한 기기 연결 기능, 부모 비밀번호 보호, 요금제 등을 찾을 수 있어요. 리더보드에서 특정 멤버를 제외하거나 경쟁이 별로 없으면 아예 끌 수도 있어요. 사용자 전환으로 자녀 계정 간에 빠르게 전환할 수 있어요 — 여러 자녀가 같은 기기를 사용할 때 편리해요.",
-    "step6": "별 아이콘을 통해 모든 플레이어가 자신만의 캐릭터 스킨과 새 배경을 잠금 해제할 수 있어요. 거기서 별을 모을 수도 있어요. 네 번째 별마다 HeroKids Legacy가 잠금 해제돼요.",
+    "step6": "별 아이콘을 통해 모든 플레이어가 자신만의 캐릭터 스킨과 새 배경을 잠금 해제할 수 있어요. 거기서 별을 모을 수도 있어요. 네 번째 별마다 Little Champs Legacy가 잠금 해제돼요.",
     "step7": "핀보드는 가족의 게시판이에요. 메시지, 칭찬, 공지사항 — 모두가 볼 수 있는 한 곳에 모든 것을. 각 가족 구성원은 2개의 메모를 붙일 수 있어요.",
     "step8": "여기에 보너스 보상이 표시돼요. 이달의 챔피언은 누구일까요? 점수를 부여하거나 용돈 인상 같은 커스텀 보상을 입력할 수 있어요. 상단 메뉴에서 설정을 찾을 수 있어요.",
     "step9": "가족 목표가 하나로 만들어줘요! 모든 자녀가 함께 목표를 향해 일해요 — 가족 나들이나 게임의 밤처럼.",
     "step10": "여기서 자녀에게 점수를 보낼 수 있어요 — 과제와 무관하게, 그냥 보상이나 동기부여로.",
     "step11": "가족 채팅이 여러분을 연결해줘요! 자신의 스마트폰이 있는 구성원만 거기서 쓸 수 있어요 — 하지만 그들에게는 정말 활기차게 돼요.",
-    "step12": "이게 전부예요 – 이제 가장 중요한 기능들을 알았어요. 지금 시작해서 가족을 진정한 HeroKids로 만들어 보세요!"
+    "step12": "이게 전부예요 – 이제 가장 중요한 기능들을 알았어요. 지금 시작해서 가족을 진정한 Little Champs로 만들어 보세요!"
   },
   "languageNames": {
     "de": "독일어",
@@ -1654,7 +1654,7 @@
     "checking": "확인 중…"
   },
   "paywall": {
-    "title": "HeroKids를 더 활용하세요",
+    "title": "Little Champs를 더 활용하세요",
     "subtitle": "무료로 시작하고 준비되면 업그레이드하세요.",
     "freeTitle": "무료",
     "familyTitle": "패밀리",

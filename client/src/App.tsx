@@ -579,7 +579,7 @@ function ServerStatusGuard({ children }: { children: React.ReactNode }) {
       >
         <img
           src={logoUrl}
-          alt="HeroKids"
+          alt="Little Champs"
           style={{ width: 160, height: 160, objectFit: "contain" }}
         />
         <div style={{ textAlign: "center", color: "white" }}>

@@ -39,7 +39,7 @@ export default function Privacy() {
               <p className="mt-2">
                 Sonoa · Riewert Petersen<br />
                 Warnstedtstr. 59a · 22525 Hamburg<br />
-                E-Mail: <a href="mailto:info@herokids.app" className="underline">info@herokids.app</a>
+                E-Mail: <a href="mailto:info@littlechamps.net" className="underline">info@littlechamps.net</a>
               </p>
             </section>
 
@@ -67,14 +67,14 @@ export default function Privacy() {
 
               <h3 className="text-base font-medium mt-4 mb-2">Zahlungsdaten</h3>
               <ul className="list-disc pl-6 space-y-1">
-                <li>Zahlungen werden ausschließlich über Stripe abgewickelt. HeroKids speichert keine Kreditkartendaten.</li>
+                <li>Zahlungen werden ausschließlich über Stripe abgewickelt. Little Champs speichert keine Kreditkartendaten.</li>
               </ul>
             </section>
 
             <section>
               <h2 className="text-xl font-semibold mt-6 mb-3">3. Zweck der Datenverarbeitung</h2>
               <ul className="list-disc pl-6 space-y-1">
-                <li>Bereitstellung und Betrieb des HeroKids-Dienstes</li>
+                <li>Bereitstellung und Betrieb des Little Champs-Dienstes</li>
                 <li>Verwaltung des Kontos und der Familienmitgliedschaft</li>
                 <li>Verarbeitung von Aufgabenabschlüssen und Belohnungen</li>
                 <li>Versand wichtiger Benachrichtigungen (E-Mail-Verifizierung, Passwort-Reset)</li>
@@ -117,7 +117,7 @@ export default function Privacy() {
             <section>
               <h2 className="text-xl font-semibold mt-6 mb-3">6. Kinderdaten</h2>
               <p>
-                HeroKids ist für die Nutzung durch Familien konzipiert. Kinderkonten werden
+                Little Champs ist für die Nutzung durch Familien konzipiert. Kinderkonten werden
                 ausschließlich durch die Eltern erstellt — Kinder registrieren sich nicht selbst.
                 Eltern haben jederzeit die volle Kontrolle über die Daten ihrer Kinder und können
                 diese über die App-Einstellungen löschen.
@@ -150,7 +150,7 @@ export default function Privacy() {
               </ul>
               <p className="mt-2">
                 Zur Ausübung Ihrer Rechte kontaktieren Sie uns bitte unter:{" "}
-                <a href="mailto:info@herokids.app" className="underline font-medium">info@herokids.app</a>
+                <a href="mailto:info@littlechamps.net" className="underline font-medium">info@littlechamps.net</a>
               </p>
               <p className="mt-2">
                 Sie haben zudem das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren,
@@ -183,7 +183,7 @@ export default function Privacy() {
                 Bei Fragen zu dieser Datenschutzerklärung oder Ihren Daten wenden Sie sich bitte an:
               </p>
               <p className="mt-2">
-                <a href="mailto:info@herokids.app" className="underline font-medium">info@herokids.app</a>
+                <a href="mailto:info@littlechamps.net" className="underline font-medium">info@littlechamps.net</a>
               </p>
             </section>
 
@@ -197,7 +197,7 @@ export default function Privacy() {
               <h3 className="text-base font-medium mt-4 mb-2">1. Data Controller</h3>
               <p>
                 Sonoa · Riewert Petersen · Warnstedtstr. 59a · 22525 Hamburg, Germany<br />
-                Email: <a href="mailto:info@herokids.app" className="underline">info@herokids.app</a>
+                Email: <a href="mailto:info@littlechamps.net" className="underline">info@littlechamps.net</a>
               </p>
 
               <h3 className="text-base font-medium mt-4 mb-2">2. Data We Collect</h3>
@@ -211,7 +211,7 @@ export default function Privacy() {
 
               <h3 className="text-base font-medium mt-4 mb-2">3. How We Use Your Data</h3>
               <ul className="list-disc pl-6 space-y-1">
-                <li>To provide and operate the HeroKids service</li>
+                <li>To provide and operate the Little Champs service</li>
                 <li>To manage accounts and family membership</li>
                 <li>To send transactional emails (verification, password reset)</li>
                 <li>To improve our application</li>
@@ -246,7 +246,7 @@ export default function Privacy() {
                 <li>Lodge a complaint with a supervisory authority</li>
               </ul>
               <p className="mt-2">
-                Contact: <a href="mailto:info@herokids.app" className="underline">info@herokids.app</a>
+                Contact: <a href="mailto:info@littlechamps.net" className="underline">info@littlechamps.net</a>
               </p>
 
               <h3 className="text-base font-medium mt-4 mb-2">7. Cookies</h3>

@@ -79,8 +79,8 @@ STRIPE_PRICE_FAMILY_HERO_LIFETIME = "price_1TiYrLKA4XTwoahotDUjFDAo"
 VITE_REVENUECAT_IOS_KEY = "appl_gzlXiKvjqKZFhpWZzgMalMXBAJT"
 
 [userenv.production]
-APP_BASE_URL = "https://herokids.app"
-EMAIL_FROM = "HeroKids <noreply@herokids.app>"
+APP_BASE_URL = "https://littlechamps.net"
+EMAIL_FROM = "Little Champs <noreply@littlechamps.net>"
 
 [objectStorage]
 defaultBucketID = "replit-objstore-985f36e6-158d-4316-8d22-5e4228a8f037"

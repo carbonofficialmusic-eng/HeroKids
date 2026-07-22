@@ -682,7 +682,7 @@ export default function SkinsGallery() {
                   {previewSkin && previewSkin.isDiscovered && isLegacySkin(previewSkin.id) && (
                     <Badge variant="secondary" className="mt-1">
                       <Crown className="h-3 w-3 mr-1" />
-                      HeroKids Legacy
+                      Little Champs Legacy
                     </Badge>
                   )}
                   {!previewSkin && memberData?.avatarUrl && (
@@ -835,7 +835,7 @@ export default function SkinsGallery() {
                 <Card className="bg-gradient-to-br from-purple-500/20 to-card/80 backdrop-blur-md p-3 mb-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Crown className="h-5 w-5 text-purple-400" />
-                    <h3 className="font-bold font-accent text-purple-300">HeroKids Legacy</h3>
+                    <h3 className="font-bold font-accent text-purple-300">Little Champs Legacy</h3>
                     <Badge variant="secondary" className="text-xs">
                       <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
                       4 {t('common.stars')} = 1 Avatar
@@ -929,7 +929,7 @@ export default function SkinsGallery() {
                 >
                   <p className="text-sm sm:text-base font-bold text-white flex items-center gap-2 text-center">
                     <Crown className="h-4 w-4 flex-shrink-0" />
-                    {t('skins.legacyUnlocked', 'HeroKids Legacy Avatar unlocked!')}
+                    {t('skins.legacyUnlocked', 'Little Champs Legacy Avatar unlocked!')}
                   </p>
                 </motion.div>
               )}

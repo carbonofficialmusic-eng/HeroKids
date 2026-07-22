@@ -2239,11 +2239,11 @@ export default function KidDashboard() {
       <div className="container mx-auto max-w-7xl pt-4 pb-[calc(8rem+env(safe-area-inset-bottom))] relative" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <div className="lg:col-span-2 space-y-8 min-w-0 overflow-hidden">
-        {/* HeroKids Logo */}
+        {/* Little Champs Logo */
         <div className="flex justify-center">
           <img 
             src={logoUrl} 
-            alt="HeroKids Logo" 
+            alt="Little Champs Logo" 
             className="h-36 w-auto object-contain"
             data-testid="img-kid-dashboard-logo"
           />

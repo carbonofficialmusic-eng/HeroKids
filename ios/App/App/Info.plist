@@ -5,7 +5,7 @@
         <key>CFBundleDevelopmentRegion</key>
         <string>en</string>
         <key>CFBundleDisplayName</key>
-        <string>HeroKids</string>
+        <string>Little Champs</string>
         <key>CFBundleExecutable</key>
         <string>$(EXECUTABLE_NAME)</string>
         <key>CFBundleIdentifier</key>
@@ -48,11 +48,11 @@
         <key>UIStatusBarStyle</key>
         <string>UIStatusBarStyleLightContent</string>
         <key>NSCameraUsageDescription</key>
-        <string>HeroKids needs camera access so kids can take photos as proof of completing tasks.</string>
+        <string>Little Champs needs camera access so kids can take photos as proof of completing tasks.</string>
         <key>NSPhotoLibraryUsageDescription</key>
-        <string>HeroKids needs photo library access so kids can choose a photo as proof of completing tasks.</string>
+        <string>Little Champs needs photo library access so kids can choose a photo as proof of completing tasks.</string>
         <key>NSPhotoLibraryAddUsageDescription</key>
-        <string>HeroKids needs access to save photos to your library.</string>
+        <string>Little Champs needs access to save photos to your library.</string>
         <key>ITSAppUsesNonExemptEncryption</key>
         <false/>
         <key>CFBundleURLTypes</key>

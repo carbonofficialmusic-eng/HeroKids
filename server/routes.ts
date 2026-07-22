@@ -7748,7 +7748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 <div style="background: #f9f9f9; padding: 24px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb;">
                   <p style="color: #374151; font-size: 16px; line-height: 1.6; white-space: pre-wrap;">${message}</p>
                   <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
-                  <p style="color: #9ca3af; font-size: 13px; margin: 0;">This message was sent by the HeroKids team. Please do not reply to this email — contact us at <a href="mailto:info@herokids.app">info@herokids.app</a>.</p>
+                  <p style="color: #9ca3af; font-size: 13px; margin: 0;">This message was sent by the Little Champs team. Please do not reply to this email — contact us at <a href="mailto:info@littlechamps.net">info@littlechamps.net</a>.</p>
                 </div>
               </div>
             `,

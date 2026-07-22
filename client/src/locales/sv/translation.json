@@ -46,7 +46,7 @@
   "auth": {
     "login": "Logga in med Replit",
     "logout": "Logga ut",
-    "welcome": "Välkommen till HeroKids!",
+    "welcome": "Välkommen till Little Champs!",
     "selectFamily": "Välj din familj",
     "createFamily": "Skapa ny familj",
     "joinFamily": "Gå med i en familj",
@@ -57,7 +57,7 @@
     "verificationEmailFailed": "Verifieringsmejlet kunde inte skickas",
     "tryAgainLater": "Försök igen senare.",
     "emailVerifiedTitle": "E-post verifierad",
-    "emailVerifiedDescription": "Ditt HeroKids-konto är nu verifierat.",
+    "emailVerifiedDescription": "Ditt Little Champs-konto är nu verifierat.",
     "verificationFailedTitle": "Verifieringen misslyckades",
     "verificationFailedDescription": "Länken är ogiltig eller har gått ut."
   },
@@ -485,7 +485,7 @@
     "useYourPhoto": "Använd ditt foto",
     "photoEquipped": "Ditt foto utrustat!",
     "starFound": "Du hittade en stjärna!",
-    "legacyUnlocked": "HeroKids Legacy-avatar upplåst!",
+    "legacyUnlocked": "Little Champs Legacy-avatar upplåst!",
     "unlockAtStars": "Upplåsning vid {{count}} stjärnor",
     "unlockedWithStars": "Upplåst med {{count}} stjärnor",
     "hideBackground": "Dölj bakgrund",
@@ -668,7 +668,7 @@
     "factoryResetWarning": "Detta raderar alla uppgifter, belöningar och poänghistorik. Denna åtgärd kan inte ångras!",
     "confirmReset": "Skriv 'RESET' för att bekräfta",
     "settingsSaved": "Inställningar sparade",
-    "manageExperience": "Hantera din familjs HeroKids-upplevelse",
+    "manageExperience": "Hantera din familjs Little Champs-upplevelse",
     "manageMembersDesc": "Hantera dina familjemedlemmar. Lägg till nya medlemmar eller ta bort befintliga.",
     "loadingMembers": "Laddar medlemmar...",
     "overLimitTitle": "Medlemsgräns överskridits",
@@ -825,7 +825,7 @@
     "passwordChangedDesc": "Ditt lösenord har uppdaterats.",
     "passwordsDoNotMatch": "Lösenorden stämmer inte överens",
     "onboardingTourTitle": "Introduktionstur",
-    "onboardingTourDesc": "Visar dig steg för steg alla viktiga funktioner i HeroKids.",
+    "onboardingTourDesc": "Visar dig steg för steg alla viktiga funktioner i Little Champs.",
     "restartTour": "Starta om turen"
   },
   "subscription": {
@@ -926,7 +926,7 @@
     "enterPinFor": "Ange PIN-koden för {{name}}"
   },
   "familySetup": {
-    "welcomeToHeroKids": "Välkommen till HeroKids!",
+    "welcomeToLittle Champs": "Välkommen till Little Champs!",
     "setupProfile": "Sista steget: skapa din familj och din föräldraprofil.",
     "createFamily": "Skapa familj",
     "joinFamily": "Gå med i familj",
@@ -952,17 +952,17 @@
   "landing": {
     "getStarted": "Kom igång",
     "heroTitle": "Gör sysslor till äventyr!",
-    "heroSubtitle": "HeroKids gör hushållsuppgifter roliga för hela familjen. Barn tjänar poäng, klättrar på topplistor och vinner fantastiska belöningar!",
+    "heroSubtitle": "Little Champs gör hushållsuppgifter roliga för hela familjen. Barn tjänar poäng, klättrar på topplistor och vinner fantastiska belöningar!",
     "startYourAdventure": "Starta ditt äventyr",
     "linkDevice": "Länka barnets enhet",
-    "howItWorks": "Så fungerar HeroKids",
+    "howItWorks": "Så fungerar Little Champs",
     "createTasks": "Skapa uppgifter",
     "createTasksDesc": "Föräldrar tilldelar hushållssysslor med poängvärden och valfritt fotobevis för slutförande.",
     "earnPoints": "Tjäna poäng",
     "earnPointsDesc": "Barn slutför uppgifter och ser sina poäng växa. Varje avklarad syssla för dem närmare belöningar!",
     "winRewards": "Vinn belöningar",
     "winRewardsDesc": "Klättra på familjens topplista och tjäna priser! Vecko- och månadsvinnare får speciella belöningar.",
-    "whyFamiliesLove": "Varför familjer älskar HeroKids",
+    "whyFamiliesLove": "Varför familjer älskar Little Champs",
     "getEveryoneInvolved": "Få alla involverade i hushållssysslor",
     "motivateWithPoints": "Motivera barn med poäng och prestationer",
     "friendlyCompetition": "Vänlig tävling för familjer tillsammans",
@@ -970,7 +970,7 @@
     "readyToMakeFun": "Redo att göra sysslor roliga?",
     "joinThousands": "Gå med tusentals familjer som gör hushållsuppgifter till ett äventyr!",
     "getStartedFree": "Kom igång gratis",
-    "copyrightNotice": "© 2025 HeroKids. Gör familjer starkare, en syssla i taget.",
+    "copyrightNotice": "© 2025 Little Champs. Gör familjer starkare, en syssla i taget.",
     "nav": {
       "pricing": "Priser",
       "connectDevice": "Anslut enhet"
@@ -986,7 +986,7 @@
       "pointsEarned": "Poäng intjänade"
     },
     "auth": {
-      "title": "HeroKids-konto",
+      "title": "Little Champs-konto",
       "description": "Logga in direkt, utan omdirigering.",
       "tabLogin": "Logga in",
       "tabRegister": "Registrera",
@@ -1195,7 +1195,7 @@
     "questionsTitle": "Frågor?",
     "questionsDesc": "Alla planer inkluderar obegränsade uppgifter, poängspårning och realtidsuppdateringar. Uppgradera eller nedgradera när som helst. Avsluta när du vill, inga frågor ställda.",
     "paymentInfo": "Betalningar behandlas säkert av Stripe. Din prenumeration förnyas automatiskt varje månad.",
-    "manageOnWeb": "Prenumerationer hanteras på herokids.app.",
+    "manageOnWeb": "Prenumerationer hanteras på littlechamps.net.",
     "cancelToSettings": "Avsluta prenumeration → Inställningar",
     "toastPermissionDenied": "Åtkomst nekad",
     "toastOnlyParents": "Endast föräldrar kan hantera prenumerationer",
@@ -1484,7 +1484,7 @@
     "desc_task-streak-14": "Slutför uppgifter 14 dagar i rad",
     "desc_task-streak-30": "Slutför uppgifter 30 dagar i rad",
     "title_legacy-collector": "Legacy-samlare",
-    "desc_legacy-collector": "Lås upp 10 av 12 HeroKids Legacy-skins",
+    "desc_legacy-collector": "Lås upp 10 av 12 Little Champs Legacy-skins",
     "desc_lifetime-500": "Tjäna totalt 500 poäng",
     "desc_lifetime-1000": "Tjäna totalt 1000 poäng",
     "desc_lifetime-2000": "Tjäna totalt 2000 poäng",
@@ -1640,19 +1640,19 @@
     "skip": "Hoppa över",
     "next": "Nästa →",
     "letsGo": "Kör igång!",
-    "step0": "Hej, vi är Mia och Max! Vi visar dig i några steg hur HeroKids fungerar. Du kan avbryta när som helst och fortsätta senare.",
+    "step0": "Hej, vi är Mia och Max! Vi visar dig i några steg hur Little Champs fungerar. Du kan avbryta när som helst och fortsätta senare.",
     "step1": "Här skapar du nya uppgifter för dina barn. Du kan ge poäng, sätta ett förfallodatum, kräva bevisfoto och godkännanden, skapa inköpslistor och tilldela uppgifter till barn. Uppgifter markerade som Viktiga visas alltid högst upp i uppgiftslistan.",
     "step2": "Belöningar är den bästa motivationen! Bestäm vad dina barn kan tjäna med sina insamlade poäng. Belöningar kan också erbjudas för delning.",
     "step3": "När ett barn markerar en uppgift som kräver godkännande som klar, hamnar den här för granskning. Belöningsönskemål som dina barn skickar kan också hanteras och godkännas här.",
     "step4": "Här har du översikten över belöningarna. Du kan se vem som löst in en belöning, delta i delade belöningar och slutligen markera dem som klara.",
     "step5": "I Inställningar hittar du tidszon, familjekod, kategorinamn, Device Link-funktion för barn, föräldralösenordsskydd, din plan och mycket mer. Du kan också ta bort enskilda medlemmar från topplistan eller stänga av den helt om du föredrar mindre tävling. Med användarbytet kan du snabbt växla mellan barnens konton — praktiskt när flera barn använder samma enhet.",
-    "step6": "Via stjärnsymbolen kan varje spelare låsa upp egna karaktärsskins och nya bakgrunder. Där kan du också samla stjärnor. Var fjärde stjärna låser upp en HeroKids Legacy.",
+    "step6": "Via stjärnsymbolen kan varje spelare låsa upp egna karaktärsskins och nya bakgrunder. Där kan du också samla stjärnor. Var fjärde stjärna låser upp en Little Champs Legacy.",
     "step7": "Anslagstavlan är familjens anslagstavla. Meddelanden, beröm och tillkännagivanden — allt på ett ställe synligt för alla. Varje familjemedlem kan fästa 2 lappar där.",
     "step8": "Här visas bonusbelöningarna. Vem blir månadsmästare? Du kan ge poäng eller ange egna belöningar — som höjning av fickpengar. I toppmenyn hittar du inställningarna.",
     "step9": "Familjemål håller ihop! Alla barn jobbar tillsammans mot ett mål — som en gemensam utflykt eller spelkväll.",
     "step10": "Här kan du skicka poäng till dina barn — oberoende av uppgifter, bara som belöning eller motivation.",
     "step11": "Familjechatten förbinder er alla! Bara medlemmar med egen smartphone kan skriva där — men för dem blir det riktigt livligt.",
-    "step12": "Det var allt – nu känner du till de viktigaste funktionerna. Sätt igång och gör din familj till riktiga HeroKids!"
+    "step12": "Det var allt – nu känner du till de viktigaste funktionerna. Sätt igång och gör din familj till riktiga Little Champs!"
   },
   "languageNames": {
     "de": "Tyska",
@@ -1672,7 +1672,7 @@
     "checking": "Kontrollerar…"
   },
   "paywall": {
-    "title": "Få ut mer av HeroKids",
+    "title": "Få ut mer av Little Champs",
     "subtitle": "Börja gratis — uppgradera när du är redo.",
     "freeTitle": "Gratis",
     "familyTitle": "Familj",

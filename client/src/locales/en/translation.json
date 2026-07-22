@@ -47,7 +47,7 @@
   "auth": {
     "login": "Log in with Replit",
     "logout": "Logout",
-    "welcome": "Welcome to HeroKids!",
+    "welcome": "Welcome to Little Champs!",
     "selectFamily": "Select Your Family",
     "createFamily": "Create New Family",
     "joinFamily": "Join a Family",
@@ -58,7 +58,7 @@
     "verificationEmailFailed": "Verification email could not be sent",
     "tryAgainLater": "Please try again later.",
     "emailVerifiedTitle": "Email verified",
-    "emailVerifiedDescription": "Your HeroKids account is now verified.",
+    "emailVerifiedDescription": "Your Little Champs account is now verified.",
     "verificationFailedTitle": "Verification failed",
     "verificationFailedDescription": "The link is invalid or expired."
   },
@@ -486,7 +486,7 @@
     "useYourPhoto": "Use Your Photo",
     "photoEquipped": "Your Photo Equipped!",
     "starFound": "You found a Star!",
-    "legacyUnlocked": "HeroKids Legacy Avatar unlocked!",
+    "legacyUnlocked": "Little Champs Legacy Avatar unlocked!",
     "unlockAtStars": "Unlock at {{count}} stars",
     "unlockedWithStars": "Unlocked with {{count}} stars",
     "hideBackground": "Hide Background",
@@ -669,7 +669,7 @@
     "factoryResetWarning": "This will delete all tasks, rewards, and points history. This action cannot be undone!",
     "confirmReset": "Type 'RESET' to confirm",
     "settingsSaved": "Settings saved successfully",
-    "manageExperience": "Manage your family's HeroKids experience",
+    "manageExperience": "Manage your family's Little Champs experience",
     "manageMembersDesc": "Manage your family members. Add new members or remove existing ones.",
     "loadingMembers": "Loading members...",
     "overLimitTitle": "Member limit exceeded",
@@ -826,7 +826,7 @@
     "passwordChangedDesc": "Your password has been changed successfully.",
     "passwordsDoNotMatch": "Passwords do not match",
     "onboardingTourTitle": "Introduction Tour",
-    "onboardingTourDesc": "Shows you all the important features of HeroKids step by step.",
+    "onboardingTourDesc": "Shows you all the important features of Little Champs step by step.",
     "restartTour": "Restart tour"
   },
   "subscription": {
@@ -927,7 +927,7 @@
     "enterPinFor": "Enter the PIN code for {{name}}"
   },
   "familySetup": {
-    "welcomeToHeroKids": "Welcome to HeroKids!",
+    "welcomeToLittle Champs": "Welcome to Little Champs!",
     "setupProfile": "One last step: create your family and parent profile.",
     "createFamily": "Create Family",
     "joinFamily": "Join Family",
@@ -953,17 +953,17 @@
   "landing": {
     "getStarted": "Get Started",
     "heroTitle": "Turn Chores into Adventures!",
-    "heroSubtitle": "HeroKids makes household tasks fun for the whole family. Kids earn points, climb leaderboards, and win awesome rewards!",
+    "heroSubtitle": "Little Champs makes household tasks fun for the whole family. Kids earn points, climb leaderboards, and win awesome rewards!",
     "startYourAdventure": "Start Your Adventure",
     "linkDevice": "Link Child Device",
-    "howItWorks": "How HeroKids Works",
+    "howItWorks": "How Little Champs Works",
     "createTasks": "Create Tasks",
     "createTasksDesc": "Parents assign household chores with point values and optional photo proof for completion.",
     "earnPoints": "Earn Points",
     "earnPointsDesc": "Kids complete tasks and watch their points grow. Each completed chore brings them closer to rewards!",
     "winRewards": "Win Rewards",
     "winRewardsDesc": "Climb the family leaderboard and earn prizes! Weekly and monthly winners get special rewards.",
-    "whyFamiliesLove": "Why Families Love HeroKids",
+    "whyFamiliesLove": "Why Families Love Little Champs",
     "getEveryoneInvolved": "Get everyone involved in household chores",
     "motivateWithPoints": "Motivate kids with points and achievements",
     "friendlyCompetition": "Friendly competition brings families together",
@@ -971,7 +971,7 @@
     "readyToMakeFun": "Ready to Make Chores Fun?",
     "joinThousands": "Join thousands of families making household tasks an adventure!",
     "getStartedFree": "Get Started Free",
-    "copyrightNotice": "© 2025 HeroKids. Making families stronger, one chore at a time.",
+    "copyrightNotice": "© 2025 Little Champs. Making families stronger, one chore at a time.",
     "nav": {
       "pricing": "Pricing",
       "connectDevice": "Link Device"
@@ -987,7 +987,7 @@
       "pointsEarned": "Points earned"
     },
     "auth": {
-      "title": "HeroKids Account",
+      "title": "Little Champs Account",
       "description": "Sign in directly, no browser redirect.",
       "tabLogin": "Login",
       "tabRegister": "Register",
@@ -1209,7 +1209,7 @@
     "questionsTitle": "Questions?",
     "questionsDesc": "All plans include unlimited tasks, points tracking, and real-time updates. Upgrade or downgrade anytime. Cancel whenever you want, no questions asked.",
     "paymentInfo": "Payments are securely processed by Stripe. Your subscription will renew automatically each month.",
-    "manageOnWeb": "Subscriptions are managed at herokids.app.",
+    "manageOnWeb": "Subscriptions are managed at littlechamps.net.",
     "cancelToSettings": "Cancel subscription → Settings",
     "toastPermissionDenied": "Permission Denied",
     "toastOnlyParents": "Only parents can manage subscriptions",
@@ -1533,7 +1533,7 @@
     "desc_monthly-leaderboard-1st": "Finish in 1st place on the monthly leaderboard",
     "desc_star-collector": "Find 4 hidden stars on skin cards",
     "title_legacy-collector": "Legacy Collector",
-    "desc_legacy-collector": "Unlock 10 of 12 HeroKids Legacy skins"
+    "desc_legacy-collector": "Unlock 10 of 12 Little Champs Legacy skins"
   },
   "error": "Error",
   "goBack": "Go Back",
@@ -1658,19 +1658,19 @@
     "skip": "Skip",
     "next": "Next →",
     "letsGo": "Let's go!",
-    "step0": "Hi, we're Mia and Max. We'll show you in a few steps how HeroKids works. You can quit at any time and continue later.",
+    "step0": "Hi, we're Mia and Max. We'll show you in a few steps how Little Champs works. You can quit at any time and continue later.",
     "step1": "Here you create new tasks for your children. You can assign points, set a due date, require proof photos and approvals, create shopping lists, and assign tasks to children. Tasks marked as Important always appear at the top of the task list.",
     "step2": "Rewards are the best motivation! Set what your children can earn with their collected points. Rewards can also be offered for sharing.",
     "step3": "When a child marks a task with approval required as done, it lands here for review. Reward requests sent by your children can also be managed and approved here.",
     "step4": "Here you keep track of the rewards. You can see who has redeemed a reward, join shared rewards, and mark them as done when completed.",
     "step5": "In Settings you'll find timezone, family code, category names, Device Link for children, parent password protection, your plan and much more. You can also remove individual members from the leaderboard or turn it off entirely if you prefer less competition. With User Switch you can quickly switch between children's accounts — handy when multiple children use the same device.",
-    "step6": "Through the star symbol, every player can unlock their own character skins and new backgrounds. You can also collect stars there. Every fourth star unlocks a HeroKids Legacy.",
+    "step6": "Through the star symbol, every player can unlock their own character skins and new backgrounds. You can also collect stars there. Every fourth star unlocks a Little Champs Legacy.",
     "step7": "The pinboard is your family's bulletin board. Messages, praise and announcements — all in one place, visible to everyone. Each family member can pin 2 notes there.",
     "step8": "Here your bonus rewards are displayed. Who will be monthly champion? You can award points or enter custom rewards — like pocket money increases. In the top menu you'll find the settings for this.",
     "step9": "Family goals bring you together! All children work together toward a goal — like a shared trip or a game night.",
     "step10": "Here you can send points to your children — independent of tasks, simply as a reward or motivation.",
     "step11": "The family chat connects you all! Only members with their own smartphone can write there — but for them it gets really lively.",
-    "step12": "That's it – you now know the most important features. Get started and turn your family into real HeroKids!"
+    "step12": "That's it – you now know the most important features. Get started and turn your family into real Little Champs!"
   },
   "languageNames": {
     "de": "German",
@@ -1690,7 +1690,7 @@
     "checking": "Checking…"
   },
   "paywall": {
-    "title": "Get more out of HeroKids",
+    "title": "Get more out of Little Champs",
     "subtitle": "Start free — upgrade whenever you're ready.",
     "freeTitle": "Free",
     "familyTitle": "Family",

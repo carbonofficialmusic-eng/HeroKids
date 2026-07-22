@@ -1264,7 +1264,7 @@ export default function Dashboard() {
                 <div className="mb-4 flex justify-center">
                   <img 
                     src={logoUrl} 
-                    alt="HeroKids Logo" 
+                    alt="Little Champs Logo" 
                     className="h-36 w-auto object-contain cursor-pointer"
                     data-testid="img-dashboard-logo"
                     onClick={handleDebugTap}
@@ -1950,7 +1950,7 @@ export default function Dashboard() {
               <div className="mb-4 flex justify-center">
                 <img 
                   src={logoUrl} 
-                  alt="HeroKids Logo" 
+                  alt="Little Champs Logo" 
                   className="h-44 w-auto object-contain cursor-pointer"
                   data-testid="img-dashboard-logo-child"
                   onClick={handleDebugTap}

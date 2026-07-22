@@ -36,7 +36,7 @@ function normalizeBaseUrl(value: string) {
 }
 
 export async function checkTransactionalEmailHealth(options: EmailHealthOptions = {}): Promise<EmailHealthResult> {
-  const expectedProductionBaseUrl = normalizeBaseUrl(options.expectedProductionBaseUrl || "https://herokids.app");
+  const expectedProductionBaseUrl = normalizeBaseUrl(options.expectedProductionBaseUrl || "https://littlechamps.net");
   const configuration = await getTransactionalEmailConfiguration();
   const issues: string[] = [];
   let baseUrl: string | null = null;

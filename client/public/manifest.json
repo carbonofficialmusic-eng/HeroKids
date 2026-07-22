@@ -1,6 +1,6 @@
 {
-  "name": "HeroKids",
-  "short_name": "HeroKids",
+  "name": "Little Champs",
+  "short_name": "Little Champs",
   "description": "Gamified family task management for kids",
   "start_url": "/",
   "display": "standalone",

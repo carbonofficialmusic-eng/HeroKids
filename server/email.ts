@@ -13,7 +13,7 @@ type EmailInput = {
   html: string;
 };
 
-const fromAddress = process.env.EMAIL_FROM || "HeroKids <no-reply@herokids.app>";
+const fromAddress = process.env.EMAIL_FROM || "Little Champs <no-reply@littlechamps.net>";
 
 export type TransactionalEmailConfiguration = {
   configured: boolean;
@@ -86,7 +86,7 @@ export function explainEmailProviderError(error: unknown) {
     .slice(0, 500);
 
   if (/domain is not verified|domain.*not verified|verify your domain/i.test(sanitized)) {
-    return "The email provider rejected the sender domain. Verify herokids.app and its required DNS records in the email provider dashboard before launch.";
+    return "The email provider rejected the sender domain. Verify littlechamps.net and its required DNS records in the email provider dashboard before launch.";
   }
 
   if (/401|403|unauthorized|forbidden|invalid api key|permission/i.test(sanitized)) {

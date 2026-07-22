@@ -1237,7 +1237,7 @@ export default function Settings() {
                 <CardTitle>{t('settings.onboardingTourTitle', 'Einführungstour')}</CardTitle>
               </div>
               <CardDescription>
-                {t('settings.onboardingTourDesc', 'Zeigt dir Schritt für Schritt alle wichtigen Funktionen von HeroKids.')}
+                {t('settings.onboardingTourDesc', 'Zeigt dir Schritt für Schritt alle wichtigen Funktionen von Little Champs.')}
               </CardDescription>
             </CardHeader>
             <CardContent>

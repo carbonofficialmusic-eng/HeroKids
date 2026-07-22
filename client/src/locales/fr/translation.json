@@ -46,7 +46,7 @@
   "auth": {
     "login": "Se connecter avec Replit",
     "logout": "Déconnexion",
-    "welcome": "Bienvenue sur HeroKids !",
+    "welcome": "Bienvenue sur Little Champs !",
     "selectFamily": "Sélectionnez votre famille",
     "createFamily": "Créer une nouvelle famille",
     "joinFamily": "Rejoindre une famille",
@@ -57,7 +57,7 @@
     "verificationEmailFailed": "L’e-mail de vérification n’a pas pu être envoyé",
     "tryAgainLater": "Veuillez réessayer plus tard.",
     "emailVerifiedTitle": "E-mail vérifié",
-    "emailVerifiedDescription": "Votre compte HeroKids est maintenant vérifié.",
+    "emailVerifiedDescription": "Votre compte Little Champs est maintenant vérifié.",
     "verificationFailedTitle": "Vérification échouée",
     "verificationFailedDescription": "Le lien est invalide ou a expiré."
   },
@@ -471,7 +471,7 @@
     "pterosaurSky": "Ciel des Ptérosaures",
     "unlockAtPoints": "🔒 Déverrouiller avec {{points}} points totaux",
     "starFound": "Tu as trouvé une étoile !",
-    "legacyUnlocked": "Avatar HeroKids Legacy débloqué !",
+    "legacyUnlocked": "Avatar Little Champs Legacy débloqué !",
     "unlockAtStars": "Déverrouillage à {{count}} étoiles",
     "unlockedWithStars": "Déverrouillé avec {{count}} étoiles",
     "hideBackground": "Masquer le fond",
@@ -640,7 +640,7 @@
     "factoryResetWarning": "Cela supprimera toutes les tâches, récompenses et l'historique des points. Cette action est irréversible !",
     "confirmReset": "Tapez 'RESET' pour confirmer",
     "settingsSaved": "Paramètres enregistrés avec succès",
-    "manageExperience": "Gérez l'expérience HeroKids de votre famille",
+    "manageExperience": "Gérez l'expérience Little Champs de votre famille",
     "manageMembersDesc": "Gérez les membres de votre famille. Ajoutez de nouveaux membres ou supprimez ceux existants.",
     "loadingMembers": "Chargement des membres...",
     "overLimitTitle": "Limite de membres dépassée",
@@ -796,7 +796,7 @@
     "passwordChangedDesc": "Votre mot de passe a été mis à jour avec succès.",
     "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
     "onboardingTourTitle": "Visite guidée",
-    "onboardingTourDesc": "Te montre étape par étape toutes les fonctions importantes de HeroKids.",
+    "onboardingTourDesc": "Te montre étape par étape toutes les fonctions importantes de Little Champs.",
     "restartTour": "Redémarrer la visite"
   },
   "subscription": {
@@ -897,7 +897,7 @@
     "enterPinFor": "Entrez le code PIN pour {{name}}"
   },
   "familySetup": {
-    "welcomeToHeroKids": "Welcome to HeroKids!",
+    "welcomeToLittle Champs": "Welcome to Little Champs!",
     "setupProfile": "Dernière étape : créez votre famille et votre profil parent.",
     "createFamily": "Create Family",
     "joinFamily": "Join Family",
@@ -921,16 +921,16 @@
   "landing": {
     "getStarted": "Get Started",
     "heroTitle": "Turn Chores into Adventures!",
-    "heroSubtitle": "HeroKids makes household tasks fun for the whole family. Kids earn points, climb leaderboards, and win awesome rewards!",
+    "heroSubtitle": "Little Champs makes household tasks fun for the whole family. Kids earn points, climb leaderboards, and win awesome rewards!",
     "startYourAdventure": "Start Your Adventure",
-    "howItWorks": "How HeroKids Works",
+    "howItWorks": "How Little Champs Works",
     "createTasks": "Create Tasks",
     "createTasksDesc": "Parents assign household chores with point values and optional photo proof for completion.",
     "earnPoints": "Earn Points",
     "earnPointsDesc": "Kids complete tasks and watch their points grow. Each completed chore brings them closer to rewards!",
     "winRewards": "Win Rewards",
     "winRewardsDesc": "Climb the family leaderboard and earn prizes! Weekly and monthly winners get special rewards.",
-    "whyFamiliesLove": "Why Families Love HeroKids",
+    "whyFamiliesLove": "Why Families Love Little Champs",
     "getEveryoneInvolved": "Get everyone involved in household chores",
     "motivateWithPoints": "Motivate kids with points and achievements",
     "friendlyCompetition": "Friendly competition brings families together",
@@ -938,7 +938,7 @@
     "readyToMakeFun": "Ready to Make Chores Fun?",
     "joinThousands": "Rejoins des milliers de familles qui transforment les corvées en aventure !",
     "getStartedFree": "Commencer gratuitement",
-    "copyrightNotice": "© 2025 HeroKids. Des familles plus fortes, une tâche à la fois.",
+    "copyrightNotice": "© 2025 Little Champs. Des familles plus fortes, une tâche à la fois.",
     "nav": {
       "pricing": "Tarifs",
       "connectDevice": "Connecter un appareil"
@@ -954,7 +954,7 @@
       "pointsEarned": "Points gagnés"
     },
     "auth": {
-      "title": "Compte HeroKids",
+      "title": "Compte Little Champs",
       "description": "Connexion directe, sans redirection.",
       "tabLogin": "Connexion",
       "tabRegister": "S'inscrire",
@@ -1163,7 +1163,7 @@
     "questionsTitle": "Questions ?",
     "questionsDesc": "Toutes les formules incluent des tâches illimitées, le suivi des points et des mises à jour en temps réel. Passez à un niveau supérieur ou inférieur à tout moment. Annulez quand vous voulez, sans questions posées.",
     "paymentInfo": "Les paiements sont traités en toute sécurité par Stripe. Votre abonnement se renouvellera automatiquement chaque mois.",
-    "manageOnWeb": "Les abonnements sont gérés sur herokids.app.",
+    "manageOnWeb": "Les abonnements sont gérés sur littlechamps.net.",
     "cancelToSettings": "Résilier l'abonnement → Paramètres",
     "toastPermissionDenied": "Permission Refusée",
     "toastOnlyParents": "Seuls les parents peuvent gérer les abonnements",
@@ -1477,7 +1477,7 @@
     "desc_task-streak-14": "Terminez des tâches pendant 14 jours consécutifs",
     "desc_task-streak-30": "Terminez des tâches pendant 30 jours consécutifs",
     "title_legacy-collector": "Collectionneur Legacy",
-    "desc_legacy-collector": "Débloquez 10 skins Legacy HeroKids sur 12",
+    "desc_legacy-collector": "Débloquez 10 skins Legacy Little Champs sur 12",
     "desc_lifetime-500": "Gagnez un total de 500 points",
     "desc_lifetime-1000": "Gagnez un total de 1000 points",
     "desc_lifetime-2000": "Gagnez un total de 2000 points",
@@ -1607,19 +1607,19 @@
     "skip": "Passer",
     "next": "Suivant →",
     "letsGo": "C'est parti !",
-    "step0": "Bonjour, nous sommes Mia et Max. Nous allons te montrer en quelques étapes comment HeroKids fonctionne. Tu peux quitter à tout moment et continuer plus tard.",
+    "step0": "Bonjour, nous sommes Mia et Max. Nous allons te montrer en quelques étapes comment Little Champs fonctionne. Tu peux quitter à tout moment et continuer plus tard.",
     "step1": "Ici tu crées de nouvelles tâches pour tes enfants. Tu peux attribuer des points, définir une date limite, exiger une photo de preuve et des approbations, créer des listes de courses et assigner des tâches aux enfants. Les tâches marquées comme Importantes apparaissent toujours en haut de la liste.",
     "step2": "Les récompenses sont la meilleure motivation ! Définis ce que tes enfants peuvent gagner avec leurs points. Les récompenses peuvent aussi être proposées au partage.",
     "step3": "Quand un enfant marque comme terminée une tâche nécessitant une approbation, elle arrive ici pour vérification. Les demandes de récompenses envoyées par tes enfants peuvent aussi être gérées et approuvées ici.",
     "step4": "Ici tu gardes une vue d'ensemble des récompenses. Tu peux voir qui a échangé une récompense, participer aux récompenses partagées et les marquer comme terminées.",
     "step5": "Dans les paramètres tu trouveras le fuseau horaire, le code famille, les noms de catégories, la fonction Device Link pour les enfants, la protection par mot de passe pour les parents, ton plan et bien plus. Tu peux aussi retirer des membres individuels du classement ou le désactiver complètement si tu préfères moins de compétition. Avec le changement d'utilisateur tu peux rapidement basculer entre les comptes des enfants — pratique quand plusieurs enfants utilisent le même appareil.",
-    "step6": "Via le symbole étoile, chaque joueur peut débloquer ses propres skins de personnage et de nouveaux arrière-plans. Là tu peux aussi collecter des étoiles. Chaque quatrième étoile débloque un HeroKids Legacy.",
+    "step6": "Via le symbole étoile, chaque joueur peut débloquer ses propres skins de personnage et de nouveaux arrière-plans. Là tu peux aussi collecter des étoiles. Chaque quatrième étoile débloque un Little Champs Legacy.",
     "step7": "Le tableau d'affichage est le tableau familial. Messages, félicitations et annonces — tout en un seul endroit visible par tous. Chaque membre de la famille peut y épingler 2 notes.",
     "step8": "Ici s'affichent les récompenses bonus. Qui sera champion mensuel ? Tu peux attribuer des points ou saisir des récompenses personnalisées — comme des augmentations d'argent de poche. Dans le menu du haut tu trouveras les paramètres.",
     "step9": "Les objectifs familiaux rapprochent tout le monde ! Tous les enfants travaillent ensemble vers un objectif — comme une sortie commune ou une soirée jeux.",
     "step10": "Ici tu peux envoyer des points à tes enfants — indépendamment des tâches, simplement comme récompense ou motivation.",
     "step11": "Le chat familial vous connecte tous ! Seuls les membres avec leur propre smartphone peuvent y écrire — mais pour eux ça devient vraiment animé.",
-    "step12": "C'est tout – tu connais maintenant les fonctions les plus importantes. Lance-toi et transforme ta famille en vrais HeroKids !"
+    "step12": "C'est tout – tu connais maintenant les fonctions les plus importantes. Lance-toi et transforme ta famille en vrais Little Champs !"
   },
   "languageNames": {
     "de": "Allemand",
@@ -1639,7 +1639,7 @@
     "checking": "Vérification…"
   },
   "paywall": {
-    "title": "Tirez le meilleur de HeroKids",
+    "title": "Tirez le meilleur de Little Champs",
     "subtitle": "Commencez gratuitement – mettez à niveau quand vous êtes prêt.",
     "freeTitle": "Gratuit",
     "familyTitle": "Famille",

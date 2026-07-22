@@ -100,7 +100,7 @@ async function startNativeGoogleLogin() {
   }, 300_000);
 
   await Browser.open({
-    url: `https://herokids.app/api/auth/google?native=1&pollKey=${encodeURIComponent(pollKey)}`,
+    url: `https://littlechamps.net/api/auth/google?native=1&pollKey=${encodeURIComponent(pollKey)}`,
   });
 }
 

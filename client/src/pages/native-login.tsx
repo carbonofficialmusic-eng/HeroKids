@@ -58,7 +58,7 @@ async function startNativeGoogleLogin() {
   _safetyTimer = setTimeout(() => { _clearTimers(); listener.remove(); }, 300_000);
 
   await Browser.open({
-    url: `https://herokids.app/api/auth/google?native=1&pollKey=${encodeURIComponent(pollKey)}`,
+    url: `https://littlechamps.net/api/auth/google?native=1&pollKey=${encodeURIComponent(pollKey)}`,
   });
 }
 
@@ -316,7 +316,7 @@ export default function NativeLoginScreen() {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.6rem" }}>
             <img
               src={logoUrl}
-              alt="HeroKids"
+              alt="Little Champs"
               data-testid="img-native-logo"
               style={{ width: 72, height: 72, borderRadius: 18, boxShadow: `0 8px 32px -8px ${C.orange}66` }}
             />
@@ -324,7 +324,7 @@ export default function NativeLoginScreen() {
               data-testid="text-native-app-name"
               style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: "1.9rem", fontWeight: 700, color: C.fg, margin: 0, letterSpacing: "-0.01em" }}
             >
-              HeroKids
+              Little Champs
             </h1>
             <p style={{ fontSize: "0.85rem", color: C.fgMuted, margin: 0, textAlign: "center" }}>
               {t("landing.heroSubtitle", "Make chores fun for the whole family")}
