@@ -403,11 +403,11 @@ export default function AdminPage() {
   });
 
   const changePasswordMutation = useMutation({
-    mutationFn: async ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) => {
+    mutationFn: async ({ newPassword }: { newPassword: string }) => {
       const res = await fetch("/api/admin/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ currentPassword, newPassword }),
+        body: JSON.stringify({ newPassword }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -983,19 +983,9 @@ export default function AdminPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change Admin Password</DialogTitle>
-            <DialogDescription>Enter your current password and choose a new one (min. 8 characters).</DialogDescription>
+            <DialogDescription>Wähle ein neues Admin-Passwort (min. 8 Zeichen).</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Current Password</label>
-              <Input
-                type="password"
-                value={changePwCurrent}
-                onChange={(e) => setChangePwCurrent(e.target.value)}
-                autoComplete="current-password"
-                data-testid="input-current-password"
-              />
-            </div>
             <div className="space-y-1">
               <label className="text-sm font-medium">New Password</label>
               <Input
@@ -1025,9 +1015,9 @@ export default function AdminPage() {
                   toast({ title: "Passwords don't match", description: "New password and confirmation must be identical.", variant: "destructive" });
                   return;
                 }
-                changePasswordMutation.mutate({ currentPassword: changePwCurrent, newPassword: changePwNew });
+                changePasswordMutation.mutate({ newPassword: changePwNew });
               }}
-              disabled={changePasswordMutation.isPending || !changePwCurrent || !changePwNew || !changePwConfirm}
+              disabled={changePasswordMutation.isPending || !changePwNew || !changePwConfirm}
               data-testid="button-confirm-change-password"
             >
               {changePasswordMutation.isPending ? "Saving..." : "Save Password"}

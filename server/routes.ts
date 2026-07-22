@@ -7484,29 +7484,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Change admin password
   app.post("/api/admin/change-password", isAdmin, async (req, res) => {
     try {
-      const { currentPassword, newPassword } = req.body;
+      const { newPassword } = req.body;
 
       if (!newPassword || typeof newPassword !== "string" || newPassword.trim().length < 8) {
         return res.status(400).json({ message: "New password must be at least 8 characters" });
       }
 
-      // Verify current password
-      const envPassword = process.env.ADMIN_PASSWORD;
-      const storedHash = await storage.getAppConfig("admin_password_hash");
-      const trimmedCurrent = (currentPassword || "").trim();
-
-      let currentValid = false;
-      if (storedHash) {
-        currentValid = await bcrypt.compare(trimmedCurrent, storedHash);
-      } else {
-        currentValid = trimmedCurrent === (envPassword || "").trim();
-      }
-
-      if (!currentValid) {
-        return res.status(401).json({ message: "Current password is incorrect" });
-      }
-
-      // Hash and store new password
+      // Hash and store new password (no current-password check — admin session is already verified by isAdmin)
       const newHash = await bcrypt.hash(newPassword.trim(), 12);
       await storage.setAppConfig("admin_password_hash", newHash);
 
