@@ -1986,7 +1986,7 @@ export default function AdminPage() {
                   <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
                     <li>Go to the <strong>Development</strong> environment and click "Export All Data"</li>
                     <li>Save the JSON file to your computer</li>
-                    <li>Go to the <strong>Production</strong> app (herokids.replit.app/admin)</li>
+                    <li>Go to the <strong>Production</strong> app (littlechamps.net/admin)</li>
                     <li>Login to admin and click "Import from JSON"</li>
                     <li>Select the exported JSON file - all families will be restored</li>
                   </ol>
