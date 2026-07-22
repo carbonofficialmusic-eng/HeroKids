@@ -126,7 +126,7 @@ export async function getTransactionalEmailConfiguration(): Promise<Transactiona
           configured: true,
           provider: "resend",
           credentialSource: "replit_connection",
-          fromAddress: credentials.fromEmail || fromAddress,
+          fromAddress: fromAddress,
         };
       }
     } catch (error) {
@@ -166,7 +166,7 @@ async function sendWithResend(input: EmailInput) {
 
   const resend = new Resend(credentials.apiKey);
   const result = await resend.emails.send({
-    from: credentials.fromEmail || fromAddress,
+    from: fromAddress,
     to: input.to,
     subject: input.subject,
     html: input.html,
