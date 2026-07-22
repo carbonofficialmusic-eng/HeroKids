@@ -2162,6 +2162,7 @@ export default function Dashboard() {
               transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
             }}
           >
+            <div className={!chatBarCollapsed ? 'sm:max-w-2xl sm:mx-auto' : undefined}>
             <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-lg relative">
               <div className="flex items-center gap-1">
                 <Button
@@ -2201,6 +2202,7 @@ export default function Dashboard() {
                 </span>
               )}
             </Card>
+            </div>
           </div>
         </div>
       )}
