@@ -594,6 +594,26 @@ export default function AdminPage() {
     },
   });
 
+  const changeTierMutation = useMutation({
+    mutationFn: async ({ familyName, tier }: { familyName: string; tier: string }) => {
+      const res = await fetch(`/api/admin/families/${encodeURIComponent(familyName)}/tier`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ tier }),
+      });
+      if (!res.ok) throw new Error("Failed to update tier");
+      return res.json();
+    },
+    onSuccess: (_, { familyName, tier }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/families", familyName] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/families"] });
+      toast({ title: `Tier geändert zu: ${TIER_LABELS[tier] || tier}` });
+    },
+    onError: () => {
+      toast({ title: "Tier-Änderung fehlgeschlagen", variant: "destructive" });
+    },
+  });
+
   const removeMemberMutation = useMutation({
     mutationFn: async ({ familyName, memberId }: { familyName: string; memberId: string }) => {
       const res = await fetch(`/api/admin/families/${encodeURIComponent(familyName)}/members/${memberId}`, {
@@ -2178,6 +2198,30 @@ export default function AdminPage() {
                       {TIER_LABELS[familyDetails.family.subscriptionTier]}
                     </Badge>
                     <p className="text-sm text-muted-foreground mt-1">Tier</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Crown className="h-4 w-4" />
+                    Subscription Tier ändern
+                  </h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {["free", "family", "family_plus", "family_hero"].map((t) => (
+                      <Button
+                        key={t}
+                        size="sm"
+                        variant={familyDetails.family.subscriptionTier === t ? "default" : "outline"}
+                        disabled={changeTierMutation.isPending || familyDetails.family.subscriptionTier === t}
+                        onClick={() => changeTierMutation.mutate({ familyName: selectedFamily!, tier: t })}
+                        data-testid={`button-set-tier-${t}`}
+                      >
+                        {TIER_LABELS[t] || t}
+                      </Button>
+                    ))}
+                    {changeTierMutation.isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                   </div>
                 </div>
 
