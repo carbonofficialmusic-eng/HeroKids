@@ -242,6 +242,23 @@ export async function sendVerificationEmail(email: string, firstName: string | n
   });
 }
 
+export async function sendAdminMagicLinkEmail(email: string, magicUrl: string) {
+  return sendTransactionalEmail({
+    to: email,
+    subject: "Little Champs Admin – Magic Login Link",
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.5;color:#1f2937">
+        <h1>Admin Login</h1>
+        <p>Hier ist dein Magic Login Link für das Little Champs Admin Dashboard. Er ist <strong>15 Minuten</strong> gültig und kann nur einmal verwendet werden.</p>
+        <p><a href="${magicUrl}" style="display:inline-block;background:#7c3aed;color:white;padding:12px 18px;border-radius:8px;text-decoration:none">Admin Dashboard öffnen</a></p>
+        <p>Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:</p>
+        <p style="word-break:break-all">${magicUrl}</p>
+        <p style="color:#6b7280;font-size:0.85em">Falls du diesen Link nicht angefordert hast, ignoriere diese E-Mail.</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendPasswordResetEmail(email: string, firstName: string | null | undefined, resetUrl: string) {
   return sendTransactionalEmail({
     to: email,

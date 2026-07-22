@@ -266,6 +266,8 @@ function getAccountLinkRepairActionLabel(action: string) {
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(null);
   const [password, setPassword] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
   const [messageToSend, setMessageToSend] = useState("");
   const [messageSubject, setMessageSubject] = useState("");
@@ -328,6 +330,56 @@ export default function AdminPage() {
     },
     onError: () => {
       toast({ title: "Invalid password", variant: "destructive" });
+    },
+  });
+
+  // Handle magic token from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const magicToken = params.get("magic_token");
+    if (magicToken) {
+      // Remove token from URL immediately
+      const url = new URL(window.location.href);
+      url.searchParams.delete("magic_token");
+      window.history.replaceState({}, "", url.toString());
+      // Exchange for admin session
+      fetch("/api/admin/magic-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: magicToken }),
+      }).then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
+          setToken(data.token);
+          localStorage.setItem("admin_token", data.token);
+          toast({ title: "Eingeloggt via Magic Link" });
+        } else {
+          toast({ title: "Magic Link abgelaufen oder ungültig", variant: "destructive" });
+        }
+      }).catch(() => {
+        toast({ title: "Login fehlgeschlagen", variant: "destructive" });
+      });
+    }
+  }, []);
+
+  const requestMagicLinkMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/admin/request-magic-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Fehler");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      setMagicLinkSent(true);
+    },
+    onError: (err: Error) => {
+      toast({ title: err.message || "Magic Link konnte nicht gesendet werden", variant: "destructive" });
     },
   });
 
@@ -771,46 +823,103 @@ export default function AdminPage() {
               <Shield className="h-8 w-8 text-primary" />
             </div>
             <CardTitle className="text-2xl">Admin Dashboard</CardTitle>
-            <CardDescription>Enter your admin password to continue</CardDescription>
+            <CardDescription>
+              {showForgotPassword ? "Magic Link anfordern" : "Enter your admin password to continue"}
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                loginMutation.mutate(password);
-              }}
-              className="space-y-4"
-            >
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Admin Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onPaste={(e) => {
-                    e.stopPropagation();
-                    const text = e.clipboardData.getData('text');
-                    setPassword(text);
-                  }}
-                  className="pl-10"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  spellCheck={false}
-                  data-testid="input-admin-password"
-                  style={{ WebkitTextSecurity: 'disc' } as any}
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={loginMutation.isPending}
-                data-testid="button-admin-login"
+          <CardContent className="space-y-4">
+            {!showForgotPassword ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  loginMutation.mutate(password);
+                }}
+                className="space-y-4"
               >
-                {loginMutation.isPending ? "Logging in..." : "Login"}
-              </Button>
-            </form>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Admin Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onPaste={(e) => {
+                      e.stopPropagation();
+                      const text = e.clipboardData.getData('text');
+                      setPassword(text);
+                    }}
+                    className="pl-10"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-testid="input-admin-password"
+                    style={{ WebkitTextSecurity: 'disc' } as any}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loginMutation.isPending}
+                  data-testid="button-admin-login"
+                >
+                  {loginMutation.isPending ? "Logging in..." : "Login"}
+                </Button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    className="text-sm text-muted-foreground underline underline-offset-4"
+                    onClick={() => setShowForgotPassword(true)}
+                    data-testid="button-admin-forgot-password"
+                  >
+                    Passwort vergessen? Magic Link anfordern
+                  </button>
+                </div>
+              </form>
+            ) : magicLinkSent ? (
+              <div className="space-y-4 text-center">
+                <div className="mx-auto h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Magic Link wurde an die konfigurierte Admin-E-Mail gesendet. Bitte prüfe dein Postfach — der Link ist 15 Minuten gültig.
+                </p>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => { setShowForgotPassword(false); setMagicLinkSent(false); }}
+                >
+                  Zurück zum Login
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground text-center">
+                  Ein Magic Login Link wird an die hinterlegte Admin-E-Mail gesendet.
+                </p>
+                <Button
+                  className="w-full"
+                  onClick={() => requestMagicLinkMutation.mutate()}
+                  disabled={requestMagicLinkMutation.isPending}
+                  data-testid="button-admin-send-magic-link"
+                >
+                  {requestMagicLinkMutation.isPending ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Senden...</>
+                  ) : (
+                    <><Mail className="h-4 w-4 mr-2" />Magic Link senden</>
+                  )}
+                </Button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    className="text-sm text-muted-foreground underline underline-offset-4"
+                    onClick={() => setShowForgotPassword(false)}
+                  >
+                    Zurück zum Passwort-Login
+                  </button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

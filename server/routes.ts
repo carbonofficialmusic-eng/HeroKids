@@ -7367,6 +7367,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const adminSessions = new Map<string, number>();
   const ADMIN_SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
 
+  // Admin magic link store: token -> expiry timestamp (15 min)
+  const adminMagicTokens = new Map<string, number>();
+  const ADMIN_MAGIC_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
   // Periodically evict expired admin sessions
   setInterval(() => {
     const now = Date.now();
@@ -7429,6 +7433,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Admin login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Admin forgot password — sends a magic login link to ADMIN_EMAIL
+  app.post("/api/admin/request-magic-link", rateLimit(3, 15 * 60 * 1000), async (req, res) => {
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (!adminEmail) {
+        return res.status(503).json({ message: "ADMIN_EMAIL not configured" });
+      }
+      // Always respond with success to avoid email enumeration
+      const magicToken = crypto.randomBytes(32).toString("hex");
+      adminMagicTokens.set(magicToken, Date.now() + ADMIN_MAGIC_TTL_MS);
+      const baseUrl = process.env.APP_BASE_URL || process.env.PUBLIC_APP_URL || "https://littlechamps.net";
+      const magicUrl = `${baseUrl}/admin?magic_token=${magicToken}`;
+      const { sendAdminMagicLinkEmail } = await import("./email.js");
+      await sendAdminMagicLinkEmail(adminEmail, magicUrl);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Admin magic link error:", error);
+      // Still return success to avoid leaking info
+      res.json({ success: true });
+    }
+  });
+
+  // Admin magic link verification — exchange token for an admin session
+  app.post("/api/admin/magic-login", async (req, res) => {
+    try {
+      const { token: magicToken } = req.body;
+      if (!magicToken || typeof magicToken !== "string") {
+        return res.status(400).json({ message: "Invalid token" });
+      }
+      const expiry = adminMagicTokens.get(magicToken);
+      if (!expiry || Date.now() > expiry) {
+        adminMagicTokens.delete(magicToken);
+        return res.status(401).json({ message: "Magic link expired or invalid" });
+      }
+      adminMagicTokens.delete(magicToken); // one-time use
+      const sessionToken = crypto.randomBytes(32).toString("hex");
+      adminSessions.set(sessionToken, Date.now() + ADMIN_SESSION_TTL_MS);
+      res.json({ success: true, token: sessionToken });
+    } catch (error) {
+      console.error("Admin magic login error:", error);
       res.status(500).json({ message: "Login failed" });
     }
   });
