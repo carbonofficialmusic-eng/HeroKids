@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { AuthPanel } from "@/components/AuthPanel";
-import logoUrl from "@assets/littlechamps_logo.png";
+import logoUrl from "@assets/littlechamps_logo_opt.webp";
 
 // ─── Design tokens — Warm & Energetic ──────────────────────────────────────────
 const C = {

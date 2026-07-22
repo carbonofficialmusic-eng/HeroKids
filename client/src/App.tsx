@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
-import logoUrl from "@assets/littlechamps_logo.png";
+import logoUrl from "@assets/littlechamps_logo_opt.webp";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";

@@ -12,7 +12,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient, storeDevToken } from "@/lib/queryClient";
 import { isNativePlatform } from "@/lib/platform";
-import logoUrl from "@assets/littlechamps_logo.png";
+import logoUrl from "@assets/littlechamps_logo_opt.webp";
 
 // ─── module-level timers (survive component unmount) ─────────────────────────
 let _pollInterval: ReturnType<typeof setInterval> | null = null;
