@@ -111,7 +111,7 @@ import { Pinboard } from "@/components/pinboard";
 import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature, canUseSharedRewards, type SubscriptionTier } from "@shared/tier-config";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
-import logoUrl from "@assets/herokids_logo_neu.png";
+import logoUrl from "@assets/littlechamps_logo.png";
 
 // Extended Task type with metadata from API
 interface TaskWithMeta extends Task {

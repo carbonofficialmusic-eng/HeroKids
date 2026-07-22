@@ -65,7 +65,7 @@ import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import { hasFeature } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { celebrateTaskCompletion } from "@/lib/confetti";
-import logoUrl from "@assets/herokids_logo_neu.png";
+import logoUrl from "@assets/littlechamps_logo.png";
 import familyGoalsIcon from "@assets/family-goals-icon.png";
 
 // Custom hook for sticky sidebar on desktop
