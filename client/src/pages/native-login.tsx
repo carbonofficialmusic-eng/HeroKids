@@ -318,7 +318,7 @@ export default function NativeLoginScreen() {
               src={logoUrl}
               alt="Little Champs"
               data-testid="img-native-logo"
-              style={{ width: 72, height: 72, borderRadius: 18, boxShadow: `0 8px 32px -8px ${C.orange}66` }}
+              style={{ width: 72, height: 72, boxShadow: `0 8px 32px -8px ${C.orange}66` }}
             />
             <h1
               data-testid="text-native-app-name"
