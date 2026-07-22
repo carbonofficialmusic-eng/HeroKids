@@ -100,7 +100,7 @@ describe("admin email health routes", () => {
     expect(await response.json()).toMatchObject({
       status: "healthy",
       provider: "resend",
-      fromAddress: "noreply@herokids.app",
+      fromAddress: "noreply@littlechamps.net",
     });
     expect(mockCheckTransactionalEmailHealth).toHaveBeenCalledWith({
       includeMissingTestRecipientIssue: false,
@@ -188,7 +188,7 @@ describe("admin email health UI", () => {
 
     expect((await screen.findByTestId("badge-email-health-status")).textContent).toContain("Ready");
     expect(screen.getByTestId("text-email-provider").textContent).toContain("resend");
-    expect(screen.getByTestId("text-email-sender").textContent).toContain("noreply@herokids.app");
+    expect(screen.getByTestId("text-email-sender").textContent).toContain("noreply@littlechamps.net");
     expect(screen.getByTestId("text-email-link-domain").textContent).toContain("Matches launch domain");
   });
 
@@ -198,7 +198,7 @@ describe("admin email health UI", () => {
 
     await user.click(await screen.findByTestId("tab-email"));
     expect((await screen.findByTestId("text-email-detail-provider")).textContent).toContain("resend");
-    expect(screen.getByTestId("text-email-current-domain").textContent).toContain("https://herokids.app");
+    expect(screen.getByTestId("text-email-current-domain").textContent).toContain("https://littlechamps.net");
 
     await user.type(screen.getByTestId("input-email-test-recipient"), "owner@example.com");
     await user.click(screen.getByTestId("button-send-email-health-test"));

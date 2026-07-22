@@ -46,8 +46,8 @@ vi.mock("../../../server/email", () => ({
 }));
 
 vi.mock("../../../server/authLinks", () => ({
-  createEmailVerificationUrl: vi.fn(() => "https://herokids.app/api/auth/verify-email?token=test"),
-  createPasswordResetUrl: vi.fn(() => "https://herokids.app/?reset_token=test"),
+  createEmailVerificationUrl: vi.fn(() => "https://littlechamps.net/api/auth/verify-email?token=test"),
+  createPasswordResetUrl: vi.fn(() => "https://littlechamps.net/?reset_token=test"),
 }));
 
 vi.mock("../../../server/mobileAuth", () => ({
