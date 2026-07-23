@@ -78,6 +78,8 @@ STRIPE_PRICE_FAMILY_HERO_YEARLY = "price_1TiYqRKA4XTwoahocqpeQCqI"
 STRIPE_PRICE_FAMILY_HERO_LIFETIME = "price_1TiYrLKA4XTwoahotDUjFDAo"
 VITE_REVENUECAT_IOS_KEY = "appl_gzlXiKvjqKZFhpWZzgMalMXBAJT"
 ADMIN_EMAIL = "sonoastudio@me.com"
+APNS_KEY_ID = "DQT69WC98R"
+APNS_BUNDLE_ID = "app.herokids.com"
 
 [userenv.production]
 APP_BASE_URL = "https://littlechamps.net"
