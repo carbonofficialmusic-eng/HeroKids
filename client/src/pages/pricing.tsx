@@ -184,6 +184,7 @@ export default function Pricing() {
 
     setProcessingTier(`${tierId}-${cycle}`);
     try {
+      console.log('[Pricing] calling purchaseRCPackage for tier:', tierId, 'cycle:', cycle, 'pkg:', pkg?.identifier);
       const customerInfo = await purchaseRCPackage(pkg);
       const grantedTier = getEntitlementTier(customerInfo);
       const isLifetimePurchase = cycle === "lifetime";

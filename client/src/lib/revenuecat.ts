@@ -35,9 +35,22 @@ export async function getRCOfferings() {
 }
 
 export async function purchaseRCPackage(pkg: any) {
+  if (!isInitialized) {
+    console.error('[RevenueCat] purchaseRCPackage called but SDK not initialized');
+    throw new Error('RevenueCat not initialized');
+  }
   const Purchases = await getPurchases();
-  const result = await Purchases.purchasePackage({ aPackage: pkg });
-  return result.customerInfo;
+  console.log('[RevenueCat] purchasePackage start — product:', pkg?.storeProduct?.productIdentifier ?? pkg?.product?.productIdentifier ?? pkg?.identifier);
+
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Kauf-Zeitüberschreitung. Bitte versuche es erneut.')), 60_000)
+  );
+  const result = await Promise.race([
+    Purchases.purchasePackage({ aPackage: pkg }),
+    timeout,
+  ]);
+  console.log('[RevenueCat] purchasePackage success');
+  return (result as Awaited<ReturnType<typeof Purchases.purchasePackage>>).customerInfo;
 }
 
 export async function restoreRCPurchases() {
