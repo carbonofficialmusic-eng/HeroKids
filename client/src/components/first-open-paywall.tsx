@@ -95,7 +95,20 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
 
       if (isNativePlatform()) {
         // iOS: purchase via RevenueCat
-        const offering = rcOfferings?.all?.["family"];
+        // If offerings didn't load yet, try reloading before giving up
+        let currentOfferings = rcOfferings;
+        if (!currentOfferings && familyName) {
+          try {
+            await initRevenueCat(familyName);
+            const reloaded = await getRCOfferings();
+            if (reloaded) {
+              setRcOfferings(reloaded);
+              currentOfferings = reloaded;
+            }
+          } catch (_) {}
+        }
+
+        const offering = currentOfferings?.all?.["family"];
         const pkgId = billingCycle === "monthly" ? "$rc_monthly" : "$rc_annual";
         const pkg = offering?.availablePackages?.find((p: any) => p.identifier === pkgId);
         if (!pkg) {

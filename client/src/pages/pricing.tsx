@@ -147,7 +147,24 @@ export default function Pricing() {
 
     const offeringKey = tierId === "family_hero" ? "family_pro" : "family";
     const entitlementKey = tierId === "family_hero" ? "family_pro" : "family";
-    const offering = rcOfferings?.all?.[offeringKey];
+
+    // If offerings haven't loaded yet, try reloading before giving up
+    let currentOfferings = rcOfferings;
+    if (!currentOfferings && familyData?.familyName) {
+      setProcessingTier(`${tierId}-${cycle}`);
+      try {
+        await initRevenueCat(familyData.familyName);
+        const reloaded = await getRCOfferings();
+        if (reloaded) {
+          setRcOfferings(reloaded);
+          setRcLoadFailed(false);
+          currentOfferings = reloaded;
+        }
+      } catch (_) {}
+      setProcessingTier(null);
+    }
+
+    const offering = currentOfferings?.all?.[offeringKey];
     if (!offering) {
       toast({ title: t("pricing.toastCheckoutError"), description: "Angebote nicht verfügbar. Bitte versuche es später.", variant: "destructive" });
       return;
@@ -434,7 +451,7 @@ export default function Pricing() {
                               <Button
                                 className="w-full"
                                 variant={tier.popular ? "default" : "outline"}
-                                disabled={!isParent || isProcessing || isProcessingLifetime || rcLoading || isCurrentTier || !rcOfferings}
+                                disabled={!isParent || isProcessing || isProcessingLifetime || rcLoading || isCurrentTier}
                                 onClick={() => handleIOSPurchase(tier.id, cycleKey as "monthly" | "yearly")}
                                 data-testid={`button-select-${tier.id}`}
                               >
