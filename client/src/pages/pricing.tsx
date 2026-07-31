@@ -35,6 +35,7 @@ export default function Pricing() {
   // RevenueCat state (iOS only)
   const [rcOfferings, setRcOfferings] = useState<any>(null);
   const [rcLoading, setRcLoading] = useState(false);
+  const [rcLoadFailed, setRcLoadFailed] = useState(false);
   const [rcRestoring, setRcRestoring] = useState(false);
 
   const { data: member } = useQuery<FamilyMember>({
@@ -69,7 +70,10 @@ export default function Pricing() {
       try {
         await initRevenueCat(familyData.familyName);
         const offerings = await getRCOfferings();
-        if (!cancelled) setRcOfferings(offerings);
+        if (!cancelled) {
+          setRcOfferings(offerings);
+          if (!offerings) setRcLoadFailed(true);
+        }
 
         // Auto-recover mid-transaction loss: if RC already granted a lifetime
         // entitlement but the server hasn't been notified yet (e.g. the app
@@ -96,6 +100,7 @@ export default function Pricing() {
         }
       } catch (err) {
         console.error("[RevenueCat] Failed to load offerings:", err);
+        if (!cancelled) setRcLoadFailed(true);
       } finally {
         clearTimeout(safetyTimer);
         if (!cancelled) setRcLoading(false);
@@ -420,29 +425,37 @@ export default function Pricing() {
                       <>
                         {/* Subscription button — hidden if already on this tier with lifetime */}
                         {!(isCurrentTier && familyData?.isLifetimePurchase) && (
-                          <Button
-                            className="w-full"
-                            variant={tier.popular ? "default" : "outline"}
-                            disabled={!isParent || isProcessing || isProcessingLifetime || rcLoading || isCurrentTier}
-                            onClick={() => handleIOSPurchase(tier.id, cycleKey as "monthly" | "yearly")}
-                            data-testid={`button-select-${tier.id}`}
-                          >
-                            {isProcessing ? (
-                              <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                {t("pricing.processing")}
-                              </>
-                            ) : rcLoading ? (
-                              <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                {t("pricing.processing")}
-                              </>
-                            ) : isCurrentTier ? (
-                              t("pricing.currentPlan")
+                          <>
+                            {rcLoadFailed ? (
+                              <p className="text-center text-sm text-muted-foreground py-2">
+                                {t("pricing.rcUnavailable", "In-App Purchases temporarily unavailable. Please try again later.")}
+                              </p>
                             ) : (
-                              t("pricing.choosePlan", { name: tier.name })
+                              <Button
+                                className="w-full"
+                                variant={tier.popular ? "default" : "outline"}
+                                disabled={!isParent || isProcessing || isProcessingLifetime || rcLoading || isCurrentTier || !rcOfferings}
+                                onClick={() => handleIOSPurchase(tier.id, cycleKey as "monthly" | "yearly")}
+                                data-testid={`button-select-${tier.id}`}
+                              >
+                                {isProcessing ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    {t("pricing.processing")}
+                                  </>
+                                ) : rcLoading ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    {t("pricing.processing")}
+                                  </>
+                                ) : isCurrentTier ? (
+                                  t("pricing.currentPlan")
+                                ) : (
+                                  t("pricing.choosePlan", { name: tier.name })
+                                )}
+                              </Button>
                             )}
-                          </Button>
+                          </>
                         )}
 
                         {/* Lifetime button — only for family_hero tier, only if RC has the product */}
