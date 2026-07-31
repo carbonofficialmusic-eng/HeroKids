@@ -7,6 +7,15 @@ async function getPurchases() {
   return Purchases;
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`[RevenueCat] ${label} timed out after ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
 export async function initRevenueCat(familyName: string): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
   if (isInitialized) return;
@@ -19,7 +28,11 @@ export async function initRevenueCat(familyName: string): Promise<void> {
 
   try {
     const Purchases = await getPurchases();
-    await Purchases.configure({ apiKey, appUserID: familyName });
+    await withTimeout(
+      Purchases.configure({ apiKey, appUserID: familyName }),
+      10_000,
+      'configure'
+    );
     isInitialized = true;
     console.log('[RevenueCat] Initialized for family:', familyName);
   } catch (err) {
@@ -29,9 +42,14 @@ export async function initRevenueCat(familyName: string): Promise<void> {
 
 export async function getRCOfferings() {
   if (!Capacitor.isNativePlatform() || !isInitialized) return null;
-  const Purchases = await getPurchases();
-  const result = await Purchases.getOfferings();
-  return result.offerings;
+  try {
+    const Purchases = await getPurchases();
+    const result = await withTimeout(Purchases.getOfferings(), 10_000, 'getOfferings');
+    return result.offerings;
+  } catch (err) {
+    console.error('[RevenueCat] getOfferings failed:', err);
+    return null;
+  }
 }
 
 export async function purchaseRCPackage(pkg: any) {
