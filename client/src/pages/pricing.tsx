@@ -31,6 +31,7 @@ export default function Pricing() {
   const qc = useQueryClient();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [processingTier, setProcessingTier] = useState<string | null>(null);
+  const [processingStep, setProcessingStep] = useState<string>("");
 
   // RevenueCat state (iOS only)
   const [rcOfferings, setRcOfferings] = useState<any>(null);
@@ -152,6 +153,7 @@ export default function Pricing() {
     let currentOfferings = rcOfferings;
     if (!currentOfferings && familyData?.familyName) {
       setProcessingTier(`${tierId}-${cycle}`);
+      setProcessingStep("Angebote laden…");
       try {
         await initRevenueCat(familyData.familyName);
         const reloaded = await getRCOfferings();
@@ -162,6 +164,7 @@ export default function Pricing() {
         }
       } catch (_) {}
       setProcessingTier(null);
+      setProcessingStep("");
     }
 
     const offering = currentOfferings?.all?.[offeringKey];
@@ -178,11 +181,12 @@ export default function Pricing() {
     const pkgIdentifier = identifierMap[cycle];
     const pkg = offering.availablePackages?.find((p: any) => p.identifier === pkgIdentifier);
     if (!pkg) {
-      toast({ title: t("pricing.toastCheckoutError"), description: "Paket nicht gefunden.", variant: "destructive" });
+      toast({ title: t("pricing.toastCheckoutError"), description: `Paket "${pkgIdentifier}" nicht gefunden. Verfügbar: ${offering.availablePackages?.map((p: any) => p.identifier).join(", ") || "keine"}`, variant: "destructive" });
       return;
     }
 
     setProcessingTier(`${tierId}-${cycle}`);
+    setProcessingStep("Apple Store öffnen…");
     try {
       console.log('[Pricing] calling purchaseRCPackage for tier:', tierId, 'cycle:', cycle, 'pkg:', pkg?.identifier);
       const customerInfo = await purchaseRCPackage(pkg);
@@ -212,6 +216,7 @@ export default function Pricing() {
       }
     } finally {
       setProcessingTier(null);
+      setProcessingStep("");
     }
   };
 
@@ -459,7 +464,7 @@ export default function Pricing() {
                                 {isProcessing ? (
                                   <>
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    {t("pricing.processing")}
+                                    {processingStep || t("pricing.processing")}
                                   </>
                                 ) : rcLoading ? (
                                   <>
@@ -488,7 +493,7 @@ export default function Pricing() {
                             {isProcessingLifetime ? (
                               <>
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                {t("pricing.processing")}
+                                {processingStep || t("pricing.processing")}
                               </>
                             ) : rcLoading ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
