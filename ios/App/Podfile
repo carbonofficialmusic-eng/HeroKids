@@ -1,5 +1,8 @@
 require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
 
+# Use GitHub-based specs repo instead of CDN — CDN is blocked in Xcode Cloud's network
+source 'https://github.com/CocoaPods/Specs.git'
+
 platform :ios, '15.0'
 use_frameworks!
 

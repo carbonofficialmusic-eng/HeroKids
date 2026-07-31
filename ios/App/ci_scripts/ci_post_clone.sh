@@ -42,6 +42,23 @@ git checkout -- ios/App/App/Assets.xcassets/Splash.imageset/
 
 echo "Installing CocoaPods dependencies..."
 cd ios/App
-pod install
+
+# Add the GitHub-based trunk repo explicitly (avoids CDN SSL issues in Xcode Cloud)
+pod repo add trunk https://github.com/CocoaPods/Specs.git 2>/dev/null || pod repo update trunk 2>/dev/null || true
+
+# Retry pod install up to 3 times in case of transient network issues
+for attempt in 1 2 3; do
+  echo "pod install attempt $attempt..."
+  if pod install --repo-update; then
+    echo "pod install succeeded on attempt $attempt"
+    break
+  fi
+  if [ "$attempt" -eq 3 ]; then
+    echo "pod install failed after 3 attempts"
+    exit 1
+  fi
+  echo "Retrying in 10 seconds..."
+  sleep 10
+done
 
 echo "=== Post-clone complete ==="
