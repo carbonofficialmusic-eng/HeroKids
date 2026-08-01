@@ -26,18 +26,15 @@ export async function initRevenueCat(familyName: string): Promise<void> {
     return;
   }
 
+  // configure() is fire-and-forget on iOS — the native SDK initialises
+  // synchronously; awaiting the returned promise causes an indefinite hang.
   try {
-    const Purchases = await getPurchases();
-    await withTimeout(
-      Purchases.configure({ apiKey, appUserID: familyName }),
-      5_000,
-      'configure'
-    );
-    isInitialized = true;
-    console.log('[RevenueCat] Initialized for family:', familyName);
+    Purchases.configure({ apiKey, appUserID: familyName });
   } catch (err) {
-    console.error('[RevenueCat] Init failed:', err);
+    console.error('[RevenueCat] configure() threw:', err);
   }
+  isInitialized = true;
+  console.log('[RevenueCat] Initialized (fire-and-forget) for family:', familyName);
 }
 
 export async function getRCOfferings() {

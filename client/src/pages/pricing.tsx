@@ -70,7 +70,7 @@ export default function Pricing() {
 
     (async () => {
       try {
-        setRcDebugMsg("RC: init…");
+        setRcDebugMsg("RC: configure…");
         await initRevenueCat(familyData.familyName);
         setRcDebugMsg("RC: getOfferings…");
         const offerings = await getRCOfferings();
