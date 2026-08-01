@@ -74,19 +74,25 @@ export default function Pricing() {
         await initRevenueCat(familyData.familyName);
         // Small pause so the native SDK finishes internal setup after fire-and-forget configure()
         await new Promise(r => setTimeout(r, 300));
-        // Live counter — proves JS event loop is alive during getOfferings() wait
-        let secs = 0;
-        const counter = setInterval(() => {
-          secs++;
-          if (!cancelled) setRcDebugMsg(`RC: getOfferings… (${secs}s)`);
-        }, 1000);
-        setRcDebugMsg("RC: getOfferings… (0s)");
-        let offerings: any;
-        try {
-          offerings = await getRCOfferings();
-        } finally {
-          clearInterval(counter);
+
+        // Avoid Promise.race() — Capacitor native promises don't interop reliably
+        // with standard JS timeout promises in WKWebView. Instead: kick off the
+        // fetch in the background and poll every 500ms for up to 15 seconds.
+        let offeringsResult: any = undefined;
+        let offeringsDone = false;
+        getRCOfferings().then(r => { offeringsResult = r; offeringsDone = true; });
+
+        const MAX_POLLS = 30; // 30 × 500ms = 15 seconds
+        for (let i = 0; i < MAX_POLLS; i++) {
+          await new Promise(r => setTimeout(r, 500));
+          if (offeringsDone || cancelled) break;
+          if (!cancelled) setRcDebugMsg(`RC: getOfferings… (${Math.round((i + 1) * 0.5)}s)`);
         }
+
+        if (!offeringsDone) {
+          throw new Error('RC_TIMEOUT: getOfferings nach 15s');
+        }
+        const offerings = offeringsResult;
         if (!cancelled) {
           setRcOfferings(offerings);
           if (!offerings) {
