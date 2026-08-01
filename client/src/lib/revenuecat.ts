@@ -31,7 +31,8 @@ export async function initRevenueCat(familyName: string): Promise<void> {
   // usesStoreKit2IfAvailable:false forces StoreKit 1 which avoids known SK2
   // timing hangs in WKWebView / Capacitor environments.
   try {
-    Purchases.configure({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (Purchases as any).configure({
       apiKey,
       appUserID: familyName,
       usesStoreKit2IfAvailable: false,
@@ -43,36 +44,61 @@ export async function initRevenueCat(familyName: string): Promise<void> {
   console.log('[RevenueCat] Initialized (fire-and-forget) for family:', familyName);
 }
 
-export async function getRCOfferings() {
+// Known product IDs — getProducts() fetches these directly from StoreKit,
+// bypassing RC's server-side getOfferings() which hangs in WKWebView/Capacitor.
+const KNOWN_PRODUCT_IDS = [
+  'com.herokids.family.monthly',
+  'com.herokids.family.yearly',
+  'com.herokids.familypro.monthly',
+  'com.herokids.familypro.yearly',
+];
+
+export async function getRCProducts(): Promise<Record<string, any> | null> {
   if (!Capacitor.isNativePlatform() || !isInitialized) return null;
   try {
-    const Purchases = await getPurchases();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = await withTimeout(Purchases.getOfferings() as any, 5_000, 'getOfferings');
-    return result.offerings ?? result ?? null;
+    const result = await Purchases.getProducts({ productIdentifiers: KNOWN_PRODUCT_IDS });
+    const map: Record<string, any> = {};
+    for (const product of result.products ?? []) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const id = (product as any).identifier ?? (product as any).productIdentifier;
+      if (id) map[id] = product;
+    }
+    console.log('[RevenueCat] getProducts OK:', Object.keys(map).join(', '));
+    return Object.keys(map).length > 0 ? map : null;
   } catch (err) {
-    console.error('[RevenueCat] getOfferings failed:', err);
+    console.error('[RevenueCat] getProducts failed:', err);
     return null;
   }
 }
 
-export async function purchaseRCPackage(pkg: any) {
+export async function purchaseRCStoreProduct(product: any): Promise<any> {
   if (!isInitialized) {
-    console.error('[RevenueCat] purchaseRCPackage called but SDK not initialized');
+    console.error('[RevenueCat] purchaseRCStoreProduct called but SDK not initialized');
     throw new Error('RevenueCat not initialized');
   }
-  const Purchases = await getPurchases();
-  console.log('[RevenueCat] purchasePackage start — product:', pkg?.storeProduct?.productIdentifier ?? pkg?.product?.productIdentifier ?? pkg?.identifier);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const id = (product as any)?.identifier ?? '?';
+  console.log('[RevenueCat] purchaseStoreProduct start — product:', id);
 
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error('Kauf-Zeitüberschreitung. Bitte versuche es erneut.')), 60_000)
+  let timedOut = false;
+  const timerPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => { timedOut = true; reject(new Error('Kauf-Zeitüberschreitung. Bitte versuche es erneut.')); }, 60_000)
   );
   const result = await Promise.race([
-    Purchases.purchasePackage({ aPackage: pkg }),
-    timeout,
+    Purchases.purchaseStoreProduct({ product }),
+    timerPromise,
   ]);
-  console.log('[RevenueCat] purchasePackage success');
-  return (result as Awaited<ReturnType<typeof Purchases.purchasePackage>>).customerInfo;
+  if (timedOut) throw new Error('Kauf-Zeitüberschreitung. Bitte versuche es erneut.');
+  console.log('[RevenueCat] purchaseStoreProduct success');
+  return (result as any).customerInfo;
+}
+
+/** @deprecated Use purchaseRCStoreProduct instead */
+export async function purchaseRCPackage(pkg: any) {
+  // Fallback: try to extract the store product and use purchaseStoreProduct
+  const product = pkg?.storeProduct ?? pkg?.product;
+  if (product) return purchaseRCStoreProduct(product);
+  throw new Error('purchaseRCPackage: no storeProduct found on package');
 }
 
 export async function restoreRCPurchases() {

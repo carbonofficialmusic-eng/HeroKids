@@ -13,13 +13,12 @@ import type { FamilyMember } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import {
   initRevenueCat,
-  getRCOfferings,
+  getRCProducts,
   getRCCustomerInfo,
-  purchaseRCPackage,
+  purchaseRCStoreProduct,
   restoreRCPurchases,
   getEntitlementTier,
   isLifetimeEntitlement,
-  getPackagePrice,
 } from "@/lib/revenuecat";
 
 type BillingCycle = "monthly" | "yearly";
@@ -33,8 +32,8 @@ export default function Pricing() {
   const [processingTier, setProcessingTier] = useState<string | null>(null);
   const [processingStep, setProcessingStep] = useState<string>("");
 
-  // RevenueCat state (iOS only)
-  const [rcOfferings, setRcOfferings] = useState<any>(null);
+  // RevenueCat state (iOS only) — keyed by product identifier
+  const [rcProducts, setRcProducts] = useState<Record<string, any> | null>(null);
   const [rcLoading, setRcLoading] = useState(false);
   const [rcLoadFailed, setRcLoadFailed] = useState(false);
   const [rcDebugMsg, setRcDebugMsg] = useState<string>("");
@@ -78,28 +77,27 @@ export default function Pricing() {
         // Avoid Promise.race() — Capacitor native promises don't interop reliably
         // with standard JS timeout promises in WKWebView. Instead: kick off the
         // fetch in the background and poll every 500ms for up to 15 seconds.
-        let offeringsResult: any = undefined;
-        let offeringsDone = false;
-        getRCOfferings().then(r => { offeringsResult = r; offeringsDone = true; });
+        let productsResult: Record<string, any> | null = undefined as any;
+        let productsDone = false;
+        getRCProducts().then(r => { productsResult = r; productsDone = true; });
 
         const MAX_POLLS = 30; // 30 × 500ms = 15 seconds
         for (let i = 0; i < MAX_POLLS; i++) {
           await new Promise(r => setTimeout(r, 500));
-          if (offeringsDone || cancelled) break;
-          if (!cancelled) setRcDebugMsg(`RC: getOfferings… (${Math.round((i + 1) * 0.5)}s)`);
+          if (productsDone || cancelled) break;
+          if (!cancelled) setRcDebugMsg(`RC: getProducts… (${Math.round((i + 1) * 0.5)}s)`);
         }
 
-        if (!offeringsDone) {
-          throw new Error('RC_TIMEOUT: getOfferings nach 15s');
+        if (!productsDone) {
+          throw new Error('RC_TIMEOUT: getProducts nach 15s');
         }
-        const offerings = offeringsResult;
         if (!cancelled) {
-          setRcOfferings(offerings);
-          if (!offerings) {
+          setRcProducts(productsResult);
+          if (!productsResult) {
             setRcLoadFailed(true);
-            setRcDebugMsg("RC: getOfferings returned null");
+            setRcDebugMsg("RC: keine Produkte gefunden");
           } else {
-            setRcDebugMsg(`RC: OK (${Object.keys(offerings.all ?? {}).join(", ")})`);
+            setRcDebugMsg(`RC: OK (${Object.keys(productsResult).length} Produkte)`);
           }
         }
 
@@ -179,47 +177,41 @@ export default function Pricing() {
     const offeringKey = tierId === "family_hero" ? "family_pro" : "family";
     const entitlementKey = tierId === "family_hero" ? "family_pro" : "family";
 
-    // If offerings haven't loaded yet, try reloading before giving up
-    let currentOfferings = rcOfferings;
-    if (!currentOfferings && familyData?.familyName) {
+    // Look up the StoreKit product directly from our product map
+    const productIdMap: Record<string, Record<string, string>> = {
+      family: { monthly: 'com.herokids.family.monthly', yearly: 'com.herokids.family.yearly' },
+      family_pro: { monthly: 'com.herokids.familypro.monthly', yearly: 'com.herokids.familypro.yearly' },
+    };
+    const productId = productIdMap[offeringKey]?.[cycle];
+    let product = productId ? rcProducts?.[productId] : null;
+
+    // If products haven't loaded yet, try a quick reload
+    if (!product && familyData?.familyName) {
       setProcessingTier(`${tierId}-${cycle}`);
-      setProcessingStep("Angebote laden…");
+      setProcessingStep("Produkte laden…");
       try {
         await initRevenueCat(familyData.familyName);
-        const reloaded = await getRCOfferings();
+        const reloaded = await getRCProducts();
         if (reloaded) {
-          setRcOfferings(reloaded);
+          setRcProducts(reloaded);
           setRcLoadFailed(false);
-          currentOfferings = reloaded;
+          product = productId ? reloaded[productId] : null;
         }
       } catch (_) {}
       setProcessingTier(null);
       setProcessingStep("");
     }
 
-    const offering = currentOfferings?.all?.[offeringKey];
-    if (!offering) {
-      toast({ title: t("pricing.toastCheckoutError"), description: "Angebote nicht verfügbar. Bitte versuche es später.", variant: "destructive" });
-      return;
-    }
-
-    const identifierMap: Record<string, string> = {
-      monthly: "$rc_monthly",
-      yearly: "$rc_annual",
-      lifetime: "$rc_lifetime",
-    };
-    const pkgIdentifier = identifierMap[cycle];
-    const pkg = offering.availablePackages?.find((p: any) => p.identifier === pkgIdentifier);
-    if (!pkg) {
-      toast({ title: t("pricing.toastCheckoutError"), description: `Paket "${pkgIdentifier}" nicht gefunden. Verfügbar: ${offering.availablePackages?.map((p: any) => p.identifier).join(", ") || "keine"}`, variant: "destructive" });
+    if (!product) {
+      toast({ title: t("pricing.toastCheckoutError"), description: "Produkt nicht verfügbar. Bitte versuche es später.", variant: "destructive" });
       return;
     }
 
     setProcessingTier(`${tierId}-${cycle}`);
     setProcessingStep("Apple Store öffnen…");
     try {
-      console.log('[Pricing] calling purchaseRCPackage for tier:', tierId, 'cycle:', cycle, 'pkg:', pkg?.identifier);
-      const customerInfo = await purchaseRCPackage(pkg);
+      console.log('[Pricing] purchaseRCStoreProduct for tier:', tierId, 'cycle:', cycle, 'productId:', productId);
+      const customerInfo = await purchaseRCStoreProduct(product);
       const grantedTier = getEntitlementTier(customerInfo);
       const isLifetimePurchase = cycle === "lifetime";
 
@@ -327,13 +319,23 @@ export default function Pricing() {
     },
   ];
 
-  // Helper: get a package price string from RevenueCat offerings
-  const getRcPrice = (offeringKey: string | null, packageId: string): string | null => {
-    if (!offeringKey || !rcOfferings?.all?.[offeringKey]) return null;
-    const pkg = rcOfferings.all[offeringKey]?.availablePackages?.find(
-      (p: any) => p.identifier === packageId,
-    );
-    return pkg ? getPackagePrice(pkg) : null;
+  // Helper: get a price string directly from the StoreKit product map
+  const PRODUCT_ID_MAP: Record<string, Record<string, string>> = {
+    family: {
+      monthly: 'com.herokids.family.monthly',
+      yearly: 'com.herokids.family.yearly',
+    },
+    family_pro: {
+      monthly: 'com.herokids.familypro.monthly',
+      yearly: 'com.herokids.familypro.yearly',
+    },
+  };
+  const getRcPrice = (offeringKey: string | null, cycle: string): string | null => {
+    if (!offeringKey || !rcProducts) return null;
+    const productId = PRODUCT_ID_MAP[offeringKey]?.[cycle];
+    if (!productId) return null;
+    const product = rcProducts[productId];
+    return product?.priceString ?? product?.price?.toString() ?? null;
   };
 
   return (
@@ -416,10 +418,10 @@ export default function Pricing() {
             const isProcessing = processingTier === processingKey;
             const isProcessingLifetime = processingTier === lifetimeProcessingKey;
 
-            // RevenueCat prices (iOS) — fall back to hardcoded if not available
-            const rcMonthlyPrice = getRcPrice(tier.rcOfferingKey, "$rc_monthly");
-            const rcYearlyPrice = getRcPrice(tier.rcOfferingKey, "$rc_annual");
-            const rcLifetimePrice = getRcPrice(tier.rcOfferingKey, "$rc_lifetime");
+            // RevenueCat prices (iOS) — look up from StoreKit product map
+            const rcMonthlyPrice = getRcPrice(tier.rcOfferingKey, "monthly");
+            const rcYearlyPrice = getRcPrice(tier.rcOfferingKey, "yearly");
+            const rcLifetimePrice: string | null = null; // lifetime removed
             const displayPrice = isNativePlatform()
               ? (billingCycle === "monthly" ? (rcMonthlyPrice ?? tier.price) : (rcYearlyPrice ?? tier.price))
               : tier.price;
