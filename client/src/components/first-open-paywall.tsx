@@ -16,10 +16,9 @@ import { isNativePlatform } from "@/lib/platform";
 import { apiRequest } from "@/lib/queryClient";
 import {
   initRevenueCat,
-  getRCOfferings,
-  purchaseRCPackage,
+  getRCProducts,
+  purchaseRCStoreProduct,
   getEntitlementTier,
-  getPackagePrice,
 } from "@/lib/revenuecat";
 
 interface FirstOpenPaywallProps {
@@ -36,10 +35,10 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
   const qc = useQueryClient();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("yearly");
   const [processing, setProcessing] = useState(false);
-  const [rcOfferings, setRcOfferings] = useState<any>(null);
+  const [rcProducts, setRcProducts] = useState<Record<string, any> | null>(null);
   const [rcLoading, setRcLoading] = useState(false);
 
-  // Load RevenueCat offerings on iOS when modal opens
+  // Load RevenueCat products on iOS when modal opens (uses getProducts, not getOfferings)
   useEffect(() => {
     if (!open || !isNativePlatform() || !familyName) return;
     let cancelled = false;
@@ -50,10 +49,15 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
       }, 8000);
       try {
         await initRevenueCat(familyName);
-        const offerings = await getRCOfferings();
-        if (!cancelled) setRcOfferings(offerings);
+        let result: Record<string, any> | null = null;
+        let done = false;
+        getRCProducts().then(r => { result = r; done = true; });
+        for (let i = 0; i < 30 && !done && !cancelled; i++) {
+          await new Promise(r => setTimeout(r, 500));
+        }
+        if (!cancelled && done) setRcProducts(result);
       } catch (err) {
-        console.error("[RevenueCat] Failed to load offerings in paywall:", err);
+        console.error("[RevenueCat] Failed to load products in paywall:", err);
       } finally {
         clearTimeout(safetyTimer);
         if (!cancelled) setRcLoading(false);
@@ -69,18 +73,17 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
   const familyPriceMonthly = "€3,99";
   const familyPriceYearly = "€29,99";
 
-  // Get localized RC price if available
-  const getRcPrice = (packageId: string): string | null => {
-    const offering = rcOfferings?.all?.["family"];
-    if (!offering) return null;
-    const pkg = offering.availablePackages?.find((p: any) => p.identifier === packageId);
-    return pkg ? getPackagePrice(pkg) : null;
+  // Get localized RC price directly from StoreKit product map
+  const getRcPrice = (cycle: "monthly" | "yearly"): string | null => {
+    const productId = cycle === "monthly"
+      ? "com.herokids.family.monthly"
+      : "com.herokids.family.yearly";
+    const product = rcProducts?.[productId];
+    return product?.priceString ?? null;
   };
 
   const displayPrice = isNativePlatform()
-    ? (billingCycle === "monthly"
-        ? (getRcPrice("$rc_monthly") ?? familyPriceMonthly)
-        : (getRcPrice("$rc_annual") ?? familyPriceYearly))
+    ? (getRcPrice(billingCycle) ?? (billingCycle === "monthly" ? familyPriceMonthly : familyPriceYearly))
     : (billingCycle === "monthly" ? familyPriceMonthly : familyPriceYearly);
 
   const handleStartFree = () => {
@@ -94,33 +97,34 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
       localStorage.setItem("herokids_seen_paywall", "true");
 
       if (isNativePlatform()) {
-        // iOS: purchase via RevenueCat
-        // If offerings didn't load yet, try reloading before giving up
-        let currentOfferings = rcOfferings;
-        if (!currentOfferings && familyName) {
+        // iOS: purchase via RevenueCat using StoreKit product directly
+        const productId = billingCycle === "monthly"
+          ? "com.herokids.family.monthly"
+          : "com.herokids.family.yearly";
+        let product = rcProducts?.[productId];
+
+        // If products didn't load yet, try a quick reload
+        if (!product && familyName) {
           try {
             await initRevenueCat(familyName);
-            const reloaded = await getRCOfferings();
+            const reloaded = await getRCProducts();
             if (reloaded) {
-              setRcOfferings(reloaded);
-              currentOfferings = reloaded;
+              setRcProducts(reloaded);
+              product = reloaded[productId];
             }
           } catch (_) {}
         }
 
-        const offering = currentOfferings?.all?.["family"];
-        const pkgId = billingCycle === "monthly" ? "$rc_monthly" : "$rc_annual";
-        const pkg = offering?.availablePackages?.find((p: any) => p.identifier === pkgId);
-        if (!pkg) {
+        if (!product) {
           toast({
             title: t("pricing.toastCheckoutError"),
-            description: "Angebote nicht verfügbar. Bitte versuche es später.",
+            description: "Produkt nicht verfügbar. Bitte versuche es später.",
             variant: "destructive",
           });
           setProcessing(false);
           return;
         }
-        const customerInfo = await purchaseRCPackage(pkg);
+        const customerInfo = await purchaseRCStoreProduct(product);
         const grantedTier = getEntitlementTier(customerInfo);
         await apiRequest("POST", "/api/revenuecat-sync", { entitlementId: "family" });
         await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
