@@ -37,6 +37,7 @@ export default function Pricing() {
   const [rcOfferings, setRcOfferings] = useState<any>(null);
   const [rcLoading, setRcLoading] = useState(false);
   const [rcLoadFailed, setRcLoadFailed] = useState(false);
+  const [rcDebugMsg, setRcDebugMsg] = useState<string>("");
   const [rcRestoring, setRcRestoring] = useState(false);
 
   const { data: member } = useQuery<FamilyMember>({
@@ -69,11 +70,18 @@ export default function Pricing() {
 
     (async () => {
       try {
+        setRcDebugMsg("RC: init…");
         await initRevenueCat(familyData.familyName);
+        setRcDebugMsg("RC: getOfferings…");
         const offerings = await getRCOfferings();
         if (!cancelled) {
           setRcOfferings(offerings);
-          if (!offerings) setRcLoadFailed(true);
+          if (!offerings) {
+            setRcLoadFailed(true);
+            setRcDebugMsg("RC: getOfferings returned null");
+          } else {
+            setRcDebugMsg(`RC: OK (${Object.keys(offerings.all ?? {}).join(", ")})`);
+          }
         }
 
         // Auto-recover mid-transaction loss: if RC already granted a lifetime
@@ -99,9 +107,12 @@ export default function Pricing() {
             console.warn("[RevenueCat] Auto-sync failed (will retry next launch):", autoSyncErr);
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("[RevenueCat] Failed to load offerings:", err);
-        if (!cancelled) setRcLoadFailed(true);
+        if (!cancelled) {
+          setRcLoadFailed(true);
+          setRcDebugMsg(`RC Fehler: ${err?.message ?? String(err)}`);
+        }
       } finally {
         clearTimeout(safetyTimer);
         if (!cancelled) setRcLoading(false);
@@ -581,6 +592,13 @@ export default function Pricing() {
           })}
         </div>
 
+
+        {/* iOS: RC debug info (temporary) */}
+        {isNativePlatform() && rcDebugMsg && (
+          <div className="mt-4 mx-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+            <p className="text-xs font-mono text-yellow-600 dark:text-yellow-400 break-all">{rcDebugMsg}</p>
+          </div>
+        )}
 
         {/* iOS: Restore Purchases */}
         {isNativePlatform() && (

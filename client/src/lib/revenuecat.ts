@@ -11,7 +11,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   return Promise.race([
     promise,
     new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error(`[RevenueCat] ${label} timed out after ${ms}ms`)), ms)
+      setTimeout(() => reject(new Error(`RC_TIMEOUT: ${label} nach ${ms / 1000}s`)), ms)
     ),
   ]);
 }
@@ -30,7 +30,7 @@ export async function initRevenueCat(familyName: string): Promise<void> {
     const Purchases = await getPurchases();
     await withTimeout(
       Purchases.configure({ apiKey, appUserID: familyName }),
-      10_000,
+      5_000,
       'configure'
     );
     isInitialized = true;
@@ -44,7 +44,7 @@ export async function getRCOfferings() {
   if (!Capacitor.isNativePlatform() || !isInitialized) return null;
   try {
     const Purchases = await getPurchases();
-    const result = await withTimeout(Purchases.getOfferings(), 10_000, 'getOfferings');
+    const result = await withTimeout(Purchases.getOfferings(), 5_000, 'getOfferings');
     return result.offerings;
   } catch (err) {
     console.error('[RevenueCat] getOfferings failed:', err);
