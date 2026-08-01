@@ -28,8 +28,14 @@ export async function initRevenueCat(familyName: string): Promise<void> {
 
   // configure() is fire-and-forget on iOS — the native SDK initialises
   // synchronously; awaiting the returned promise causes an indefinite hang.
+  // usesStoreKit2IfAvailable:false forces StoreKit 1 which avoids known SK2
+  // timing hangs in WKWebView / Capacitor environments.
   try {
-    Purchases.configure({ apiKey, appUserID: familyName });
+    Purchases.configure({
+      apiKey,
+      appUserID: familyName,
+      usesStoreKit2IfAvailable: false,
+    });
   } catch (err) {
     console.error('[RevenueCat] configure() threw:', err);
   }
