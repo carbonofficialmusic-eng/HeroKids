@@ -72,8 +72,21 @@ export default function Pricing() {
       try {
         setRcDebugMsg("RC: configure…");
         await initRevenueCat(familyData.familyName);
-        setRcDebugMsg("RC: getOfferings…");
-        const offerings = await getRCOfferings();
+        // Small pause so the native SDK finishes internal setup after fire-and-forget configure()
+        await new Promise(r => setTimeout(r, 300));
+        // Live counter — proves JS event loop is alive during getOfferings() wait
+        let secs = 0;
+        const counter = setInterval(() => {
+          secs++;
+          if (!cancelled) setRcDebugMsg(`RC: getOfferings… (${secs}s)`);
+        }, 1000);
+        setRcDebugMsg("RC: getOfferings… (0s)");
+        let offerings: any;
+        try {
+          offerings = await getRCOfferings();
+        } finally {
+          clearInterval(counter);
+        }
         if (!cancelled) {
           setRcOfferings(offerings);
           if (!offerings) {
