@@ -3,7 +3,11 @@ import { Capacitor } from '@capacitor/core';
 let isInitialized = false;
 
 async function getPurchases() {
-  const { Purchases } = await import('@revenuecat/purchases-capacitor');
+  const { Purchases } = await withTimeout(
+    import('@revenuecat/purchases-capacitor'),
+    5_000,
+    'import RC module'
+  );
   return Purchases;
 }
 
@@ -44,8 +48,9 @@ export async function getRCOfferings() {
   if (!Capacitor.isNativePlatform() || !isInitialized) return null;
   try {
     const Purchases = await getPurchases();
-    const result = await withTimeout(Purchases.getOfferings(), 5_000, 'getOfferings');
-    return result.offerings;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result: any = await withTimeout(Purchases.getOfferings() as any, 5_000, 'getOfferings');
+    return result.offerings ?? result ?? null;
   } catch (err) {
     console.error('[RevenueCat] getOfferings failed:', err);
     return null;
