@@ -1,13 +1,9 @@
 import { Capacitor } from '@capacitor/core';
+import { Purchases } from '@revenuecat/purchases-capacitor';
 
 let isInitialized = false;
 
-async function getPurchases() {
-  const { Purchases } = await withTimeout(
-    import('@revenuecat/purchases-capacitor'),
-    5_000,
-    'import RC module'
-  );
+function getPurchases() {
   return Purchases;
 }
 
