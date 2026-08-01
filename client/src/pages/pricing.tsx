@@ -36,7 +36,6 @@ export default function Pricing() {
   const [rcProducts, setRcProducts] = useState<Record<string, any> | null>(null);
   const [rcLoading, setRcLoading] = useState(false);
   const [rcLoadFailed, setRcLoadFailed] = useState(false);
-  const [rcDebugMsg, setRcDebugMsg] = useState<string>("");
   const [rcRestoring, setRcRestoring] = useState(false);
 
   const { data: member } = useQuery<FamilyMember>({
@@ -69,7 +68,6 @@ export default function Pricing() {
 
     (async () => {
       try {
-        setRcDebugMsg("RC: configure…");
         await initRevenueCat(familyData.familyName);
         // Small pause so the native SDK finishes internal setup after fire-and-forget configure()
         await new Promise(r => setTimeout(r, 300));
@@ -85,7 +83,6 @@ export default function Pricing() {
         for (let i = 0; i < MAX_POLLS; i++) {
           await new Promise(r => setTimeout(r, 500));
           if (productsDone || cancelled) break;
-          if (!cancelled) setRcDebugMsg(`RC: getProducts… (${Math.round((i + 1) * 0.5)}s)`);
         }
 
         if (!productsDone) {
@@ -95,9 +92,6 @@ export default function Pricing() {
           setRcProducts(productsResult);
           if (!productsResult) {
             setRcLoadFailed(true);
-            setRcDebugMsg("RC: keine Produkte gefunden");
-          } else {
-            setRcDebugMsg(`RC: OK (${Object.keys(productsResult).length} Produkte)`);
           }
         }
 
@@ -613,13 +607,6 @@ export default function Pricing() {
           })}
         </div>
 
-
-        {/* iOS: RC debug info (temporary) */}
-        {isNativePlatform() && rcDebugMsg && (
-          <div className="mt-4 mx-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-            <p className="text-xs font-mono text-yellow-600 dark:text-yellow-400 break-all">{rcDebugMsg}</p>
-          </div>
-        )}
 
         {/* iOS: Restore Purchases */}
         {isNativePlatform() && (
