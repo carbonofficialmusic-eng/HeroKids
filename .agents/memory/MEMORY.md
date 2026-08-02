@@ -9,3 +9,4 @@
 - [iOS Photo Upload — No Reload Needed](ios-photo-no-reload.md) — kickHeaderRepaint()+kickScrollReset() fully fix WKWebView GPU displacement after camera; full page reload is unnecessary and was removed
 - [Period-blind hasActiveMemberCompletion bug](recurring-task-period-guard.md) — hasActiveMemberCompletion must filter by nextAvailableDate for recurrenceDays/weekly/monthly/yearly tasks or old-period completions block new-period submissions
 - [iOS IAP Spinner — Paywall was the real source](ios-iap-spinner.md) — first-open-paywall.tsx had Loader2 spinner on rcLoading with NO safety timeout; pricing.tsx fix alone was insufficient
+- [Skip CI Convention](skip-ci-convention.md) — web-only pushes get [skip ci] in commit msg; iOS builds only when ios/ or capacitor.config.ts changed; use ShellExec for commit, gitPush() for push
