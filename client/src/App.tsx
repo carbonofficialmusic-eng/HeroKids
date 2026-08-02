@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useTranslation } from "react-i18next";
 import { isNativePlatform } from "@/lib/platform";
+import { apiRequest } from "@/lib/queryClient";
 import { getBackgroundUrl } from "@/lib/skins";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "@/pages/not-found";
@@ -175,6 +176,51 @@ function Router() {
   useEffect(() => {
     document.getElementById('root')?.scrollTo({ top: 0, behavior: 'instant' });
   }, [location]);
+
+  // Subscription cancel-sync: when app comes to foreground on iOS, check if
+  // the server's paid tier is still backed by an active RC entitlement.
+  // Catches missed EXPIRATION webhooks so the dashboard reflects cancellations
+  // without the user having to open the pricing page.
+  useEffect(() => {
+    if (!isNativePlatform() || !isAuthenticated) return;
+    let lastChecked = 0;
+    const THROTTLE_MS = 5 * 60 * 1000; // at most once every 5 minutes
+
+    const runCheck = async () => {
+      const now = Date.now();
+      if (now - lastChecked < THROTTLE_MS) return;
+      lastChecked = now;
+
+      try {
+        // Only bother if the server thinks we have a paid tier
+        const familyData = queryClient.getQueryData<any>(["/api/families/current"]);
+        if (!familyData || familyData.subscriptionTier === "free" || familyData.isLifetimePurchase || familyData.isAdminGranted) return;
+
+        const { getRCCustomerInfo, getEntitlementTier, initRevenueCat } = await import("@/lib/revenuecat");
+        await initRevenueCat(familyData.familyName);
+        const customerInfo = await getRCCustomerInfo();
+        const tier = customerInfo ? getEntitlementTier(customerInfo) : null;
+
+        if (!tier) {
+          console.log("[RC resume-check] No active entitlement — syncing cancellation…");
+          await apiRequest("POST", "/api/revenuecat-cancel-sync", {});
+          await queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
+          console.log("[RC resume-check] Done.");
+        }
+      } catch (err) {
+        // Non-fatal — will retry next resume
+        console.warn("[RC resume-check] Failed:", err);
+      }
+    };
+
+    const onResume = () => { if (document.visibilityState !== "hidden") runCheck(); };
+    document.addEventListener("visibilitychange", onResume);
+    document.addEventListener("resume", onResume); // Capacitor native resume
+    return () => {
+      document.removeEventListener("visibilitychange", onResume);
+      document.removeEventListener("resume", onResume);
+    };
+  }, [isAuthenticated]);
 
   // Cache env(safe-area-inset-top) as --sat CSS variable on :root.
   // Only set when value > 0 — if WKWebView hasn't resolved the inset yet it
