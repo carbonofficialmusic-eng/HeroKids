@@ -562,6 +562,22 @@ export default function Pricing() {
                         )}
                       </>
                     )}
+
+                    {/* Cancel subscription — opens Apple subscription management */}
+                    {isCurrentTier && tier.id !== "free" && isParent && !familyData?.isLifetimePurchase && (
+                      <button
+                        onClick={() => {
+                          window.open("itms-apps://apps.apple.com/account/subscriptions", "_system");
+                        }}
+                        className="w-full mt-1 py-2 text-sm text-muted-foreground hover:text-destructive border border-dashed border-muted-foreground/30 hover:border-destructive/50 rounded-lg transition-colors"
+                        data-testid={`button-cancel-${tier.id}`}
+                      >
+                        {t("pricing.cancelSubscription")}
+                        <span className="block text-xs opacity-60 mt-0.5">
+                          {t("pricing.cancelSubscriptionHint")}
+                        </span>
+                      </button>
+                    )}
                   </div>
                 ) : (
                   /* ── Web: Stripe checkout buttons ── */
