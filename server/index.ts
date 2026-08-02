@@ -116,6 +116,7 @@ app.post("/api/stripe-webhook",
             .set({
               subscriptionTier: tier,
               subscriptionStatus: "active",
+              isAdminGranted: false, // legitimate Stripe purchase clears admin-granted flag
               billingSubscriptionId: isLifetime ? null : (session.subscription as string),
               ...(isLifetime ? { isLifetimePurchase: true } : {}),
             })
@@ -895,6 +896,11 @@ async function ensurePinboardTable() {
 
   // Add Nemicolopterus & Skater Kid to complete the last row
   await addNemicolopterusAndSkaterKidIfNeeded();
+
+  // Ensure is_admin_granted column exists
+  try {
+    await db.execute(sql`ALTER TABLE families ADD COLUMN IF NOT EXISTS is_admin_granted boolean NOT NULL DEFAULT false`);
+  } catch (e) { console.warn("is_admin_granted migration warning:", e); }
 
   // Ensure is_lifetime_purchase column exists
   try {

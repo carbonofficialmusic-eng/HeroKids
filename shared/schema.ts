@@ -114,6 +114,7 @@ export const families = pgTable("families", {
   trialStartedAt: timestamp("trial_started_at"), // When the 7-day free trial started (null = never trialed)
   trialEndsAt: timestamp("trial_ends_at"), // When the trial expires
   isLifetimePurchase: boolean("is_lifetime_purchase").notNull().default(false), // One-time lifetime purchase (never expires)
+  isAdminGranted: boolean("is_admin_granted").notNull().default(false), // Tier set manually by admin, not via IAP/Stripe
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

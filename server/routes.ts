@@ -6561,6 +6561,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .set({
           subscriptionTier: newTier,
           subscriptionStatus: "active",
+          isAdminGranted: false, // legitimate RC/IAP purchase clears admin-granted flag
           ...(isLifetime ? { isLifetimePurchase: true } : {}),
         })
         .where(eq(families.familyName, member.familyName));
@@ -6607,9 +6608,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const [family] = await db.select().from(families).where(eq(families.familyName, member.familyName));
       if (!family) return res.status(404).json({ message: "Family not found" });
 
-      // Never downgrade lifetime purchases
+      // Never downgrade lifetime purchases or admin-granted tiers
       if (family.isLifetimePurchase) {
         return res.json({ ok: true, action: "skipped", reason: "lifetime" });
+      }
+      if (family.isAdminGranted) {
+        return res.json({ ok: true, action: "skipped", reason: "admin_granted" });
       }
       // Nothing to do if already free
       if (family.subscriptionTier === "free") {

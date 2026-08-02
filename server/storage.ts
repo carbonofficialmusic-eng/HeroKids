@@ -605,7 +605,13 @@ export class DatabaseStorage implements IStorage {
   ): Promise<void> {
     await db
       .update(families)
-      .set({ subscriptionTier: tier, updatedAt: new Date() })
+      .set({
+        subscriptionTier: tier,
+        // Mark as admin-granted so RC cancel-sync won't auto-revert it;
+        // clear the flag when setting back to free (no longer needs protection).
+        isAdminGranted: tier !== "free",
+        updatedAt: new Date(),
+      })
       .where(eq(families.familyName, familyName));
   }
 
