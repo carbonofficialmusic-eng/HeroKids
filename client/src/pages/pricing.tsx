@@ -235,8 +235,9 @@ export default function Pricing() {
         ...(isLifetimePurchase ? { isLifetime: true } : {}),
       });
 
-      // Refresh family data
-      await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
+      // Refresh family data — use refetchQueries (not invalidate) so the header
+      // reflects the new tier immediately before the success toast fires.
+      await qc.refetchQueries({ queryKey: ["/api/families/current"] });
 
       toast({
         title: isLifetimePurchase ? "Lifetime-Zugang aktiviert!" : "Abonnement aktiviert!",
@@ -268,7 +269,7 @@ export default function Pricing() {
           entitlementId: entitlementKey,
           ...(isLifetime ? { isLifetime: true } : {}),
         });
-        await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
+        await qc.refetchQueries({ queryKey: ["/api/families/current"] });
         toast({
           title: "Käufe wiederhergestellt!",
           description: isLifetime
