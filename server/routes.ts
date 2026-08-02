@@ -6810,6 +6810,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(and(
               eq(families.familyName, appUserId),
               eq(families.isLifetimePurchase, false),
+              eq(families.isAdminGranted, false),
             ));
           console.log(`[RevenueCat] ${eventType}: ${appUserId} → free`);
           break;
