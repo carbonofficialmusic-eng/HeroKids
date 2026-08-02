@@ -6547,31 +6547,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ent !== undefined &&
         (ent.expires_date === null || new Date(ent.expires_date) > new Date());
 
-      // Fallback for Apple IAP downgrades: when a user downgrades (e.g. FamilyPro → Family),
-      // Apple schedules the change for the next renewal period. RC's entitlement won't be
-      // active yet, but the subscription will appear in rcData.subscriber.subscriptions
-      // with a recent purchase_date. Accept it if the product was purchased within the
-      // last 10 minutes and hasn't expired.
+      // Fallback A — subscription record: entitlement not yet active but the
+      // subscription record shows a recent purchase (e.g. RC REST lag, or restore).
+      // Window is 30 min to cover slow Apple server propagation.
       let verifiedViaSubscription = false;
+      const allSubs: Record<string, { expires_date: string | null; purchase_date: string; unsubscribe_detected_at?: string | null }> =
+        rcData?.subscriber?.subscriptions ?? {};
+
       if (!isEntitlementActive && entitlementId) {
         const productMap: Record<string, string[]> = {
           family:     ["com.herokids.family.monthly", "com.herokids.family.yearly"],
           family_pro: ["com.herokids.familypro.monthly", "com.herokids.familypro.yearly"],
         };
         const productIds = productMap[entitlementId] ?? [];
-        const subs: Record<string, { expires_date: string | null; purchase_date: string }> =
-          rcData?.subscriber?.subscriptions ?? {};
-        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
         for (const pid of productIds) {
-          const sub = subs[pid];
+          const sub = allSubs[pid];
           if (!sub) continue;
           const notExpired = sub.expires_date === null || new Date(sub.expires_date) > new Date();
-          const recentlyPurchased = new Date(sub.purchase_date) > tenMinutesAgo;
+          const recentlyPurchased = new Date(sub.purchase_date) > thirtyMinutesAgo;
           if (notExpired || recentlyPurchased) {
             console.log(`[RevenueCat] Entitlement '${entitlementId}' not yet active, but product '${pid}' purchased at ${sub.purchase_date} — accepting via subscription record`);
             verifiedViaSubscription = true;
             break;
           }
+        }
+      }
+
+      // Fallback B — Apple scheduled downgrade: when downgrading FamilyPro → Family,
+      // Apple does NOT immediately activate the family entitlement — it schedules the
+      // switch for the next renewal period and sets unsubscribe_detected_at on the
+      // FamilyPro subscription. RC REST API won't show a family entitlement or
+      // subscription record until the period starts. Accept the family claim when
+      // FamilyPro is provably cancelled (unsubscribe_detected_at set).
+      if (!isEntitlementActive && !verifiedViaSubscription && entitlementId === "family") {
+        const familyProSubIds = ["com.herokids.familypro.monthly", "com.herokids.familypro.yearly"];
+        const familyProCancelled = familyProSubIds.some(pid => {
+          const s = allSubs[pid];
+          return s && s.unsubscribe_detected_at != null &&
+                 (s.expires_date === null || new Date(s.expires_date) > new Date());
+        });
+        if (familyProCancelled) {
+          console.log(`[RevenueCat] Apple scheduled downgrade FamilyPro→Family for ${member.familyName} — accepting family claim`);
+          verifiedViaSubscription = true;
         }
       }
 
