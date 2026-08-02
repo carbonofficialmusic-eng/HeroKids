@@ -1165,6 +1165,8 @@
     "paymentInfo": "付款由Stripe安全处理。您的订阅将每月自动续订。",
     "manageOnWeb": "订阅在littlechamps.net上管理。",
     "cancelToSettings": "取消订阅 → 设置",
+    "cancelSubscription": "取消订阅",
+    "cancelSubscriptionHint": "打开Apple订阅管理",
     "toastPermissionDenied": "权限被拒绝",
     "toastOnlyParents": "只有家长可以管理订阅",
     "toastCheckoutError": "结账错误",

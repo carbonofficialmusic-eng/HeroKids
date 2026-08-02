@@ -1165,6 +1165,8 @@
     "paymentInfo": "Los pagos se procesan de forma segura por Stripe. Tu suscripción se renovará automáticamente cada mes.",
     "manageOnWeb": "Las suscripciones se gestionan en littlechamps.net.",
     "cancelToSettings": "Cancelar suscripción → Configuración",
+    "cancelSubscription": "Cancelar suscripción",
+    "cancelSubscriptionHint": "Abre la gestión de suscripciones de Apple",
     "toastPermissionDenied": "Permiso Denegado",
     "toastOnlyParents": "Solo los padres pueden gestionar suscripciones",
     "toastCheckoutError": "Error de Pago",

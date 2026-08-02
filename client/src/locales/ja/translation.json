@@ -1165,6 +1165,8 @@
     "paymentInfo": "支払いはStripeによって安全に処理されます。サブスクリプションは毎月自動的に更新されます。",
     "manageOnWeb": "サブスクリプションはlittlechamps.netで管理されます。",
     "cancelToSettings": "サブスクリプションをキャンセル → 設定",
+    "cancelSubscription": "サブスクリプションをキャンセル",
+    "cancelSubscriptionHint": "Appleサブスクリプション管理を開く",
     "toastPermissionDenied": "権限が拒否されました",
     "toastOnlyParents": "サブスクリプションの管理は保護者のみ可能です",
     "toastCheckoutError": "チェックアウトエラー",

@@ -1210,6 +1210,8 @@
     "paymentInfo": "Os pagamentos são processados com segurança pelo Stripe. Sua assinatura será renovada automaticamente todo mês.",
     "manageOnWeb": "As assinaturas são gerenciadas em littlechamps.net.",
     "cancelToSettings": "Cancelar assinatura → Configurações",
+    "cancelSubscription": "Cancelar assinatura",
+    "cancelSubscriptionHint": "Abre o gerenciamento de assinaturas da Apple",
     "toastPermissionDenied": "Permissão Negada",
     "toastOnlyParents": "Apenas pais podem gerenciar assinaturas",
     "toastCheckoutError": "Erro no Checkout",

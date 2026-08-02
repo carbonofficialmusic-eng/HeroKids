@@ -1221,6 +1221,8 @@
     "paymentInfo": "Zahlungen werden sicher über Stripe verarbeitet. Dein Abonnement verlängert sich jeden Monat automatisch.",
     "manageOnWeb": "Abonnements werden auf littlechamps.net verwaltet.",
     "cancelToSettings": "Abo kündigen → Einstellungen",
+    "cancelSubscription": "Abo kündigen",
+    "cancelSubscriptionHint": "Öffnet Apple-Aboverwaltung",
     "toastPermissionDenied": "Zugriff verweigert",
     "toastOnlyParents": "Nur Eltern können Abonnements verwalten",
     "toastCheckoutError": "Checkout-Fehler",

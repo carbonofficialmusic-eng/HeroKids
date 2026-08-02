@@ -1197,6 +1197,8 @@
     "paymentInfo": "Betalningar behandlas säkert av Stripe. Din prenumeration förnyas automatiskt varje månad.",
     "manageOnWeb": "Prenumerationer hanteras på littlechamps.net.",
     "cancelToSettings": "Avsluta prenumeration → Inställningar",
+    "cancelSubscription": "Avsluta prenumeration",
+    "cancelSubscriptionHint": "Öppnar Apples prenumerationshantering",
     "toastPermissionDenied": "Åtkomst nekad",
     "toastOnlyParents": "Endast föräldrar kan hantera prenumerationer",
     "toastCheckoutError": "Utcheckningsfel",

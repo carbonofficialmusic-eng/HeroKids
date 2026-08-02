@@ -615,11 +615,24 @@ export default function Pricing() {
                     )}
 
                     {isCurrentTier && tier.id !== "free" && isParent && !familyData?.isLifetimePurchase && (
-                      <Link href="/settings" data-testid={`link-cancel-${tier.id}`}>
-                        <span className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                          {t("pricing.cancelToSettings")}
-                        </span>
-                      </Link>
+                      <button
+                        onClick={() => {
+                          if (isNativePlatform()) {
+                            window.open("itms-apps://apps.apple.com/account/subscriptions", "_system");
+                          } else {
+                            window.location.href = "/settings";
+                          }
+                        }}
+                        className="w-full mt-1 py-2 text-sm text-muted-foreground hover:text-destructive border border-dashed border-muted-foreground/30 hover:border-destructive/50 rounded-lg transition-colors"
+                        data-testid={`button-cancel-${tier.id}`}
+                      >
+                        {t("pricing.cancelSubscription")}
+                        {isNativePlatform() && (
+                          <span className="block text-xs opacity-60 mt-0.5">
+                            {t("pricing.cancelSubscriptionHint")}
+                          </span>
+                        )}
+                      </button>
                     )}
                   </div>
                 )}
