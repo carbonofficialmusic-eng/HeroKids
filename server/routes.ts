@@ -6547,13 +6547,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ent !== undefined &&
         (ent.expires_date === null || new Date(ent.expires_date) > new Date());
 
-      if (!isEntitlementActive) {
+      // Fallback for Apple IAP downgrades: when a user downgrades (e.g. FamilyPro → Family),
+      // Apple schedules the change for the next renewal period. RC's entitlement won't be
+      // active yet, but the subscription will appear in rcData.subscriber.subscriptions
+      // with a recent purchase_date. Accept it if the product was purchased within the
+      // last 10 minutes and hasn't expired.
+      let verifiedViaSubscription = false;
+      if (!isEntitlementActive && entitlementId) {
+        const productMap: Record<string, string[]> = {
+          family:     ["com.herokids.family.monthly", "com.herokids.family.yearly"],
+          family_pro: ["com.herokids.familypro.monthly", "com.herokids.familypro.yearly"],
+        };
+        const productIds = productMap[entitlementId] ?? [];
+        const subs: Record<string, { expires_date: string | null; purchase_date: string }> =
+          rcData?.subscriber?.subscriptions ?? {};
+        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        for (const pid of productIds) {
+          const sub = subs[pid];
+          if (!sub) continue;
+          const notExpired = sub.expires_date === null || new Date(sub.expires_date) > new Date();
+          const recentlyPurchased = new Date(sub.purchase_date) > tenMinutesAgo;
+          if (notExpired || recentlyPurchased) {
+            console.log(`[RevenueCat] Entitlement '${entitlementId}' not yet active, but product '${pid}' purchased at ${sub.purchase_date} — accepting via subscription record`);
+            verifiedViaSubscription = true;
+            break;
+          }
+        }
+      }
+
+      if (!isEntitlementActive && !verifiedViaSubscription) {
         console.warn(`[RevenueCat] Entitlement '${entitlementId}' not active for ${member.familyName}`);
         return res.status(403).json({ message: "Entitlement not active" });
       }
 
       // Cross-verify lifetime claim: RC returns expires_date=null for non-consumable (lifetime) entitlements
-      const isLifetime = clientClaimsLifetime === true && ent.expires_date === null;
+      const isLifetime = clientClaimsLifetime === true && !verifiedViaSubscription && ent?.expires_date === null;
 
       const { eq } = await import("drizzle-orm");
       const { families } = await import("../shared/schema");
