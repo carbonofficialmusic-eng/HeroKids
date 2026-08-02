@@ -6670,10 +6670,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return e !== undefined && (e.expires_date === null || new Date(e.expires_date) > new Date());
       };
 
-      if (isActive("family") || isActive("family_pro")) {
-        // RC still shows an active entitlement — don't downgrade
+      // Also check subscription cancellation status: if all relevant subscriptions
+      // have unsubscribe_detected_at set, the user has voluntarily cancelled and
+      // won't auto-renew — treat same as expired (matches Stripe cancel behavior).
+      const subs: Record<string, { expires_date: string | null; unsubscribe_detected_at: string | null }> =
+        rcData?.subscriber?.subscriptions ?? {};
+      const relevantProductIds = [
+        "com.herokids.family.monthly", "com.herokids.family.yearly",
+        "com.herokids.familypro.monthly", "com.herokids.familypro.yearly",
+      ];
+      const activeSubIds = relevantProductIds.filter(pid => {
+        const s = subs[pid];
+        return s && (s.expires_date === null || new Date(s.expires_date) > new Date());
+      });
+      const allCancelled = activeSubIds.length > 0 && activeSubIds.every(pid => {
+        return subs[pid]?.unsubscribe_detected_at != null;
+      });
+
+      if (!allCancelled && (isActive("family") || isActive("family_pro"))) {
+        // RC still shows an active, non-cancelled entitlement — don't downgrade
         console.log(`[RC cancel-sync] Entitlement still active for ${member.familyName} — no downgrade`);
         return res.json({ ok: true, action: "skipped", reason: "still_active" });
+      }
+
+      if (allCancelled) {
+        console.log(`[RC cancel-sync] All subscriptions cancelled for ${member.familyName} — downgrading`);
       }
 
       // No active entitlement → downgrade
@@ -6741,12 +6762,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`[RevenueCat] ${eventType}: ${appUserId} → ${newTier}`);
           break;
         }
+        case "CANCELLATION":
         case "EXPIRATION":
         case "BILLING_ISSUE": {
           await db.update(families)
             .set({
               subscriptionTier: "free",
-              subscriptionStatus: eventType === "EXPIRATION" ? "canceled" : "past_due",
+              subscriptionStatus: eventType === "BILLING_ISSUE" ? "past_due" : "canceled",
             })
             .where(and(
               eq(families.familyName, appUserId),
