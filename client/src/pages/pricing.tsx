@@ -566,8 +566,14 @@ export default function Pricing() {
                     {/* Cancel subscription — opens Apple subscription management */}
                     {isCurrentTier && tier.id !== "free" && isParent && !familyData?.isLifetimePurchase && (
                       <button
-                        onClick={() => {
-                          window.open("itms-apps://apps.apple.com/account/subscriptions", "_system");
+                        onClick={async () => {
+                          try {
+                            const { App: CapApp } = await import("@capacitor/app");
+                            await CapApp.openUrl({ url: "itms-apps://apps.apple.com/account/subscriptions" });
+                          } catch {
+                            // fallback for older Capacitor versions
+                            window.location.href = "itms-apps://apps.apple.com/account/subscriptions";
+                          }
                         }}
                         className="w-full mt-1 py-2 text-sm text-muted-foreground hover:text-destructive border border-dashed border-muted-foreground/30 hover:border-destructive/50 rounded-lg transition-colors"
                         data-testid={`button-cancel-${tier.id}`}
