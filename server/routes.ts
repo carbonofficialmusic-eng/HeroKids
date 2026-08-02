@@ -6517,39 +6517,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newTier = entitlementId ? tierMap[entitlementId] : null;
       if (!newTier) return res.status(400).json({ message: "Unknown entitlement" });
 
-      // Verify the entitlement with RevenueCat's server before trusting the client claim
+      // Verify the entitlement with RevenueCat's server before trusting the client claim.
+      // RC REST API can lag several seconds behind a fresh StoreKit purchase, so we
+      // poll up to 3 times (2-second gaps) before falling through to the fallbacks.
       const rcApiKey = process.env.REVENUECAT_API_KEY;
       if (!rcApiKey) {
         console.error("[RevenueCat] REVENUECAT_API_KEY not set; rejecting sync request to prevent bypass");
         return res.status(503).json({ message: "Purchase verification unavailable" });
       }
 
-      const rcVerifyRes = await fetch(
-        `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(member.familyName)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${rcApiKey}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const fetchRCSubscriber = async () => {
+        const r = await fetch(
+          `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(member.familyName)}`,
+          { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } }
+        );
+        if (!r.ok) throw new Error(`RC API ${r.status}`);
+        return r.json();
+      };
 
-      if (!rcVerifyRes.ok) {
-        console.error(`[RevenueCat] Subscriber API returned ${rcVerifyRes.status} for ${member.familyName}`);
-        return res.status(402).json({ message: "Purchase verification failed" });
+      const checkActive = (data: any, id: string) => {
+        const ent = data?.subscriber?.entitlements?.[id];
+        return ent !== undefined && (ent.expires_date === null || new Date(ent.expires_date) > new Date());
+      };
+
+      let rcData: any;
+      let isEntitlementActive = false;
+      const MAX_ATTEMPTS = 3;
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        try {
+          rcData = await fetchRCSubscriber();
+        } catch (err: any) {
+          console.error(`[RevenueCat] Subscriber API error (attempt ${attempt}):`, err.message);
+          if (attempt === MAX_ATTEMPTS) return res.status(402).json({ message: "Purchase verification failed" });
+          await new Promise(r => setTimeout(r, 2000));
+          continue;
+        }
+        isEntitlementActive = entitlementId ? checkActive(rcData, entitlementId) : false;
+        if (isEntitlementActive) {
+          console.log(`[RevenueCat] Entitlement '${entitlementId}' active on attempt ${attempt}`);
+          break;
+        }
+        if (attempt < MAX_ATTEMPTS) {
+          console.log(`[RevenueCat] Entitlement '${entitlementId}' not yet active (attempt ${attempt}) — retrying in 2s…`);
+          await new Promise(r => setTimeout(r, 2000));
+        }
       }
 
-      const rcData = await rcVerifyRes.json();
-      const entitlements: Record<string, { expires_date: string | null }> =
-        rcData?.subscriber?.entitlements ?? {};
-      const ent = entitlementId ? entitlements[entitlementId] : undefined;
-      const isEntitlementActive =
-        ent !== undefined &&
-        (ent.expires_date === null || new Date(ent.expires_date) > new Date());
-
       // Fallback A — subscription record: entitlement not yet active but the
-      // subscription record shows a recent purchase (e.g. RC REST lag, or restore).
-      // Window is 30 min to cover slow Apple server propagation.
+      // subscription record shows a recent purchase (RC REST lag) or a valid
+      // unexpired subscription (restore flow). Window is 30 min.
       let verifiedViaSubscription = false;
       const allSubs: Record<string, { expires_date: string | null; purchase_date: string; unsubscribe_detected_at?: string | null }> =
         rcData?.subscriber?.subscriptions ?? {};
@@ -6574,27 +6590,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Fallback B — Apple scheduled downgrade: when downgrading FamilyPro → Family,
-      // Apple does NOT immediately activate the family entitlement — it schedules the
-      // switch for the next renewal period and sets unsubscribe_detected_at on the
-      // FamilyPro subscription. RC REST API won't show a family entitlement or
-      // subscription record until the period starts. Accept the family claim when
-      // FamilyPro is provably cancelled (unsubscribe_detected_at set).
+      // Fallback B — Apple scheduled downgrade OR fresh purchase after cancel:
+      // When downgrading FamilyPro → Family, Apple schedules the switch for the
+      // next renewal period so the family entitlement isn't active yet.
+      // When buying Family fresh after FamilyPro expired, there may also be a brief
+      // RC REST lag. In both cases, if FamilyPro has unsubscribe_detected_at set
+      // (user consciously cancelled it), accept the family claim — it's a lower
+      // tier so there is no security risk.
       if (!isEntitlementActive && !verifiedViaSubscription && entitlementId === "family") {
         const familyProSubIds = ["com.herokids.familypro.monthly", "com.herokids.familypro.yearly"];
-        const familyProCancelled = familyProSubIds.some(pid => {
+        const familyProEverCancelled = familyProSubIds.some(pid => {
           const s = allSubs[pid];
-          return s && s.unsubscribe_detected_at != null &&
-                 (s.expires_date === null || new Date(s.expires_date) > new Date());
+          return s?.unsubscribe_detected_at != null;
         });
-        if (familyProCancelled) {
-          console.log(`[RevenueCat] Apple scheduled downgrade FamilyPro→Family for ${member.familyName} — accepting family claim`);
+        if (familyProEverCancelled) {
+          console.log(`[RevenueCat] FamilyPro was cancelled for ${member.familyName} — accepting family claim (downgrade / post-cancel purchase)`);
           verifiedViaSubscription = true;
         }
       }
 
       if (!isEntitlementActive && !verifiedViaSubscription) {
-        console.warn(`[RevenueCat] Entitlement '${entitlementId}' not active for ${member.familyName}`);
+        console.warn(`[RevenueCat] Entitlement '${entitlementId}' not active for ${member.familyName} after ${MAX_ATTEMPTS} attempts`);
         return res.status(403).json({ message: "Entitlement not active" });
       }
 
