@@ -6766,7 +6766,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case "INITIAL_PURCHASE":
         case "NON_RENEWING_PURCHASE":
         case "RENEWAL":
-        case "UNCANCELLATION": {
+        case "UNCANCELLATION":
+        case "PRODUCT_CHANGE": {
+          // PRODUCT_CHANGE fires when Apple's scheduled downgrade/upgrade takes effect.
+          // entitlement_ids reflects the NEW product's entitlement.
           const entId = entitlementIds.find((e) => tierMap[e]);
           if (!entId) break;
           const newTier = tierMap[entId];
