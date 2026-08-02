@@ -127,7 +127,7 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
         const customerInfo = await purchaseRCStoreProduct(product);
         const grantedTier = getEntitlementTier(customerInfo);
         await apiRequest("POST", "/api/revenuecat-sync", { entitlementId: "family" });
-        await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
+        await qc.refetchQueries({ queryKey: ["/api/families/current"] });
         toast({
           title: t("pricing.toastCheckoutError").replace("Fehler", "Erfolg").replace("Error", "Success"),
           description: `Family ${grantedTier ? "aktiviert" : "abonniert"}!`,
