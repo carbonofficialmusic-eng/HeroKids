@@ -119,20 +119,20 @@ export default function Pricing() {
           }
         }
 
-        // Auto-downgrade: if the server still shows a paid tier but RC has no
-        // active entitlement (e.g. subscription cancelled/expired and the webhook
-        // was missed), silently sync the cancellation on every launch.
+        // Auto-downgrade: if the server still shows a paid tier, always ask the
+        // server to check RC (handles both fully-expired AND cancelled-but-not-yet-
+        // expired subscriptions via unsubscribe_detected_at). The server returns
+        // action:"skipped" when the subscription is still genuinely active.
         if (!familyData.isLifetimePurchase && familyData.subscriptionTier !== "free") {
           try {
-            const customerInfo = await getRCCustomerInfo();
-            const tier = customerInfo ? getEntitlementTier(customerInfo) : null;
-            if (!tier) {
-              console.log("[RevenueCat] Server shows paid but RC has no entitlement — syncing cancellation…");
-              await apiRequest("POST", "/api/revenuecat-cancel-sync", {});
-              if (!cancelled) {
-                await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
-                console.log("[RevenueCat] Cancel-sync complete: downgraded on server.");
-              }
+            console.log("[RevenueCat] Checking cancellation status…");
+            const res = await apiRequest("POST", "/api/revenuecat-cancel-sync", {});
+            const result = await res.json().catch(() => ({}));
+            if (!cancelled && result?.action === "downgraded") {
+              await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
+              console.log("[RevenueCat] Cancel-sync: downgraded to free.");
+            } else {
+              console.log("[RevenueCat] Cancel-sync result:", result?.action ?? "ok");
             }
           } catch (cancelSyncErr) {
             console.warn("[RevenueCat] Cancel-sync failed (will retry next launch):", cancelSyncErr);

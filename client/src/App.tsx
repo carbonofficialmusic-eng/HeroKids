@@ -196,16 +196,17 @@ function Router() {
         const familyData = queryClient.getQueryData<any>(["/api/families/current"]);
         if (!familyData || familyData.subscriptionTier === "free" || familyData.isLifetimePurchase || familyData.isAdminGranted) return;
 
-        const { getRCCustomerInfo, getEntitlementTier, initRevenueCat } = await import("@/lib/revenuecat");
-        await initRevenueCat(familyData.familyName);
-        const customerInfo = await getRCCustomerInfo();
-        const tier = customerInfo ? getEntitlementTier(customerInfo) : null;
-
-        if (!tier) {
-          console.log("[RC resume-check] No active entitlement — syncing cancellation…");
-          await apiRequest("POST", "/api/revenuecat-cancel-sync", {});
+        // Always ask the server — it checks both fully-expired entitlements AND
+        // cancelled-but-not-yet-expired subscriptions (unsubscribe_detected_at).
+        // The server returns action:"skipped" when still genuinely active.
+        console.log("[RC resume-check] Checking cancellation status with server…");
+        const res = await apiRequest("POST", "/api/revenuecat-cancel-sync", {});
+        const result = await res.json().catch(() => ({}));
+        if (result?.action === "downgraded") {
           await queryClient.invalidateQueries({ queryKey: ["/api/families/current"] });
-          console.log("[RC resume-check] Done.");
+          console.log("[RC resume-check] Downgraded to free.");
+        } else {
+          console.log("[RC resume-check] Result:", result?.action ?? "ok");
         }
       } catch (err) {
         // Non-fatal — will retry next resume
