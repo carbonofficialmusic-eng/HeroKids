@@ -118,6 +118,26 @@ export default function Pricing() {
             console.warn("[RevenueCat] Auto-sync failed (will retry next launch):", autoSyncErr);
           }
         }
+
+        // Auto-downgrade: if the server still shows a paid tier but RC has no
+        // active entitlement (e.g. subscription cancelled/expired and the webhook
+        // was missed), silently sync the cancellation on every launch.
+        if (!familyData.isLifetimePurchase && familyData.subscriptionTier !== "free") {
+          try {
+            const customerInfo = await getRCCustomerInfo();
+            const tier = customerInfo ? getEntitlementTier(customerInfo) : null;
+            if (!tier) {
+              console.log("[RevenueCat] Server shows paid but RC has no entitlement — syncing cancellation…");
+              await apiRequest("POST", "/api/revenuecat-cancel-sync", {});
+              if (!cancelled) {
+                await qc.invalidateQueries({ queryKey: ["/api/families/current"] });
+                console.log("[RevenueCat] Cancel-sync complete: downgraded on server.");
+              }
+            }
+          } catch (cancelSyncErr) {
+            console.warn("[RevenueCat] Cancel-sync failed (will retry next launch):", cancelSyncErr);
+          }
+        }
       } catch (err: any) {
         console.error("[RevenueCat] Failed to load offerings:", err);
         if (!cancelled) {

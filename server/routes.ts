@@ -6594,6 +6594,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Auto-downgrade: client detects RC has no active entitlement but server still shows paid
+  app.post("/api/revenuecat-cancel-sync", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub ?? req.user.id;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+      if (member.role !== "parent") return res.status(403).json({ message: "Only parents can manage subscriptions" });
+
+      const { eq } = await import("drizzle-orm");
+      const { families } = await import("../shared/schema");
+      const [family] = await db.select().from(families).where(eq(families.familyName, member.familyName));
+      if (!family) return res.status(404).json({ message: "Family not found" });
+
+      // Never downgrade lifetime purchases
+      if (family.isLifetimePurchase) {
+        return res.json({ ok: true, action: "skipped", reason: "lifetime" });
+      }
+      // Nothing to do if already free
+      if (family.subscriptionTier === "free") {
+        return res.json({ ok: true, action: "skipped", reason: "already_free" });
+      }
+
+      // Verify with RC REST API that neither entitlement is active
+      const rcApiKey = process.env.REVENUECAT_API_KEY;
+      if (!rcApiKey) return res.status(503).json({ message: "Purchase verification unavailable" });
+
+      const rcRes = await fetch(
+        `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(member.familyName)}`,
+        { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } }
+      );
+      if (!rcRes.ok) {
+        console.error(`[RC cancel-sync] RC API returned ${rcRes.status} for ${member.familyName}`);
+        return res.status(402).json({ message: "Purchase verification failed" });
+      }
+
+      const rcData = await rcRes.json();
+      const entitlements: Record<string, { expires_date: string | null }> =
+        rcData?.subscriber?.entitlements ?? {};
+
+      const isActive = (id: string) => {
+        const e = entitlements[id];
+        return e !== undefined && (e.expires_date === null || new Date(e.expires_date) > new Date());
+      };
+
+      if (isActive("family") || isActive("family_pro")) {
+        // RC still shows an active entitlement — don't downgrade
+        console.log(`[RC cancel-sync] Entitlement still active for ${member.familyName} — no downgrade`);
+        return res.json({ ok: true, action: "skipped", reason: "still_active" });
+      }
+
+      // No active entitlement → downgrade
+      await db.update(families)
+        .set({ subscriptionTier: "free", subscriptionStatus: "canceled" })
+        .where(eq(families.familyName, member.familyName));
+
+      console.log(`[RC cancel-sync] Downgraded ${member.familyName} to free (no active RC entitlement)`);
+      res.json({ ok: true, action: "downgraded" });
+    } catch (error: any) {
+      console.error("[RC cancel-sync] Error:", error);
+      res.status(500).json({ message: "Sync failed" });
+    }
+  });
+
   // RevenueCat webhook (Apple server-to-server notifications forwarded by RevenueCat)
   app.post("/api/revenuecat-webhook", async (req: any, res) => {
     try {
