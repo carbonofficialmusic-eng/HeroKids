@@ -6691,6 +6691,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } }
       );
       if (!rcRes.ok) {
+        if (rcRes.status === 404) {
+          // Subscriber not found in RC = this family has never made a real IAP purchase.
+          // That means the tier was set manually (admin-granted). Never downgrade.
+          // Also repair the isAdminGranted flag in case it was missing.
+          console.log(`[RC cancel-sync] No RC subscriber for ${member.familyName} — auto-fixing isAdminGranted, skipping downgrade`);
+          await db.update(families)
+            .set({ isAdminGranted: true })
+            .where(eq(families.familyName, member.familyName));
+          return res.json({ ok: true, action: "skipped", reason: "no_rc_subscriber" });
+        }
         console.error(`[RC cancel-sync] RC API returned ${rcRes.status} for ${member.familyName}`);
         return res.status(402).json({ message: "Purchase verification failed" });
       }
