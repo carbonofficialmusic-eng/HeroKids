@@ -19,6 +19,7 @@ import {
   getRCProducts,
   purchaseRCStoreProduct,
   getEntitlementTier,
+  getIntroductoryOffer,
 } from "@/lib/revenuecat";
 
 interface FirstOpenPaywallProps {
@@ -85,6 +86,14 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
   const displayPrice = isNativePlatform()
     ? (getRcPrice(billingCycle) ?? (billingCycle === "monthly" ? familyPriceMonthly : familyPriceYearly))
     : (billingCycle === "monthly" ? familyPriceMonthly : familyPriceYearly);
+
+  // Detect free trial intro offer on the selected product (iOS only)
+  const selectedProductId = billingCycle === "monthly"
+    ? "com.herokids.family.monthly"
+    : "com.herokids.family.yearly";
+  const introOffer = isNativePlatform()
+    ? getIntroductoryOffer(rcProducts?.[selectedProductId])
+    : null;
 
   const handleStartFree = () => {
     try { localStorage.setItem("herokids_seen_paywall", "true"); } catch {}
@@ -247,10 +256,23 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
               <span className="font-bold font-accent">{t("paywall.familyTitle")}</span>
             </div>
             <div>
-              <span className="text-2xl font-black">{displayPrice}</span>
-              <span className="text-xs text-muted-foreground ml-1">
-                /{billingCycle === "monthly" ? t("pricing.perMonth") : t("pricing.perYear")}
-              </span>
+              {introOffer ? (
+                <>
+                  <span className="text-2xl font-black text-green-600">
+                    {t("pricing.freeTrial", { days: introOffer.periodDays })}
+                  </span>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {t("pricing.freeTrialThen", { price: `${displayPrice}/${billingCycle === "monthly" ? t("pricing.perMonth") : t("pricing.perYear")}` })}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl font-black">{displayPrice}</span>
+                  <span className="text-xs text-muted-foreground ml-1">
+                    /{billingCycle === "monthly" ? t("pricing.perMonth") : t("pricing.perYear")}
+                  </span>
+                </>
+              )}
             </div>
             <ul className="space-y-1.5 flex-1">
               {familyFeatures.map((f, i) => (
@@ -276,6 +298,8 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 {t("pricing.processing")}
               </>
+            ) : introOffer ? (
+              t("pricing.freeTrialButton", { days: introOffer.periodDays })
             ) : (
               t("paywall.upgradeFamily")
             )}

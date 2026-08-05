@@ -136,3 +136,19 @@ export function isLifetimeEntitlement(customerInfo: any, entitlementId: string):
 export function getPackagePrice(pkg: any): string {
   return pkg?.storeProduct?.priceString ?? pkg?.product?.priceString ?? '';
 }
+
+/**
+ * Returns the free-trial intro offer for a StoreKit product, or null if none.
+ * Only returns an offer when price === 0 (true free trial, not discounted intro).
+ */
+export function getIntroductoryOffer(product: any): { periodDays: number } | null {
+  const intro = product?.introductoryPrice;
+  if (!intro) return null;
+  if (intro.price !== 0 && intro.price !== '0' && intro.price !== 0.0) return null;
+  let days: number = intro.periodNumberOfUnits ?? 7;
+  const unit: string = (intro.periodUnit ?? '').toUpperCase();
+  if (unit === 'WEEK') days = days * 7;
+  else if (unit === 'MONTH') days = days * 30;
+  else if (unit === 'YEAR') days = days * 365;
+  return { periodDays: days };
+}

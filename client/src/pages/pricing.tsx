@@ -19,6 +19,7 @@ import {
   restoreRCPurchases,
   getEntitlementTier,
   isLifetimeEntitlement,
+  getIntroductoryOffer,
 } from "@/lib/revenuecat";
 
 type BillingCycle = "monthly" | "yearly";
@@ -441,6 +442,14 @@ export default function Pricing() {
               ? (billingCycle === "monthly" ? (rcMonthlyPrice ?? tier.price) : (rcYearlyPrice ?? tier.price))
               : tier.price;
 
+            // Free trial intro offer (iOS only)
+            const tierProductId = tier.rcOfferingKey
+              ? PRODUCT_ID_MAP[tier.rcOfferingKey]?.[cycleKey]
+              : null;
+            const introOffer = isNativePlatform() && tierProductId
+              ? getIntroductoryOffer(rcProducts?.[tierProductId])
+              : null;
+
             return (
               <Card
                 key={tier.id}
@@ -464,15 +473,30 @@ export default function Pricing() {
                 </div>
 
                 <div className="mb-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-black">{displayPrice}</span>
-                    <span className="text-sm text-muted-foreground">/{tier.period}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {tier.memberLimit === 999
-                      ? t("pricing.unlimitedMembers")
-                      : t("pricing.upToMembers", { count: tier.memberLimit })}
-                  </p>
+                  {introOffer ? (
+                    <>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-black text-green-600">
+                          {t("pricing.freeTrial", { days: introOffer.periodDays })}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {t("pricing.freeTrialThen", { price: `${displayPrice}/${tier.period}` })}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-black">{displayPrice}</span>
+                        <span className="text-sm text-muted-foreground">/{tier.period}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {tier.memberLimit === 999
+                          ? t("pricing.unlimitedMembers")
+                          : t("pricing.upToMembers", { count: tier.memberLimit })}
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <ul className="space-y-3 mb-6 flex-1">
@@ -520,6 +544,8 @@ export default function Pricing() {
                                   </>
                                 ) : isCurrentTier ? (
                                   t("pricing.currentPlan")
+                                ) : introOffer ? (
+                                  t("pricing.freeTrialButton", { days: introOffer.periodDays })
                                 ) : (
                                   t("pricing.choosePlan", { name: tier.name })
                                 )}
