@@ -837,7 +837,11 @@
     "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
     "onboardingTourTitle": "Einführungstour",
     "onboardingTourDesc": "Zeigt dir Schritt für Schritt alle wichtigen Funktionen von Little Champs.",
-    "restartTour": "Tour neu starten"
+    "restartTour": "Tour neu starten",
+    "pushNotificationsTitle": "Push-Benachrichtigungen",
+    "pushNotificationsGranted": "Push-Benachrichtigungen sind aktiviert.",
+    "pushNotificationsDenied": "Push-Benachrichtigungen sind deaktiviert. Du erhältst keine Hinweise auf neue Aufgaben, Chats oder Belohnungen.",
+    "pushNotificationsOpenSettings": "In Einstellungen öffnen"
   },
   "subscription": {
     "free": "Free",

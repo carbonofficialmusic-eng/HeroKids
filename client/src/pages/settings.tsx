@@ -15,7 +15,7 @@ import { AddMemberDialog } from "@/components/add-member-dialog";
 import { MemberOnboardingModal } from "@/components/member-onboarding-modal";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin, Infinity, HelpCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin, Infinity, HelpCircle, Bell, BellOff } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -61,6 +61,19 @@ export default function Settings() {
   const [memberForDeviceLink, setMemberForDeviceLink] = useState<FamilyMember | null>(null);
   const [deviceLinkDialogOpen, setDeviceLinkDialogOpen] = useState(false);
   const [localSkinCardCost, setLocalSkinCardCost] = useState<number | null>(null);
+  const [pushPermission, setPushPermission] = useState<"granted" | "denied" | "prompt" | null>(null);
+  useEffect(() => {
+    if (!isNativePlatform()) return;
+    (async () => {
+      try {
+        const { PushNotifications } = await import("@capacitor/push-notifications");
+        const result = await PushNotifications.checkPermissions();
+        setPushPermission(result.receive);
+      } catch {
+        // not available in this build
+      }
+    })();
+  }, []);
   const [localCategoryNames, setLocalCategoryNames] = useState<{ household: string; school: string; selfCare: string; other: string }>({ household: "", school: "", selfCare: "", other: "" });
   // Fetch current family member (may be acting as someone)
   const { data: member, isLoading: memberLoading } = useQuery<FamilyMember>({
@@ -1260,6 +1273,42 @@ export default function Settings() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Push Notification Status — native only */}
+          {isNativePlatform() && pushPermission !== null && (
+            <Card className={pushPermission !== "granted" ? "border-amber-500/50" : ""}>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  {pushPermission === "granted"
+                    ? <Bell className="h-5 w-5 text-green-500" />
+                    : <BellOff className="h-5 w-5 text-amber-500" />}
+                  <CardTitle>{t('settings.pushNotificationsTitle', 'Push-Benachrichtigungen')}</CardTitle>
+                </div>
+                <CardDescription>
+                  {pushPermission === "granted"
+                    ? t('settings.pushNotificationsGranted', 'Push-Benachrichtigungen sind aktiviert.')
+                    : t('settings.pushNotificationsDenied', 'Push-Benachrichtigungen sind deaktiviert. Du erhältst keine Hinweise auf neue Aufgaben, Chats oder Belohnungen.')}
+                </CardDescription>
+              </CardHeader>
+              {pushPermission !== "granted" && (
+                <CardContent>
+                  <Button
+                    variant="outline"
+                    className="w-full border-amber-500/50 text-amber-700 dark:text-amber-400"
+                    onClick={async () => {
+                      try {
+                        const { App: CapApp } = await import("@capacitor/app");
+                        await CapApp.openUrl({ url: "app-settings:" });
+                      } catch {}
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    {t('settings.pushNotificationsOpenSettings', 'In Einstellungen öffnen')}
+                  </Button>
+                </CardContent>
+              )}
+            </Card>
+          )}
 
           {/* Factory Reset Settings */}
           <Card className="border-destructive/50">
