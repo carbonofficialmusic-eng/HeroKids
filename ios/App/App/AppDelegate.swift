@@ -1,6 +1,10 @@
 import UIKit
 import Capacitor
 
+// APNs push notifications are enabled via the aps-environment entitlement (production)
+// in App.entitlements. PushNotificationsPlugin handles token registration and
+// forwards device tokens to the server via /api/device-tokens/register.
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
