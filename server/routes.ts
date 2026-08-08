@@ -5320,7 +5320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send APNs push to all other family members
       try {
         const lang = family.language || "en";
-        const allMembers = await storage.getFamilyMembers(member.familyName);
+        const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
         const otherMemberIds = allMembers
           .filter(m => m.id !== member.id)
           .map(m => m.id);
