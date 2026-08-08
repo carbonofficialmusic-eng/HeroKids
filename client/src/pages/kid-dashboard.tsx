@@ -3200,7 +3200,7 @@ export default function KidDashboard() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setChatBarCollapsed(c => !c)}
-                className="flex-shrink-0 rounded-2xl h-11 w-10 pointer-events-auto"
+                className="flex-shrink-0 rounded-2xl h-14 w-10 pointer-events-auto"
                 data-testid="button-chat-bar-toggle"
                 aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
               >
@@ -3212,14 +3212,14 @@ export default function KidDashboard() {
                   size="lg"
                   onClick={() => setRequestRewardDialogOpen(true)}
                   data-testid="button-nav-request-reward"
-                  className="h-11 w-full px-3 sm:px-5 rounded-2xl"
+                  className="h-14 w-full px-3 sm:px-5 rounded-2xl"
                 >
                   <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-amber-500 flex-shrink-0" />
                   <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("kidDashboard.requestNewReward")}</span>
                 </Button>
               </div>
               <div className="flex-1 min-w-0 relative">
-                <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-11 w-full px-3 sm:px-5 rounded-2xl">
+                <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
                   <Link href="/chat">
                     <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
                     <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("nav.chat")}</span>
