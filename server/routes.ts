@@ -6252,14 +6252,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all notifications for the current member
   // ===== DEVICE PUSH TOKEN ROUTES =====
   app.post("/api/device-tokens/register", isAuthenticated, async (req: any, res) => {
+    console.log("[Push] /api/device-tokens/register called");
     try {
       const result = await getCurrentMemberFromRequest(req);
-      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      if (!result) {
+        console.warn("[Push] device-tokens/register: no member in session (401)");
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const { token, platform = "ios" } = req.body;
       if (!token || typeof token !== "string") {
+        console.warn("[Push] device-tokens/register: missing token in body");
         return res.status(400).json({ message: "token is required" });
       }
       await storage.upsertDevicePushToken(result.member.id, token, platform);
+      console.log(`[Push] Token registered for member ${result.member.id} (${platform})`);
       res.json({ success: true });
     } catch (error: any) {
       console.error("Error registering device token:", error);
