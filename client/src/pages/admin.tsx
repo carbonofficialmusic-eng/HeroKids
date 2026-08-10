@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { Capacitor } from "@capacitor/core";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -263,7 +264,7 @@ function getAccountLinkRepairActionLabel(action: string) {
   return action;
 }
 
-export default function AdminPage() {
+function AdminPageImpl() {
   const [token, setToken] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -2706,4 +2707,11 @@ export default function AdminPage() {
       </main>
     </div>
   );
+}
+
+// Admin area is web-only — block on iOS native to comply with Apple IAP guidelines.
+// Apple reviewers must not encounter subscription management tools that bypass IAP.
+export default function AdminPage() {
+  if (Capacitor.isNativePlatform()) return null;
+  return <AdminPageImpl />;
 }
