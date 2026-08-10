@@ -720,6 +720,16 @@ export default function Pricing() {
           <p className="text-sm text-muted-foreground">
             {billingCycle === "yearly" ? t("pricing.paymentInfoYearly") : t("pricing.paymentInfo")}
           </p>
+          {/* Required by Apple Guideline 3.1.2(c): functional links to Privacy Policy and EULA */}
+          <div className="mt-6 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+            <Link href="/privacy" className="underline hover:text-foreground transition-colors">
+              {t("landing.footer.privacy", "Privacy Policy")}
+            </Link>
+            <span>·</span>
+            <Link href="/terms" className="underline hover:text-foreground transition-colors">
+              {t("landing.footer.terms", "Terms of Use")}
+            </Link>
+          </div>
         </div>
       </div>
     </div>
