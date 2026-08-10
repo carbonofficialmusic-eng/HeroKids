@@ -264,7 +264,7 @@ function getAccountLinkRepairActionLabel(action: string) {
   return action;
 }
 
-function AdminPageImpl() {
+export default function AdminPageImpl() {
   const [token, setToken] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -1707,8 +1707,13 @@ function AdminPageImpl() {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="free">Free</SelectItem>
-                              <SelectItem value="family">Family (2€)</SelectItem>
-                              <SelectItem value="family_hero">FamilyPro (12€)</SelectItem>
+                              {/* Paid tier grants are web-only — Apple IAP must handle upgrades on iOS */}
+                              {!Capacitor.isNativePlatform() && (
+                                <>
+                                  <SelectItem value="family">Family (2€)</SelectItem>
+                                  <SelectItem value="family_hero">FamilyPro (12€)</SelectItem>
+                                </>
+                              )}
                             </SelectContent>
                           </Select>
                           <ChevronRight 
@@ -2709,9 +2714,5 @@ function AdminPageImpl() {
   );
 }
 
-// Admin area is web-only — block on iOS native to comply with Apple IAP guidelines.
-// Apple reviewers must not encounter subscription management tools that bypass IAP.
-export default function AdminPage() {
-  if (Capacitor.isNativePlatform()) return null;
-  return <AdminPageImpl />;
-}
+// Re-export under the expected name (App.tsx imports AdminPage)
+export default AdminPageImpl;
