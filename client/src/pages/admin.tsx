@@ -2713,6 +2713,3 @@ export default function AdminPageImpl() {
     </div>
   );
 }
-
-// Re-export under the expected name (App.tsx imports AdminPage)
-export default AdminPageImpl;
