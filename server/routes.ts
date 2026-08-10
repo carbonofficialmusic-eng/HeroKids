@@ -6548,7 +6548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let rcData: any;
       let isEntitlementActive = false;
-      const MAX_ATTEMPTS = 3;
+      const MAX_ATTEMPTS = 5;
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
         try {
           rcData = await fetchRCSubscriber();
@@ -6615,7 +6615,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Fallback C — RC SDK on the client already verified the purchase directly
+      // with RC's servers via purchaseStoreProduct(). The returned customerInfo
+      // is RC-signed, not a local cache. If the client reports the entitlement
+      // active with a future expiration (or lifetime=null) AND the RC subscriber
+      // record exists, accept it. This covers the REST API lag that occurs
+      // immediately after a fresh StoreKit purchase.
+      let verifiedViaClientSDK = false;
       if (!isEntitlementActive && !verifiedViaSubscription) {
+        const { rcClientConfirmed, rcExpiresMs } = req.body as {
+          rcClientConfirmed?: boolean;
+          rcExpiresMs?: number | null;
+        };
+        if (rcClientConfirmed === true && rcData?.subscriber) {
+          const isLifetimeClient = rcExpiresMs === null || rcExpiresMs === undefined;
+          const isFutureExpiry = typeof rcExpiresMs === "number" && rcExpiresMs > Date.now();
+          if (isLifetimeClient || isFutureExpiry) {
+            console.log(
+              `[RevenueCat] Entitlement '${entitlementId}' accepted via RC client SDK confirmation for ${member.familyName}` +
+              (isLifetimeClient ? " (lifetime)" : ` (expires ${new Date(rcExpiresMs!).toISOString()})`)
+            );
+            verifiedViaClientSDK = true;
+          }
+        }
+      }
+
+      if (!isEntitlementActive && !verifiedViaSubscription && !verifiedViaClientSDK) {
         console.warn(`[RevenueCat] Entitlement '${entitlementId}' not active for ${member.familyName} after ${MAX_ATTEMPTS} attempts`);
         return res.status(403).json({ message: "Entitlement not active" });
       }

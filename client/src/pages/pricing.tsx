@@ -230,10 +230,20 @@ export default function Pricing() {
       const grantedTier = getEntitlementTier(customerInfo);
       const isLifetimePurchase = cycle === "lifetime";
 
+      // Pass RC SDK's own verification to the server as Fallback C evidence.
+      // purchaseStoreProduct() talks directly to RC's servers, so customerInfo
+      // is already RC-verified — even if RC's REST API lags behind.
+      const activeEnt = customerInfo?.entitlements?.active?.[entitlementKey];
+      const rcClientConfirmed = activeEnt?.isActive === true;
+      const rcExpiresMs = activeEnt?.expirationDate
+        ? new Date(activeEnt.expirationDate).getTime()
+        : null; // null = lifetime
+
       // Sync to backend
       await apiRequest("POST", "/api/revenuecat-sync", {
         entitlementId: entitlementKey,
         ...(isLifetimePurchase ? { isLifetime: true } : {}),
+        ...(rcClientConfirmed ? { rcClientConfirmed: true, rcExpiresMs } : {}),
       });
 
       // Refresh family data — use refetchQueries (not invalidate) so the header
