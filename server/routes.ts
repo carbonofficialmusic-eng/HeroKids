@@ -7851,6 +7851,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid tier" });
       }
 
+      // When downgrading to free, check whether RC has an active subscription.
+      // If so, RC will immediately overwrite the reset — block it unless the
+      // current tier was admin-granted (no real IAP behind it) or force=true.
+      const { force } = req.body;
+      if (tier === "free" && !force) {
+        const { eq } = await import("drizzle-orm");
+        const { families } = await import("../shared/schema");
+        const [family] = await db.select().from(families).where(eq(families.familyName, familyName));
+        if (family && !family.isAdminGranted && family.subscriptionTier !== "free") {
+          const rcApiKey = process.env.REVENUECAT_API_KEY;
+          if (rcApiKey) {
+            try {
+              const rcRes = await fetch(
+                `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(familyName)}`,
+                { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } }
+              );
+              if (rcRes.ok) {
+                const rcData = await rcRes.json();
+                const ents = rcData?.subscriber?.entitlements ?? {};
+                const hasActiveRcEnt = ["family", "family_pro"].some(id => {
+                  const e = ents[id];
+                  return e && (e.expires_date === null || new Date(e.expires_date) > new Date());
+                });
+                if (hasActiveRcEnt) {
+                  return res.status(409).json({ message: "RC_ACTIVE" });
+                }
+              }
+            } catch (_) { /* RC unreachable — allow reset */ }
+          }
+        }
+      }
+
       await storage.updateFamilyTier(familyName, tier);
       
       // Auto-unpause members that are now within the new tier's member limit

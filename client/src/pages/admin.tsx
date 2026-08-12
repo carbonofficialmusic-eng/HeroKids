@@ -548,24 +548,35 @@ export default function AdminPageImpl() {
   const CHART_COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7c43", "#a855f7"];
 
   const updateTierMutation = useMutation({
-    mutationFn: async ({ familyName, tier }: { familyName: string; tier: string }) => {
+    mutationFn: async ({ familyName, tier, force }: { familyName: string; tier: string; force?: boolean }) => {
       const res = await fetch(`/api/admin/families/${encodeURIComponent(familyName)}/tier`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ tier }),
+        body: JSON.stringify({ tier, force }),
       });
-      if (!res.ok) throw new Error("Failed to update tier");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw Object.assign(new Error("Failed to update tier"), { code: body.message, status: res.status });
+      }
       return res.json();
     },
     onSuccess: () => {
       toast({ title: "Subscription tier updated" });
       refetchFamilies();
     },
-    onError: () => {
-      toast({ title: "Failed to update tier", variant: "destructive" });
+    onError: (err: any) => {
+      if (err.code === "RC_ACTIVE") {
+        toast({
+          title: "Aktives Apple-Abo vorhanden",
+          description: "Diese Familie hat ein aktives RevenueCat-Abo. Kündige es zuerst im RC-Dashboard oder warte bis die Laufzeit endet — sonst stellt RC den Tier sofort wieder her.",
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: "Failed to update tier", variant: "destructive" });
+      }
     },
   });
 
