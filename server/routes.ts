@@ -6722,8 +6722,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (family.isAdminGranted) {
         return res.json({ ok: true, action: "skipped", reason: "admin_granted" });
       }
-      // Nothing to do if already free
-      if (family.subscriptionTier === "free") {
+      // Skip only if truly free AND not recently canceled — a "canceled" status
+      // means the DB may have been wrongly downgraded; always check RC in that case.
+      if (family.subscriptionTier === "free" && family.subscriptionStatus !== "canceled") {
         return res.json({ ok: true, action: "skipped", reason: "already_free" });
       }
 

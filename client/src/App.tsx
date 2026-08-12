@@ -192,9 +192,12 @@ function Router() {
       lastChecked = now;
 
       try {
-        // Only bother if the server thinks we have a paid tier
+        // Only bother if the server thinks we have a paid tier — OR if the status
+        // is "canceled" (DB may have been wrongly downgraded by a stale webhook;
+        // the server self-heal will restore the correct tier from RC in that case).
         const familyData = queryClient.getQueryData<any>(["/api/families/current"]);
-        if (!familyData || familyData.subscriptionTier === "free" || familyData.isLifetimePurchase || familyData.isAdminGranted) return;
+        const isCanceled = familyData?.subscriptionStatus === "canceled";
+        if (!familyData || (familyData.subscriptionTier === "free" && !isCanceled) || familyData.isLifetimePurchase || familyData.isAdminGranted) return;
 
         // Always ask the server — it checks both fully-expired entitlements AND
         // cancelled-but-not-yet-expired subscriptions (unsubscribe_detected_at).
