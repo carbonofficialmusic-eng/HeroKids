@@ -7836,12 +7836,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         repairedAt: entry.repairedAt,
       }));
 
+      // Fetch RC Promotional Entitlement status (best-effort; never blocks)
+      let rcPromoStatus: {
+        entitlement: string;
+        expiresDate: string | null;
+        isLifetime: boolean;
+        productIdentifier: string;
+      } | null = null;
+      const rcApiKeyForPromo = process.env.REVENUECAT_API_KEY;
+      if (rcApiKeyForPromo) {
+        try {
+          const rcRes = await fetch(
+            `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(familyName)}`,
+            { headers: { Authorization: `Bearer ${rcApiKeyForPromo}`, "Content-Type": "application/json" } }
+          );
+          if (rcRes.ok) {
+            const rcData = await rcRes.json();
+            const ents: Record<string, any> = rcData?.subscriber?.entitlements ?? {};
+            for (const [entId, ent] of Object.entries(ents)) {
+              if (["family", "family_pro"].includes(entId) &&
+                  typeof ent.product_identifier === "string" &&
+                  ent.product_identifier.startsWith("rc_promo_")) {
+                const isActive = !ent.expires_date || new Date(ent.expires_date) > new Date();
+                if (isActive) {
+                  rcPromoStatus = {
+                    entitlement: entId,
+                    expiresDate: ent.expires_date ?? null,
+                    isLifetime: !ent.expires_date,
+                    productIdentifier: ent.product_identifier,
+                  };
+                  break;
+                }
+              }
+            }
+          }
+        } catch (_) { /* RC unreachable — omit promo status */ }
+      }
+
       res.json({
         family,
         members: membersWithAccounts,
         taskCount: tasks.length,
         rewardCount: rewards.length,
         accountLinkRepairHistory,
+        rcPromoStatus,
       });
     } catch (error) {
       console.error("Error fetching admin family details:", error);
@@ -7945,6 +7983,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating family tier:", error);
       res.status(500).json({ message: "Failed to update tier" });
+    }
+  });
+
+  // Grant RC Promotional Entitlement (preferred way to give free access)
+  // Calls the RevenueCat REST API so RC tracks the grant — cancel-sync, webhooks,
+  // and the client SDK will all see it as a legitimate active entitlement.
+  app.post("/api/admin/families/:familyName/promo-entitlement", isAdmin, async (req, res) => {
+    try {
+      const { familyName } = req.params;
+      const { entitlement, duration } = req.body;
+
+      const validEntitlements = ["family", "family_pro"];
+      const validDurations = ["monthly", "three_month", "yearly", "lifetime"];
+
+      if (!validEntitlements.includes(entitlement)) {
+        return res.status(400).json({ message: "Invalid entitlement. Must be 'family' or 'family_pro'" });
+      }
+      if (!validDurations.includes(duration)) {
+        return res.status(400).json({ message: "Invalid duration. Must be 'monthly', 'three_month', 'yearly', or 'lifetime'" });
+      }
+
+      const rcApiKey = process.env.REVENUECAT_API_KEY;
+      if (!rcApiKey) {
+        return res.status(503).json({ message: "RevenueCat API key not configured" });
+      }
+
+      // POST to RC promotional entitlement endpoint
+      const rcRes = await fetch(
+        `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(familyName)}/entitlements/${encodeURIComponent(entitlement)}/promotional`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${rcApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ duration }),
+        }
+      );
+
+      if (!rcRes.ok) {
+        const rcError = await rcRes.json().catch(() => ({}));
+        console.error("[Admin] RC promotional entitlement grant failed:", rcError);
+        return res.status(502).json({ message: "RevenueCat API error", details: rcError });
+      }
+
+      // Map RC entitlement identifier → DB tier
+      const tierMap: Record<string, string> = {
+        family: "family",
+        family_pro: "family_hero",
+      };
+      const dbTier = tierMap[entitlement] as "family" | "family_hero";
+
+      // Update DB so the app immediately reflects the granted tier
+      await storage.updateFamilyTier(familyName, dbTier);
+      await autoUnpauseMembersAfterUpgrade(familyName, dbTier);
+
+      console.log(`[Admin] Promotional entitlement '${entitlement}' (${duration}) granted to ${familyName} → DB tier: ${dbTier}`);
+      res.json({ success: true, tier: dbTier });
+    } catch (error) {
+      console.error("Error granting promotional entitlement:", error);
+      res.status(500).json({ message: "Failed to grant promotional entitlement" });
     }
   });
 

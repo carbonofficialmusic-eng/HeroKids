@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -81,6 +81,7 @@ interface AdminStats {
 interface FamilyWithStats {
   familyName: string;
   subscriptionTier: string;
+  isAdminGranted?: boolean;
   memberCount: number;
   parentCount: number;
   childCount: number;
@@ -90,6 +91,13 @@ interface FamilyWithStats {
   createdAt: string;
   language?: string;
   timezone?: string;
+}
+
+interface RcPromoStatus {
+  entitlement: string;
+  expiresDate: string | null;
+  isLifetime: boolean;
+  productIdentifier: string;
 }
 
 interface FamilyMember {
@@ -121,6 +129,7 @@ interface FamilyDetails {
   taskCount: number;
   rewardCount: number;
   accountLinkRepairHistory: AccountLinkRepairEntry[];
+  rcPromoStatus: RcPromoStatus | null;
 }
 
 interface AccountLinkRepairEntry {
@@ -296,6 +305,10 @@ export default function AdminPageImpl() {
   const [changePwCurrent, setChangePwCurrent] = useState("");
   const [changePwNew, setChangePwNew] = useState("");
   const [changePwConfirm, setChangePwConfirm] = useState("");
+  const [promoDialogFamily, setPromoDialogFamily] = useState<string | null>(null);
+  const [promoDuration, setPromoDuration] = useState("monthly");
+  const [promoEntitlement, setPromoEntitlement] = useState("family_pro");
+  const [emergencyTierConfirm, setEmergencyTierConfirm] = useState<{ familyName: string; tier: string } | null>(null);
   const lastEmailAlertKeyRef = useRef<string | null>(null);
   const { toast } = useToast();
 
@@ -577,6 +590,33 @@ export default function AdminPageImpl() {
       } else {
         toast({ title: "Failed to update tier", variant: "destructive" });
       }
+    },
+  });
+
+  const grantPromoMutation = useMutation({
+    mutationFn: async ({ familyName, entitlement, duration }: { familyName: string; entitlement: string; duration: string }) => {
+      const res = await fetch(`/api/admin/families/${encodeURIComponent(familyName)}/promo-entitlement`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ entitlement, duration }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw Object.assign(new Error(body.message || "Failed to grant promo"), { code: body.message });
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "✓ Promotional Zugang gewährt", description: "RC Promotional Entitlement wurde erfolgreich gesetzt." });
+      setPromoDialogFamily(null);
+      refetchFamilies();
+      refetchDetails();
+    },
+    onError: (err: any) => {
+      toast({ title: "Fehler beim Gewähren des Promo-Zugangs", description: err.message, variant: "destructive" });
     },
   });
 
@@ -1707,26 +1747,50 @@ export default function AdminPageImpl() {
                             <p>{family.taskCount} tasks</p>
                             <p className="text-muted-foreground">{family.rewardCount} rewards</p>
                           </div>
-                          <Select
-                            value={family.subscriptionTier}
-                            onValueChange={(tier) => {
-                              updateTierMutation.mutate({ familyName: family.familyName, tier });
-                            }}
-                          >
-                            <SelectTrigger className="w-36" onClick={(e) => e.stopPropagation()}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="free">Free</SelectItem>
-                              {/* Paid tier grants are web-only — Apple IAP must handle upgrades on iOS */}
-                              {!Capacitor.isNativePlatform() && (
-                                <>
-                                  <SelectItem value="family">Family (2€)</SelectItem>
-                                  <SelectItem value="family_hero">FamilyPro (12€)</SelectItem>
-                                </>
-                              )}
-                            </SelectContent>
-                          </Select>
+                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            {!Capacitor.isNativePlatform() && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-2 text-xs border-amber-400 text-amber-700 hover:bg-amber-50"
+                                onClick={() => {
+                                  setPromoDialogFamily(family.familyName);
+                                  setPromoEntitlement("family_pro");
+                                  setPromoDuration("monthly");
+                                }}
+                              >
+                                <Gift className="h-3 w-3 mr-1" />
+                                Promo
+                              </Button>
+                            )}
+                            <Select
+                              value={family.subscriptionTier}
+                              onValueChange={(tier) => {
+                                if (tier === "free") {
+                                  updateTierMutation.mutate({ familyName: family.familyName, tier });
+                                } else {
+                                  setEmergencyTierConfirm({ familyName: family.familyName, tier });
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="free">⬇ Free (Reset)</SelectItem>
+                                {!Capacitor.isNativePlatform() && (
+                                  <>
+                                    <SelectSeparator />
+                                    <SelectGroup>
+                                      <SelectLabel className="text-destructive text-xs">⚠ Nur Notfall</SelectLabel>
+                                      <SelectItem value="family">Family (DB direkt)</SelectItem>
+                                      <SelectItem value="family_hero">FamilyPro (DB direkt)</SelectItem>
+                                    </SelectGroup>
+                                  </>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </div>
                           <ChevronRight 
                             className="h-5 w-5 text-muted-foreground cursor-pointer" 
                             onClick={() => setSelectedFamily(family.familyName)}
@@ -2438,6 +2502,24 @@ export default function AdminPageImpl() {
                   )}
                 </div>
 
+                {/* RC Promotional Entitlement status */}
+                {familyDetails.rcPromoStatus && (
+                  <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm">
+                    <p className="font-medium text-amber-800 flex items-center gap-1.5">
+                      <Gift className="h-4 w-4" />
+                      RC Promotional Entitlement aktiv
+                    </p>
+                    <p className="text-amber-700 mt-1">
+                      Entitlement: <span className="font-mono">{familyDetails.rcPromoStatus.entitlement}</span>
+                      {" · "}
+                      {familyDetails.rcPromoStatus.isLifetime
+                        ? "Unbefristet (Lifetime)"
+                        : `Läuft ab: ${new Date(familyDetails.rcPromoStatus.expiresDate!).toLocaleDateString()}`}
+                    </p>
+                    <p className="text-amber-600 text-xs mt-0.5 font-mono">{familyDetails.rcPromoStatus.productIdentifier}</p>
+                  </div>
+                )}
+
                 {familyDetails.family.language && (
                   <div className="text-sm text-muted-foreground">
                     Language: {familyDetails.family.language} | Timezone: {familyDetails.family.timezone || "Not set"}
@@ -2447,6 +2529,116 @@ export default function AdminPageImpl() {
             ) : null}
           </DialogContent>
         </Dialog>
+
+        {/* Grant Promotional Entitlement dialog */}
+        <Dialog open={!!promoDialogFamily} onOpenChange={(open) => !open && setPromoDialogFamily(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Gift className="h-5 w-5 text-amber-600" />
+                Promotional Zugang gewähren
+              </DialogTitle>
+              <DialogDescription>
+                Setzt ein RC Promotional Entitlement für{" "}
+                <span className="font-semibold">{promoDialogFamily}</span>.
+                RC trackt den Zugang — cancel-sync und Webhooks respektieren ihn.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Entitlement (Tier)</label>
+                <Select value={promoEntitlement} onValueChange={setPromoEntitlement}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="family">Family</SelectItem>
+                    <SelectItem value="family_pro">FamilyPro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Laufzeit</label>
+                <Select value={promoDuration} onValueChange={setPromoDuration}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">30 Tage (monatlich)</SelectItem>
+                    <SelectItem value="three_month">90 Tage (3 Monate)</SelectItem>
+                    <SelectItem value="yearly">365 Tage (jährlich)</SelectItem>
+                    <SelectItem value="lifetime">Unbefristet (Lifetime)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPromoDialogFamily(null)}>
+                Abbrechen
+              </Button>
+              <Button
+                className="bg-amber-600 hover:bg-amber-700 text-white"
+                disabled={grantPromoMutation.isPending}
+                onClick={() => {
+                  if (promoDialogFamily) {
+                    grantPromoMutation.mutate({
+                      familyName: promoDialogFamily,
+                      entitlement: promoEntitlement,
+                      duration: promoDuration,
+                    });
+                  }
+                }}
+              >
+                {grantPromoMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                ) : (
+                  <Gift className="h-4 w-4 mr-1" />
+                )}
+                Gewähren via RC
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Emergency direct-DB tier override confirmation */}
+        <AlertDialog open={!!emergencyTierConfirm} onOpenChange={(open) => !open && setEmergencyTierConfirm(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-5 w-5" />
+                ⚠️ Notfall-Override — nur wenn RC nicht erreichbar ist
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <span className="block">
+                  Du bist dabei, den Tier für{" "}
+                  <span className="font-semibold">{emergencyTierConfirm?.familyName}</span> direkt in der Datenbank
+                  auf <span className="font-semibold">{TIER_LABELS[emergencyTierConfirm?.tier ?? ""] ?? emergencyTierConfirm?.tier}</span> zu setzen
+                  — <strong>ohne RevenueCat zu informieren</strong>.
+                </span>
+                <span className="block text-destructive font-medium">
+                  RC wird diesen Wert beim nächsten Abo-Sync überschreiben!
+                  Nutze stattdessen den „Promo"-Button, um einen sicheren RC Promotional Entitlement zu setzen.
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setEmergencyTierConfirm(null)}>
+                Abbrechen
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive hover:bg-destructive/90"
+                onClick={() => {
+                  if (emergencyTierConfirm) {
+                    updateTierMutation.mutate({ familyName: emergencyTierConfirm.familyName, tier: emergencyTierConfirm.tier });
+                    setEmergencyTierConfirm(null);
+                  }
+                }}
+              >
+                Trotzdem direkt setzen (Notfall)
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <Dialog open={!!memberToLinkAccount} onOpenChange={(open) => { if (!open) { setMemberToLinkAccount(null); setAccountEmailToLink(""); setAccountMoveConfirmation(null); } }}>
           <DialogContent>
