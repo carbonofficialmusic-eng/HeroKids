@@ -20,6 +20,7 @@ import { wsClients, broadcastToFamily } from "./websocket";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, childDeviceSessions, users, pinboardNotes } from "@shared/schema";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier, SubscriptionTierLegacy } from "@shared/tier-config";
+import { resolveFallbackD, isFamilySubNewerThanFamilyPro } from "./lib/rc-tier-resolver";
 
 /**
  * After a tier upgrade, automatically un-pause members that are now within the new tier's member limit.
@@ -6633,15 +6634,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!isEntitlementActive && !verifiedViaSubscription && entitlementId === "family") {
         const familyProActive = checkActive(rcData, "family_pro");
         if (familyProActive) {
-          const familySubIds = ["com.herokids.family.monthly", "com.herokids.family.yearly"];
-          const hasFamilySub = familySubIds.some(pid => !!allSubs[pid]);
-          if (hasFamilySub) {
-            // Scenario A: genuine downgrade purchase. Grant 'family' (newTier already set).
-            console.log(`[RevenueCat] 'family_pro' active but 'family' subscription exists for ${member.familyName} — downgrade purchase, granting 'family' directly`);
-            verifiedViaSubscription = true;
+          // Use the shared helper (see server/lib/rc-tier-resolver.ts).
+          // Scenario A: 'family' sub is newer → genuine downgrade, grant 'family'.
+          // Scenario B: 'family_pro' is newer or no 'family' sub → admin-reset, grant 'family_hero'.
+          const resolved = resolveFallbackD(allSubs);
+          if (resolved === "family") {
+            console.log(`[RevenueCat] Fallback D: 'family' sub is newer for ${member.familyName} — downgrade purchase, granting 'family'`);
+            verifiedViaSubscription = true; // newTier stays "family"
           } else {
-            // Scenario B: admin-reset; no family sub in RC. Grant family_hero.
-            console.log(`[RevenueCat] 'family_pro' is active for ${member.familyName} while claiming 'family' — no family sub found, granting family_hero instead`);
+            console.log(`[RevenueCat] Fallback D: 'family_pro' is newer for ${member.familyName} — granting 'family_hero'`);
             newTier = "family_hero";
             verifiedViaSubscription = true;
           }
@@ -6858,15 +6859,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (!entId) break;
           const newTier = tierMap[entId];
 
-          // Guard: if this is a PRODUCT_CHANGE to family_pro, verify it isn't a
-          // FamilyPro renewal that fired while a 'family' downgrade is in progress.
-          // When the user purchases Family as a downgrade, Apple renews/continues
-          // FamilyPro until the next billing date and can fire PRODUCT_CHANGE with
-          // family_pro before the Family subscription becomes active. If the RC
-          // subscriber record contains a 'family' subscription purchased MORE
-          // RECENTLY than the latest family_pro subscription, this PRODUCT_CHANGE
-          // belongs to the old period — skip the DB update to avoid overwriting the
-          // user's intended 'family' tier.
+          // Guard: if this PRODUCT_CHANGE is to family_pro, verify it isn't a
+          // FamilyPro renewal firing while a 'family' downgrade is in progress.
+          // Uses isFamilySubNewerThanFamilyPro from server/lib/rc-tier-resolver.ts.
           if (entId === "family_pro") {
             const rcApiKey = process.env.REVENUECAT_API_KEY;
             if (rcApiKey) {
@@ -6879,15 +6874,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   const rcSubData = await rcRes.json();
                   const subs: Record<string, { purchase_date?: string }> =
                     rcSubData?.subscriber?.subscriptions ?? {};
-                  const familySubIds    = ["com.herokids.family.monthly",    "com.herokids.family.yearly"];
-                  const familyProSubIds = ["com.herokids.familypro.monthly", "com.herokids.familypro.yearly"];
-                  const latestFamily    = familySubIds.reduce((d, pid) =>
-                    subs[pid]?.purchase_date && new Date(subs[pid].purchase_date!) > d
-                      ? new Date(subs[pid].purchase_date!) : d, new Date(0));
-                  const latestFamilyPro = familyProSubIds.reduce((d, pid) =>
-                    subs[pid]?.purchase_date && new Date(subs[pid].purchase_date!) > d
-                      ? new Date(subs[pid].purchase_date!) : d, new Date(0));
-                  if (latestFamily > latestFamilyPro) {
+                  if (isFamilySubNewerThanFamilyPro(subs)) {
                     console.log(
                       `[RevenueCat] PRODUCT_CHANGE to family_pro suppressed for ${appUserId}` +
                       ` — family subscription is newer (downgrade in progress)`
