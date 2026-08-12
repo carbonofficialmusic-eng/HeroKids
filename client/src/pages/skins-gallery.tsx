@@ -117,6 +117,11 @@ export default function SkinsGallery() {
   }
 
   function openParentalGate() {
+    // Parents don't need to prove they're adults — navigate directly to pricing
+    if (!isChild) {
+      navigate("/pricing");
+      return;
+    }
     setParentalGateQ(generateMathQ());
     setParentalGateInput("");
     setParentalGateError(false);
