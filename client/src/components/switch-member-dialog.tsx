@@ -79,11 +79,17 @@ export function SwitchMemberDialog({
               <div key={member.id}>
                 <button
                   onClick={() => {
+                    if (member.isPaused) return;
                     setSelectedMemberId(member.id);
                     setPinCode("");
                   }}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg hover-elevate active-elevate-2 transition-colors ${
-                    selectedMemberId === member.id ? 'bg-accent' : 'bg-card'
+                  disabled={!!member.isPaused}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                    member.isPaused
+                      ? 'bg-muted/40 opacity-50 cursor-not-allowed'
+                      : selectedMemberId === member.id
+                      ? 'bg-accent hover-elevate active-elevate-2'
+                      : 'bg-card hover-elevate active-elevate-2'
                   }`}
                   data-testid={`button-select-member-${member.id}`}
                 >
@@ -95,16 +101,22 @@ export function SwitchMemberDialog({
                   </Avatar>
                   
                   <div className="flex-1 text-left">
-                    <div className="font-medium flex items-center gap-2">
+                    <div className={`font-medium flex items-center gap-2 ${member.isPaused ? "line-through text-muted-foreground" : ""}`}>
                       {member.displayName}
-                      {familyData?.singleDeviceMode && member.role === "parent" && (
+                      {familyData?.singleDeviceMode && member.role === "parent" && !member.isPaused && (
                         <Lock className="h-3 w-3 text-muted-foreground" />
                       )}
                     </div>
-                    <div className="text-sm text-muted-foreground">{member.role === "parent" ? t('settings.parent') : t('settings.child')}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {member.isPaused
+                        ? t('memberDialogs.paused', 'Pausiert')
+                        : member.role === "parent"
+                        ? t('settings.parent')
+                        : t('settings.child')}
+                    </div>
                   </div>
                   
-                  {selectedMemberId === member.id && (
+                  {selectedMemberId === member.id && !member.isPaused && (
                     <Check className="h-5 w-5 text-primary" data-testid={`icon-selected-${member.id}`} />
                   )}
                 </button>
