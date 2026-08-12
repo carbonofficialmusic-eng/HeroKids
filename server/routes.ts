@@ -934,7 +934,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const maxMembersForTier = getMaxMembers(family.subscriptionTier as any);
       const activeCount = allMembersForLimit.filter((m: any) => !m.isPaused).length;
       const overLimitCount = Math.max(0, activeCount - maxMembersForTier);
-      
+
+      // Never cache this endpoint — overLimitCount and tier can change at any time
+      // without the underlying DB row changing (e.g. after a cancel-sync or webhook).
+      res.set("Cache-Control", "no-store");
       res.json({ ...family, memberCount, maxMembersForTier, overLimitCount });
     } catch (error) {
       console.error("Error fetching family:", error);

@@ -523,6 +523,18 @@ export default function Dashboard() {
     }
   }, [familyData?.showLeaderboard, childActiveTab]);
 
+  // Auto-open member-pause dialog when the family is over the tier limit.
+  // Uses a ref so it only fires once per session (not on every re-render).
+  const didAutoOpenPauseDialog = useRef(false);
+  useEffect(() => {
+    if (didAutoOpenPauseDialog.current) return;
+    if (!isRealParent) return;
+    if ((familyData?.overLimitCount ?? 0) > 0) {
+      didAutoOpenPauseDialog.current = true;
+      setPauseMemberDialogOpen(true);
+    }
+  }, [familyData?.overLimitCount, isRealParent]);
+
   // Persist filter selection (must be before early returns to follow hooks rules)
   useEffect(() => {
     localStorage.setItem("herokids_task_filter", taskFilter);
