@@ -6619,16 +6619,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Fallback D — user already has an active family_pro subscription in RC while
-      // claiming family. This happens when the admin reset the DB to Free but the
-      // RC subscription is still live (not cancelled). Apple won't create a new
-      // family subscription on top of an active family_pro, so family never becomes
-      // active in RC. Since family_pro is the higher tier, grant family_hero instead.
+      // claiming family. Two scenarios:
+      //
+      // A) Genuine downgrade: user cancelled FamilyPro and purchased Family. Apple
+      //    schedules Family for the next billing period; FamilyPro stays active in RC
+      //    until that date. The subscriber record WILL contain a 'family' subscription
+      //    entry. → Grant 'family' directly (what the user paid for).
+      //
+      // B) Admin-reset scenario: admin set DB to Free but RC subscription is still live
+      //    (not cancelled). Apple won't create a new family subscription on top of an
+      //    active family_pro, so no 'family' subscription entry exists in RC. → Grant
+      //    'family_hero' to reflect what is actually active in RC.
       if (!isEntitlementActive && !verifiedViaSubscription && entitlementId === "family") {
         const familyProActive = checkActive(rcData, "family_pro");
         if (familyProActive) {
-          console.log(`[RevenueCat] 'family_pro' is active for ${member.familyName} while claiming 'family' — granting family_hero instead`);
-          newTier = "family_hero";
-          verifiedViaSubscription = true;
+          const familySubIds = ["com.herokids.family.monthly", "com.herokids.family.yearly"];
+          const hasFamilySub = familySubIds.some(pid => !!allSubs[pid]);
+          if (hasFamilySub) {
+            // Scenario A: genuine downgrade purchase. Grant 'family' (newTier already set).
+            console.log(`[RevenueCat] 'family_pro' active but 'family' subscription exists for ${member.familyName} — downgrade purchase, granting 'family' directly`);
+            verifiedViaSubscription = true;
+          } else {
+            // Scenario B: admin-reset; no family sub in RC. Grant family_hero.
+            console.log(`[RevenueCat] 'family_pro' is active for ${member.familyName} while claiming 'family' — no family sub found, granting family_hero instead`);
+            newTier = "family_hero";
+            verifiedViaSubscription = true;
+          }
         }
       }
 
@@ -6841,6 +6857,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const entId = entitlementIds.find((e) => tierMap[e]);
           if (!entId) break;
           const newTier = tierMap[entId];
+
+          // Guard: if this is a PRODUCT_CHANGE to family_pro, verify it isn't a
+          // FamilyPro renewal that fired while a 'family' downgrade is in progress.
+          // When the user purchases Family as a downgrade, Apple renews/continues
+          // FamilyPro until the next billing date and can fire PRODUCT_CHANGE with
+          // family_pro before the Family subscription becomes active. If the RC
+          // subscriber record contains a 'family' subscription purchased MORE
+          // RECENTLY than the latest family_pro subscription, this PRODUCT_CHANGE
+          // belongs to the old period — skip the DB update to avoid overwriting the
+          // user's intended 'family' tier.
+          if (entId === "family_pro") {
+            const rcApiKey = process.env.REVENUECAT_API_KEY;
+            if (rcApiKey) {
+              try {
+                const rcRes = await fetch(
+                  `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(appUserId)}`,
+                  { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } }
+                );
+                if (rcRes.ok) {
+                  const rcSubData = await rcRes.json();
+                  const subs: Record<string, { purchase_date?: string }> =
+                    rcSubData?.subscriber?.subscriptions ?? {};
+                  const familySubIds    = ["com.herokids.family.monthly",    "com.herokids.family.yearly"];
+                  const familyProSubIds = ["com.herokids.familypro.monthly", "com.herokids.familypro.yearly"];
+                  const latestFamily    = familySubIds.reduce((d, pid) =>
+                    subs[pid]?.purchase_date && new Date(subs[pid].purchase_date!) > d
+                      ? new Date(subs[pid].purchase_date!) : d, new Date(0));
+                  const latestFamilyPro = familyProSubIds.reduce((d, pid) =>
+                    subs[pid]?.purchase_date && new Date(subs[pid].purchase_date!) > d
+                      ? new Date(subs[pid].purchase_date!) : d, new Date(0));
+                  if (latestFamily > latestFamilyPro) {
+                    console.log(
+                      `[RevenueCat] PRODUCT_CHANGE to family_pro suppressed for ${appUserId}` +
+                      ` — family subscription is newer (downgrade in progress)`
+                    );
+                    break;
+                  }
+                }
+              } catch (err: any) {
+                console.error("[RevenueCat] PRODUCT_CHANGE guard: RC lookup failed:", err.message);
+                // Fall through to normal processing on RC error
+              }
+            }
+          }
+
           await db.update(families)
             .set({
               subscriptionTier: newTier,
