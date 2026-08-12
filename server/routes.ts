@@ -6520,7 +6520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         family: "family",
         family_pro: "family_hero",
       };
-      const newTier = entitlementId ? tierMap[entitlementId] : null;
+      let newTier = entitlementId ? tierMap[entitlementId] : null;
       if (!newTier) return res.status(400).json({ message: "Unknown entitlement" });
 
       // Verify the entitlement with RevenueCat's server before trusting the client claim.
@@ -6611,6 +6611,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         if (familyProEverCancelled) {
           console.log(`[RevenueCat] FamilyPro was cancelled for ${member.familyName} — accepting family claim (downgrade / post-cancel purchase)`);
+          verifiedViaSubscription = true;
+        }
+      }
+
+      // Fallback D — user already has an active family_pro subscription in RC while
+      // claiming family. This happens when the admin reset the DB to Free but the
+      // RC subscription is still live (not cancelled). Apple won't create a new
+      // family subscription on top of an active family_pro, so family never becomes
+      // active in RC. Since family_pro is the higher tier, grant family_hero instead.
+      if (!isEntitlementActive && !verifiedViaSubscription && entitlementId === "family") {
+        const familyProActive = checkActive(rcData, "family_pro");
+        if (familyProActive) {
+          console.log(`[RevenueCat] 'family_pro' is active for ${member.familyName} while claiming 'family' — granting family_hero instead`);
+          newTier = "family_hero";
           verifiedViaSubscription = true;
         }
       }
