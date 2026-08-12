@@ -525,15 +525,17 @@ export default function Dashboard() {
 
   // Auto-open member-pause dialog when the family is over the tier limit.
   // Uses a ref so it only fires once per session (not on every re-render).
+  // NOTE: must use realMember directly here — isRealParent is declared after
+  // the early `if (!member) return` and cannot be referenced before that.
   const didAutoOpenPauseDialog = useRef(false);
   useEffect(() => {
     if (didAutoOpenPauseDialog.current) return;
-    if (!isRealParent) return;
+    if (realMember?.role !== "parent") return;
     if ((familyData?.overLimitCount ?? 0) > 0) {
       didAutoOpenPauseDialog.current = true;
       setPauseMemberDialogOpen(true);
     }
-  }, [familyData?.overLimitCount, isRealParent]);
+  }, [familyData?.overLimitCount, realMember?.role]);
 
   // Persist filter selection (must be before early returns to follow hooks rules)
   useEffect(() => {
