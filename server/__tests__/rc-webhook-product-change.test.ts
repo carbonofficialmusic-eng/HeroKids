@@ -225,3 +225,81 @@ describe("RC webhook — PRODUCT_CHANGE guard only fires for PRODUCT_CHANGE + fa
     expect(row.subscriptionTier).toBe("family");
   });
 });
+
+describe("RC webhook — EXPIRATION downgrades promo families correctly", () => {
+  beforeAll(async () => {
+    // family was already seeded above; ensure it exists
+  });
+
+  it("EXPIRATION with isAdminGranted:false (promo family) → downgrades to free", async () => {
+    // Set family to paid with isAdminGranted=false (how promo grants are stored)
+    await testDb.update(families)
+      .set({ subscriptionTier: "family_hero" as any, subscriptionStatus: "active", isAdminGranted: false })
+      .where(eq(families.familyName, FAMILY));
+
+    const res = await realFetch(`${baseUrl}/api/revenuecat-webhook`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: {
+          type: "EXPIRATION",
+          app_user_id: FAMILY,
+          entitlement_ids: ["family_pro"],
+          product_id: "rc_promo_family_pro_monthly",
+        },
+      }),
+    });
+    expect(res.status).toBe(200);
+    const row = await getFamily();
+    expect(row.subscriptionTier).toBe("free");
+  });
+
+  it("EXPIRATION with isAdminGranted:true (direct DB override) → tier unchanged, admin grant protected", async () => {
+    // Set family to paid with isAdminGranted=true (emergency DB override — should NOT be downgraded by webhook)
+    await testDb.update(families)
+      .set({ subscriptionTier: "family_hero" as any, subscriptionStatus: "active", isAdminGranted: true })
+      .where(eq(families.familyName, FAMILY));
+
+    const res = await realFetch(`${baseUrl}/api/revenuecat-webhook`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: {
+          type: "EXPIRATION",
+          app_user_id: FAMILY,
+          entitlement_ids: ["family_pro"],
+          product_id: "com.herokids.familypro.monthly",
+        },
+      }),
+    });
+    expect(res.status).toBe(200);
+    const row = await getFamily();
+    // isAdminGranted:true prevents EXPIRATION from downgrading
+    expect(row.subscriptionTier).toBe("family_hero");
+  });
+
+  it("NON_RENEWING_PURCHASE with rc_promo product → self-heals DB tier if endpoint write had failed", async () => {
+    // Start from free to simulate a state where the promo endpoint RC call succeeded
+    // but the DB write failed; the webhook should heal it.
+    await testDb.update(families)
+      .set({ subscriptionTier: "free" as any, subscriptionStatus: "canceled", isAdminGranted: false })
+      .where(eq(families.familyName, FAMILY));
+
+    const res = await realFetch(`${baseUrl}/api/revenuecat-webhook`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: {
+          type: "NON_RENEWING_PURCHASE",
+          app_user_id: FAMILY,
+          entitlement_ids: ["family_pro"],
+          product_id: "rc_promo_family_pro_monthly",
+        },
+      }),
+    });
+    expect(res.status).toBe(200);
+    const row = await getFamily();
+    // Webhook healed the DB — tier now reflects the promo grant
+    expect(row.subscriptionTier).toBe("family_hero");
+  });
+});

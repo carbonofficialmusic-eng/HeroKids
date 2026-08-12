@@ -8035,8 +8035,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       const dbTier = tierMap[entitlement] as "family" | "family_hero";
 
-      // Update DB so the app immediately reflects the granted tier
-      await storage.updateFamilyTier(familyName, dbTier);
+      // Update DB so the app immediately reflects the granted tier.
+      // IMPORTANT: set isAdminGranted: false (NOT true) so that:
+      //   • cancel-sync will check RC and not skip verification
+      //   • EXPIRATION / BILLING_ISSUE webhooks will fire and downgrade correctly
+      //   • RC remains the authoritative source for the grant lifecycle
+      // The isAdminGranted flag is reserved for manual DB-only overrides that RC
+      // does not know about. Promotional entitlements are RC-tracked; they must
+      // follow the normal RC reconciliation path.
+      const { eq: eqPromo } = await import("drizzle-orm");
+      const { families: familiesTable } = await import("../shared/schema");
+      await db.update(familiesTable).set({
+        subscriptionTier: dbTier,
+        subscriptionStatus: "active",
+        isAdminGranted: false,
+        updatedAt: new Date(),
+      }).where(eqPromo(familiesTable.familyName, familyName));
       await autoUnpauseMembersAfterUpgrade(familyName, dbTier);
 
       console.log(`[Admin] Promotional entitlement '${entitlement}' (${duration}) granted to ${familyName} → DB tier: ${dbTier}`);
