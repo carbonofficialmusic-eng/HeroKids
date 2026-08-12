@@ -6762,7 +6762,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // RC keeps entitlements active until the subscription's expires_date even after
       // a cancellation. Only downgrade when RC confirms the entitlement has truly
       // expired. Do NOT treat "cancelled but not yet expired" as expired.
-      if (isActive("family") || isActive("family_pro")) {
+      // Also self-heal: if the DB was wrongly set to a lower tier (e.g. by a stale
+      // CANCELLATION webhook), restore the correct tier from RC now.
+      const tierMap: Record<string, string> = { family: "family", family_pro: "family_hero" };
+      const activeEntId = isActive("family_pro") ? "family_pro" : isActive("family") ? "family" : null;
+      if (activeEntId) {
+        const correctTier = tierMap[activeEntId];
+        if (family.subscriptionTier !== correctTier) {
+          console.log(`[RC cancel-sync] Entitlement '${activeEntId}' still active for ${member.familyName} — restoring tier to ${correctTier} (was ${family.subscriptionTier})`);
+          await db.update(families)
+            .set({ subscriptionTier: correctTier, subscriptionStatus: "canceled", isAdminGranted: false })
+            .where(eq(families.familyName, member.familyName));
+          return res.json({ ok: true, action: "restored", tier: correctTier });
+        }
         console.log(`[RC cancel-sync] Entitlement still active for ${member.familyName} — no downgrade`);
         return res.json({ ok: true, action: "skipped", reason: "still_active" });
       }
