@@ -6759,31 +6759,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return e !== undefined && (e.expires_date === null || new Date(e.expires_date) > new Date());
       };
 
-      // Also check subscription cancellation status: if all relevant subscriptions
-      // have unsubscribe_detected_at set, the user has voluntarily cancelled and
-      // won't auto-renew — treat same as expired (matches Stripe cancel behavior).
-      const subs: Record<string, { expires_date: string | null; unsubscribe_detected_at: string | null }> =
-        rcData?.subscriber?.subscriptions ?? {};
-      const relevantProductIds = [
-        "com.herokids.family.monthly", "com.herokids.family.yearly",
-        "com.herokids.familypro.monthly", "com.herokids.familypro.yearly",
-      ];
-      const activeSubIds = relevantProductIds.filter(pid => {
-        const s = subs[pid];
-        return s && (s.expires_date === null || new Date(s.expires_date) > new Date());
-      });
-      const allCancelled = activeSubIds.length > 0 && activeSubIds.every(pid => {
-        return subs[pid]?.unsubscribe_detected_at != null;
-      });
-
-      if (!allCancelled && (isActive("family") || isActive("family_pro"))) {
-        // RC still shows an active, non-cancelled entitlement — don't downgrade
+      // RC keeps entitlements active until the subscription's expires_date even after
+      // a cancellation. Only downgrade when RC confirms the entitlement has truly
+      // expired. Do NOT treat "cancelled but not yet expired" as expired.
+      if (isActive("family") || isActive("family_pro")) {
         console.log(`[RC cancel-sync] Entitlement still active for ${member.familyName} — no downgrade`);
         return res.json({ ok: true, action: "skipped", reason: "still_active" });
-      }
-
-      if (allCancelled) {
-        console.log(`[RC cancel-sync] All subscriptions cancelled for ${member.familyName} — downgrading`);
       }
 
       // No active entitlement → downgrade
@@ -6854,9 +6835,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`[RevenueCat] ${eventType}: ${appUserId} → ${newTier}`);
           break;
         }
-        case "CANCELLATION":
+        case "CANCELLATION": {
+          // User cancelled — they keep access until the subscription's expires_date.
+          // Only mark the status; do NOT drop the tier. EXPIRATION fires when access
+          // actually ends and that is when we downgrade to free.
+          await db.update(families)
+            .set({ subscriptionStatus: "canceled" })
+            .where(and(
+              eq(families.familyName, appUserId),
+              eq(families.isLifetimePurchase, false),
+              eq(families.isAdminGranted, false),
+            ));
+          console.log(`[RevenueCat] CANCELLATION: ${appUserId} — status → canceled (tier retained until expiry)`);
+          break;
+        }
         case "EXPIRATION":
         case "BILLING_ISSUE": {
+          // Subscription has truly ended — remove paid access.
           await db.update(families)
             .set({
               subscriptionTier: "free",
