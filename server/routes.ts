@@ -6859,10 +6859,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (!entId) break;
           const newTier = tierMap[entId];
 
-          // Guard: if this PRODUCT_CHANGE is to family_pro, verify it isn't a
-          // FamilyPro renewal firing while a 'family' downgrade is in progress.
+          // Guard: only for PRODUCT_CHANGE events (not INITIAL_PURCHASE, RENEWAL, etc.).
+          // If this PRODUCT_CHANGE is to family_pro, verify it isn't a FamilyPro renewal
+          // firing while a 'family' downgrade is in progress.
           // Uses isFamilySubNewerThanFamilyPro from server/lib/rc-tier-resolver.ts.
-          if (entId === "family_pro") {
+          if (eventType === "PRODUCT_CHANGE" && entId === "family_pro") {
             const rcApiKey = process.env.REVENUECAT_API_KEY;
             if (rcApiKey) {
               try {
