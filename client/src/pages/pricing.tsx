@@ -300,6 +300,39 @@ export default function Pricing() {
   const isParent = member?.role === "parent";
   const currentTier = familyData?.subscriptionTier;
 
+  // Helper: get a price string directly from the StoreKit product map
+  const PRODUCT_ID_MAP: Record<string, Record<string, string>> = {
+    family: {
+      monthly: 'com.herokids.family.monthly',
+      yearly: 'com.herokids.family.yearly',
+    },
+    family_pro: {
+      monthly: 'com.herokids.familypro.monthly',
+      yearly: 'com.herokids.familypro.yearly',
+    },
+  };
+  const getRcPrice = (offeringKey: string | null, cycle: string): string | null => {
+    if (!offeringKey || !rcProducts) return null;
+    const productId = PRODUCT_ID_MAP[offeringKey]?.[cycle];
+    if (!productId) return null;
+    const product = rcProducts[productId];
+    return product?.priceString ?? product?.price?.toString() ?? null;
+  };
+
+  // Derive the currency symbol from any loaded RC priceString so the free tier
+  // shows the same currency as the paid tiers (e.g. "$0" in US sandbox, "€0" in DE prod).
+  const rcCurrencyPrefix = (() => {
+    if (!rcProducts) return null;
+    for (const product of Object.values(rcProducts)) {
+      const ps: string | undefined = (product as any)?.priceString;
+      if (ps) {
+        const match = ps.match(/^([^0-9]+)/);
+        if (match) return match[1];
+      }
+    }
+    return null;
+  })();
+
   const tiers = [
     {
       id: "free",
@@ -344,39 +377,6 @@ export default function Pricing() {
       rcEntitlementKey: "family_pro",
     },
   ];
-
-  // Helper: get a price string directly from the StoreKit product map
-  const PRODUCT_ID_MAP: Record<string, Record<string, string>> = {
-    family: {
-      monthly: 'com.herokids.family.monthly',
-      yearly: 'com.herokids.family.yearly',
-    },
-    family_pro: {
-      monthly: 'com.herokids.familypro.monthly',
-      yearly: 'com.herokids.familypro.yearly',
-    },
-  };
-  const getRcPrice = (offeringKey: string | null, cycle: string): string | null => {
-    if (!offeringKey || !rcProducts) return null;
-    const productId = PRODUCT_ID_MAP[offeringKey]?.[cycle];
-    if (!productId) return null;
-    const product = rcProducts[productId];
-    return product?.priceString ?? product?.price?.toString() ?? null;
-  };
-
-  // Derive the currency symbol from any loaded RC priceString so the free tier
-  // shows the same currency as the paid tiers (e.g. "$0" in US sandbox, "€0" in DE prod).
-  const rcCurrencyPrefix = (() => {
-    if (!rcProducts) return null;
-    for (const product of Object.values(rcProducts)) {
-      const ps: string | undefined = (product as any)?.priceString;
-      if (ps) {
-        const match = ps.match(/^([^0-9]+)/);
-        if (match) return match[1];
-      }
-    }
-    return null;
-  })();
 
   return (
     <div className="min-h-screen">
