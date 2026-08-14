@@ -215,14 +215,14 @@ export default function Landing() {
       </section>
 
       {/* ── Auth Panel ── */}
-      <section id="auth-panel" style={{ padding: "2rem 1rem 5rem", zIndex: 1, position: "relative" }}>
+      <section id="auth-panel" style={{ padding: "2rem 1rem 5rem", zIndex: 1, position: "relative", scrollMarginTop: "4rem" }}>
         <div style={{ maxWidth: 480, margin: "0 auto" }}>
           <AuthPanel />
         </div>
       </section>
 
       {/* ── How it Works ── */}
-      <section id="how-it-works" style={{ padding: "5rem 1rem", background: C.bgSection, position: "relative", zIndex: 1 }}>
+      <section id="how-it-works" style={{ padding: "5rem 1rem", background: C.bgSection, position: "relative", zIndex: 1, scrollMarginTop: "4rem" }}>
         <div style={{ maxWidth: 1152, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
             <h2 className="hk-display" style={{ fontSize: "clamp(1.8rem, 4vw, 2.75rem)", fontWeight: 800, marginBottom: "0.75rem" }} data-testid="text-features-title">
@@ -336,7 +336,7 @@ export default function Landing() {
       </section>
 
       {/* ── Pricing ── */}
-      <section id="pricing" style={{ padding: "5rem 1rem", background: C.bgSection, position: "relative", zIndex: 1 }}>
+      <section id="pricing" style={{ padding: "5rem 1rem", background: C.bgSection, position: "relative", zIndex: 1, scrollMarginTop: "4rem" }}>
         <div style={{ maxWidth: 1152, margin: "0 auto" }}>
 
           {/* Header */}
