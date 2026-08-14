@@ -306,7 +306,7 @@ export default function Pricing() {
       name: "Free",
       icon: Users,
       memberLimit: 3,
-      price: "€0",
+      price: isNativePlatform() && rcCurrencyPrefix ? `${rcCurrencyPrefix}0` : "€0",
       period: t("pricing.forever"),
       description: t("pricing.tierFreeDesc"),
       features: t("pricing.tierFreeFeatures", { returnObjects: true }) as string[],
@@ -363,6 +363,20 @@ export default function Pricing() {
     const product = rcProducts[productId];
     return product?.priceString ?? product?.price?.toString() ?? null;
   };
+
+  // Derive the currency symbol from any loaded RC priceString so the free tier
+  // shows the same currency as the paid tiers (e.g. "$0" in US sandbox, "€0" in DE prod).
+  const rcCurrencyPrefix = (() => {
+    if (!rcProducts) return null;
+    for (const product of Object.values(rcProducts)) {
+      const ps: string | undefined = (product as any)?.priceString;
+      if (ps) {
+        const match = ps.match(/^([^0-9]+)/);
+        if (match) return match[1];
+      }
+    }
+    return null;
+  })();
 
   return (
     <div className="min-h-screen">
