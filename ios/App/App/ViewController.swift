@@ -3,5 +3,6 @@ import Capacitor
 class ViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(AppleSignInPlugin())
+        bridge?.registerPluginInstance(AppReviewPlugin())
     }
 }
