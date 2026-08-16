@@ -21,6 +21,7 @@ import {
   getEntitlementTier,
   getIntroductoryOffer,
 } from "@/lib/revenuecat";
+import { recordPaidSince } from "@/hooks/useAppReview";
 
 interface FirstOpenPaywallProps {
   open: boolean;
@@ -137,6 +138,8 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
         const grantedTier = getEntitlementTier(customerInfo);
         await apiRequest("POST", "/api/revenuecat-sync", { entitlementId: "family" });
         await qc.refetchQueries({ queryKey: ["/api/families/current"] });
+        // Start the 30-day review-prompt timer on first paid purchase
+        recordPaidSince();
         toast({
           title: t("pricing.toastCheckoutError").replace("Fehler", "Erfolg").replace("Error", "Success"),
           description: `Family ${grantedTier ? "aktiviert" : "abonniert"}!`,

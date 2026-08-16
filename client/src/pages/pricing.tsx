@@ -21,6 +21,7 @@ import {
   isLifetimeEntitlement,
   getIntroductoryOffer,
 } from "@/lib/revenuecat";
+import { recordPaidSince } from "@/hooks/useAppReview";
 
 type BillingCycle = "monthly" | "yearly";
 
@@ -249,6 +250,9 @@ export default function Pricing() {
       // Refresh family data — use refetchQueries (not invalidate) so the header
       // reflects the new tier immediately before the success toast fires.
       await qc.refetchQueries({ queryKey: ["/api/families/current"] });
+
+      // Start the 30-day review-prompt timer on first paid purchase
+      recordPaidSince();
 
       toast({
         title: isLifetimePurchase ? "Lifetime-Zugang aktiviert!" : "Abonnement aktiviert!",

@@ -24,6 +24,7 @@ import { ProfileMenu } from "@/components/profile-menu";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { MemberOnboardingModal } from "@/components/member-onboarding-modal";
 import { FirstOpenPaywall } from "@/components/first-open-paywall";
+import { useAppReview } from "@/hooks/useAppReview";
 import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -431,6 +432,12 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [member?.id, member?.role, familyData?.subscriptionTier]);
+
+  // Trigger native iOS review prompt once user has been on a paid tier for ≥30 days
+  useAppReview({
+    subscriptionTier: familyData?.subscriptionTier,
+    isParent: member?.role === "parent",
+  });
 
   const { data: unreadChatData } = useQuery<{ count: number }>({
     queryKey: ["/api/chat/unread-count"],
