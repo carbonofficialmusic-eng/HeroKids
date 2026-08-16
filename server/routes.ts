@@ -7630,6 +7630,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ========================================
 
   // ========================================
+  // ========================================
+  // Feature Flags (public read)
+  // ========================================
+
+  app.get("/api/feature-flags", async (_req, res) => {
+    try {
+      const raw = await storage.getAppConfig("review_prompt_enabled");
+      res.json({ review_prompt_enabled: raw === "true" });
+    } catch (error) {
+      console.error("Error fetching feature flags:", error);
+      res.json({ review_prompt_enabled: false });
+    }
+  });
+
   // Admin Dashboard Routes
   // ========================================
 
@@ -8490,6 +8504,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching admin users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // ---- Feature Flags (admin read + write) ----
+
+  app.get("/api/admin/feature-flags", isAdmin, async (_req, res) => {
+    try {
+      const raw = await storage.getAppConfig("review_prompt_enabled");
+      res.json({ review_prompt_enabled: raw === "true" });
+    } catch (error) {
+      console.error("Error fetching admin feature flags:", error);
+      res.status(500).json({ message: "Failed to fetch feature flags" });
+    }
+  });
+
+  app.patch("/api/admin/feature-flags", isAdmin, async (req, res) => {
+    try {
+      const { review_prompt_enabled } = req.body as { review_prompt_enabled?: boolean };
+      if (typeof review_prompt_enabled !== "boolean") {
+        return res.status(400).json({ message: "review_prompt_enabled must be a boolean" });
+      }
+      await storage.setAppConfig("review_prompt_enabled", review_prompt_enabled ? "true" : "false");
+      res.json({ review_prompt_enabled });
+    } catch (error) {
+      console.error("Error updating feature flags:", error);
+      res.status(500).json({ message: "Failed to update feature flags" });
     }
   });
 

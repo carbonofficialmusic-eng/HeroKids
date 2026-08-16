@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -522,6 +523,41 @@ export default function AdminPageImpl() {
     },
     enabled: !!token,
     staleTime: 2 * 60 * 1000,
+  });
+
+  const { data: featureFlags, refetch: refetchFeatureFlags } = useQuery<{ review_prompt_enabled: boolean }>({
+    queryKey: ["/api/admin/feature-flags"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/feature-flags", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch feature flags");
+      return res.json();
+    },
+    enabled: !!token,
+    staleTime: 60 * 1000,
+  });
+
+  const featureFlagMutation = useMutation({
+    mutationFn: async (flags: { review_prompt_enabled: boolean }) => {
+      const res = await fetch("/api/admin/feature-flags", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(flags),
+      });
+      if (!res.ok) throw new Error("Failed to update feature flags");
+      return res.json();
+    },
+    onSuccess: () => {
+      refetchFeatureFlags();
+      toast({ title: "Feature flags updated" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update feature flags", variant: "destructive" });
+    },
   });
 
   const { data: emailHealth, isLoading: emailHealthLoading, refetch: refetchEmailHealth } = useQuery<EmailHealthResult>({
@@ -1271,6 +1307,33 @@ export default function AdminPageImpl() {
                 ) : (
                   <p className="text-sm text-muted-foreground">Email status is unavailable.</p>
                 )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Feature Flags
+                </CardTitle>
+                <CardDescription>Enable or disable features without a code deployment</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between py-1">
+                  <div>
+                    <p className="font-medium text-sm">In-App-Review-Prompt</p>
+                    <p className="text-xs text-muted-foreground">
+                      Fordert iOS-Nutzer nach 30 Tagen Paid-Abo auf, die App zu bewerten
+                    </p>
+                  </div>
+                  <Switch
+                    checked={featureFlags?.review_prompt_enabled ?? false}
+                    disabled={featureFlagMutation.isPending}
+                    onCheckedChange={(checked) =>
+                      featureFlagMutation.mutate({ review_prompt_enabled: checked })
+                    }
+                    data-testid="switch-review-prompt"
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
