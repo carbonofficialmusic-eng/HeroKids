@@ -1773,10 +1773,11 @@ export default function AdminPageImpl() {
                     {families.map((family) => (
                       <div
                         key={family.familyName}
-                        className="flex items-center justify-between p-3 sm:p-4 gap-2 border rounded-lg hover-elevate overflow-hidden"
+                        className="border rounded-lg p-3 hover-elevate"
                         data-testid={`card-family-${family.familyName}`}
                       >
-                        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                        {/* Row 1: checkbox + name + chevron */}
+                        <div className="flex items-center gap-2">
                           <Checkbox
                             checked={selectedFamilies.has(family.familyName)}
                             onCheckedChange={(checked) => {
@@ -1791,31 +1792,32 @@ export default function AdminPageImpl() {
                             onClick={(e) => e.stopPropagation()}
                             data-testid={`checkbox-family-${family.familyName}`}
                           />
-                          <div 
-                            className="cursor-pointer"
+                          <p
+                            className="font-semibold flex-1 min-w-0 truncate cursor-pointer"
                             onClick={() => setSelectedFamily(family.familyName)}
                           >
-                            <p className="font-semibold">{family.familyName}</p>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Users className="h-3 w-3" />
-                              {family.memberCount} members
-                              <span className="text-xs">
-                                ({family.parentCount}P / {family.childCount}C)
-                              </span>
-                            </div>
-                          </div>
+                            {family.familyName}
+                          </p>
+                          <ChevronRight
+                            className="h-5 w-5 text-muted-foreground cursor-pointer flex-shrink-0"
+                            onClick={() => setSelectedFamily(family.familyName)}
+                          />
                         </div>
-                        <div className="flex items-center gap-1.5 sm:gap-4 flex-shrink-0">
-                          <div className="text-right text-sm hidden sm:block">
-                            <p>{family.taskCount} tasks</p>
-                            <p className="text-muted-foreground">{family.rewardCount} rewards</p>
+                        {/* Row 2: member info + tier controls */}
+                        <div className="flex items-center justify-between mt-2 pl-6 gap-2">
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground min-w-0">
+                            <Users className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate">
+                              {family.memberCount} members
+                              <span className="text-xs ml-1">({family.parentCount}P/{family.childCount}C)</span>
+                            </span>
                           </div>
-                          <div className="flex items-center gap-1 sm:gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                             {!Capacitor.isNativePlatform() && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-8 px-2 text-xs border-amber-400 text-amber-700 hover:bg-amber-50"
+                                className="h-7 px-2 text-xs border-amber-400 text-amber-700 hover:bg-amber-50"
                                 onClick={() => {
                                   setPromoDialogFamily(family.familyName);
                                   setPromoEntitlement("family_pro");
@@ -1836,7 +1838,7 @@ export default function AdminPageImpl() {
                                 }
                               }}
                             >
-                              <SelectTrigger className="w-24 sm:w-32">
+                              <SelectTrigger className="w-28">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -1854,10 +1856,6 @@ export default function AdminPageImpl() {
                               </SelectContent>
                             </Select>
                           </div>
-                          <ChevronRight 
-                            className="h-5 w-5 text-muted-foreground cursor-pointer" 
-                            onClick={() => setSelectedFamily(family.familyName)}
-                          />
                         </div>
                       </div>
                     ))}
