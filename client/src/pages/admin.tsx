@@ -1773,10 +1773,10 @@ export default function AdminPageImpl() {
                     {families.map((family) => (
                       <div
                         key={family.familyName}
-                        className="flex items-center justify-between p-4 border rounded-lg hover-elevate"
+                        className="flex items-center justify-between p-3 sm:p-4 gap-2 border rounded-lg hover-elevate overflow-hidden"
                         data-testid={`card-family-${family.familyName}`}
                       >
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                           <Checkbox
                             checked={selectedFamilies.has(family.familyName)}
                             onCheckedChange={(checked) => {
@@ -1805,12 +1805,12 @@ export default function AdminPageImpl() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-right text-sm">
+                        <div className="flex items-center gap-1.5 sm:gap-4 flex-shrink-0">
+                          <div className="text-right text-sm hidden sm:block">
                             <p>{family.taskCount} tasks</p>
                             <p className="text-muted-foreground">{family.rewardCount} rewards</p>
                           </div>
-                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center gap-1 sm:gap-1.5" onClick={(e) => e.stopPropagation()}>
                             {!Capacitor.isNativePlatform() && (
                               <Button
                                 size="sm"
@@ -1836,7 +1836,7 @@ export default function AdminPageImpl() {
                                 }
                               }}
                             >
-                              <SelectTrigger className="w-32">
+                              <SelectTrigger className="w-24 sm:w-32">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
