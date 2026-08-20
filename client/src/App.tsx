@@ -220,6 +220,9 @@ function Router() {
     const onResume = () => { if (document.visibilityState !== "hidden") runCheck(); };
     document.addEventListener("visibilitychange", onResume);
     document.addEventListener("resume", onResume); // Capacitor native resume
+    // Repair a false free/canceled state as soon as the app starts, rather than
+    // waiting until the user backgrounds and resumes it once.
+    runCheck();
     return () => {
       document.removeEventListener("visibilitychange", onResume);
       document.removeEventListener("resume", onResume);

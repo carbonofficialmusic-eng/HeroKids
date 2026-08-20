@@ -6916,7 +6916,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         case "EXPIRATION":
         case "BILLING_ISSUE": {
-          // Subscription has truly ended — remove paid access.
+          // An EXPIRATION/BILLING_ISSUE can arrive late for an older purchase.
+          // Never let a delayed event overwrite a newer entitlement: RevenueCat's
+          // current subscriber state is authoritative at the moment we remove access.
+          const [family] = await db.select()
+            .from(families)
+            .where(eq(families.familyName, appUserId));
+          if (!family) {
+            console.warn(`[RevenueCat] ${eventType}: no family found for ${appUserId}`);
+            break;
+          }
+          if (family.isLifetimePurchase || family.isAdminGranted) {
+            console.log(`[RevenueCat] ${eventType}: ${appUserId} is protected from downgrade`);
+            break;
+          }
+
+          const rcApiKey = process.env.REVENUECAT_API_KEY;
+          if (!rcApiKey) {
+            console.error(`[RevenueCat] ${eventType}: no API key available to verify ${appUserId}`);
+            return res.status(503).json({ message: "Purchase verification unavailable" });
+          }
+
+          let rcData: any;
+          try {
+            const rcRes = await fetch(
+              `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(appUserId)}`,
+              { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } },
+            );
+            if (!rcRes.ok) {
+              console.error(`[RevenueCat] ${eventType}: RC returned ${rcRes.status} for ${appUserId}; preserving tier`);
+              return res.status(503).json({ message: "Purchase verification failed" });
+            }
+            rcData = await rcRes.json();
+          } catch (err: any) {
+            console.error(`[RevenueCat] ${eventType}: RC verification failed for ${appUserId}:`, err.message);
+            return res.status(503).json({ message: "Purchase verification failed" });
+          }
+
+          const currentEntitlements: Record<string, { expires_date: string | null }> =
+            rcData?.subscriber?.entitlements ?? {};
+          const hasActiveEntitlement = (id: string) => {
+            const entitlement = currentEntitlements[id];
+            return entitlement !== undefined &&
+              (entitlement.expires_date === null || new Date(entitlement.expires_date) > new Date());
+          };
+          const activeEntitlement = hasActiveEntitlement("family_pro")
+            ? "family_pro"
+            : hasActiveEntitlement("family")
+              ? "family"
+              : null;
+
+          if (activeEntitlement) {
+            const correctTier = tierMap[activeEntitlement];
+            // A later purchase is active: suppress this stale event and repair a
+            // previous bad downgrade in the same operation.
+            await db.update(families)
+              .set({
+                subscriptionTier: correctTier,
+                subscriptionStatus: "active",
+                isAdminGranted: false,
+              })
+              .where(eq(families.familyName, appUserId));
+            console.log(
+              `[RevenueCat] ${eventType}: suppressed stale downgrade for ${appUserId}` +
+              ` — '${activeEntitlement}' remains active`,
+            );
+            break;
+          }
+
+          // RevenueCat has confirmed the subscription has truly ended — remove paid access.
           await db.update(families)
             .set({
               subscriptionTier: "free",

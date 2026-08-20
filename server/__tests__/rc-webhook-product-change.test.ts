@@ -121,6 +121,32 @@ function rcWithFamilyNewer() {
   };
 }
 
+/** RC subscriber response with an active entitlement. */
+function rcWithActiveEntitlement(entitlement: "family" | "family_pro") {
+  return {
+    subscriber: {
+      entitlements: {
+        [entitlement]: {
+          expires_date: new Date(Date.now() + 86_400_000).toISOString(),
+        },
+      },
+    },
+  };
+}
+
+/** RC subscriber response with no active entitlement. */
+function rcWithExpiredEntitlement() {
+  return {
+    subscriber: {
+      entitlements: {
+        family_pro: {
+          expires_date: new Date(Date.now() - 86_400_000).toISOString(),
+        },
+      },
+    },
+  };
+}
+
 // Preserve the real fetch before any vi.spyOn overrides it
 const realFetch = global.fetch;
 
@@ -226,7 +252,7 @@ describe("RC webhook — PRODUCT_CHANGE guard only fires for PRODUCT_CHANGE + fa
   });
 });
 
-describe("RC webhook — EXPIRATION downgrades promo families correctly", () => {
+describe("RC webhook — EXPIRATION only downgrades after live RC verification", () => {
   beforeAll(async () => {
     // family was already seeded above; ensure it exists
   });
@@ -236,6 +262,8 @@ describe("RC webhook — EXPIRATION downgrades promo families correctly", () => 
     await testDb.update(families)
       .set({ subscriptionTier: "family_hero" as any, subscriptionStatus: "active", isAdminGranted: false })
       .where(eq(families.familyName, FAMILY));
+    process.env.REVENUECAT_API_KEY = "test-key";
+    mockRcFetch(rcWithExpiredEntitlement());
 
     const res = await realFetch(`${baseUrl}/api/revenuecat-webhook`, {
       method: "POST",
@@ -252,6 +280,34 @@ describe("RC webhook — EXPIRATION downgrades promo families correctly", () => 
     expect(res.status).toBe(200);
     const row = await getFamily();
     expect(row.subscriptionTier).toBe("free");
+    delete process.env.REVENUECAT_API_KEY;
+  });
+
+  it("delayed EXPIRATION with a newer active entitlement → preserves the paid tier", async () => {
+    await testDb.update(families)
+      .set({ subscriptionTier: "family_hero" as any, subscriptionStatus: "active", isAdminGranted: false })
+      .where(eq(families.familyName, FAMILY));
+    process.env.REVENUECAT_API_KEY = "test-key";
+    mockRcFetch(rcWithActiveEntitlement("family_pro"));
+
+    const res = await realFetch(`${baseUrl}/api/revenuecat-webhook`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: {
+          type: "EXPIRATION",
+          app_user_id: FAMILY,
+          entitlement_ids: ["family_pro"],
+          product_id: "com.herokids.familypro.monthly",
+        },
+      }),
+    });
+
+    expect(res.status).toBe(200);
+    const row = await getFamily();
+    expect(row.subscriptionTier).toBe("family_hero");
+    expect(row.subscriptionStatus).toBe("active");
+    delete process.env.REVENUECAT_API_KEY;
   });
 
   it("EXPIRATION with isAdminGranted:true (direct DB override) → tier unchanged, admin grant protected", async () => {
