@@ -15,7 +15,14 @@
 set -e
 
 echo "==> Syncing Capacitor iOS..."
+# Capacitor does not remove files that disappeared from the previous web build.
+# Clear the generated folder first so old bundled backgrounds cannot survive.
+rm -rf ios/App/App/public
 npx cap sync ios
+
+echo ""
+echo "==> Removing large skin backgrounds from the local iOS bundle..."
+bash "$(dirname "$0")/trim-ios-background-assets.sh"
 
 INFO_PLIST="ios/App/App/Info.plist"
 

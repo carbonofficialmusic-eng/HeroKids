@@ -1,9 +1,10 @@
 import { resolveAvatarUrl } from "@/lib/avatarAssets";
+import { isNativePlatform } from "@/lib/platform";
 
-// Skin images are served from /skins/avatars/{skinId}.png and
-// /skins/backgrounds/{skinId}.png with Cache-Control: immutable (1 year).
-// The browser only ever fetches images for skins the user has actually
-// unlocked — nothing else is downloaded.
+// Avatars remain part of the local iOS web bundle. Backgrounds are intentionally
+// excluded from that bundle and loaded on demand from the production server.
+// Web builds keep relative URLs so development and deployments use their own host.
+const NATIVE_SKIN_ASSET_ORIGIN = "https://littlechamps.net";
 
 export function getSkinImageUrl(skinId: string): string {
   return `/skins/avatars/${skinId}.png`;
@@ -13,7 +14,8 @@ export function getSkinImageUrl(skinId: string): string {
 const BACKGROUND_VERSION = 2;
 
 export function getSkinBackgroundUrl(skinId: string): string {
-  return `/skins/backgrounds/${skinId}.png?v=${BACKGROUND_VERSION}`;
+  const path = `/skins/backgrounds/${skinId}.png?v=${BACKGROUND_VERSION}`;
+  return isNativePlatform() ? `${NATIVE_SKIN_ASSET_ORIGIN}${path}` : path;
 }
 
 // All valid skin IDs — used to check whether a URL exists.

@@ -33,7 +33,7 @@ echo "Building web assets..."
 npm run build
 
 echo "Syncing Capacitor..."
-npx cap sync ios
+bash ./scripts/ios-sync.sh
 
 # Restore app icon and splash screen after cap sync (which overwrites them with defaults)
 echo "Restoring app icon and splash screen..."

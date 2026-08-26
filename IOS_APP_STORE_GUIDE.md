@@ -43,7 +43,7 @@ chmod +x scripts/ios-sync.sh
 ./scripts/ios-sync.sh
 ```
 
-Dieses Script führt `npx cap sync ios` aus **und** setzt automatisch die erforderlichen Kamera-Berechtigungen in `Info.plist`. Immer dieses Script statt `npx cap sync ios` direkt verwenden.
+Dieses Script führt den Capacitor-Sync aus, setzt automatisch die erforderlichen Kamera-Berechtigungen in `Info.plist` und bereinigt die iOS-Web-Ressourcen. Avatarbilder bleiben lokal in der App, große Skin-Hintergründe werden aus dem App-Bundle entfernt und bei Bedarf über `https://littlechamps.net` geladen. Immer dieses Script statt `npx cap sync ios` direkt verwenden.
 
 ## Schritt 2: App-Icons erstellen
 
@@ -271,8 +271,8 @@ Ersetze `DEINE-APP-URL` mit deiner tatsächlichen Replit-URL.
 # Web-App bauen
 npm run build
 
-# iOS synchronisieren (Kamera-Berechtigungen sind bereits in Info.plist eingetragen)
-npx cap sync ios
+# iOS synchronisieren, Berechtigungen anwenden und große Hintergründe entfernen
+bash scripts/ios-sync.sh
 
 # In Xcode öffnen
 npx cap open ios
@@ -300,6 +300,10 @@ npx cap open ios
 
 ### "White screen in app"
 → Server-URL in capacitor.config.ts prüfen - für Production sollte die App lokal funktionieren
+
+### "Skin-Hintergrund fehlt in der iOS-App"
+→ Für lokal gebündelte App-Store-Builds lädt die native App Hintergründe von `https://littlechamps.net/skins/backgrounds/...`.
+→ Prüfe die Internetverbindung und ob die URL des betroffenen Skins erreichbar ist.
 
 ---
 

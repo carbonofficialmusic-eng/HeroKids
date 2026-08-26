@@ -1,5 +1,7 @@
 #!/bin/bash
-# Run this on your Mac AFTER running: npx cap add ios && npx cap sync ios
+# Legacy helper for an already completed Capacitor sync.
+# Prefer scripts/ios-sync.sh for future syncs so stale generated files are
+# removed before syncing and large backgrounds are excluded from the bundle.
 #
 # Adds the required iOS camera/photo permission strings to Info.plist.
 # Without these entries Apple rejects the build and the app crashes when
@@ -42,3 +44,7 @@ else
 fi
 
 echo "Done. Open Xcode and build the app."
+
+echo ""
+echo "Removing large skin backgrounds from the local iOS bundle..."
+bash "$(dirname "$0")/trim-ios-background-assets.sh"
