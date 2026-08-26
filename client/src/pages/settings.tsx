@@ -15,7 +15,7 @@ import { AddMemberDialog } from "@/components/add-member-dialog";
 import { MemberOnboardingModal } from "@/components/member-onboarding-modal";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin, Infinity, HelpCircle, Bell, BellOff } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin, Infinity, HelpCircle, Bell, BellOff, Mail } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +34,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { FamilyMember, Family } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
+import { FEEDBACK_MAILTO } from "@/lib/feedback";
 
 type FamilyMemberWithLimit = FamilyMember & { isOverLimit?: boolean; accountEmail?: string | null };
 
@@ -1241,6 +1242,28 @@ export default function Settings() {
               </CardContent>
             </Card>
           )}
+
+          {/* Feedback */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                <CardTitle>{t('feedback.title')}</CardTitle>
+              </div>
+              <CardDescription>{t('feedback.description')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild className="w-full" data-testid="button-send-feedback">
+                <a href={FEEDBACK_MAILTO}>
+                  <Mail className="h-4 w-4 mr-2" />
+                  {t('feedback.button')}
+                </a>
+              </Button>
+              <p className="mt-2 text-center text-xs text-muted-foreground">
+                info@littlechamps.net
+              </p>
+            </CardContent>
+          </Card>
 
           {/* Onboarding Tour */}
           <Card>

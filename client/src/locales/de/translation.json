@@ -655,6 +655,11 @@
     "failedToSend": "Nachricht konnte nicht gesendet werden",
     "errorLoadingChat": "Fehler beim Laden des Chats"
   },
+  "feedback": {
+    "title": "Feedback senden",
+    "description": "Helfe uns die App zu optimieren und sende dein Feedback.",
+    "button": "Feedback per E-Mail senden"
+  },
   "settings": {
     "title": "Einstellungen",
     "familySettings": "Familieneinstellungen",

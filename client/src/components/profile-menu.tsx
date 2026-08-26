@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Settings, Palette, User2, LogOut, Sun, Moon, Menu, Trophy, MailCheck, Loader2, KeyRound } from "lucide-react";
+import { Settings, Palette, User2, LogOut, Sun, Moon, Menu, Trophy, MailCheck, Loader2, KeyRound, Mail } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { apiRequest, queryClient, clearDevToken } from "@/lib/queryClient";
+import { FEEDBACK_MAILTO } from "@/lib/feedback";
 
 interface ProfileMenuProps {
   member: FamilyMember;
@@ -167,6 +168,16 @@ export function ProfileMenu({
             </Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem asChild>
+          <a
+            href={FEEDBACK_MAILTO}
+            onClick={() => setOpen(false)}
+            data-testid="menu-item-feedback"
+          >
+            <Mail className="mr-2 h-4 w-4" />
+            <span>{t("feedback.title")}</span>
+          </a>
+        </DropdownMenuItem>
         
         {/* Block 3: System & Logout */}
         <DropdownMenuSeparator />

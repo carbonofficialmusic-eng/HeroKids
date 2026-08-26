@@ -645,6 +645,11 @@
     "failedToSend": "Failed to send message",
     "errorLoadingChat": "Error loading chat"
   },
+  "feedback": {
+    "title": "Send feedback",
+    "description": "Help us improve the app and send us your feedback.",
+    "button": "Send feedback by email"
+  },
   "settings": {
     "title": "Settings",
     "familySettings": "Family Settings",
