@@ -8,8 +8,8 @@ const config: CapacitorConfig = {
     // TESTMODUS: App lädt direkt von littlechamps.net (kein lokaler Build nötig).
     // Für App-Store-Release: Diese beiden Zeilen auskommentieren,
     // dann `npm run build && bash scripts/ios-sync.sh` ausführen.
-    // Der iOS-Sync entfernt große Skin-Hintergründe aus dem lokalen Bundle;
-    // sie werden bei Bedarf vom Server geladen.
+    // Der iOS-Sync behält nur den Hintergrund des kostenlosen Start-Skins lokal;
+    // alle weiteren Hintergründe werden bei Bedarf vom Server geladen.
     url: 'https://littlechamps.net',
     allowNavigation: ['littlechamps.net'],
     androidScheme: 'https',

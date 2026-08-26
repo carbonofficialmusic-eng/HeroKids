@@ -12,6 +12,7 @@ export const LEGACY_UNLOCK_THRESHOLD = 9100; // Points needed to unlock Legacy s
 export const TOTAL_HIDDEN_STARS = 48; // Total stars hidden across all standard skin cards
 export const STARS_PER_LEGACY_AVATAR = 4; // Stars needed to unlock each Legacy avatar
 // 48 stars / 4 per avatar = 12 Little Champs Legacy avatars
+export const STARTER_SKIN_ID = "junior-champion";
 
 /**
  * All regular skin IDs in mixed order (alternating between different themes)
@@ -19,7 +20,7 @@ export const STARS_PER_LEGACY_AVATAR = 4; // Stars needed to unlock each Legacy 
  */
 export const MIXED_SKIN_ORDER: string[] = [
   // Mix skins from different packs for variety
-  "junior-champion",      // Starter
+  STARTER_SKIN_ID,        // Starter
   "t-rex",                // Dinosaur
   "princess-tiara",       // Princess
   "tech-ninja",           // Elite

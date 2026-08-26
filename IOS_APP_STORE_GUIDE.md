@@ -43,7 +43,7 @@ chmod +x scripts/ios-sync.sh
 ./scripts/ios-sync.sh
 ```
 
-Dieses Script führt den Capacitor-Sync aus, setzt automatisch die erforderlichen Kamera-Berechtigungen in `Info.plist` und bereinigt die iOS-Web-Ressourcen. Avatarbilder bleiben lokal in der App, große Skin-Hintergründe werden aus dem App-Bundle entfernt und bei Bedarf über `https://littlechamps.net` geladen. Immer dieses Script statt `npx cap sync ios` direkt verwenden.
+Dieses Script führt den Capacitor-Sync aus, setzt automatisch die erforderlichen Kamera-Berechtigungen in `Info.plist` und bereinigt die iOS-Web-Ressourcen. Avatarbilder und der Hintergrund des kostenlosen Start-Skins `junior-champion` bleiben lokal in der App. Die übrigen großen Skin-Hintergründe werden aus dem App-Bundle entfernt und bei Bedarf über `https://littlechamps.net` geladen. Immer dieses Script statt `npx cap sync ios` direkt verwenden.
 
 ## Schritt 2: App-Icons erstellen
 
@@ -271,7 +271,7 @@ Ersetze `DEINE-APP-URL` mit deiner tatsächlichen Replit-URL.
 # Web-App bauen
 npm run build
 
-# iOS synchronisieren, Berechtigungen anwenden und große Hintergründe entfernen
+# iOS synchronisieren, Berechtigungen anwenden und nur den Start-Hintergrund behalten
 bash scripts/ios-sync.sh
 
 # In Xcode öffnen
@@ -302,8 +302,8 @@ npx cap open ios
 → Server-URL in capacitor.config.ts prüfen - für Production sollte die App lokal funktionieren
 
 ### "Skin-Hintergrund fehlt in der iOS-App"
-→ Für lokal gebündelte App-Store-Builds lädt die native App Hintergründe von `https://littlechamps.net/skins/backgrounds/...`.
-→ Prüfe die Internetverbindung und ob die URL des betroffenen Skins erreichbar ist.
+→ Der kostenlose Start-Skin `junior-champion` wird lokal ausgeliefert. Andere Skins laden ihre Hintergründe in lokal gebündelten App-Store-Builds von `https://littlechamps.net/skins/backgrounds/...`.
+→ Prüfe bei anderen Skins die Internetverbindung und ob die URL des betroffenen Skins erreichbar ist.
 
 ---
 

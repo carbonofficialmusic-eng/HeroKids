@@ -21,7 +21,7 @@ rm -rf ios/App/App/public
 npx cap sync ios
 
 echo ""
-echo "==> Removing large skin backgrounds from the local iOS bundle..."
+echo "==> Keeping only the starter skin background in the local iOS bundle..."
 bash "$(dirname "$0")/trim-ios-background-assets.sh"
 
 INFO_PLIST="ios/App/App/Info.plist"
