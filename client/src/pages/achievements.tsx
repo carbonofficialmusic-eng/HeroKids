@@ -321,22 +321,22 @@ export default function Achievements() {
     <div className="min-h-screen p-4 md:p-6" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-start gap-3 md:items-center md:gap-4">
           <Button
             variant="outline"
             size="icon"
             onClick={() => setLocation("/")}
             data-testid="button-back"
-            className="bg-card/90 backdrop-blur-sm border-border"
+            className="mt-0.5 shrink-0 bg-card/90 backdrop-blur-sm border-border md:mt-0"
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Trophy className="h-8 w-8 text-primary" />
-              {t("achievements.title")}
+          <div className="min-w-0 flex-1">
+            <h1 className="flex items-center gap-2 text-2xl md:text-3xl leading-tight font-bold">
+              <Trophy className="h-7 w-7 shrink-0 text-primary md:h-8 md:w-8" />
+              <span className="min-w-0">{t("achievements.title")}</span>
             </h1>
-            <p className="text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground text-on-image">
               {t("achievements.subtitle")}
             </p>
           </div>
