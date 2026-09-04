@@ -117,6 +117,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { height: vvHeight, offsetTop: vvOffsetTop } = useVisualViewport();
+  const [orientationLayoutEpoch, setOrientationLayoutEpoch] = useState(0);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
@@ -133,6 +134,35 @@ export default function Dashboard() {
   const [showTour, setShowTour] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showMemberOnboarding, setShowMemberOnboarding] = useState(false);
+
+  // iOS/WKWebView can keep stale grid heights and backdrop-filter compositor
+  // layers after rotating back to portrait. Remount only the task-list content
+  // once the orientation has settled so cards return to normal document flow.
+  useEffect(() => {
+    let settleTimer: ReturnType<typeof setTimeout> | undefined;
+    let frameId: number | undefined;
+
+    const refreshTaskLayout = () => {
+      if (settleTimer) clearTimeout(settleTimer);
+      if (frameId) cancelAnimationFrame(frameId);
+
+      settleTimer = setTimeout(() => {
+        frameId = requestAnimationFrame(() => {
+          setOrientationLayoutEpoch((epoch) => epoch + 1);
+        });
+      }, 450);
+    };
+
+    window.addEventListener("orientationchange", refreshTaskLayout);
+    screen.orientation?.addEventListener("change", refreshTaskLayout);
+
+    return () => {
+      window.removeEventListener("orientationchange", refreshTaskLayout);
+      screen.orientation?.removeEventListener("change", refreshTaskLayout);
+      if (settleTimer) clearTimeout(settleTimer);
+      if (frameId) cancelAnimationFrame(frameId);
+    };
+  }, []);
   const [chatBarCollapsed, setChatBarCollapsed] = useState(() => {
     try { return localStorage.getItem("herokids_chatbar_collapsed") === "true"; } catch { return false; }
   });
@@ -1545,7 +1575,7 @@ export default function Dashboard() {
                           />
                         </Button>
                       </CollapsibleTrigger>
-                      <CollapsibleContent className="pt-2">
+                      <CollapsibleContent key={`important-${orientationLayoutEpoch}`} className="pt-2">
                         <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
                           {importantActiveTasks.map((task) => (
                             <div key={task.id} className={`relative min-w-0${dashboardView === "list" ? " group min-h-[140px]" : ""}`}>
@@ -1622,7 +1652,7 @@ export default function Dashboard() {
                           />
                         </Button>
                       </CollapsibleTrigger>
-                      <CollapsibleContent className="pt-2">
+                      <CollapsibleContent key={`${category}-${orientationLayoutEpoch}`} className="pt-2">
                         <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
                           {categoryTasks.map((task) => (
                             <div key={task.id} className={`relative min-w-0${dashboardView === "list" ? " group min-h-[140px]" : ""}`}>
