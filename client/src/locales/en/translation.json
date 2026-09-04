@@ -672,7 +672,7 @@
     "upgradeNow": "Upgrade Now",
     "factoryReset": "Factory Reset",
     "factoryResetWarning": "This will delete all tasks, rewards, and points history. This action cannot be undone!",
-    "confirmReset": "Type 'RESET' to confirm",
+    "confirmReset": "Type the family name “{{name}}” to confirm",
     "settingsSaved": "Settings saved successfully",
     "manageExperience": "Manage your family's Little Champs experience",
     "manageMembersDesc": "Manage your family members. Add new members or remove existing ones.",

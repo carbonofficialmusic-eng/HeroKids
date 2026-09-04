@@ -642,7 +642,7 @@
     "upgradeNow": "지금 업그레이드",
     "factoryReset": "초기화",
     "factoryResetWarning": "모든 과제, 보상, 포인트 기록이 삭제됩니다. 이 작업은 되돌릴 수 없습니다!",
-    "confirmReset": "'RESET'을 입력하여 확인",
+    "confirmReset": "확인하려면 가족 이름 “{{name}}”을 입력하세요",
     "settingsSaved": "설정이 저장되었습니다",
     "manageExperience": "가족의 Little Champs 경험을 관리하세요",
     "manageMembersDesc": "가족 구성원을 관리합니다. 새 구성원을 추가하거나 기존 구성원을 제거합니다.",

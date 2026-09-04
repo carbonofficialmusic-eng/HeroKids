@@ -638,7 +638,7 @@
     "upgradeNow": "今すぐアップグレード",
     "factoryReset": "ファクトリーリセット",
     "factoryResetWarning": "すべてのタスク、ごほうび、ポイント履歴が削除されます。この操作は元に戻せません！",
-    "confirmReset": "確認のため「RESET」と入力してください",
+    "confirmReset": "確認のため家族名「{{name}}」を入力してください",
     "settingsSaved": "設定を保存しました",
     "manageExperience": "家族のLittle Champs体験を管理",
     "manageMembersDesc": "家族メンバーを管理します。新しいメンバーを追加したり、既存のメンバーを削除できます。",

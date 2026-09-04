@@ -638,7 +638,7 @@
     "upgradeNow": "Mettre à niveau maintenant",
     "factoryReset": "Réinitialisation totale",
     "factoryResetWarning": "Cela supprimera toutes les tâches, récompenses et l'historique des points. Cette action est irréversible !",
-    "confirmReset": "Tapez 'RESET' pour confirmer",
+    "confirmReset": "Saisissez le nom de famille « {{name}} » pour confirmer",
     "settingsSaved": "Paramètres enregistrés avec succès",
     "manageExperience": "Gérez l'expérience Little Champs de votre famille",
     "manageMembersDesc": "Gérez les membres de votre famille. Ajoutez de nouveaux membres ou supprimez ceux existants.",

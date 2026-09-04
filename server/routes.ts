@@ -52,6 +52,7 @@ import { eq, inArray, and, desc } from "drizzle-orm";
 import "./types";
 import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
 import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
+import { isValidFactoryResetConfirmation } from "@shared/factory-reset";
 
 // Backend notification translations for all 9 supported languages
 const notificationTranslations: Record<string, Record<string, string>> = {
@@ -1056,6 +1057,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Factory reset - parent only
   app.post("/api/family/reset", isAuthenticated, async (req: any, res) => {
+    let auditContext: Record<string, unknown> | undefined;
+
     try {
       const userId = req.user.claims.sub;
       const actingMemberId = req.session.actingAsMemberId;
@@ -1072,9 +1075,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (member.role !== "parent") {
         return res.status(403).json({ message: "Only parents can reset the family" });
       }
+
+      auditContext = {
+        event: "family_factory_reset",
+        userId,
+        memberId: member.id,
+        memberDisplayName: member.displayName,
+        familyName: member.familyName,
+        ip: req.ip,
+        deviceId: req.get("x-device-id")?.slice(0, 128) || null,
+        userAgent: req.get("user-agent")?.slice(0, 256) || null,
+      };
+
+      if (!isValidFactoryResetConfirmation(req.body?.confirmation, member.familyName)) {
+        console.warn("[AUDIT] Family factory reset rejected", {
+          ...auditContext,
+          result: "invalid_confirmation",
+          timestamp: new Date().toISOString(),
+        });
+        return res.status(400).json({
+          message: "Family name confirmation does not match",
+          code: "INVALID_FACTORY_RESET_CONFIRMATION",
+        });
+      }
+
+      console.warn("[AUDIT] Family factory reset authorized", {
+        ...auditContext,
+        result: "authorized",
+        timestamp: new Date().toISOString(),
+      });
       
       // Perform factory reset
       await storage.resetFamilyToFactory(member.familyName);
+
+      console.warn("[AUDIT] Family factory reset completed", {
+        ...auditContext,
+        result: "completed",
+        timestamp: new Date().toISOString(),
+      });
       
       // Broadcast reset to all family members
       broadcastToFamily(member.familyName, {
@@ -1084,6 +1122,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ message: "Family reset to factory settings successfully" });
     } catch (error) {
+      console.error("[AUDIT] Family factory reset failed", {
+        ...auditContext,
+        result: "failed",
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      });
       console.error("Error resetting family:", error);
       res.status(500).json({ message: "Failed to reset family" });
     }

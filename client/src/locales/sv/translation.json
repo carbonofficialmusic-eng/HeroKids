@@ -666,7 +666,7 @@
     "upgradeNow": "Uppgradera nu",
     "factoryReset": "Fabriksåterställning",
     "factoryResetWarning": "Detta raderar alla uppgifter, belöningar och poänghistorik. Denna åtgärd kan inte ångras!",
-    "confirmReset": "Skriv 'RESET' för att bekräfta",
+    "confirmReset": "Skriv familjenamnet ”{{name}}” för att bekräfta",
     "settingsSaved": "Inställningar sparade",
     "manageExperience": "Hantera din familjs Little Champs-upplevelse",
     "manageMembersDesc": "Hantera dina familjemedlemmar. Lägg till nya medlemmar eller ta bort befintliga.",

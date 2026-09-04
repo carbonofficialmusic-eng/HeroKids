@@ -638,7 +638,7 @@
     "upgradeNow": "立即升级",
     "factoryReset": "恢复出厂设置",
     "factoryResetWarning": "这将删除所有任务、奖励和积分历史。此操作无法撤销！",
-    "confirmReset": "输入 RESET 确认",
+    "confirmReset": "输入家庭名称“{{name}}”以确认",
     "settingsSaved": "设置保存成功",
     "manageExperience": "管理你家庭的 Little Champs 体验",
     "manageMembersDesc": "管理你的家庭成员。添加新成员或移除现有成员。",

@@ -638,7 +638,7 @@
     "upgradeNow": "Actualizar Ahora",
     "factoryReset": "Restablecer de Fábrica",
     "factoryResetWarning": "Esto eliminará todas las tareas, recompensas e historial de puntos. ¡Esta acción no se puede deshacer!",
-    "confirmReset": "Escribe 'RESET' para confirmar",
+    "confirmReset": "Escribe el nombre de la familia «{{name}}» para confirmar",
     "settingsSaved": "Configuración guardada exitosamente",
     "manageExperience": "Gestiona la experiencia Little Champs de tu familia",
     "manageMembersDesc": "Gestiona los miembros de tu familia. Agrega nuevos miembros o elimina los existentes.",

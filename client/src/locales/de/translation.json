@@ -682,7 +682,7 @@
     "upgradeNow": "Jetzt upgraden",
     "factoryReset": "Werkseinstellungen",
     "factoryResetWarning": "Dies löscht alle Aufgaben, Belohnungen und Punkteverlauf. Diese Aktion kann nicht rückgängig gemacht werden!",
-    "confirmReset": "Gib 'RESET' ein, um zu bestätigen",
+    "confirmReset": "Gib den Familiennamen „{{name}}“ ein, um zu bestätigen",
     "settingsSaved": "Einstellungen erfolgreich gespeichert",
     "manageExperience": "Verwalte das Little Champs-Erlebnis deiner Familie",
     "manageMembersDesc": "Verwalte deine Familienmitglieder. Füge neue Mitglieder hinzu oder entferne bestehende.",

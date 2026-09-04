@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import type { FamilyMember, Family } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { FEEDBACK_MAILTO } from "@/lib/feedback";
+import { isValidFactoryResetConfirmation } from "@shared/factory-reset";
 
 type FamilyMemberWithLimit = FamilyMember & { isOverLimit?: boolean; accountEmail?: string | null };
 
@@ -51,6 +52,7 @@ export default function Settings() {
   const [memberToEdit, setMemberToEdit] = useState<FamilyMember | null>(null);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false);
+  const [factoryResetConfirmation, setFactoryResetConfirmation] = useState("");
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
   const [deleteAccountConfirmed, setDeleteAccountConfirmed] = useState(false);
   const [joinCodeCopied, setJoinCodeCopied] = useState(false);
@@ -278,11 +280,12 @@ export default function Settings() {
   });
 
   const factoryResetMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/family/reset", {});
+    mutationFn: async (confirmation: string) => {
+      return await apiRequest("POST", "/api/family/reset", { confirmation });
     },
     onSuccess: () => {
       setShowFactoryResetDialog(false);
+      setFactoryResetConfirmation("");
       // Ensure dark theme persists after reset, then force a full page reload
       // so the inline theme script in index.html runs fresh and avoids a white flash.
       localStorage.setItem("theme", "dark");
@@ -1350,7 +1353,10 @@ export default function Settings() {
               </div>
               <Button
                 variant="destructive"
-                onClick={() => setShowFactoryResetDialog(true)}
+                onClick={() => {
+                  setFactoryResetConfirmation("");
+                  setShowFactoryResetDialog(true);
+                }}
                 disabled={factoryResetMutation.isPending}
                 data-testid="button-factory-reset"
                 className="w-full"
@@ -1573,42 +1579,66 @@ export default function Settings() {
       </AlertDialog>
 
       {/* Factory Reset Confirmation Dialog */}
-      <AlertDialog open={showFactoryResetDialog} onOpenChange={setShowFactoryResetDialog}>
-        <AlertDialogContent data-testid="dialog-factory-reset">
+      <AlertDialog
+        open={showFactoryResetDialog}
+        onOpenChange={(open) => {
+          setShowFactoryResetDialog(open);
+          if (!open) setFactoryResetConfirmation("");
+        }}
+      >
+        <AlertDialogContent data-testid="dialog-factory-reset" onOpenAutoFocus={(event) => event.preventDefault()}>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-destructive">{t('settings.resetConfirmTitle')}</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
-              <p className="font-semibold text-foreground">
-                {t('settings.resetConfirmMessage')}
-              </p>
-              <p>
-                <strong>{t('settings.whatDeleted')}</strong>
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>{t('settings.allTasks')}</li>
-                <li>{t('settings.allRewardsRequests')}</li>
-                <li>{t('settings.allPoints')}</li>
-                <li>{t('settings.allSkins')}</li>
-                <li>{t('settings.allHistory')}</li>
-              </ul>
-              <p>
-                <strong>{t('settings.whatCreated')}</strong>
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>{t('settings.defaultTask1')}</li>
-                <li>{t('settings.defaultTask2')}</li>
-                <li>{t('settings.defaultTask3')}</li>
-              </ul>
-              <p>
-                <strong>{t('settings.whatKept')}</strong>
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>{t('settings.familyNameKept', { name: member?.familyName })}</li>
-                <li>{t('settings.membersKept')}</li>
-              </ul>
-              <p className="font-semibold text-destructive">
-                {t('settings.resetAbsoluteSure')}
-              </p>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-muted-foreground">
+                <p className="font-semibold text-foreground">
+                  {t('settings.resetConfirmMessage')}
+                </p>
+                <p>
+                  <strong>{t('settings.whatDeleted')}</strong>
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>{t('settings.allTasks')}</li>
+                  <li>{t('settings.allRewardsRequests')}</li>
+                  <li>{t('settings.allPoints')}</li>
+                  <li>{t('settings.allSkins')}</li>
+                  <li>{t('settings.allHistory')}</li>
+                </ul>
+                <p>
+                  <strong>{t('settings.whatCreated')}</strong>
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>{t('settings.defaultTask1')}</li>
+                  <li>{t('settings.defaultTask2')}</li>
+                  <li>{t('settings.defaultTask3')}</li>
+                </ul>
+                <p>
+                  <strong>{t('settings.whatKept')}</strong>
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>{t('settings.familyNameKept', { name: member?.familyName })}</li>
+                  <li>{t('settings.membersKept')}</li>
+                </ul>
+                <p className="font-semibold text-destructive">
+                  {t('settings.resetAbsoluteSure')}
+                </p>
+                <div className="space-y-2 text-left">
+                  <Label htmlFor="factory-reset-confirmation" className="text-foreground">
+                    {t('settings.confirmReset', { name: member?.familyName })}
+                  </Label>
+                  <Input
+                    id="factory-reset-confirmation"
+                    value={factoryResetConfirmation}
+                    onChange={(event) => setFactoryResetConfirmation(event.target.value)}
+                    placeholder={member?.familyName || ""}
+                    autoComplete="off"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    disabled={factoryResetMutation.isPending}
+                    data-testid="input-factory-reset-confirmation"
+                  />
+                </div>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1620,8 +1650,18 @@ export default function Settings() {
               {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => factoryResetMutation.mutate()}
-              disabled={factoryResetMutation.isPending}
+              onClick={(event) => {
+                if (!member?.familyName || !isValidFactoryResetConfirmation(factoryResetConfirmation, member.familyName)) {
+                  event.preventDefault();
+                  return;
+                }
+                factoryResetMutation.mutate(factoryResetConfirmation);
+              }}
+              disabled={
+                factoryResetMutation.isPending ||
+                !member?.familyName ||
+                !isValidFactoryResetConfirmation(factoryResetConfirmation, member.familyName)
+              }
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               data-testid="button-confirm-reset"
             >
