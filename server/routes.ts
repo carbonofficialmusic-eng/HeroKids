@@ -14,6 +14,7 @@ import { db } from "./db";
 import { setupAuth, isAuthenticated, isDev, setDevTokenActingAs, resolveWsUserId } from "./replitAuth";
 import { generateTokenPair, refreshAccessToken, revokeRefreshToken, registerPushToken, unregisterPushToken } from "./mobileAuth";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { shouldKeepCustomPhotoWhenSelectingSkin } from "@shared/avatar-preferences";
 import { ObjectPermission } from "./objectAcl";
 import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
@@ -1106,7 +1107,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Perform factory reset
-      await storage.resetFamilyToFactory(member.familyName);
+      const profilePhotoPaths = await storage.resetFamilyToFactory(member.familyName);
+
+      const objectStorageService = new ObjectStorageService();
+      const profilePhotoCleanupResults = await Promise.all(
+        profilePhotoPaths.map(async (path) => ({
+          path,
+          deleted: await objectStorageService.deleteObjectEntity(path),
+        })),
+      );
+      const failedProfilePhotoDeletes = profilePhotoCleanupResults.filter((result) => !result.deleted);
+      if (failedProfilePhotoDeletes.length > 0) {
+        console.warn("[AUDIT] Factory reset profile photo cleanup incomplete", {
+          ...auditContext,
+          result: "profile_photo_cleanup_incomplete",
+          timestamp: new Date().toISOString(),
+          failedCount: failedProfilePhotoDeletes.length,
+        });
+      }
 
       console.warn("[AUDIT] Family factory reset completed", {
         ...auditContext,
@@ -5059,13 +5077,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Update the active skin - preserve the user's background preference
-      // If user has custom photo enabled, they keep seeing their photo while the skin background changes
+      // Update the active skin - preserve the user's background preference.
+      // Keep a custom photo only when the member explicitly enabled an uploaded photo.
+      // Default avatars switch to the selected skin automatically.
       // Only enable background if it was never set before (null/undefined), otherwise respect user's choice
       const shouldEnableBackground = skinId !== null && member.useThemeBackground == null ? true : undefined;
+      const useCustomAvatar = skinId !== null
+        ? shouldKeepCustomPhotoWhenSelectingSkin(skinId, member.useCustomAvatar, member.avatarUrl)
+        : undefined;
       await storage.updateFamilyMemberActiveSkin(member.id, {
         skinId,
-        useCustomAvatar: undefined, // Don't change the useCustomAvatar setting
+        useCustomAvatar,
         useThemeBackground: shouldEnableBackground // Only set if never explicitly configured
       });
       

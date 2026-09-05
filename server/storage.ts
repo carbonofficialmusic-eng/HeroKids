@@ -84,6 +84,7 @@ import { startOfDay } from 'date-fns';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import bcrypt from 'bcrypt';
 import { TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR } from "@shared/skin-config";
+import { getProfilePhotoObjectPaths } from "@shared/avatar-preferences";
 
 /**
  * Default achievement templates - used by both seedDefaultAchievements and resetFamilyToFactory
@@ -318,7 +319,7 @@ export interface IStorage {
   incrementRewardsRedeemed(memberId: string): Promise<number>;
 
   // Factory reset operation
-  resetFamilyToFactory(familyName: string): Promise<void>;
+  resetFamilyToFactory(familyName: string): Promise<string[]>;
 
   // Analytics operations
   getAnalytics(familyName: string): Promise<any>;
@@ -2692,18 +2693,19 @@ export class DatabaseStorage implements IStorage {
     return newCount;
   }
 
-  async resetFamilyToFactory(familyName: string): Promise<void> {
+  async resetFamilyToFactory(familyName: string): Promise<string[]> {
     // Wrap entire operation in a transaction to ensure atomicity
-    await db.transaction(async (tx) => {
+    return await db.transaction(async (tx) => {
       // Get all family members first (we need their IDs)
       const members = await tx
         .select()
         .from(familyMembers)
         .where(eq(familyMembers.familyName, familyName));
       const memberIds = members.map(m => m.id);
+      const profilePhotoPaths = getProfilePhotoObjectPaths(members);
 
       if (memberIds.length === 0) {
-        return; // No members, nothing to reset
+        return []; // No members, nothing to reset
       }
 
       // Get all family tasks (we'll need task IDs for assignments)
@@ -2811,7 +2813,8 @@ export class DatabaseStorage implements IStorage {
             earnedLegacySkinIds: [], // Reset HeroKids Legacy avatars earned through stars
             activeSkinId: null, // No skin selected - use avatarUrl instead
             avatarUrl: randomAvatar, // Set random default avatar icon (resolved by frontend)
-            useCustomAvatar: true, // Use the default avatar icon
+            useCustomAvatar: false, // Show skins when one is selected
+            avatarHistory: [], // Remove all references to previously uploaded profile photos
             pinCode: null,
             starsFound: 0,
             updatedAt: new Date(),
@@ -2828,6 +2831,8 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date(),
         });
       }
+
+      return profilePhotoPaths;
     });
   }
 
