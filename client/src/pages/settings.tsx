@@ -1586,7 +1586,11 @@ export default function Settings() {
           if (!open) setFactoryResetConfirmation("");
         }}
       >
-        <AlertDialogContent data-testid="dialog-factory-reset" onOpenAutoFocus={(event) => event.preventDefault()}>
+        <AlertDialogContent
+          className="max-h-[calc(100dvh-2rem)] overflow-y-auto"
+          data-testid="dialog-factory-reset"
+          onOpenAutoFocus={(event) => event.preventDefault()}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="text-destructive">{t('settings.resetConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription asChild>
@@ -1630,6 +1634,7 @@ export default function Settings() {
                     id="factory-reset-confirmation"
                     value={factoryResetConfirmation}
                     onChange={(event) => setFactoryResetConfirmation(event.target.value)}
+                    onFocus={(event) => scrollFieldIntoView(event.currentTarget)}
                     placeholder={member?.familyName || ""}
                     autoComplete="off"
                     autoCapitalize="none"
