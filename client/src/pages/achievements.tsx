@@ -133,6 +133,16 @@ interface AchievementAward {
   };
 }
 
+const ACHIEVEMENT_BADGES: Record<string, string> = {
+  "perfect-week": "/achievement-badges/perfect-week.webp",
+  "monthly-leaderboard-1st": "/achievement-badges/monthly-champion.webp",
+  "lifetime-500": "/achievement-badges/lifetime-500.webp",
+  "lifetime-1000": "/achievement-badges/lifetime-1000.webp",
+  "lifetime-2000": "/achievement-badges/lifetime-2000.webp",
+  "star-collector": "/achievement-badges/star-collector.webp",
+  "legacy-collector": "/achievement-badges/legacy-collector.webp",
+};
+
 export default function Achievements() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -397,9 +407,17 @@ export default function Achievements() {
                 <CardHeader>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1">
-                      <div className="p-3 rounded-lg bg-primary/10 text-primary mt-1 flex-shrink-0">
-                        {getAchievementIcon(achievement.type)}
-                      </div>
+                      {ACHIEVEMENT_BADGES[achievement.slug] ? (
+                        <img
+                          src={ACHIEVEMENT_BADGES[achievement.slug]}
+                          alt=""
+                          className="mt-0.5 h-14 w-14 flex-shrink-0 object-contain drop-shadow-sm md:h-16 md:w-16"
+                        />
+                      ) : (
+                        <div className="p-3 rounded-lg bg-primary/10 text-primary mt-1 flex-shrink-0">
+                          {getAchievementIcon(achievement.type)}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <CardTitle className="text-lg">{t(`achievements.title_${achievement.slug}`)}</CardTitle>
@@ -588,9 +606,17 @@ export default function Achievements() {
                     <CardContent className="py-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                            {award.rewardType === "custom" ? <Gift className="h-5 w-5" /> : <Trophy className="h-5 w-5" />}
-                          </div>
+                          {ACHIEVEMENT_BADGES[award.achievementDefinition.slug] ? (
+                            <img
+                              src={ACHIEVEMENT_BADGES[award.achievementDefinition.slug]}
+                              alt=""
+                              className="h-12 w-12 flex-shrink-0 object-contain drop-shadow-sm"
+                            />
+                          ) : (
+                            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                              {award.rewardType === "custom" ? <Gift className="h-5 w-5" /> : <Trophy className="h-5 w-5" />}
+                            </div>
+                          )}
                           <div>
                             <div className="font-medium">{award.achievementDefinition.title}</div>
                             <div className="text-sm text-muted-foreground">
