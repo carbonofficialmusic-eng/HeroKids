@@ -68,6 +68,7 @@ import type { SubscriptionTier } from "@shared/tier-config";
 import { celebrateTaskCompletion } from "@/lib/confetti";
 import logoUrl from "@assets/littlechamps_logo_opt.webp";
 import familyGoalsIcon from "@assets/family-goals-icon.png";
+import { ACHIEVEMENT_BADGES } from "@/lib/achievement-badges";
 
 // Custom hook for sticky sidebar on desktop
 
@@ -1947,9 +1948,17 @@ export default function Dashboard() {
                     {specialRewards.slice(0, 2).map((achievement) => (
                       <Card key={achievement.id} className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-purple-500/20 flex-shrink-0">
-                            <Gift className="h-5 w-5 text-purple-500" />
-                          </div>
+                          {ACHIEVEMENT_BADGES[achievement.slug] ? (
+                            <img
+                              src={ACHIEVEMENT_BADGES[achievement.slug]}
+                              alt=""
+                              className="h-12 w-12 flex-shrink-0 object-contain drop-shadow-sm"
+                            />
+                          ) : (
+                            <div className="p-2 rounded-lg bg-purple-500/20 flex-shrink-0">
+                              <Gift className="h-5 w-5 text-purple-500" />
+                            </div>
+                          )}
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm truncate">{t(`achievements.title_${achievement.slug}`)}</h3>
                             <p className="text-sm text-purple-600 dark:text-purple-400 truncate">

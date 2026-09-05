@@ -17,6 +17,7 @@ import {
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import type { User, FamilyMember } from "@shared/schema";
+import { ACHIEVEMENT_BADGES } from "@/lib/achievement-badges";
 
 interface AchievementDefinition {
   id: string;
@@ -196,9 +197,17 @@ export default function MyAchievements() {
                   <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
                   <div className="p-4 flex items-center gap-3">
                     {/* Icon box */}
-                    <div className="relative flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-400/20 flex items-center justify-center shadow-inner overflow-hidden">
-                      <Gift className="h-7 w-7 text-violet-300" />
-                    </div>
+                    {ACHIEVEMENT_BADGES[achievement.slug] ? (
+                      <img
+                        src={ACHIEVEMENT_BADGES[achievement.slug]}
+                        alt=""
+                        className="h-14 w-14 flex-shrink-0 object-contain drop-shadow-md"
+                      />
+                    ) : (
+                      <div className="relative flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-400/20 flex items-center justify-center shadow-inner overflow-hidden">
+                        <Gift className="h-7 w-7 text-violet-300" />
+                      </div>
+                    )}
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-base text-white truncate" style={{ fontFamily: "Fredoka, sans-serif" }}>

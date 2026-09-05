@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import type { FamilyMember } from "@shared/schema";
 import { hasFeature, type SubscriptionTier } from "@shared/tier-config";
 import { isNativePlatform } from "@/lib/platform";
+import { ACHIEVEMENT_BADGES } from "@/lib/achievement-badges";
 
 // Debounced input component for text fields
 function DebouncedInput({ 
@@ -132,16 +133,6 @@ interface AchievementAward {
     color: string;
   };
 }
-
-const ACHIEVEMENT_BADGES: Record<string, string> = {
-  "perfect-week": "/achievement-badges/perfect-week.webp",
-  "monthly-leaderboard-1st": "/achievement-badges/monthly-champion.webp",
-  "lifetime-500": "/achievement-badges/lifetime-500.webp",
-  "lifetime-1000": "/achievement-badges/lifetime-1000.webp",
-  "lifetime-2000": "/achievement-badges/lifetime-2000.webp",
-  "star-collector": "/achievement-badges/star-collector.webp",
-  "legacy-collector": "/achievement-badges/legacy-collector.webp",
-};
 
 export default function Achievements() {
   const { t } = useTranslation();
