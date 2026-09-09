@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Trophy, Medal, Award } from "lucide-react";
+import { Trophy, Medal, Award, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { FamilyMember } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
@@ -14,135 +14,61 @@ interface LeaderboardProps {
 
 export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPrize }: LeaderboardProps) {
   const { t } = useTranslation();
-  const eligibleMembers = members.filter(m => !m.excludeFromLeaderboard);
-
+  const eligibleMembers = members.filter((m) => !m.excludeFromLeaderboard);
   const sortedMembers = [...eligibleMembers].sort((a, b) => {
-    const aPoints = period === "week" ? a.weeklyPoints : period === "month" ? a.monthlyPoints : a.totalPoints;
-    const bPoints = period === "week" ? b.weeklyPoints : period === "month" ? b.monthlyPoints : b.totalPoints;
-    return bPoints - aPoints;
+    const points = (m: FamilyMember) => period === "week" ? m.weeklyPoints : period === "month" ? m.monthlyPoints : m.totalPoints;
+    return points(b) - points(a);
   });
-
-  const getPoints = (member: FamilyMember) => {
-    return period === "week" ? member.weeklyPoints : period === "month" ? member.monthlyPoints : member.totalPoints;
-  };
-
+  const getPoints = (m: FamilyMember) => period === "week" ? m.weeklyPoints : period === "month" ? m.monthlyPoints : m.totalPoints;
   const top3 = sortedMembers.slice(0, 3);
   const rest = sortedMembers.slice(3);
+  const title = period === "week" ? t("leaderboard.thisWeeksLeaderboard") : period === "month" ? t("leaderboard.thisMonthsLeaderboard") : t("leaderboard.allTimeLeaderboard");
 
-  const getTrophyIcon = (rank: number) => {
-    if (rank === 0) return <Trophy className="h-8 w-8 landscape:h-5 landscape:w-5 text-yellow-500" />;
-    if (rank === 1) return <Medal className="h-7 w-7 landscape:h-4 landscape:w-4 text-gray-400" />;
-    if (rank === 2) return <Award className="h-6 w-6 landscape:h-4 landscape:w-4 text-amber-700" />;
-    return null;
-  };
+  const avatar = (m: FamilyMember, size: string) => (
+    <Avatar className={`${size} lc-podium-avatar`} style={{ borderColor: m.color }}>
+      <AvatarImage src={getAvatarUrl(m.activeSkinId, m.avatarUrl, m.useCustomAvatar, m.updatedAt)} />
+      <AvatarFallback style={{ backgroundColor: m.color }} className="text-white font-bold">{m.displayName[0]}</AvatarFallback>
+    </Avatar>
+  );
 
-  const getTitle = () => {
-    if (period === "week") return t('leaderboard.thisWeeksLeaderboard');
-    if (period === "month") return t('leaderboard.thisMonthsLeaderboard');
-    return t('leaderboard.allTimeLeaderboard');
-  };
+  const podiumPerson = (m: FamilyMember, rank: 1 | 2 | 3) => (
+    <div className={`lc-podium-place lc-podium-place-${rank}`} data-testid={`podium-rank-${rank}`}>
+      <div className="lc-medal">{rank === 1 ? <Trophy /> : rank === 2 ? <Medal /> : <Award />}</div>
+      {avatar(m, rank === 1 ? "h-20 w-20 sm:h-24 sm:w-24" : "h-16 w-16 sm:h-20 sm:w-20")}
+      <div className="lc-podium-name" data-testid={`text-member-name-${rank}`}>{m.displayName}</div>
+      <div className="lc-podium-points" data-testid={`text-member-points-${rank}`}>{getPoints(m)}</div>
+      <div className="lc-podium-block"><span>{rank}</span></div>
+    </div>
+  );
 
   return (
-    <Card className="p-6 landscape:p-3" data-testid="card-leaderboard">
-      <h2 className="text-2xl landscape:text-base font-bold font-accent mb-6 landscape:mb-2" data-testid="text-leaderboard-title">
-        {getTitle()}
-      </h2>
-      <p className="text-sm text-muted-foreground mb-6 landscape:mb-3" data-testid="text-leaderboard-subtitle">
-        {period === "month" && t('leaderboard.pointsEarnedMonth')}
-        {period === "week" && t('leaderboard.pointsEarnedWeek')}
-        {period === "all" && t('leaderboard.pointsEarnedAllTime')}
-      </p>
+    <Card className="lc-leaderboard-card p-4 sm:p-6" data-testid="card-leaderboard">
+      <div className="lc-leaderboard-heading">
+        <div className="lc-heading-kicker"><Sparkles /> {period === "month" ? t("dashboard.monthly") : t("dashboard.weekly")}</div>
+        <h2 data-testid="text-leaderboard-title">{title}</h2>
+        <p data-testid="text-leaderboard-subtitle">
+          {period === "month" ? t("leaderboard.pointsEarnedMonth") : period === "week" ? t("leaderboard.pointsEarnedWeek") : t("leaderboard.pointsEarnedAllTime")}
+        </p>
+      </div>
 
-      {/* Podium display for top 3 */}
       {top3.length > 0 && (
-        <div className="flex items-end justify-center gap-4 landscape:gap-3 mb-8 landscape:mb-3">
-          {/* 2nd place */}
-          {top3[1] && (
-            <div className="flex flex-col items-center" data-testid={`podium-rank-2`}>
-              <div className="mb-2 landscape:mb-1">{getTrophyIcon(1)}</div>
-              <Avatar className="h-12 w-12 landscape:h-8 landscape:w-8 mb-2 landscape:mb-1" style={{ borderWidth: "4px", borderColor: top3[1].color }}>
-                <AvatarImage src={getAvatarUrl(top3[1].activeSkinId, top3[1].avatarUrl, top3[1].useCustomAvatar, top3[1].updatedAt)} />
-                <AvatarFallback style={{ backgroundColor: top3[1].color }} className="text-white">
-                  {top3[1].displayName[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-sm landscape:text-xs font-semibold text-center" data-testid={`text-member-name-2`}>
-                {top3[1].displayName}
-              </div>
-              <div className="text-2xl landscape:text-base font-black font-accent gradient-text-achievement" data-testid={`text-member-points-2`}>
-                {getPoints(top3[1])}
-              </div>
-            </div>
-          )}
-
-          {/* 1st place - elevated */}
-          {top3[0] && (
-            <div className="flex flex-col items-center transform -translate-y-4 landscape:translate-y-0" data-testid={`podium-rank-1`}>
-              <div className="mb-2 landscape:mb-1">{getTrophyIcon(0)}</div>
-              <Avatar className="h-16 w-16 landscape:h-10 landscape:w-10 mb-2 landscape:mb-1" style={{ borderWidth: "4px", borderColor: top3[0].color }}>
-                <AvatarImage src={getAvatarUrl(top3[0].activeSkinId, top3[0].avatarUrl, top3[0].useCustomAvatar, top3[0].updatedAt)} />
-                <AvatarFallback style={{ backgroundColor: top3[0].color }} className="text-white">
-                  {top3[0].displayName[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-base landscape:text-xs font-bold text-center" data-testid={`text-member-name-1`}>
-                {top3[0].displayName}
-              </div>
-              <div className="text-3xl landscape:text-lg font-black font-accent gradient-text-winner" data-testid={`text-member-points-1`}>
-                {getPoints(top3[0])}
-              </div>
-            </div>
-          )}
-
-          {/* 3rd place */}
-          {top3[2] && (
-            <div className="flex flex-col items-center" data-testid={`podium-rank-3`}>
-              <div className="mb-2 landscape:mb-1">{getTrophyIcon(2)}</div>
-              <Avatar className="h-12 w-12 landscape:h-8 landscape:w-8 mb-2 landscape:mb-1" style={{ borderWidth: "4px", borderColor: top3[2].color }}>
-                <AvatarImage src={getAvatarUrl(top3[2].activeSkinId, top3[2].avatarUrl, top3[2].useCustomAvatar, top3[2].updatedAt)} />
-                <AvatarFallback style={{ backgroundColor: top3[2].color }} className="text-white">
-                  {top3[2].displayName[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-sm landscape:text-xs font-semibold text-center" data-testid={`text-member-name-3`}>
-                {top3[2].displayName}
-              </div>
-              <div className="text-2xl landscape:text-base font-black font-accent gradient-text-achievement" data-testid={`text-member-points-3`}>
-                {getPoints(top3[2])}
-              </div>
-            </div>
-          )}
+        <div className="lc-podium" aria-label={title}>
+          {top3[1] && podiumPerson(top3[1], 2)}
+          {top3[0] && podiumPerson(top3[0], 1)}
+          {top3[2] && podiumPerson(top3[2], 3)}
         </div>
       )}
 
-      {/* Rest of the members */}
       {rest.length > 0 && (
-        <div className="space-y-2 landscape:space-y-1">
-          {rest.map((member, index) => {
+        <div className="lc-rank-list">
+          {rest.map((m, index) => {
             const rank = index + 4;
             return (
-              <div
-                key={member.id}
-                className="flex items-center gap-3 p-3 landscape:p-2 rounded-lg bg-card"
-                data-testid={`row-member-${member.id}`}
-              >
-                <div className="w-6 text-center font-bold text-muted-foreground" data-testid={`text-rank-${rank}`}>
-                  {rank}
-                </div>
-                <Avatar className="h-10 w-10 landscape:h-7 landscape:w-7">
-                  <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} />
-                  <AvatarFallback style={{ backgroundColor: member.color }} className="text-white">
-                    {member.displayName[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="font-semibold landscape:text-sm" data-testid={`text-member-name-${rank}`}>
-                    {member.displayName}
-                  </div>
-                </div>
-                <div className="text-xl landscape:text-sm font-black font-accent" data-testid={`text-member-points-${rank}`}>
-                  {getPoints(member)}
-                </div>
+              <div key={m.id} className="lc-rank-row" data-testid={`row-member-${m.id}`}>
+                <div className="lc-rank-number" data-testid={`text-rank-${rank}`}>{rank}</div>
+                {avatar(m, "h-11 w-11")}
+                <div className="lc-rank-name" data-testid={`text-member-name-${rank}`}>{m.displayName}</div>
+                <div className="lc-rank-points" data-testid={`text-member-points-${rank}`}>{getPoints(m)}</div>
               </div>
             );
           })}
@@ -150,34 +76,16 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
       )}
 
       {eligibleMembers.length === 0 && (
-        <div className="text-center py-12 landscape:py-4" data-testid="leaderboard-empty-state">
-          <Trophy className="h-16 w-16 landscape:h-10 landscape:w-10 mx-auto mb-4 landscape:mb-2 text-muted-foreground" />
-          <p className="text-lg landscape:text-sm text-muted-foreground" data-testid="leaderboard-empty-message">
-            {members.length === 0
-              ? t('leaderboard.noMembersYet')
-              : t('leaderboard.allExcluded')
-            }
+        <div className="text-center py-12" data-testid="leaderboard-empty-state">
+          <Trophy className="h-14 w-14 mx-auto mb-4 text-cyan-300/60" />
+          <p className="text-lg text-muted-foreground" data-testid="leaderboard-empty-message">
+            {members.length === 0 ? t("leaderboard.noMembersYet") : t("leaderboard.allExcluded")}
           </p>
         </div>
       )}
 
-      {/* Prize Display */}
-      {period === "week" && weeklyPrize && (
-        <div className="mt-6 landscape:mt-3 p-4 landscape:p-2 bg-primary/10 rounded-lg border border-primary/20">
-          <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-            <Trophy className="h-4 w-4" />
-            <span>{t('leaderboard.weeklyPrize')}: {weeklyPrize}</span>
-          </div>
-        </div>
-      )}
-
-      {period === "month" && monthlyPrize && (
-        <div className="mt-6 landscape:mt-3 p-4 landscape:p-2 bg-primary/10 rounded-lg border border-primary/20">
-          <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-            <Trophy className="h-4 w-4" />
-            <span>{t('leaderboard.monthlyPrize')}: {monthlyPrize}</span>
-          </div>
-        </div>
+      {((period === "week" && weeklyPrize) || (period === "month" && monthlyPrize)) && (
+        <div className="lc-prize"><Trophy /> <span>{period === "week" ? t("leaderboard.weeklyPrize") : t("leaderboard.monthlyPrize")}: {period === "week" ? weeklyPrize : monthlyPrize}</span></div>
       )}
     </Card>
   );

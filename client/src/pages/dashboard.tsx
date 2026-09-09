@@ -1192,7 +1192,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-clip">
+    <div className="lc-dashboard min-h-screen overflow-x-clip">
       {/* Header — position:fixed so it never scrolls away in WKWebView */}
       <header
         data-app-header
@@ -1233,7 +1233,7 @@ export default function Dashboard() {
               const badge = (
                 <Badge
                   variant="secondary"
-                  className="cursor-pointer hover-elevate"
+                   className="lc-family-badge cursor-pointer hover-elevate"
                   data-testid="badge-current-tier"
                 >
                   <Crown className="h-3 w-3 mr-1" />
@@ -1338,7 +1338,7 @@ export default function Dashboard() {
                       </Avatar>
                     </button>
                     <Link href="/skins" data-testid="link-stars-to-skins-parent" data-tour="tour-skins">
-                      <div className="flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate">
+                      <div className="lc-star-chip flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate">
                         <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                         <span className="text-base font-semibold" data-testid="text-parent-stars-header">
                           {(starData?.starsFound ?? member.starsFound) ?? 0}/{TOTAL_HIDDEN_STARS}
@@ -1348,7 +1348,7 @@ export default function Dashboard() {
                     <button
                       data-testid="button-scroll-to-pinboard"
                       data-tour="tour-pinboard"
-                      className="flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate"
+                      className="lc-icon-button flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate"
                       onClick={() => {
                         const el = document.getElementById("pinboard");
                         if (el) scrollToPinboard(el);
@@ -1358,7 +1358,7 @@ export default function Dashboard() {
                     </button>
                   </div>
                   {/* Right: Points box */}
-                  <div className="bg-card/80 p-4 rounded-2xl border min-w-[220px]">
+                  <div className="lc-points-card bg-card/80 p-4 rounded-2xl border min-w-[220px]">
                     <p className="text-xs text-muted-foreground mb-2 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
                     <div className="space-y-2">
                       <div className="text-center pb-2 border-b border-border">
@@ -1383,8 +1383,8 @@ export default function Dashboard() {
                 {/* Row 1: Approvals, Rewards Board */}
                 <div className="relative w-full">
                   <Link href="/approvals" className="w-full block">
-                    <Button variant="card" data-testid="button-approvals" data-tour="tour-approvals" className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3">
-                      <span className="w-6 flex-shrink-0 flex justify-center">
+                      <Button variant="card" data-testid="button-approvals" data-tour="tour-approvals" className="lc-action-button lc-action-violet w-full min-h-14 h-auto py-3 justify-start px-4 gap-3">
+                       <span className="lc-icon-bubble w-6 flex-shrink-0 flex justify-center">
                         <ClipboardCheck className="h-5 w-5" />
                       </span>
                       <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.approvals")}</span>
@@ -1398,8 +1398,8 @@ export default function Dashboard() {
                 </div>
                 <div className="relative w-full">
                   <Link href="/rewards-board" className="w-full block">
-                    <Button variant="card" data-testid="button-rewards-board" data-tour="tour-rewards-board" className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3">
-                      <span className="w-6 flex-shrink-0 flex justify-center">
+                    <Button variant="card" data-testid="button-rewards-board" data-tour="tour-rewards-board" className="lc-action-button lc-action-green w-full min-h-14 h-auto py-3 justify-start px-4 gap-3">
+                      <span className="lc-icon-bubble w-6 flex-shrink-0 flex justify-center">
                         <Gift className="h-5 w-5" />
                       </span>
                       <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.rewardsBoard")}</span>
@@ -1413,7 +1413,7 @@ export default function Dashboard() {
                 </div>
                 {/* Row 2: Family Goals, Send Points */}
                 <Link href="/family-goals" className="w-full">
-                  <Button variant="card" data-testid="button-family-goals" data-tour="tour-family-goals" className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3 whitespace-normal">
+                   <Button variant="card" data-testid="button-family-goals" data-tour="tour-family-goals" className="lc-action-button lc-action-cyan w-full min-h-14 h-auto py-3 justify-start px-4 gap-3 whitespace-normal">
                     <span className="w-11 flex-shrink-0 flex justify-center">
                       <img src={familyGoalsIcon} alt="" className="h-11 w-11 object-contain" />
                     </span>
@@ -1424,14 +1424,14 @@ export default function Dashboard() {
                   variant="card"
                   data-testid="button-send-points"
                   data-tour="tour-send-points"
-                  className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3 whitespace-normal"
+                   className="lc-action-button lc-action-orange w-full min-h-14 h-auto py-3 justify-start px-4 gap-3 whitespace-normal"
                   onClick={() => {
                     setSelectedPointsRecipients([]);
                     setPointsAmount("");
                     setSendPointsOpen(true);
                   }}
                 >
-                  <span className="w-6 flex-shrink-0 flex justify-center">
+                   <span className="lc-icon-bubble w-6 flex-shrink-0 flex justify-center">
                     <Zap className="h-5 w-5 text-amber-500" />
                   </span>
                   <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.sendPoints", "Punkte senden")}</span>
@@ -1444,9 +1444,9 @@ export default function Dashboard() {
                   }}
                   data-testid="button-add-task"
                   data-tour="tour-add-task"
-                  className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
+                   className="lc-action-button lc-action-cyan w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
                 >
-                  <span className="w-6 flex-shrink-0 flex justify-center">
+                   <span className="lc-icon-bubble w-6 flex-shrink-0 flex justify-center">
                     <Plus className="h-5 w-5" />
                   </span>
                   <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.addTask")}</span>
@@ -1458,9 +1458,9 @@ export default function Dashboard() {
                   }}
                   data-testid="button-add-reward"
                   data-tour="tour-add-reward"
-                  className="w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
+                   className="lc-action-button lc-action-gold w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
                 >
-                  <span className="w-6 flex-shrink-0 flex justify-center">
+                   <span className="lc-icon-bubble w-6 flex-shrink-0 flex justify-center">
                     <Plus className="h-5 w-5" />
                   </span>
                   <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.addReward")}</span>
@@ -1471,12 +1471,12 @@ export default function Dashboard() {
               {/* Task Filter Tabs */}
               {activeTasks.length > 0 && (
                 <div className="flex items-center gap-2 mb-4 flex-wrap">
-                  <div className="flex bg-muted rounded-lg p-1 gap-1 flex-wrap">
+                   <div className="lc-segmented flex bg-muted rounded-lg p-1 gap-1 flex-wrap">
                     <Button
                       variant={taskFilter === "daily" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskFilter("daily")}
-                      className="text-xs px-2"
+                       className="lc-filter-button text-xs px-2"
                       data-testid="button-filter-daily"
                     >
                       <RefreshCw className="h-3 w-3 mr-1 flex-shrink-0" />
@@ -1486,7 +1486,7 @@ export default function Dashboard() {
                       variant={taskFilter === "weekly" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskFilter("weekly")}
-                      className="text-xs px-2"
+                       className="lc-filter-button text-xs px-2"
                       data-testid="button-filter-weekly"
                     >
                       {t("dashboard.filterWeekly")}
@@ -1495,7 +1495,7 @@ export default function Dashboard() {
                       variant={taskFilter === "monthly" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskFilter("monthly")}
-                      className="text-xs px-2"
+                       className="lc-filter-button text-xs px-2"
                       data-testid="button-filter-monthly"
                     >
                       {t("dashboard.filterMonthly")}
@@ -1504,7 +1504,7 @@ export default function Dashboard() {
                       variant={taskFilter === "onetime" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskFilter("onetime")}
-                      className="text-xs px-2"
+                       className="lc-filter-button text-xs px-2"
                       data-testid="button-filter-onetime"
                     >
                       <Target className="h-3 w-3 mr-1 flex-shrink-0" />
@@ -1514,7 +1514,7 @@ export default function Dashboard() {
                       variant={taskFilter === "all" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskFilter("all")}
-                      className="text-xs px-2"
+                       className="lc-filter-button text-xs px-2"
                       data-testid="button-filter-all"
                     >
                       {t("dashboard.filterAll")}
@@ -1523,7 +1523,7 @@ export default function Dashboard() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className={`ml-auto bg-card border-2 border-border shadow-sm toggle-elevate${dashboardView === "grid" ? " toggle-elevated" : ""}`}
+                     className={`lc-icon-button ml-auto bg-card border-2 border-border shadow-sm toggle-elevate${dashboardView === "grid" ? " toggle-elevated" : ""}`}
                     onClick={() => setDashboardView(dashboardView === "list" ? "grid" : "list")}
                     data-testid="button-toggle-dashboard-view"
                   >
@@ -1988,7 +1988,7 @@ export default function Dashboard() {
               {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
                 <div className="mb-4">
                   <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
-                    <TabsList className="grid w-full grid-cols-2">
+                    <TabsList className="lc-leaderboard-tabs grid w-full grid-cols-2">
                       <TabsTrigger value="week" data-testid="tab-leaderboard-week">{t("dashboard.weekly")}</TabsTrigger>
                       <TabsTrigger value="month" data-testid="tab-leaderboard-month">{t("dashboard.monthly")}</TabsTrigger>
                     </TabsList>
@@ -2110,7 +2110,7 @@ export default function Dashboard() {
                 <TabsContent value="leaderboard" className="mt-6 space-y-4">
                   {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
                     <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
-                      <TabsList className="grid w-full grid-cols-2">
+                      <TabsList className="lc-leaderboard-tabs grid w-full grid-cols-2">
                         <TabsTrigger value="week" data-testid="tab-leaderboard-period-week">{t("dashboard.weekly")}</TabsTrigger>
                         <TabsTrigger value="month" data-testid="tab-leaderboard-period-month">{t("dashboard.monthly")}</TabsTrigger>
                       </TabsList>
