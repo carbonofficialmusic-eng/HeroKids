@@ -3010,7 +3010,7 @@ export default function KidDashboard() {
 
         {/* Family Goals Section */}
         {goals.filter(g => g.isActive).length > 0 && (
-          <div className="space-y-6">
+          <div className="lc-kid-goals space-y-6">
             <div className="flex items-center gap-3">
               <img src={familyGoalsIcon} alt="" className="h-32 w-32 object-contain flex-shrink-0 drop-shadow-sm -my-4" />
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
@@ -3025,10 +3025,10 @@ export default function KidDashboard() {
               
               return (
                 <div key={goal.id}>
-                  <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-2 border-blue-500/30 rounded-3xl">
+                   <Card className="lc-kid-goal-card p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-2 border-blue-500/30 rounded-3xl">
                     <div className="space-y-4">
                       <div className="flex items-start gap-4">
-                        <div className="text-5xl flex-shrink-0">{goal.iconEmoji}</div>
+                         <div className="lc-kid-goal-icon text-5xl flex-shrink-0">{goal.iconEmoji}</div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-2xl font-bold mb-1" style={{ fontFamily: "Fredoka, sans-serif" }}>
                             {goal.title}
@@ -3062,7 +3062,7 @@ export default function KidDashboard() {
                             {t("kidDashboard.goalProgress", { current: goal.currentPoints, target: goal.targetPoints })}
                           </span>
                         </div>
-                        <Progress value={progress} className="h-3" />
+                         <Progress value={progress} className="lc-kid-goal-progress h-3" />
                       </div>
 
                       {/* Contributors list - shows who has contributed this period */}
@@ -3108,7 +3108,7 @@ export default function KidDashboard() {
                               onClick={() => contributeMutation.mutate(goal.id)}
                               disabled={contributeMutation.isPending || member.totalPoints < goal.contributionAmount}
                               data-testid={`button-contribute-${goal.id}`}
-                              className="font-bold rounded-xl"
+                               className="lc-kid-goal-cta font-bold rounded-xl"
                             >
                               <TrendingUp className="h-4 w-4 mr-2" />
                               {t("kidDashboard.contributePoints", { count: goal.contributionAmount })}

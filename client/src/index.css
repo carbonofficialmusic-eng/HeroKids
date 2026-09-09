@@ -1134,6 +1134,83 @@ html {
   color: #ffe071;
   background: rgba(167,99,14,.22);
 }
+
+.lc-kid-goals {
+  position: relative;
+}
+.lc-kid-goals > .flex:first-child h2 {
+  color: #f5fbff;
+  text-shadow: 0 3px 0 #18375f, 0 6px 12px rgba(0,0,0,.32);
+}
+.lc-kid-goal-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(61,194,238,.38) !important;
+  border-radius: 1.35rem !important;
+  background: linear-gradient(145deg,#142d4d,#0d1c34) !important;
+  box-shadow: 0 11px 22px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-kid-goal-card::after {
+  content: "";
+  position: absolute;
+  right: 1rem;
+  top: .8rem;
+  width: .45rem;
+  height: .45rem;
+  border-radius: 50%;
+  background: #64ddff;
+  box-shadow: -1.2rem 2.2rem 0 #ffc542, -2.5rem -.2rem 0 #a97aff;
+}
+.lc-kid-goal-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 4.35rem;
+  height: 4.35rem;
+  border: 1px solid rgba(76,210,248,.5);
+  border-radius: 1.2rem;
+  background: radial-gradient(circle at 45% 35%,rgba(27,194,241,.38),rgba(28,66,124,.25));
+  box-shadow: inset 0 1px rgba(255,255,255,.2), 0 6px 12px rgba(0,0,0,.3);
+}
+.lc-kid-goal-card h3 {
+  position: relative;
+  z-index: 1;
+  color: #f5fbff;
+  letter-spacing: -.01em;
+  text-shadow: 0 2px 0 rgba(19,52,91,.8);
+}
+.lc-kid-goal-card [role="progressbar"] {
+  height: .78rem;
+  border: 1px solid rgba(77,151,224,.4);
+  border-radius: 999px;
+  background: #08172d;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.38);
+}
+.lc-kid-goal-card [role="progressbar"] > div {
+  border-radius: inherit;
+  background: linear-gradient(90deg,#12b9e7,#6ce3ff) !important;
+  box-shadow: 0 0 9px rgba(29,202,239,.28), inset 0 1px rgba(255,255,255,.4);
+}
+.lc-kid-goal-card .border-t {
+  border-color: rgba(93,151,217,.28);
+}
+.lc-kid-goal-card .bg-green-500\/10 {
+  background: rgba(38,185,107,.14) !important;
+  border-color: rgba(82,220,155,.35) !important;
+  color: #86efbb !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.08);
+}
+.lc-kid-goal-cta {
+  border: 1px solid rgba(104,224,255,.42) !important;
+  border-radius: .82rem !important;
+  color: #fff !important;
+  background: linear-gradient(135deg,#087eb9,#19c9ef) !important;
+  box-shadow: 0 4px 0 #075278, 0 7px 12px rgba(13,186,232,.2);
+  transition: transform .16s ease, filter .16s ease;
+}
+.lc-kid-goal-cta:hover { filter: brightness(1.1); transform: translateY(-2px); }
+.lc-kid-goal-cta:active { transform: translateY(2px); }
 [data-testid="dialog-delete-goal"],
 [data-testid="dialog-reject"],
 [data-testid="dialog-edit-reward"] {
