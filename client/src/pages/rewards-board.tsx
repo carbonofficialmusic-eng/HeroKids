@@ -677,7 +677,7 @@ export default function RewardsBoard() {
   }
 
   return (
-    <div className="min-h-screen pb-20 relative overflow-x-hidden" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
+    <div className="lc-rewards-board-page min-h-screen pb-20 relative overflow-x-hidden" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
       {/* Atmosphere glow */}
       <div className="pointer-events-none fixed inset-0 z-0" style={{ background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(251,191,36,0.13) 0%, rgba(245,158,11,0.06) 45%, transparent 75%)" }} />
 
@@ -747,7 +747,7 @@ export default function RewardsBoard() {
                 .map((request) => {
                   const requester = familyMembers.find(m => m.id === request.requestedBy) as FamilyMember & { activeSkinId?: string; useCustomAvatar?: boolean; updatedAt?: string };
                   return (
-                    <Card key={request.id} className="p-6" data-testid={`card-request-${request.id}`}>
+                    <Card key={request.id} className="lc-rewards-board-card p-6" data-testid={`card-request-${request.id}`}>
                       <div className="flex items-start gap-3 mb-4">
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={getAvatarUrl(requester?.activeSkinId, requester?.avatarUrl, requester?.useCustomAvatar, requester?.updatedAt)} />
@@ -831,7 +831,7 @@ export default function RewardsBoard() {
               const pointsPerPerson = Math.ceil(shared.originalPointsSpent / totalParticipants);
               
               return (
-                <Card key={shared.id} className="border-primary/20" data-testid={`card-shared-${shared.id}`}>
+                <Card key={shared.id} className="lc-rewards-board-card border-primary/20" data-testid={`card-shared-${shared.id}`}>
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3 flex-1">
@@ -1015,7 +1015,7 @@ export default function RewardsBoard() {
           ) : (
           <div className="grid grid-cols-1 gap-4">
           {displayRedemptions.map((redemption) => (
-            <Card key={redemption.id} data-testid={`card-redemption-${redemption.id}`}>
+            <Card key={redemption.id} className="lc-rewards-board-card" data-testid={`card-redemption-${redemption.id}`}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3 flex-1">

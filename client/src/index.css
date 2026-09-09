@@ -995,6 +995,153 @@ html {
   box-shadow: 0 4px 0 #7d3d0c, 0 7px 12px rgba(153,79,13,.2);
 }
 .lc-reward-page-button:disabled { color: #aab4c9 !important; background: #29344a !important; box-shadow: 0 3px 0 #151c2b; }
+
+/* Management pages use the same tokens, but keep their own scope so the
+   dashboard and task cards remain untouched. */
+.lc-family-goals-page,
+.lc-approvals-page,
+.lc-rewards-board-page { color: var(--lc-text-primary); }
+.lc-family-goals-page h1,
+.lc-approvals-page h1,
+.lc-rewards-board-page h1 {
+  color: #f7fbff;
+  text-shadow: 0 3px 0 #18375f, 0 6px 12px rgba(0,0,0,.3);
+}
+.lc-family-goals-page > div > div:first-child button,
+.lc-approvals-page > div > a button,
+.lc-rewards-board-page [data-testid="button-back-dashboard"] {
+  border-radius: .82rem;
+  color: #d8ecff;
+  background: #132744;
+  border-color: rgba(100,157,226,.4);
+  box-shadow: 0 3px 0 rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-feature-card {
+  border-radius: 1.2rem !important;
+  border-color: rgba(61,193,238,.35) !important;
+  background: linear-gradient(145deg,#122b4a,#0c1b33) !important;
+  box-shadow: 0 9px 18px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.07);
+}
+.lc-feature-card > div > div:first-child {
+  display: grid;
+  place-items: center;
+  min-width: 3.2rem;
+  min-height: 3.2rem;
+  border-radius: 1rem;
+  background: rgba(23,154,203,.2);
+  box-shadow: inset 0 1px rgba(255,255,255,.16);
+}
+.lc-feature-card button:not([data-testid*="back"]) {
+  border-radius: .8rem;
+  color: #fff;
+  background: linear-gradient(135deg,#087eb9,#19c9ef);
+  box-shadow: 0 3px 0 #075278;
+}
+.lc-goal-management-card {
+  border-radius: 1.35rem !important;
+  border-color: rgba(61,194,238,.36) !important;
+  background: linear-gradient(145deg,#142c4b,#0d1c34) !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,.27), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-goal-management-card h3 { color: #f4fbff; }
+.lc-goal-management-icon {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border: 1px solid rgba(75,208,246,.45);
+  border-radius: 1.1rem;
+  background: radial-gradient(circle,rgba(22,185,234,.3),rgba(29,67,123,.22));
+  box-shadow: inset 0 1px rgba(255,255,255,.18), 0 5px 10px rgba(0,0,0,.28);
+}
+.lc-goal-management-card [role="progressbar"] {
+  height: .75rem;
+  border: 1px solid rgba(77,151,224,.38);
+  border-radius: 999px;
+  background: #08172d;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.35);
+}
+.lc-goal-management-card [role="progressbar"] > div {
+  border-radius: inherit;
+  background: linear-gradient(90deg,#13b8e6,#6be3ff) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.35);
+}
+.lc-goal-management-card button:not([data-testid*="edit"]):not([data-testid*="delete"]) {
+  border-radius: .78rem;
+  color: #fff;
+  background: linear-gradient(135deg,#087eb9,#19c9ef);
+  box-shadow: 0 3px 0 #075278;
+}
+.lc-goal-completed {
+  border: 1px solid rgba(83,220,154,.28) !important;
+  border-radius: 1rem !important;
+  background: #10283a !important;
+}
+.lc-approvals-page h2 { color: #eef7ff; }
+.lc-approvals-page [data-testid^="badge-"] {
+  border: 1px solid rgba(73,200,238,.4);
+  color: #9eeaff;
+  background: rgba(22,135,181,.24);
+}
+.lc-approval-card {
+  border: 1px solid rgba(76,143,216,.34) !important;
+  border-radius: 1.2rem !important;
+  background: linear-gradient(145deg,#142945,#0e1e36) !important;
+  box-shadow: 0 9px 18px rgba(0,0,0,.23), inset 0 1px rgba(255,255,255,.07);
+}
+.lc-approval-card [data-testid^="button-approve"] {
+  border-radius: .75rem;
+  background: linear-gradient(135deg,#24904b,#60d45c);
+  box-shadow: 0 3px 0 #175d31;
+}
+.lc-approval-card [data-testid^="button-reject"],
+.lc-approval-card [data-testid^="button-decline"] {
+  border-radius: .75rem;
+  border-color: rgba(246,124,113,.46);
+}
+.lc-proof-area {
+  border-color: rgba(98,156,220,.36) !important;
+  border-radius: .9rem !important;
+  background: #0a172b;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.35);
+}
+.lc-bulk-action-bar {
+  border-color: rgba(77,145,216,.4);
+  background: rgba(9,24,45,.94) !important;
+  box-shadow: 0 -8px 20px rgba(0,0,0,.22);
+}
+.lc-rewards-board-page h2 { color: #fff0c1; }
+.lc-rewards-board-page .lc-rewards-board-card {
+  border: 1px solid rgba(231,158,41,.38) !important;
+  border-radius: 1.25rem !important;
+  background: linear-gradient(145deg,#2b2630,#171c2c) !important;
+  box-shadow: 0 10px 19px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-rewards-board-page .lc-rewards-board-card [data-testid^="button-approve"],
+.lc-rewards-board-page .lc-rewards-board-card [data-testid^="button-finalize"],
+.lc-rewards-board-page .lc-rewards-board-card [data-testid^="button-join"] {
+  border-radius: .75rem;
+  color: #fff;
+  background: linear-gradient(135deg,#c16a13,#efaa20);
+  box-shadow: 0 3px 0 #793c0b;
+}
+.lc-rewards-board-page .lc-rewards-board-card [data-testid^="button-decline"],
+.lc-rewards-board-page .lc-rewards-board-card [data-testid^="button-cancel"] {
+  border-radius: .75rem;
+}
+.lc-rewards-board-page .lc-rewards-board-card [data-testid^="badge-"] {
+  border-color: rgba(255,205,72,.4);
+  color: #ffe071;
+  background: rgba(167,99,14,.22);
+}
+[data-testid="dialog-delete-goal"],
+[data-testid="dialog-reject"],
+[data-testid="dialog-edit-reward"] {
+  border: 1px solid rgba(91,145,216,.42);
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg,#142945,#0d1b32);
+  box-shadow: 0 18px 40px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.08);
+}
 @media (max-width: 480px) {
   .lc-podium { min-height: 15rem; gap: .1rem; }
   .lc-podium-place { min-width: 5.5rem; }

@@ -268,7 +268,7 @@ export default function FamilyGoals() {
   const completedGoals = goals.filter((goal) => !goal.isActive && goal.completedAt);
 
   return (
-    <div className="min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
+    <div className="lc-family-goals-page min-h-screen p-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="mb-8">
           <Link href="/dashboard">
@@ -292,7 +292,7 @@ export default function FamilyGoals() {
         </div>
 
         {member?.role === "parent" && !hasGoalsFeature && !!familyData && (
-          <Card className="p-6 bg-card" data-testid="card-goals-upgrade-prompt">
+          <Card className="lc-feature-card p-6 bg-card" data-testid="card-goals-upgrade-prompt">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-muted rounded-lg">
                 <Lock className="h-6 w-6 text-muted-foreground" />
@@ -314,7 +314,7 @@ export default function FamilyGoals() {
         )}
 
         {member?.role === "parent" && hasGoalsFeature && (
-          <Card className="p-6 bg-card border-2 border-primary/20">
+          <Card className="lc-feature-card p-6 bg-card border-2 border-primary/20">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-primary/10 rounded-lg">
                 <Plus className="h-6 w-6 text-primary" />
@@ -358,7 +358,7 @@ export default function FamilyGoals() {
             return (
               <div key={goal.id} className="space-y-0">
                 {/* Main Goal Card */}
-                <Card className="overflow-hidden relative" data-testid={`card-goal-${goal.id}`}>
+                <Card className="lc-goal-management-card overflow-hidden relative" data-testid={`card-goal-${goal.id}`}>
                   <div className="p-6">
                     {member?.role === "parent" && (
                       <div className="absolute top-4 right-4 z-10 flex gap-1">
@@ -389,7 +389,7 @@ export default function FamilyGoals() {
                     
                     <div className="mb-4 pr-12">
                       <div className="flex items-start gap-3 sm:gap-4">
-                        <div className="text-4xl sm:text-5xl flex-shrink-0">{goal.iconEmoji}</div>
+                        <div className="lc-goal-management-icon text-4xl sm:text-5xl flex-shrink-0">{goal.iconEmoji}</div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-xl sm:text-2xl font-bold mb-1">{goal.title}</h3>
                           {goal.description && (
@@ -597,7 +597,7 @@ export default function FamilyGoals() {
             </h2>
             <div className="grid gap-4">
               {completedGoals.map((goal) => (
-                <Card key={goal.id} className="p-4 opacity-75" data-testid={`card-completed-goal-${goal.id}`}>
+                  <Card key={goal.id} className="lc-goal-completed p-4 opacity-75" data-testid={`card-completed-goal-${goal.id}`}>
                   <div className="flex items-center gap-4">
                     <div className="text-3xl">{goal.iconEmoji}</div>
                     <div className="flex-1">

@@ -283,7 +283,7 @@ export default function Approvals() {
   const isBusy = approveMutation.isPending || rejectMutation.isPending || isBulkApproving;
 
   return (
-    <div className="min-h-screen p-6 pb-32" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
+    <div className="lc-approvals-page min-h-screen p-6 pb-32" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))', paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
       <div className="max-w-5xl mx-auto">
         <Link href="/dashboard">
           <Button
@@ -320,7 +320,7 @@ export default function Approvals() {
               {pendingRewardRequests.map((request: any) => {
                 const requester = request.requester;
                 return (
-                  <Card key={request.id} data-testid={`card-reward-request-${request.id}`}>
+                   <Card key={request.id} className="lc-approval-card lc-approval-reward-card" data-testid={`card-reward-request-${request.id}`}>
                     <CardHeader>
                       <div className="flex items-start justify-between gap-2 flex-wrap">
                         <div className="flex items-start gap-3">
@@ -428,7 +428,7 @@ export default function Approvals() {
                 <Card
                   key={completion.id}
                   data-testid={`card-completion-${completion.id}`}
-                  className={isSelected ? "ring-2 ring-primary" : ""}
+                  className={`lc-approval-card ${isSelected ? "ring-2 ring-primary" : ""}`}
                   onClick={() => toggleSelection(completion.id)}
                   style={{ cursor: "pointer" }}
                 >
@@ -467,7 +467,7 @@ export default function Approvals() {
                     {completion.proofPhotoUrl && (
                       <div>
                         <Label className="text-sm font-medium mb-2 block">{t("approvals.photoProof")}</Label>
-                        <div className="relative rounded-md overflow-hidden border">
+                         <div className="lc-proof-area relative rounded-md overflow-hidden border">
                           <img
                             src={completion.proofPhotoUrl}
                             alt={t("approvals.photoProofAlt")}
@@ -510,7 +510,7 @@ export default function Approvals() {
       {/* Sticky Bulk Action Bar */}
       {someSelected && (
         <div
-          className="fixed bottom-0 left-0 right-0 z-50 p-4 border-t bg-background/95 backdrop-blur-sm"
+          className="lc-bulk-action-bar fixed bottom-0 left-0 right-0 z-50 p-4 border-t bg-background/95 backdrop-blur-sm"
           data-testid="bulk-action-bar"
         >
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 flex-wrap">
