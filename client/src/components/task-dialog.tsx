@@ -937,7 +937,7 @@ export function TaskDialog({
                   }
 
                   return (
-                    <FormItem>
+                    <FormItem className="lc-task-dialog-compact-top">
                       <FormLabel>{t('tasks.dueDateDesc')}</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -996,7 +996,7 @@ export function TaskDialog({
 
             {/* Shopping List Toggle - only for one-time tasks */}
             {recurrenceMode === "standard" && form.watch("recurrence") === "none" && (
-              <div className="space-y-3">
+              <div className="lc-task-dialog-compact-top space-y-3">
                 <div className={`flex items-center justify-between rounded-lg border p-4 ${!canUseShoppingList ? "opacity-60" : ""}`}>
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">

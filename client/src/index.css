@@ -889,6 +889,10 @@ html {
   margin-top: .3rem !important;
   padding-top: .35rem;
 }
+.lc-task-dialog-form > .lc-task-dialog-compact-top {
+  margin-top: .4rem !important;
+  padding-top: .5rem;
+}
 .lc-task-dialog label,
 .lc-task-dialog [data-slot="form-label"] { color: #e8f4ff; }
 .lc-task-dialog input,
