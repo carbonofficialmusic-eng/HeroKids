@@ -895,6 +895,10 @@ html {
   background: rgba(12, 41, 61, .66);
 }
 .lc-task-dialog [data-slot="card"]:hover { border-color: rgba(27,198,237,.78); background: rgba(20,65,88,.82); }
+.lc-task-dialog-form > .lc-task-dialog-option {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
 .lc-task-dialog-section-heading {
   display: flex; align-items: center; gap: .65rem;
   padding: .25rem 0 .1rem; border-bottom: 0 !important;

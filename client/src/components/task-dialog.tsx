@@ -1158,7 +1158,7 @@ export function TaskDialog({
               control={form.control}
               name="requiresProof"
               render={({ field }) => (
-                <FormItem className={`flex items-center justify-between rounded-lg border p-4 ${!canUsePhotoProof ? "opacity-60" : ""}`}>
+                <FormItem className={`lc-task-dialog-option flex items-center justify-between rounded-lg border p-4 ${!canUsePhotoProof ? "opacity-60" : ""}`}>
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <FormLabel className="text-base">{t('tasks.photoProof')}</FormLabel>
@@ -1203,7 +1203,7 @@ export function TaskDialog({
                 }
                 
                 return (
-                  <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                  <FormItem className="lc-task-dialog-option flex items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
                       <FormLabel className="text-base">{t('tasks.parentApproval')}</FormLabel>
                       <FormDescription>
@@ -1226,7 +1226,7 @@ export function TaskDialog({
             />
 
             {/* Important Task Toggle */}
-            <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="lc-task-dialog-option flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
                   <Pin className="h-4 w-4 text-amber-500" />
