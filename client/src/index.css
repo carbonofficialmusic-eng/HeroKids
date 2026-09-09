@@ -674,6 +674,164 @@ html {
   box-shadow: 0 3px 0 #4e229f, 0 4px 13px rgba(133,71,234,.32);
 }
 
+/* Skin gallery — the wardrobe room of the Little Champs game world.
+   Deliberately scoped: the gallery keeps its existing data and component
+   behavior while borrowing the dashboards' deep-space surfaces and chunky
+   reward language. */
+.lc-skins-gallery {
+  --lc-bg-dark: #071326;
+  --lc-surface-dark: #0d1b34;
+  --lc-surface-mid: #142746;
+  --lc-surface-high: #1c3559;
+  --lc-blue: #19c9ef;
+  --lc-violet: #9859f6;
+  --lc-gold: #ffc328;
+  --lc-ink: #f7fbff;
+  --lc-muted: #aebcda;
+  min-height: 100dvh;
+  color: var(--lc-ink);
+  background:
+    radial-gradient(circle at 12% 5%, rgba(33, 105, 185, .25), transparent 28rem),
+    radial-gradient(circle at 88% 24%, rgba(132, 67, 222, .19), transparent 25rem),
+    linear-gradient(145deg, #08152b 0%, #071326 52%, #10162f 100%);
+}
+.lc-skins-gallery::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .18;
+  background-image: radial-gradient(rgba(255,255,255,.32) .7px, transparent .7px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(to bottom, #000, transparent 82%);
+}
+.lc-skins-gallery > div {
+  position: relative;
+  z-index: 1;
+}
+.lc-skins-gallery .lc-skins-header {
+  padding: .35rem;
+}
+.lc-skins-gallery .lc-skin-back {
+  border: 1px solid rgba(125, 170, 226, .38);
+  border-radius: .9rem;
+  color: #d9e7ff;
+  background: rgba(16, 36, 67, .82);
+  box-shadow: 0 4px 0 rgba(2, 9, 22, .45), inset 0 1px rgba(255,255,255,.09);
+}
+.lc-skins-gallery .lc-points-chip,
+.lc-skins-gallery .lc-stars-chip,
+.lc-skins-gallery .lc-cards-chip {
+  border-radius: .85rem;
+  border: 1px solid rgba(117, 160, 224, .4);
+  box-shadow: 0 4px 0 rgba(2, 9, 22, .38), inset 0 1px rgba(255,255,255,.12);
+}
+.lc-skins-gallery .lc-points-chip {
+  color: #fff4bd;
+  background: linear-gradient(145deg, #a8640b, #e9a719);
+  border-color: rgba(255, 215, 92, .62);
+}
+.lc-skins-gallery .lc-stars-chip {
+  color: #ffe88a;
+  background: #15294a !important;
+  border-color: rgba(255, 203, 63, .6) !important;
+}
+.lc-skins-gallery .lc-cards-chip {
+  color: #fff;
+  background: linear-gradient(145deg, #693bc4, #a052ee) !important;
+  border-color: rgba(218, 181, 255, .45);
+}
+.lc-skins-gallery .lc-skins-tagline {
+  border: 1px solid rgba(128, 170, 231, .25);
+  color: #d3e4ff;
+  background: rgba(5, 15, 34, .72);
+  box-shadow: 0 5px 14px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-skins-gallery .lc-limit-banner {
+  border-color: rgba(255, 192, 50, .52);
+  color: #fff0b6;
+  background: rgba(84, 50, 10, .9);
+  box-shadow: 0 6px 16px rgba(0,0,0,.22);
+}
+.lc-skins-gallery .lc-limit-banner p { color: #ffe6a0; }
+.lc-skins-gallery .lc-limit-banner button {
+  color: #fff3bb;
+  border-color: rgba(255, 215, 91, .55);
+  background: rgba(160, 91, 7, .72);
+}
+.lc-skins-gallery .lc-preview-card,
+.lc-skins-gallery .lc-legacy-card,
+.lc-skins-gallery .lc-regular-card {
+  border: 1px solid rgba(87, 139, 213, .4);
+  border-radius: 1.35rem;
+  background: linear-gradient(145deg, rgba(24, 48, 84, .94), rgba(10, 23, 46, .94));
+  box-shadow: 0 14px 28px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-skins-gallery .lc-preview-card {
+  border-color: rgba(42, 194, 232, .4);
+}
+.lc-skins-gallery .lc-preview-art {
+  border: 1px solid rgba(105, 164, 226, .32);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(33, 201, 239, .2), transparent 48%),
+    linear-gradient(145deg, #17345b, #0a1833) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.1), inset 0 -18px 30px rgba(3,10,24,.24);
+}
+.lc-skins-gallery .lc-preview-art img:first-child { opacity: .55; }
+.lc-skins-gallery .lc-preview-info h2 { color: #fff; text-shadow: 0 2px 0 #173461; }
+.lc-skins-gallery .lc-preview-info .text-muted-foreground,
+.lc-skins-gallery .lc-unlock-progress .text-muted-foreground { color: var(--lc-muted); }
+.lc-skins-gallery .lc-preview-actions button {
+  min-height: 2.8rem;
+  border-radius: .9rem;
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 4px 0 rgba(0,0,0,.27), inset 0 1px rgba(255,255,255,.18);
+}
+.lc-skins-gallery .lc-preview-actions button:not(:disabled):not([data-variant="ghost"]) {
+  background: linear-gradient(135deg, #087cba, #19c9ef);
+}
+.lc-skins-gallery .lc-preview-actions button[data-variant="secondary"] {
+  color: #fff1b0;
+  background: linear-gradient(135deg, #9c640c, #e6a719);
+}
+.lc-skins-gallery .lc-preview-actions button:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+.lc-skins-gallery .lc-unlock-progress {
+  border-color: rgba(114, 155, 218, .25);
+}
+.lc-skins-gallery .lc-unlock-progress .bg-primary,
+.lc-skins-gallery .lc-unlock-progress .bg-yellow-400 {
+  background: linear-gradient(90deg, #18aede, #6be6ff) !important;
+  box-shadow: 0 0 10px rgba(25,201,239,.35);
+}
+.lc-skins-gallery .lc-legacy-card {
+  border-color: rgba(169, 105, 255, .48);
+  background: linear-gradient(145deg, rgba(55, 37, 94, .9), rgba(15, 24, 52, .95));
+}
+.lc-skins-gallery .lc-legacy-card h3 { color: #e1b5ff; }
+.lc-skins-gallery .lc-regular-card { background: rgba(13, 29, 54, .92); }
+.lc-skins-gallery .lc-mini-skin {
+  border-radius: .7rem;
+  background: rgba(5, 15, 34, .55);
+  box-shadow: 0 4px 8px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-skins-gallery .lc-mini-skin:hover {
+  filter: brightness(1.14);
+  box-shadow: 0 7px 13px rgba(0,0,0,.3), 0 0 0 1px rgba(25,201,239,.28);
+}
+.lc-skins-gallery .lc-mini-skin.border-primary {
+  border-color: var(--lc-blue);
+  box-shadow: 0 0 0 3px rgba(25,201,239,.24), 0 8px 16px rgba(0,0,0,.35);
+}
+@media (max-width: 640px) {
+  .lc-skins-gallery { padding-top: max(1rem, env(safe-area-inset-top)); }
+  .lc-skins-gallery .lc-preview-card,
+  .lc-skins-gallery .lc-legacy-card,
+  .lc-skins-gallery .lc-regular-card { border-radius: 1.1rem; }
+}
+
 .lc-leaderboard-card {
   position: relative;
   overflow: hidden;

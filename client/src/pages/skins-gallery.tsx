@@ -416,8 +416,8 @@ export default function SkinsGallery() {
       <div
         key={skin.id}
         onClick={handleClick}
-        className={`
-          relative cursor-pointer transition-all duration-200
+         className={`
+           lc-mini-skin relative cursor-pointer transition-all duration-200
           rounded-md border-2
           ${isSelected ? "border-primary border-4 ring-4 ring-primary/60 scale-110 shadow-lg shadow-primary/30" : "border-transparent"}
           ${isActive ? "ring-4 ring-yellow-400 ring-offset-2" : ""}
@@ -550,15 +550,15 @@ export default function SkinsGallery() {
 
   return (
     <>
-      <div className="min-h-screen p-4" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
+      <div className="lc-skins-gallery min-h-screen p-4" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div className="lc-skins-header flex flex-wrap items-center justify-between gap-2 mb-3">
             <Link href={dashboardUrl}>
               <Button 
                 variant="outline" 
                 size="sm"
-                className="bg-card/80 backdrop-blur-sm" 
+                className="lc-skin-back bg-card/80 backdrop-blur-sm"
                 data-testid="button-back-to-dashboard"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -567,21 +567,21 @@ export default function SkinsGallery() {
             </Link>
             
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="text-sm font-bold whitespace-nowrap" onClick={handleCheatTap}>
+               <Badge variant="secondary" className="lc-points-chip text-sm font-bold whitespace-nowrap" onClick={handleCheatTap}>
                 <Trophy className="h-4 w-4 mr-1" />
                 {totalEarned} {t('common.points')}
               </Badge>
               
               {/* Star counter for children */}
               {starStats.totalStars > 0 && (
-                <Badge variant="outline" className="text-xs sm:text-sm font-bold whitespace-nowrap bg-yellow-100 text-yellow-800 border-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-300 px-1.5 sm:px-2.5">
+                 <Badge variant="outline" className="lc-stars-chip text-xs sm:text-sm font-bold whitespace-nowrap bg-yellow-100 text-yellow-800 border-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-300 px-1.5 sm:px-2.5">
                   <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 fill-yellow-400" />
                   {starStats.starsFound}/{starStats.totalStars}
                 </Badge>
               )}
               
               {availableCards > 0 && (
-                <Badge className="text-base font-bold animate-pulse whitespace-nowrap">
+                 <Badge className="lc-cards-chip text-base font-bold animate-pulse whitespace-nowrap">
                   <Sparkles className="h-5 w-5 mr-1" />
                   {availableCards} {t('skins.cardsAvailable')}
                 </Badge>
@@ -591,7 +591,7 @@ export default function SkinsGallery() {
 
           {/* Tagline */}
           <div className="mb-4 text-center">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-xs font-bold tracking-widest uppercase text-white">
+             <span className="lc-skins-tagline inline-block px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-xs font-bold tracking-widest uppercase text-white">
               <span className="text-yellow-400">✦</span>{" "}
               {t('skins.tagline')}{" "}
               <span className="text-yellow-400">✦</span>
@@ -599,11 +599,11 @@ export default function SkinsGallery() {
           </div>
 
           {/* Wrapper so banner can float on mobile without pushing content */}
-          <div className="relative">
+             <div className="lc-skins-stage relative">
             {/* Tier limit banner — absolute on mobile (overlays skin card), static on desktop */}
             {tierLimitReached && maxSkins < 999 && (
               <div className="absolute top-0 left-0 right-0 z-20 lg:static lg:mb-2">
-                <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50/90 dark:bg-amber-950/80 dark:border-amber-700 px-4 py-3 backdrop-blur-sm">
+                 <div className="lc-limit-banner flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50/90 dark:bg-amber-950/80 dark:border-amber-700 px-4 py-3 backdrop-blur-sm">
                   <div className="flex items-center gap-2 min-w-0">
                     <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
                     <p className="text-sm text-amber-800 dark:text-amber-300 font-medium">
@@ -618,7 +618,7 @@ export default function SkinsGallery() {
             )}
 
           {/* Main Layout: Preview Left + Grid Right */}
-          <div ref={containerRef} className={`flex gap-4 relative ${isLandscapeMobile ? 'flex-row' : 'flex-col lg:flex-row'}`}>
+           <div ref={containerRef} className={`lc-skins-layout flex gap-4 relative ${isLandscapeMobile ? 'flex-row' : 'flex-col lg:flex-row'}`}>
             {/* Preview Panel - Left Side - JS-based sticky on desktop, normal on mobile */}
             <div className={`flex-shrink-0 ${isDesktop ? 'lg:w-80' : isLandscapeMobile ? 'w-36' : ''}`}>
               <div
@@ -627,9 +627,9 @@ export default function SkinsGallery() {
                   ? { position: 'sticky', top: '1rem', alignSelf: 'flex-start' }
                   : stickyStyle}
               >
-                <Card className={`bg-card/90 backdrop-blur-md ${isLandscapeMobile ? 'p-2' : 'p-4'}`}>
+                <Card className={`lc-preview-card bg-card/90 backdrop-blur-md ${isLandscapeMobile ? 'p-2' : 'p-4'}`}>
                 {/* Preview Image */}
-                <div className={`relative rounded-lg overflow-hidden bg-gradient-to-br from-muted to-card ${isLandscapeMobile ? 'aspect-square mb-2' : 'aspect-square mb-4'}`}>
+                <div className={`lc-preview-art relative rounded-lg overflow-hidden bg-gradient-to-br from-muted to-card ${isLandscapeMobile ? 'aspect-square mb-2' : 'aspect-square mb-4'}`}>
                   {previewSkin ? (
                     previewSkin.isDiscovered ? (
                       <>
@@ -678,7 +678,7 @@ export default function SkinsGallery() {
                 </div>
                 
                 {/* Preview Info */}
-                <div className={`text-center ${isLandscapeMobile ? 'mb-1' : 'mb-4'}`}>
+                <div className={`lc-preview-info text-center ${isLandscapeMobile ? 'mb-1' : 'mb-4'}`}>
                   <h2 className={`font-bold font-accent ${isLandscapeMobile ? 'text-sm' : 'text-xl'}`}>
                     {previewSkin 
                       ? (previewSkin.isDiscovered ? t(`skinNames.${previewSkin.id}`) : "???")
@@ -699,7 +699,7 @@ export default function SkinsGallery() {
                 </div>
                 
                 {/* Action Buttons */}
-                <div className={isLandscapeMobile ? "space-y-1" : "space-y-2"}>
+                <div className={`lc-preview-actions ${isLandscapeMobile ? "space-y-1" : "space-y-2"}`}>
                   {previewSkin ? (
                     previewSkin.isDiscovered ? (
                       <Button
@@ -774,7 +774,7 @@ export default function SkinsGallery() {
                 </div>
                 
                 {/* Progress to next unlock — hidden in landscape mobile (no room) */}
-                <div className={`mt-4 pt-4 border-t ${isLandscapeMobile ? 'hidden' : ''}`}>
+                <div className={`lc-unlock-progress mt-4 pt-4 border-t ${isLandscapeMobile ? 'hidden' : ''}`}>
                   {previewSkin && isLegacySkin(previewSkin.id) ? (
                     // Legacy skin - show star-based info
                     (() => {
@@ -834,10 +834,10 @@ export default function SkinsGallery() {
             </div>
 
             {/* Skins Grid - Right Side */}
-            <div className="flex-1">
+             <div className="lc-skin-collection flex-1">
               {/* Legacy Skins Section - unlocked via stars */}
               {legacySkins.length > 0 && (
-                <Card className="bg-gradient-to-br from-purple-500/20 to-card/80 backdrop-blur-md p-3 mb-4">
+                <Card className="lc-legacy-card bg-gradient-to-br from-purple-500/20 to-card/80 backdrop-blur-md p-3 mb-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Crown className="h-5 w-5 text-purple-400" />
                     <h3 className="font-bold font-accent text-purple-300">Little Champs Legacy</h3>
@@ -853,7 +853,7 @@ export default function SkinsGallery() {
               )}
 
               {/* Regular Skins Grid */}
-              <Card className="bg-card/80 backdrop-blur-md p-3">
+              <Card className="lc-regular-card bg-card/80 backdrop-blur-md p-3">
                 <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-8 xl:grid-cols-10 gap-2">
                   {regularSkins.map((skin, index) => renderMiniCard(skin, index))}
                 </div>
