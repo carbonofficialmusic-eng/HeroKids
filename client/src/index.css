@@ -1928,3 +1928,123 @@ html {
   }
 }
 
+/* Pricing — subscription choices presented as clear game progression tiers. */
+.lc-pricing-page {
+  min-height: 100dvh;
+  color: #f5f9ff;
+  background:
+    radial-gradient(circle at 10% 5%, rgba(21,155,211,.24), transparent 27rem),
+    radial-gradient(circle at 90% 20%, rgba(141,74,223,.22), transparent 28rem),
+    linear-gradient(160deg, #071326 0%, #0c1b36 50%, #0a162c 100%);
+}
+.lc-pricing-header {
+  border-bottom: 1px solid rgba(112,159,222,.22);
+  background: rgba(7,19,38,.9) !important;
+  backdrop-filter: blur(14px);
+}
+.lc-pricing-header button {
+  border-color: rgba(116,165,231,.34) !important;
+  border-radius: .85rem;
+  color: #dceaff !important;
+  background: #142c4f !important;
+  box-shadow: 0 4px 0 #061329, inset 0 1px rgba(255,255,255,.1);
+}
+.lc-pricing-shell { position: relative; z-index: 1; }
+.lc-pricing-shell > h1 {
+  color: #fff;
+  letter-spacing: -.03em;
+  text-shadow: 0 4px 0 #173665;
+}
+.lc-pricing-page .text-muted-foreground { color: #aebedb !important; }
+.lc-pricing-cycle {
+  border: 1px solid rgba(151,108,232,.42);
+  background: #101d3c !important;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.35);
+}
+.lc-pricing-cycle button {
+  color: #aebedb !important;
+  background: transparent !important;
+}
+.lc-pricing-cycle button.bg-background {
+  color: #fff !important;
+  background: linear-gradient(135deg, #7040bd, #9a5ee2) !important;
+  box-shadow: 0 3px 0 #432270, inset 0 1px rgba(255,255,255,.22);
+}
+.lc-pricing-page [data-testid="badge-yearly-discount"] {
+  border: 1px solid rgba(255,224,130,.38);
+  box-shadow: 0 4px 0 #86530d, 0 8px 16px rgba(205,125,19,.24);
+}
+.lc-pricing-card {
+  overflow: visible;
+  border: 1px solid rgba(107,155,221,.34) !important;
+  border-radius: 1.35rem !important;
+  background: linear-gradient(150deg, #172f54, #0d1e3a) !important;
+  box-shadow: 0 12px 0 #061329, 0 20px 34px rgba(0,0,0,.28), inset 0 2px rgba(255,255,255,.08);
+}
+.lc-pricing-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.25rem;
+  right: 1.25rem;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(66,211,241,.76), transparent);
+}
+.lc-pricing-card-popular {
+  border-color: rgba(169,105,247,.72) !important;
+  background: linear-gradient(150deg, #332458, #171d3d) !important;
+  box-shadow: 0 12px 0 #180d32, 0 22px 38px rgba(44,19,86,.36), inset 0 2px rgba(255,255,255,.1) !important;
+}
+.lc-pricing-card-popular::before {
+  background: linear-gradient(90deg, transparent, #b87cff, transparent);
+}
+.lc-pricing-card [data-testid="badge-most-popular"] {
+  border: 1px solid rgba(232,207,255,.42);
+  color: #fff;
+  background: linear-gradient(135deg, #7040bd, #a363ef);
+  box-shadow: 0 3px 0 #432270;
+}
+.lc-pricing-icon {
+  border: 1px solid rgba(94,208,239,.45);
+  border-radius: 1rem !important;
+  color: #66e4fa;
+  background: linear-gradient(145deg, #173e68, #102746) !important;
+  box-shadow: 0 5px 0 #08162b, inset 0 1px rgba(255,255,255,.14);
+}
+.lc-pricing-card-popular .lc-pricing-icon {
+  border-color: rgba(218,179,255,.52);
+  background: linear-gradient(145deg, #985de2, #6840b2) !important;
+  box-shadow: 0 5px 0 #3c216d, inset 0 1px rgba(255,255,255,.2);
+}
+.lc-pricing-card h2,
+.lc-pricing-card .text-4xl { color: #fff; }
+.lc-pricing-card li { color: #dce8fb; }
+.lc-pricing-card li .text-green-600 { color: #66e58b !important; }
+.lc-pricing-card button:not([data-testid^="button-cancel"]) {
+  min-height: 2.7rem;
+  border-color: rgba(116,181,232,.4);
+  border-radius: .85rem;
+  color: #eaf6ff;
+  background: #173657;
+  box-shadow: 0 4px 0 #08182e;
+}
+.lc-pricing-card-popular button:not([data-testid^="button-cancel"]):not(:disabled) {
+  border-color: rgba(190,242,255,.42);
+  background: linear-gradient(135deg, #087eaf, #20c8eb);
+  box-shadow: 0 4px 0 #075174, 0 8px 15px rgba(8,159,207,.2);
+}
+.lc-pricing-card button:disabled { opacity: .6; }
+.lc-pricing-card [data-testid^="button-cancel"] {
+  border-color: rgba(255,126,139,.3);
+  color: #d9a7b0 !important;
+  background: rgba(58,22,43,.3);
+}
+.lc-pricing-page [data-testid="button-restore-purchases"] { color: #73dff5 !important; }
+@media (max-width: 767px) {
+  .lc-pricing-shell { padding-top: 1.5rem; }
+  .lc-pricing-shell > h1 { font-size: 2.15rem; }
+  .lc-pricing-grid { gap: 1.6rem; }
+  .lc-pricing-card { border-radius: 1.15rem !important; box-shadow: 0 8px 0 #061329, 0 15px 26px rgba(0,0,0,.25); }
+}
+

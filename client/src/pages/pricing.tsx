@@ -383,9 +383,9 @@ export default function Pricing() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="lc-pricing-page min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full bg-background/95" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+      <header className="lc-pricing-header sticky top-0 z-40 w-full bg-background/95" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/">
             <Button
@@ -399,7 +399,7 @@ export default function Pricing() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 pt-8 pb-16">
+      <div className="lc-pricing-shell container mx-auto px-4 pt-8 pb-16">
         <h1 className="text-4xl md:text-5xl font-black font-accent text-center mb-4" data-testid="heading-pricing">
           {t("pricing.title")}
         </h1>
@@ -409,7 +409,7 @@ export default function Pricing() {
 
         {/* Billing toggle (web only or iOS with RevenueCat) */}
         <div className="flex flex-col items-center gap-3 mb-10" data-testid="billing-toggle">
-          <div className="flex items-center bg-muted rounded-full p-1 gap-1">
+          <div className="lc-pricing-cycle flex items-center bg-muted rounded-full p-1 gap-1">
             <button
               onClick={() => setBillingCycle("monthly")}
               data-testid="button-billing-monthly"
@@ -452,7 +452,7 @@ export default function Pricing() {
           )}
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="lc-pricing-grid grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {tiers.map((tier) => {
             const Icon = tier.icon;
             const isCurrentTier = currentTier === tier.id;
@@ -481,7 +481,7 @@ export default function Pricing() {
             return (
               <Card
                 key={tier.id}
-                className={`relative p-6 flex flex-col ${tier.popular ? "ring-2 ring-primary shadow-lg" : ""}`}
+                className={`lc-pricing-card relative p-6 flex flex-col ${tier.popular ? "lc-pricing-card-popular ring-2 ring-primary shadow-lg" : ""}`}
                 data-testid={`card-tier-${tier.id}`}
               >
                 {tier.popular && (
@@ -491,7 +491,7 @@ export default function Pricing() {
                 )}
 
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`h-12 w-12 rounded-full ${tier.popular ? "gradient-winner" : "bg-primary/10"} flex items-center justify-center`}>
+                  <div className={`lc-pricing-icon h-12 w-12 rounded-full ${tier.popular ? "gradient-winner" : "bg-primary/10"} flex items-center justify-center`}>
                     <Icon className={`h-6 w-6 ${tier.popular ? "text-white" : "text-primary"}`} />
                   </div>
                   <div>
