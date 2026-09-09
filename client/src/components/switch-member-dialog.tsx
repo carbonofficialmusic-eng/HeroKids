@@ -65,7 +65,7 @@ export function SwitchMemberDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] flex flex-col" data-testid="dialog-switch-member">
+      <DialogContent className="lc-member-switch sm:max-w-[425px] max-h-[90vh] flex flex-col" data-testid="dialog-switch-member">
         <DialogHeader>
           <DialogTitle>{t('memberDialogs.switchMember')}</DialogTitle>
           <DialogDescription>
@@ -73,7 +73,7 @@ export function SwitchMemberDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4 overflow-y-auto flex-1 min-h-0">
+        <div className="lc-member-switch-list space-y-4 py-4 overflow-y-auto flex-1 min-h-0">
           <div className="space-y-2 pr-1">
             {sortedMembers.map((member) => (
               <div key={member.id}>
@@ -84,7 +84,7 @@ export function SwitchMemberDialog({
                     setPinCode("");
                   }}
                   disabled={!!member.isPaused}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                  className={`lc-member-switch-option w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
                     member.isPaused
                       ? 'bg-muted/40 opacity-50 cursor-not-allowed'
                       : selectedMemberId === member.id
@@ -123,7 +123,7 @@ export function SwitchMemberDialog({
 
                 {/* PIN Code Input - shown directly below the selected parent */}
                 {selectedMemberId === member.id && familyData?.singleDeviceMode && member.role === "parent" && (
-                  <div className="mt-2 space-y-2 p-4 rounded-lg border bg-accent/20">
+                  <div className="lc-member-switch-pin mt-2 space-y-2 p-4 rounded-lg border bg-accent/20">
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Lock className="h-4 w-4" />
                       <span>{t('memberDialogs.pinRequired')}</span>
@@ -154,7 +154,7 @@ export function SwitchMemberDialog({
           </div>
         </div>
         
-        <DialogFooter className="flex-row gap-2 sm:gap-2 flex-shrink-0">
+        <DialogFooter className="lc-member-switch-actions flex-row gap-2 sm:gap-2 flex-shrink-0">
           <Button
             variant="outline"
             onClick={handleSwitchBack}

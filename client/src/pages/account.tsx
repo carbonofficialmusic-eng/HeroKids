@@ -113,7 +113,7 @@ export default function AccountPage() {
 
   if (isLoading || !user?.email) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="lc-account-page min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -123,14 +123,14 @@ export default function AccountPage() {
   const backHref = isParent ? "/dashboard" : "/kid-dashboard";
 
   return (
-    <div className="min-h-screen p-6" style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top))", paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
-      <div className="max-w-lg mx-auto">
+    <div className="lc-account-page min-h-screen p-6" style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top))", paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
+      <div className="lc-account-shell max-w-lg mx-auto">
         {/* Back button — pill style matching other sub-pages */}
         <Link href={backHref}>
           <Button
             variant="outline"
             size="sm"
-            className="mb-4 gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
+            className="lc-account-back mb-4 gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
             data-testid="button-back-account"
           >
             <Home className="h-4 w-4" />
@@ -139,7 +139,7 @@ export default function AccountPage() {
         </Link>
 
         {/* Page title */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="lc-account-header flex items-center gap-3 mb-6">
           <Key className="h-8 w-8 text-primary" />
           <div>
             <h1
@@ -152,7 +152,7 @@ export default function AccountPage() {
           </div>
         </div>
 
-        <Card>
+        <Card className="lc-account-card">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Key className="h-5 w-5 text-primary" />
@@ -216,7 +216,7 @@ export default function AccountPage() {
             )}
 
             {/* Change Password */}
-            <div className="space-y-3">
+            <div className="lc-account-section space-y-3">
               <div className="flex items-center gap-2">
                 <Key className="h-4 w-4 text-muted-foreground" />
                 <h3 className="font-medium text-sm">{t("settings.changePassword")}</h3>
@@ -270,7 +270,7 @@ export default function AccountPage() {
             <div className="border-t" />
 
             {/* Change Email */}
-            <div className="space-y-3">
+            <div className="lc-account-section space-y-3">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <h3 className="font-medium text-sm">{t("settings.changeEmail")}</h3>

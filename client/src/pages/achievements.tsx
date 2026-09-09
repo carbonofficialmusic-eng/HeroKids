@@ -243,7 +243,7 @@ export default function Achievements() {
 
   if (!isParent) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="lc-bonus-settings-page min-h-screen flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle>{t("achievements.accessDenied")}</CardTitle>
@@ -263,7 +263,7 @@ export default function Achievements() {
 
   if (!hasAchievementsFeature && !!familyData) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
+      <div className="lc-bonus-settings-page min-h-screen flex items-center justify-center p-4" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-3">
@@ -319,10 +319,10 @@ export default function Achievements() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="lc-bonus-settings-page min-h-screen p-4 md:p-6" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
+      <div className="lc-bonus-settings-shell max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-start gap-3 md:items-center md:gap-4">
+        <div className="lc-bonus-settings-header flex items-start gap-3 md:items-center md:gap-4">
           <Button
             variant="outline"
             size="icon"
@@ -344,7 +344,7 @@ export default function Achievements() {
         </div>
 
         {/* Tabs for Configuration and History */}
-        <Tabs defaultValue="configure" className="w-full">
+        <Tabs defaultValue="configure" className="lc-bonus-settings-tabs w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="configure" data-testid="tab-configure">
               <Trophy className="h-4 w-4 mr-2" />
@@ -393,7 +393,7 @@ export default function Achievements() {
               <Card 
                 key={achievement.id} 
                 data-testid={`achievement-card-${achievement.slug}`}
-                className={!achievement.isActive ? "opacity-75" : ""}
+                className={`lc-bonus-settings-card ${!achievement.isActive ? "opacity-75" : ""}`}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between gap-4">
@@ -593,7 +593,7 @@ export default function Achievements() {
             ) : awards.length > 0 ? (
               <div className="space-y-2">
                 {awards.map((award) => (
-                  <Card key={award.id} data-testid={`award-${award.id}`}>
+                  <Card className="lc-bonus-history-card" key={award.id} data-testid={`award-${award.id}`}>
                     <CardContent className="py-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -645,7 +645,7 @@ export default function Achievements() {
         </Tabs>
 
         {/* Info Card */}
-        <Card>
+        <Card className="lc-bonus-info-card">
           <CardHeader>
             <CardTitle className="text-base">{t("achievements.howItWorks")}</CardTitle>
           </CardHeader>
