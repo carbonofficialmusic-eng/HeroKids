@@ -87,14 +87,14 @@ export function ProfileMenu({
         <Button
           variant="ghost"
           size="icon"
-          className="flex-shrink-0 bg-background border border-border/50"
+          className="lc-profile-trigger flex-shrink-0 bg-background border border-border/50"
           data-testid="button-profile-menu"
         >
           <Menu className="h-5 w-5" data-testid="icon-menu" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>
+       <DropdownMenuContent align="end" className="lc-profile-menu w-56">
+         <DropdownMenuLabel className="lc-profile-header">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{member.displayName}</p>
             <p className="text-xs leading-none text-muted-foreground">{member.familyName}</p>
