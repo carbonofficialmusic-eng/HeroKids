@@ -2850,13 +2850,13 @@ export default function KidDashboard() {
           </div>
 
           {/* Filter tabs row */}
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1 flex-wrap p-1.5 rounded-xl border border-border bg-card">
+           <div className="lc-kid-filter-row flex items-center gap-2">
+             <div className="lc-kid-filter-rail flex gap-1 flex-wrap p-1.5 rounded-xl border border-border bg-card">
               <Button
                 variant={kidTaskFilter === "daily" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("daily")}
-                className={`text-xs px-3 ${kidTaskFilter !== "daily" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
+                 className={`lc-kid-filter-button text-xs px-3 ${kidTaskFilter !== "daily" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
                 data-testid="button-kid-filter-daily"
               >
                 <RefreshCw className="h-3 w-3 mr-1" />
@@ -2866,7 +2866,7 @@ export default function KidDashboard() {
                 variant={kidTaskFilter === "weekly" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("weekly")}
-                className={`text-xs px-3 ${kidTaskFilter !== "weekly" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
+                 className={`lc-kid-filter-button text-xs px-3 ${kidTaskFilter !== "weekly" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
                 data-testid="button-kid-filter-weekly"
               >
                 {t("kidDashboard.filterWeekly")}
@@ -2875,7 +2875,7 @@ export default function KidDashboard() {
                 variant={kidTaskFilter === "monthly" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("monthly")}
-                className={`text-xs px-3 ${kidTaskFilter !== "monthly" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
+                 className={`lc-kid-filter-button text-xs px-3 ${kidTaskFilter !== "monthly" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
                 data-testid="button-kid-filter-monthly"
               >
                 {t("kidDashboard.filterMonthly")}
@@ -2884,7 +2884,7 @@ export default function KidDashboard() {
                 variant={kidTaskFilter === "onetime" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("onetime")}
-                className={`text-xs px-3 ${kidTaskFilter !== "onetime" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
+                 className={`lc-kid-filter-button text-xs px-3 ${kidTaskFilter !== "onetime" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
                 data-testid="button-kid-filter-onetime"
               >
                 <Target className="h-3 w-3 mr-1" />
@@ -2894,7 +2894,7 @@ export default function KidDashboard() {
                 variant={kidTaskFilter === "all" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setKidTaskFilter("all")}
-                className={`text-xs px-3 ${kidTaskFilter !== "all" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
+                 className={`lc-kid-filter-button text-xs px-3 ${kidTaskFilter !== "all" ? "text-white/80 hover:text-white hover:bg-white/15" : ""}`}
                 data-testid="button-kid-filter-all"
               >
                 {t("kidDashboard.filterAll")}
