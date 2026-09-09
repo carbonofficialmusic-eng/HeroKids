@@ -294,11 +294,11 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
   };
 
   const cardCls = isReady
-    ? "from-amber-900/80 via-yellow-900/80 to-amber-800/80 border-amber-400/60 shadow-amber-400/20"
-    : "from-indigo-900/80 via-purple-900/80 to-violet-900/80 border-violet-500/40 shadow-violet-500/10";
+    ? "from-emerald-950/95 via-green-900/90 to-emerald-900/90 border-emerald-400/60 shadow-emerald-500/20"
+    : "from-orange-950/95 via-amber-900/90 to-orange-900/90 border-orange-400/55 shadow-orange-500/20";
   const iconBgCls = isReady
-    ? "from-amber-500/30 to-yellow-400/20 border-amber-400/40"
-    : "from-violet-500/20 to-purple-500/20 border-violet-400/20";
+    ? "from-emerald-400/30 to-green-500/20 border-emerald-300/45"
+    : "from-orange-400/30 to-amber-500/20 border-orange-300/40";
 
   return (
     <>
@@ -309,7 +309,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
         <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
         {/* Ready glow ring */}
         {isReady && (
-          <div className="absolute inset-0 rounded-2xl border-2 border-amber-400/30 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl border-2 border-emerald-400/30 pointer-events-none" />
         )}
 
         <div className="p-4 flex items-center gap-3">
@@ -317,8 +317,8 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
           <div className={`relative flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br ${iconBgCls} border flex items-center justify-center shadow-inner overflow-hidden`}>
             <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-9 h-9 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
             {isReady && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center">
-                <span className="text-[8px] font-bold text-amber-900">✓</span>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full flex items-center justify-center">
+                  <span className="text-[8px] font-bold text-emerald-950">✓</span>
               </div>
             )}
           </div>
@@ -331,7 +331,7 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
             {/* Progress bar — mockup style */}
             <div className="h-3 rounded-full bg-black/30 overflow-hidden relative mb-1.5">
               <div
-                className={`h-full rounded-full relative transition-all ${isReady ? "bg-gradient-to-r from-amber-400 to-yellow-300" : "bg-gradient-to-r from-violet-400 to-purple-300"}`}
+                className={`h-full rounded-full relative transition-all ${isReady ? "bg-gradient-to-r from-emerald-400 to-green-300" : "bg-gradient-to-r from-orange-500 to-amber-300"}`}
                 style={{ width: `${percentage}%` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent rounded-full" />
@@ -343,17 +343,17 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
             <div className="flex items-center justify-between">
               <span className="text-xs" style={{ fontFamily: "Nunito, sans-serif" }}>
                 {isReady ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-amber-400/20 text-amber-300 border-amber-400/40">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-emerald-400/20 text-emerald-300 border-emerald-400/40">
                     <Sparkles className="h-2.5 w-2.5" />{t("kidDashboard.readyToRequest")}
                   </span>
                 ) : (
                   <span className="flex items-center gap-1 text-white/50">
-                    <Zap className="h-3 w-3 text-amber-400" />{remaining} {t("kidDashboard.pointsRemaining", { count: remaining }).split(" ").slice(-1)[0]}
+                    <Zap className="h-3 w-3 text-orange-400" />{remaining} {t("kidDashboard.pointsRemaining", { count: remaining }).split(" ").slice(-1)[0]}
                   </span>
                 )}
               </span>
-              <span className="flex items-center gap-1 text-xs font-bold text-amber-300">
-                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />{reward.pointThreshold}
+              <span className={`flex items-center gap-1 text-xs font-bold ${isReady ? "text-emerald-300" : "text-orange-300"}`}>
+                <Star className={`h-3 w-3 ${isReady ? "fill-emerald-400 text-emerald-400" : "fill-orange-400 text-orange-400"}`} />{reward.pointThreshold}
               </span>
             </div>
           </div>
@@ -371,23 +371,23 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
               <button
                 onClick={handleRequest}
                 disabled={redeemMutation.isPending}
-                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-gradient-to-b from-amber-400 to-amber-500 shadow-lg shadow-amber-500/30 active:scale-95 transition-transform border border-amber-300/50 disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-gradient-to-b from-emerald-400 to-green-500 shadow-lg shadow-emerald-500/30 active:scale-95 transition-transform border border-emerald-300/50 disabled:opacity-50"
                 data-testid={`button-request-reward-${reward.id}`}
               >
                 {redeemMutation.isPending
-                  ? <Loader2 className="h-4 w-4 text-amber-900 animate-spin" />
-                  : <Gift className="h-4 w-4 text-amber-900" />
+                  ? <Loader2 className="h-4 w-4 text-emerald-950 animate-spin" />
+                  : <Gift className="h-4 w-4 text-emerald-950" />
                 }
-                <span className="text-xs font-bold text-amber-900 whitespace-nowrap">{t("kidDashboard.now")}</span>
+                <span className="text-xs font-bold text-emerald-950 whitespace-nowrap">{t("kidDashboard.now")}</span>
               </button>
             ) : (
               <button
-                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-white/5 border border-white/10 cursor-not-allowed"
+                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-gradient-to-b from-orange-500/35 to-amber-600/25 border border-orange-300/30 cursor-not-allowed"
                 disabled
                 data-testid={`button-request-reward-${reward.id}`}
               >
-                <Lock className="h-4 w-4 text-white/25" />
-                <span className="text-xs font-bold text-white/25 whitespace-nowrap">{remaining} {t("points")}</span>
+                <Lock className="h-4 w-4 text-orange-200/55" />
+                <span className="text-xs font-bold text-orange-100/55 whitespace-nowrap">{remaining} {t("points")}</span>
               </button>
             )}
           </div>
