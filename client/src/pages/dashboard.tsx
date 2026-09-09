@@ -1359,6 +1359,10 @@ export default function Dashboard() {
                   </div>
                   {/* Right: Points box */}
                   <div className="lc-points-card bg-card/80 p-4 rounded-2xl border min-w-[220px]">
+                    <div className="lc-points-trophy" aria-hidden="true">
+                      <Trophy className="h-8 w-8" />
+                      <Star className="lc-points-trophy-star h-3 w-3" />
+                    </div>
                     <p className="text-xs text-muted-foreground mb-2 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
                     <div className="space-y-2">
                       <div className="text-center pb-2 border-b border-border">
@@ -1444,7 +1448,7 @@ export default function Dashboard() {
                   }}
                   data-testid="button-add-task"
                   data-tour="tour-add-task"
-                   className="lc-action-button lc-action-cyan w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
+                  className="lc-action-button lc-action-primary lc-action-cyan w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
                 >
                    <span className="lc-icon-bubble w-6 flex-shrink-0 flex justify-center">
                     <Plus className="h-5 w-5" />
@@ -1458,7 +1462,7 @@ export default function Dashboard() {
                   }}
                   data-testid="button-add-reward"
                   data-tour="tour-add-reward"
-                   className="lc-action-button lc-action-gold w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
+                  className="lc-action-button lc-action-primary lc-action-gold w-full min-h-14 h-auto py-3 justify-start px-4 gap-3"
                 >
                    <span className="lc-icon-bubble w-6 flex-shrink-0 flex justify-center">
                     <Plus className="h-5 w-5" />
@@ -1716,7 +1720,7 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold font-accent">{t("dashboard.activeRewards")}</h2>
                     {activeRewards.length > 3 && (
-                      <Button variant="ghost" size="icon" asChild className="bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0" data-testid="button-view-all-rewards-parent">
+                      <Button variant="ghost" size="icon" asChild className="lc-icon-button bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0" data-testid="button-view-all-rewards-parent">
                         <Link href="/active-rewards" onClick={() => sessionStorage.setItem("dashboardScrollTarget", "section-active-rewards")}>
                           <ChevronRight className="h-5 w-5" />
                         </Link>
@@ -1725,7 +1729,7 @@ export default function Dashboard() {
                   </div>
                   <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
                     {activeRewards.slice(0, 4).map((reward, rewardIndex) => (
-                      <Card key={reward.id} className={`relative overflow-visible ${dashboardView === "grid" ? "p-2" : "p-6"}${dashboardView !== "grid" && rewardIndex === 3 ? " hidden md:block" : ""}`} data-testid={`card-reward-${reward.id}`}>
+                      <Card key={reward.id} className={`lc-reward-card relative overflow-visible ${dashboardView === "grid" ? "p-2" : "p-6"}${dashboardView !== "grid" && rewardIndex === 3 ? " hidden md:block" : ""}`} data-testid={`card-reward-${reward.id}`}>
                         {isRealParent && dashboardView === "list" && (
                           <div className="absolute top-2 right-2 flex gap-1">
                             <Button
@@ -1754,7 +1758,7 @@ export default function Dashboard() {
                         )}
                         {dashboardView === "grid" ? (
                           <div className="flex flex-col items-center text-center gap-1">
-                            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 p-0.5">
+                            <div className="lc-reward-illustration h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 p-0.5">
                               <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-base leading-none" />
                             </div>
                             <p className="font-semibold text-xs leading-tight line-clamp-1 w-full" data-testid={`text-reward-title-${reward.id}`}>{reward.title}</p>
@@ -1773,7 +1777,7 @@ export default function Dashboard() {
                           </div>
                         ) : (
                           <div className="flex items-start gap-3">
-                            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 p-1.5">
+                             <div className="lc-reward-illustration h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 p-1.5">
                               <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-4xl leading-none" />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -1785,6 +1789,10 @@ export default function Dashboard() {
                                   {reward.description}
                                 </p>
                               )}
+                              <Progress
+                                value={reward.pointThreshold > 0 ? Math.min((member.totalPoints / reward.pointThreshold) * 100, 100) : 100}
+                                className="lc-reward-progress h-2 mb-3"
+                              />
                               <div className="flex items-center gap-2 mb-3">
                                 <Badge
                                   variant={member.totalPoints >= reward.pointThreshold ? "default" : "secondary"}
@@ -1798,11 +1806,11 @@ export default function Dashboard() {
                                   </span>
                                 )}
                               </div>
-                              <Button
+                               <Button
                                 onClick={() => redeemRewardMutation.mutate(reward.id)}
                                 disabled={member.totalPoints < reward.pointThreshold || redeemRewardMutation.isPending}
                                 size="sm"
-                                className="w-full"
+                                 className="lc-redeem-button w-full"
                                 data-testid={`button-redeem-${reward.id}`}
                               >
                                 {redeemRewardMutation.isPending ? (
@@ -1937,7 +1945,7 @@ export default function Dashboard() {
                       <Sparkles className="h-4 w-4 text-purple-500" />
                     </div>
                     {specialRewards.length > 2 && (
-                      <Button variant="ghost" size="icon" asChild className="bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0" data-testid="button-view-all-achievements">
+                      <Button variant="ghost" size="icon" asChild className="lc-icon-button bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0" data-testid="button-view-all-achievements">
                         <Link href="/my-achievements" onClick={() => sessionStorage.setItem("dashboardScrollTarget", "section-bonus-rewards")}>
                           <ChevronRight className="h-5 w-5" />
                         </Link>
@@ -1946,8 +1954,8 @@ export default function Dashboard() {
                   </div>
                   <div className="space-y-3">
                     {specialRewards.slice(0, 2).map((achievement) => (
-                      <Card key={achievement.id} className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30">
-                        <div className="flex items-center gap-3">
+                      <Card key={achievement.id} className="lc-achievement-card p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30">
+                        <div className="lc-achievement-inner flex items-center gap-3">
                           {ACHIEVEMENT_BADGES[achievement.slug] ? (
                             <img
                               src={ACHIEVEMENT_BADGES[achievement.slug]}
@@ -1955,7 +1963,7 @@ export default function Dashboard() {
                               className="h-12 w-12 flex-shrink-0 object-contain drop-shadow-sm"
                             />
                           ) : (
-                            <div className="p-2 rounded-lg bg-purple-500/20 flex-shrink-0">
+                            <div className="lc-achievement-icon p-2 rounded-lg bg-purple-500/20 flex-shrink-0">
                               <Gift className="h-5 w-5 text-purple-500" />
                             </div>
                           )}
@@ -2148,10 +2156,10 @@ export default function Dashboard() {
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
                   {activeRewards.map((reward) => (
-                    <Card key={reward.id} className="p-6" data-testid={`card-reward-${reward.id}`}>
+                      <Card key={reward.id} className="lc-reward-card p-6" data-testid={`card-reward-${reward.id}`}>
                       <div className="flex items-start gap-3">
-                        <div className="h-12 w-12 rounded-full gradient-winner flex items-center justify-center shrink-0">
-                          <Gift className="h-6 w-6 text-white" />
+                         <div className="lc-reward-illustration h-12 w-12 rounded-full gradient-winner flex items-center justify-center shrink-0">
+                           <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-bold mb-1">{reward.title}</h3>
@@ -2160,6 +2168,10 @@ export default function Dashboard() {
                               {reward.description}
                             </p>
                           )}
+                          <Progress
+                            value={reward.pointThreshold > 0 ? Math.min((member.totalPoints / reward.pointThreshold) * 100, 100) : 100}
+                            className="lc-reward-progress h-2 mb-3"
+                          />
                           <div className="flex items-center gap-2 mb-3">
                             <Badge
                               variant={
@@ -2183,7 +2195,7 @@ export default function Dashboard() {
                               redeemRewardMutation.isPending
                             }
                             size="sm"
-                            className="w-full"
+                             className="lc-redeem-button w-full"
                             data-testid={`button-redeem-${reward.id}`}
                           >
                             {redeemRewardMutation.isPending ? (

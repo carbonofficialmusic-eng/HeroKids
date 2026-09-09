@@ -576,6 +576,37 @@ html {
   font-size: 1.35rem;
   opacity: .8;
 }
+.lc-dashboard .lc-points-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 75%, rgba(255, 185, 40, .14), transparent 28%),
+    radial-gradient(circle at 92% 15%, rgba(137, 83, 247, .16), transparent 24%);
+}
+.lc-dashboard .lc-points-trophy {
+  position: absolute;
+  left: .9rem;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 3.35rem;
+  height: 3.35rem;
+  transform: translateY(-50%);
+  border: 1px solid rgba(255, 218, 93, .65);
+  border-radius: 1rem;
+  color: #fff1a7;
+  background: linear-gradient(145deg, #ffbd24, #c96c08);
+  box-shadow: inset 0 2px 1px rgba(255,255,255,.35), 0 5px 0 #713708, 0 9px 16px rgba(0,0,0,.32);
+}
+.lc-dashboard .lc-points-trophy-star {
+  position: absolute;
+  right: -.35rem;
+  top: -.3rem;
+  fill: #fff3a4;
+  color: #fff3a4;
+}
 .lc-dashboard .lc-points-card [data-testid="text-parent-total-earned"] {
   color: var(--lc-text-primary);
   font-size: clamp(2.25rem, 5vw, 3rem);
@@ -596,6 +627,11 @@ html {
 }
 .lc-dashboard .lc-action-button:hover { filter: brightness(1.12); transform: translateY(-2px); }
 .lc-dashboard .lc-action-button:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.28); }
+.lc-dashboard .lc-action-primary {
+  min-height: 3.9rem;
+  border-color: rgba(255,255,255,.32) !important;
+  box-shadow: 0 7px 0 rgba(0,0,0,.3), 0 12px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);
+}
 .lc-dashboard .lc-action-violet { background: linear-gradient(135deg,#6738ca,#a04df0) !important; }
 .lc-dashboard .lc-action-green { background: linear-gradient(135deg,#269c43,#70d638) !important; }
 .lc-dashboard .lc-action-cyan { background: linear-gradient(135deg,#087cba,#19c9ef) !important; }
@@ -633,6 +669,17 @@ html {
   border-color: rgba(118,159,222,.35) !important;
   background: #122440 !important;
 }
+.lc-dashboard [data-app-header] button,
+.lc-dashboard [data-app-header] [data-testid="badge-current-tier"] {
+  border-radius: .85rem;
+  border: 1px solid rgba(110,155,223,.36);
+  box-shadow: 0 3px 0 rgba(0,0,0,.27), inset 0 1px rgba(255,255,255,.1);
+}
+.lc-dashboard [data-app-header] [data-testid="badge-current-tier"] {
+  border-color: rgba(255,191,43,.5);
+  color: #fff1b0;
+  background: linear-gradient(135deg,#b86a08,#f0a916);
+}
 .lc-dashboard .lc-leaderboard-tabs {
   padding: .25rem;
   gap: .3rem;
@@ -648,6 +695,8 @@ html {
 }
 
 .lc-leaderboard-card {
+  position: relative;
+  overflow: hidden;
   border: 1px solid rgba(75,137,220,.5) !important;
   border-radius: var(--lc-card-radius) !important;
   background: linear-gradient(155deg, #112b50, #09182e) !important;
@@ -662,9 +711,23 @@ html {
 .lc-leaderboard-heading h2 { margin: 0; color: #fff; font-size: clamp(1.45rem, 4vw, 2rem); }
 .lc-leaderboard-heading p { margin: .35rem 0 0; color: #aebce0; font-size: .86rem; }
 .lc-podium {
-  display: flex; align-items: end; justify-content: center; gap: clamp(.35rem, 3vw, 1.25rem);
+  position: relative; display: flex; align-items: end; justify-content: center; gap: clamp(.35rem, 3vw, 1.25rem);
   min-height: 18rem; margin: 1.2rem auto 1.5rem; padding: 1rem .5rem 0;
 }
+.lc-podium::before,
+.lc-podium::after {
+  content: "";
+  position: absolute;
+  width: .45rem;
+  height: .45rem;
+  border-radius: .12rem;
+  background: #39d7ed;
+  box-shadow: 2.2rem 3.3rem 0 #f5bc28, 4.7rem .8rem 0 #a66aff, 8.2rem 4.1rem 0 #ff7b28;
+  transform: rotate(25deg);
+  opacity: .9;
+}
+.lc-podium::before { left: 3%; top: 18%; }
+.lc-podium::after { right: 10%; top: 6%; transform: rotate(-18deg); }
 .lc-podium-place { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 6.1rem; }
 .lc-podium-place-1 { z-index: 2; }
 .lc-medal { height: 2rem; color: #c3cce2; }
@@ -685,6 +748,86 @@ html {
 .lc-rank-points { min-width: 3.3rem; padding: .35rem .5rem; border-radius: .65rem; color: #ffd34b; background: #0a1b36; font-family: var(--font-accent); font-size: 1.1rem; font-weight: 900; text-align: center; }
 .lc-prize { display: flex; align-items: center; gap: .5rem; margin-top: 1.25rem; padding: .8rem 1rem; border: 1px solid rgba(255,193,38,.3); border-radius: .9rem; color: #ffd768; background: rgba(214,145,17,.13); font-size: .85rem; font-weight: 800; }
 .lc-prize svg { width: 1.1rem; }
+.lc-reward-card {
+  border: 1px solid rgba(239,158,38,.35) !important;
+  border-radius: 1.25rem !important;
+  background: linear-gradient(145deg, #2b2630, #171c2c) !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.07);
+}
+.lc-reward-card .lc-reward-illustration {
+  border: 1px solid rgba(255,195,61,.45);
+  border-radius: 1rem !important;
+  background: radial-gradient(circle, rgba(255,193,51,.36), rgba(160,76,19,.2)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.18), 0 5px 10px rgba(0,0,0,.25);
+}
+.lc-reward-card h3 { color: #fff3cc; font-size: 1.05rem; }
+.lc-reward-card [data-testid^="badge-reward-points"] {
+  border: 1px solid rgba(255,205,72,.5);
+  color: #ffe071;
+  background: rgba(167,99,14,.24);
+}
+.lc-redeem-button {
+  border-radius: .78rem !important;
+  border: 1px solid rgba(255,223,121,.35) !important;
+  color: #fff !important;
+  background: linear-gradient(135deg,#c26a13,#f0a51b) !important;
+  box-shadow: 0 4px 0 #7d3d0c, 0 7px 12px rgba(153,79,13,.2);
+}
+.lc-redeem-button:disabled { color: #aab4c9 !important; background: #29344a !important; box-shadow: 0 3px 0 #151c2b; }
+.lc-reward-progress {
+  overflow: hidden;
+  border: 1px solid rgba(255,205,82,.28);
+  background: #121b2c !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.35);
+}
+.lc-reward-progress > div {
+  background: linear-gradient(90deg, #f08a18, #ffd649) !important;
+  box-shadow: 0 0 9px rgba(255,190,43,.45);
+}
+.lc-achievement-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.15rem !important;
+  border: 1px solid rgba(166,103,255,.48) !important;
+  background: linear-gradient(145deg, #302050, #171b36) !important;
+  box-shadow: 0 8px 16px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.09);
+}
+.lc-achievement-card::after {
+  content: "";
+  position: absolute;
+  right: .6rem;
+  top: .45rem;
+  width: .4rem;
+  height: .4rem;
+  border-radius: 50%;
+  background: #e2a7ff;
+  box-shadow: -1.3rem 2.6rem 0 #ffc84c, -3.5rem -.3rem 0 #74dcff;
+}
+.lc-achievement-inner { position: relative; z-index: 1; }
+.lc-achievement-icon {
+  min-width: 3rem;
+  min-height: 3rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(216,160,255,.45);
+  border-radius: .9rem !important;
+  background: linear-gradient(145deg, rgba(159,81,236,.55), rgba(63,39,130,.55)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.2), 0 4px 9px rgba(0,0,0,.25);
+}
+.lc-achievement-card h3 { color: #fff; }
+.lc-achievement-card p { color: #d5a6ff !important; font-weight: 800; }
+.lc-dashboard [data-testid="button-info-perfect_week"],
+.lc-dashboard [data-testid^="button-info-"] {
+  border-radius: .7rem;
+  color: #ddb0ff !important;
+  background: rgba(119,65,191,.3);
+}
+.lc-dashboard [data-testid="button-parent-nav-chat"] {
+  border: 1px solid rgba(57,198,242,.35);
+  color: #e9f8ff;
+  background: #112846;
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 3px 0 rgba(0,0,0,.2);
+}
 @media (max-width: 480px) {
   .lc-podium { min-height: 15rem; gap: .1rem; }
   .lc-podium-place { min-width: 5.5rem; }
