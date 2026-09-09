@@ -1359,10 +1359,6 @@ export default function Dashboard() {
                   </div>
                   {/* Right: Points box */}
                   <div className="lc-points-card bg-card/80 p-4 rounded-2xl border min-w-[220px]">
-                    <div className="lc-points-trophy" aria-hidden="true">
-                      <Trophy className="h-8 w-8" />
-                      <Star className="lc-points-trophy-star h-3 w-3" />
-                    </div>
                     <p className="text-xs text-muted-foreground mb-2 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
                     <div className="space-y-2">
                       <div className="text-center pb-2 border-b border-border">
