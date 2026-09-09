@@ -168,8 +168,8 @@ export function RewardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md overflow-y-auto [&>button.absolute]:hidden" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"} onOpenAutoFocus={(e) => e.preventDefault()}>
-        <DialogHeader>
+      <DialogContent className="lc-game-dialog lc-reward-dialog max-w-md overflow-y-auto [&>button.absolute]:hidden" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"} onOpenAutoFocus={(e) => e.preventDefault()}>
+        <DialogHeader className="lc-game-dialog-header">
           <DialogTitle className="text-2xl font-accent">{isEditing ? t('rewards.editReward') : t('rewards.createReward')}</DialogTitle>
           <DialogDescription>
             {isEditing ? t('rewards.updateDetails') : t('rewards.setupNewReward')}
@@ -177,7 +177,7 @@ export function RewardDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="lc-game-dialog-form space-y-6">
 
             {/* Icon Picker */}
             <FormField
@@ -207,6 +207,7 @@ export function RewardDialog({
                           <button
                             key={icon.value}
                             type="button"
+                            aria-pressed={field.value === icon.value}
                             onClick={() => field.onChange(icon.value)}
                             title={icon.label}
                             data-testid={`button-icon-img-${icon.label}`}
@@ -319,7 +320,7 @@ export function RewardDialog({
               )}
             />
 
-            <div className="flex gap-3">
+            <div className="lc-game-dialog-actions flex gap-3">
               <Button
                 type="button"
                 variant="outline"

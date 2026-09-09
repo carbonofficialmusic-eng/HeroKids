@@ -86,7 +86,7 @@ export function RewardRequestDialog({
     transform: 'translate(-50%, -50%)',
     maxHeight: `${vvHeight - 48}px`,
     overflowY: 'auto',
-    width: 'min(calc(100vw - 2rem), 28rem)',
+    width: 'min(calc(100% - 1rem), 28rem)',
   };
 
   const form = useForm<RewardRequestFormData>({
@@ -127,10 +127,11 @@ export function RewardRequestDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         style={dialogStyle}
+        className="lc-game-dialog lc-request-dialog"
         data-testid={isEditing ? "dialog-edit-request" : "dialog-request-reward"}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader>
+        <DialogHeader className="lc-game-dialog-header">
           <div className="flex items-center gap-2">
             {isEditing ? (
               <Pencil className="h-6 w-6 text-primary" />
@@ -150,7 +151,7 @@ export function RewardRequestDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="lc-game-dialog-form space-y-6">
             <FormField
               control={form.control}
               name="title"
@@ -217,7 +218,7 @@ export function RewardRequestDialog({
               )}
             />
 
-            <div className="flex justify-end gap-2">
+            <div className="lc-game-dialog-actions flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"

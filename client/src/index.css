@@ -1001,6 +1001,148 @@ html {
   .lc-task-dialog-members { grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
 
+/* Shared Little Champs editor language. These classes intentionally do not
+   touch the base dialog primitives: each workflow gets one bounded scroll
+   owner and keeps its existing form/handler contract. */
+.lc-game-dialog {
+  --lc-editor-bg: #0a1b2d;
+  --lc-editor-panel: #102b41;
+  --lc-editor-line: rgba(130, 193, 226, .28);
+  --lc-editor-cyan: #1bc6ed;
+  --lc-editor-text: #f4f8ff;
+  --lc-editor-muted: #a8bdd0;
+  width: min(calc(100% - 1rem), 42rem);
+  max-height: min(92dvh, 52rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  gap: .55rem;
+  padding: clamp(.85rem, 2.8vw, 1.45rem);
+  color: var(--lc-editor-text);
+  border: 1px solid rgba(91, 175, 222, .42);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(31, 170, 217, .14), transparent 25rem),
+    linear-gradient(155deg, #0c2438, var(--lc-editor-bg) 58%);
+  box-shadow: 0 22px 60px rgba(0, 6, 16, .5), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-game-dialog-header {
+  padding: .1rem .2rem .55rem;
+  border-bottom: 1px solid var(--lc-editor-line);
+}
+.lc-game-dialog-header [data-slot="dialog-title"] { color: var(--lc-editor-text); letter-spacing: -.02em; }
+.lc-game-dialog-header [data-slot="dialog-description"],
+.lc-game-dialog .text-muted-foreground { color: var(--lc-editor-muted); }
+.lc-game-dialog-form { padding-top: .1rem; }
+.lc-game-dialog-form > * {
+  padding: .85rem 0;
+  border-bottom: 1px solid rgba(130,193,226,.2);
+}
+.lc-game-dialog-form > *:last-child { border-bottom: 0; }
+.lc-game-dialog label,
+.lc-game-dialog [data-slot="form-label"] { color: #e8f4ff; }
+.lc-game-dialog input,
+.lc-game-dialog textarea,
+.lc-game-dialog [data-slot="select-trigger"] {
+  color: var(--lc-editor-text);
+  border-color: rgba(93, 177, 222, .42);
+  background: rgba(4, 18, 33, .62);
+  box-shadow: inset 0 1px rgba(255,255,255,.04);
+}
+.lc-game-dialog input::placeholder,
+.lc-game-dialog textarea::placeholder { color: #7894aa; }
+.lc-game-dialog [data-slot="form-description"] { color: var(--lc-editor-muted); }
+.lc-game-dialog-actions {
+  position: sticky;
+  bottom: -.1rem;
+  z-index: 4;
+  margin: 0 -.1rem;
+  padding: .8rem .1rem calc(.15rem + env(safe-area-inset-bottom, 0px)) !important;
+  border-bottom: 0 !important;
+  background: linear-gradient(to bottom, transparent, var(--lc-editor-bg) 25%);
+}
+.lc-game-dialog-actions button {
+  min-height: 2.8rem;
+  border-radius: .7rem;
+}
+.lc-game-dialog-actions button[type="submit"],
+.lc-game-dialog-actions button[data-testid*="confirm"],
+.lc-game-dialog-actions button[data-testid*="submit"],
+.lc-game-dialog-actions button[data-testid*="save"] {
+  color: #05283a;
+  border-color: #79eaff;
+  background: linear-gradient(135deg,#16bce7,#65e4f2);
+  box-shadow: 0 4px 0 #087697;
+}
+.lc-game-dialog-actions button[type="button"]:not([data-testid*="confirm"]):not([data-testid*="submit"]):not([data-testid*="save"]) {
+  border-color: rgba(115,191,226,.52);
+  color: #e1f2ff;
+  background: rgba(11,40,61,.75);
+}
+.lc-game-dialog .rounded-lg.border {
+  border-color: rgba(99, 181, 225, .3);
+  background: rgba(12, 41, 61, .66);
+}
+.lc-reward-dialog [data-testid="reward-icon-grid"] button {
+  border-color: rgba(99,181,225,.3);
+  background: rgba(12,41,61,.66);
+}
+.lc-reward-dialog [data-testid="reward-icon-grid"] button:hover,
+.lc-reward-dialog [data-testid="reward-icon-grid"] button:focus-visible {
+  border-color: var(--lc-editor-cyan);
+}
+.lc-goal-dialog .grid button {
+  border-color: rgba(99,181,225,.3);
+  background: rgba(12,41,61,.66);
+}
+.lc-goal-dialog .grid button[aria-pressed="true"],
+.lc-reward-dialog [data-testid="reward-icon-grid"] button[aria-pressed="true"] {
+  color: #fff;
+  border-color: #63e5fa;
+  background: linear-gradient(145deg,#087ea9,#1ac6e7);
+  box-shadow: inset 0 1px rgba(255,255,255,.3), 0 3px 0 #075877;
+}
+.lc-send-points-dialog [data-testid^="button-recipient"][aria-pressed="true"],
+.lc-send-points-dialog [aria-pressed="true"] {
+  border-color: var(--lc-editor-cyan);
+  background: rgba(15, 103, 141, .45);
+}
+.lc-chat-page {
+  --lc-editor-line: rgba(130, 193, 226, .28);
+  --lc-editor-text: #f4f8ff;
+  color: var(--lc-editor-text);
+}
+.lc-chat-card {
+  border: 1px solid rgba(91, 175, 222, .42);
+  border-radius: 1rem;
+  background: linear-gradient(155deg, #0c2438, #0a1b2d 58%);
+  box-shadow: 0 18px 42px rgba(0, 6, 16, .35), inset 0 1px rgba(255,255,255,.07);
+}
+.lc-chat-card [data-slot="card-header"] { border-color: var(--lc-editor-line); }
+.lc-chat-card [data-slot="card-title"] { color: #f4f8ff; }
+.lc-chat-card [data-radix-scroll-area-viewport] { scrollbar-color: #315c79 transparent; }
+.lc-chat-card [data-testid^="chat-message-"] > div:nth-child(2) {
+  padding: .55rem .7rem;
+  border: 1px solid rgba(99,181,225,.2);
+  border-radius: .75rem;
+  background: rgba(12, 41, 61, .55);
+}
+.lc-chat-composer {
+  border-color: var(--lc-editor-line) !important;
+  background: rgba(5, 19, 35, .62);
+}
+.lc-chat-page:not(.is-keyboard-open) .lc-chat-composer {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+}
+.lc-chat-composer input {
+  color: #f4f8ff;
+  border-color: rgba(93,177,222,.42);
+  background: rgba(4,18,33,.62);
+}
+@media (max-width: 480px) {
+  .lc-game-dialog { width: calc(100% - .75rem); padding: .8rem; border-radius: .8rem; }
+}
+
 .lc-leaderboard-card {
   position: relative;
   overflow: hidden;

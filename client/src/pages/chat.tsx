@@ -256,7 +256,7 @@ export default function Chat() {
 
   return (
     <div
-      className="flex flex-col items-center"
+      className={`lc-chat-page ${isKeyboardOpen ? "is-keyboard-open" : ""} flex flex-col items-center`}
       style={safeTopStyle}
       data-testid="page-chat"
     >
@@ -268,7 +268,7 @@ export default function Chat() {
           </h1>
         </div>
 
-        <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <Card className="lc-chat-card flex-1 flex flex-col min-h-0 overflow-hidden">
           {!isKeyboardOpen && (
             <CardHeader className="border-b shrink-0 py-3">
               <div className="flex items-center justify-between">
@@ -333,7 +333,7 @@ export default function Chat() {
             ) : (
               <form
                 onSubmit={handleSendMessage}
-                className={`border-t flex gap-2 shrink-0 ${isKeyboardOpen ? 'py-2 px-3' : 'p-4'}`}
+                className={`lc-chat-composer border-t flex gap-2 shrink-0 ${isKeyboardOpen ? 'py-2 px-3' : 'p-4'}`}
                 data-testid="form-send-message"
               >
                 <EmoticonPicker onSelectEmoticon={handleSelectEmoticon} />

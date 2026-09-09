@@ -2416,7 +2416,7 @@ export default function Dashboard() {
         }}>
           <DialogContent
             data-testid="dialog-send-points"
-            className="max-w-sm"
+            className="lc-game-dialog lc-send-points-dialog max-w-sm"
             style={{
               position: "fixed",
               left: "50%",
@@ -2424,11 +2424,11 @@ export default function Dashboard() {
               transform: "translate(-50%, -50%)",
               maxHeight: `${vvHeight - 48}px`,
               overflowY: "auto",
-              width: "min(calc(100vw - 2rem), 24rem)",
+              width: "min(calc(100% - 1rem), 24rem)",
             }}
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
-            <DialogHeader>
+              <DialogHeader className="lc-game-dialog-header">
               <DialogTitle className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-amber-500" />
                 {t("dashboard.sendPoints", "Punkte senden")}
@@ -2451,6 +2451,7 @@ export default function Dashboard() {
                       <button
                         key={fm.id}
                         type="button"
+                        aria-pressed={selected}
                         data-testid={`button-recipient-${fm.id}`}
                         onClick={() =>
                           setSelectedPointsRecipients((prev) =>
@@ -2498,8 +2499,9 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="lc-game-dialog-actions">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => setSendPointsOpen(false)}
                 data-testid="button-cancel-send-points"
@@ -2507,6 +2509,7 @@ export default function Dashboard() {
                 {t("common.cancel")}
               </Button>
               <Button
+                type="button"
                 onClick={() => {
                   const pts = parseInt(pointsAmount, 10);
                   if (selectedPointsRecipients.length === 0 || !pts || pts < 1 || pts > 1000) return;

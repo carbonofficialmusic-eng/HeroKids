@@ -99,8 +99,8 @@ export function FamilyGoalDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto [&>button.absolute]:hidden" data-testid="dialog-create-family-goal" onOpenAutoFocus={(e) => e.preventDefault()}>
-        <DialogHeader>
+      <DialogContent className="lc-game-dialog lc-goal-dialog max-w-2xl max-h-[90vh] overflow-y-auto [&>button.absolute]:hidden" data-testid="dialog-create-family-goal" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <DialogHeader className="lc-game-dialog-header">
           <DialogTitle className="text-2xl font-accent">
             {editingGoal ? "Familienziel bearbeiten" : "Neues Familienziel erstellen"}
           </DialogTitle>
@@ -112,7 +112,7 @@ export function FamilyGoalDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="lc-game-dialog-form space-y-6">
             <FormField
               control={form.control}
               name="iconEmoji"
@@ -124,6 +124,7 @@ export function FamilyGoalDialog({
                       <Button
                         key={icon}
                         type="button"
+                        aria-pressed={field.value === icon}
                         variant={field.value === icon ? "default" : "outline"}
                         className="h-12 text-2xl"
                         onClick={() => field.onChange(icon)}
@@ -257,7 +258,7 @@ export function FamilyGoalDialog({
               )}
             />
 
-            <div className="flex gap-3 pt-4">
+            <div className="lc-game-dialog-actions flex gap-3 pt-4">
               <Button
                 type="button"
                 variant="outline"
