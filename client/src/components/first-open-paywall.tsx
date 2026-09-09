@@ -96,9 +96,27 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
     ? getIntroductoryOffer(rcProducts?.[selectedProductId])
     : null;
 
-  const handleStartFree = () => {
+  const handleDismiss = () => {
     try { localStorage.setItem("herokids_seen_paywall", "true"); } catch {}
     onClose();
+  };
+
+  const handleStartFree = async () => {
+    setProcessing(true);
+    try {
+      await apiRequest("POST", "/api/families/start-trial");
+      try { localStorage.setItem("herokids_seen_paywall", "true"); } catch {}
+      await qc.refetchQueries({ queryKey: ["/api/families/current"] });
+      onClose();
+    } catch (err: any) {
+      toast({
+        title: t("errors.somethingWrong"),
+        description: err?.message || t("auth.tryAgainLater"),
+        variant: "destructive",
+      });
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleUpgrade = async () => {
@@ -174,7 +192,7 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) handleStartFree(); }}>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
       <DialogContent
         className="lc-first-paywall max-w-lg mx-auto overflow-y-auto overscroll-contain"
         onOpenAutoFocus={(e) => e.preventDefault()}
@@ -318,7 +336,7 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
           </Button>
           <button
             className="text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
-            onClick={handleStartFree}
+            onClick={handleDismiss}
             disabled={processing}
             data-testid="button-paywall-maybe-later"
           >

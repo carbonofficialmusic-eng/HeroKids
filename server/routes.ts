@@ -948,6 +948,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Start the one-time 7-day Family feature trial from the first-open paywall.
+  app.post("/api/families/start-trial", isAuthenticated, async (req: any, res) => {
+    try {
+      let member;
+
+      if (req.user.authMethod === "device" && req.user.member) {
+        member = req.user.member;
+      } else {
+        const userId = req.user.claims.sub;
+        member = await storage.getFamilyMemberByUserId(userId);
+      }
+
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can start a family trial" });
+      }
+
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+
+      if (family.subscriptionTier !== "free") {
+        return res.json({ trialActivated: false, reason: "paid_tier", trialEndsAt: family.trialEndsAt });
+      }
+
+      // A trial is strictly one-time. Returning the current state keeps this endpoint idempotent.
+      if (family.trialStartedAt) {
+        const isActive = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+        return res.json({
+          trialActivated: false,
+          reason: isActive ? "already_active" : "already_used",
+          trialEndsAt: family.trialEndsAt,
+        });
+      }
+
+      const now = new Date();
+      const trialEndsAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      await storage.updateFamily(member.familyName, { trialStartedAt: now, trialEndsAt });
+
+      res.set("Cache-Control", "no-store");
+      res.json({ trialActivated: true, trialEndsAt });
+    } catch (error) {
+      console.error("Error starting family trial:", error);
+      res.status(500).json({ message: "Failed to start family trial" });
+    }
+  });
+
   // Get family settings (includes showLeaderboard)
   app.get("/api/families/settings", isAuthenticated, async (req: any, res) => {
     try {
