@@ -1393,6 +1393,39 @@ html {
   opacity: .55;
   transform: none;
 }
+.lc-kid-leaderboard-tabs {
+  min-height: 3.15rem;
+  gap: .35rem;
+  padding: .38rem !important;
+  border: 1px solid rgba(157, 112, 235, .42);
+  border-radius: 1rem !important;
+  background: linear-gradient(145deg, #111d34, #0b1629) !important;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.38), 0 7px 15px rgba(0,0,0,.25);
+}
+.lc-kid-leaderboard-tab {
+  min-height: 2.35rem;
+  border: 1px solid transparent;
+  border-radius: .75rem !important;
+  color: #aebbd2 !important;
+  font-family: var(--font-accent);
+  font-size: .95rem;
+  font-weight: 700;
+  transition: color .16s ease, transform .16s ease, filter .16s ease, box-shadow .16s ease;
+}
+.lc-kid-leaderboard-tab:hover {
+  color: #f1eaff !important;
+  background: rgba(116, 79, 180, .2);
+}
+.lc-kid-leaderboard-tab[data-state="active"] {
+  border-color: rgba(218, 179, 255, .5);
+  color: #fff !important;
+  background: linear-gradient(135deg, #7040bd, #9a5ee2) !important;
+  box-shadow: 0 3px 0 #432270, 0 6px 13px rgba(102,54,172,.3), inset 0 1px rgba(255,255,255,.24) !important;
+}
+.lc-kid-leaderboard-tab[data-state="active"]:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #432270, 0 3px 8px rgba(102,54,172,.25) !important;
+}
 @media (max-width: 480px) {
   .lc-podium { min-height: 15rem; gap: .1rem; }
   .lc-podium-place { min-width: 5.5rem; }

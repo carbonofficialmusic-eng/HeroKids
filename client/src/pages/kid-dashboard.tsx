@@ -3151,9 +3151,9 @@ export default function KidDashboard() {
             {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
               <div className="mb-4">
                 <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
-                  <TabsList className="grid w-full grid-cols-2" data-testid="tabs-leaderboard-period">
-                    <TabsTrigger value="week" data-testid="tab-leaderboard-week">{t("dashboard.weekly")}</TabsTrigger>
-                    <TabsTrigger value="month" data-testid="tab-leaderboard-month">{t("dashboard.monthly")}</TabsTrigger>
+                  <TabsList className="lc-kid-leaderboard-tabs grid w-full grid-cols-2" data-testid="tabs-leaderboard-period">
+                    <TabsTrigger className="lc-kid-leaderboard-tab" value="week" data-testid="tab-leaderboard-week">{t("dashboard.weekly")}</TabsTrigger>
+                    <TabsTrigger className="lc-kid-leaderboard-tab" value="month" data-testid="tab-leaderboard-month">{t("dashboard.monthly")}</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
@@ -3171,9 +3171,9 @@ export default function KidDashboard() {
           <div className="space-y-4">
             {hasFeature(familyData?.subscriptionTier as SubscriptionTier || "free", "weeklyLeaderboard") && (
               <Tabs value={leaderboardPeriod} onValueChange={(value) => setLeaderboardPeriod(value as "week" | "month")}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="week">{t("dashboard.weekly")}</TabsTrigger>
-                  <TabsTrigger value="month">{t("dashboard.monthly")}</TabsTrigger>
+                <TabsList className="lc-kid-leaderboard-tabs grid w-full grid-cols-2">
+                  <TabsTrigger className="lc-kid-leaderboard-tab" value="week">{t("dashboard.weekly")}</TabsTrigger>
+                  <TabsTrigger className="lc-kid-leaderboard-tab" value="month">{t("dashboard.monthly")}</TabsTrigger>
                 </TabsList>
               </Tabs>
             )}
