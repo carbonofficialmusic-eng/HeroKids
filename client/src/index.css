@@ -1231,6 +1231,18 @@ html {
   padding: .65rem .35rem .8rem;
   border-color: rgba(109,160,222,.3) !important;
 }
+
+/* Open task cards share the deep-blue family-goal/points-card palette.
+   Status cards keep their existing amber and green appearance. */
+.lc-task-card-open {
+  border-color: rgba(76, 176, 232, .35) !important;
+  background: linear-gradient(
+    145deg,
+    rgba(20, 45, 77, .9),
+    rgba(13, 28, 52, .86)
+  ) !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.07);
+}
 .lc-kid-points-card [data-testid="text-total-earned"] {
   display: block;
   width: 100%;

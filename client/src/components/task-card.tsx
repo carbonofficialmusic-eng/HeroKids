@@ -335,7 +335,7 @@ export function TaskCard({
       >
         <Card
           className={`p-2 transition-all h-full flex flex-col backdrop-blur-md ${
-            isGrayedOut ? 'bg-card/20' : 'bg-card/80'
+            isGrayedOut ? 'bg-card/20' : 'lc-task-card-open'
           } hover-elevate active-elevate-2 cursor-pointer`}
           data-testid={`card-task-${task.id}`}
           onClick={() => (task as any).isShoppingList ? setShoppingListExpanded(v => !v) : onClick?.(task)}
@@ -495,7 +495,7 @@ export function TaskCard({
     >
       <Card
         className={`p-4 transition-all min-h-[140px] h-full flex flex-col backdrop-blur-md ${
-          isGrayedOut ? 'bg-card/20' : 'bg-card/80'
+          isGrayedOut ? 'bg-card/20' : 'lc-task-card-open'
         } ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
         data-testid={`card-task-${task.id}`}
         onClick={() => onClick?.(task)}
