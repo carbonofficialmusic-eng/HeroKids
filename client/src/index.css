@@ -1862,6 +1862,8 @@ html {
 
 /* Bonus rewards configuration — clear active states and playful reward surfaces. */
 .lc-bonus-settings-tabs > [role="tablist"] {
+  height: auto;
+  min-height: 3.25rem;
   padding: .3rem;
   border: 1px solid rgba(151,108,232,.4);
   border-radius: 1rem;
@@ -1869,8 +1871,15 @@ html {
   box-shadow: inset 0 2px 6px rgba(0,0,0,.32);
 }
 .lc-bonus-settings-tabs [role="tab"] {
+  min-width: 0;
+  min-height: 2.65rem;
+  padding: .55rem .65rem;
   border-radius: .72rem;
   color: #aebedb;
+  line-height: 1.15;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .lc-bonus-settings-tabs [role="tab"][data-state="active"] {
   color: #fff;
@@ -1906,5 +1915,16 @@ html {
   .lc-bonus-info-card { border-radius: 1.05rem !important; }
   .lc-bonus-settings-card [data-slot="card-header"] { padding: 1rem; }
   .lc-bonus-settings-card [data-slot="card-content"] { padding: 0 1rem 1rem; }
+  .lc-bonus-settings-tabs [role="tab"] {
+    gap: .3rem;
+    padding-inline: .4rem;
+    font-size: .78rem;
+  }
+  .lc-bonus-settings-tabs [role="tab"] svg {
+    width: .9rem;
+    height: .9rem;
+    margin-right: .15rem;
+    flex-shrink: 0;
+  }
 }
 
