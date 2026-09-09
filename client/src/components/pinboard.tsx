@@ -139,7 +139,7 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
           <p className="text-muted-foreground text-xs text-center py-2">{t("pinboard.loading")}</p>
         )}
         {!isLoading && notes.length === 0 && !isAdding && (
-          <p className="text-muted-foreground/60 text-xs text-center py-3 italic">{t("pinboard.empty")}</p>
+          <p className="lc-empty-state lc-empty-state-description text-muted-foreground/60 text-xs text-center py-3 italic">{t("pinboard.empty")}</p>
         )}
 
         {notes.map((note) => {

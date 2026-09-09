@@ -2531,10 +2531,10 @@ export default function KidDashboard() {
           </div>
 
           {activeRewards.length === 0 ? (
-            <Card className="p-8 text-center bg-card rounded-2xl">
-              <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-lg text-muted-foreground">{t("kidDashboard.noRewardsYet")}</p>
-              <p className="text-sm text-muted-foreground mt-2">{t("kidDashboard.parentsCanCreate")}</p>
+            <Card className="lc-empty-state p-8 text-center bg-card rounded-2xl">
+              <Gift className="lc-empty-state-icon h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <p className="lc-empty-state-description text-lg text-muted-foreground">{t("kidDashboard.noRewardsYet")}</p>
+              <p className="lc-empty-state-description text-sm text-muted-foreground mt-2">{t("kidDashboard.parentsCanCreate")}</p>
             </Card>
           ) : (
             <div className="space-y-4">
@@ -2939,16 +2939,16 @@ export default function KidDashboard() {
           )}
 
           {filteredKidTasks.length === 0 ? (
-            <Card className="p-8 text-center bg-card rounded-2xl">
-              <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-green-500" />
+            <Card className="lc-empty-state p-8 text-center bg-card rounded-2xl">
+              <CheckCircle2 className="lc-empty-state-icon h-16 w-16 mx-auto mb-4 text-green-500" />
               {myTasks.length === 0 ? (
                 <>
-                  <p className="text-lg font-bold text-green-500">{t("kidDashboard.noTasksYet")}</p>
-                  <p className="text-sm text-muted-foreground mt-2">{t("kidDashboard.askParentsTasks")}</p>
+                  <p className="lc-empty-state-title text-lg font-bold text-green-500">{t("kidDashboard.noTasksYet")}</p>
+                  <p className="lc-empty-state-description text-sm text-muted-foreground mt-2">{t("kidDashboard.askParentsTasks")}</p>
                 </>
               ) : (
                 <>
-                  <p className="text-lg font-bold text-muted-foreground">{t("kidDashboard.noTasksForFilter")}</p>
+                  <p className="lc-empty-state-title text-lg font-bold text-muted-foreground">{t("kidDashboard.noTasksForFilter")}</p>
                   <Button 
                     variant="outline" 
                     className="mt-4 rounded-full"

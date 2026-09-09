@@ -272,7 +272,7 @@ export function NotificationBell({ familyLanguage = "en", wsConnection, memberRo
         <DropdownMenuSeparator />
         
         {isLoading ? (
-          <div className="p-4 text-center text-muted-foreground text-sm">
+          <div className="lc-empty-state lc-empty-state-description p-4 text-center text-muted-foreground text-sm">
             {t("common.loading", "Loading...")}
           </div>
         ) : notifications.length === 0 ? (

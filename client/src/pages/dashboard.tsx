@@ -1533,10 +1533,10 @@ export default function Dashboard() {
               )}
 
               {activeTasks.length === 0 ? (
-                <Card className="p-12 text-center">
-                  <Star className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-bold font-accent mb-2">{t("dashboard.noTasksYet")}</h3>
-                  <p className="text-muted-foreground mb-6">
+                <Card className="lc-empty-state p-12 text-center">
+                  <Star className="lc-empty-state-icon h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="lc-empty-state-title text-xl font-bold font-accent mb-2">{t("dashboard.noTasksYet")}</h3>
+                  <p className="lc-empty-state-description text-muted-foreground mb-6">
                     {t("dashboard.createFirstTask")}
                   </p>
                   <Button onClick={() => {
@@ -2085,10 +2085,10 @@ export default function Dashboard() {
 
               <TabsContent value="active" className="space-y-4 mt-6">
                 {activeTasks.length === 0 ? (
-                  <Card className="p-12 text-center">
-                    <Star className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-xl font-bold font-accent mb-2">{t("dashboard.noTasksAvailable")}</h3>
-                    <p className="text-muted-foreground">
+                  <Card className="lc-empty-state p-12 text-center">
+                    <Star className="lc-empty-state-icon h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="lc-empty-state-title text-xl font-bold font-accent mb-2">{t("dashboard.noTasksAvailable")}</h3>
+                    <p className="lc-empty-state-description text-muted-foreground">
                       {t("dashboard.askParents")}
                     </p>
                   </Card>
@@ -2135,10 +2135,10 @@ export default function Dashboard() {
             <div>
               <h2 className="text-2xl font-bold font-accent mb-4">{t("dashboard.rewardsYouCanEarn")}</h2>
               {activeRewards.length === 0 ? (
-                <Card className="p-12 text-center">
-                  <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-bold font-accent mb-2">{t("dashboard.noRewardsAvailable")}</h3>
-                  <p className="text-muted-foreground mb-4">
+                <Card className="lc-empty-state p-12 text-center">
+                  <Gift className="lc-empty-state-icon h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="lc-empty-state-title text-xl font-bold font-accent mb-2">{t("dashboard.noRewardsAvailable")}</h3>
+                  <p className="lc-empty-state-description text-muted-foreground mb-4">
                     {t("dashboard.requestRewardReview")}
                   </p>
                   <Button

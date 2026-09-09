@@ -1003,11 +1003,11 @@ export default function RewardsBoard() {
       {isParent && (
         <div className="space-y-4">
           {displayRedemptions.length === 0 ? (
-          <Card className="rounded-2xl bg-card/80">
+          <Card className="lc-empty-state rounded-2xl bg-card/80">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Gift className="h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">{t("rewardsBoard.noRewardsYet")}</h3>
-              <p className="text-muted-foreground text-center">
+              <Gift className="lc-empty-state-icon h-16 w-16 text-muted-foreground mb-4" />
+              <h3 className="lc-empty-state-title text-xl font-semibold mb-2">{t("rewardsBoard.noRewardsYet")}</h3>
+              <p className="lc-empty-state-description text-muted-foreground text-center">
                 {t("rewardsBoard.noRewardsFamilyDesc")}
               </p>
             </CardContent>

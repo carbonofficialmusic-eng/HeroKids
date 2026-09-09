@@ -287,9 +287,9 @@ export default function Chat() {
             <ScrollArea className="flex-1 min-h-0 p-4" ref={scrollAreaRef}>
               <div className="space-y-4" data-testid="chat-messages">
                 {messages.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-12">
-                    <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>{t('chat.noMessagesStart')}</p>
+                  <div className="lc-empty-state text-center py-12">
+                    <MessageCircle className="lc-empty-state-icon w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p className="lc-empty-state-description">{t('chat.noMessagesStart')}</p>
                   </div>
                 ) : (
                   messages.map((msg, index) => (

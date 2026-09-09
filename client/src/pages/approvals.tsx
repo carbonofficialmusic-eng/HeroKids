@@ -413,11 +413,11 @@ export default function Approvals() {
         </div>
 
         {completions.length === 0 ? (
-          <Card>
+          <Card className="lc-empty-state">
             <CardContent className="p-8 text-center">
-              <CheckCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-lg font-medium mb-2">{t("approvals.allCaughtUp")}</p>
-              <p className="text-muted-foreground">{t("approvals.noPendingCompletions")}</p>
+              <CheckCircle className="lc-empty-state-icon w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="lc-empty-state-title text-lg font-medium mb-2">{t("approvals.allCaughtUp")}</p>
+              <p className="lc-empty-state-description text-muted-foreground">{t("approvals.noPendingCompletions")}</p>
             </CardContent>
           </Card>
         ) : (

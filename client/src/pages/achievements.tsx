@@ -546,16 +546,16 @@ export default function Achievements() {
             ))}
 
                 {achievements.length === 0 && (
-                  <Card>
+                  <Card className="lc-empty-state">
                     <CardContent className="py-12 text-center space-y-6">
                       <div className="flex justify-center">
                         <div className="rounded-full bg-primary/10 p-6">
-                          <Sparkles className="h-12 w-12 text-primary" />
+                          <Sparkles className="lc-empty-state-icon h-12 w-12 text-primary" />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <h3 className="text-xl font-semibold">{t("achievements.noAchievements")}</h3>
-                        <p className="text-muted-foreground max-w-md mx-auto">
+                        <h3 className="lc-empty-state-title text-xl font-semibold">{t("achievements.noAchievements")}</h3>
+                        <p className="lc-empty-state-description text-muted-foreground max-w-md mx-auto">
                           {t("achievements.startWithDefaults")}
                         </p>
                       </div>
@@ -634,10 +634,10 @@ export default function Achievements() {
                 ))}
               </div>
             ) : (
-              <Card>
+              <Card className="lc-empty-state">
                 <CardContent className="py-12 text-center">
-                  <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">{t("achievements.noAwards")}</p>
+                  <History className="lc-empty-state-icon h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="lc-empty-state-description text-muted-foreground">{t("achievements.noAwards")}</p>
                 </CardContent>
               </Card>
             )}

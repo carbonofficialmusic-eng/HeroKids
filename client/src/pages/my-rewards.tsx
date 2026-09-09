@@ -375,10 +375,10 @@ export default function MyRewards() {
 
         <div className="grid grid-cols-1 landscape:grid-cols-2 gap-4">
           {allAcquiredRewards.length === 0 ? (
-            <Card className="p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
-              <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-lg text-muted-foreground">{t("myRewards.noRewards")}</p>
-              <p className="text-sm text-muted-foreground mt-2">
+            <Card className="lc-empty-state p-8 text-center bg-card/80 backdrop-blur-md rounded-2xl">
+              <Gift className="lc-empty-state-icon h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <p className="lc-empty-state-description text-lg text-muted-foreground">{t("myRewards.noRewards")}</p>
+              <p className="lc-empty-state-description text-sm text-muted-foreground mt-2">
                 {t("myRewards.collectPoints")}
               </p>
             </Card>

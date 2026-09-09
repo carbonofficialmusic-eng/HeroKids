@@ -76,9 +76,9 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
       )}
 
       {eligibleMembers.length === 0 && (
-        <div className="text-center py-12" data-testid="leaderboard-empty-state">
-          <Trophy className="h-14 w-14 mx-auto mb-4 text-cyan-300/60" />
-          <p className="text-lg text-muted-foreground" data-testid="leaderboard-empty-message">
+        <div className="lc-empty-state text-center py-12" data-testid="leaderboard-empty-state">
+          <Trophy className="lc-empty-state-icon h-14 w-14 mx-auto mb-4 text-cyan-300/60" />
+          <p className="lc-empty-state-description text-lg text-muted-foreground" data-testid="leaderboard-empty-message">
             {members.length === 0 ? t("leaderboard.noMembersYet") : t("leaderboard.allExcluded")}
           </p>
         </div>

@@ -190,7 +190,7 @@ html {
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 215 8% 12%;
+  --background: 210 30.6% 9.6%;
 
   --foreground: 210 10% 92%;
 
@@ -830,6 +830,16 @@ html {
   .lc-skins-gallery .lc-legacy-card,
   .lc-skins-gallery .lc-regular-card { border-radius: 1.1rem; }
 }
+
+/* Empty states are opt-in so ordinary cards are never recolored. */
+.dark .lc-empty-state {
+  background: linear-gradient(135deg, #162B40, #112236);
+  border: 1px solid rgba(38, 184, 224, 0.30);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+.dark .lc-empty-state-title { color: #f7fbff; }
+.dark .lc-empty-state-description { color: #AAB8C7; }
+.dark .lc-empty-state-icon { color: #79CBE5; }
 
 .lc-leaderboard-card {
   position: relative;

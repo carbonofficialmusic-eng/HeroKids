@@ -131,9 +131,9 @@ export default function ActiveRewards() {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : activeRewards.length === 0 ? (
-          <Card className="p-12 text-center">
-            <Gift className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-bold font-accent mb-2">{t("dashboard.noRewardsAvailable")}</h3>
+          <Card className="lc-empty-state p-12 text-center">
+            <Gift className="lc-empty-state-icon h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="lc-empty-state-title text-xl font-bold font-accent mb-2">{t("dashboard.noRewardsAvailable")}</h3>
           </Card>
         ) : (
           <div className="grid gap-4">

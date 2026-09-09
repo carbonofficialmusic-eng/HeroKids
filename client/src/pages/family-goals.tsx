@@ -334,10 +334,10 @@ export default function FamilyGoals() {
         )}
 
         {activeGoals.length === 0 && (
-          <Card className="p-12 text-center">
-            <img src={familyGoalsIcon} alt="" className="h-24 w-24 mx-auto object-contain mb-4 drop-shadow-md" />
-            <h3 className="text-xl font-semibold mb-2">{t("familyGoals.noGoalsYet")}</h3>
-            <p className="text-muted-foreground mb-6">
+          <Card className="lc-empty-state p-12 text-center">
+            <img src={familyGoalsIcon} alt="" className="lc-empty-state-icon h-24 w-24 mx-auto object-contain mb-4 drop-shadow-md" />
+            <h3 className="lc-empty-state-title text-xl font-semibold mb-2">{t("familyGoals.noGoalsYet")}</h3>
+            <p className="lc-empty-state-description text-muted-foreground mb-6">
               {member?.role === "parent" 
                 ? t("familyGoals.noGoalsParent")
                 : t("familyGoals.noGoalsChild")}
