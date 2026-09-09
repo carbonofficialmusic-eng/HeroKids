@@ -1211,6 +1211,58 @@ html {
 }
 .lc-kid-goal-cta:hover { filter: brightness(1.1); transform: translateY(-2px); }
 .lc-kid-goal-cta:active { transform: translateY(2px); }
+
+/* Points card only: no floating decoration, so long totals always have
+   their own full-width reading lane on small screens. */
+.lc-kid-points-card {
+  width: min(100%, 19rem);
+  border: 1px solid rgba(91,157,224,.42) !important;
+  border-radius: 1.3rem !important;
+  background: linear-gradient(145deg,#162b49,#0d1b33) !important;
+  box-shadow: 0 10px 21px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.08);
+  color: #f7fbff;
+}
+.lc-kid-points-card > p {
+  color: #b7c8e5 !important;
+  letter-spacing: .02em;
+}
+.lc-kid-points-card > div { position: relative; }
+.lc-kid-points-card > div > div:first-child {
+  padding: .65rem .35rem .8rem;
+  border-color: rgba(109,160,222,.3) !important;
+}
+.lc-kid-points-card [data-testid="text-total-earned"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-size: clamp(2rem, 8vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -.025em;
+  text-shadow: 0 3px 0 #21538a, 0 6px 12px rgba(0,0,0,.34);
+}
+.lc-kid-points-card [data-testid="text-total-earned"]::before {
+  content: "";
+  display: block;
+  width: 2.2rem;
+  height: .2rem;
+  margin: 0 auto .45rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg,#18c8ef,#e5a928);
+  opacity: .9;
+}
+.lc-kid-points-card [data-testid="text-total-points"] {
+  color: #81e4ff;
+  font-size: 1.3rem;
+  font-family: var(--font-accent);
+  text-shadow: 0 2px 0 #194a73;
+}
+.lc-kid-points-card > div > div:last-child {
+  min-height: 2.45rem;
+  padding: .25rem .15rem 0;
+}
 [data-testid="dialog-delete-goal"],
 [data-testid="dialog-reject"],
 [data-testid="dialog-edit-reward"] {

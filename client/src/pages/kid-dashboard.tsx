@@ -2293,7 +2293,7 @@ export default function KidDashboard() {
                   <MessageSquare className="h-5 w-5" />
                 </button>
               </div>
-              <div className="bg-card p-4 rounded-2xl border min-w-[220px]">
+              <div className="lc-kid-points-card bg-card p-4 rounded-2xl border min-w-[220px]">
                 <p className="text-xs text-muted-foreground mb-2 font-medium text-center">{t("kidDashboard.yourPoints")}</p>
                 <div className="space-y-2">
                   <div className="text-center pb-2 border-b border-border">
