@@ -1044,8 +1044,7 @@ html {
 .lc-game-dialog textarea::placeholder { color: #7894aa; }
 .lc-game-dialog [data-slot="form-description"] { color: var(--lc-editor-muted); }
 .lc-game-dialog-actions {
-  position: sticky;
-  bottom: -.1rem;
+  position: static;
   z-index: 4;
   margin: 0 -.1rem;
   padding: .8rem .1rem calc(.15rem + env(safe-area-inset-bottom, 0px)) !important;
@@ -1069,9 +1068,6 @@ html {
   border-color: rgba(115,191,226,.52);
   color: #e1f2ff;
   background: rgba(11,40,61,.75);
-}
-.lc-goal-dialog .lc-game-dialog-actions {
-  position: static;
 }
 .lc-game-dialog .rounded-lg.border {
   border-color: rgba(99, 181, 225, .3);

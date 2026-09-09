@@ -13,7 +13,8 @@ To scroll a focused input above the iOS keyboard inside a scrollable dialog:
    - iOS WKWebView (Capacitor): `visualViewport.height` does NOT shrink → use `innerHeight - 350` (fixed estimate).
    - Detection: `vvHeight < innerHeight - 50 ? vvHeight : innerHeight - KEYBOARD_HEIGHT`
 4. **Scroll timing**: wait ~400ms after `onFocus` (keyboard animation completes), then `scrollBy`.
+5. **Do not use sticky action rows inside these scrollable dialogs.** iOS can recalculate `position: sticky` against the keyboard-resized visual viewport and move the buttons over earlier form sections. Keep shared form actions in normal document flow at the form end.
 
-**Why:** CSS class selectors (`closest(".overflow-y-auto")`) can miss the target in WKWebView. Double-subtracting keyboard height (once via `innerHeight` shrink, once via hardcoded 350px) causes over-scrolling on regular browsers.
+**Why:** CSS class selectors (`closest(".overflow-y-auto")`) can miss the target in WKWebView. Double-subtracting keyboard height (once via `innerHeight` shrink, once via hardcoded 350px) causes over-scrolling on regular browsers. Sticky form actions visibly jump and overlap content when iOS opens the keyboard.
 
 **How to apply:** Any dialog with inputs that get covered by the keyboard on iOS. See `reward-dialog.tsx` `scrollFieldIntoView()` for the working implementation.
