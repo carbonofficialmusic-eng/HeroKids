@@ -1268,17 +1268,6 @@ html {
   background: linear-gradient(145deg,#142d4d,#0d1c34) !important;
   box-shadow: 0 11px 22px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.08);
 }
-.lc-kid-goal-card::after {
-  content: "";
-  position: absolute;
-  right: 1rem;
-  top: .8rem;
-  width: .45rem;
-  height: .45rem;
-  border-radius: 50%;
-  background: #64ddff;
-  box-shadow: -1.2rem 2.2rem 0 #ffc542, -2.5rem -.2rem 0 #a97aff;
-}
 .lc-kid-goal-icon {
   position: relative;
   z-index: 1;
