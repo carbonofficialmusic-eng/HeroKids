@@ -854,6 +854,7 @@ html {
   width: min(calc(100% - 1rem), 42rem);
   max-height: min(92dvh, 52rem);
   scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  gap: .55rem;
   padding: clamp(.85rem, 2.8vw, 1.45rem);
   color: var(--lc-task-text);
   border: 1px solid rgba(91, 175, 222, .42);
@@ -864,7 +865,7 @@ html {
   box-shadow: 0 22px 60px rgba(0, 6, 16, .5), inset 0 1px rgba(255,255,255,.08);
 }
 .lc-task-dialog-header {
-  padding: .15rem .2rem .7rem;
+  padding: .1rem .2rem .4rem;
   border-bottom: 1px solid var(--lc-task-line);
 }
 .lc-task-dialog-header [data-slot="dialog-title"] { color: var(--lc-task-text); letter-spacing: -.02em; }
@@ -876,6 +877,18 @@ html {
   border-bottom: 1px solid rgba(130,193,226,.2);
 }
 .lc-task-dialog-form > *:last-child { border-bottom: 0; }
+.lc-task-dialog-form > .lc-task-dialog-top-divider {
+  margin-top: .2rem !important;
+  padding: .25rem 0;
+}
+.lc-task-dialog-form > .lc-task-dialog-templates {
+  margin-top: .25rem !important;
+  padding: .35rem 0;
+}
+.lc-task-dialog-form > .lc-task-dialog-first-heading {
+  margin-top: .3rem !important;
+  padding-top: .35rem;
+}
 .lc-task-dialog label,
 .lc-task-dialog [data-slot="form-label"] { color: #e8f4ff; }
 .lc-task-dialog input,

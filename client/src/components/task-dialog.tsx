@@ -474,7 +474,7 @@ export function TaskDialog({
             {/* Quick Templates Section - Only show when creating */}
             {!editingTask && (
             <>
-              <div className="relative">
+              <div className="lc-task-dialog-top-divider relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
                 </div>
@@ -483,7 +483,7 @@ export function TaskDialog({
                 </div>
               </div>
               
-              <div className="space-y-2">
+              <div className="lc-task-dialog-templates space-y-2">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
                   <h3 className="font-semibold text-sm">{t('tasks.quickTemplates')}</h3>
@@ -509,7 +509,7 @@ export function TaskDialog({
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="lc-task-dialog-top-divider relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
                 </div>
@@ -520,7 +520,7 @@ export function TaskDialog({
             </>
             )}
 
-            <div className="lc-task-dialog-section-heading">
+            <div className="lc-task-dialog-section-heading lc-task-dialog-first-heading">
               <span className="lc-task-dialog-section-number">1</span>
               <h3>{t("tasks.sectionTaskDetails")}</h3>
             </div>
