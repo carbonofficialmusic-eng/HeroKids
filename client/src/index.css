@@ -1070,6 +1070,9 @@ html {
   color: #e1f2ff;
   background: rgba(11,40,61,.75);
 }
+.lc-goal-dialog .lc-game-dialog-actions {
+  position: static;
+}
 .lc-game-dialog .rounded-lg.border {
   border-color: rgba(99, 181, 225, .3);
   background: rgba(12, 41, 61, .66);
