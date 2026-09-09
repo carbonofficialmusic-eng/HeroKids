@@ -929,17 +929,6 @@ html {
   background: linear-gradient(145deg, #302050, #171b36) !important;
   box-shadow: 0 8px 16px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.09);
 }
-.lc-achievement-card::after {
-  content: "";
-  position: absolute;
-  right: .6rem;
-  top: .45rem;
-  width: .4rem;
-  height: .4rem;
-  border-radius: 50%;
-  background: #e2a7ff;
-  box-shadow: -1.3rem 2.6rem 0 #ffc84c, -3.5rem -.3rem 0 #74dcff;
-}
 .lc-achievement-inner { position: relative; z-index: 1; }
 .lc-achievement-icon {
   min-width: 3rem;
@@ -967,17 +956,6 @@ html {
   border-color: rgba(43,190,239,.38) !important;
   background: linear-gradient(145deg, #122b4b, #0c1b33) !important;
   box-shadow: 0 8px 17px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.08);
-}
-.lc-goal-card::after {
-  content: "";
-  position: absolute;
-  right: .8rem;
-  top: .65rem;
-  width: .45rem;
-  height: .45rem;
-  border-radius: 50%;
-  background: #6ce5ff;
-  box-shadow: -1.2rem 2rem 0 #ffc83d, -2.1rem -.2rem 0 #a879ff;
 }
 .lc-goal-illustration {
   display: grid;
@@ -1074,17 +1052,6 @@ html {
   border-radius: 1.2rem !important;
   background: linear-gradient(145deg,#302050,#171b36) !important;
   box-shadow: 0 9px 18px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.09);
-}
-.lc-achievement-page-card::after {
-  content: "";
-  position: absolute;
-  right: .9rem;
-  bottom: .7rem;
-  width: .4rem;
-  height: .4rem;
-  border-radius: 50%;
-  background: #ffc84c;
-  box-shadow: -1.4rem -.8rem 0 #8be5ff;
 }
 .lc-achievement-page-inner { position: relative; z-index: 1; }
 .lc-achievement-page-card img,
