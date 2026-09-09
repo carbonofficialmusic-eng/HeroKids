@@ -364,7 +364,7 @@ export default function Settings() {
   // Only parents can access settings
   if (!memberLoading && !familyLoading && realMember?.role !== "parent") {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="lc-settings-page min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle>{t('settings.accessDenied')}</CardTitle>
@@ -390,7 +390,7 @@ export default function Settings() {
 
   if (memberLoading || familyLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="lc-settings-page min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">{t('settings.loadingSettings')}</p>
@@ -489,10 +489,10 @@ export default function Settings() {
   const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   return (
-    <div className="min-h-screen">
-      <div className="container max-w-4xl mx-auto p-4 sm:p-6 lg:p-8" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
+    <div className="lc-settings-page min-h-screen">
+      <div className="lc-settings-shell container max-w-4xl mx-auto p-4 sm:p-6 lg:p-8" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="lc-settings-header flex items-center gap-3 mb-6">
           <Button
             variant="outline"
             size="icon"
@@ -509,7 +509,7 @@ export default function Settings() {
         </div>
 
         {/* Settings Cards */}
-        <div className="space-y-4">
+        <div className="lc-settings-sections space-y-4">
           {/* Family Members Settings */}
           <Card>
             <CardHeader>
@@ -1337,7 +1337,7 @@ export default function Settings() {
           )}
 
           {/* Factory Reset Settings */}
-          <Card className="border-destructive/50">
+          <Card className="lc-settings-danger border-destructive/50">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-5 w-5 text-destructive" />

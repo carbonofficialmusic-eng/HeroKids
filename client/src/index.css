@@ -1596,3 +1596,164 @@ html {
   .lc-podium-place-1 .lc-podium-block { width: 6.2rem; }
 }
 
+/* Settings — the parent control room of the Little Champs universe.
+   A calm, ink-blue foundation keeps a long admin page trustworthy; cyan,
+   violet and warm gold mark the places where families make choices. */
+.lc-settings-page {
+  --lc-settings-ink: #071326;
+  --lc-settings-deep: #091a34;
+  --lc-settings-panel: rgba(17, 35, 66, .94);
+  --lc-settings-panel-raised: #172c50;
+  --lc-settings-line: rgba(116, 165, 231, .28);
+  --lc-settings-line-bright: rgba(44, 203, 239, .55);
+  --lc-settings-text: #f5f9ff;
+  --lc-settings-muted: #aebedb;
+  --lc-settings-cyan: #20c8eb;
+  --lc-settings-violet: #9b62f2;
+  --lc-settings-gold: #ffc43c;
+  min-height: 100dvh;
+  color: var(--lc-settings-text);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(29, 117, 196, .26), transparent 28rem),
+    radial-gradient(circle at 94% 16%, rgba(131, 68, 218, .2), transparent 25rem),
+    linear-gradient(160deg, #071326 0%, #0b1b35 52%, #08162c 100%);
+}
+.lc-settings-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .13;
+  background-image: radial-gradient(rgba(255,255,255,.4) .7px, transparent .7px);
+  background-size: 19px 19px;
+  mask-image: linear-gradient(to bottom, #000, transparent 75%);
+}
+.lc-settings-page > .lc-settings-shell {
+  position: relative;
+  z-index: 1;
+}
+.lc-settings-header {
+  padding: .55rem 0 1rem;
+  border-bottom: 1px solid rgba(120, 167, 229, .2);
+}
+.lc-settings-header h1 {
+  color: #fff;
+  font-size: clamp(1.75rem, 5vw, 2.55rem);
+  letter-spacing: -.025em;
+  text-shadow: 0 3px 0 #153562;
+}
+.lc-settings-header p,
+.lc-settings-page .text-muted-foreground {
+  color: var(--lc-settings-muted) !important;
+}
+.lc-settings-header button,
+.lc-settings-page .lc-settings-header + .lc-settings-sections button[data-testid="button-back"] {
+  border-color: var(--lc-settings-line) !important;
+  color: #d9e8ff !important;
+  background: rgba(20, 43, 79, .9) !important;
+  box-shadow: 0 4px 0 rgba(2, 10, 25, .45), inset 0 1px rgba(255,255,255,.1);
+}
+.lc-settings-sections > * {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--lc-settings-line) !important;
+  border-radius: 1.25rem !important;
+  background: linear-gradient(145deg, rgba(23, 47, 85, .96), rgba(11, 28, 54, .97)) !important;
+  box-shadow: 0 12px 25px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.07);
+}
+.lc-settings-sections > *::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.35rem;
+  right: 1.35rem;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(32,200,235,.75), transparent);
+  opacity: .6;
+}
+.lc-settings-sections > *:nth-child(3n + 2)::before {
+  background: linear-gradient(90deg, transparent, rgba(155,98,242,.8), transparent);
+}
+.lc-settings-sections > *:nth-child(3n)::before {
+  background: linear-gradient(90deg, transparent, rgba(255,196,60,.8), transparent);
+}
+.lc-settings-page [data-slot="card-header"],
+.lc-settings-page [class*="CardHeader"],
+.lc-settings-page .shadcn-card > div:first-child {
+  padding: 1.3rem 1.35rem 1rem;
+}
+.lc-settings-page [data-slot="card-content"],
+.lc-settings-page [class*="CardContent"],
+.lc-settings-page .shadcn-card > div:last-child {
+  padding: 0 1.35rem 1.35rem;
+}
+.lc-settings-page [data-slot="card-title"],
+.lc-settings-page [class*="CardTitle"] {
+  color: #fff;
+  letter-spacing: -.01em;
+}
+.lc-settings-page [data-slot="card-description"],
+.lc-settings-page [class*="CardDescription"] {
+  color: var(--lc-settings-muted) !important;
+}
+.lc-settings-page .bg-card,
+.lc-settings-page .bg-card\/50,
+.lc-settings-page .bg-muted\/50 {
+  border-color: rgba(110, 157, 222, .28) !important;
+  background: rgba(7, 21, 43, .52) !important;
+}
+.lc-settings-page input,
+.lc-settings-page [role="combobox"] {
+  border-color: rgba(120, 166, 227, .38) !important;
+  color: #f5f9ff !important;
+  background: rgba(7, 20, 42, .72) !important;
+}
+.lc-settings-page input::placeholder { color: #8095ba; }
+.lc-settings-page button:not([data-testid="button-back"]) {
+  transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+}
+.lc-settings-page .bg-primary,
+.lc-settings-page button.bg-primary {
+  border-color: rgba(184, 242, 255, .4) !important;
+  background: linear-gradient(135deg, #087eaf, #20c8eb) !important;
+  box-shadow: 0 4px 0 #075174, 0 8px 15px rgba(8, 159, 207, .2), inset 0 1px rgba(255,255,255,.25);
+}
+.lc-settings-page button:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.lc-settings-page button:active:not(:disabled) { transform: translateY(2px); }
+.lc-settings-page .text-primary { color: #63ddf5 !important; }
+.lc-settings-page .text-green-500 { color: #73e36a !important; }
+.lc-settings-page .lc-settings-danger {
+  border-color: rgba(255, 100, 112, .68) !important;
+  background: linear-gradient(145deg, rgba(68, 25, 53, .97), rgba(34, 20, 42, .98)) !important;
+  box-shadow: 0 14px 26px rgba(26, 4, 19, .38), inset 0 2px rgba(255, 105, 120, .2);
+}
+.lc-settings-page .lc-settings-danger::before {
+  background: linear-gradient(90deg, transparent, #ff6677, transparent);
+}
+.lc-settings-page .lc-settings-danger [class*="CardTitle"],
+.lc-settings-page .lc-settings-danger .text-destructive {
+  color: #ff9ca7 !important;
+}
+.lc-settings-page .lc-settings-danger button {
+  border-color: rgba(255, 139, 148, .62) !important;
+}
+.lc-settings-page .lc-settings-danger button.bg-destructive,
+.lc-settings-page .lc-settings-danger button[class*="destructive"] {
+  background: linear-gradient(135deg, #b83252, #ed5266) !important;
+  box-shadow: 0 4px 0 #721d39, 0 8px 16px rgba(165, 36, 64, .25);
+}
+@media (max-width: 640px) {
+  .lc-settings-shell { padding-top: max(1rem, env(safe-area-inset-top)) !important; }
+  .lc-settings-sections > * { border-radius: 1.05rem !important; }
+  .lc-settings-page [data-slot="card-header"],
+  .lc-settings-page [class*="CardHeader"],
+  .lc-settings-page .shadcn-card > div:first-child { padding: 1.1rem 1rem .8rem; }
+  .lc-settings-page [data-slot="card-content"],
+  .lc-settings-page [class*="CardContent"],
+  .lc-settings-page .shadcn-card > div:last-child { padding: 0 1rem 1rem; }
+  .lc-settings-page [role="combobox"] { max-width: 52vw; }
+}
+
