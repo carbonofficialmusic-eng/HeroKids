@@ -1226,9 +1226,9 @@ html {
   border-color: rgba(109,160,222,.3) !important;
 }
 
-/* Open task cards share the deep-blue family-goal/points-card palette.
-   Status cards keep their existing amber and green appearance. */
-.lc-task-card-open {
+/* On the parent dashboard every task card shares the deep-blue palette.
+   Approval/completion status remains visible through its amber/green check. */
+.lc-dashboard [data-testid^="card-task-"] {
   border-color: rgba(76, 176, 232, .35) !important;
   background: linear-gradient(
     145deg,
