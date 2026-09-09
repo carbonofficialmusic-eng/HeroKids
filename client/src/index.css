@@ -692,8 +692,7 @@ html {
   color: var(--lc-ink);
   background:
     radial-gradient(circle at 12% 5%, rgba(33, 105, 185, .25), transparent 28rem),
-    radial-gradient(circle at 88% 24%, rgba(132, 67, 222, .19), transparent 25rem),
-    linear-gradient(145deg, #08152b 0%, #071326 52%, #10162f 100%);
+    radial-gradient(circle at 88% 24%, rgba(132, 67, 222, .19), transparent 25rem);
 }
 .lc-skins-gallery::before {
   content: "";
