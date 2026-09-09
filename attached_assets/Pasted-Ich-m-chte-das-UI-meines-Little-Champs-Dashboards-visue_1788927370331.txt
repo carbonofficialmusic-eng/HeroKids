@@ -1,0 +1,291 @@
+Ich möchte das UI meines Little Champs Dashboards visuell überarbeiten.
+
+Bitte nutze die hochgeladenen Screenshots als Referenz:
+- als Struktur- und Inhaltsreferenz für die bestehende App
+- und als Stilreferenz für das neue gewünschte Design
+
+WICHTIG:
+Bitte KEINE Logik ändern.
+Bitte KEINE Navigation ändern.
+Bitte KEINE Daten ändern.
+Bitte KEINE Texte inhaltlich ändern.
+Bitte KEINE Funktionen umbauen.
+Bitte KEINE bestehenden Seiten neu strukturieren.
+Bitte nur das visuelle UI / Styling überarbeiten.
+
+WICHTIGER FOKUS:
+In diesem Schritt sollen die Aufgabenkarten selbst ERSTMAL NICHT neu gestaltet werden.
+Die bestehenden Aufgabenkarten und deren Zustandslogik bleiben vorerst wie sie sind.
+Bitte konzentriere dich nur auf diese Bereiche:
+
+1. Buttons
+2. Leaderboard / Bestenliste
+3. Punkteanzeige / Punktekarte
+4. Sortierung / Tabs / Filter (z. B. Täglich, Wöchentlich, Monatlich, Alle Aufgaben)
+
+ALLGEMEINE DESIGNRICHTUNG:
+Das Design soll sich am spielerischen, kindgerechten Mockup orientieren.
+Bitte nicht nüchtern, nicht businesshaft, nicht minimalistisch-steril und nicht glassmorphism-lastig.
+Der Stil soll sein:
+
+- kindgerecht
+- verspielt
+- hochwertig
+- bunt, aber kontrolliert
+- game-artig
+- modern
+- mit klarer Hierarchie
+- weich und freundlich
+- mit stärkerem Charakter als das aktuelle UI
+
+VISUELLER STIL:
+- große, runde Ecken
+- kräftigere Farben
+- klare aktive Zustände
+- weiche Schatten
+- leichte 3D-Anmutung
+- Buttons mit mehr Tiefe
+- spielerische Icon-Bubbles / Icon-Flächen
+- gute Lesbarkeit auf dunklem Hintergrund
+- weiße bzw. sehr helle Typografie
+- deutliche visuelle Trennung zwischen primären und sekundären Aktionen
+
+FARBWELT / RICHTUNG:
+Bitte orientiere dich an den Referenzen:
+- Dunkler Hintergrund / dunkle UI-Basis
+- Akzentfarben wie Cyan, Blau, Violett, Gold, Orange, Grün
+- CTA-/Primary-Buttons dürfen kräftiger und bunter sein
+- Sekundäre Bereiche dunkler, hochwertig und sauber
+- Buttons und Bedienelemente sollen mehr “Game UI”-Charakter haben
+
+BITTE DIE FOLGENDEN TEILE ÜBERARBEITEN:
+
+==================================================
+A) BUTTON DESIGN
+==================================================
+
+Bitte alle Buttons im neuen Stil überarbeiten.
+
+Ziel:
+Die Buttons sollen deutlich hochwertiger, klarer und spielerischer wirken als aktuell.
+
+Bitte beachten:
+- stärker abgerundete Ecken
+- mehr visuelle Tiefe
+- leichte Schatten
+- klare aktive Zustände
+- klare Hierarchie zwischen primären und sekundären Buttons
+- bessere visuelle Gruppierung
+- kindgerechter Game-UI-Look
+
+PRIMARY BUTTONS:
+z. B.
+- Family Button
+- + Aufgabe
+- + Belohnung
+- aktive Auswahlbuttons
+- relevante CTA-Buttons
+
+Gestaltung:
+- kräftigere Farbe / Verlauf
+- weich gerundet
+- leichte innere Highlights
+- optional leichte 3D-Wirkung
+- Icons sauber integriert
+- deutlich hervorstechend
+
+SECONDARY BUTTONS:
+z. B.
+- Genehmigungen
+- Belohnungen
+- Familienziele
+- Punkte senden
+- Icon Buttons oben rechts
+- Chat-Button
+- Sortier-/Filterbuttons
+
+Gestaltung:
+- dunklere Buttonflächen
+- trotzdem hochwertig
+- feine Umrandung / Tiefe
+- klarer Hover-/Active-/Selected-State
+- visuell passend zu den Primary Buttons
+
+ICON BUTTONS:
+Bitte Icon-Buttons wie Benachrichtigung, Menü, Chat etc. hochwertiger machen:
+- dunkle Basis
+- weiche Kontur / leichte Tiefe
+- klare aktive / pressable Wirkung
+- konsistentes Sizing
+- rote Notification Badge beibehalten, aber sauber integriert
+
+==================================================
+B) PUNKTEANZEIGE / PUNKTEKARTE
+==================================================
+
+Die Punktekarte soll deutlich spielerischer und hochwertiger werden.
+
+Bitte an den Referenzbildern orientieren:
+- größere visuelle Präsenz
+- klarere Zahlendarstellung
+- spielerische Illustration oder Icon-Bereich
+- bessere Informationshierarchie
+
+Bitte die Punktekarte so gestalten, dass:
+- “Deine Punkte” klar erkennbar ist
+- “Total verdient” stärker betont wird
+- die große Punktzahl visuell im Mittelpunkt steht
+- “Verfügbar” gut lesbar bleibt
+- die Karte hochwertig und leicht gamifiziert wirkt
+
+Mögliche Gestaltung:
+- dunkle Card als Basis
+- stärkerer Radius
+- leichte Schatten / Tiefe
+- optional kleine illustrative Akzente (z. B. Trophäe, Sterne, Münzen)
+- große weiße Zahl
+- Sekundärinfos kleiner, aber klar lesbar
+- feine Trennlinie zwischen Hauptwert und verfügbarem Wert
+
+Die Karte soll nicht wie ein nüchterner Statistik-Block wirken, sondern wie ein Reward-/Progress-Bereich aus einer Kinder-App.
+
+==================================================
+C) SORTIERUNG / TABS / FILTER
+==================================================
+
+Bitte die Sortierungs- und Filterelemente deutlich verbessern:
+z. B.
+- Täglich
+- Wöchentlich
+- Monatlich
+- Einmalig & Direkt
+- Alle Aufgaben
+- Wöchentlich / Monatlich im Leaderboard
+
+Ziel:
+Diese Elemente sollen wie hochwertige Segment-Buttons / Tabs aussehen.
+
+Bitte gestalten als:
+- runde Pill-Buttons / Segmented Controls
+- klare Unterscheidung zwischen aktiv und inaktiv
+- aktive Auswahl farblich deutlich hervorheben
+- inaktive Buttons dunkler und ruhiger
+- insgesamt sauberer und spielerischer als aktuell
+
+Aktive States:
+- kräftiger Farbton (z. B. Cyan oder Violett)
+- mehr Tiefe / Highlight
+- klarer Kontrast zum Hintergrund
+
+Inaktive States:
+- dunkle, elegante Flächen
+- trotzdem gut lesbar
+- visuell konsistent
+
+Bitte besonders darauf achten, dass die Sortierung kompakter, moderner und hochwertiger wirkt.
+
+==================================================
+D) LEADERBOARD / BESTENLISTE
+==================================================
+
+Die Bestenliste soll sich stark am neuen Mockup orientieren.
+Das ist einer der wichtigsten Bereiche.
+
+Bitte die aktuelle Bestenliste visuell deutlich aufwerten.
+
+Ziel:
+- klarer spielerischer Wettbewerb
+- Podest / Siegerdarstellung für Platz 1–3
+- visuell deutlich spannender als die aktuelle nüchterne Liste
+- kindgerechter, belohnender Charakter
+
+Bitte übernehmen / anstreben:
+1. Top 3 als Podest / Bühnen-Darstellung
+2. Avatar im Mittelpunkt
+3. Platz 1 deutlich hervorgehoben
+4. Platz 2 und 3 klar sichtbar, aber schwächer als Platz 1
+5. Trophäe / Medaillen / Rang-Icons
+6. große und gut lesbare Punktzahlen
+7. sauber gestaltete Liste ab Platz 4 darunter
+
+TOP 3 BEREICH:
+- Podestartige Darstellung
+- Platz 1 mittig und am größten
+- Platz 2 links
+- Platz 3 rechts
+- Avatare größer und schön gerahmt
+- Namen gut lesbar
+- Punkte auffällig darstellen
+- kleine visuelle Belohnungsakzente erlaubt (Sterne, Konfetti, Trophy)
+
+LISTE AB PLATZ 4:
+- dunkle List Cards
+- besseres Spacing
+- Avatar links
+- Name klar lesbar
+- Punktzahl rechts
+- Rang links gut sichtbar
+- insgesamt hochwertiger und strukturierter
+
+ZEITRAUM-WECHSEL:
+Die Umschaltung zwischen Wöchentlich / Monatlich im Leaderboard ebenfalls im neuen Tab-Stil gestalten.
+
+WICHTIG:
+Die Bestenliste soll deutlich “mehr designed” aussehen als aktuell.
+Bitte nicht einfach nur bestehende Flächen leicht abrunden, sondern die Top-3-Zone wirklich neu und attraktiver inszenieren.
+
+==================================================
+E) WAS UNBEDINGT GLEICH BLEIBEN SOLL
+==================================================
+
+Bitte NICHT ändern:
+- Aufgabenkarten vorerst nicht redesignen
+- deren Statuslogik nicht anfassen
+- keine Änderungen an der Aufgaben-Transparenzlogik
+- keine Änderungen an Daten, Texten, Logik oder Navigation
+- keine Umstrukturierung der Seite
+- keine generische Business-UI daraus machen
+- keine helle Minimal-UI
+- kein dominanter Glassmorphism-Look
+
+Die bestehende App-Struktur soll erhalten bleiben.
+Es geht um ein visuelles Upgrade im Stil des neuen Mockups.
+
+==================================================
+F) TECHNISCHE UMSETZUNG
+==================================================
+
+Bitte setze die Änderungen komponentenbasiert um und arbeite mit wiederverwendbaren Styles / Tokens.
+
+Lege nach Möglichkeit Design-Tokens / Variablen an, z. B.:
+
+--lc-bg-dark
+--lc-surface-dark
+--lc-surface-elevated
+--lc-accent-cyan
+--lc-accent-violet
+--lc-accent-gold
+--lc-accent-green
+--lc-accent-orange
+--lc-text-primary
+--lc-text-secondary
+--lc-button-radius
+--lc-card-radius
+--lc-shadow-soft
+--lc-shadow-strong
+
+Bitte ein konsistentes kleines UI-System daraus machen für:
+- Primary Buttons
+- Secondary Buttons
+- Icon Buttons
+- Tab Buttons / Segmented Controls
+- Punktekarte
+- Leaderboard Cards
+- Top-3 Podestbereich
+
+Bitte beginne mit folgenden Screens / Bereichen:
+1. Dashboard mit Punktekarte und Hauptbuttons
+2. Sortierungs-/Filterbereich
+3. Bestenliste / Leaderboard
+
+Das Ergebnis soll sich visuell eng an den hochgeladenen Mockups orientieren und klar hochwertiger, spielerischer und kindgerechter wirken als das aktuelle Design.
