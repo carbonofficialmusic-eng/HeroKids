@@ -31,7 +31,9 @@
       "11": "Dez"
     },
     "stars": "Sterne",
-    "unknown": "Unbekannt"
+    "unknown": "Unbekannt",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger anzeigen"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -198,6 +200,10 @@
     "orCustomize": "Oder anpassen",
     "taskIcon": "Aufgaben-Symbol",
     "taskTitle": "Aufgabentitel",
+    "sectionTaskDetails": "Aufgabe",
+    "sectionPointsPeople": "Punkte & Personen",
+    "sectionSchedule": "Zeitplan",
+    "sectionExtraOptions": "Zusatzoptionen",
     "taskTitlePlaceholder": "z.B. Zimmer aufräumen",
     "descriptionOptional": "Beschreibung (Optional)",
     "descriptionPlaceholder": "Füge weitere Details zur Aufgabe hinzu...",
@@ -221,7 +227,7 @@
     "customDaysDesc": "Lege eine benutzerdefinierte Anzahl von Tagen für die Wiederholung fest",
     "repeatSchedule": "Wiederholungsplan",
     "oneTime": "Einmalig",
-    "immediate": "Direkt",
+    "immediate": "Sofort wieder verfügbar",
     "immediateDesc": "Kann jederzeit wiederholt werden. Erfordert IMMER elterliche Genehmigung.",
     "daily": "Täglich",
     "weekly": "Wöchentlich",

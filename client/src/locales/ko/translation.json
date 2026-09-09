@@ -30,7 +30,9 @@
       "11월",
       "12월"
     ],
-    "stars": "별"
+    "stars": "별",
+    "showMore": "더 보기",
+    "showLess": "간략히 보기"
   },
   "nav": {
     "dashboard": "대시보드",
@@ -196,6 +198,10 @@
     "orCustomize": "또는 직접 만들기",
     "taskIcon": "과제 아이콘",
     "taskTitle": "과제 제목",
+    "sectionTaskDetails": "과제 세부정보",
+    "sectionPointsPeople": "포인트 및 담당자",
+    "sectionSchedule": "일정",
+    "sectionExtraOptions": "추가 옵션",
     "taskTitlePlaceholder": "예: 방 청소하기",
     "descriptionOptional": "설명 (선택사항)",
     "descriptionPlaceholder": "과제에 대한 자세한 내용을 추가하세요...",
@@ -219,7 +225,7 @@
     "customDaysDesc": "과제가 반복될 맞춤 일수 설정",
     "repeatSchedule": "반복 일정",
     "oneTime": "일회성",
-    "immediate": "즉시 반복",
+    "immediate": "즉시 다시 이용 가능",
     "immediateDesc": "언제든지 반복 가능. 항상 부모 승인이 필요합니다.",
     "daily": "매일",
     "weekly": "매주",

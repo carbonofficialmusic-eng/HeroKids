@@ -31,7 +31,9 @@
       "Dec"
     ],
     "stars": "Stars",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -198,6 +200,10 @@
     "orCustomize": "Or customize",
     "taskIcon": "Task Icon",
     "taskTitle": "Task Title",
+    "sectionTaskDetails": "Task details",
+    "sectionPointsPeople": "Points & people",
+    "sectionSchedule": "Schedule",
+    "sectionExtraOptions": "Extra options",
     "taskTitlePlaceholder": "e.g., Clean your room",
     "descriptionOptional": "Description (Optional)",
     "descriptionPlaceholder": "Add more details about the task...",
@@ -221,7 +227,7 @@
     "customDaysDesc": "Set a custom number of days for the task to repeat",
     "repeatSchedule": "Repeat Schedule",
     "oneTime": "One-time",
-    "immediate": "Immediate Repeat",
+    "immediate": "Available again immediately",
     "immediateDesc": "Can be repeated anytime. ALWAYS requires parent approval.",
     "daily": "Daily",
     "weekly": "Weekly",

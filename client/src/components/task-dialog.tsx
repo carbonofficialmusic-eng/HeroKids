@@ -42,6 +42,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +55,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, parse, type Locale } from "date-fns";
 import { de, enUS, fr, es, ja, zhCN, ko, sv } from "date-fns/locale";
+import { getAvatarUrl } from "@/lib/skins";
 
 const dateFnsLocales: Record<string, Locale> = {
   de, en: enUS, fr, es, ja, zh: zhCN, ko, sv,
@@ -87,21 +89,22 @@ interface TaskDialogProps {
 const emojiCategories = {
   household: {
     label: "tasks.emojiCategory.household",
-    emojis: ["🧹", "🍽️", "🧺"]
+    emojis: ["🧹", "🍽️", "🧺", "🧽"]
   },
   school: {
     label: "tasks.emojiCategory.school",
-    emojis: ["📚", "✏️", "🎒"]
+    emojis: ["📚", "✏️", "🎒", "🧮"]
   },
   selfCare: {
     label: "tasks.emojiCategory.selfCare",
-    emojis: ["🦷", "🛏️", "👕"]
+    emojis: ["🦷", "🛏️", "👕", "🧼"]
   },
   other: {
     label: "tasks.emojiCategory.other",
-    emojis: ["⭐", "🎯", "🛒"]
+    emojis: ["⭐", "🎯", "🛒", "🎨"]
   }
 };
+type EmojiCategoryKey = keyof typeof emojiCategories;
 
 
 export function TaskDialog({
@@ -194,11 +197,20 @@ export function TaskDialog({
 
   // State for assigned member selection
   const [selectedSharedMembers, setSelectedSharedMembers] = useState<string[]>([]);
+  const [showAllMembers, setShowAllMembers] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<EmojiCategoryKey>("household");
   
   // All family members can be assigned to shared tasks (parents and children)
   const allMembers = useMemo(() => {
     return familyMembers;
   }, [familyMembers]);
+
+  const visibleMembers = useMemo(() => {
+    if (showAllMembers || allMembers.length <= 6) return allMembers;
+    const selectedMembers = allMembers.filter((member) => selectedSharedMembers.includes(member.id));
+    const unselectedMembers = allMembers.filter((member) => !selectedSharedMembers.includes(member.id));
+    return [...selectedMembers, ...unselectedMembers].slice(0, Math.max(6, selectedMembers.length));
+  }, [allMembers, selectedSharedMembers, showAllMembers]);
   
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskFormSchema),
@@ -224,6 +236,12 @@ export function TaskDialog({
   // Reset form when dialog opens or editingTask changes
   useEffect(() => {
     if (open) {
+      setShowAllMembers(false);
+      const savedIcon = editingTask?.iconEmoji;
+      const savedCategory = (Object.entries(emojiCategories).find(([, category]) =>
+        category.emojis.includes(savedIcon || "")
+      )?.[0] as EmojiCategoryKey | undefined) || "household";
+      setActiveCategory(savedCategory);
       if (editingTask) {
         // Determine mode based on which field has a value
         if (editingTask.recurrence === "immediate") {
@@ -394,6 +412,10 @@ export function TaskDialog({
     form.setValue("description", template.description);
     form.setValue("points", template.points);
     form.setValue("iconEmoji", template.iconEmoji);
+    const templateCategory = (Object.entries(emojiCategories).find(([, category]) =>
+      category.emojis.includes(template.iconEmoji)
+    )?.[0] as EmojiCategoryKey | undefined);
+    if (templateCategory) setActiveCategory(templateCategory);
     form.setValue("requiresProof", template.requiresProof && canUsePhotoProof);
     if ((template as any).recurrence) {
       form.setValue("recurrence", (template as any).recurrence);
@@ -436,8 +458,8 @@ export function TaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl overflow-y-auto [&>button.absolute]:hidden" data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
-        <DialogHeader>
+      <DialogContent className={`lc-task-dialog ${editingTask ? "is-editing" : "is-creating"} max-w-2xl overflow-y-auto [&>button.absolute]:hidden`} data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <DialogHeader className="lc-task-dialog-header">
           <DialogTitle className="text-2xl font-accent">
             {editingTask ? t('tasks.editTask') : t('tasks.createTask')}
           </DialogTitle>
@@ -447,7 +469,7 @@ export function TaskDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="lc-task-dialog-form space-y-6">
 
             {/* Quick Templates Section - Only show when creating */}
             {!editingTask && (
@@ -472,7 +494,7 @@ export function TaskDialog({
                     return (
                       <Card
                         key={template.id}
-                        className={`p-2 transition-all ${isLocked ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover-elevate active-elevate-2"}`}
+                        className={`lc-task-dialog-template lc-task-dialog-template-${template.id} p-2 transition-all ${isLocked ? "is-locked opacity-60 cursor-not-allowed" : "cursor-pointer hover-elevate active-elevate-2"}`}
                         onClick={() => applyTemplate(template)}
                         data-testid={`template-${template.id}`}
                       >
@@ -498,34 +520,49 @@ export function TaskDialog({
             </>
             )}
 
+            <div className="lc-task-dialog-section-heading">
+              <span className="lc-task-dialog-section-number">1</span>
+              <h3>{t("tasks.sectionTaskDetails")}</h3>
+            </div>
             <FormField
               control={form.control}
               name="iconEmoji"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('tasks.category')}</FormLabel>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {Object.entries(emojiCategories).map(([categoryKey, category]) => (
-                      <div key={categoryKey} className="space-y-1.5">
-                        <p className="text-xs text-muted-foreground font-medium text-center min-h-[2rem] flex items-center justify-center">
-                          {categoryNames?.[categoryKey as keyof typeof categoryNames] || t(category.label)}
-                        </p>
-                        <div className="flex justify-center gap-1.5">
-                          {category.emojis.map((icon) => (
-                            <Button
-                              key={icon}
-                              type="button"
-                              variant={field.value === icon ? "default" : "outline"}
-                              size="icon"
-                              className="h-9 w-9 text-lg"
-                              onClick={() => field.onChange(icon)}
-                              data-testid={`button-icon-${icon}`}
-                            >
-                              {icon}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
+                  <div className="lc-task-dialog-category-tabs">
+                    {(Object.entries(emojiCategories) as [EmojiCategoryKey, typeof emojiCategories[EmojiCategoryKey]][]).map(([categoryKey, category]) => (
+                      <button
+                        key={categoryKey}
+                        type="button"
+                        role="tab"
+                        aria-selected={activeCategory === categoryKey}
+                        aria-controls="task-category-symbols"
+                        className={`lc-task-dialog-category-tab ${activeCategory === categoryKey ? "is-active" : ""}`}
+                        onClick={() => {
+                          setActiveCategory(categoryKey);
+                          if (!category.emojis.includes(field.value || "")) {
+                            field.onChange(category.emojis[0]);
+                          }
+                        }}
+                      >
+                        {categoryNames?.[categoryKey as keyof typeof categoryNames] || t(category.label)}
+                      </button>
+                    ))}
+                  </div>
+                  <div id="task-category-symbols" role="tabpanel" className="lc-task-dialog-symbol-row">
+                    {emojiCategories[activeCategory].emojis.map((icon) => (
+                      <Button
+                        key={icon}
+                        type="button"
+                        variant={field.value === icon ? "default" : "outline"}
+                        size="icon"
+                        className={`lc-task-dialog-symbol ${field.value === icon ? "is-selected" : ""}`}
+                        onClick={() => field.onChange(icon)}
+                        data-testid={`button-icon-${icon}`}
+                      >
+                        {icon}
+                      </Button>
                     ))}
                   </div>
                   <FormMessage />
@@ -576,6 +613,10 @@ export function TaskDialog({
               )}
             />
 
+            <div className="lc-task-dialog-section-heading">
+              <span className="lc-task-dialog-section-number">2</span>
+              <h3>{t("tasks.sectionPointsPeople")}</h3>
+            </div>
             <FormField
               control={form.control}
               name="points"
@@ -628,14 +669,16 @@ export function TaskDialog({
                         <span>{t('tasks.assignmentLockedDesc', 'Upgrade to Family to assign tasks to specific members.')}</span>
                       </div>
                     ) : hasMembers ? (
-                      <div className="flex flex-wrap gap-2">
-                        {allMembers.map((member) => {
+                      <div className="lc-task-dialog-members-wrap">
+                        <div id="task-member-selection" className="lc-task-dialog-members">
+                        {visibleMembers.map((member) => {
                           const isSelected = selectedSharedMembers.includes(member.id);
                           return (
-                            <Badge
+                            <button
+                              type="button"
                               key={member.id}
-                              variant={isSelected ? "default" : "outline"}
-                              className="cursor-pointer transition-all py-1.5 px-3"
+                              aria-pressed={isSelected}
+                              className={`lc-task-dialog-member ${isSelected ? "is-selected" : ""}`}
                               onClick={() => {
                                 let newSelection: string[];
                                 if (isSelected) {
@@ -648,10 +691,29 @@ export function TaskDialog({
                               }}
                               data-testid={`badge-assign-${member.id}`}
                             >
-                              {member.displayName}
-                            </Badge>
+                              <Avatar className="lc-task-dialog-member-avatar">
+                                <AvatarImage src={getAvatarUrl(member.activeSkinId, member.avatarUrl, member.useCustomAvatar, member.updatedAt)} alt="" />
+                                <AvatarFallback>{member.displayName.slice(0, 1).toUpperCase()}</AvatarFallback>
+                              </Avatar>
+                              <span>{member.displayName}</span>
+                              {isSelected && <Check className="lc-task-dialog-member-check" />}
+                            </button>
                           );
                         })}
+                        </div>
+                        {allMembers.length > 6 && (
+                          <button
+                            type="button"
+                            className="lc-task-dialog-show-more"
+                            aria-expanded={showAllMembers}
+                            aria-controls="task-member-selection"
+                            onClick={() => setShowAllMembers((value) => !value)}
+                          >
+                            {showAllMembers ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            {showAllMembers ? t("common.showLess", { defaultValue: "Show less" }) : t("common.showMore", { defaultValue: "Show more" })}
+                            {!showAllMembers && ` (${allMembers.length - 6})`}
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground">
@@ -664,6 +726,10 @@ export function TaskDialog({
               }}
             />
 
+            <div className="lc-task-dialog-section-heading">
+              <span className="lc-task-dialog-section-number">3</span>
+              <h3>{t("tasks.sectionSchedule")}</h3>
+            </div>
             <div className="space-y-4">
               <div>
                 <FormLabel>{t('tasks.recurrenceType')}</FormLabel>
@@ -959,6 +1025,7 @@ export function TaskDialog({
                       setIsShoppingList(checked);
                       if (checked) {
                         form.setValue("iconEmoji", "🛒");
+                        setActiveCategory("other");
                         form.setValue("title", t('taskTemplates.shoppingList.title'));
                       }
                     }}
@@ -1083,6 +1150,10 @@ export function TaskDialog({
               </div>
             )}
 
+            <div className="lc-task-dialog-section-heading">
+              <span className="lc-task-dialog-section-number">4</span>
+              <h3>{t("tasks.sectionExtraOptions")}</h3>
+            </div>
             <FormField
               control={form.control}
               name="requiresProof"
@@ -1174,7 +1245,25 @@ export function TaskDialog({
               />
             </div>
 
-            <div className="flex gap-3">
+            {editingTask && (
+              <div className="pt-4 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowResetDialog(true)}
+                  data-testid="button-reset-task"
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  {t('tasks.resetTask')}
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  {t('tasks.resetTaskDesc')}
+                </p>
+              </div>
+            )}
+
+            <div className="lc-task-dialog-actions flex gap-3">
               <Button
                 type="button"
                 variant="outline"
@@ -1193,24 +1282,6 @@ export function TaskDialog({
                 {isSubmitting ? (editingTask ? t('tasks.updating') : t('tasks.creating')) : editingTask ? t('tasks.updateTaskButton') : t('tasks.createTaskButton')}
               </Button>
             </div>
-
-            {editingTask && (
-              <div className="pt-4 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setShowResetDialog(true)}
-                  data-testid="button-reset-task"
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  {t('tasks.resetTask')}
-                </Button>
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  {t('tasks.resetTaskDesc')}
-                </p>
-              </div>
-            )}
           </form>
         </Form>
       </DialogContent>

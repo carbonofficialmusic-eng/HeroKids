@@ -30,7 +30,9 @@
       "11月",
       "12月"
     ],
-    "stars": "スター"
+    "stars": "スター",
+    "showMore": "もっと見る",
+    "showLess": "折りたたむ"
   },
   "nav": {
     "dashboard": "ダッシュボード",
@@ -192,6 +194,10 @@
     "orCustomize": "またはカスタマイズ",
     "taskIcon": "タスクアイコン",
     "taskTitle": "タスクタイトル",
+    "sectionTaskDetails": "タスクの詳細",
+    "sectionPointsPeople": "ポイントと担当者",
+    "sectionSchedule": "スケジュール",
+    "sectionExtraOptions": "追加オプション",
     "taskTitlePlaceholder": "例：部屋をきれいにする",
     "descriptionOptional": "説明（任意）",
     "descriptionPlaceholder": "タスクの詳細を追加...",
@@ -215,7 +221,7 @@
     "customDaysDesc": "タスクを繰り返すカスタム日数を設定",
     "repeatSchedule": "繰り返しスケジュール",
     "oneTime": "一回限り",
-    "immediate": "即時繰り返し",
+    "immediate": "すぐに再び利用可能",
     "immediateDesc": "いつでも繰り返し可能。常に親の承認が必要です。",
     "daily": "毎日",
     "weekly": "毎週",

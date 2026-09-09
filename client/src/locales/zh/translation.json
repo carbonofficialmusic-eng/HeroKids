@@ -30,7 +30,9 @@
       "十一月",
       "十二月"
     ],
-    "stars": "星星"
+    "stars": "星星",
+    "showMore": "显示更多",
+    "showLess": "显示更少"
   },
   "nav": {
     "dashboard": "主页",
@@ -192,6 +194,10 @@
     "orCustomize": "或自定义",
     "taskIcon": "任务图标",
     "taskTitle": "任务标题",
+    "sectionTaskDetails": "任务详情",
+    "sectionPointsPeople": "积分和人员",
+    "sectionSchedule": "时间安排",
+    "sectionExtraOptions": "其他选项",
     "taskTitlePlaceholder": "例如：整理房间",
     "descriptionOptional": "描述（可选）",
     "descriptionPlaceholder": "添加更多任务细节...",
@@ -215,7 +221,7 @@
     "customDaysDesc": "设置任务重复的自定义天数",
     "repeatSchedule": "重复计划",
     "oneTime": "一次性",
-    "immediate": "即时重复",
+    "immediate": "立即再次可用",
     "immediateDesc": "可随时重复。始终需要家长批准。",
     "daily": "每天",
     "weekly": "每周",

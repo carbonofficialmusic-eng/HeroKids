@@ -31,7 +31,9 @@
       "Dez"
     ],
     "stars": "Estrelas",
-    "unknown": "Desconhecido"
+    "unknown": "Desconhecido",
+    "showMore": "Mostrar mais",
+    "showLess": "Mostrar menos"
   },
   "nav": {
     "dashboard": "Painel",
@@ -198,6 +200,10 @@
     "orCustomize": "Ou personalize",
     "taskIcon": "Ícone da Tarefa",
     "taskTitle": "Título da Tarefa",
+    "sectionTaskDetails": "Detalhes da tarefa",
+    "sectionPointsPeople": "Pontos e pessoas",
+    "sectionSchedule": "Agenda",
+    "sectionExtraOptions": "Opções adicionais",
     "taskTitlePlaceholder": "Ex.: Limpar o quarto",
     "descriptionOptional": "Descrição (Opcional)",
     "descriptionPlaceholder": "Adicione mais detalhes sobre a tarefa...",
@@ -221,7 +227,7 @@
     "customDaysDesc": "Defina um número personalizado de dias para a tarefa se repetir",
     "repeatSchedule": "Programação de Repetição",
     "oneTime": "Único",
-    "immediate": "Repetição Imediata",
+    "immediate": "Disponível novamente de imediato",
     "immediateDesc": "Pode ser repetida a qualquer momento. SEMPRE requer aprovação dos pais.",
     "daily": "Diário",
     "weekly": "Semanal",

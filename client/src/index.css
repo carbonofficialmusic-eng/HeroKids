@@ -841,6 +841,138 @@ html {
 .dark .lc-empty-state-description { color: #AAB8C7; }
 .dark .lc-empty-state-icon { color: #79CBE5; }
 
+/* Compact game-control treatment for the task editor. The dialog keeps Radix's
+   single scroll owner; these styles only tune this workflow. */
+.lc-task-dialog {
+  --lc-task-bg: #0a1b2d;
+  --lc-task-panel: #102b41;
+  --lc-task-panel-2: #12354d;
+  --lc-task-line: rgba(130, 193, 226, .28);
+  --lc-task-cyan: #1bc6ed;
+  --lc-task-text: #f4f8ff;
+  --lc-task-muted: #a8bdd0;
+  width: min(calc(100% - 1rem), 42rem);
+  max-height: min(92dvh, 52rem);
+  scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  padding: clamp(.85rem, 2.8vw, 1.45rem);
+  color: var(--lc-task-text);
+  border: 1px solid rgba(91, 175, 222, .42);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(31, 170, 217, .14), transparent 25rem),
+    linear-gradient(155deg, #0c2438, var(--lc-task-bg) 58%);
+  box-shadow: 0 22px 60px rgba(0, 6, 16, .5), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-task-dialog-header {
+  padding: .15rem .2rem .7rem;
+  border-bottom: 1px solid var(--lc-task-line);
+}
+.lc-task-dialog-header [data-slot="dialog-title"] { color: var(--lc-task-text); letter-spacing: -.02em; }
+.lc-task-dialog-header [data-slot="dialog-description"],
+.lc-task-dialog .text-muted-foreground { color: var(--lc-task-muted); }
+.lc-task-dialog-form { padding-top: .1rem; }
+.lc-task-dialog-form > * {
+  padding: .95rem 0;
+  border-bottom: 1px solid rgba(130,193,226,.2);
+}
+.lc-task-dialog-form > *:last-child { border-bottom: 0; }
+.lc-task-dialog label,
+.lc-task-dialog [data-slot="form-label"] { color: #e8f4ff; }
+.lc-task-dialog input,
+.lc-task-dialog textarea,
+.lc-task-dialog [data-slot="select-trigger"] {
+  color: var(--lc-task-text);
+  border-color: rgba(93, 177, 222, .42);
+  background: rgba(4, 18, 33, .62);
+  box-shadow: inset 0 1px rgba(255,255,255,.04);
+}
+.lc-task-dialog input::placeholder,
+.lc-task-dialog textarea::placeholder { color: #7894aa; }
+.lc-task-dialog [data-slot="card"],
+.lc-task-dialog .rounded-lg.border,
+.lc-task-dialog .rounded-md.border-dashed {
+  border-color: rgba(99, 181, 225, .3);
+  background: rgba(12, 41, 61, .66);
+}
+.lc-task-dialog [data-slot="card"]:hover { border-color: rgba(27,198,237,.78); background: rgba(20,65,88,.82); }
+.lc-task-dialog-section-heading {
+  display: flex; align-items: center; gap: .65rem;
+  padding: .25rem 0 .1rem; border-bottom: 0 !important;
+}
+.lc-task-dialog-section-heading h3 { margin: 0; color: #f4f8ff; font-size: 1.06rem; }
+.lc-task-dialog-section-number {
+  display: grid; place-items: center; width: 1.8rem; height: 1.8rem;
+  border-radius: 999px; color: #fff; font-weight: 800;
+  background: linear-gradient(145deg, #08a8d9, #22d0ed);
+  box-shadow: inset 0 1px rgba(255,255,255,.3), 0 3px 0 rgba(0,75,105,.8);
+}
+.lc-task-dialog-category-tabs { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .4rem; margin-top: .35rem; }
+.lc-task-dialog-category-tab {
+  min-height: 2.25rem; padding: .3rem .25rem; border: 1px solid rgba(112,184,220,.34);
+  border-radius: .55rem; color: #c0d2e2; background: rgba(8,32,51,.78); font-size: .75rem;
+}
+.lc-task-dialog-category-tab.is-active {
+  color: #fff; border-color: #41d8f2; background: linear-gradient(145deg,#0d8ebc,#19c9e7);
+  box-shadow: 0 3px 0 #075a79;
+}
+.lc-task-dialog-symbol-row {
+  display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .5rem; margin-top: .55rem;
+}
+.lc-task-dialog .lc-task-dialog-symbol {
+  width: 100%; height: 3.05rem; font-size: 1.55rem; border-radius: .65rem;
+  border-color: rgba(110,181,216,.34); background: rgba(9,35,55,.8);
+}
+.lc-task-dialog .lc-task-dialog-symbol.is-selected {
+  border-color: #63e5fa; background: linear-gradient(145deg,#087ea9,#1ac6e7);
+  box-shadow: inset 0 1px rgba(255,255,255,.3), 0 3px 0 #075877;
+}
+.lc-task-dialog-template {
+  color: #fff !important; border-color: rgba(255,255,255,.25) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.22), 0 3px 0 rgba(0,0,0,.3);
+}
+.lc-task-dialog-template-clean-room { background: linear-gradient(135deg,#04a9d2,#16d0ed) !important; }
+.lc-task-dialog-template-homework { background: linear-gradient(135deg,#6330cf,#a54cf0) !important; }
+.lc-task-dialog-template-brush-teeth { background: linear-gradient(135deg,#199c4a,#69d644) !important; }
+.lc-task-dialog-template-shopping-list { background: linear-gradient(135deg,#d94d0e,#ff8d20) !important; }
+.lc-task-dialog-template.is-locked { filter: saturate(.55); }
+.lc-task-dialog [data-testid="slider-task-points"] {
+  height: 1.2rem; padding: .35rem .2rem; border-radius: .5rem; background: rgba(4,18,33,.45);
+}
+.lc-task-dialog [data-testid="slider-task-points"] [role="slider"] {
+  width: 1.2rem; height: 1.2rem; border: 2px solid #b5f5ff; background: #16bfe5;
+  box-shadow: 0 2px 0 #075b7a;
+}
+.lc-task-dialog [data-testid="radio-recurrence-mode"] > div,
+.lc-task-dialog [data-testid^="radio-"] + label { color: #d9ebf8; }
+.lc-task-dialog-members-wrap { display: grid; gap: .55rem; }
+.lc-task-dialog-members { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .45rem; }
+.lc-task-dialog-member {
+  position: relative; display: flex; min-width: 0; align-items: center; gap: .42rem;
+  padding: .42rem .38rem; border: 1px solid rgba(108,173,211,.32); border-radius: .7rem;
+  color: #cbdbea; background: rgba(7, 25, 44, .7); text-align: left;
+  transition: transform .15s ease, opacity .15s ease;
+}
+.lc-task-dialog-member:hover { transform: translateY(-1px); border-color: rgba(27,198,237,.7); }
+.lc-task-dialog-member.is-selected { color: #fff; border-color: var(--lc-task-cyan); background: linear-gradient(145deg, #0e6f9b, #106080); box-shadow: inset 0 1px rgba(255,255,255,.18); }
+.lc-task-dialog-member-avatar { width: 2rem; height: 2rem; flex: 0 0 auto; border: 1px solid rgba(255,255,255,.2); }
+.lc-task-dialog-member > span:not(.sr-only) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .78rem; }
+.lc-task-dialog-member-check { width: .85rem; height: .85rem; margin-left: auto; color: #a9f2ff; flex: 0 0 auto; }
+.lc-task-dialog-show-more { display: inline-flex; align-items: center; justify-content: center; gap: .3rem; color: #7ddff6; font-size: .78rem; }
+.lc-task-dialog [role="radiogroup"] { padding: .2rem; border: 1px solid rgba(99,181,225,.26); border-radius: .72rem; background: rgba(4,18,33,.35); }
+.lc-task-dialog [data-testid="radio-recurrence-mode"] > div { padding: .45rem .5rem; }
+.lc-task-dialog-actions {
+  position: sticky; bottom: -.1rem; z-index: 4; margin: 0 -.1rem;
+  padding: .8rem .1rem calc(.15rem + env(safe-area-inset-bottom, 0px)) !important; border-bottom: 0 !important;
+  background: linear-gradient(to bottom, transparent, var(--lc-task-bg) 25%);
+}
+.lc-task-dialog-actions button { min-height: 2.85rem; border-radius: .7rem; }
+.lc-task-dialog-actions button[type="submit"] { color: #05283a; border-color: #79eaff; background: linear-gradient(135deg,#16bce7,#65e4f2); box-shadow: 0 4px 0 #087697; }
+.lc-task-dialog-actions button[type="button"] { border-color: rgba(115,191,226,.52); color: #e1f2ff; background: rgba(11,40,61,.75); }
+@media (max-width: 480px) {
+  .lc-task-dialog { width: calc(100% - .75rem); padding: .8rem; border-radius: .8rem; }
+  .lc-task-dialog-members { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+
 .lc-leaderboard-card {
   position: relative;
   overflow: hidden;

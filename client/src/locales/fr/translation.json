@@ -30,7 +30,9 @@
       "Nov",
       "Déc"
     ],
-    "stars": "Étoiles"
+    "stars": "Étoiles",
+    "showMore": "Afficher plus",
+    "showLess": "Afficher moins"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -192,6 +194,10 @@
     "orCustomize": "Ou personnaliser",
     "taskIcon": "Icône de la tâche",
     "taskTitle": "Titre de la tâche",
+    "sectionTaskDetails": "Détails de la tâche",
+    "sectionPointsPeople": "Points et personnes",
+    "sectionSchedule": "Planning",
+    "sectionExtraOptions": "Options supplémentaires",
     "taskTitlePlaceholder": "ex. Range ta chambre",
     "descriptionOptional": "Description (facultatif)",
     "descriptionPlaceholder": "Ajoute plus de détails sur la tâche...",
@@ -215,7 +221,7 @@
     "customDaysDesc": "Définissez un nombre de jours personnalisé pour la répétition de la tâche",
     "repeatSchedule": "Programme de répétition",
     "oneTime": "Unique",
-    "immediate": "Répétition immédiate",
+    "immediate": "À nouveau disponible immédiatement",
     "immediateDesc": "Peut être répétée à tout moment. Nécessite TOUJOURS l'approbation parentale.",
     "daily": "Quotidien",
     "weekly": "Hebdomadaire",

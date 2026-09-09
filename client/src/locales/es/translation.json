@@ -30,7 +30,9 @@
       "Nov",
       "Dic"
     ],
-    "stars": "Estrellas"
+    "stars": "Estrellas",
+    "showMore": "Mostrar más",
+    "showLess": "Mostrar menos"
   },
   "nav": {
     "dashboard": "Panel",
@@ -192,6 +194,10 @@
     "orCustomize": "O personaliza",
     "taskIcon": "Ícono de la Tarea",
     "taskTitle": "Título de la Tarea",
+    "sectionTaskDetails": "Detalles de la tarea",
+    "sectionPointsPeople": "Puntos y personas",
+    "sectionSchedule": "Calendario",
+    "sectionExtraOptions": "Opciones adicionales",
     "taskTitlePlaceholder": "ej., Limpia tu habitación",
     "descriptionOptional": "Descripción (Opcional)",
     "descriptionPlaceholder": "Agrega más detalles sobre la tarea...",
@@ -215,7 +221,7 @@
     "customDaysDesc": "Establece un número personalizado de días para que la tarea se repita",
     "repeatSchedule": "Programa de Repetición",
     "oneTime": "Una vez",
-    "immediate": "Repetición inmediata",
+    "immediate": "Disponible de nuevo al instante",
     "immediateDesc": "Se puede repetir en cualquier momento. SIEMPRE requiere aprobación de los padres.",
     "daily": "Diaria",
     "weekly": "Semanal",

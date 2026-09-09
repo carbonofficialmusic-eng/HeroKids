@@ -30,7 +30,9 @@
       "Nov",
       "Dec"
     ],
-    "stars": "Stjärnor"
+    "stars": "Stjärnor",
+    "showMore": "Visa mer",
+    "showLess": "Visa mindre"
   },
   "nav": {
     "dashboard": "Instrumentpanel",
@@ -197,6 +199,10 @@
     "orCustomize": "Eller anpassa",
     "taskIcon": "Uppgiftsikon",
     "taskTitle": "Uppgiftstitel",
+    "sectionTaskDetails": "Uppgiftsdetaljer",
+    "sectionPointsPeople": "Poäng och personer",
+    "sectionSchedule": "Schema",
+    "sectionExtraOptions": "Extra alternativ",
     "taskTitlePlaceholder": "t.ex., Städa ditt rum",
     "descriptionOptional": "Beskrivning (Valfritt)",
     "descriptionPlaceholder": "Lägg till mer detaljer om uppgiften...",
@@ -220,7 +226,7 @@
     "customDaysDesc": "Ange ett anpassat antal dagar för uppgiften att upprepas",
     "repeatSchedule": "Upprepningsschema",
     "oneTime": "Engångsgång",
-    "immediate": "Direkt upprepning",
+    "immediate": "Tillgänglig igen direkt",
     "immediateDesc": "Kan upprepas när som helst. Kräver ALLTID föräldragodkännande.",
     "daily": "Dagligen",
     "weekly": "Veckovis",
