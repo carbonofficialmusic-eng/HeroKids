@@ -176,11 +176,11 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleStartFree(); }}>
       <DialogContent
-        className="max-w-lg mx-auto"
+        className="lc-first-paywall max-w-lg mx-auto overflow-y-auto overscroll-contain"
         onOpenAutoFocus={(e) => e.preventDefault()}
         data-testid="dialog-first-open-paywall"
       >
-        <DialogHeader className="text-center space-y-1">
+        <DialogHeader className="lc-first-paywall-header text-center space-y-1">
           <DialogTitle className="text-2xl font-accent font-black">
             {t("paywall.title")}
           </DialogTitle>
@@ -191,7 +191,7 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
 
         {/* Billing toggle */}
         <div className="flex justify-center">
-          <div className="flex items-center bg-muted rounded-full p-1 gap-1">
+          <div className="lc-first-paywall-cycle flex items-center bg-muted rounded-full p-1 gap-1">
             <button
               onClick={() => setBillingCycle("monthly")}
               data-testid="button-paywall-billing-monthly"
@@ -224,7 +224,7 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
         <div className="grid grid-cols-2 gap-3">
           {/* Free card */}
           <div
-            className="rounded-lg border bg-card p-4 flex flex-col gap-2"
+            className="lc-first-paywall-card lc-first-paywall-card-free rounded-lg border bg-card p-4 flex flex-col gap-2"
             data-testid="card-paywall-free"
           >
             <div className="flex items-center gap-2">
@@ -246,7 +246,7 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
 
           {/* Family card */}
           <div
-            className="rounded-lg border-2 border-primary bg-card p-4 flex flex-col gap-2 relative"
+            className="lc-first-paywall-card lc-first-paywall-card-family rounded-lg border-2 border-primary bg-card p-4 flex flex-col gap-2 relative"
             data-testid="card-paywall-family"
           >
             <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs px-2">
@@ -289,7 +289,7 @@ export function FirstOpenPaywall({ open, onClose, familyName }: FirstOpenPaywall
         </div>
 
         {/* CTAs */}
-        <div className="flex flex-col gap-2 pt-1">
+        <div className="lc-first-paywall-actions flex flex-col gap-2 pt-1">
           <Button
             className="w-full"
             onClick={handleUpgrade}

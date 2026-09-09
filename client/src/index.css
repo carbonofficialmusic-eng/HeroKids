@@ -2037,3 +2037,131 @@ html {
   .lc-pricing-card { border-radius: 1.15rem !important; box-shadow: 0 8px 0 #061329, 0 15px 26px rgba(0,0,0,.25); }
 }
 
+/* First-open paywall — compact tier selection that stays inside short mobile viewports. */
+.lc-first-paywall {
+  width: calc(100% - 1rem);
+  padding: 1.35rem !important;
+  padding-bottom: max(1.35rem, env(safe-area-inset-bottom)) !important;
+  border: 1px solid rgba(108,164,230,.44) !important;
+  border-radius: 1.35rem !important;
+  color: #f5f9ff;
+  background:
+    radial-gradient(circle at 90% 5%, rgba(146,78,224,.24), transparent 15rem),
+    linear-gradient(155deg, #172f54, #0b1b35 58%, #111a39) !important;
+  box-shadow: 0 20px 55px rgba(0,0,0,.62), inset 0 2px rgba(255,255,255,.08) !important;
+  scrollbar-color: #536f9a transparent;
+}
+.lc-first-paywall::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.25rem;
+  right: 1.25rem;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38d4ef, #a970f5, transparent);
+}
+.lc-first-paywall > button[data-radix-dialog-close],
+.lc-first-paywall > button:last-child {
+  color: #b8c7e0;
+}
+.lc-first-paywall-header h2 {
+  padding-inline: 1.25rem;
+  color: #fff;
+  text-shadow: 0 3px 0 #173665;
+}
+.lc-first-paywall-header p,
+.lc-first-paywall .text-muted-foreground { color: #aebedb !important; }
+.lc-first-paywall-cycle {
+  border: 1px solid rgba(151,108,232,.42);
+  background: #0e1c38 !important;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.35);
+}
+.lc-first-paywall-cycle > button {
+  color: #aebedb !important;
+  background: transparent !important;
+}
+.lc-first-paywall-cycle > button.bg-background {
+  color: #fff !important;
+  background: linear-gradient(135deg, #7040bd, #9a5ee2) !important;
+  box-shadow: 0 3px 0 #432270, inset 0 1px rgba(255,255,255,.22);
+}
+.lc-first-paywall-cycle .bg-green-500 {
+  border: 1px solid rgba(128,244,167,.36);
+  color: #dfffea !important;
+  background: linear-gradient(135deg, #149557, #25bf70) !important;
+}
+.lc-first-paywall-card {
+  min-width: 0;
+  border-radius: 1.05rem !important;
+  background: linear-gradient(145deg, #172e50, #0d1f3a) !important;
+  box-shadow: 0 7px 0 #07152a, 0 12px 22px rgba(0,0,0,.23), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-first-paywall-card-free { border-color: rgba(100,154,221,.34) !important; }
+.lc-first-paywall-card-family {
+  border-color: rgba(53,207,238,.7) !important;
+  background: linear-gradient(145deg, #173d5e, #102541) !important;
+  box-shadow: 0 7px 0 #07233b, 0 12px 24px rgba(12,139,181,.18), inset 0 1px rgba(255,255,255,.1);
+}
+.lc-first-paywall-card > div:first-child > div {
+  border: 1px solid rgba(91,210,238,.38);
+  border-radius: .75rem !important;
+  color: #64e0f7;
+  background: #153759 !important;
+}
+.lc-first-paywall-card-family > div:first-of-type > div {
+  border-color: rgba(218,179,255,.48);
+  background: linear-gradient(145deg, #9258dc, #6540ad) !important;
+}
+.lc-first-paywall-card [data-slot="badge"],
+.lc-first-paywall-card > .absolute {
+  border: 1px solid rgba(205,239,255,.42);
+  color: #fff;
+  background: linear-gradient(135deg, #087eaf, #20c8eb) !important;
+  box-shadow: 0 3px 0 #075174;
+}
+.lc-first-paywall-card .text-green-600 { color: #65e28d !important; }
+.lc-first-paywall-actions {
+  position: relative;
+  z-index: 1;
+  padding-bottom: .15rem;
+}
+.lc-first-paywall-actions button {
+  min-height: 2.7rem;
+  border-radius: .82rem;
+}
+.lc-first-paywall-actions [data-testid="button-paywall-upgrade"] {
+  border: 1px solid rgba(184,242,255,.42);
+  color: #fff;
+  background: linear-gradient(135deg, #087eaf, #20c8eb);
+  box-shadow: 0 4px 0 #075174, 0 8px 15px rgba(8,159,207,.2);
+}
+.lc-first-paywall-actions [data-testid="button-paywall-start-free"] {
+  border-color: rgba(116,165,231,.38);
+  color: #e5efff;
+  background: #142c4f;
+  box-shadow: 0 3px 0 #07152a;
+}
+.lc-first-paywall-actions [data-testid="button-paywall-maybe-later"] {
+  display: block;
+  width: 100%;
+  min-height: 2rem;
+  padding: .45rem .5rem;
+  color: #9fb2d1 !important;
+}
+@media (max-width: 480px), (max-height: 760px) {
+  .lc-first-paywall {
+    gap: .75rem !important;
+    padding: 1rem !important;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+    border-radius: 1.1rem !important;
+  }
+  .lc-first-paywall-header h2 { font-size: 1.35rem; }
+  .lc-first-paywall-header p { font-size: .78rem; }
+  .lc-first-paywall-cycle > button { padding: .35rem .65rem; font-size: .75rem; }
+  .lc-first-paywall-cycle .bg-green-500 { font-size: .65rem; }
+  .lc-first-paywall-card { padding: .8rem !important; gap: .4rem !important; }
+  .lc-first-paywall-card ul { gap: .25rem; }
+  .lc-first-paywall-card li { font-size: .68rem; line-height: 1.2; }
+  .lc-first-paywall-actions { gap: .45rem; }
+}
+
