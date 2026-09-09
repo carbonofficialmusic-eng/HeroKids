@@ -77,8 +77,8 @@ export function MemberPauseDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] max-h-[90vh] flex flex-col" data-testid="dialog-member-pause">
-        <DialogHeader>
+      <DialogContent className="lc-member-pause sm:max-w-[480px] max-h-[90vh] flex flex-col" data-testid="dialog-member-pause">
+        <DialogHeader className="lc-member-pause-header">
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
             Mitglieder verwalten
@@ -98,7 +98,7 @@ export function MemberPauseDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2 py-2 overflow-y-auto flex-1 min-h-0 pr-1">
+        <div className="lc-member-pause-list space-y-2 py-2 overflow-y-auto flex-1 min-h-0 pr-1">
           {sorted.map((member) => {
             const isCurrentUser = member.id === currentMemberId;
             const isAutoBlocked = !member.isPaused && !!member.isOverLimit;
@@ -109,12 +109,12 @@ export function MemberPauseDialog({
             return (
               <div
                 key={member.id}
-                className={`flex items-center gap-3 p-3 rounded-lg border ${
+                className={`lc-member-pause-card flex items-center gap-3 p-3 rounded-lg border ${
                   member.isPaused
-                    ? "bg-muted/50 border-border opacity-60"
+                    ? "lc-member-pause-card-paused bg-muted/50 border-border opacity-60"
                     : isAutoBlocked
-                    ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
-                    : "bg-card border-border"
+                    ? "lc-member-pause-card-blocked bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
+                    : "lc-member-pause-card-active bg-card border-border"
                 }`}
               >
                 <Avatar
@@ -180,7 +180,7 @@ export function MemberPauseDialog({
           })}
         </div>
 
-        <DialogFooter className="flex-shrink-0">
+        <DialogFooter className="lc-member-pause-footer flex-shrink-0">
           <div className="flex items-center justify-between w-full flex-wrap gap-2">
             <span className="text-xs text-muted-foreground">
               {pausedCount} pausiert · {autoBlockedCount} auto-blockiert

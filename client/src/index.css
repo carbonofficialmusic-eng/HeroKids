@@ -2165,3 +2165,118 @@ html {
   .lc-first-paywall-actions { gap: .45rem; }
 }
 
+/* Member limit management — clear active, paused and over-limit player states. */
+.lc-member-pause {
+  overflow: hidden;
+  width: calc(100% - 1rem);
+  padding: 1.25rem !important;
+  border: 1px solid rgba(108,164,230,.44) !important;
+  border-radius: 1.35rem !important;
+  color: #f5f9ff;
+  background:
+    radial-gradient(circle at 92% 4%, rgba(151,91,231,.2), transparent 16rem),
+    linear-gradient(155deg, #172f54, #0b1b35 60%, #101a39) !important;
+  box-shadow: 0 20px 55px rgba(0,0,0,.62), inset 0 2px rgba(255,255,255,.08) !important;
+}
+.lc-member-pause::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.25rem;
+  right: 1.25rem;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38d4ef, #a970f5, transparent);
+}
+.lc-member-pause-header h2 {
+  color: #fff;
+  text-shadow: 0 3px 0 #173665;
+}
+.lc-member-pause-header h2 svg {
+  color: #ffc94b !important;
+  filter: drop-shadow(0 3px 5px rgba(230,157,25,.35));
+}
+.lc-member-pause-header p,
+.lc-member-pause .text-muted-foreground { color: #afbfdb !important; }
+.lc-member-pause-header strong { color: #fff; }
+.lc-member-pause-list {
+  padding-block: .45rem;
+  scrollbar-color: #536f9a transparent;
+}
+.lc-member-pause-card {
+  min-height: 4.7rem;
+  border-radius: 1rem !important;
+  background: linear-gradient(145deg, #172f52, #102440) !important;
+  box-shadow: 0 5px 0 #08162b, inset 0 1px rgba(255,255,255,.07);
+}
+.lc-member-pause-card-active {
+  border-color: rgba(105,151,216,.3) !important;
+}
+.lc-member-pause-card-blocked {
+  border-color: rgba(241,130,45,.64) !important;
+  background: linear-gradient(145deg, #40251d, #291a22) !important;
+  box-shadow: 0 5px 0 #190d13, 0 0 18px rgba(224,102,31,.12), inset 0 1px rgba(255,190,116,.1);
+}
+.lc-member-pause-card-blocked .text-muted-foreground { color: #e6b195 !important; }
+.lc-member-pause-card-paused {
+  border-color: rgba(105,139,183,.24) !important;
+  background: linear-gradient(145deg, #15243b, #0d192c) !important;
+}
+.lc-member-pause-card [data-slot="avatar"],
+.lc-member-pause-card [class*="Avatar"] {
+  box-shadow: 0 0 0 2px #0b1b35, 0 4px 8px rgba(0,0,0,.35);
+}
+.lc-member-pause-card [data-slot="badge"] {
+  border-color: rgba(255,206,86,.4);
+  color: #ffe49a;
+  background: rgba(169,104,17,.25);
+}
+.lc-member-pause-card button {
+  min-width: 7.6rem;
+  border-color: rgba(116,165,231,.34) !important;
+  border-radius: .75rem;
+  color: #dceaff;
+  background: #142c4f;
+  box-shadow: 0 3px 0 #07152a;
+}
+.lc-member-pause-card button:not(:disabled):hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+.lc-member-pause-card button:disabled {
+  opacity: .45;
+  box-shadow: none;
+}
+.lc-member-pause-card-paused button:not(:disabled) {
+  border-color: rgba(113,233,154,.42) !important;
+  color: #e6fff0;
+  background: linear-gradient(135deg, #14864f, #2cbd70);
+  box-shadow: 0 3px 0 #0a512f;
+}
+.lc-member-pause-footer {
+  padding-top: .9rem;
+  border-top: 1px solid rgba(105,151,216,.22);
+}
+.lc-member-pause-footer [data-testid="button-close-pause-dialog"] {
+  min-width: 5.5rem;
+  border: 1px solid rgba(184,242,255,.42);
+  border-radius: .8rem;
+  color: #fff;
+  background: linear-gradient(135deg, #087eaf, #20c8eb);
+  box-shadow: 0 4px 0 #075174, 0 8px 15px rgba(8,159,207,.2);
+}
+@media (max-width: 480px) {
+  .lc-member-pause {
+    gap: .8rem !important;
+    padding: 1rem !important;
+    border-radius: 1.1rem !important;
+  }
+  .lc-member-pause-card {
+    gap: .6rem;
+    padding: .75rem !important;
+  }
+  .lc-member-pause-card button {
+    min-width: 6.8rem;
+    padding-inline: .65rem;
+  }
+}
+
