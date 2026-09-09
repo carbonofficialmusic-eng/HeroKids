@@ -3203,13 +3203,13 @@ export default function KidDashboard() {
           }}
         >
           <div className={!chatBarCollapsed ? 'sm:max-w-2xl sm:mx-auto' : undefined}>
-          <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative">
+          <Card className={`lc-collapsible-chatbar ${chatBarCollapsed ? "is-collapsed" : "is-expanded"} p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-2xl relative`}>
             <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setChatBarCollapsed(c => !c)}
-                className="flex-shrink-0 rounded-2xl h-14 w-10 pointer-events-auto"
+                className="lc-collapsible-chatbar-toggle flex-shrink-0 rounded-2xl h-14 w-10 pointer-events-auto"
                 data-testid="button-chat-bar-toggle"
                 aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
               >
@@ -3228,9 +3228,9 @@ export default function KidDashboard() {
                 </Button>
               </div>
               <div className="flex-1 min-w-0 relative">
-                <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="h-14 w-full px-3 sm:px-5 rounded-2xl">
+                <Button variant="ghost" size="lg" asChild data-testid="button-nav-chat" className="lc-collapsible-chatbar-link h-14 w-full px-3 sm:px-5 rounded-2xl">
                   <Link href="/chat">
-                    <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
+                    <MessageCircle className="lc-collapsible-chatbar-icon h-5 w-5 sm:h-6 sm:w-6 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" />
                     <span className="font-bold text-xs sm:text-sm leading-tight text-center whitespace-normal">{t("nav.chat")}</span>
                   </Link>
                 </Button>

@@ -2232,22 +2232,22 @@ export default function Dashboard() {
             }}
           >
             <div className={!chatBarCollapsed ? 'sm:max-w-2xl sm:mx-auto' : undefined}>
-            <Card className="p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-lg relative">
+            <Card className={`lc-collapsible-chatbar ${chatBarCollapsed ? "is-collapsed" : "is-expanded"} p-1 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 border-2 border-primary/30 rounded-3xl shadow-lg relative`}>
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setChatBarCollapsed(c => !c)}
-                  className="flex-shrink-0 rounded-2xl pointer-events-auto"
+                  className="lc-collapsible-chatbar-toggle flex-shrink-0 rounded-2xl pointer-events-auto"
                   data-testid="button-chat-bar-toggle"
                   aria-label={chatBarCollapsed ? t("chat.openChat", "Chat öffnen") : t("chat.closeChat", "Chat einklappen")}
                 >
                   {chatBarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                 </Button>
                 <div className="flex-1 min-w-0 relative">
-                  <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="h-10 w-full px-3 sm:px-4 rounded-2xl">
+                  <Button variant="ghost" size="default" asChild data-testid="button-parent-nav-chat" data-tour="tour-family-chat" className="lc-collapsible-chatbar-link h-10 w-full px-3 sm:px-4 rounded-2xl">
                     <Link href="/chat">
-                      <MessageCircle className="h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
+                      <MessageCircle className="lc-collapsible-chatbar-icon h-4 w-4 mr-1.5 text-blue-500 flex-shrink-0" />
                       <span className="font-medium text-sm truncate">{t("nav.chat")}</span>
                     </Link>
                   </Button>
