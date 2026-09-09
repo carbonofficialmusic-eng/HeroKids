@@ -34,18 +34,10 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
   const podiumPerson = (m: FamilyMember, rank: 1 | 2 | 3) => (
     <div className={`lc-podium-place lc-podium-place-${rank}`} data-testid={`podium-rank-${rank}`}>
       <div className="lc-medal">{rank === 1 ? <Trophy /> : rank === 2 ? <Medal /> : <Award />}</div>
-      <div className="lc-podium-cylinder">
-        <div className="lc-cylinder-top" aria-hidden="true" />
-        <div className="lc-avatar-dock">
-          {avatar(m, rank === 1 ? "h-20 w-20 sm:h-24 sm:w-24" : "h-16 w-16 sm:h-20 sm:w-20")}
-        </div>
-        <div className="lc-podium-ribbon" data-testid={`text-member-name-${rank}`}>
-          <span className="lc-ribbon-tail lc-ribbon-tail-left" aria-hidden="true" />
-          <span className="lc-ribbon-label">{m.displayName}</span>
-          <span className="lc-ribbon-tail lc-ribbon-tail-right" aria-hidden="true" />
-        </div>
-        <div className="lc-podium-plaque" data-testid={`text-member-points-${rank}`}>{getPoints(m)}</div>
-      </div>
+      {avatar(m, rank === 1 ? "h-20 w-20 sm:h-24 sm:w-24" : "h-16 w-16 sm:h-20 sm:w-20")}
+      <div className="lc-podium-name" data-testid={`text-member-name-${rank}`}>{m.displayName}</div>
+      <div className="lc-podium-points" data-testid={`text-member-points-${rank}`}>{getPoints(m)}</div>
+      <div className="lc-podium-block"><span>{rank}</span></div>
     </div>
   );
 
@@ -53,7 +45,7 @@ export function Leaderboard({ members, period = "week", weeklyPrize, monthlyPriz
     <Card className="lc-leaderboard-card p-4 sm:p-6" data-testid="card-leaderboard">
       <div className="lc-leaderboard-heading">
         <div className="lc-heading-kicker"><Sparkles /> {period === "month" ? t("dashboard.monthly") : t("dashboard.weekly")}</div>
-        <h2 className="lc-game-heading" data-testid="text-leaderboard-title">{title}</h2>
+        <h2 data-testid="text-leaderboard-title">{title}</h2>
         <p data-testid="text-leaderboard-subtitle">
           {period === "month" ? t("leaderboard.pointsEarnedMonth") : period === "week" ? t("leaderboard.pointsEarnedWeek") : t("leaderboard.pointsEarnedAllTime")}
         </p>
