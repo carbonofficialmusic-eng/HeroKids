@@ -101,7 +101,7 @@ export default function ActiveRewards() {
 
   return (
     <div
-      className="min-h-screen p-4 pb-20"
+       className="lc-active-rewards-page min-h-screen p-4 pb-20"
       style={{
         paddingTop: "calc(1rem + env(safe-area-inset-top))",
         paddingLeft: "max(1rem, env(safe-area-inset-left))",
@@ -144,7 +144,7 @@ export default function ActiveRewards() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Card className="p-5 relative overflow-visible" data-testid={`card-reward-${reward.id}`}>
+                 <Card className="lc-reward-page-card p-5 relative overflow-visible" data-testid={`card-reward-${reward.id}`}>
                   {isRealParent && (
                     <div className="absolute top-2 right-2 flex gap-1">
                       <Button
@@ -172,7 +172,7 @@ export default function ActiveRewards() {
                     </div>
                   )}
                   <div className="flex items-start gap-4">
-                    <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 p-1.5">
+                     <div className="lc-reward-page-illustration h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 p-1.5">
                       <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-4xl leading-none" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -197,6 +197,9 @@ export default function ActiveRewards() {
                           </span>
                         )}
                       </div>
+                       <div className="lc-reward-progress" aria-hidden="true">
+                         <span style={{ width: `${Math.min(((member?.totalPoints ?? 0) / Math.max(reward.pointThreshold, 1)) * 100, 100)}%` }} />
+                       </div>
                       <Button
                         onClick={() => redeemMutation.mutate(reward.id)}
                         disabled={
@@ -205,7 +208,7 @@ export default function ActiveRewards() {
                           redeemMutation.isPending
                         }
                         size="sm"
-                        className="w-full"
+                         className="lc-reward-page-button w-full"
                         data-testid={`button-redeem-${reward.id}`}
                       >
                         {redeemMutation.isPending ? (

@@ -1552,7 +1552,7 @@ export default function Dashboard() {
                   </Button>
                 </Card>
               ) : (
-                <div className="space-y-3">
+                <div className="lc-goals-widget space-y-3">
                   {/* Pinned important tasks — collapsible, filter-independent */}
                   {importantActiveTasks.length > 0 && (
                     <Collapsible
@@ -1848,10 +1848,10 @@ export default function Dashboard() {
                     const alreadyContributed = member ? goal.contributions?.some(c => c.memberId === member.id) : false;
 
                     return (
-                      <Card key={goal.id} className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/30" data-testid={`card-parent-goal-${goal.id}`}>
+                      <Card key={goal.id} className="lc-goal-card p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/30" data-testid={`card-parent-goal-${goal.id}`}>
                         <div className="space-y-3">
                           <div className="flex items-start gap-3">
-                            <div className="text-3xl flex-shrink-0">{goal.iconEmoji}</div>
+                            <div className="lc-goal-illustration text-3xl flex-shrink-0">{goal.iconEmoji}</div>
                             <div className="flex-1 min-w-0">
                               <h3 className="font-bold text-base leading-tight">{goal.title}</h3>
                               {isCompleted && (
@@ -1878,7 +1878,7 @@ export default function Dashboard() {
                               <span className="text-xs font-medium text-muted-foreground">{t("familyGoals.progress")}</span>
                               <span className="text-xs font-bold">{goal.currentPoints} / {goal.targetPoints}</span>
                             </div>
-                            <Progress value={progress} className="h-2" />
+                             <Progress value={progress} className="lc-goal-progress h-2" />
                           </div>
 
                           {goal.contributions && goal.contributions.length > 0 && (
@@ -1908,11 +1908,12 @@ export default function Dashboard() {
                                   <span className="text-xs text-muted-foreground">{getGoalNextContributionDate(goal.contributionPeriod)}</span>
                                 </div>
                               ) : (
-                                <Button
+                                  <Button
                                   size="sm"
                                   onClick={() => parentContributeMutation.mutate(goal.id)}
                                   disabled={parentContributeMutation.isPending || member.totalPoints < goal.contributionAmount}
-                                  data-testid={`button-parent-contribute-${goal.id}`}
+                                   className="lc-goal-cta"
+                                   data-testid={`button-parent-contribute-${goal.id}`}
                                 >
                                   <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
                                   {t("familyGoals.contributePoints", { amount: goal.contributionAmount })}

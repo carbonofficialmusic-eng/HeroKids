@@ -117,14 +117,14 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
   };
 
   return (
-    <div className="rounded-xl overflow-hidden shadow-lg border border-border bg-card">
+    <div className="lc-pinboard rounded-xl overflow-hidden shadow-lg border border-border bg-card">
       {/* Header — only shown when add button is available */}
       {canAdd && !isAdding && editingId === null && (
         <div className="flex items-center justify-end px-3 py-2 bg-card border-b border-border">
-          <Button
+            <Button
             size="icon"
             variant="ghost"
-            className="h-7 w-7"
+             className="lc-pinboard-add h-7 w-7"
             onClick={() => setIsAdding(true)}
             data-testid="button-pinboard-add"
           >
@@ -154,7 +154,7 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
           return (
             <div
               key={note.id}
-              className="relative rounded-sm shadow-md"
+               className="lc-pin-note relative rounded-sm shadow-md"
               style={{
                 transform: `rotate(${rotation}deg)`,
                 backgroundColor: bgColor,
@@ -187,17 +187,17 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
                 </span>
                 {isOwn && !isEditing && (
                   <div className="flex gap-0.5 shrink-0">
-                    <button
+                     <button
                       onClick={() => handleEdit(note)}
-                      className="p-0.5 rounded transition-opacity opacity-50 hover:opacity-90"
+                       className="lc-pin-action p-0.5 rounded transition-opacity opacity-50 hover:opacity-90"
                       style={{ color: textColor }}
                       data-testid={`button-pinboard-edit-${note.id}`}
                     >
                       <Pencil className="h-3 w-3" />
                     </button>
-                    <button
+                     <button
                       onClick={() => deleteMutation.mutate(note.id)}
-                      className="p-0.5 rounded transition-opacity opacity-50 hover:opacity-90"
+                       className="lc-pin-action p-0.5 rounded transition-opacity opacity-50 hover:opacity-90"
                       style={{ color: textColor }}
                       data-testid={`button-pinboard-delete-${note.id}`}
                     >
@@ -254,7 +254,7 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
         {/* New note input */}
         {isAdding && (
           <div
-            className="relative rounded-sm shadow-md bg-card border border-border"
+                   className="lc-pin-composer relative rounded-sm shadow-md bg-card border border-border"
             style={{
               transform: `rotate(${ROTATIONS[(notes.length) % ROTATIONS.length]}deg)`,
               borderTop: "3px solid hsl(var(--primary))",
@@ -279,14 +279,14 @@ export function Pinboard({ currentMemberId }: PinboardProps) {
               <div className="flex gap-1">
                 <button
                   onClick={() => { setIsAdding(false); setNewText(""); }}
-                  className="p-0.5 text-muted-foreground opacity-50 hover:opacity-90 transition-opacity"
+                         className="lc-pin-action p-0.5 text-muted-foreground opacity-50 hover:opacity-90 transition-opacity"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
                 <button
                   onClick={handlePost}
                   disabled={!newText.trim() || createMutation.isPending}
-                  className="p-0.5 text-foreground opacity-70 hover:opacity-100 disabled:opacity-30 transition-opacity"
+                   className="lc-pin-action p-0.5 text-foreground opacity-70 hover:opacity-100 disabled:opacity-30 transition-opacity"
                   data-testid="button-pinboard-post"
                 >
                   <Check className="h-3.5 w-3.5" />

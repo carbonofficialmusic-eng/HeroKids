@@ -828,6 +828,193 @@ html {
   background: #112846;
   box-shadow: inset 0 1px rgba(255,255,255,.08), 0 3px 0 rgba(0,0,0,.2);
 }
+.lc-goals-widget > div:first-child { color: #fff; }
+.lc-goal-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.2rem !important;
+  border-color: rgba(43,190,239,.38) !important;
+  background: linear-gradient(145deg, #122b4b, #0c1b33) !important;
+  box-shadow: 0 8px 17px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-goal-card::after {
+  content: "";
+  position: absolute;
+  right: .8rem;
+  top: .65rem;
+  width: .45rem;
+  height: .45rem;
+  border-radius: 50%;
+  background: #6ce5ff;
+  box-shadow: -1.2rem 2rem 0 #ffc83d, -2.1rem -.2rem 0 #a879ff;
+}
+.lc-goal-illustration {
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border: 1px solid rgba(84,210,255,.45);
+  border-radius: 1rem;
+  background: radial-gradient(circle, rgba(24,189,240,.32), rgba(26,64,121,.24));
+  box-shadow: inset 0 1px rgba(255,255,255,.2), 0 5px 9px rgba(0,0,0,.3);
+}
+.lc-goal-card h3 { color: #f5fbff; font-size: 1.05rem; }
+.lc-goal-card [data-testid] { position: relative; z-index: 1; }
+.lc-goal-card .bg-muted\/50 { background: #112846; border-color: rgba(92,151,217,.35); }
+.lc-goal-progress {
+  height: .7rem !important;
+  overflow: hidden;
+  border: 1px solid rgba(81,151,225,.4);
+  border-radius: 999px;
+  background: #08172d !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.35);
+}
+.lc-goal-progress > div {
+  border-radius: inherit;
+  background: linear-gradient(90deg, #13b8e6, #60e1fa) !important;
+  box-shadow: 0 0 8px rgba(30,202,239,.32), inset 0 1px rgba(255,255,255,.36);
+}
+.lc-goal-cta {
+  border-radius: .75rem !important;
+  color: #fff !important;
+  background: linear-gradient(135deg,#087eb9,#19c9ef) !important;
+  box-shadow: 0 3px 0 #075278, 0 6px 10px rgba(13,186,232,.22);
+}
+
+.lc-pinboard {
+  border: 1px solid rgba(107,151,220,.35) !important;
+  border-radius: 1.2rem !important;
+  background: #0d1c34 !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.06);
+}
+.lc-pinboard > div:first-child,
+.lc-pinboard > div:last-child { background: #0d1c34 !important; border-color: rgba(91,143,214,.25) !important; }
+.lc-pinboard-add {
+  border-radius: .7rem !important;
+  color: #7fe6ff !important;
+  background: #153255 !important;
+  box-shadow: 0 3px 0 #09182e;
+}
+.lc-pin-note {
+  border-radius: .8rem !important;
+  box-shadow: 0 7px 13px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.12) !important;
+}
+.lc-pin-note .lc-pin-action,
+.lc-pin-composer .lc-pin-action {
+  display: grid;
+  place-items: center;
+  min-width: 1.35rem;
+  min-height: 1.35rem;
+  border-radius: .38rem;
+  background: rgba(8,18,39,.2);
+}
+.lc-pin-note textarea,
+.lc-pin-composer textarea {
+  border-radius: .65rem;
+  padding: .45rem .55rem;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.12);
+}
+.lc-pin-composer {
+  border-radius: .85rem !important;
+  background: linear-gradient(145deg,#172e4d,#10243e) !important;
+  border-color: rgba(71,204,240,.45) !important;
+}
+
+.lc-achievements-page,
+.lc-active-rewards-page { color: var(--lc-text-primary); }
+.lc-achievements-page > div > div:first-child button,
+.lc-active-rewards-page [data-testid="button-back-active-rewards"] {
+  border-radius: .8rem;
+  color: #cde6ff;
+  background: #132744;
+  border-color: rgba(100,157,226,.35);
+  box-shadow: 0 3px 0 rgba(0,0,0,.25);
+}
+.lc-achievements-hero {
+  border-color: rgba(168,100,255,.45) !important;
+  border-radius: 1.3rem !important;
+  background: linear-gradient(145deg,#30214f,#171b36) !important;
+  box-shadow: 0 10px 21px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-achievements-hero h2,
+.lc-achievements-page h1 { color: #fff; text-shadow: 0 3px 0 #321b65; }
+.lc-achievement-page-card {
+  border-color: rgba(168,100,255,.48) !important;
+  border-radius: 1.2rem !important;
+  background: linear-gradient(145deg,#302050,#171b36) !important;
+  box-shadow: 0 9px 18px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.09);
+}
+.lc-achievement-page-card::after {
+  content: "";
+  position: absolute;
+  right: .9rem;
+  bottom: .7rem;
+  width: .4rem;
+  height: .4rem;
+  border-radius: 50%;
+  background: #ffc84c;
+  box-shadow: -1.4rem -.8rem 0 #8be5ff;
+}
+.lc-achievement-page-inner { position: relative; z-index: 1; }
+.lc-achievement-page-card img,
+.lc-achievement-page-card .bg-gradient-to-br {
+  border-radius: .95rem;
+  filter: drop-shadow(0 5px 7px rgba(0,0,0,.3));
+}
+.lc-achievement-page-card h3 { color: #fff; }
+.lc-achievement-info {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(215,164,255,.38);
+  border-radius: .65rem;
+  color: #e0b6ff !important;
+  background: rgba(112,63,177,.28);
+}
+.lc-active-rewards-page h1 { color: #fff1c2; text-shadow: 0 3px 0 #71380d; }
+.lc-reward-page-card {
+  border: 1px solid rgba(239,158,38,.4) !important;
+  border-radius: 1.3rem !important;
+  background: linear-gradient(145deg,#2b2630,#171c2c) !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,.26), inset 0 1px rgba(255,255,255,.08);
+}
+.lc-reward-page-illustration {
+  border: 1px solid rgba(255,195,61,.48);
+  border-radius: 1rem !important;
+  background: radial-gradient(circle,rgba(255,193,51,.4),rgba(160,76,19,.2)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.18), 0 5px 10px rgba(0,0,0,.25);
+}
+.lc-reward-page-card h3 { color: #fff2c5; }
+.lc-reward-page-card [data-testid^="badge-reward-points"] {
+  border: 1px solid rgba(255,205,72,.5);
+  color: #ffe071;
+  background: rgba(167,99,14,.24);
+}
+.lc-reward-progress {
+  height: .6rem;
+  margin: .15rem 0 .85rem;
+  overflow: hidden;
+  border: 1px solid rgba(255,193,51,.28);
+  border-radius: 999px;
+  background: #101d33;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.35);
+}
+.lc-reward-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg,#d77916,#ffd04c);
+  box-shadow: inset 0 1px rgba(255,255,255,.35);
+}
+.lc-reward-page-button {
+  border-radius: .8rem !important;
+  border: 1px solid rgba(255,223,121,.38) !important;
+  color: #fff !important;
+  background: linear-gradient(135deg,#c26a13,#f0a51b) !important;
+  box-shadow: 0 4px 0 #7d3d0c, 0 7px 12px rgba(153,79,13,.2);
+}
+.lc-reward-page-button:disabled { color: #aab4c9 !important; background: #29344a !important; box-shadow: 0 3px 0 #151c2b; }
 @media (max-width: 480px) {
   .lc-podium { min-height: 15rem; gap: .1rem; }
   .lc-podium-place { min-width: 5.5rem; }

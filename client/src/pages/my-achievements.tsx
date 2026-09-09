@@ -139,7 +139,7 @@ export default function MyAchievements() {
     });
 
   return (
-    <div className="min-h-screen p-4 pb-20" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
+    <div className="lc-achievements-page min-h-screen p-4 pb-20" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <Link href={member?.role === "parent" ? "/" : "/kid-dashboard"}>
@@ -160,7 +160,7 @@ export default function MyAchievements() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl">
+           <Card className="lc-achievements-hero p-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 flex items-center justify-center flex-shrink-0">
                 <img src="/nav-icons/bonus.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
@@ -191,11 +191,11 @@ export default function MyAchievements() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="relative rounded-2xl border bg-gradient-to-br from-indigo-900/80 via-purple-900/80 to-violet-900/80 border-violet-500/40 shadow-xl shadow-violet-500/10 overflow-hidden"
+                  className="lc-achievement-page-card relative rounded-2xl border bg-gradient-to-br from-indigo-900/80 via-purple-900/80 to-violet-900/80 border-violet-500/40 shadow-xl shadow-violet-500/10 overflow-hidden"
                 >
                   {/* Shine overlay */}
                   <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
-                  <div className="p-4 flex items-center gap-3">
+                   <div className="lc-achievement-page-inner p-4 flex items-center gap-3">
                     {/* Icon box */}
                     {ACHIEVEMENT_BADGES[achievement.slug] ? (
                       <img
@@ -222,7 +222,7 @@ export default function MyAchievements() {
                     {/* Info button */}
                     <Popover>
                       <PopoverTrigger asChild>
-                        <button className="flex-shrink-0 text-white/30 hover:text-white/60 transition-colors" data-testid={`button-info-${achievement.slug}`}>
+                       <button className="lc-achievement-info flex-shrink-0 text-white/30 hover:text-white/60 transition-colors" data-testid={`button-info-${achievement.slug}`}>
                           <Info className="h-4 w-4" />
                         </button>
                       </PopoverTrigger>
