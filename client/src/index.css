@@ -600,6 +600,13 @@ html {
   background: linear-gradient(145deg, #ffbd24, #c96c08);
   box-shadow: inset 0 2px 1px rgba(255,255,255,.35), 0 5px 0 #713708, 0 9px 16px rgba(0,0,0,.32);
 }
+.lc-dashboard .lc-points-card > p,
+.lc-dashboard .lc-points-card > .space-y-2 {
+  position: relative;
+  z-index: 1;
+  margin-left: 4.4rem;
+  min-width: 0;
+}
 .lc-dashboard .lc-points-trophy-star {
   position: absolute;
   right: -.35rem;
@@ -609,7 +616,9 @@ html {
 }
 .lc-dashboard .lc-points-card [data-testid="text-parent-total-earned"] {
   color: var(--lc-text-primary);
-  font-size: clamp(2.25rem, 5vw, 3rem);
+  font-size: clamp(1.8rem, 8vw, 3rem);
+  line-height: 1;
+  white-space: nowrap;
   text-shadow: 0 3px 0 #1e4e84, 0 6px 12px rgba(0,0,0,.3);
 }
 .lc-dashboard .lc-points-card [data-testid="text-parent-available"] {
