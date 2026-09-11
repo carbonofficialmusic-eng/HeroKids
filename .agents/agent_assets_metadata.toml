@@ -374,3 +374,17 @@ mtime_ms = 1789170800599
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/2bcb8e66-65f4-427c-b4e3-e7ed5e080883/3e62e678-829d-4bc1-9604-3d8b545fd547"
 storage_version_token = "1789170810238944"
 content_type = "image/png"
+
+[[outputs]]
+id = "iLnnPaLD_dmUzLWtiWg00"
+uri = "file://attached_assets/generated_images/legacy-ultra-simple-logo-hero-concept.png"
+type = "image"
+title = "Legacy-Heldin – stark vereinfachter Logo-Stil"
+description = "Einfacher Maskenheld mit großen Farbflächen, klarer Kontur und klassischer Little-Champs-Silhouette."
+logical_id = "50b8992b-3b91-4d9e-91f9-bf7e1c9c59e3"
+content_hash = "sha256:739d6856037144e17c36536f7206462ecdce049f1259b7b7eeb9c588aab3c440"
+size = 965073
+mtime_ms = 1789171028500
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/50b8992b-3b91-4d9e-91f9-bf7e1c9c59e3/dbc57a3c-a97e-4dd2-80f4-1662debe4fe5"
+storage_version_token = "1789171037217245"
+content_type = "image/png"
