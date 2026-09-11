@@ -25,59 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { RewardIconDisplay } from "@/lib/reward-icon";
-
-const KEYBOARD_HEIGHT = 350; // iOS keyboard + accessory bar estimate
-
-function findScrollableAncestor(el: HTMLElement): HTMLElement | null {
-  let parent = el.parentElement;
-  while (parent && parent !== document.body) {
-    const style = getComputedStyle(parent);
-    if (style.overflowY === "auto" || style.overflowY === "scroll") {
-      return parent;
-    }
-    parent = parent.parentElement;
-  }
-  return null;
-}
-
-function scrollFieldIntoView(el: HTMLElement) {
-  // WKWebView does NOT resize window.innerHeight when keyboard appears —
-  // find the scrollable dialog container and scroll manually.
-  const scrollable = findScrollableAncestor(el);
-
-  if (scrollable) {
-    // Temporarily add bottom padding so there's always room to scroll
-    // past the keyboard, even if the content would otherwise fit exactly.
-    scrollable.style.paddingBottom = `${KEYBOARD_HEIGHT}px`;
-
-    el.addEventListener(
-      "blur",
-      () => {
-        scrollable.style.paddingBottom = "";
-      },
-      { once: true }
-    );
-  }
-
-  setTimeout(() => {
-    const elRect = el.getBoundingClientRect();
-    // visualViewport.height shrinks when keyboard opens on regular browsers (Chrome, Safari desktop).
-    // On iOS WKWebView (Capacitor) it does NOT shrink — fall back to fixed keyboard estimate.
-    const vvHeight = window.visualViewport?.height ?? window.innerHeight;
-    const visibleBottom = vvHeight < window.innerHeight - 50
-      ? vvHeight          // browser already accounts for keyboard
-      : window.innerHeight - KEYBOARD_HEIGHT; // WKWebView: apply manual estimate
-    // Already visible above keyboard — nothing to do
-    if (elRect.bottom < visibleBottom - 20) return;
-    if (scrollable) {
-      // Scroll just enough to show field 20 px above keyboard
-      const scrollNeeded = elRect.bottom - visibleBottom + 20;
-      scrollable.scrollBy({ top: scrollNeeded, behavior: "smooth" });
-    } else {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, 400);
-}
+import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 
 const REWARD_IMAGE_ICONS = [
   { value: "/reward-icons/ice-cream.png",     label: "Eis" },
@@ -168,7 +116,7 @@ export function RewardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="lc-game-dialog lc-reward-dialog max-w-md overflow-y-auto [&>button.absolute]:hidden" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"} onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent className="lc-game-dialog lc-reward-dialog max-w-md overflow-hidden [&>button.absolute]:hidden" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"} onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader className="lc-game-dialog-header">
           <DialogTitle className="text-2xl font-accent">{isEditing ? t('rewards.editReward') : t('rewards.createReward')}</DialogTitle>
           <DialogDescription>
@@ -177,7 +125,7 @@ export function RewardDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="lc-game-dialog-form space-y-6">
+          <form id="reward-dialog-form" onSubmit={form.handleSubmit(handleSubmit)} className="lc-game-dialog-form lc-reward-dialog-form space-y-6">
 
             {/* Icon Picker */}
             <FormField
@@ -302,8 +250,8 @@ export function RewardDialog({
               control={form.control}
               name="oneTimeOnly"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
+                <FormItem className="lc-reward-one-time-option flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="min-w-0 space-y-0.5">
                     <FormLabel className="text-base">{t('rewards.oneTimeOnly')}</FormLabel>
                     <FormDescription>
                       {t('rewards.oneTimeOnlyDesc')}
@@ -320,27 +268,28 @@ export function RewardDialog({
               )}
             />
 
-            <div className="lc-game-dialog-actions flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => onOpenChange(false)}
-                data-testid="button-cancel-reward"
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1"
-                disabled={isSubmitting}
-                data-testid="button-submit-reward"
-              >
-                {isSubmitting ? (isEditing ? t('rewards.saving') : t('rewards.creating')) : (isEditing ? t('rewards.saveChanges') : t('rewards.createRewardButton'))}
-              </Button>
-            </div>
           </form>
         </Form>
+        <div className="lc-game-dialog-actions lc-reward-dialog-actions flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+            data-testid="button-cancel-reward"
+          >
+            {t('common.cancel')}
+          </Button>
+          <Button
+            type="submit"
+            form="reward-dialog-form"
+            className="flex-1"
+            disabled={isSubmitting}
+            data-testid="button-submit-reward"
+          >
+            {isSubmitting ? (isEditing ? t('rewards.saving') : t('rewards.creating')) : (isEditing ? t('rewards.saveChanges') : t('rewards.createRewardButton'))}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

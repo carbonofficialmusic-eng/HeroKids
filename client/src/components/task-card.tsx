@@ -275,6 +275,27 @@ export function TaskCard({
     return task.status === "pending_approval";
   })();
 
+  // A shared task remains visually open until every assigned member has
+  // completed it, even when the currently viewed member is already done.
+  const assignedCompletions = task.assignedMemberCompletions;
+  const sharedCompletions = task.sharedMemberCompletions;
+  const hasMultipleAssignees =
+    (assignedCompletions?.length ?? 0) > 1 ||
+    (sharedCompletions?.length ?? 0) > 1;
+  const allAssigneesCompleted = assignedCompletions?.length
+    ? assignedCompletions.every((member) => member.hasCompleted)
+    : sharedCompletions?.length
+      ? sharedCompletions.every((member) => member.hasCompleted)
+      : false;
+  const isVisuallyApproved =
+    task.status === "completed" ||
+    (hasMultipleAssignees ? allAssigneesCompleted : isCompletedByMember);
+  const taskVisualState = hasPendingApproval
+    ? "submitted"
+    : isVisuallyApproved
+      ? "approved"
+      : "open";
+
   // ── Compact (grid) rendering ──────────────────────────────────────────────
   if (compact) {
     // Date label shown directly on the compact card
@@ -337,6 +358,7 @@ export function TaskCard({
           className={`p-2 transition-all h-full flex flex-col backdrop-blur-md ${
             isGrayedOut ? 'bg-card/20' : 'bg-card/80 lc-task-card-open'
           } hover-elevate active-elevate-2 cursor-pointer`}
+          data-task-visual-state={taskVisualState}
           data-testid={`card-task-${task.id}`}
           onClick={() => (task as any).isShoppingList ? setShoppingListExpanded(v => !v) : onClick?.(task)}
         >
@@ -497,6 +519,7 @@ export function TaskCard({
         className={`p-4 transition-all min-h-[140px] h-full flex flex-col backdrop-blur-md ${
           isGrayedOut ? 'bg-card/20' : 'bg-card/80 lc-task-card-open'
         } ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
+        data-task-visual-state={taskVisualState}
         data-testid={`card-task-${task.id}`}
         onClick={() => onClick?.(task)}
       >
@@ -691,7 +714,7 @@ export function TaskCard({
                       <Badge 
                         key={member.memberId} 
                         variant={hasSubmitted ? "default" : "outline"}
-                        className="gap-1.5 text-xs"
+                        className={`gap-1.5 text-xs ${member.hasCompleted ? "lc-task-member-completed" : ""}`}
                         data-testid={`assigned-member-${member.memberId}`}
                       >
                         <Avatar className="h-4 w-4">
@@ -729,7 +752,7 @@ export function TaskCard({
                     <Badge 
                       key={member.memberId} 
                       variant={member.hasCompleted ? "default" : "outline"}
-                      className="gap-1.5 text-xs"
+                      className={`gap-1.5 text-xs ${member.hasCompleted ? "lc-task-member-completed" : ""}`}
                       data-testid={`shared-member-${member.memberId}`}
                     >
                       <Avatar className="h-4 w-4">

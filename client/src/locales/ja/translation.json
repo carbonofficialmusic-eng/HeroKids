@@ -422,7 +422,7 @@
     "thisMonthsLeaderboard": "今月のランキング",
     "allTimeLeaderboard": "通算ランキング",
     "pointsEarnedWeek": "今週獲得したポイント",
-    "pointsEarnedMonth": "今月獲得したポイント - 1日にリセット",
+    "pointsEarnedMonth": "今月獲得したポイント",
     "pointsEarnedAllTime": "通算獲得ポイント",
     "weeklyPrize": "週間賞品",
     "monthlyPrize": "月間賞品",
@@ -491,6 +491,10 @@
     "nextUnlock": "次のアンロック"
   },
   "skinNames": {
+    "brave-knight": "勇敢な騎士",
+    "sky-spark": "スカイスパーク",
+    "bright-mind": "ひらめき博士",
+    "turbo-trail": "ターボレーサー",
     "junior-champion": "ジュニアチャンピオン",
     "brave-explorer": "勇敢な探検家",
     "star-cadet": "スター候補生",

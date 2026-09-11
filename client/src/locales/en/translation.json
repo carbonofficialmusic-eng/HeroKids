@@ -102,7 +102,7 @@
     "decline": "Decline",
     "activeRewards": "Active Rewards",
     "youCanClaim": "You can claim this!",
-    "redeemNow": "Redeem Now!",
+    "redeemNow": "Get It Now!",
     "redeeming": "Redeeming...",
     "needMorePoints": "Need {{count}} more points",
     "weekly": "Weekly",
@@ -428,7 +428,7 @@
     "thisMonthsLeaderboard": "This Month's Leaderboard",
     "allTimeLeaderboard": "All-Time Leaderboard",
     "pointsEarnedWeek": "Points earned this week",
-    "pointsEarnedMonth": "Points earned this month - resets on the 1st",
+    "pointsEarnedMonth": "Points earned this month",
     "pointsEarnedAllTime": "Total points earned all time",
     "weeklyPrize": "Weekly Prize",
     "monthlyPrize": "Monthly Prize",
@@ -504,6 +504,10 @@
     "failedToToggleBackground": "Failed to toggle background"
   },
   "skinNames": {
+    "brave-knight": "Brave Knight",
+    "sky-spark": "Sky Spark",
+    "bright-mind": "Bright Mind",
+    "turbo-trail": "Turbo Trail",
     "junior-champion": "Junior Champion",
     "brave-explorer": "Brave Explorer",
     "star-cadet": "Star Cadet",

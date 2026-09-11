@@ -110,19 +110,17 @@ export default function ActiveRewards() {
     >
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" asChild data-testid="button-back-active-rewards" className="gap-2 shrink-0 bg-background/30 backdrop-blur-sm border-border/40">
+        <div className="grid min-h-28 grid-cols-[1fr_auto_1fr] items-center">
+          <Button variant="outline" size="sm" asChild data-testid="button-back-active-rewards" className="justify-self-start gap-2 shrink-0 bg-background/30 backdrop-blur-sm border-border/40">
             <Link href="/">
               <ArrowLeft className="h-4 w-4" />
               {t("common.back") || "Zurück"}
             </Link>
           </Button>
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-full gradient-winner flex items-center justify-center shrink-0">
-              <Gift className="h-5 w-5 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold font-accent">{t("dashboard.activeRewards")}</h1>
+          <div className="h-32 w-32 flex items-center justify-center shrink-0 -my-3">
+            <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-sm" />
           </div>
+          <div aria-hidden />
         </div>
 
         {/* Content */}
@@ -144,7 +142,11 @@ export default function ActiveRewards() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                 <Card className="lc-reward-page-card p-5 relative overflow-visible" data-testid={`card-reward-${reward.id}`}>
+                 <Card
+                   className="lc-reward-page-card p-5 relative overflow-visible"
+                   data-reward-visual-state={member && member.totalPoints >= reward.pointThreshold ? "ready" : "locked"}
+                   data-testid={`card-reward-${reward.id}`}
+                 >
                   {isRealParent && (
                     <div className="absolute top-2 right-2 flex gap-1">
                       <Button
@@ -191,11 +193,6 @@ export default function ActiveRewards() {
                         >
                           {reward.pointThreshold} {t("dashboard.pointsLabel")}
                         </Badge>
-                        {member && member.totalPoints >= reward.pointThreshold && (
-                          <span className="text-xs font-semibold text-green-600">
-                            {t("dashboard.youCanClaim")}
-                          </span>
-                        )}
                       </div>
                        <div className="lc-reward-progress" aria-hidden="true">
                          <span style={{ width: `${Math.min(((member?.totalPoints ?? 0) / Math.max(reward.pointThreshold, 1)) * 100, 100)}%` }} />

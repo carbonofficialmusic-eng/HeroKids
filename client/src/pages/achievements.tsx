@@ -333,11 +333,13 @@ export default function Achievements() {
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="flex items-center gap-2 text-2xl md:text-3xl leading-tight font-bold">
-              <Trophy className="h-7 w-7 shrink-0 text-primary md:h-8 md:w-8" />
+            <h1 className="flex items-center gap-2 text-2xl md:text-3xl leading-tight font-bold" style={{ fontFamily: "Fredoka, sans-serif" }}>
+              <span className="lc-bonus-settings-heading-icon h-24 w-24 flex shrink-0 items-center justify-center -my-2">
+                <img src="/nav-icons/bonus.png" alt="" className="h-full w-full object-contain drop-shadow-sm" />
+              </span>
               <span className="min-w-0">{t("achievements.title")}</span>
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground text-on-image">
+            <p className="lc-bonus-settings-subtitle mt-1 text-sm text-muted-foreground">
               {t("achievements.subtitle")}
             </p>
           </div>

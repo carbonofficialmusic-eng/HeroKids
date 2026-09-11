@@ -533,6 +533,36 @@ async function addNemicolopterusAndSkaterKidIfNeeded() {
   }
 }
 
+// Add four character skins to complete the final five-column row.
+// Hidden star totals and existing star placements intentionally stay unchanged.
+async function addFinalCharacterSkinsIfNeeded() {
+  try {
+    const NEW_SKINS = [
+      { id: "brave-knight", name: "Brave Knight", description: "Courageous young knight protecting the kingdom with shield and heart!", imageUrl: "🛡️", pointsRequired: 7300, bonusPoints: 0 },
+      { id: "sky-spark", name: "Sky Spark", description: "Fearless superheroine soaring into action with star-powered courage!", imageUrl: "🦸‍♀️", pointsRequired: 7300, bonusPoints: 0 },
+      { id: "bright-mind", name: "Bright Mind", description: "Curious young scientist making brilliant discoveries in her laboratory!", imageUrl: "👩‍🔬", pointsRequired: 7300, bonusPoints: 0 },
+      { id: "turbo-trail", name: "Turbo Trail", description: "Confident young race driver speeding toward the finish line!", imageUrl: "🏁", pointsRequired: 7300, bonusPoints: 0 },
+    ];
+
+    const existing = await db.select({ id: skins.id }).from(skins).where(
+      sql`${skins.id} IN ('brave-knight', 'sky-spark', 'bright-mind', 'turbo-trail')`
+    );
+    const existingIds = new Set(existing.map((skin) => skin.id));
+    const missingSkins = NEW_SKINS.filter((skin) => !existingIds.has(skin.id));
+
+    if (missingSkins.length === 0) {
+      log("✅ Final character skins already exist");
+      return;
+    }
+
+    log(`🌱 Adding ${missingSkins.length} final character skins...`);
+    await db.insert(skins).values(missingSkins);
+    log("✅ Successfully added final character skins!");
+  } catch (error) {
+    console.error("❌ Error adding final character skins:", error);
+  }
+}
+
 // Force reseed all skins if new skin collections don't exist
 // This is a one-time migration that will run on next app start (both dev and production)
 async function forceReseedSkinsIfNeeded() {
@@ -896,6 +926,9 @@ async function ensurePinboardTable() {
 
   // Add Nemicolopterus & Skater Kid to complete the last row
   await addNemicolopterusAndSkaterKidIfNeeded();
+
+  // Add Knight, Superheroine, Scientist & Race Driver to complete the final row
+  await addFinalCharacterSkinsIfNeeded();
 
   // Ensure is_admin_granted column exists
   try {

@@ -293,106 +293,44 @@ function RewardCard({ reward, currentPoints, member }: { reward: Reward; current
     }
   };
 
-  const cardCls = isReady
-    ? "from-emerald-950/95 via-green-900/90 to-emerald-900/90 border-emerald-400/60 shadow-emerald-500/20"
-    : "from-orange-950/95 via-amber-900/90 to-orange-900/90 border-orange-400/55 shadow-orange-500/20";
-  const iconBgCls = isReady
-    ? "from-emerald-400/30 to-green-500/20 border-emerald-300/45"
-    : "from-orange-400/30 to-amber-500/20 border-orange-300/40";
-
   return (
     <>
-      <div
-        className={`relative rounded-2xl border bg-gradient-to-br ${cardCls} shadow-xl overflow-hidden active:scale-[0.98] transition-transform duration-150`}
+      <Card
+        className="lc-reward-card p-5 relative overflow-visible"
+        data-reward-visual-state={isReady ? "ready" : "locked"}
+        data-testid={`card-reward-${reward.id}`}
       >
-        {/* Shine overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
-        {/* Ready glow ring */}
-        {isReady && (
-          <div className="absolute inset-0 rounded-2xl border-2 border-emerald-400/30 pointer-events-none" />
-        )}
-
-        <div className="p-4 flex items-center gap-3">
-          {/* Icon box */}
-          <div className={`relative flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br ${iconBgCls} border flex items-center justify-center shadow-inner overflow-hidden`}>
-            <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-9 h-9 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
-            {isReady && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full flex items-center justify-center">
-                  <span className="text-[8px] font-bold text-emerald-950">✓</span>
-              </div>
-            )}
+        <div className="flex items-start gap-4">
+          <div className="lc-reward-illustration h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 p-1.5">
+            <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-4xl leading-none" />
           </div>
-
-          {/* Content */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-base text-white leading-tight mb-1.5" style={{ fontFamily: "Fredoka, sans-serif" }}>
+            <h3 className="font-bold text-lg mb-1" data-testid={`text-reward-title-${reward.id}`}>
               {reward.title}
             </h3>
-            {/* Progress bar — mockup style */}
-            <div className="h-3 rounded-full bg-black/30 overflow-hidden relative mb-1.5">
-              <div
-                className={`h-full rounded-full relative transition-all ${isReady ? "bg-gradient-to-r from-emerald-400 to-green-300" : "bg-gradient-to-r from-orange-500 to-amber-300"}`}
-                style={{ width: `${percentage}%` }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent rounded-full" />
-                {percentage > 15 && (
-                  <div className="absolute right-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white/60 rounded-full" />
-                )}
-              </div>
+            {reward.description && <p className="text-sm text-muted-foreground mb-2">{reward.description}</p>}
+            <Progress value={percentage} className="lc-reward-progress h-2 mb-3" />
+            <div className="flex items-center gap-2 mb-3">
+              <Badge className="lc-reward-points-badge" variant={isReady ? "default" : "secondary"} data-testid={`badge-reward-points-${reward.id}`}>
+                {reward.pointThreshold} {t("dashboard.pointsLabel")}
+              </Badge>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs" style={{ fontFamily: "Nunito, sans-serif" }}>
-                {isReady ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-emerald-400/20 text-emerald-300 border-emerald-400/40">
-                    <Sparkles className="h-2.5 w-2.5" />{t("kidDashboard.readyToRequest")}
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-white/50">
-                    <Zap className="h-3 w-3 text-orange-400" />{remaining} {t("kidDashboard.pointsRemaining", { count: remaining }).split(" ").slice(-1)[0]}
-                  </span>
-                )}
-              </span>
-              <span className={`flex items-center gap-1 text-xs font-bold ${isReady ? "text-emerald-300" : "text-orange-300"}`}>
-                <Star className={`h-3 w-3 ${isReady ? "fill-emerald-400 text-emerald-400" : "fill-orange-400 text-orange-400"}`} />{reward.pointThreshold}
-              </span>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="flex-shrink-0 flex flex-col items-end gap-2">
-            <button
-              onClick={() => setShowDetails(true)}
-              className="text-white/30 hover:text-white/60 transition-colors"
-              data-testid={`button-info-reward-${reward.id}`}
+            <Button
+              onClick={handleRequest}
+              disabled={!isReady || redeemMutation.isPending}
+              size="sm"
+              className="lc-redeem-button w-full"
+              data-testid={`button-request-reward-${reward.id}`}
             >
-              <Info className="h-4 w-4" />
-            </button>
-            {isReady ? (
-              <button
-                onClick={handleRequest}
-                disabled={redeemMutation.isPending}
-                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-gradient-to-b from-emerald-400 to-green-500 shadow-lg shadow-emerald-500/30 active:scale-95 transition-transform border border-emerald-300/50 disabled:opacity-50"
-                data-testid={`button-request-reward-${reward.id}`}
-              >
-                {redeemMutation.isPending
-                  ? <Loader2 className="h-4 w-4 text-emerald-950 animate-spin" />
-                  : <Gift className="h-4 w-4 text-emerald-950" />
-                }
-                <span className="text-xs font-bold text-emerald-950 whitespace-nowrap">{t("kidDashboard.now")}</span>
-              </button>
-            ) : (
-              <button
-                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-gradient-to-b from-orange-500/35 to-amber-600/25 border border-orange-300/30 cursor-not-allowed"
-                disabled
-                data-testid={`button-request-reward-${reward.id}`}
-              >
-                <Lock className="h-4 w-4 text-orange-200/55" />
-                <span className="text-xs font-bold text-orange-100/55 whitespace-nowrap">{remaining} {t("points")}</span>
-              </button>
-            )}
+              {redeemMutation.isPending
+                ? t("dashboard.redeeming")
+                : isReady
+                  ? t("dashboard.redeemNow")
+                  : t("dashboard.needMorePoints", { count: remaining })}
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Details Dialog */}
       <AlertDialog open={showDetails} onOpenChange={setShowDetails}>
@@ -782,6 +720,7 @@ function TaskCard({
         <div
           className={`rounded-2xl border transition-colors min-w-0 w-full cursor-pointer ${borderColor}`}
           style={{ background: cardBg }}
+          data-task-visual-state={showAsPending || showAsSubmitted ? "submitted" : showAsApproved ? "approved" : "open"}
           data-testid={`task-card-${task.id}`}
           onClick={() => setShoppingListExpanded(v => !v)}
         >
@@ -837,6 +776,7 @@ function TaskCard({
         <div
           className={`p-2.5 rounded-2xl border transition-colors min-w-0 w-full ${borderColor} ${isActionable ? "cursor-pointer" : ""} ${!isActionable && !showAsApproved && !allSharedMembersCompleted && !showAsPending && !showAsSubmitted && !isRejected && !dueDateInfo.expired ? "opacity-70" : ""}`}
           style={cardBg ? { background: cardBg } : undefined}
+          data-task-visual-state={showAsPending || showAsSubmitted ? "submitted" : showAsApproved || allSharedMembersCompleted ? "approved" : "open"}
           data-testid={`task-card-${task.id}`}
           onClick={isActionable ? handleComplete : undefined}
         >
@@ -910,6 +850,7 @@ function TaskCard({
               ? "rgba(239,68,68,0.15)"
               : "linear-gradient(135deg, rgba(51,65,85,0.88) 0%, rgba(30,41,59,0.92) 55%, rgba(15,23,42,0.95) 100%)"
         }}
+        data-task-visual-state={showAsSubmitted || showAsPending ? "submitted" : showAsApproved || allSharedMembersCompleted ? "approved" : "open"}
         data-testid={`task-card-${task.id}`}
         onClick={(task as any).isShoppingList
           ? () => setShoppingListExpanded(v => !v)
@@ -990,7 +931,7 @@ function TaskCard({
                       <Badge 
                         key={m.memberId} 
                         variant={hasSubmitted ? "default" : "outline"}
-                        className="gap-1 text-xs"
+                        className="lc-multi-task-member-badge gap-1 text-xs"
                       >
                         <Avatar className="h-4 w-4">
                           <AvatarImage src={getAvatarUrl(m.activeSkinId, m.avatarUrl, m.useCustomAvatar)} />
@@ -1038,7 +979,7 @@ function TaskCard({
                     <Badge 
                       key={m.memberId} 
                       variant={m.hasCompleted ? "default" : "outline"}
-                      className="gap-1 text-xs"
+                      className="lc-multi-task-member-badge gap-1 text-xs"
                     >
                       <Avatar className="h-4 w-4">
                         <AvatarImage src={getAvatarUrl(m.activeSkinId, m.avatarUrl, m.useCustomAvatar)} />
@@ -2166,7 +2107,7 @@ export default function KidDashboard() {
   };
 
   return (
-    <div className="min-h-dvh">
+    <div className="lc-kid-dashboard min-h-dvh">
       {/* Header — same structure as parent dashboard: fixed, in root stacking context */}
       <header
         data-app-header
@@ -2321,7 +2262,7 @@ export default function KidDashboard() {
         {/* Special Achievement Rewards Section */}
         {specialRewards.length > 0 && (
           <div className="space-y-4" id="section-bonus-rewards">
-            <div className="flex items-end justify-between gap-3">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
                   <img src="/nav-icons/bonus.png" alt="" className="w-full h-full object-contain drop-shadow-sm" />
@@ -2340,7 +2281,7 @@ export default function KidDashboard() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {specialRewards.slice(0, 2).map((achievement, index) => (
-                <div key={achievement.id} className="relative rounded-2xl border bg-gradient-to-br from-indigo-900/80 via-purple-900/80 to-violet-900/80 border-violet-500/40 shadow-xl shadow-violet-500/10 overflow-hidden">
+                <div key={achievement.id} className="lc-kid-achievement-card relative rounded-2xl border bg-gradient-to-br from-indigo-900/80 via-purple-900/80 to-violet-900/80 border-violet-500/40 shadow-xl shadow-violet-500/10 overflow-hidden">
                   {/* Shine overlay */}
                   <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
                   <div className="p-4 flex items-center gap-3">
@@ -2352,7 +2293,7 @@ export default function KidDashboard() {
                         className="h-14 w-14 flex-shrink-0 object-contain drop-shadow-md"
                       />
                     ) : (
-                      <div className="relative flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-400/20 flex items-center justify-center shadow-inner overflow-hidden">
+                      <div className="lc-kid-achievement-icon relative flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-400/20 flex items-center justify-center shadow-inner overflow-hidden">
                         <Gift className="h-7 w-7 text-violet-300" />
                       </div>
                     )}
@@ -2412,28 +2353,28 @@ export default function KidDashboard() {
                   const JoinIcon = hasJoined ? Trophy : Users;
 
                   return (
-                    <div key={shared.id} style={{ borderRadius: "20px", background: jrc.cardBg, border: `2px solid ${jrc.border}`, boxShadow: `0 0 18px ${jrc.glow}, 0 6px 20px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)`, overflow: "hidden" }}>
+                    <div key={shared.id} className="lc-kid-joinable-reward-card" style={{ borderRadius: "20px", background: jrc.cardBg, border: `2px solid ${jrc.border}`, boxShadow: `0 0 18px ${jrc.glow}, 0 6px 20px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)`, overflow: "hidden" }}>
                       <div style={{ padding: "14px 14px 16px" }}>
                         {/* Icon zone */}
                         <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-                          <div style={{ width: 70, height: 70, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", background: jrc.iconBg, border: `2px solid ${jrc.border}`, boxShadow: `0 0 20px ${jrc.glow}` }}>
+                          <div className="lc-kid-joinable-reward-icon" style={{ width: 70, height: 70, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", background: jrc.iconBg, border: `2px solid ${jrc.border}`, boxShadow: `0 0 20px ${jrc.glow}` }}>
                             <JoinIcon style={{ width: 32, height: 32, color: jrc.icon }} />
                           </div>
                         </div>
 
                         {/* Title */}
-                        <h3 style={{ fontFamily: "Fredoka, sans-serif", fontSize: 17, fontWeight: 700, color: "#fff", textAlign: "center", marginBottom: 10, textShadow: "0 1px 4px rgba(0,0,0,0.7)", lineHeight: 1.2 }}>
+                        <h3 className="lc-kid-joinable-reward-title" style={{ fontFamily: "Fredoka, sans-serif", fontSize: 17, fontWeight: 700, color: "#fff", textAlign: "center", marginBottom: 10, textShadow: "0 1px 4px rgba(0,0,0,0.7)", lineHeight: 1.2 }}>
                           {shared.reward?.title || t("kidDashboard.reward")}
                         </h3>
 
                         {/* Stat chips */}
                         <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap", marginBottom: 10 }}>
-                          <div style={{ background: jrc.chip, border: `1px solid ${jrc.border}`, borderRadius: 20, padding: "3px 10px" }}>
-                            <span style={{ fontSize: 13, color: jrc.chipText, fontWeight: 700 }}>★ {shared.originalPointsSpent}</span>
+                          <div className="lc-kid-joinable-reward-chip" style={{ background: jrc.chip, border: `1px solid ${jrc.border}`, borderRadius: 20, padding: "3px 10px" }}>
+                            <span className="lc-kid-joinable-reward-chip-text" style={{ fontSize: 13, color: jrc.chipText, fontWeight: 700 }}>★ {shared.originalPointsSpent}</span>
                           </div>
-                          <div style={{ background: "rgba(99,102,241,0.18)", border: "1px solid rgba(99,102,241,0.4)", borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}>
+                          <div className="lc-kid-joinable-reward-chip" style={{ background: "rgba(99,102,241,0.18)", border: "1px solid rgba(99,102,241,0.4)", borderRadius: 20, padding: "3px 10px", display: "flex", alignItems: "center", gap: 4 }}>
                             <Users style={{ width: 10, height: 10, color: "#a5b4fc" }} />
-                            <span style={{ fontSize: 12, color: "#a5b4fc", fontWeight: 600 }}>{t("kidDashboard.participants", { count: shared.participants.length + 1 })}</span>
+                            <span className="lc-kid-joinable-reward-chip-text" style={{ fontSize: 12, color: "#a5b4fc", fontWeight: 600 }}>{t("kidDashboard.participants", { count: shared.participants.length + 1 })}</span>
                           </div>
                           {hasJoined && <div style={{ background: "rgba(34,197,94,0.18)", border: "1px solid rgba(34,197,94,0.45)", borderRadius: 20, padding: "3px 10px" }}><span style={{ fontSize: 12, color: "#4ade80", fontWeight: 600 }}>{t("kidDashboard.shared")}</span></div>}
                         </div>
@@ -2441,13 +2382,13 @@ export default function KidDashboard() {
                         {/* Initiator */}
                         {initiatorMember && (
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: shared.participants.length > 0 ? 8 : 0 }}>
-                            <span style={{ fontSize: 11, color: "#94a3b8" }}>{t("kidDashboard.with")}</span>
-                            <div style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
+                            <span className="lc-kid-joinable-reward-label" style={{ fontSize: 11, color: "#94a3b8" }}>{t("kidDashboard.with")}</span>
+                            <div className="lc-kid-joinable-reward-person" style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
                               <Avatar className="h-4 w-4">
                                 <AvatarImage src={getAvatarUrl(initiatorMember.activeSkinId, initiatorMember.avatarUrl, (initiatorMember as any).useCustomAvatar, (initiatorMember as any).updatedAt)} />
                                 <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: initiatorMember.color, fontSize: 8 }}>{initiatorMember.displayName[0]}</AvatarFallback>
                               </Avatar>
-                              <span style={{ fontSize: 11, color: "#e2e8f0", fontWeight: 600 }}>{initiatorMember.displayName}</span>
+                              <span className="lc-kid-joinable-reward-person-name" style={{ fontSize: 11, color: "#e2e8f0", fontWeight: 600 }}>{initiatorMember.displayName}</span>
                             </div>
                           </div>
                         )}
@@ -2456,12 +2397,12 @@ export default function KidDashboard() {
                         {shared.participants.length > 0 && (
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
                             {shared.participants.map(p => (
-                              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
+                              <div key={p.id} className="lc-kid-joinable-reward-person" style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "2px 8px 2px 3px" }}>
                                 <Avatar className="h-4 w-4">
                                   <AvatarImage src={getAvatarUrl(p.member.activeSkinId, p.member.avatarUrl, (p.member as any).useCustomAvatar, (p.member as any).updatedAt)} />
                                   <AvatarFallback className="text-xs text-white font-bold" style={{ backgroundColor: p.member.color, fontSize: 8 }}>{p.member.displayName[0]}</AvatarFallback>
                                 </Avatar>
-                                <span style={{ fontSize: 11, color: "#e2e8f0", fontWeight: 600 }}>{p.member.displayName}</span>
+                                <span className="lc-kid-joinable-reward-person-name" style={{ fontSize: 11, color: "#e2e8f0", fontWeight: 600 }}>{p.member.displayName}</span>
                               </div>
                             ))}
                           </div>
@@ -2550,7 +2491,7 @@ export default function KidDashboard() {
         {/* My Redeemed Rewards Section */}
         {(myRedemptions.length > 0 || joinedSharedRewards.length > 0) && (
           <div className="space-y-4 mb-8" id="section-my-rewards">
-            <div className="flex items-end justify-between gap-3">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
                   <img src="/nav-icons/chest.png" alt="" className="w-full h-full object-contain drop-shadow-sm" />
@@ -2559,7 +2500,7 @@ export default function KidDashboard() {
                   {t("kidDashboard.myRewards")}
                 </h2>
               </div>
-              <Button variant="ghost" size="icon" asChild className="bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0 mb-1" data-testid="button-view-all-rewards">
+              <Button variant="ghost" size="icon" asChild className="bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0" data-testid="button-view-all-rewards">
                 <Link href="/my-rewards" onClick={() => sessionStorage.setItem("dashboardScrollTarget", "section-my-rewards")}>
                   <ChevronRight className="h-5 w-5" />
                 </Link>
@@ -2585,7 +2526,7 @@ export default function KidDashboard() {
                 return (
                   <div
                     key={redemption.id}
-                    className="rounded-2xl overflow-hidden"
+                    className="lc-purchased-reward-card rounded-2xl overflow-hidden"
                     style={{
                       background: "linear-gradient(160deg, rgba(30,20,10,0.92) 0%, rgba(20,15,8,0.97) 100%)",
                       border: `1.5px solid ${rc.border}`,
@@ -2597,7 +2538,7 @@ export default function KidDashboard() {
                       <Sparkles className="absolute left-5 top-4 h-3.5 w-3.5 opacity-40" style={{ color: rc.textColor }} />
                       <Sparkles className="absolute right-5 top-5 h-3 w-3 opacity-30" style={{ color: rc.textColor }} />
                       <div
-                        className="h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
+                        className="lc-purchased-reward-icon h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
                         style={{ background: rc.iconBg, boxShadow: `0 0 28px ${rc.glow}, 0 0 8px ${rc.glow}` }}
                       >
                         <RewardIconDisplay icon={typed.rewardIconEmoji} imgClassName="w-10 h-10 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
@@ -2606,17 +2547,17 @@ export default function KidDashboard() {
 
                     {/* Content zone */}
                     <div className="px-4 pb-4 space-y-3">
-                      <h3 className="font-black text-xl text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${rc.glow}` }}>
+                      <h3 className="lc-purchased-reward-title font-black text-xl text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${rc.glow}` }}>
                         {typed.rewardTitle || t("kidDashboard.reward")}
                       </h3>
 
                       {/* Stats chips */}
                       <div className="flex items-center justify-center gap-2 flex-wrap">
-                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: rc.iconBg, color: rc.textColor, border: `1px solid ${rc.border}` }}>
+                        <div className="lc-purchased-reward-points flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: rc.iconBg, color: rc.textColor, border: `1px solid ${rc.border}` }}>
                           <Coins className="h-3.5 w-3.5" />
                           <span>{t("myRewards.pointsSpent", { count: typed.pointsSpent })}</span>
                         </div>
-                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-white/5 text-white/60 border border-white/10">
+                        <div className="lc-purchased-reward-date flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-white/5 text-white/60 border border-white/10">
                           <span>{typed.redeemedAt ? new Date(typed.redeemedAt).toLocaleDateString() : "-"}</span>
                         </div>
                       </div>
@@ -2624,7 +2565,7 @@ export default function KidDashboard() {
                       {/* Status badges */}
                       <div className="flex items-center justify-center gap-2 flex-wrap">
                         <div
-                          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                          className={`lc-purchased-reward-status ${isCompleted ? "lc-purchased-reward-status-completed" : ""} flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold`}
                           data-testid={`badge-status-dashboard-${typed.id}`}
                           style={{ background: isCompleted ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.08)", color: isCompleted ? "#4ade80" : "rgba(255,255,255,0.7)", border: isCompleted ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,255,255,0.15)" }}
                         >
@@ -2684,7 +2625,7 @@ export default function KidDashboard() {
                             </Button>
                           )}
                           {canCancelSharing && (
-                            <Button variant="outline" className="w-full gap-2 h-11 rounded-xl border-white/20 text-white/70 font-bold" onClick={() => cancelSharingMutation.mutate(typed.id)} disabled={cancelSharingMutation.isPending} data-testid={`button-cancel-share-${typed.id}`}>
+                            <Button variant="outline" className="lc-purchased-reward-cancel-share w-full gap-2 h-11 rounded-xl border-white/20 text-white/70 font-bold" onClick={() => cancelSharingMutation.mutate(typed.id)} disabled={cancelSharingMutation.isPending} data-testid={`button-cancel-share-${typed.id}`}>
                               <X className="h-4 w-4" />{t("kidDashboard.cancelSharing")}
                             </Button>
                           )}
@@ -2714,7 +2655,7 @@ export default function KidDashboard() {
                 return (
                   <div
                     key={`joined-${joined.id}`}
-                    className="rounded-2xl overflow-hidden"
+                    className="lc-purchased-reward-card rounded-2xl overflow-hidden"
                     style={{
                       background: "linear-gradient(160deg, rgba(30,20,10,0.92) 0%, rgba(20,15,8,0.97) 100%)",
                       border: `1.5px solid ${jRc.border}`,
@@ -2726,7 +2667,7 @@ export default function KidDashboard() {
                       <Sparkles className="absolute left-5 top-4 h-3.5 w-3.5 opacity-40" style={{ color: jRc.textColor }} />
                       <Sparkles className="absolute right-5 top-5 h-3 w-3 opacity-30" style={{ color: jRc.textColor }} />
                       <div
-                        className="h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
+                        className="lc-purchased-reward-icon h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
                         style={{ background: jRc.iconBg, boxShadow: `0 0 28px ${jRc.glow}, 0 0 8px ${jRc.glow}` }}
                       >
                         <RewardIconDisplay icon={joined.rewardIconEmoji} imgClassName="w-10 h-10 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
@@ -2735,14 +2676,14 @@ export default function KidDashboard() {
 
                     {/* Content zone */}
                     <div className="px-4 pb-4 space-y-3">
-                      <h3 className="font-black text-xl text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${jRc.glow}` }}>
+                      <h3 className="lc-purchased-reward-title font-black text-xl text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${jRc.glow}` }}>
                         {joined.rewardTitle || t("kidDashboard.reward")}
                       </h3>
 
                       {/* Stats chips */}
                       <div className="flex items-center justify-center gap-2 flex-wrap">
                         {myParticipation && (
-                          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: jRc.iconBg, color: jRc.textColor, border: `1px solid ${jRc.border}` }}>
+                          <div className="lc-purchased-reward-points flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: jRc.iconBg, color: jRc.textColor, border: `1px solid ${jRc.border}` }}>
                             <Coins className="h-3.5 w-3.5" />
                             <span>{t("myRewards.pointsSpent", { count: myParticipation.pointsContributed })}</span>
                           </div>
@@ -2756,7 +2697,7 @@ export default function KidDashboard() {
                       {/* Status badge */}
                       <div className="flex items-center justify-center gap-2 flex-wrap">
                         <div
-                          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                          className={`lc-purchased-reward-status ${jIsCompleted ? "lc-purchased-reward-status-completed" : ""} flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold`}
                           style={{ background: jIsCompleted ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.08)", color: jIsCompleted ? "#4ade80" : "rgba(255,255,255,0.7)", border: jIsCompleted ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,255,255,0.15)" }}
                         >
                           {jIsCompleted ? (
@@ -3012,7 +2953,9 @@ export default function KidDashboard() {
         {goals.filter(g => g.isActive).length > 0 && (
           <div className="lc-kid-goals space-y-6">
             <div className="flex items-center gap-3">
-              <img src={familyGoalsIcon} alt="" className="h-32 w-32 object-contain flex-shrink-0 drop-shadow-sm -my-4" />
+              <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                <img src={familyGoalsIcon} alt="" className="h-32 w-32 max-w-none object-contain drop-shadow-sm" />
+              </div>
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>
                 {t("kidDashboard.familyGoals")}
               </h2>

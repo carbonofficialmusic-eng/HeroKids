@@ -101,7 +101,7 @@
     "decline": "Rechazar",
     "activeRewards": "Recompensas Activas",
     "youCanClaim": "¡Puedes reclamar esto!",
-    "redeemNow": "¡Canjear Ahora!",
+    "redeemNow": "¡Consíguelo ahora!",
     "redeeming": "Canjeando...",
     "needMorePoints": "Necesitas {{count}} puntos más",
     "weekly": "Semanal",
@@ -422,7 +422,7 @@
     "thisMonthsLeaderboard": "Clasificación de Este Mes",
     "allTimeLeaderboard": "Clasificación de Todos los Tiempos",
     "pointsEarnedWeek": "Puntos ganados esta semana",
-    "pointsEarnedMonth": "Puntos ganados este mes - se reinicia el día 1",
+    "pointsEarnedMonth": "Puntos ganados este mes",
     "pointsEarnedAllTime": "Total de puntos ganados en todos los tiempos",
     "weeklyPrize": "Premio Semanal",
     "monthlyPrize": "Premio Mensual",
@@ -491,6 +491,10 @@
     "nextUnlock": "Próximo desbloqueo en"
   },
   "skinNames": {
+    "brave-knight": "Caballero Valiente",
+    "sky-spark": "Chispa Celestial",
+    "bright-mind": "Mente Brillante",
+    "turbo-trail": "Piloto Turbo",
     "junior-champion": "Campeón Junior",
     "brave-explorer": "Explorador Valiente",
     "star-cadet": "Cadete Estelar",

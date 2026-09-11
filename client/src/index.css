@@ -845,6 +845,7 @@ html {
   width: min(calc(100% - 1rem), 42rem);
   max-height: min(92dvh, 52rem);
   scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  grid-template-rows: auto minmax(0, 1fr);
   gap: .55rem;
   padding: clamp(.85rem, 2.8vw, 1.45rem);
   color: var(--lc-task-text);
@@ -854,6 +855,7 @@ html {
     radial-gradient(circle at 8% 0%, rgba(31, 170, 217, .14), transparent 25rem),
     linear-gradient(155deg, #0c2438, var(--lc-task-bg) 58%);
   box-shadow: 0 22px 60px rgba(0, 6, 16, .5), inset 0 1px rgba(255,255,255,.08);
+  overflow: hidden;
 }
 .lc-task-dialog-header {
   padding: .1rem .2rem .4rem;
@@ -862,7 +864,12 @@ html {
 .lc-task-dialog-header [data-slot="dialog-title"] { color: var(--lc-task-text); letter-spacing: -.02em; }
 .lc-task-dialog-header [data-slot="dialog-description"],
 .lc-task-dialog .text-muted-foreground { color: var(--lc-task-muted); }
-.lc-task-dialog-form { padding-top: .1rem; }
+.lc-task-dialog-form {
+  min-height: 0;
+  overflow-y: auto;
+  padding-top: .1rem;
+  padding-bottom: calc(5.2rem + env(safe-area-inset-bottom, 0px));
+}
 .lc-task-dialog-form > * {
   padding: .95rem 0;
   border-bottom: 1px solid rgba(130,193,226,.2);
@@ -980,9 +987,15 @@ html {
 .lc-task-dialog [role="radiogroup"] { padding: .2rem; border: 1px solid rgba(99,181,225,.26); border-radius: .72rem; background: rgba(4,18,33,.35); }
 .lc-task-dialog [data-testid="radio-recurrence-mode"] > div { padding: .45rem .5rem; }
 .lc-task-dialog-actions {
-  position: sticky; bottom: -.1rem; z-index: 4; margin: 0 -.1rem;
-  padding: .8rem .1rem calc(.15rem + env(safe-area-inset-bottom, 0px)) !important; border-bottom: 0 !important;
-  background: linear-gradient(to bottom, transparent, var(--lc-task-bg) 25%);
+  position: absolute;
+  z-index: 3;
+  right: clamp(.85rem, 2.8vw, 1.45rem);
+  bottom: 0;
+  left: clamp(.85rem, 2.8vw, 1.45rem);
+  margin: 0;
+  padding: 1rem .1rem calc(.85rem + env(safe-area-inset-bottom, 0px)) !important;
+  border-bottom: 0 !important;
+  background: linear-gradient(to bottom, transparent, var(--lc-task-bg) 28%);
 }
 .lc-task-dialog-actions button { min-height: 2.85rem; border-radius: .7rem; }
 .lc-task-dialog-actions button[type="submit"] { color: #05283a; border-color: #79eaff; background: linear-gradient(135deg,#16bce7,#65e4f2); box-shadow: 0 4px 0 #087697; }
@@ -1069,6 +1082,31 @@ html {
   color: #e1f2ff;
   background: rgba(11,40,61,.75);
 }
+.lc-reward-dialog {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow-x: hidden;
+}
+.lc-reward-dialog-form {
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: 1rem;
+}
+.lc-reward-dialog-form > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.lc-reward-dialog-actions {
+  position: static;
+  margin: 0;
+  padding: .8rem .1rem max(.15rem, env(safe-area-inset-bottom, 0px)) !important;
+  border-top: 1px solid var(--lc-editor-line);
+  background: var(--lc-editor-bg);
+}
 .lc-game-dialog .rounded-lg.border {
   border-color: rgba(99, 181, 225, .3);
   background: rgba(12, 41, 61, .66);
@@ -1080,6 +1118,13 @@ html {
 .lc-reward-dialog [data-testid="reward-icon-grid"] button:hover,
 .lc-reward-dialog [data-testid="reward-icon-grid"] button:focus-visible {
   border-color: var(--lc-editor-cyan);
+}
+.lc-reward-dialog .lc-reward-one-time-option {
+  gap: 1rem;
+  padding: 1rem 1.25rem !important;
+}
+.lc-reward-dialog .lc-reward-one-time-option > div:first-child {
+  padding-right: .25rem;
 }
 .lc-goal-dialog .grid button {
   border-color: rgba(99,181,225,.3);
@@ -2591,5 +2636,1779 @@ html {
     min-width: 6.8rem;
     padding-inline: .65rem;
   }
+}
+
+/* -------------------------------------------------------------------------
+   Little Champs light-mode skin
+   Additive only: the dark game-world declarations above intentionally remain
+   untouched. This layer is scoped to pages that opt into the lc-* system so
+   task cards and reward cards keep their current art direction.
+   ------------------------------------------------------------------------- */
+html:not(.dark) {
+  --background: 36 33% 97%;
+  --foreground: 215 42% 16%;
+  --border: 215 22% 89%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 42% 16%;
+  --card-border: 215 22% 90%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 215 42% 16%;
+  --popover-border: 215 22% 89%;
+  --primary: 201 91% 49%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 42 91% 67%;
+  --secondary-foreground: 215 42% 16%;
+  --muted: 210 28% 95%;
+  --muted-foreground: 215 19% 43%;
+  --accent: 268 83% 93%;
+  --accent-foreground: 258 45% 33%;
+  --input: 215 22% 82%;
+  --ring: 201 91% 49%;
+  --shadow-xs: 0 1px 3px hsl(215 35% 28% / .06);
+  --shadow-sm: 0 2px 7px hsl(215 35% 28% / .07);
+  --shadow: 0 5px 14px hsl(215 35% 28% / .08);
+}
+
+html:not(.dark) body,
+html:not(.dark) #root {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+html:not(.dark) .lc-dashboard,
+html:not(.dark) .lc-kid-dashboard {
+  --lc-bg-dark: #f8f8f6;
+  --lc-surface-dark: #ffffff;
+  --lc-surface-elevated: #ffffff;
+  --lc-text-primary: #14253b;
+  --lc-text-secondary: #66758a;
+  --lc-shadow-soft: 0 3px 12px rgba(32, 55, 82, .08);
+  --lc-shadow-strong: 0 7px 18px rgba(32, 55, 82, .10);
+  color: var(--lc-text-primary);
+  background: hsl(var(--background));
+}
+
+/* Header, main/collapsible menus and the compact account controls */
+html:not(.dark) .lc-dashboard [data-app-header],
+html:not(.dark) .lc-kid-dashboard [data-app-header] {
+  background: rgba(255, 255, 255, .94);
+  border-bottom: 1px solid #e8edf2;
+  box-shadow: 0 2px 10px rgba(32, 55, 82, .05);
+}
+html:not(.dark) .lc-dashboard [data-app-header] button,
+html:not(.dark) .lc-kid-dashboard [data-app-header] button,
+html:not(.dark) .lc-dashboard .lc-star-chip,
+html:not(.dark) .lc-dashboard .lc-icon-button,
+html:not(.dark) .lc-kid-dashboard .lc-star-chip,
+html:not(.dark) .lc-kid-dashboard .lc-icon-button {
+  color: #253750 !important;
+  background: #fff !important;
+  border-color: #e4eaf0 !important;
+  box-shadow: 0 2px 8px rgba(32, 55, 82, .07);
+}
+html:not(.dark) .lc-dashboard .lc-family-badge,
+html:not(.dark) .lc-kid-dashboard .lc-family-badge {
+  color: #654815;
+  background: linear-gradient(180deg, #ffd978, #f2b940);
+  border-color: #edc15d;
+  box-shadow: inset 0 1px rgba(255,255,255,.55), 0 2px 5px rgba(183, 126, 28, .18);
+}
+html:not(.dark) .lc-dashboard [data-app-header] [data-testid="badge-current-tier"],
+html:not(.dark) .lc-kid-dashboard [data-app-header] [data-testid="badge-current-tier"] {
+  color: #654815;
+  background: #ffda78;
+  border-color: #ecc15d;
+  box-shadow: 0 2px 5px rgba(183, 126, 28, .14);
+}
+html:not(.dark) .lc-dashboard .lc-icon-button,
+html:not(.dark) .lc-kid-dashboard .lc-icon-button {
+  color: #38516d !important;
+}
+/* Parent points panel and new management controls */
+html:not(.dark) .lc-dashboard .lc-points-card,
+html:not(.dark) .lc-kid-dashboard .lc-kid-points-card {
+  border: 1px solid #edf0f3;
+  background: #fff;
+  box-shadow: var(--lc-shadow-strong);
+}
+html:not(.dark) .lc-dashboard .lc-points-card::before { opacity: .28; }
+html:not(.dark) .lc-dashboard .lc-points-card [data-testid="text-parent-total-earned"] {
+  color: #142b45;
+  text-shadow: none;
+}
+html:not(.dark) .lc-dashboard .lc-points-card [data-testid="text-parent-available"] {
+  color: #168bc4;
+}
+html:not(.dark) .lc-dashboard .lc-action-button {
+  color: #fff !important;
+  border-color: rgba(255,255,255,.38) !important;
+  box-shadow: 0 3px 0 rgba(20, 86, 137, .16), 0 6px 12px rgba(32, 110, 171, .12);
+}
+html:not(.dark) .lc-dashboard .lc-action-violet { background: #8d72dc !important; }
+html:not(.dark) .lc-dashboard .lc-action-green { background: #71c983 !important; }
+html:not(.dark) .lc-dashboard .lc-action-cyan,
+html:not(.dark) .lc-dashboard .lc-action-primary { background: #199ee7 !important; }
+html:not(.dark) .lc-dashboard .lc-action-orange { background: #ef9b58 !important; }
+html:not(.dark) .lc-dashboard .lc-action-gold { background: #f2bc45 !important; color: #5d461b !important; }
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard) .lc-task-member-completed {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 2px 0 rgba(190, 61, 0, .22), 0 4px 9px rgba(255, 93, 0, .18) !important;
+}
+html:not(.dark) .lc-dashboard .lc-icon-bubble {
+  background: rgba(255,255,255,.28);
+  box-shadow: inset 0 1px rgba(255,255,255,.35);
+}
+
+html:not(.dark) .lc-dashboard .lc-segmented,
+html:not(.dark) .lc-dashboard .lc-leaderboard-tabs,
+html:not(.dark) .lc-kid-dashboard .lc-kid-filter-rail,
+html:not(.dark) .lc-kid-dashboard .lc-kid-leaderboard-tabs {
+  border-color: #e6ebf0;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(32, 55, 82, .06);
+}
+html:not(.dark) .lc-dashboard .lc-filter-button,
+html:not(.dark) .lc-kid-dashboard .lc-filter-button,
+html:not(.dark) .lc-kid-dashboard .lc-kid-leaderboard-tab {
+  color: #64748b !important;
+}
+html:not(.dark) .lc-dashboard .lc-filter-button[data-state="active"],
+html:not(.dark) .lc-dashboard .lc-filter-button.bg-primary,
+html:not(.dark) .lc-kid-dashboard .lc-filter-button[data-state="active"],
+html:not(.dark) .lc-kid-dashboard .lc-kid-leaderboard-tab[data-state="active"] {
+  color: #fff !important;
+  background: #199ee7 !important;
+  box-shadow: 0 2px 5px rgba(25, 158, 231, .20);
+}
+
+/* Goals, approvals, rewards management pages: white controls, pastel chrome. */
+html:not(.dark) .lc-family-goals-page,
+html:not(.dark) .lc-approvals-page,
+html:not(.dark) .lc-rewards-board-page,
+html:not(.dark) .lc-reward-page {
+  color: #14253b;
+  background: hsl(var(--background));
+}
+html:not(.dark) .lc-family-goals-page h1,
+html:not(.dark) .lc-approvals-page h1,
+html:not(.dark) .lc-rewards-board-page h1 { color: #14253b; }
+html:not(.dark) .lc-family-goals-page > div > div:first-child button,
+html:not(.dark) .lc-approvals-page > div > a button,
+html:not(.dark) .lc-rewards-board-page [data-testid="button-back-dashboard"],
+html:not(.dark) .lc-reward-page [data-testid="button-back-dashboard"] {
+  color: #38516d !important;
+  background: #fff !important;
+  border-color: #e2e9ef !important;
+  box-shadow: 0 2px 8px rgba(32, 55, 82, .07);
+}
+html:not(.dark) .lc-goal-management-card,
+html:not(.dark) .lc-approval-card,
+html:not(.dark) .lc-rewards-board-page .lc-rewards-board-card {
+  border-color: #e6ebf0 !important;
+  background: #fff !important;
+  box-shadow: 0 4px 14px rgba(32, 55, 82, .07) !important;
+}
+html:not(.dark) .lc-goal-management-card h3,
+html:not(.dark) .lc-approvals-page h2,
+html:not(.dark) .lc-rewards-board-page h2 { color: #1b3048; }
+
+/* Dialogs and chat: same dimensions, lighter surfaces only. */
+html:not(.dark) .lc-game-dialog,
+html:not(.dark) .lc-member-pause,
+html:not(.dark) .lc-chat-card {
+  color: #14253b;
+  border-color: #e0e8ef !important;
+  background: #fff !important;
+  box-shadow: 0 14px 36px rgba(32, 55, 82, .14) !important;
+}
+html:not(.dark) .lc-game-dialog .text-muted-foreground,
+html:not(.dark) .lc-member-pause .text-muted-foreground,
+html:not(.dark) .lc-chat-card .text-muted-foreground { color: #697a8d !important; }
+html:not(.dark) .lc-game-dialog input,
+html:not(.dark) .lc-game-dialog textarea,
+html:not(.dark) .lc-game-dialog [role="combobox"],
+html:not(.dark) .lc-member-pause input {
+  color: #14253b;
+  background: #fbfcfd;
+  border-color: #dfe7ee;
+}
+html:not(.dark) .lc-collapsible-chatbar-toggle,
+html:not(.dark) .lc-collapsible-chatbar-link {
+  color: #31506b;
+  background: #fff;
+  border-color: #e1e8ef;
+  box-shadow: 0 4px 12px rgba(32, 55, 82, .10);
+}
+html:not(.dark) .lc-collapsible-chatbar-link:hover { background: #f5fbff; }
+
+/* Complete light-mode treatment for the game UI. Dark mode stays governed by
+   the existing declarations above; every selector in this section is light-only. */
+html:not(.dark) .lc-kid-dashboard {
+  min-height: 100dvh;
+  color: #14253b;
+  background: hsl(var(--background));
+}
+html:not(.dark) .lc-kid-dashboard [data-app-header] {
+  background: rgba(255,255,255,.94);
+  border-bottom: 1px solid #e8edf2;
+  box-shadow: 0 2px 10px rgba(32,55,82,.05);
+}
+html:not(.dark) .lc-kid-dashboard [data-app-header] button {
+  color: #253750 !important;
+  background: #fff !important;
+  border-color: #e4eaf0 !important;
+  box-shadow: 0 2px 8px rgba(32,55,82,.07);
+}
+
+html:not(.dark) .lc-kid-points-card {
+  color: #14253b;
+  border-color: #edf0f3 !important;
+  background: #fff !important;
+  box-shadow: 0 7px 18px rgba(32,55,82,.10);
+}
+html:not(.dark) .lc-kid-points-card > p,
+html:not(.dark) .lc-kid-points-card .text-muted-foreground {
+  color: #697a8d !important;
+}
+html:not(.dark) .lc-kid-points-card > div > div:first-child {
+  border-color: #e8edf2 !important;
+}
+html:not(.dark) .lc-kid-points-card [data-testid="text-total-earned"] {
+  color: #142b45;
+  text-shadow: none;
+}
+html:not(.dark) .lc-kid-points-card [data-testid="text-total-points"] {
+  color: #168bc4;
+  text-shadow: none;
+}
+
+html:not(.dark) .lc-kid-goals > .flex:first-child h2 {
+  color: #fff !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,.8), 0 4px 12px rgba(0,0,0,.6), 0 0 20px rgba(0,0,0,.4) !important;
+}
+html:not(.dark) .lc-kid-goal-card {
+  border-color: #dceaf2 !important;
+  background: #fff !important;
+  box-shadow: 0 5px 15px rgba(32,55,82,.08);
+}
+html:not(.dark) .lc-kid-goal-icon,
+html:not(.dark) .lc-goal-management-icon,
+html:not(.dark) .lc-goal-illustration {
+  border-color: #d7edf5;
+  background: #edf9fc;
+  box-shadow: inset 0 1px rgba(255,255,255,.8), 0 3px 9px rgba(42,120,157,.08);
+}
+html:not(.dark) .lc-kid-goal-card h3,
+html:not(.dark) .lc-goal-card h3 {
+  color: #18324d;
+  text-shadow: none;
+}
+html:not(.dark) .lc-kid-goal-card .border-t { border-color: #e7edf1; }
+html:not(.dark) .lc-kid-goal-card [role="progressbar"],
+html:not(.dark) .lc-goal-management-card [role="progressbar"],
+html:not(.dark) .lc-goal-progress {
+  border-color: #dae5ec;
+  background: #edf3f6 !important;
+  box-shadow: inset 0 1px 3px rgba(32,55,82,.08);
+}
+html:not(.dark) .lc-kid-goal-card .bg-green-500\/10 {
+  color: #238654 !important;
+  border-color: #cdebd9 !important;
+  background: #edf9f1 !important;
+}
+
+html:not(.dark) .lc-kid-filter-rail,
+html:not(.dark) .lc-kid-leaderboard-tabs {
+  border-color: #e5ebf0 !important;
+  background: #fff !important;
+  box-shadow: 0 3px 12px rgba(32,55,82,.07);
+}
+html:not(.dark) .lc-kid-filter-button,
+html:not(.dark) .lc-kid-leaderboard-tab {
+  color: #63748a !important;
+}
+html:not(.dark) .lc-kid-filter-button:hover,
+html:not(.dark) .lc-kid-leaderboard-tab:hover {
+  color: #18324d !important;
+  background: #f0f7fb !important;
+}
+html:not(.dark) .lc-kid-filter-button.bg-primary,
+html:not(.dark) .lc-kid-leaderboard-tab[data-state="active"] {
+  color: #fff !important;
+  border-color: #64c8f0 !important;
+  background: #199ee7 !important;
+  box-shadow: 0 2px 5px rgba(25,158,231,.2) !important;
+}
+
+html:not(.dark) .lc-collapsible-chatbar {
+  color: #253b55 !important;
+  border-color: #dce8ef !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow: 0 5px 15px rgba(32,55,82,.10) !important;
+}
+html:not(.dark) .lc-collapsible-chatbar-toggle {
+  color: #31506b !important;
+  border-color: #e1e8ef !important;
+  background: #f5f9fc !important;
+}
+html:not(.dark) .lc-collapsible-chatbar-toggle:hover,
+html:not(.dark) .lc-collapsible-chatbar-toggle:focus-visible,
+html:not(.dark) .lc-collapsible-chatbar-link:hover,
+html:not(.dark) .lc-collapsible-chatbar-link:focus-visible {
+  color: #18324d !important;
+  background: #eef7fb !important;
+}
+html:not(.dark) .lc-collapsible-chatbar-link,
+html:not(.dark) .lc-collapsible-chatbar [data-testid="button-nav-request-reward"] {
+  color: #253b55 !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none;
+}
+html:not(.dark) .lc-collapsible-chatbar-icon { color: #159bd4 !important; }
+
+html:not(.dark) .lc-profile-trigger {
+  color: #29435f !important;
+  border-color: #e2e9ef !important;
+  background: #fff !important;
+  box-shadow: 0 2px 8px rgba(32,55,82,.08);
+}
+html:not(.dark) .lc-profile-menu {
+  color: #14253b !important;
+  border-color: #dfe7ed !important;
+  background: #fff !important;
+  box-shadow: 0 14px 30px rgba(32,55,82,.14);
+}
+html:not(.dark) .lc-profile-header {
+  border-color: #e1e9ef;
+  background: #f3f8fb;
+}
+html:not(.dark) .lc-profile-header p:first-child { color: #14253b; }
+html:not(.dark) .lc-profile-header p:last-child { color: #6b7d90 !important; }
+html:not(.dark) .lc-profile-menu [data-radix-menu-separator] { background: #e5ebef; }
+html:not(.dark) .lc-profile-menu [role="menuitem"] { color: #29415b; }
+html:not(.dark) .lc-profile-menu [role="menuitem"]:hover,
+html:not(.dark) .lc-profile-menu [role="menuitem"]:focus-visible {
+  border-color: #d9eaf2;
+  background: #f1f8fb;
+}
+html:not(.dark) .lc-profile-menu [role="menuitem"] svg {
+  color: #168dbf;
+  background: #e8f7fb;
+}
+html:not(.dark) .lc-profile-menu [data-testid="menu-item-skins"] svg { color: #7d5fc1; background: #f0ebfb; }
+html:not(.dark) .lc-profile-menu [data-testid="menu-item-achievements"] svg,
+html:not(.dark) .lc-profile-menu [data-testid="menu-item-theme-toggle"] svg { color: #b67c0e; background: #fff5d9; }
+html:not(.dark) .lc-profile-menu [data-testid="menu-item-settings"] svg,
+html:not(.dark) .lc-profile-menu [data-testid="menu-item-switch-member"] svg { color: #27885a; background: #e9f7ef; }
+html:not(.dark) .lc-profile-menu [data-testid="menu-item-logout"] {
+  color: #b44750;
+  border-color: #f2dfe1;
+  background: #fff5f5;
+}
+
+html:not(.dark) .lc-family-goals-page,
+html:not(.dark) .lc-approvals-page,
+html:not(.dark) .lc-rewards-board-page,
+html:not(.dark) .lc-active-rewards-page,
+html:not(.dark) .lc-account-page,
+html:not(.dark) .lc-settings-page,
+html:not(.dark) .lc-chat-page {
+  color: #14253b;
+  background: hsl(var(--background));
+}
+html:not(.dark) .lc-family-goals-page h1,
+html:not(.dark) .lc-approvals-page h1,
+html:not(.dark) .lc-rewards-board-page h1,
+html:not(.dark) .lc-active-rewards-page h1,
+html:not(.dark) .lc-account-header h1,
+html:not(.dark) .lc-settings-header h1 {
+  color: #14253b;
+  text-shadow: none;
+}
+html:not(.dark) .lc-rewards-board-page .lc-parent-rewards-board-title {
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-rewards-board-page .lc-parent-rewards-board-subtitle {
+  color: #5f7185 !important;
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-feature-card,
+html:not(.dark) .lc-goal-management-card,
+html:not(.dark) .lc-approval-card,
+html:not(.dark) .lc-goal-completed,
+html:not(.dark) .lc-account-card,
+html:not(.dark) .lc-settings-sections > * {
+  color: #14253b;
+  border-color: #e3eaf0 !important;
+  background: #fff !important;
+  box-shadow: 0 5px 15px rgba(32,55,82,.08) !important;
+}
+html:not(.dark) .lc-feature-card > div > div:first-child {
+  background: #e9f7fb;
+  box-shadow: inset 0 1px rgba(255,255,255,.8);
+}
+html:not(.dark) .lc-goal-management-card h3,
+html:not(.dark) .lc-account-card [data-slot="card-title"],
+html:not(.dark) .lc-settings-page [data-slot="card-title"],
+html:not(.dark) .lc-settings-page [class*="CardTitle"] {
+  color: #18324d;
+}
+html:not(.dark) .lc-approvals-page h2,
+html:not(.dark) .lc-rewards-board-page h2 { color: #18324d; }
+html:not(.dark) .lc-approvals-page [data-testid^="badge-"] {
+  color: #167ba5;
+  border-color: #cde8f1;
+  background: #eaf7fb;
+}
+html:not(.dark) .lc-approvals-page :is(
+  [data-testid^="checkbox-completion-"],
+  [data-testid="button-select-all"] [role="checkbox"]
+)[data-state="checked"] {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+}
+html:not(.dark) .lc-approvals-page [data-testid="button-bulk-approve"] {
+  color: #fff !important;
+  border-color: transparent !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 2px 5px rgba(255, 93, 0, .22);
+}
+html:not(.dark) .lc-proof-area {
+  border-color: #e0e8ee !important;
+  background: #f8fafb;
+  box-shadow: inset 0 1px 3px rgba(32,55,82,.06);
+}
+html:not(.dark) .lc-bulk-action-bar {
+  border-color: #dfe7ed;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow: 0 -5px 16px rgba(32,55,82,.08);
+}
+html:not(.dark) .lc-active-rewards-page h1 {
+  color: #18324d;
+  text-shadow: none;
+}
+
+html:not(.dark) .lc-account-page .text-muted-foreground,
+html:not(.dark) .lc-settings-page .text-muted-foreground,
+html:not(.dark) .lc-settings-header p {
+  color: #697a8d !important;
+}
+html:not(.dark) .lc-account-back,
+html:not(.dark) .lc-settings-header button {
+  color: #38516d !important;
+  border-color: #e1e8ee !important;
+  background: #fff !important;
+  box-shadow: 0 2px 8px rgba(32,55,82,.07);
+}
+html:not(.dark) .lc-account-section,
+html:not(.dark) .lc-settings-page .bg-card,
+html:not(.dark) .lc-settings-page .bg-card\/50,
+html:not(.dark) .lc-settings-page .bg-muted\/50 {
+  border-color: #e4ebf0 !important;
+  background: #f7fafb !important;
+}
+html:not(.dark) .lc-account-page input,
+html:not(.dark) .lc-settings-page input,
+html:not(.dark) .lc-settings-page [role="combobox"] {
+  color: #14253b !important;
+  border-color: #dce5eb !important;
+  background: #fbfcfd !important;
+  box-shadow: inset 0 1px 3px rgba(32,55,82,.04);
+}
+html:not(.dark) .lc-settings-page .text-primary { color: #168dbf !important; }
+
+html:not(.dark) .lc-task-dialog,
+html:not(.dark) .lc-game-dialog,
+html:not(.dark) .lc-member-switch,
+html:not(.dark) .lc-member-pause {
+  color: #14253b;
+  border-color: #dce6ed !important;
+  background: #fff !important;
+  box-shadow: 0 14px 36px rgba(32,55,82,.14) !important;
+}
+html:not(.dark) .lc-task-dialog-header,
+html:not(.dark) .lc-game-dialog-header {
+  border-color: #e4ebf0;
+}
+html:not(.dark) .lc-task-dialog-header [data-slot="dialog-title"],
+html:not(.dark) .lc-game-dialog-header [data-slot="dialog-title"],
+html:not(.dark) .lc-member-switch [data-slot="dialog-title"] {
+  color: #14253b;
+  text-shadow: none;
+}
+html:not(.dark) .lc-task-dialog-header [data-slot="dialog-description"],
+html:not(.dark) .lc-game-dialog-header [data-slot="dialog-description"],
+html:not(.dark) .lc-task-dialog .text-muted-foreground,
+html:not(.dark) .lc-game-dialog .text-muted-foreground,
+html:not(.dark) .lc-member-switch .text-muted-foreground {
+  color: #697a8d !important;
+}
+html:not(.dark) .lc-task-dialog-form > *,
+html:not(.dark) .lc-game-dialog-form > * { border-color: #e6edf1; }
+html:not(.dark) .lc-task-dialog label,
+html:not(.dark) .lc-task-dialog [data-slot="form-label"],
+html:not(.dark) .lc-game-dialog label,
+html:not(.dark) .lc-game-dialog [data-slot="form-label"] { color: #203a55; }
+html:not(.dark) .lc-task-dialog input,
+html:not(.dark) .lc-task-dialog textarea,
+html:not(.dark) .lc-task-dialog [data-slot="select-trigger"],
+html:not(.dark) .lc-game-dialog input,
+html:not(.dark) .lc-game-dialog textarea,
+html:not(.dark) .lc-game-dialog [data-slot="select-trigger"] {
+  color: #14253b;
+  border-color: #dbe5eb;
+  background: #fbfcfd;
+  box-shadow: inset 0 1px 3px rgba(32,55,82,.04);
+}
+html:not(.dark) .lc-task-dialog [data-slot="card"],
+html:not(.dark) .lc-task-dialog .rounded-lg.border,
+html:not(.dark) .lc-game-dialog .rounded-lg.border,
+html:not(.dark) .lc-goal-dialog .grid button {
+  border-color: #e0e8ee;
+  background: #f5f9fb;
+}
+html:not(.dark) .lc-task-dialog-actions,
+html:not(.dark) .lc-game-dialog-actions {
+  background: linear-gradient(to bottom, transparent, #fff 25%);
+}
+html:not(.dark) .lc-game-dialog-actions button[type="button"]:not([data-testid*="confirm"]):not([data-testid*="submit"]):not([data-testid*="save"]),
+html:not(.dark) .lc-task-dialog-actions button[type="button"] {
+  color: #38516d;
+  border-color: #dbe5eb;
+  background: #f5f9fb;
+  box-shadow: 0 2px 7px rgba(32,55,82,.06);
+}
+html:not(.dark) .lc-game-dialog-actions button[type="submit"],
+html:not(.dark) .lc-game-dialog-actions button[data-testid*="confirm"],
+html:not(.dark) .lc-game-dialog-actions button[data-testid*="submit"],
+html:not(.dark) .lc-game-dialog-actions button[data-testid*="save"],
+html:not(.dark) .lc-task-dialog-actions button[type="submit"] {
+  color: #fff;
+  border-color: #54bff0;
+  background: #199ee7;
+  box-shadow: 0 3px 0 #127db7, 0 7px 12px rgba(25,158,231,.16);
+}
+html:not(.dark) .lc-request-dialog [data-testid="button-submit-request"] {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 3px 0 #c74700, 0 7px 12px rgba(255, 93, 0, .2) !important;
+}
+html:not(.dark) .lc-add-member-dialog [data-testid="button-submit-member"] {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 3px 0 #c74700, 0 7px 12px rgba(255, 93, 0, .2) !important;
+}
+html:not(.dark) .lc-member-switch-option {
+  color: #203a55;
+  border-color: #e0e8ee;
+  background: #f7fafc !important;
+  box-shadow: 0 3px 9px rgba(32,55,82,.07);
+}
+html:not(.dark) .lc-member-switch-option.bg-accent {
+  border-color: #a9ddef !important;
+  background: #eaf7fb !important;
+  box-shadow: 0 3px 10px rgba(35,136,177,.10);
+}
+html:not(.dark) .lc-member-switch-pin {
+  border-color: #e2daf3 !important;
+  background: #f6f2fb !important;
+}
+html:not(.dark) .lc-member-switch-pin input {
+  color: #14253b;
+  border-color: #ddd5ed;
+  background: #fff;
+}
+html:not(.dark) .lc-member-switch-actions button:last-child {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 4px 0 #c74700, 0 8px 15px rgba(255, 93, 0, .22) !important;
+}
+
+html:not(.dark) .lc-chat-page { --lc-editor-text: #14253b; --lc-editor-line: #e0e8ee; }
+html:not(.dark) .lc-chat-card [data-slot="card-title"] { color: #14253b; }
+html:not(.dark) .lc-chat-card [data-testid^="chat-message-"] > div:nth-child(2) {
+  border-color: #e1e9ee;
+  background: #f5f9fb;
+}
+html:not(.dark) .lc-chat-composer {
+  border-color: #dfe8ee !important;
+  background: rgba(255,255,255,.96);
+}
+html:not(.dark) .lc-chat-composer input {
+  color: #14253b;
+  border-color: #dbe5eb;
+  background: #f8fafb;
+}
+
+/* Light content surfaces. Task status colors are intentionally isolated:
+   only cards explicitly marked as open receive the white treatment. */
+html:not(.dark) .lc-dashboard .lc-task-card-open,
+html:not(.dark) .lc-dashboard [data-task-visual-state="open"],
+html:not(.dark) .lc-kid-dashboard [data-task-visual-state="open"] {
+  color: #18324d !important;
+  border-color: #e0e8ee !important;
+  background: #fff !important;
+  box-shadow: 0 5px 15px rgba(32,55,82,.08), inset 0 1px rgba(255,255,255,.8) !important;
+}
+html:not(.dark) .lc-kid-dashboard [data-task-visual-state="open"] .text-white {
+  color: #18324d !important;
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-kid-dashboard [data-task-visual-state="open"] .text-white\/70 {
+  color: #6c7e91 !important;
+}
+html:not(.dark) .lc-kid-dashboard [data-task-visual-state="open"] .bg-white\/10 {
+  background: #edf7fb !important;
+}
+html:not(.dark) .lc-kid-dashboard [data-testid^="badge-multi-completion-"] {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 2px 5px rgba(255, 93, 0, .22);
+}
+html:not(.dark) .lc-kid-dashboard .lc-multi-task-member-badge {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 2px 5px rgba(255, 93, 0, .22);
+}
+html:not(.dark) .lc-dashboard [data-task-visual-state="submitted"],
+html:not(.dark) .lc-kid-dashboard [data-task-visual-state="submitted"] {
+  color: #263451 !important;
+  border-color: #ead9b5 !important;
+  background: linear-gradient(145deg, rgba(255,253,248,.94), rgba(255,245,223,.94)) !important;
+  box-shadow: 0 6px 16px rgba(123,87,34,.09), inset 0 1px rgba(255,255,255,.9) !important;
+}
+html:not(.dark) .lc-dashboard [data-task-visual-state="submitted"] .text-white,
+html:not(.dark) .lc-kid-dashboard [data-task-visual-state="submitted"] .text-white {
+  color: #263451 !important;
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-dashboard [data-task-visual-state="submitted"] .text-white\/70,
+html:not(.dark) .lc-kid-dashboard [data-task-visual-state="submitted"] .text-white\/70 {
+  color: #756b5b !important;
+}
+html:not(.dark) .lc-dashboard [data-task-visual-state="submitted"] .bg-white\/10,
+html:not(.dark) .lc-kid-dashboard [data-task-visual-state="submitted"] .bg-white\/10 {
+  background: rgba(255,240,200,.76) !important;
+}
+html:not(.dark) .lc-dashboard [data-task-visual-state="approved"] {
+  color: #18324d !important;
+  border-color: #dce6ec !important;
+  background: #fff !important;
+  box-shadow: 0 5px 15px rgba(32,55,82,.08), inset 0 1px rgba(255,255,255,.82) !important;
+}
+html:not(.dark) .lc-dashboard [data-task-visual-state="approved"] :is(h3, [data-testid^="text-task-title-"]) {
+  color: #18324d !important;
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-dashboard [data-task-visual-state="approved"] :is(.text-muted-foreground, .text-white\/70) {
+  color: #6c7e91 !important;
+}
+html:not(.dark) .lc-dashboard [data-task-visual-state="approved"] :is(.bg-muted, .bg-secondary, .bg-white\/10) {
+  color: #36516d !important;
+  border-color: #dbe8ee !important;
+  background: #eef5f8 !important;
+}
+
+html:not(.dark) .lc-leaderboard-card {
+  color: #18324d;
+  border-color: #e1e8ee !important;
+  background: #fff !important;
+  box-shadow: 0 6px 17px rgba(32,55,82,.09), inset 0 1px rgba(255,255,255,.8);
+}
+html:not(.dark) .lc-leaderboard-heading h2,
+html:not(.dark) .lc-podium-name,
+html:not(.dark) .lc-rank-name {
+  color: #18324d;
+}
+html:not(.dark) .lc-leaderboard-heading p { color: #6b7c8f; }
+html:not(.dark) .lc-heading-kicker { color: #6f5ca5; }
+html:not(.dark) .lc-rank-row {
+  border-color: #e5ebef;
+  background: #f8fafb;
+  box-shadow: 0 2px 7px rgba(32,55,82,.05);
+}
+html:not(.dark) .lc-rank-points {
+  color: #a66c00;
+  background: #fff5d8;
+}
+html:not(.dark) .lc-prize {
+  color: #805d14;
+  border-color: #f0dfaa;
+  background: #fff8e6;
+}
+
+html:not(.dark) .lc-goal-card {
+  color: #18324d;
+  border-color: #dce9ef !important;
+  background: #fff !important;
+  box-shadow: 0 5px 15px rgba(32,55,82,.08), inset 0 1px rgba(255,255,255,.8);
+}
+html:not(.dark) .lc-goals-widget > div:first-child { color: #18324d; }
+html:not(.dark) .lc-goal-card .bg-muted\/50 {
+  color: #38516d;
+  border-color: #e0e9ee;
+  background: #f4f8fa;
+}
+html:not(.dark) .lc-dashboard .lc-goal-card .lc-family-goal-accent-badge {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 2px 0 rgba(190, 61, 0, .20), 0 4px 8px rgba(255, 93, 0, .16);
+}
+
+html:not(.dark) .lc-pinboard {
+  color: #18324d;
+  border-color: #e1e8ee !important;
+  background: #fff !important;
+  box-shadow: 0 6px 17px rgba(32,55,82,.09), inset 0 1px rgba(255,255,255,.8);
+}
+html:not(.dark) .lc-pinboard > div:first-child,
+html:not(.dark) .lc-pinboard > div:last-child {
+  color: #18324d;
+  border-color: #e8edf1 !important;
+  background: #fff !important;
+}
+html:not(.dark) .lc-pinboard-add {
+  color: #167ea9 !important;
+  border-color: #d7ebf2 !important;
+  background: #ebf8fb !important;
+  box-shadow: 0 2px 7px rgba(32,105,136,.08);
+}
+html:not(.dark) .lc-pin-composer {
+  color: #18324d;
+  border-color: #dce9ef !important;
+  background: #f5fafc !important;
+  box-shadow: 0 3px 9px rgba(32,55,82,.05);
+}
+html:not(.dark) .lc-pin-note .lc-pin-action,
+html:not(.dark) .lc-pin-composer .lc-pin-action {
+  background: rgba(255,255,255,.48);
+}
+
+/* Bonus rewards: retain the child's existing dashboard cards as the visual
+   reference. Only the parent dashboard and the related full pages are restyled. */
+html:not(.dark) .lc-dashboard .lc-achievement-card {
+  color: #263451;
+  border-color: #dfd3f2 !important;
+  background: linear-gradient(145deg, #f8f4fd, #f1eafd) !important;
+  box-shadow: 0 6px 16px rgba(87,62,129,.10), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-dashboard .lc-achievement-icon {
+  border-color: #d8c5ee;
+  background: linear-gradient(145deg, #eadcf8, #dfcef4) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.8), 0 3px 8px rgba(91,57,137,.10);
+}
+html:not(.dark) .lc-dashboard .lc-achievement-card h3 { color: #263451; }
+html:not(.dark) .lc-dashboard .lc-achievement-card p { color: #7655a4 !important; }
+html:not(.dark) .lc-dashboard .lc-achievement-card [data-testid^="button-info-"] {
+  color: #7655a4 !important;
+  border-color: #dacbed;
+  background: #eee4f9;
+}
+
+html:not(.dark) .lc-achievements-page {
+  color: #263451;
+  background: hsl(var(--background));
+}
+html:not(.dark) .lc-achievements-page > div > div:first-child button {
+  color: #43516b;
+  border: 1px solid #e2d9ee;
+  background: #fff !important;
+  box-shadow: 0 2px 8px rgba(74,52,108,.08);
+}
+html:not(.dark) .lc-achievements-page h1,
+html:not(.dark) .lc-achievements-hero h2 {
+  color: #263451;
+  text-shadow: none;
+}
+html:not(.dark) .lc-achievements-hero {
+  color: #263451;
+  border-color: #dfd2f2 !important;
+  background: linear-gradient(145deg, #f7f2fc, #eee5fa) !important;
+  box-shadow: 0 6px 17px rgba(84,57,126,.10), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-achievements-hero .text-muted-foreground { color: #755f91 !important; }
+html:not(.dark) .lc-achievement-page-card {
+  color: #263451;
+  border-color: #dfd3f1 !important;
+  background: linear-gradient(145deg, #fbf8fe, #f0e8fa) !important;
+  box-shadow: 0 6px 16px rgba(84,57,126,.09), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-achievement-page-card h3,
+html:not(.dark) .lc-achievement-page-card .text-white { color: #263451 !important; }
+html:not(.dark) .lc-achievement-page-card .text-violet-300 { color: #7655a4 !important; }
+html:not(.dark) .lc-achievement-page-card .from-white\/5 { --tw-gradient-from: rgba(255,255,255,.45) var(--tw-gradient-from-position); }
+html:not(.dark) .lc-achievement-info {
+  color: #7555a3 !important;
+  border-color: #dacbed;
+  background: #eee4f9;
+}
+
+html:not(.dark) .lc-bonus-settings-page {
+  color: #263451;
+  background: hsl(var(--background));
+}
+html:not(.dark) .lc-bonus-settings-header h1 {
+  color: #263451;
+  text-shadow: none !important;
+  filter: none !important;
+}
+html:not(.dark) .lc-bonus-settings-header h1 > svg {
+  color: #8061b2 !important;
+  filter: drop-shadow(0 3px 5px rgba(109,76,157,.16));
+}
+html:not(.dark) .lc-bonus-settings-subtitle {
+  text-shadow: none !important;
+  filter: none !important;
+}
+html:not(.dark) .lc-bonus-settings-header button {
+  color: #43516b !important;
+  border-color: #e2d9ee !important;
+  background: #fff !important;
+  box-shadow: 0 2px 8px rgba(74,52,108,.08);
+}
+html:not(.dark) .lc-bonus-settings-page .text-muted-foreground { color: #726482 !important; }
+html:not(.dark) .lc-bonus-settings-card,
+html:not(.dark) .lc-bonus-history-card,
+html:not(.dark) .lc-bonus-info-card,
+html:not(.dark) .lc-bonus-settings-page > .max-w-md {
+  color: #263451;
+  border-color: #e1d6f0 !important;
+  background: linear-gradient(145deg, #fff, #f7f2fc) !important;
+  box-shadow: 0 6px 16px rgba(84,57,126,.09), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-bonus-settings-card::before,
+html:not(.dark) .lc-bonus-info-card::before {
+  background: linear-gradient(90deg, #bda3de, #dac8ee, #bda3de);
+}
+html:not(.dark) .lc-bonus-settings-page [data-slot="card-title"] { color: #263451; }
+html:not(.dark) .lc-bonus-settings-page input {
+  color: #263451 !important;
+  border-color: #ded4eb !important;
+  background: #fff !important;
+  box-shadow: inset 0 1px 3px rgba(60,43,88,.05);
+}
+html:not(.dark) .lc-bonus-settings-page input::placeholder { color: #9387a3; }
+html:not(.dark) .lc-bonus-settings-tabs > [role="tablist"] {
+  border-color: #e1d7ee;
+  background: #f1eafa;
+  box-shadow: inset 0 1px 3px rgba(69,47,102,.06);
+}
+html:not(.dark) .lc-bonus-settings-tabs [role="tab"] { color: #716180; }
+html:not(.dark) .lc-bonus-settings-tabs [role="tab"][data-state="active"] {
+  color: #fff;
+  background: #8061b2;
+  box-shadow: 0 2px 6px rgba(93,64,137,.22);
+}
+html:not(.dark) .lc-bonus-settings-card [role="radio"] {
+  border-color: #a98dca;
+  background: #fff;
+}
+html:not(.dark) .lc-bonus-settings-page button.bg-primary {
+  border-color: #bca5d8 !important;
+  background: linear-gradient(135deg, #73549f, #9876c6) !important;
+  box-shadow: 0 4px 0 #583e7d, 0 8px 15px rgba(91,61,132,.16);
+}
+html:not(.dark) .lc-bonus-settings-card [role="switch"][data-state="checked"] {
+  background: linear-gradient(135deg, #73549f, #9876c6) !important;
+  box-shadow: 0 0 10px rgba(116,82,163,.2);
+}
+html:not(.dark) .lc-bonus-settings-card .text-primary,
+html:not(.dark) .lc-bonus-history-card .text-primary { color: #7655a4 !important; }
+
+/* Active rewards: warm light surfaces remain visually distinct from bonus
+   rewards' purple treatment on dashboards and the complete list page. */
+html:not(.dark) .lc-dashboard .lc-reward-card,
+html:not(.dark) .lc-kid-dashboard .lc-reward-card {
+  color: #263451;
+  border-color: #ead9b5 !important;
+  background: linear-gradient(145deg, #fffdf8, #fff5df) !important;
+  box-shadow: 0 6px 16px rgba(123,87,34,.09), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-dashboard .lc-reward-card .lc-reward-illustration,
+html:not(.dark) .lc-kid-dashboard .lc-reward-card .lc-reward-illustration {
+  border-color: #ecd49f;
+  background: radial-gradient(circle, #fff3cb, #f9e4b7) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.85), 0 3px 8px rgba(126,86,26,.09);
+}
+html:not(.dark) .lc-dashboard .lc-reward-card h3,
+html:not(.dark) .lc-kid-dashboard .lc-reward-card h3,
+html:not(.dark) .lc-rewards-board-page .lc-reward-card h3 {
+  color: #263451 !important;
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-rewards-board-page .lc-reward-card .text-muted-foreground {
+  color: #756b5b !important;
+}
+html:not(.dark) .lc-dashboard .lc-reward-card [data-testid^="badge-reward-points"],
+html:not(.dark) .lc-kid-dashboard .lc-reward-card [data-testid^="badge-reward-points"] {
+  color: #8a6417;
+  border-color: #ead298;
+  background: #fff0c8;
+}
+html:not(.dark) .lc-dashboard .lc-reward-progress,
+html:not(.dark) .lc-kid-dashboard .lc-reward-progress {
+  border-color: #ead39f;
+  background: #f5ead4 !important;
+  box-shadow: inset 0 2px 4px rgba(103,71,24,.10);
+}
+html:not(.dark) .lc-dashboard .lc-redeem-button:disabled,
+html:not(.dark) .lc-kid-dashboard .lc-redeem-button:disabled,
+html:not(.dark) .lc-rewards-board-page .lc-redeem-button:disabled {
+  color: #8a8172 !important;
+  background: #eee8dd !important;
+  box-shadow: 0 3px 0 #d9d0c1;
+}
+
+html:not(.dark) .lc-active-rewards-page {
+  color: #263451;
+  background: hsl(var(--background));
+}
+html:not(.dark) .lc-active-rewards-page h1 {
+  color: #263451;
+  text-shadow: none;
+}
+html:not(.dark) .lc-active-rewards-page [data-testid="button-back-active-rewards"] {
+  color: #43516b;
+  border-color: #eadfca;
+  background: #fff !important;
+  box-shadow: 0 2px 8px rgba(98,70,27,.08);
+}
+html:not(.dark) .lc-reward-page-card {
+  color: #263451;
+  border-color: #ead9b5 !important;
+  background: linear-gradient(145deg, #fffefb, #fff5df) !important;
+  box-shadow: 0 6px 16px rgba(123,87,34,.09), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-reward-page-card h3 { color: #263451; }
+html:not(.dark) .lc-reward-page-card .text-muted-foreground { color: #756b5b !important; }
+html:not(.dark) .lc-reward-page-illustration {
+  border-color: #ecd49f;
+  background: radial-gradient(circle, #fff3cb, #f9e4b7) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.85), 0 3px 8px rgba(126,86,26,.09);
+}
+html:not(.dark) .lc-reward-page-card [data-testid^="badge-reward-points"] {
+  color: #8a6417;
+  border-color: #ead298;
+  background: #fff0c8;
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-progress {
+  border-color: #ead39f;
+  background: #f5ead4;
+  box-shadow: inset 0 2px 4px rgba(103,71,24,.10);
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-button:disabled {
+  color: #8a8172 !important;
+  border-color: #ddd3c2 !important;
+  background: #eee8dd !important;
+  box-shadow: 0 3px 0 #d9d0c1;
+}
+
+/* Child dashboard reward cards use their own markup. In Light Mode they mirror
+   the parent dashboard's purple bonus and warm cream active-reward palettes. */
+html:not(.dark) .lc-kid-dashboard .lc-kid-achievement-card {
+  color: #263451;
+  border-color: #dfd3f2 !important;
+  background: linear-gradient(145deg, #f8f4fd, #f1eafd) !important;
+  box-shadow: 0 6px 16px rgba(87,62,129,.10), inset 0 1px rgba(255,255,255,.9) !important;
+}
+html:not(.dark) .lc-kid-dashboard #section-bonus-rewards > div:first-child h2,
+html:not(.dark) .lc-kid-dashboard #section-rewards > div:first-child h2 {
+  color: #fff !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,.8), 0 4px 12px rgba(0,0,0,.6), 0 0 20px rgba(0,0,0,.4) !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-achievement-card h3,
+html:not(.dark) .lc-kid-dashboard .lc-kid-achievement-card .text-white {
+  color: #263451 !important;
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-achievement-card .text-violet-300 { color: #7655a4 !important; }
+html:not(.dark) .lc-kid-dashboard .lc-kid-achievement-card [data-testid^="button-info-"] {
+  color: #7655a4 !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-achievement-icon {
+  color: #7655a4;
+  border-color: #d8c5ee !important;
+  background: linear-gradient(145deg, #eadcf8, #dfcef4) !important;
+}
+
+html:not(.dark) .lc-kid-dashboard .lc-kid-reward-card {
+  color: #263451;
+  border-color: #ead9b5 !important;
+  background: linear-gradient(145deg, #fffdf8, #fff5df) !important;
+  box-shadow: 0 6px 16px rgba(123,87,34,.09), inset 0 1px rgba(255,255,255,.9) !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-reward-card h3,
+html:not(.dark) .lc-kid-dashboard .lc-kid-reward-card .text-white {
+  color: #263451 !important;
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-reward-card .text-white\/50 { color: #756b5b !important; }
+html:not(.dark) .lc-kid-dashboard .lc-kid-reward-card [data-testid^="button-info-"] { color: #8a713e !important; }
+html:not(.dark) .lc-kid-dashboard .lc-kid-reward-icon {
+  border-color: #ecd49f !important;
+  background: radial-gradient(circle, #fff3cb, #f9e4b7) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.85), 0 3px 8px rgba(126,86,26,.09);
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-reward-progress {
+  background: #f0e3cc !important;
+  box-shadow: inset 0 2px 4px rgba(103,71,24,.10);
+}
+
+html:not(.dark) .lc-kid-dashboard .lc-kid-joinable-reward-card {
+  border-color: #b9d9ef !important;
+  background: linear-gradient(155deg, rgba(252,254,255,.98), rgba(232,244,253,.97)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.96), 0 7px 18px rgba(38,111,174,.12) !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-joinable-reward-icon {
+  border-color: #bddcf1 !important;
+  background: linear-gradient(145deg, #f5fbff, #dceefb) !important;
+  box-shadow: 0 0 0 1px rgba(38,116,184,.10), 0 5px 14px rgba(38,111,174,.10) !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-joinable-reward-title {
+  color: #263451 !important;
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-joinable-reward-chip {
+  border-color: #b9d8ed !important;
+  background: #eaf5fc !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-joinable-reward-chip-text {
+  color: #2b6f9f !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-joinable-reward-label {
+  color: #6a8094 !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-joinable-reward-person {
+  border: 1px solid #d3e5f1;
+  background: rgba(255,255,255,.78) !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-kid-joinable-reward-person-name {
+  color: #45627b !important;
+}
+
+/* Skin gallery Light Mode. Layout and interaction remain owned by the page. */
+html:not(.dark) .lc-skins-gallery {
+  --lc-ink: #18324d;
+  --lc-muted: #6b7c8f;
+  color: var(--lc-ink);
+  background:
+    radial-gradient(circle at 12% 5%, rgba(79,178,221,.10), transparent 28rem),
+    radial-gradient(circle at 88% 24%, rgba(139,97,194,.09), transparent 25rem),
+    hsl(var(--background));
+}
+html:not(.dark) .lc-skins-gallery::before {
+  opacity: .22;
+  background-image: radial-gradient(rgba(72,107,145,.18) .7px, transparent .7px);
+}
+html:not(.dark) .lc-skins-gallery .lc-skin-back {
+  color: #29435f;
+  border-color: #dfe7ed;
+  background: #fff;
+  box-shadow: 0 3px 9px rgba(32,55,82,.08), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-skins-gallery .lc-points-chip {
+  color: #805d14;
+  border-color: #efd895;
+  background: linear-gradient(145deg, #fff8df, #ffe9a9);
+  box-shadow: 0 3px 8px rgba(120,83,22,.10);
+}
+html:not(.dark) .lc-skins-gallery .lc-stars-chip {
+  color: #805d14;
+  border-color: #efd895 !important;
+  background: #fff7dc !important;
+  box-shadow: 0 3px 8px rgba(120,83,22,.10);
+}
+html:not(.dark) .lc-skins-gallery .lc-cards-chip {
+  color: #674694;
+  border-color: #d9c7ed;
+  background: #eee5f9 !important;
+  box-shadow: 0 3px 8px rgba(84,57,126,.10);
+}
+html:not(.dark) .lc-skins-gallery .lc-skins-tagline {
+  color: #53677d;
+  border-color: #dfe7ed;
+  background: rgba(255,255,255,.88);
+  box-shadow: 0 4px 12px rgba(32,55,82,.07);
+}
+html:not(.dark) .lc-skins-gallery .lc-limit-banner {
+  color: #745818;
+  border-color: #ead18d;
+  background: rgba(255,248,221,.96);
+  box-shadow: 0 5px 14px rgba(110,76,21,.09);
+}
+html:not(.dark) .lc-skins-gallery .lc-limit-banner p { color: #745818; }
+html:not(.dark) .lc-skins-gallery .lc-limit-banner button {
+  color: #745818;
+  border-color: #dfc374;
+  background: #fff5d1;
+}
+html:not(.dark) .lc-skins-gallery .lc-preview-card,
+html:not(.dark) .lc-skins-gallery .lc-legacy-card,
+html:not(.dark) .lc-skins-gallery .lc-regular-card {
+  color: #18324d;
+  border-color: #dfe7ed;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 8px 21px rgba(32,55,82,.10), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-skins-gallery .lc-preview-card { border-color: #cde5ee; }
+html:not(.dark) .lc-skins-gallery .lc-preview-art {
+  border-color: #d7e6ed;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(48,183,218,.12), transparent 48%),
+    linear-gradient(145deg, #eef8fb, #f8fbfc) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.9), inset 0 -18px 30px rgba(66,121,147,.06);
+}
+html:not(.dark) .lc-skins-gallery .lc-preview-info h2 {
+  color: #18324d;
+  text-shadow: none;
+}
+html:not(.dark) .lc-skins-gallery .lc-preview-actions button[data-variant="secondary"] {
+  color: #70571d;
+  border-color: #e7d39c;
+  background: linear-gradient(135deg, #fff5d5, #f4dfaa);
+}
+html:not(.dark) .lc-skins-gallery .lc-preview-actions button[data-variant="ghost"] {
+  color: #38516d;
+  background: #f3f8fa;
+}
+html:not(.dark) .lc-skins-gallery .lc-unlock-progress { border-color: #e1e8ed; }
+html:not(.dark) .lc-skins-gallery .lc-legacy-card {
+  border-color: #ddd0ef;
+  background: linear-gradient(145deg, #fbf8fe, #f0e8fa);
+}
+html:not(.dark) .lc-skins-gallery .lc-legacy-card h3 { color: #674694; }
+html:not(.dark) .lc-skins-gallery .lc-regular-card { background: rgba(255,255,255,.94); }
+html:not(.dark) .lc-skins-gallery .lc-mini-skin {
+  background: #f3f7f9;
+  box-shadow: 0 3px 8px rgba(32,55,82,.08), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-skins-gallery .lc-mini-skin:hover {
+  filter: brightness(1.02);
+  box-shadow: 0 6px 13px rgba(32,55,82,.12), 0 0 0 1px rgba(25,158,195,.18);
+}
+html:not(.dark) .lc-skins-gallery .lc-mini-skin.border-primary {
+  border-color: #159bc5;
+  box-shadow: 0 0 0 3px rgba(25,155,197,.16), 0 7px 15px rgba(32,55,82,.12);
+}
+
+/* Pricing tiers in Light Mode: bright premium surfaces with distinct popular
+   and FamilyPro treatments. Purchase logic and card layout remain untouched. */
+html:not(.dark) .lc-pricing-page {
+  color: #18324d;
+  background:
+    radial-gradient(circle at 10% 5%, rgba(48,176,218,.10), transparent 27rem),
+    radial-gradient(circle at 90% 20%, rgba(139,97,194,.09), transparent 28rem),
+    hsl(var(--background));
+}
+html:not(.dark) .lc-pricing-header {
+  border-color: #e0e8ee;
+  background: rgba(255,255,255,.94) !important;
+  box-shadow: 0 2px 10px rgba(32,55,82,.06);
+}
+html:not(.dark) .lc-pricing-header button {
+  color: #29435f !important;
+  border-color: #dfe7ed !important;
+  background: #fff !important;
+  box-shadow: 0 3px 8px rgba(32,55,82,.08);
+}
+html:not(.dark) .lc-pricing-shell > h1 {
+  color: #18324d;
+  text-shadow: none;
+}
+html:not(.dark) .lc-pricing-page .text-muted-foreground { color: #697a8d !important; }
+html:not(.dark) .lc-pricing-cycle {
+  border-color: #ddd2ec;
+  background: #f1eafa !important;
+  box-shadow: inset 0 1px 3px rgba(69,47,102,.07);
+}
+html:not(.dark) .lc-pricing-cycle button { color: #716180 !important; }
+html:not(.dark) .lc-pricing-cycle button.bg-background {
+  color: #fff !important;
+  background: linear-gradient(135deg, #73549f, #9876c6) !important;
+  box-shadow: 0 2px 6px rgba(93,64,137,.22);
+}
+html:not(.dark) .lc-pricing-page [data-testid="badge-yearly-discount"] {
+  border-color: #efd28d;
+  box-shadow: 0 4px 11px rgba(157,104,19,.15);
+}
+html:not(.dark) .lc-pricing-card {
+  color: #18324d;
+  border-color: #dfe7ed !important;
+  background: linear-gradient(150deg, #fff, #f7fafb) !important;
+  box-shadow: 0 8px 22px rgba(32,55,82,.10), inset 0 1px rgba(255,255,255,.9) !important;
+}
+html:not(.dark) .lc-pricing-card::before {
+  background: linear-gradient(90deg, transparent, #8bd2e6, transparent);
+}
+html:not(.dark) .lc-pricing-card-popular {
+  border-color: #cbb6e5 !important;
+  background: linear-gradient(150deg, #fdfbff, #f0e8fa) !important;
+  box-shadow: 0 10px 25px rgba(84,57,126,.13), inset 0 1px rgba(255,255,255,.92) !important;
+}
+html:not(.dark) .lc-pricing-card-popular::before {
+  background: linear-gradient(90deg, transparent, #a77fd3, transparent);
+}
+html:not(.dark) .lc-pricing-card[data-testid="card-tier-family_hero"] {
+  border-color: #e8ce87 !important;
+  background: linear-gradient(150deg, #fffef9, #fff4d4) !important;
+  box-shadow: 0 10px 25px rgba(126,87,24,.12), inset 0 1px rgba(255,255,255,.92) !important;
+}
+html:not(.dark) .lc-pricing-card[data-testid="card-tier-family_hero"]::before {
+  background: linear-gradient(90deg, transparent, #dfb642, transparent);
+}
+html:not(.dark) .lc-pricing-card [data-testid="badge-most-popular"] {
+  color: #fff;
+  border-color: #cdb6e5;
+  background: linear-gradient(135deg, #73549f, #9876c6);
+  box-shadow: 0 3px 7px rgba(88,57,129,.22);
+}
+html:not(.dark) .lc-pricing-icon {
+  color: #168dbf;
+  border-color: #c9e5ee;
+  background: linear-gradient(145deg, #eaf7fb, #dff1f6) !important;
+  box-shadow: 0 4px 10px rgba(35,116,148,.10), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-pricing-card-popular .lc-pricing-icon {
+  color: #fff;
+  border-color: #cbb5e3;
+  background: linear-gradient(145deg, #9876c6, #73549f) !important;
+  box-shadow: 0 4px 10px rgba(88,57,129,.18), inset 0 1px rgba(255,255,255,.25);
+}
+html:not(.dark) .lc-pricing-card[data-testid="card-tier-family_hero"] .lc-pricing-icon {
+  color: #805d14;
+  border-color: #ead18b;
+  background: linear-gradient(145deg, #fff4c9, #f4d884) !important;
+  box-shadow: 0 4px 10px rgba(126,87,24,.12), inset 0 1px rgba(255,255,255,.8);
+}
+html:not(.dark) .lc-pricing-card h2,
+html:not(.dark) .lc-pricing-card .text-4xl { color: #18324d; }
+html:not(.dark) .lc-pricing-card li { color: #38516d; }
+html:not(.dark) .lc-pricing-card li .text-green-600 { color: #27885a !important; }
+html:not(.dark) .lc-pricing-card button:not([data-testid^="button-cancel"]) {
+  color: #fff;
+  border-color: #188fc1;
+  background: linear-gradient(135deg, #168dbf, #21a7d7);
+  box-shadow: 0 4px 0 #0c6f98, 0 7px 12px rgba(20,135,181,.14);
+}
+html:not(.dark) .lc-pricing-card button:disabled {
+  color: #788696;
+  border-color: #d9e0e5;
+  background: #edf1f3;
+  box-shadow: 0 3px 0 #d8dfe3;
+}
+html:not(.dark) .lc-pricing-card-popular button:not([data-testid^="button-cancel"]):not(:disabled) {
+  border-color: #8061b2;
+  background: linear-gradient(135deg, #73549f, #9876c6);
+  box-shadow: 0 4px 0 #583e7d, 0 8px 15px rgba(91,61,132,.16);
+}
+html:not(.dark) .lc-pricing-card[data-testid="card-tier-family_hero"] button:not([data-testid^="button-cancel"]):not(:disabled) {
+  color: #fff;
+  border-color: #b98518;
+  background: linear-gradient(135deg, #b98518, #d8a82f);
+  box-shadow: 0 4px 0 #8b6210, 0 8px 15px rgba(139,98,16,.16);
+}
+html:not(.dark) .lc-pricing-card [data-testid^="button-cancel"] {
+  color: #b44750 !important;
+  border-color: #e9cdd1;
+  background: #fff4f5;
+  box-shadow: none;
+}
+html:not(.dark) .lc-pricing-page [data-testid="button-restore-purchases"] { color: #168dbf !important; }
+html:not(.dark) .lc-pricing-shell > .mt-16 h2 { color: #18324d; }
+
+/* Purchased rewards: retain the collectible gold identity without the nearly
+   black treasure card used by Dark Mode. */
+html:not(.dark) :is(.lc-my-rewards-page, .lc-kid-dashboard) .lc-purchased-reward-card {
+  background: linear-gradient(155deg, #ffffff 0%, #fffaf0 100%) !important;
+  border-color: #ead99d !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.95),
+    0 4px 0 rgba(219,178,55,.11),
+    0 10px 22px rgba(85,67,34,.09) !important;
+}
+html:not(.dark) :is(.lc-my-rewards-page, .lc-kid-dashboard) .lc-purchased-reward-icon {
+  background: linear-gradient(145deg, #fffdf4, #fff2c7) !important;
+  box-shadow: 0 0 0 1px rgba(205,158,31,.16), 0 6px 15px rgba(188,139,21,.10) !important;
+}
+html:not(.dark) :is(.lc-my-rewards-page, .lc-kid-dashboard) .lc-purchased-reward-title {
+  color: #263451 !important;
+  text-shadow: none !important;
+}
+html:not(.dark) :is(.lc-my-rewards-page, .lc-kid-dashboard) .lc-purchased-reward-points {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 2px 5px rgba(255, 93, 0, .22);
+}
+html:not(.dark) :is(.lc-my-rewards-page, .lc-kid-dashboard) .lc-purchased-reward-date {
+  color: #657184 !important;
+  border-color: #e0e5e9 !important;
+  background: rgba(255,255,255,.72) !important;
+}
+html:not(.dark) :is(.lc-my-rewards-page, .lc-kid-dashboard) .lc-purchased-reward-status {
+  color: #756b5b !important;
+  border-color: #e7dfcd !important;
+  background: #fffdf8 !important;
+}
+html:not(.dark) :is(.lc-my-rewards-page, .lc-kid-dashboard) .lc-purchased-reward-status-completed {
+  color: #27885a !important;
+  border-color: #a8d8bb !important;
+  background: #e9f7ee !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-purchased-reward-cancel-share {
+  color: #b54747 !important;
+  border-color: #e8b8b8 !important;
+  background: #fff4f4 !important;
+  box-shadow: 0 3px 0 #efd2d2 !important;
+}
+html:not(.dark) .lc-kid-dashboard .lc-purchased-reward-cancel-share:hover {
+  color: #963b3b !important;
+  border-color: #dda0a0 !important;
+  background: #ffeaea !important;
+}
+
+/* An equipped skin background belongs to the member, not to the color theme.
+   Keep page roots transparent while it is enabled; BackgroundWrapper supplies
+   the regular theme fallback only when the Skin page toggle hides it. */
+html:not(.dark) [data-skin-background="visible"] :is(
+  .lc-dashboard,
+  .lc-kid-dashboard,
+  .lc-family-goals-page,
+  .lc-approvals-page,
+  .lc-rewards-board-page,
+  .lc-reward-page,
+  .lc-active-rewards-page,
+  .lc-achievements-page,
+  .lc-bonus-settings-page,
+  .lc-account-page,
+  .lc-settings-page,
+  .lc-chat-page,
+  .lc-my-rewards-page,
+  .lc-skins-gallery,
+  .lc-pricing-page
+) {
+  background: transparent !important;
+}
+
+/* Active rewards "view all": match the child dashboard's green ready state
+   and orange progress state instead of applying one color to every card. */
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="ready"] {
+  border-color: #9bd7ad !important;
+  background: linear-gradient(145deg, rgba(247,255,249,.96), rgba(222,246,230,.94)) !important;
+  box-shadow: 0 6px 16px rgba(39,136,90,.11), inset 0 1px rgba(255,255,255,.92);
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] {
+  border-color: #efc488 !important;
+  background: linear-gradient(145deg, rgba(255,253,247,.96), rgba(255,235,207,.94)) !important;
+  box-shadow: 0 6px 16px rgba(178,105,24,.11), inset 0 1px rgba(255,255,255,.92);
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="ready"] .lc-reward-page-illustration {
+  border-color: #a7dcb7;
+  background: radial-gradient(circle, #eefaf2, #d4efdd) !important;
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-page-illustration {
+  border-color: #efca95;
+  background: radial-gradient(circle, #fff8ec, #f8dfba) !important;
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="ready"] [data-testid^="badge-reward-points"] {
+  color: #24794d;
+  border-color: #a6d9b6;
+  background: #e7f7ec;
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] [data-testid^="badge-reward-points"] {
+  color: #9a5d19;
+  border-color: #ecc68f;
+  background: #fff1dc;
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="ready"] .lc-reward-progress {
+  border-color: #a9d9b8;
+  background: #dcefe2;
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="ready"] .lc-reward-progress span {
+  background: linear-gradient(90deg, #32a968, #72cf8d);
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-progress {
+  border-color: #ecc993;
+  background: #f5dfc0;
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-progress span {
+  background: linear-gradient(90deg, #e98227, #f3b447);
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="ready"] .lc-reward-page-button:not(:disabled) {
+  border-color: #2d9c60 !important;
+  background: linear-gradient(135deg, #2f9f62, #49bd77) !important;
+  box-shadow: 0 4px 0 #23794a, 0 7px 12px rgba(39,136,90,.16);
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-page-button:disabled {
+  color: #9a6a30 !important;
+  border-color: #e7c48f !important;
+  background: #f8e2c1 !important;
+  box-shadow: 0 3px 0 #e6c693;
+}
+
+/* Parent dashboard active rewards use the same state colors as the child board. */
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="ready"] {
+  border-color: #9bd7ad !important;
+  background: linear-gradient(145deg, rgba(247,255,249,.96), rgba(222,246,230,.94)) !important;
+  box-shadow: 0 6px 16px rgba(39,136,90,.11), inset 0 1px rgba(255,255,255,.92);
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="locked"] {
+  border-color: #efc488 !important;
+  background: linear-gradient(145deg, rgba(255,253,247,.96), rgba(255,235,207,.94)) !important;
+  box-shadow: 0 6px 16px rgba(178,105,24,.11), inset 0 1px rgba(255,255,255,.92);
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="ready"] .lc-reward-illustration {
+  border-color: #a7dcb7;
+  background: radial-gradient(circle, #eefaf2, #d4efdd) !important;
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-illustration {
+  border-color: #efca95;
+  background: radial-gradient(circle, #fff8ec, #f8dfba) !important;
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="ready"] .lc-reward-points-badge {
+  color: #24794d;
+  border-color: #a6d9b6;
+  background: #e7f7ec;
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-points-badge {
+  color: #9a5d19;
+  border-color: #ecc68f;
+  background: #fff1dc;
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="ready"] .lc-reward-progress {
+  border-color: #a9d9b8;
+  background: #dcefe2 !important;
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="ready"] .lc-reward-progress > div {
+  background: linear-gradient(90deg, #32a968, #72cf8d) !important;
+  box-shadow: 0 0 9px rgba(50,169,104,.26);
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-progress {
+  border-color: #ecc993;
+  background: #f5dfc0 !important;
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-progress > div {
+  background: linear-gradient(90deg, #e98227, #f3b447) !important;
+  box-shadow: 0 0 9px rgba(233,130,39,.24);
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="ready"] .lc-redeem-button:not(:disabled) {
+  color: #fff !important;
+  opacity: 1 !important;
+  font-weight: 800 !important;
+  border-color: #2d9c60 !important;
+  background: linear-gradient(135deg, #2f9f62, #49bd77) !important;
+  box-shadow: 0 4px 0 #23794a, 0 7px 12px rgba(39,136,90,.16);
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-reward-card[data-reward-visual-state="locked"] .lc-redeem-button:disabled {
+  color: #9a6a30 !important;
+  border-color: #e7c48f !important;
+  background: #f8e2c1 !important;
+  box-shadow: 0 3px 0 #e6c693;
+}
+
+html:not(.dark) .lc-rewards-board-page .lc-rewards-board-title,
+html:not(.dark) .lc-rewards-board-page .lc-parent-rewards-board-title {
+  color: #14253b !important;
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-rewards-board-page .lc-rewards-board-subtitle,
+html:not(.dark) .lc-rewards-board-page .lc-parent-rewards-board-subtitle {
+  color: #526277 !important;
+  text-shadow: none !important;
+}
+
+/* Joined shared rewards remain distinct from the gold treasure cards. */
+html:not(.dark) .lc-my-rewards-page .lc-shared-reward-card {
+  background: linear-gradient(155deg, rgba(247,251,255,.97), rgba(221,238,255,.95)) !important;
+  border-color: #9bc9ed !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.95), 0 6px 18px rgba(38,111,174,.13) !important;
+}
+html:not(.dark) .lc-my-rewards-page .lc-shared-reward-icon {
+  color: #2674b8 !important;
+  background: linear-gradient(145deg, #edf7ff, #cfe8fb) !important;
+  box-shadow: 0 0 0 1px rgba(38,116,184,.16), 0 6px 15px rgba(38,111,174,.12) !important;
+}
+html:not(.dark) .lc-my-rewards-page .lc-shared-reward-title {
+  color: #263451 !important;
+  text-shadow: none !important;
+}
+html:not(.dark) .lc-my-rewards-page .lc-shared-reward-points {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 2px 5px rgba(255, 93, 0, .22);
+}
+html:not(.dark) .lc-my-rewards-page .lc-shared-reward-participants {
+  border-color: #c5ddec !important;
+  background: rgba(255,255,255,.62) !important;
+}
+html:not(.dark) .lc-my-rewards-page .lc-shared-reward-participants :is(.text-white\/50, .text-white\/80) {
+  color: #526d86 !important;
+}
+
+/* Active rewards on both parent views mirror the child board in Dark Mode:
+   green when claimable, orange while more points are needed. */
+html.dark :is(.lc-dashboard .lc-reward-card, .lc-active-rewards-page .lc-reward-page-card)[data-reward-visual-state="ready"] {
+  border-color: rgba(52,211,153,.60) !important;
+  background: linear-gradient(145deg, rgba(2,44,34,.96), rgba(20,83,45,.92), rgba(6,78,59,.92)) !important;
+  box-shadow: 0 10px 22px rgba(16,185,129,.18), inset 0 1px rgba(255,255,255,.08);
+}
+html.dark :is(.lc-dashboard .lc-reward-card, .lc-active-rewards-page .lc-reward-page-card)[data-reward-visual-state="locked"] {
+  border-color: rgba(251,146,60,.55) !important;
+  background: linear-gradient(145deg, rgba(67,20,7,.96), rgba(120,53,15,.92), rgba(124,45,18,.92)) !important;
+  box-shadow: 0 10px 22px rgba(249,115,22,.17), inset 0 1px rgba(255,255,255,.08);
+}
+html.dark :is(.lc-dashboard .lc-reward-card, .lc-active-rewards-page .lc-reward-page-card)[data-reward-visual-state="ready"] :is(.lc-reward-illustration, .lc-reward-page-illustration) {
+  border-color: rgba(110,231,183,.45) !important;
+  background: radial-gradient(circle, rgba(52,211,153,.30), rgba(22,101,52,.24)) !important;
+}
+html.dark :is(.lc-dashboard .lc-reward-card, .lc-active-rewards-page .lc-reward-page-card)[data-reward-visual-state="locked"] :is(.lc-reward-illustration, .lc-reward-page-illustration) {
+  border-color: rgba(253,186,116,.42) !important;
+  background: radial-gradient(circle, rgba(251,146,60,.30), rgba(180,83,9,.23)) !important;
+}
+html.dark :is(.lc-dashboard .lc-reward-card, .lc-active-rewards-page .lc-reward-page-card)[data-reward-visual-state="ready"] :is(.lc-reward-points-badge, [data-testid^="badge-reward-points"]) {
+  color: #6ee7b7 !important;
+  border-color: rgba(52,211,153,.45) !important;
+  background: rgba(52,211,153,.18) !important;
+}
+html.dark :is(.lc-dashboard .lc-reward-card, .lc-active-rewards-page .lc-reward-page-card)[data-reward-visual-state="locked"] :is(.lc-reward-points-badge, [data-testid^="badge-reward-points"]) {
+  color: #fdba74 !important;
+  border-color: rgba(251,146,60,.42) !important;
+  background: rgba(251,146,60,.18) !important;
+}
+html.dark :is(.lc-dashboard .lc-reward-card, .lc-active-rewards-page .lc-reward-page-card)[data-reward-visual-state="ready"] .lc-reward-progress {
+  border-color: rgba(52,211,153,.32);
+  background: rgba(0,0,0,.30) !important;
+}
+html.dark .lc-dashboard .lc-reward-card[data-reward-visual-state="ready"] .lc-reward-progress > div,
+html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="ready"] .lc-reward-progress span {
+  background: linear-gradient(90deg, #34d399, #86efac) !important;
+  box-shadow: 0 0 9px rgba(52,211,153,.40);
+}
+html.dark :is(.lc-dashboard .lc-reward-card, .lc-active-rewards-page .lc-reward-page-card)[data-reward-visual-state="locked"] .lc-reward-progress {
+  border-color: rgba(251,146,60,.30);
+  background: rgba(0,0,0,.30) !important;
+}
+html.dark .lc-dashboard .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-progress > div,
+html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-progress span {
+  background: linear-gradient(90deg, #f97316, #fcd34d) !important;
+  box-shadow: 0 0 9px rgba(249,115,22,.38);
+}
+html.dark .lc-dashboard .lc-reward-card[data-reward-visual-state="ready"] .lc-redeem-button:not(:disabled),
+html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="ready"] .lc-reward-page-button:not(:disabled) {
+  border-color: rgba(110,231,183,.45) !important;
+  background: linear-gradient(135deg, #059669, #22c55e) !important;
+  box-shadow: 0 4px 0 #065f46, 0 7px 14px rgba(16,185,129,.24);
+}
+html.dark .lc-dashboard .lc-reward-card[data-reward-visual-state="locked"] .lc-redeem-button:disabled,
+html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-page-button:disabled {
+  color: #fdba74 !important;
+  border-color: rgba(251,146,60,.30) !important;
+  background: rgba(124,45,18,.55) !important;
+  box-shadow: 0 3px 0 rgba(67,20,7,.85);
+}
+
+/* Use direct state classes for the embedded parent-dashboard cards. Keeping
+   these selectors simple ensures the mobile WebKit view applies the override. */
+.lc-parent-reward-ready,
+.lc-reward-card:has(.lc-redeem-button:not(:disabled)) {
+  border-color: rgba(52,211,153,.60) !important;
+  background: linear-gradient(145deg, rgba(2,44,34,.96), rgba(20,83,45,.92), rgba(6,78,59,.92)) !important;
+  box-shadow: 0 10px 22px rgba(16,185,129,.18), inset 0 1px rgba(255,255,255,.08) !important;
+}
+.lc-parent-reward-locked,
+.lc-reward-card:has(.lc-redeem-button:disabled) {
+  border-color: rgba(251,146,60,.55) !important;
+  background: linear-gradient(145deg, rgba(67,20,7,.96), rgba(120,53,15,.92), rgba(124,45,18,.92)) !important;
+  box-shadow: 0 10px 22px rgba(249,115,22,.17), inset 0 1px rgba(255,255,255,.08) !important;
+}
+.lc-parent-reward-ready .lc-reward-illustration,
+.lc-reward-card:has(.lc-redeem-button:not(:disabled)) .lc-reward-illustration {
+  border-color: rgba(110,231,183,.45) !important;
+  background: radial-gradient(circle, rgba(52,211,153,.30), rgba(22,101,52,.24)) !important;
+}
+.lc-parent-reward-locked .lc-reward-illustration,
+.lc-reward-card:has(.lc-redeem-button:disabled) .lc-reward-illustration {
+  border-color: rgba(253,186,116,.42) !important;
+  background: radial-gradient(circle, rgba(251,146,60,.30), rgba(180,83,9,.23)) !important;
+}
+.lc-parent-reward-ready .lc-reward-points-badge,
+.lc-reward-card:has(.lc-redeem-button:not(:disabled)) :is(.lc-reward-points-badge, [data-testid^="badge-reward-points-"]) {
+  color: #6ee7b7 !important;
+  border-color: rgba(52,211,153,.45) !important;
+  background: rgba(52,211,153,.18) !important;
+}
+.lc-parent-reward-locked .lc-reward-points-badge,
+.lc-reward-card:has(.lc-redeem-button:disabled) :is(.lc-reward-points-badge, [data-testid^="badge-reward-points-"]) {
+  color: #fdba74 !important;
+  border-color: rgba(251,146,60,.42) !important;
+  background: rgba(251,146,60,.18) !important;
+}
+html:not(.dark) :is(
+  .lc-dashboard .lc-reward-card,
+  .lc-kid-dashboard .lc-reward-card,
+  .lc-rewards-board-page .lc-reward-card,
+  .lc-active-rewards-page .lc-reward-page-card
+) :is(.lc-reward-points-badge, [data-testid^="badge-reward-points"]) {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 2px 0 rgba(190, 61, 0, .20), 0 4px 8px rgba(255, 93, 0, .16);
+}
+html:not(.dark) .lc-kid-dashboard h2.text-white {
+  color: #fff !important;
+}
+html:not(.dark) .lc-dashboard .lc-parent-section-heading,
+html.dark .lc-dashboard .lc-parent-section-heading {
+  color: #fff !important;
+  font-family: Fredoka, sans-serif !important;
+  font-size: 1.5rem !important;
+  line-height: 2rem !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,.8), 0 4px 12px rgba(0,0,0,.6), 0 0 20px rgba(0,0,0,.4) !important;
+}
+html:not(.dark) .lc-dashboard .lc-filter-button[data-state="active"],
+html:not(.dark) .lc-dashboard .lc-filter-button.bg-primary,
+html:not(.dark) .lc-kid-dashboard .lc-kid-filter-button.bg-primary {
+  color: #fff !important;
+  border-color: transparent !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 2px 5px rgba(255, 93, 0, .22);
+}
+html:not(.dark) .lc-dashboard .lc-leaderboard-tabs [data-state="active"],
+html:not(.dark) .lc-kid-dashboard .lc-kid-leaderboard-tab[data-state="active"] {
+  color: #fff !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 2px 5px rgba(255, 93, 0, .22);
+}
+.lc-parent-reward-ready .lc-reward-progress,
+.lc-reward-card:has(.lc-redeem-button:not(:disabled)) .lc-reward-progress {
+  border-color: rgba(52,211,153,.32) !important;
+  background: rgba(0,0,0,.30) !important;
+}
+.lc-parent-reward-ready .lc-reward-progress > div,
+.lc-reward-card:has(.lc-redeem-button:not(:disabled)) .lc-reward-progress > div {
+  background: linear-gradient(90deg, #34d399, #86efac) !important;
+  box-shadow: 0 0 9px rgba(52,211,153,.40) !important;
+}
+.lc-parent-reward-locked .lc-reward-progress,
+.lc-reward-card:has(.lc-redeem-button:disabled) .lc-reward-progress {
+  border-color: rgba(251,146,60,.30) !important;
+  background: rgba(0,0,0,.30) !important;
+}
+.lc-parent-reward-locked .lc-reward-progress > div,
+.lc-reward-card:has(.lc-redeem-button:disabled) .lc-reward-progress > div {
+  background: linear-gradient(90deg, #f97316, #fcd34d) !important;
+  box-shadow: 0 0 9px rgba(249,115,22,.38) !important;
+}
+.lc-parent-reward-ready .lc-redeem-button:not(:disabled),
+.lc-reward-card:has(.lc-redeem-button:not(:disabled)) .lc-redeem-button {
+  border-color: rgba(110,231,183,.45) !important;
+  background: linear-gradient(135deg, #059669, #22c55e) !important;
+  box-shadow: 0 4px 0 #065f46, 0 7px 14px rgba(16,185,129,.24) !important;
+}
+.lc-dashboard .lc-redeem-button:not(:disabled),
+.lc-kid-dashboard .lc-redeem-button:not(:disabled),
+.lc-rewards-board-page .lc-redeem-button:not(:disabled),
+.lc-active-rewards-page .lc-reward-page-button:not(:disabled) {
+  color: #fff !important;
+  opacity: 1 !important;
+  font-size: .875rem !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  letter-spacing: .01em;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+.lc-parent-reward-locked .lc-redeem-button:disabled,
+.lc-reward-card:has(.lc-redeem-button:disabled) .lc-redeem-button {
+  color: #fdba74 !important;
+  border-color: rgba(251,146,60,.30) !important;
+  background: rgba(124,45,18,.55) !important;
+  box-shadow: 0 3px 0 rgba(67,20,7,.85) !important;
+}
+.lc-dashboard .lc-redeem-button:disabled,
+.lc-kid-dashboard .lc-redeem-button:disabled,
+.lc-rewards-board-page .lc-redeem-button:disabled,
+.lc-active-rewards-page .lc-reward-page-button:disabled {
+  opacity: 1 !important;
+  font-weight: 800 !important;
+  letter-spacing: .01em;
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-redeem-button:disabled,
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-button:disabled {
+  color: #7c4215 !important;
+}
+html.dark :is(.lc-dashboard, .lc-kid-dashboard, .lc-rewards-board-page) .lc-redeem-button:disabled,
+html.dark .lc-active-rewards-page .lc-reward-page-button:disabled {
+  color: #ffedd5 !important;
+}
+
+/* Parent rewards page: shared rewards stay blue until this parent joins.
+   Joined rewards move to the acquired list and keep its treasure-card style. */
+.lc-rewards-board-page .lc-shared-reward-joinable-card {
+  border-color: rgba(96,165,250,.48) !important;
+  background: linear-gradient(145deg, rgba(8,25,52,.96), rgba(13,52,96,.94), rgba(10,35,70,.96)) !important;
+  box-shadow: 0 10px 22px rgba(37,99,235,.20), inset 0 1px rgba(255,255,255,.08) !important;
+}
+.lc-rewards-board-page .lc-shared-reward-joinable-card :is(h3, [data-radix-collection-item]) {
+  color: #eff6ff;
+}
+.lc-rewards-board-page .lc-shared-reward-joinable-card [data-testid^="button-join"] {
+  color: #fff !important;
+  border-color: rgba(147,197,253,.45) !important;
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6) !important;
+  box-shadow: 0 3px 0 #1e3a8a, 0 7px 14px rgba(59,130,246,.24) !important;
+}
+.lc-rewards-board-page .lc-shared-reward-joinable-card [data-testid^="button-join"]:disabled {
+  color: rgba(191,219,254,.62) !important;
+  border-color: rgba(96,165,250,.24) !important;
+  background: rgba(30,58,138,.42) !important;
+  box-shadow: 0 3px 0 rgba(10,25,58,.72) !important;
+}
+.lc-rewards-board-page .lc-shared-reward-joinable-card [class*="badge"] {
+  color: #bfdbfe !important;
+  border-color: rgba(96,165,250,.35) !important;
+  background: rgba(59,130,246,.16) !important;
+}
+html:not(.dark) .lc-rewards-board-page .lc-shared-reward-joinable-card {
+  color: #23496c;
+  border-color: #9bc9ed !important;
+  background: linear-gradient(145deg, rgba(248,252,255,.97), rgba(218,237,253,.96)) !important;
+  box-shadow: 0 7px 18px rgba(38,111,174,.13), inset 0 1px rgba(255,255,255,.94) !important;
+}
+html:not(.dark) .lc-rewards-board-page .lc-shared-reward-joinable-card :is(h3, [data-radix-collection-item]) {
+  color: #23496c;
+}
+html:not(.dark) .lc-rewards-board-page .lc-shared-reward-joinable-card [class*="badge"] {
+  color: #24679f !important;
+  border-color: #a8cee9 !important;
+  background: #e8f4fd !important;
+}
+
+/* In Dark Mode, every bonus-reward surface uses one bright violet palette:
+   dashboard cards, the complete list, and its summary card. */
+html.dark :is(
+  .lc-dashboard .lc-achievement-card,
+  .lc-kid-dashboard .lc-kid-achievement-card,
+  .lc-achievements-page .lc-achievement-page-card,
+  .lc-achievements-page .lc-achievements-hero
+) {
+  border-color: rgba(139,92,246,.40) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(91,50,150,.92),
+    rgba(126,55,173,.90),
+    rgba(113,45,168,.92)
+  ) !important;
+  box-shadow: 0 10px 24px rgba(109,40,217,.18), inset 0 1px rgba(255,255,255,.10) !important;
 }
 

@@ -101,7 +101,7 @@
     "decline": "拒绝",
     "activeRewards": "可兑换奖励",
     "youCanClaim": "你可以兑换这个！",
-    "redeemNow": "立即兑换！",
+    "redeemNow": "立即领取！",
     "redeeming": "兑换中...",
     "needMorePoints": "还需要 {{count}} 积分",
     "weekly": "本周",
@@ -422,7 +422,7 @@
     "thisMonthsLeaderboard": "本月排行榜",
     "allTimeLeaderboard": "总排行榜",
     "pointsEarnedWeek": "本周赢取的积分",
-    "pointsEarnedMonth": "本月赢取的积分 - 每月1日重置",
+    "pointsEarnedMonth": "本月赢取的积分",
     "pointsEarnedAllTime": "累计赢取的总积分",
     "weeklyPrize": "周奖",
     "monthlyPrize": "月奖",
@@ -491,6 +491,10 @@
     "nextUnlock": "下一个解锁于"
   },
   "skinNames": {
+    "brave-knight": "勇敢骑士",
+    "sky-spark": "天空火花",
+    "bright-mind": "智慧之星",
+    "turbo-trail": "极速赛车手",
     "junior-champion": "少年冠军",
     "brave-explorer": "勇敢探险家",
     "star-cadet": "星际学员",

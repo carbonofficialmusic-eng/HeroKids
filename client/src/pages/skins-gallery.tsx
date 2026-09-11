@@ -199,7 +199,9 @@ export default function SkinsGallery() {
     onSuccess: (result) => {
       setDiscoverDialogSkinId(null); // Close the popup
       const skin = data?.skins.find(s => s.id === result.skinId);
-      const skinName = skin?.id ? t(`skinNames.${skin.id}`) : "Skin";
+      const skinName = skin?.id
+        ? t(`skinNames.${skin.id}`, { defaultValue: skin.name })
+        : "Skin";
       
       // Check if a star was found - show star animation first
       if (result.starFound) {
@@ -270,7 +272,9 @@ export default function SkinsGallery() {
       } else {
         const selectedSkin = data?.skins.find(s => s.id === skinId);
         if (selectedSkin) {
-          const skinName = t(`skinNames.${selectedSkin.id}`);
+          const skinName = t(`skinNames.${selectedSkin.id}`, {
+            defaultValue: selectedSkin.name,
+          });
           setCelebration({
             points: 0,
             message: t('skins.skinEquipped', { skinName }),
@@ -430,7 +434,7 @@ export default function SkinsGallery() {
             SKIN_IMAGES[skin.id] ? (
               <img
                 src={SKIN_IMAGES[skin.id]}
-                alt={t(`skinNames.${skin.id}`)}
+                alt={t(`skinNames.${skin.id}`, { defaultValue: skin.name })}
                 className="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
@@ -643,7 +647,7 @@ export default function SkinsGallery() {
                         )}
                         <img
                           src={SKIN_IMAGES[previewSkin.id]}
-                          alt={t(`skinNames.${previewSkin.id}`)}
+                          alt={t(`skinNames.${previewSkin.id}`, { defaultValue: previewSkin.name })}
                           className="relative w-full h-full object-contain p-4"
                           decoding="async"
                           fetchPriority="high"
@@ -681,7 +685,9 @@ export default function SkinsGallery() {
                 <div className={`lc-preview-info text-center ${isLandscapeMobile ? 'mb-1' : 'mb-4'}`}>
                   <h2 className={`font-bold font-accent ${isLandscapeMobile ? 'text-sm' : 'text-xl'}`}>
                     {previewSkin 
-                      ? (previewSkin.isDiscovered ? t(`skinNames.${previewSkin.id}`) : "???")
+                      ? (previewSkin.isDiscovered
+                        ? t(`skinNames.${previewSkin.id}`, { defaultValue: previewSkin.name })
+                        : "???")
                       : t('skins.yourPhoto')}
                   </h2>
                   {previewSkin && previewSkin.isDiscovered && isLegacySkin(previewSkin.id) && (

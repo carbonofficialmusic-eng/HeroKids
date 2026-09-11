@@ -94,7 +94,7 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
   }, [backgroundUrl, currentBg]);
 
   return (
-    <div className="min-h-full">
+    <div className="min-h-full" data-skin-background={shouldShowBackground ? "visible" : "hidden"}>
       {/* Background container - extends 60px above layout viewport so it always
           covers the native status-bar zone even when iOS sets the WKWebView
           layout viewport origin to y=safe-area-inset-top instead of y=0. */}

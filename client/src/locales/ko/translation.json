@@ -101,7 +101,7 @@
     "decline": "거절",
     "activeRewards": "활성 보상",
     "youCanClaim": "받을 수 있어요!",
-    "redeemNow": "지금 교환하기!",
+    "redeemNow": "지금 받기!",
     "redeeming": "교환 중...",
     "needMorePoints": "{{count}} 포인트 더 필요",
     "weekly": "주간",
@@ -426,7 +426,7 @@
     "thisMonthsLeaderboard": "이번 달 리더보드",
     "allTimeLeaderboard": "전체 리더보드",
     "pointsEarnedWeek": "이번 주 획득한 포인트",
-    "pointsEarnedMonth": "이번 달 획득한 포인트 - 1일에 초기화됨",
+    "pointsEarnedMonth": "이번 달 획득한 포인트",
     "pointsEarnedAllTime": "전체 기간 동안 획득한 총 포인트",
     "weeklyPrize": "주간 상품",
     "monthlyPrize": "월간 상품",
@@ -495,6 +495,10 @@
     "nextUnlock": "다음 잠금 해제"
   },
   "skinNames": {
+    "brave-knight": "용감한 기사",
+    "sky-spark": "스카이 스파크",
+    "bright-mind": "반짝이는 두뇌",
+    "turbo-trail": "터보 레이서",
     "junior-champion": "주니어 챔피언",
     "brave-explorer": "용감한 탐험가",
     "star-cadet": "스타 생도",

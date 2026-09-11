@@ -102,7 +102,7 @@
     "decline": "Recusar",
     "activeRewards": "Recompensas Ativas",
     "youCanClaim": "Você pode reivindicar isso!",
-    "redeemNow": "Resgatar Agora!",
+    "redeemNow": "Pegar agora!",
     "redeeming": "Resgatando...",
     "needMorePoints": "Precisa de mais {{count}} pontos",
     "weekly": "Semanal",
@@ -428,7 +428,7 @@
     "thisMonthsLeaderboard": "Ranking deste Mês",
     "allTimeLeaderboard": "Ranking de Todos os Tempos",
     "pointsEarnedWeek": "Pontos ganhos esta semana",
-    "pointsEarnedMonth": "Pontos ganhos este mês - reinicia no dia 1",
+    "pointsEarnedMonth": "Pontos ganhos este mês",
     "pointsEarnedAllTime": "Total de pontos ganhos",
     "weeklyPrize": "Prêmio Semanal",
     "monthlyPrize": "Prêmio Mensal",
@@ -504,6 +504,10 @@
     "failedToToggleBackground": "Falha ao alternar fundo"
   },
   "skinNames": {
+    "brave-knight": "Cavaleiro Valente",
+    "sky-spark": "Faísca Celestial",
+    "bright-mind": "Mente Brilhante",
+    "turbo-trail": "Pilota Turbo",
     "junior-champion": "Junior Champion",
     "brave-explorer": "Brave Explorer",
     "star-cadet": "Star Cadet",

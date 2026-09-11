@@ -422,7 +422,7 @@
     "thisMonthsLeaderboard": "Classement de ce mois-ci",
     "allTimeLeaderboard": "Classement de tous les temps",
     "pointsEarnedWeek": "Points gagnés cette semaine",
-    "pointsEarnedMonth": "Points gagnés ce mois-ci - réinitialisation le 1er",
+    "pointsEarnedMonth": "Points gagnés ce mois-ci",
     "pointsEarnedAllTime": "Total des points gagnés",
     "weeklyPrize": "Prix Hebdomadaire",
     "monthlyPrize": "Prix Mensuel",
@@ -491,6 +491,10 @@
     "nextUnlock": "Prochain déblocage à"
   },
   "skinNames": {
+    "brave-knight": "Chevalier Courageux",
+    "sky-spark": "Étincelle Céleste",
+    "bright-mind": "Esprit Brillant",
+    "turbo-trail": "Pilote Turbo",
     "junior-champion": "Junior Champion",
     "brave-explorer": "Brave Explorateur",
     "star-cadet": "Cadet Étoile",

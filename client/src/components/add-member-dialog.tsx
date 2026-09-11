@@ -31,6 +31,7 @@ import {
 import { AvatarSelector } from "./avatar-selector";
 import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
 import { useTranslation } from "react-i18next";
+import { UserPlus } from "lucide-react";
 
 const addMemberSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
@@ -139,16 +140,19 @@ export function AddMemberDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto" data-testid="dialog-add-member" onOpenAutoFocus={(e) => e.preventDefault()}>
-        <DialogHeader>
-          <DialogTitle>{t("addMember.title")}</DialogTitle>
+      <DialogContent className="lc-game-dialog lc-add-member-dialog sm:max-w-[500px]" data-testid="dialog-add-member" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <DialogHeader className="lc-game-dialog-header">
+          <DialogTitle className="flex items-center gap-2 text-2xl font-accent">
+            <UserPlus className="h-6 w-6 shrink-0 text-primary" />
+            {t("addMember.title")}
+          </DialogTitle>
           <DialogDescription>
             {t("addMember.description")}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="lc-game-dialog-form space-y-6">
             <FormField
               control={form.control}
               name="displayName"
@@ -200,7 +204,7 @@ export function AddMemberDialog({
               uploadedAvatarUrl={uploadedAvatarUrl}
             />
 
-            <DialogFooter>
+            <DialogFooter className="lc-game-dialog-actions">
               <Button
                 type="button"
                 variant="outline"

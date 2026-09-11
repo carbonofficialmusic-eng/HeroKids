@@ -101,7 +101,7 @@
     "decline": "Avslå",
     "activeRewards": "Aktiva belöningar",
     "youCanClaim": "Du kan hämta denna!",
-    "redeemNow": "Lös in nu!",
+    "redeemNow": "Hämta nu!",
     "redeeming": "Löser in...",
     "needMorePoints": "Behöver {{count}} fler poäng",
     "weekly": "Veckovis",
@@ -427,7 +427,7 @@
     "thisMonthsLeaderboard": "Månadens topplista",
     "allTimeLeaderboard": "Topplista för alla tider",
     "pointsEarnedWeek": "Poäng intjänade denna vecka",
-    "pointsEarnedMonth": "Poäng intjänade denna månad - återställs den 1:a",
+    "pointsEarnedMonth": "Poäng intjänade denna månad",
     "pointsEarnedAllTime": "Totala poäng intjänade genom tiderna",
     "weeklyPrize": "Veckopris",
     "monthlyPrize": "Månadspris",
@@ -503,6 +503,10 @@
     "failedToToggleBackground": "Kunde inte ändra bakgrund"
   },
   "skinNames": {
+    "brave-knight": "Modig riddare",
+    "sky-spark": "Himmelsgnista",
+    "bright-mind": "Klartänkt",
+    "turbo-trail": "Turboförare",
     "junior-champion": "Juniorchampion",
     "brave-explorer": "Modig upptäckare",
     "star-cadet": "Stjärnkadett",

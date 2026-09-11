@@ -458,7 +458,7 @@ export function TaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`lc-task-dialog ${editingTask ? "is-editing" : "is-creating"} max-w-2xl overflow-y-auto [&>button.absolute]:hidden`} data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent className={`lc-task-dialog ${editingTask ? "is-editing" : "is-creating"} max-w-2xl overflow-hidden [&>button.absolute]:hidden`} data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader className="lc-task-dialog-header">
           <DialogTitle className="text-2xl font-accent">
             {editingTask ? t('tasks.editTask') : t('tasks.createTask')}
@@ -469,7 +469,7 @@ export function TaskDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="lc-task-dialog-form space-y-6">
+          <form id="task-dialog-form" onSubmit={form.handleSubmit(handleSubmit)} className="lc-task-dialog-form space-y-6">
 
             {/* Quick Templates Section - Only show when creating */}
             {!editingTask && (
@@ -1263,27 +1263,28 @@ export function TaskDialog({
               </div>
             )}
 
-            <div className="lc-task-dialog-actions flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => onOpenChange(false)}
-                data-testid="button-cancel-task"
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1"
-                disabled={isSubmitting}
-                data-testid="button-submit-task"
-              >
-                {isSubmitting ? (editingTask ? t('tasks.updating') : t('tasks.creating')) : editingTask ? t('tasks.updateTaskButton') : t('tasks.createTaskButton')}
-              </Button>
-            </div>
           </form>
         </Form>
+        <div className="lc-task-dialog-actions flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+            data-testid="button-cancel-task"
+          >
+            {t('common.cancel')}
+          </Button>
+          <Button
+            type="submit"
+            form="task-dialog-form"
+            className="flex-1"
+            disabled={isSubmitting}
+            data-testid="button-submit-task"
+          >
+            {isSubmitting ? (editingTask ? t('tasks.updating') : t('tasks.creating')) : editingTask ? t('tasks.updateTaskButton') : t('tasks.createTaskButton')}
+          </Button>
+        </div>
       </DialogContent>
 
       {/* Reset Confirmation Dialog */}

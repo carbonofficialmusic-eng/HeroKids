@@ -67,8 +67,9 @@ const KNOWN_SKIN_IDS = new Set([
   "shield-blaze", "comet-dash", "wave-glider", "forest-guard",
   "luna-beacon", "sunrise-spark", "bloom-guardian", "breeze-captain",
   "storm-runner", "star-guardian", "thunder-bolt", "heart-shield",
-  // Tier 15 - Bonus Adventure Pack
+  // Tier 15 - Bonus Adventure Pack and additional character skins
   "pirate-captain", "wizard-kid", "rock-star", "detective-kid", "skater-kid",
+  "brave-knight", "sky-spark", "bright-mind", "turbo-trail",
 ]);
 
 // Legacy compatibility: components that use SKIN_IMAGES[id] or SKIN_BACKGROUNDS[id]

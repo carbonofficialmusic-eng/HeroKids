@@ -339,7 +339,7 @@ export default function MyRewards() {
   }
 
   return (
-    <div className="min-h-screen p-4 pb-20 relative overflow-x-hidden" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
+    <div className="lc-my-rewards-page min-h-screen p-4 pb-20 relative overflow-x-hidden" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
       {/* Golden atmosphere glow */}
       <div className="pointer-events-none fixed inset-0 z-0" style={{ background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(251,191,36,0.13) 0%, rgba(245,158,11,0.06) 45%, transparent 75%)" }} />
 
@@ -395,7 +395,7 @@ export default function MyRewards() {
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="rounded-2xl overflow-hidden"
+                    className="lc-shared-reward-card rounded-2xl overflow-hidden"
                     style={{
                       background: "linear-gradient(160deg, rgba(30,20,10,0.92) 0%, rgba(20,15,8,0.97) 100%)",
                       border: `1.5px solid ${rc.border}`,
@@ -406,23 +406,23 @@ export default function MyRewards() {
                       <Sparkles className="absolute left-5 top-4 h-3.5 w-3.5 opacity-40" style={{ color: rc.textColor }} />
                       <Sparkles className="absolute right-5 top-5 h-3 w-3 opacity-30" style={{ color: rc.textColor }} />
                       <div
-                        className="h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
+                        className="lc-shared-reward-icon h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
                         style={{ background: rc.iconBg, boxShadow: `0 0 28px ${rc.glow}, 0 0 8px ${rc.glow}` }}
                       >
                         <RewardIconDisplay icon={sr.rewardIconEmoji} imgClassName="w-10 h-10 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
                       </div>
                     </div>
                     <div className="px-4 pb-4 space-y-3">
-                      <h3 className="font-black text-xl text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${rc.glow}` }}>
+                      <h3 className="lc-shared-reward-title font-black text-xl text-center text-white leading-tight" style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${rc.glow}` }}>
                         {sr.reward?.title}
                       </h3>
                       <div className="flex items-center justify-center gap-2 flex-wrap">
-                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: rc.iconBg, color: rc.textColor, border: `1px solid ${rc.border}` }}>
+                        <div className="lc-shared-reward-points flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: rc.iconBg, color: rc.textColor, border: `1px solid ${rc.border}` }}>
                           <Coins className="h-3.5 w-3.5" />
                           <span>{t("myRewards.pointsSpent", { count: myShare?.pointsContributed ?? Math.ceil((sr.originalPointsSpent ?? sr.pointsSpent) / (sr.participants.length + 1)) })}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
+                      <div className="lc-shared-reward-participants flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 bg-white/5 border border-white/10">
                         <div className="flex items-center gap-1.5 text-xs text-white/50">
                           <Users className="h-3.5 w-3.5" />
                           <span>{t("rewardsBoard.sharedBy", { name: sr.member?.displayName })}</span>
@@ -497,7 +497,7 @@ export default function MyRewards() {
                 >
                   {/* Premium collectible treasure card */}
                   <div
-                    className="rounded-2xl overflow-hidden"
+                    className="lc-purchased-reward-card rounded-2xl overflow-hidden"
                     style={{
                       background: "linear-gradient(160deg, rgba(30,20,10,0.92) 0%, rgba(20,15,8,0.97) 100%)",
                       border: `1.5px solid ${rarity.border}`,
@@ -511,7 +511,7 @@ export default function MyRewards() {
                       <Sparkles className="absolute right-5 top-5 h-3 w-3 opacity-30" style={{ color: rarity.textColor }} />
                       {/* Icon with glow halo */}
                       <div
-                        className="h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
+                        className="lc-purchased-reward-icon h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
                         style={{
                           background: rarity.iconBg,
                           boxShadow: `0 0 28px ${rarity.glow}, 0 0 8px ${rarity.glow}`,
@@ -529,7 +529,7 @@ export default function MyRewards() {
                     <div className="px-4 pb-4 space-y-3">
                       {/* Title */}
                       <h3
-                        className="font-black text-xl text-center text-white leading-tight"
+                        className="lc-purchased-reward-title font-black text-xl text-center text-white leading-tight"
                         style={{ fontFamily: "Fredoka, sans-serif", textShadow: `0 1px 8px ${rarity.glow}` }}
                       >
                         {redemption.rewardTitle || t("myRewards.reward")}
@@ -538,13 +538,13 @@ export default function MyRewards() {
                       {/* Stats chips */}
                       <div className="flex items-center justify-center gap-2 flex-wrap">
                         <div
-                          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                          className="lc-purchased-reward-points flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
                           style={{ background: rarity.iconBg, color: rarity.textColor, border: `1px solid ${rarity.border}` }}
                         >
                           <Coins className="h-3.5 w-3.5" />
                           <span>{t("myRewards.pointsSpent", { count: redemption.pointsSpent })}</span>
                         </div>
-                        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-white/5 text-white/60 border border-white/10">
+                        <div className="lc-purchased-reward-date flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-white/5 text-white/60 border border-white/10">
                           <span>{redemption.redeemedAt ? new Date(redemption.redeemedAt).toLocaleDateString() : "-"}</span>
                         </div>
                       </div>
@@ -552,7 +552,7 @@ export default function MyRewards() {
                       {/* Status badges */}
                       <div className="flex items-center justify-center gap-2 flex-wrap">
                         <div
-                          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                          className={`lc-purchased-reward-status ${isCompleted ? "lc-purchased-reward-status-completed" : ""} flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold`}
                           data-testid={`badge-status-${redemption.id}`}
                           style={{ background: isCompleted ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.08)", color: isCompleted ? "#4ade80" : "rgba(255,255,255,0.7)", border: isCompleted ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,255,255,0.15)" }}
                         >

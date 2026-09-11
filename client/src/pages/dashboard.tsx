@@ -1646,10 +1646,10 @@ export default function Dashboard() {
                               {categoryTasks.length}
                             </Badge>
                           </div>
-                          <ChevronDown 
+                          <ChevronDown
                             className={`h-4 w-4 transition-transform ${
                               collapsedCategories.has(category) ? "-rotate-90" : ""
-                            }`} 
+                            }`}
                           />
                         </Button>
                       </CollapsibleTrigger>
@@ -1714,7 +1714,12 @@ export default function Dashboard() {
               {activeRewards.length > 0 && (
                 <div data-tour="tour-rewards" id="section-active-rewards">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold font-accent">{t("dashboard.activeRewards")}</h2>
+                    <div className="flex items-center gap-3">
+                      <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                        <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-sm" />
+                      </div>
+                      <h2 className="lc-parent-section-heading text-lg font-bold font-accent">{t("dashboard.rewardsBoard")}</h2>
+                    </div>
                     {activeRewards.length > 3 && (
                       <Button variant="ghost" size="icon" asChild className="lc-icon-button bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0" data-testid="button-view-all-rewards-parent">
                         <Link href="/active-rewards" onClick={() => sessionStorage.setItem("dashboardScrollTarget", "section-active-rewards")}>
@@ -1765,7 +1770,7 @@ export default function Dashboard() {
                               onClick={() => redeemRewardMutation.mutate(reward.id)}
                               disabled={member.totalPoints < reward.pointThreshold || redeemRewardMutation.isPending}
                               size="sm"
-                              className="w-full text-[10px] h-7 px-1"
+                              className="lc-redeem-button w-full text-[10px] h-7 px-1"
                               data-testid={`button-redeem-${reward.id}`}
                             >
                               {redeemRewardMutation.isPending ? t("dashboard.redeeming") : member.totalPoints >= reward.pointThreshold ? t("dashboard.redeemNow") : `${reward.pointThreshold - member.totalPoints} ${t("dashboard.pointsLabel")}`}
@@ -1796,11 +1801,6 @@ export default function Dashboard() {
                                 >
                                   {reward.pointThreshold} {t("dashboard.pointsLabel")}
                                 </Badge>
-                                {member.totalPoints >= reward.pointThreshold && (
-                                  <span className="text-xs font-semibold text-green-600">
-                                    {t("dashboard.youCanClaim")}
-                                  </span>
-                                )}
                               </div>
                                <Button
                                 onClick={() => redeemRewardMutation.mutate(reward.id)}
@@ -1833,9 +1833,11 @@ export default function Dashboard() {
               {/* Family Goals Widget - shown above pinboard like on kid dashboard */}
               {parentGoals.filter(g => g.isActive).length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <img src={familyGoalsIcon} alt="" className="h-11 w-11 object-contain flex-shrink-0" />
-                    <h2 className="text-lg font-bold font-accent">{t("familyGoals.title")}</h2>
+                  <div className="flex items-center gap-3">
+                    <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                      <img src={familyGoalsIcon} alt="" className="h-32 w-32 max-w-none object-contain drop-shadow-sm" />
+                    </div>
+                    <h2 className="lc-parent-section-heading text-lg font-bold font-accent">{t("familyGoals.title")}</h2>
                   </div>
                   {parentGoals.filter(g => g.isActive).map((goal) => {
                     const progress = Math.min((goal.currentPoints / goal.targetPoints) * 100, 100);
@@ -1857,11 +1859,11 @@ export default function Dashboard() {
                                 </Badge>
                               )}
                               <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                <Badge variant="secondary" className="gap-1 text-xs">
+                                <Badge variant="secondary" className="lc-family-goal-accent-badge gap-1 text-xs">
                                   <Calendar className="h-3 w-3" />
                                   {goal.contributionPeriod === "weekly" ? t("familyGoals.weekly") : t("familyGoals.monthly")}
                                 </Badge>
-                                <Badge variant="secondary" className="gap-1 text-xs">
+                                <Badge variant="secondary" className="lc-family-goal-accent-badge gap-1 text-xs">
                                   <Coins className="h-3 w-3" />
                                   {goal.contributionAmount}
                                 </Badge>
@@ -1926,9 +1928,11 @@ export default function Dashboard() {
 
               {/* Pinboard */}
               <div id="pinboard" className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <img src="/nav-icons/pinboard.png" alt="" className="w-10 h-10 object-contain drop-shadow-sm" />
-                  <h2 className="text-lg font-bold font-accent">{t("pinboard.title")}</h2>
+                <div className="flex items-center gap-3">
+                  <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                    <img src="/nav-icons/pinboard.png" alt="" className="w-full h-full object-contain drop-shadow-sm" />
+                  </div>
+                  <h2 className="lc-parent-section-heading text-lg font-bold font-accent">{t("pinboard.title")}</h2>
                 </div>
                 <Pinboard currentMemberId={member?.id ?? null} />
               </div>
@@ -1936,10 +1940,11 @@ export default function Dashboard() {
               {specialRewards.length > 0 && (
                 <div className="space-y-3" data-tour="tour-bonus-rewards" id="section-bonus-rewards">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Trophy className="h-5 w-5 text-purple-500" />
-                      <h2 className="text-lg font-bold font-accent">{t("dashboard.specialPrizes")}</h2>
-                      <Sparkles className="h-4 w-4 text-purple-500" />
+                    <div className="flex items-center gap-3">
+                      <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+                        <img src="/nav-icons/bonus.png" alt="" className="w-full h-full object-contain drop-shadow-sm" />
+                      </div>
+                      <h2 className="lc-parent-section-heading text-lg font-bold font-accent">{t("dashboard.specialPrizes")}</h2>
                     </div>
                     {specialRewards.length > 2 && (
                       <Button variant="ghost" size="icon" asChild className="lc-icon-button bg-card border-2 border-border shadow-sm text-foreground flex-shrink-0" data-testid="button-view-all-achievements">
@@ -2153,7 +2158,16 @@ export default function Dashboard() {
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
                   {activeRewards.map((reward) => (
-                      <Card key={reward.id} className="lc-reward-card p-6" data-testid={`card-reward-${reward.id}`}>
+                      <Card
+                        key={reward.id}
+                        className={`lc-reward-card p-6 ${
+                          member.totalPoints >= reward.pointThreshold
+                            ? "lc-parent-reward-ready"
+                            : "lc-parent-reward-locked"
+                        }`}
+                        data-reward-visual-state={member.totalPoints >= reward.pointThreshold ? "ready" : "locked"}
+                        data-testid={`card-reward-${reward.id}`}
+                      >
                       <div className="flex items-start gap-3">
                          <div className="lc-reward-illustration h-12 w-12 rounded-full gradient-winner flex items-center justify-center shrink-0">
                            <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
@@ -2171,6 +2185,7 @@ export default function Dashboard() {
                           />
                           <div className="flex items-center gap-2 mb-3">
                             <Badge
+                              className="lc-reward-points-badge"
                               variant={
                                 member.totalPoints >= reward.pointThreshold
                                   ? "default"
@@ -2179,11 +2194,6 @@ export default function Dashboard() {
                             >
                               {reward.pointThreshold} {t("dashboard.pointsLabel")}
                             </Badge>
-                            {member.totalPoints >= reward.pointThreshold && (
-                              <span className="text-xs font-semibold text-green-600">
-                                {t("dashboard.youCanClaim")}
-                              </span>
-                            )}
                           </div>
                           <Button
                             onClick={() => redeemRewardMutation.mutate(reward.id)}

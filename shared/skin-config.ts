@@ -132,11 +132,15 @@ export const MIXED_SKIN_ORDER: string[] = [
   "level-boss",           // Gaming
   "dsungaripterus",       // Pterosaur
   
-  // Bonus Adventure Pack (fills remaining slots)
+  // Bonus Adventure Pack and additional character skins
   "pirate-captain",       // Adventure
+  "sky-spark",            // Superheroine
   "wizard-kid",           // Adventure
+  "bright-mind",          // Scientist
   "rock-star",            // Adventure
+  "brave-knight",         // Knight
   "detective-kid",        // Adventure
+  "turbo-trail",          // Race driver
   "nemicolopterus",       // Pterosaur
   "skater-kid",           // Adventure
 ];

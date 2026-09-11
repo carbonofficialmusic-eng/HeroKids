@@ -4,6 +4,7 @@ import { queryClient, apiRequest, getDevHeaders } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle2, Clock, Gift, Sparkles, Home, Users, UserPlus, Share2, X, Check, Pencil, MessageSquarePlus, Lock, Trophy, Star, Zap, Info, Loader2, LogOut } from "lucide-react";
@@ -152,106 +153,44 @@ function RewardBoardCard({ reward, currentPoints, member, t, toast }: {
     },
   });
 
-  const cardCls = isReady
-    ? "from-amber-900/80 via-yellow-900/80 to-amber-800/80 border-amber-400/60 shadow-amber-400/20"
-    : "from-indigo-900/80 via-purple-900/80 to-violet-900/80 border-violet-500/40 shadow-violet-500/10";
-  const iconBgCls = isReady
-    ? "from-amber-500/30 to-yellow-400/20 border-amber-400/40"
-    : "from-violet-500/20 to-purple-500/20 border-violet-400/20";
-
   return (
     <>
-      <div
-        className={`relative rounded-2xl border bg-gradient-to-br ${cardCls} shadow-xl overflow-hidden active:scale-[0.98] transition-transform duration-150`}
+      <Card
+        className="lc-reward-card p-5 relative overflow-visible"
+        data-reward-visual-state={isReady ? "ready" : "locked"}
+        data-testid={`card-reward-${reward.id}`}
       >
-        {/* Shine overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
-        {/* Ready glow ring */}
-        {isReady && (
-          <div className="absolute inset-0 rounded-2xl border-2 border-amber-400/30 pointer-events-none" />
-        )}
-
-        <div className="p-4 flex items-center gap-3">
-          {/* Icon box */}
-          <div className={`relative flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br ${iconBgCls} border flex items-center justify-center shadow-inner overflow-hidden`}>
-            <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-9 h-9 object-contain drop-shadow-sm" textClassName="text-3xl leading-none" />
-            {isReady && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center">
-                <span className="text-[8px] font-bold text-amber-900">✓</span>
-              </div>
-            )}
+        <div className="flex items-start gap-4">
+          <div className="lc-reward-illustration h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 p-1.5">
+            <RewardIconDisplay icon={reward.iconEmoji} imgClassName="w-full h-full object-contain drop-shadow-sm" textClassName="text-4xl leading-none" />
           </div>
-
-          {/* Content */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-base text-white leading-tight mb-1.5" style={{ fontFamily: "Fredoka, sans-serif" }}>
+            <h3 className="font-bold text-lg mb-1" data-testid={`text-reward-title-${reward.id}`}>
               {reward.title}
             </h3>
-            {/* Custom progress bar */}
-            <div className="h-3 rounded-full bg-black/30 overflow-hidden relative mb-1.5">
-              <div
-                className={`h-full rounded-full relative transition-all ${isReady ? "bg-gradient-to-r from-amber-400 to-yellow-300" : "bg-gradient-to-r from-violet-400 to-purple-300"}`}
-                style={{ width: `${percentage}%` }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent rounded-full" />
-                {percentage > 15 && (
-                  <div className="absolute right-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white/60 rounded-full" />
-                )}
-              </div>
+            {reward.description && <p className="text-sm text-muted-foreground mb-2">{reward.description}</p>}
+            <Progress value={percentage} className="lc-reward-progress h-2 mb-3" />
+            <div className="flex items-center gap-2 mb-3">
+              <Badge className="lc-reward-points-badge" variant={isReady ? "default" : "secondary"} data-testid={`badge-reward-points-${reward.id}`}>
+                {reward.pointThreshold} {t("dashboard.pointsLabel")}
+              </Badge>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs" style={{ fontFamily: "Nunito, sans-serif" }}>
-                {isReady ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-amber-400/20 text-amber-300 border-amber-400/40">
-                    <Sparkles className="h-2.5 w-2.5" />{t("kidDashboard.readyToRequest")}
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-white/50">
-                    <Zap className="h-3 w-3 text-amber-400" />{remaining} {t("kidDashboard.pointsRemaining", { count: remaining }).split(" ").slice(-1)[0]}
-                  </span>
-                )}
-              </span>
-              <span className="flex items-center gap-1 text-xs font-bold text-amber-300">
-                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />{reward.pointThreshold}
-              </span>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="flex-shrink-0 flex flex-col items-end gap-2">
-            <button
-              onClick={() => setShowDetails(true)}
-              className="text-white/30 hover:text-white/60 transition-colors"
-              data-testid={`button-info-reward-${reward.id}`}
+            <Button
+              onClick={() => { if (isReady && !redeemMutation.isPending) redeemMutation.mutate(); }}
+              disabled={!isReady || redeemMutation.isPending}
+              size="sm"
+              className="lc-redeem-button w-full"
+              data-testid={`button-request-reward-${reward.id}`}
             >
-              <Info className="h-4 w-4" />
-            </button>
-            {isReady ? (
-              <button
-                onClick={() => { if (!redeemMutation.isPending) redeemMutation.mutate(); }}
-                disabled={redeemMutation.isPending}
-                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-gradient-to-b from-amber-400 to-amber-500 shadow-lg shadow-amber-500/30 active:scale-95 transition-transform border border-amber-300/50 disabled:opacity-50"
-                data-testid={`button-request-reward-${reward.id}`}
-              >
-                {redeemMutation.isPending
-                  ? <Loader2 className="h-4 w-4 text-amber-900 animate-spin" />
-                  : <Gift className="h-4 w-4 text-amber-900" />
-                }
-                <span className="text-xs font-bold text-amber-900 whitespace-nowrap">{t("kidDashboard.now")}</span>
-              </button>
-            ) : (
-              <button
-                className="flex items-center gap-1.5 px-3 h-10 rounded-xl bg-white/5 border border-white/10 cursor-not-allowed"
-                disabled
-                data-testid={`button-request-reward-${reward.id}`}
-              >
-                <Lock className="h-4 w-4 text-white/25" />
-                <span className="text-xs font-bold text-white/25 whitespace-nowrap">{remaining} {t("points")}</span>
-              </button>
-            )}
+              {redeemMutation.isPending
+                ? t("dashboard.redeeming")
+                : isReady
+                  ? t("dashboard.redeemNow")
+                  : t("dashboard.needMorePoints", { count: remaining })}
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       <AlertDialog open={showDetails} onOpenChange={setShowDetails}>
         <AlertDialogContent>
@@ -696,20 +635,19 @@ export default function RewardsBoard() {
         </Link>
 
         {/* Page title */}
-        <div className="flex items-center gap-3 mb-8">
-          {!isParent && (
-            <div className="h-24 w-24 flex items-center justify-center flex-shrink-0 -my-2">
+        <div className={`flex items-center gap-3 mb-8 ${!isParent ? "justify-center" : ""}`}>
+          {!isParent ? (
+            <div className="h-32 w-32 flex items-center justify-center flex-shrink-0 -my-3">
               <img src="/nav-icons/shop.png" alt="" className="w-full h-full object-contain drop-shadow-lg" />
             </div>
+          ) : (
+            <div>
+              <h1 className="lc-rewards-board-title lc-parent-rewards-board-title text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>{t("rewardsBoard.title")}</h1>
+              <p className="lc-rewards-board-subtitle lc-parent-rewards-board-subtitle text-sm text-white/70" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+                {t("rewardsBoard.manageRedemptions")}
+              </p>
+            </div>
           )}
-          <div>
-            <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)" }}>{t("rewardsBoard.title")}</h1>
-            <p className="text-sm text-white/70" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
-              {isParent
-                ? t("rewardsBoard.manageRedemptions")
-                : t("rewardsBoard.trackRewards")}
-            </p>
-          </div>
         </div>
 
         <div className="space-y-8">
@@ -831,7 +769,7 @@ export default function RewardsBoard() {
               const pointsPerPerson = Math.ceil(shared.originalPointsSpent / totalParticipants);
               
               return (
-                <Card key={shared.id} className="lc-rewards-board-card border-primary/20" data-testid={`card-shared-${shared.id}`}>
+                <Card key={shared.id} className="lc-rewards-board-card lc-shared-reward-joinable-card border-primary/20" data-testid={`card-shared-${shared.id}`}>
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3 flex-1">

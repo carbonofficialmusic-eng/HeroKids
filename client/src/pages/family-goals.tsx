@@ -26,7 +26,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { 
-  Target, 
   Plus, 
   TrendingUp, 
   Users, 
@@ -283,12 +282,9 @@ export default function FamilyGoals() {
             </Button>
           </Link>
           <h1 className="text-4xl font-black font-accent flex items-center gap-3">
-            <Target className="h-10 w-10" />
+            <img src={familyGoalsIcon} alt="" className="h-24 w-24 object-contain drop-shadow-sm" />
             {t("familyGoals.title")}
           </h1>
-          <p className="text-muted-foreground mt-2">
-            {t("familyGoals.subtitle")}
-          </p>
         </div>
 
         {member?.role === "parent" && !hasGoalsFeature && !!familyData && (
