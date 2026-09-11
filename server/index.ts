@@ -389,13 +389,13 @@ async function autoSeedSkinsIfNeeded() {
       { id: "school-hero", name: "School Hero", description: "Ordinary student with extraordinary hidden powers!", imageUrl: "📚", pointsRequired: 5500, bonusPoints: 0 },
       
       // Tier 12 - Gaming Legends (Unisex collection, 5560-6000 points) - Bonus Slots: 1, 5, 8
-      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 0 },
+      { id: "pro-gamer", name: "Beat Builder", description: "A young music producer creating joyful rhythms on her colorful beat pad!", imageUrl: "🎵", pointsRequired: 5560, bonusPoints: 0 },
       { id: "pixel-warrior", name: "Pixel Warrior", description: "Retro 8-bit hero from classic gaming era!", imageUrl: "👾", pointsRequired: 5620, bonusPoints: 0 },
-      { id: "controller-king", name: "Controller King", description: "Master of all gaming consoles and controllers!", imageUrl: "🕹️", pointsRequired: 5680, bonusPoints: 0 },
+      { id: "controller-king", name: "Puzzle Pilot", description: "A clever puzzle adventurer charting a course through mysteries in the sky!", imageUrl: "🧩", pointsRequired: 5680, bonusPoints: 0 },
       { id: "vr-champion", name: "VR Champion", description: "Virtual reality hero exploring digital worlds!", imageUrl: "🥽", pointsRequired: 5740, bonusPoints: 0 },
-      { id: "stream-star", name: "Stream Star", description: "Popular streamer bringing joy to millions!", imageUrl: "📺", pointsRequired: 5800, bonusPoints: 15 },
+      { id: "stream-star", name: "Pixel Inventor", description: "A brilliant game inventor building friendly robots and colorful pixel worlds!", imageUrl: "🤖", pointsRequired: 5800, bonusPoints: 15 },
       { id: "arcade-master", name: "Arcade Master", description: "Champion of classic arcade games with high scores!", imageUrl: "🕹️", pointsRequired: 5860, bonusPoints: 0 },
-      { id: "console-hero", name: "Console Hero", description: "Ultimate gaming hero with legendary achievements!", imageUrl: "🎮", pointsRequired: 5920, bonusPoints: 0 },
+      { id: "console-hero", name: "Dance Captain", description: "An energetic dance champion leading every beat with confidence and joy!", imageUrl: "🕺", pointsRequired: 5920, bonusPoints: 0 },
       { id: "level-boss", name: "Level Boss", description: "Final boss character with epic powers and style!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 20 },
       
       // Tier 13 - Pterosaur Sky (Flying Dinosaurs collection, 6060-6500 points) - Bonus Slots: 2, 5, 8
@@ -427,7 +427,49 @@ async function autoSeedSkinsIfNeeded() {
   }
 }
 
-// Add Tier 13 Pterosaur Sky skins incrementally if they don't exist
+async function syncRedesignedGamingSkins() {
+  const redesignedSkins = [
+    {
+      id: "pro-gamer",
+      name: "Beat Builder",
+      description: "A young music producer creating joyful rhythms on her colorful beat pad!",
+      imageUrl: "🎵",
+    },
+    {
+      id: "controller-king",
+      name: "Puzzle Pilot",
+      description: "A clever puzzle adventurer charting a course through mysteries in the sky!",
+      imageUrl: "🧩",
+    },
+    {
+      id: "stream-star",
+      name: "Pixel Inventor",
+      description: "A brilliant game inventor building friendly robots and colorful pixel worlds!",
+      imageUrl: "🤖",
+    },
+    {
+      id: "console-hero",
+      name: "Dance Captain",
+      description: "An energetic dance champion leading every beat with confidence and joy!",
+      imageUrl: "🕺",
+    },
+  ];
+
+  try {
+    for (const skin of redesignedSkins) {
+      await db.update(skins)
+        .set({
+          name: skin.name,
+          description: skin.description,
+          imageUrl: skin.imageUrl,
+        })
+        .where(eq(skins.id, skin.id));
+    }
+    log("✅ Redesigned gaming skin metadata synchronized");
+  } catch (error) {
+    console.error("❌ Error synchronizing redesigned gaming skins:", error);
+  }
+}
 async function addTier13PterosaursIfNeeded() {
   try {
     const tier13Skin = await db.select().from(skins).where(
@@ -697,13 +739,13 @@ async function forceReseedSkinsIfNeeded() {
       { id: "school-hero", name: "School Hero", description: "Ordinary student with extraordinary hidden powers!", imageUrl: "📚", pointsRequired: 5500, bonusPoints: 0 },
       
       // Tier 12 - Gaming Legends (Unisex collection, 5560-6000 points) - Bonus Slots: 1, 5, 8
-      { id: "pro-gamer", name: "Pro Gamer", description: "Esports champion with gaming headset and skills!", imageUrl: "🎮", pointsRequired: 5560, bonusPoints: 0 },
+      { id: "pro-gamer", name: "Beat Builder", description: "A young music producer creating joyful rhythms on her colorful beat pad!", imageUrl: "🎵", pointsRequired: 5560, bonusPoints: 0 },
       { id: "pixel-warrior", name: "Pixel Warrior", description: "Retro 8-bit hero from classic gaming era!", imageUrl: "👾", pointsRequired: 5620, bonusPoints: 0 },
-      { id: "controller-king", name: "Controller King", description: "Master of all gaming consoles and controllers!", imageUrl: "🕹️", pointsRequired: 5680, bonusPoints: 0 },
+      { id: "controller-king", name: "Puzzle Pilot", description: "A clever puzzle adventurer charting a course through mysteries in the sky!", imageUrl: "🧩", pointsRequired: 5680, bonusPoints: 0 },
       { id: "vr-champion", name: "VR Champion", description: "Virtual reality hero exploring digital worlds!", imageUrl: "🥽", pointsRequired: 5740, bonusPoints: 0 },
-      { id: "stream-star", name: "Stream Star", description: "Popular streamer bringing joy to millions!", imageUrl: "📺", pointsRequired: 5800, bonusPoints: 15 },
+      { id: "stream-star", name: "Pixel Inventor", description: "A brilliant game inventor building friendly robots and colorful pixel worlds!", imageUrl: "🤖", pointsRequired: 5800, bonusPoints: 15 },
       { id: "arcade-master", name: "Arcade Master", description: "Champion of classic arcade games with high scores!", imageUrl: "🕹️", pointsRequired: 5860, bonusPoints: 0 },
-      { id: "console-hero", name: "Console Hero", description: "Ultimate gaming hero with legendary achievements!", imageUrl: "🎮", pointsRequired: 5920, bonusPoints: 0 },
+      { id: "console-hero", name: "Dance Captain", description: "An energetic dance champion leading every beat with confidence and joy!", imageUrl: "🕺", pointsRequired: 5920, bonusPoints: 0 },
       { id: "level-boss", name: "Level Boss", description: "Final boss character with epic powers and style!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 20 },
       
       // Tier 13 - Pterosaur Sky (Flying Dinosaurs collection, 6060-6500 points) - Bonus Slots: 2, 5, 8
@@ -929,6 +971,9 @@ async function ensurePinboardTable() {
 
   // Add Knight, Superheroine, Scientist & Race Driver to complete the final row
   await addFinalCharacterSkinsIfNeeded();
+
+  // Update renamed gaming skins for existing databases after all seed migrations
+  await syncRedesignedGamingSkins();
 
   // Ensure is_admin_granted column exists
   try {

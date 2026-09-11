@@ -12,7 +12,7 @@ export function getSkinImageUrl(skinId: string): string {
 }
 
 // Bump this version when background images are updated to bust the immutable cache
-const BACKGROUND_VERSION = 2;
+const BACKGROUND_VERSION = 3;
 
 export function getSkinBackgroundUrl(skinId: string): string {
   const path = `/skins/backgrounds/${skinId}.png?v=${BACKGROUND_VERSION}`;
