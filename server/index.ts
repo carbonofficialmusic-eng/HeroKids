@@ -373,7 +373,7 @@ async function autoSeedSkinsIfNeeded() {
       { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 0 },
       { id: "iron-guardian", name: "Iron Guardian", description: "Heavy armored mech designed for defense and protection!", imageUrl: "🛡️", pointsRequired: 4680, bonusPoints: 0 },
       { id: "plasma-bot", name: "Plasma Bot", description: "Energy-powered robot with glowing plasma core!", imageUrl: "💫", pointsRequired: 4740, bonusPoints: 0 },
-      { id: "steel-samurai", name: "Steel Samurai", description: "Japanese-inspired mech with katana and honor code!", imageUrl: "⚔️", pointsRequired: 4800, bonusPoints: 0 },
+      { id: "steel-samurai", name: "Popstar", description: "A joyful young singer lighting up the stage with music and confidence!", imageUrl: "🎤", pointsRequired: 4800, bonusPoints: 0 },
       { id: "thunder-mech", name: "Thunder Mech", description: "Electric mech channeling lightning through its systems!", imageUrl: "⚡", pointsRequired: 4860, bonusPoints: 15 },
       { id: "neon-droid", name: "Neon Droid", description: "Colorful robot with vibrant LED displays!", imageUrl: "✨", pointsRequired: 4920, bonusPoints: 0 },
       { id: "battle-commander", name: "Battle Commander", description: "Elite mech leader coordinating robot squadrons!", imageUrl: "🎖️", pointsRequired: 5000, bonusPoints: 15 },
@@ -452,6 +452,12 @@ async function syncRedesignedGamingSkins() {
       name: "Dance Captain",
       description: "An energetic dance champion leading every beat with confidence and joy!",
       imageUrl: "🕺",
+    },
+    {
+      id: "steel-samurai",
+      name: "Popstar",
+      description: "A joyful young singer lighting up the stage with music and confidence!",
+      imageUrl: "🎤",
     },
   ];
 
@@ -723,7 +729,7 @@ async function forceReseedSkinsIfNeeded() {
       { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 0 },
       { id: "iron-guardian", name: "Iron Guardian", description: "Heavy armored mech designed for defense and protection!", imageUrl: "🛡️", pointsRequired: 4680, bonusPoints: 0 },
       { id: "plasma-bot", name: "Plasma Bot", description: "Energy-powered robot with glowing plasma core!", imageUrl: "💫", pointsRequired: 4740, bonusPoints: 0 },
-      { id: "steel-samurai", name: "Steel Samurai", description: "Japanese-inspired mech with katana and honor code!", imageUrl: "⚔️", pointsRequired: 4800, bonusPoints: 0 },
+      { id: "steel-samurai", name: "Popstar", description: "A joyful young singer lighting up the stage with music and confidence!", imageUrl: "🎤", pointsRequired: 4800, bonusPoints: 0 },
       { id: "thunder-mech", name: "Thunder Mech", description: "Electric mech channeling lightning through its systems!", imageUrl: "⚡", pointsRequired: 4860, bonusPoints: 15 },
       { id: "neon-droid", name: "Neon Droid", description: "Colorful robot with vibrant LED displays!", imageUrl: "✨", pointsRequired: 4920, bonusPoints: 0 },
       { id: "battle-commander", name: "Battle Commander", description: "Elite mech leader coordinating robot squadrons!", imageUrl: "🎖️", pointsRequired: 5000, bonusPoints: 15 },
