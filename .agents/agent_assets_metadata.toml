@@ -346,3 +346,31 @@ mtime_ms = 1789170620139
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/7edcc0f8-f445-4ba7-a24c-74dcbe47ba5c/cfe5f254-c779-419c-9f1b-c7ebb5cc46ef"
 storage_version_token = "1789170636626694"
 content_type = "image/png"
+
+[[outputs]]
+id = "awE5DkU9tF7Hk6eicDEZ0"
+uri = "file://attached_assets/generated_images/legacy-pastel-logo-star-guardian-concept.png"
+type = "image"
+title = "Star Guardian – Logo-näher"
+description = "Pastelliger 3D-Avatar mit klarer Türkis-Gold-Silhouette und klassischer Logo-Heldenwirkung."
+logical_id = "95b1726d-99e9-444a-a83b-37e59e73bf61"
+content_hash = "sha256:12447c8a3e625c7dc4861117acca221bc65161bf52ff9cac96623ed28963b9aa"
+size = 1001970
+mtime_ms = 1789170798839
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/95b1726d-99e9-444a-a83b-37e59e73bf61/f3c98984-d951-4275-bbda-531a942e7177"
+storage_version_token = "1789170809155867"
+content_type = "image/png"
+
+[[outputs]]
+id = "DyNfaU5VtSDFszuJdDwPE"
+uri = "file://attached_assets/generated_images/legacy-pastel-logo-shield-blaze-concept.png"
+type = "image"
+title = "Shield Blaze – Logo-näher"
+description = "Pastelliger Materie-Avatar mit kräftigeren Konturen, Cape und vereinfachtem Heldensymbol."
+logical_id = "2bcb8e66-65f4-427c-b4e3-e7ed5e080883"
+content_hash = "sha256:29648a8c836617277c52df57ce5ce4d417bec53eec5a74ebeba9d07ab5bca455"
+size = 1061531
+mtime_ms = 1789170800599
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/2bcb8e66-65f4-427c-b4e3-e7ed5e080883/3e62e678-829d-4bc1-9604-3d8b545fd547"
+storage_version_token = "1789170810238944"
+content_type = "image/png"
