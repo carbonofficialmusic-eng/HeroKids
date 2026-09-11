@@ -290,3 +290,59 @@ mtime_ms = 1789168073475
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/c33fbe13-b983-464d-a4a2-3be3f6bc6f3e/244ddd8c-c20a-483c-8695-23617f7d9b7d"
 storage_version_token = "1789168087334513"
 content_type = "image/png"
+
+[[outputs]]
+id = "sZD8rL_yuMCHftaPsQPiw"
+uri = "file://attached_assets/generated_images/legacy-pastel-star-guardian-concept.png"
+type = "image"
+title = "Star Guardian – Pastell-Entwurf"
+description = "Rothaarige Heldin in weicher, klassischer Little-Champs-Superheldenrichtung."
+logical_id = "9b226d92-89ce-4bf2-894d-691cb7652f23"
+content_hash = "sha256:1d62d8e3cfaa6094b806dde5fc86e9150d2133b6421b888cc22c5af8e7743d36"
+size = 1011737
+mtime_ms = 1789170610084
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/9b226d92-89ce-4bf2-894d-691cb7652f23/f52ba55c-b1c3-485e-b93f-9cae816a42ae"
+storage_version_token = "1789170633020449"
+content_type = "image/png"
+
+[[outputs]]
+id = "RrtjmhyAwVJjkPOc5LZWK"
+uri = "file://attached_assets/generated_images/legacy-pastel-star-guardian-background-concept.png"
+type = "image"
+title = "Star Guardian – Pastell-Hintergrund"
+description = "Märchenhafte Sternwarte mit zentralem Motiv für Telefon-Ausschnitte."
+logical_id = "65b3bed0-269a-4a04-b8d1-3d63a4dd2c5f"
+content_hash = "sha256:7adf76bddc58fe09f7a43a98f63139092b5fb7eb9b1f95c674ef4edaf2459921"
+size = 1390941
+mtime_ms = 1789170619631
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/65b3bed0-269a-4a04-b8d1-3d63a4dd2c5f/9aa07ff4-3c33-42b6-9770-acd58f064abe"
+storage_version_token = "1789170634236997"
+content_type = "image/png"
+
+[[outputs]]
+id = "Hro1RwHmzS3h9U9bxlfZC"
+uri = "file://attached_assets/generated_images/legacy-pastel-shield-blaze-concept.png"
+type = "image"
+title = "Shield Blaze – Pastell-Entwurf"
+description = "Materie-Heldin mit klassischem Kostüm und sanften Kristallfarben."
+logical_id = "47a7a2c3-9dd5-416d-af97-f4d760a6fc82"
+content_hash = "sha256:a38b4a311d49809a4bb79f37dc8ea5c70fdef2bdea2fec8eb9475e88bf46c4bb"
+size = 1136049
+mtime_ms = 1789170613304
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/47a7a2c3-9dd5-416d-af97-f4d760a6fc82/59d69783-8dc4-4860-86ac-60b259f029e7"
+storage_version_token = "1789170635412747"
+content_type = "image/png"
+
+[[outputs]]
+id = "1ldyIqd6mXWFiuUXxgv2b"
+uri = "file://attached_assets/generated_images/legacy-pastel-shield-blaze-background-concept.png"
+type = "image"
+title = "Shield Blaze – Pastell-Hintergrund"
+description = "Natürliche Kristallwelt statt futuristischem Portal."
+logical_id = "7edcc0f8-f445-4ba7-a24c-74dcbe47ba5c"
+content_hash = "sha256:d8d29ee51cffb4b514314f36f9acc9d5c761069c6cc4cbc49b0c4cd4529dd029"
+size = 1719939
+mtime_ms = 1789170620139
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/7edcc0f8-f445-4ba7-a24c-74dcbe47ba5c/cfe5f254-c779-419c-9f1b-c7ebb5cc46ef"
+storage_version_token = "1789170636626694"
+content_type = "image/png"
