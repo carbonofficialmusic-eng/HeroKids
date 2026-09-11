@@ -233,27 +233,60 @@ id = "jDcqlYKu7xhdwjCsAa7Eo"
 uri = "file://client/public/skins/backgrounds/neon-droid.png"
 type = "image"
 title = "Neon Droid – Hintergrundbild"
+logical_id = "10627836-bab3-4da7-828c-b76703d5115e"
 
 [[outputs]]
 id = "lgjuJDieXqGd0dKwqcbrZ"
 uri = "file://client/public/skins/backgrounds/brave-explorer.png"
 type = "image"
 title = "Mutiger Entdecker – Hintergrundbild"
+logical_id = "b64dad99-c5f0-410b-afd4-5ebd8f828c42"
 
 [[outputs]]
 id = "NPg128LAV2Htggw48V_VU"
 uri = "file://ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png"
 type = "image"
 title = "Splash Screen (neu)"
+logical_id = "08ff22ea-7a93-43ae-891a-194519da0173"
 
 [[outputs]]
 id = "LLBrQ-QkaoLMCAvL80b41"
 uri = "file://ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
 type = "image"
 title = "App Icon (neu)"
+logical_id = "86addfbc-0f93-42e2-b607-50aef312c962"
 
 [[outputs]]
 id = "5BnPfBDCsaaPaAVIJQKlB"
 uri = "file://IOS_SANDBOX_PURCHASE_GUIDE.md"
 type = "text"
 title = "Anleitung: iOS Sandbox-Kauf testen (Task #149)"
+logical_id = "24d4f9c8-1c0d-49cf-b48a-025a4616dd8d"
+
+[[outputs]]
+id = "t_0DqSfL7zwcp9mYvAXp1"
+uri = "file://attached_assets/generated_images/legacy-hero-modern-concept.png"
+type = "image"
+title = "Moderner Legacy-Held – Entwurf"
+description = "Unverbindlicher Charakterentwurf in Türkis, Goldorange und Marineblau. Noch nicht in die App eingebaut."
+logical_id = "74b3e6fe-85b6-4167-8152-9f62cc510090"
+content_hash = "sha256:79705efe661aa3ec9ae8a9338f7314ec207100954516dc4487f5993edf151508"
+size = 1090078
+mtime_ms = 1789168068271
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/74b3e6fe-85b6-4167-8152-9f62cc510090/eba836da-5281-4218-9198-9dcf13cbc8e2"
+storage_version_token = "1789168086032605"
+content_type = "image/png"
+
+[[outputs]]
+id = "1ngU6km4DkS7odjgHAk9N"
+uri = "file://attached_assets/generated_images/legacy-hero-modern-background-concept.png"
+type = "image"
+title = "Legacy-Helden-Hintergrund – Entwurf"
+description = "Passender moderner Zukunftsstadt-Hintergrund im bestehenden Little-Champs-Farbkonzept. Noch nicht eingebaut."
+logical_id = "c33fbe13-b983-464d-a4a2-3be3f6bc6f3e"
+content_hash = "sha256:cd6c49679498c45fa88cbbf48cf3bdb61945cef3c0cc296f4a688a3fba94957a"
+size = 1626750
+mtime_ms = 1789168073475
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/c33fbe13-b983-464d-a4a2-3be3f6bc6f3e/244ddd8c-c20a-483c-8695-23617f7d9b7d"
+storage_version_token = "1789168087334513"
+content_type = "image/png"
