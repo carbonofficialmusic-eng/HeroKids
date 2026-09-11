@@ -8,11 +8,15 @@ import { STARTER_SKIN_ID } from "@shared/skin-config";
 const NATIVE_SKIN_ASSET_ORIGIN = "https://littlechamps.net";
 
 export function getSkinImageUrl(skinId: string): string {
-  return `/skins/avatars/${skinId}.png`;
+  return `/skins/avatars/${skinId}.png?v=${AVATAR_VERSION}`;
 }
 
+// Bump these versions whenever the corresponding skin assets are updated.
+// Native WebViews and the production CDN cache these files aggressively.
+const AVATAR_VERSION = 2;
+
 // Bump this version when background images are updated to bust the immutable cache
-const BACKGROUND_VERSION = 3;
+const BACKGROUND_VERSION = 4;
 
 export function getSkinBackgroundUrl(skinId: string): string {
   const path = `/skins/backgrounds/${skinId}.png?v=${BACKGROUND_VERSION}`;

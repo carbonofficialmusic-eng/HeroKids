@@ -13,3 +13,4 @@
 - [Skip CI Convention](skip-ci-convention.md) — web-only pushes get [skip ci] in commit msg; iOS builds only when ios/ or capacitor.config.ts changed; use ShellExec for commit, gitPush() for push
 - [RevenueCat downgrade verification](revenuecat-downgrade-verification.md) — verify live entitlements before any expiration/billing event removes paid access
 - [Light-only interface design](light-only-interface-design.md) — future visual changes target only Light Mode; the approved Dark Mode must remain unchanged
+- [Legacy hero visual direction](legacy-hero-visual-direction.md) — approved modern hero style keeps the logo’s turquoise, gold-orange, and deep navy palette
