@@ -1082,6 +1082,24 @@ html {
   color: #e1f2ff;
   background: rgba(11,40,61,.75);
 }
+.lc-edit-member-dialog {
+  overflow-y: auto;
+}
+.lc-edit-member-dialog-form {
+  display: block;
+}
+.lc-edit-member-dialog-body {
+  padding: .1rem .2rem 1rem;
+}
+.lc-edit-member-dialog-body > * {
+  min-width: 0;
+}
+.lc-edit-member-dialog-actions {
+  margin: 0;
+  padding: .8rem .1rem max(.15rem, env(safe-area-inset-bottom, 0px)) !important;
+  border-top: 1px solid var(--lc-editor-line);
+  background: var(--lc-editor-bg);
+}
 .lc-reward-dialog {
   grid-template-rows: auto minmax(0, 1fr) auto;
   overflow-x: hidden;
@@ -3199,6 +3217,16 @@ html:not(.dark) .lc-request-dialog [data-testid="button-submit-request"] {
   box-shadow: 0 3px 0 #c74700, 0 7px 12px rgba(255, 93, 0, .2) !important;
 }
 html:not(.dark) .lc-add-member-dialog [data-testid="button-submit-member"] {
+  color: #fff !important;
+  border-color: rgb(255, 93, 0) !important;
+  background: rgb(255, 93, 0) !important;
+  box-shadow: 0 3px 0 #c74700, 0 7px 12px rgba(255, 93, 0, .2) !important;
+}
+html:not(.dark) .lc-edit-member-dialog-actions {
+  border-color: #e4ebf0;
+  background: #fff;
+}
+html:not(.dark) .lc-edit-member-dialog [data-testid="button-submit-edit"] {
   color: #fff !important;
   border-color: rgb(255, 93, 0) !important;
   background: rgb(255, 93, 0) !important;

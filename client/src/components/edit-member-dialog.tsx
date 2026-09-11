@@ -35,6 +35,7 @@ import { avatarAssets, colorOptions } from "@/lib/avatarAssets";
 import { getAvatarUrl, SKIN_IMAGES } from "@/lib/skins";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { FamilyMember } from "@shared/schema";
+import { UserRoundPen } from "lucide-react";
 
 const editMemberSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
@@ -202,16 +203,20 @@ export function EditMemberDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto" data-testid="dialog-edit-member" onOpenAutoFocus={(e) => e.preventDefault()}>
-        <DialogHeader>
-          <DialogTitle>{t('memberDialogs.editProfile')}</DialogTitle>
+      <DialogContent className="lc-game-dialog lc-edit-member-dialog sm:max-w-[500px]" data-testid="dialog-edit-member" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <DialogHeader className="lc-game-dialog-header">
+          <DialogTitle className="flex items-center gap-2 text-2xl font-accent">
+            <UserRoundPen className="h-6 w-6 shrink-0 text-primary" />
+            {t('memberDialogs.editProfile')}
+          </DialogTitle>
           <DialogDescription>
             {t('memberDialogs.editProfileDesc')}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="lc-edit-member-dialog-form">
+            <div className="lc-game-dialog-form lc-edit-member-dialog-body space-y-6">
             <FormField
               control={form.control}
               name="displayName"
@@ -351,8 +356,9 @@ export function EditMemberDialog({
               onClearCustomUpload={handleClearCustomUpload}
               uploadedAvatarUrl={uploadedAvatarUrl}
             />
+            </div>
 
-            <DialogFooter>
+            <DialogFooter className="lc-game-dialog-actions lc-edit-member-dialog-actions">
               <Button
                 type="button"
                 variant="outline"
