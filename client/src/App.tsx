@@ -278,6 +278,77 @@ function Router() {
     };
   }, []);
 
+  // iOS browser rotation hit-test repair:
+  // Safari/WKWebView can keep an old compositor snapshot (including its touch
+  // regions) after portrait ↔ landscape rotation. The page looks correct, but
+  // taps only work at the element's former coordinates; pressing there briefly
+  // reveals a duplicate "ghost" button. Native-only recovery helpers do not run
+  // inside the Replit iOS browser, so rebuild the root hit-test layer here.
+  useEffect(() => {
+    const isIOSWebKit =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+      /WebKit/.test(navigator.userAgent);
+    if (!isIOSWebKit) return;
+
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+    let repaintFrame: number | null = null;
+
+    const rebuildHitTestLayer = () => {
+      const root = document.getElementById("root");
+      if (!root) return;
+
+      const savedTop = root.scrollTop;
+      const previousPointerEvents = root.style.pointerEvents;
+      const previousVisibility = root.style.visibility;
+
+      // Remove the stale interactive/compositor layer for one frame.
+      root.style.pointerEvents = "none";
+      root.style.visibility = "hidden";
+      void document.documentElement.getBoundingClientRect();
+      void root.getBoundingClientRect();
+
+      if (repaintFrame !== null) cancelAnimationFrame(repaintFrame);
+      repaintFrame = requestAnimationFrame(() => {
+        root.style.visibility = previousVisibility;
+        root.style.pointerEvents = previousPointerEvents;
+        root.scrollTop = savedTop;
+
+        // Reading the interactive controls after restoring visibility makes
+        // WebKit rebuild their hit regions at the settled coordinates.
+        root.querySelectorAll<HTMLElement>(
+          "button, a, input, select, textarea, [role='button']",
+        ).forEach((element) => {
+          void element.getBoundingClientRect();
+        });
+        repaintFrame = null;
+      });
+    };
+
+    const scheduleRepair = () => {
+      timers.forEach(clearTimeout);
+      timers.clear();
+      // iOS reports several intermediate viewport sizes while rotating. Repair
+      // after the first layout and once more after browser chrome has settled.
+      [180, 500, 900].forEach((delay) => {
+        const timer = setTimeout(() => {
+          timers.delete(timer);
+          rebuildHitTestLayer();
+        }, delay);
+        timers.add(timer);
+      });
+    };
+
+    window.addEventListener("orientationchange", scheduleRepair);
+    screen.orientation?.addEventListener("change", scheduleRepair);
+
+    return () => {
+      window.removeEventListener("orientationchange", scheduleRepair);
+      screen.orientation?.removeEventListener("change", scheduleRepair);
+      timers.forEach(clearTimeout);
+      if (repaintFrame !== null) cancelAnimationFrame(repaintFrame);
+    };
+  }, []);
+
   // Google OAuth native deep-link: herokids://auth-done?token=<exchange_token>
   // SFSafariViewController and WKWebView have separate cookie stores on iOS, so
   // simply closing the browser doesn't give WKWebView a session.  We bridge this
