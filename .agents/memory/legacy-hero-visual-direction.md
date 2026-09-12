@@ -7,7 +7,7 @@ Legacy heroes should use warm polished 3D storybook illustration with rounded ch
 
 **Why:** After comparing futuristic, highly simplified, and intermediate concepts, the user explicitly selected the warm storybook style of their supplied Little Champs ensemble artwork on September 12, 2026.
 
-**How to apply:** Use the supplied ensemble-style direction for future Legacy additions or revisions. Keep avatar art on white, environments character-free, and central composition intact. Preserve agreed cast diversity when regenerating the collection. Do not copy the ninja theme into other worlds; transfer only its richness, spatial depth, materials, and density of meaningful details.
+**How to apply:** Use the supplied ensemble-style direction for future Legacy additions or revisions. Keep avatar art on white, environments character-free, and the identifying landmark readable in narrow phone crops. Preserve agreed cast diversity when regenerating the collection. Do not copy the ninja theme into other worlds; transfer only its richness, spatial depth, materials, and density of meaningful details. Vary scene composition across a series with paths, bridges, stairs, terraces, docks, furnished interiors, and asymmetrical workspaces. Limit circular foreground stages or arenas to one or two backgrounds per collection rather than making them the default.
 
 Kometensprint is intentionally represented by a refreshed version of the blonde, unmasked female superhero from the Little Champs logo, with turquoise suit, gold cape, and lightning emblem.
 
