@@ -430,3 +430,31 @@ mtime_ms = 1789171476303
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/5aa1cc4a-a9f9-49bd-8031-ab8ef718b77c/695877a5-d1d4-4b87-9304-68bd79377837"
 storage_version_token = "1789171489085082"
 content_type = "image/png"
+
+[[outputs]]
+id = "NeTcVO0jTRbjGYJbLhm_G"
+uri = "file://attached_assets/generated_images/style-study-abstract-artistic-wide.png"
+type = "image"
+title = "Stilprobe A – Abstrakt"
+description = "Malerische, grafische Formen mit Papier- und Gouache-Textur. Ausdrucksstark, aber ohne digitalen Gaming-Look."
+logical_id = "825f0988-26b4-401f-843b-1a6e15b23ab5"
+content_hash = "sha256:87254b2fa5fa5a23d8f5ecd361926762d049e5fa3886be454ef3b879f8644393"
+size = 1394974
+mtime_ms = 1789175480867
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/825f0988-26b4-401f-843b-1a6e15b23ab5/f1ac75b6-d12d-44ca-a88e-61c655587049"
+storage_version_token = "1789175492564274"
+content_type = "image/png"
+
+[[outputs]]
+id = "jwFL6kO-ngj1sOlrh0PYi"
+uri = "file://attached_assets/generated_images/style-study-simple-artistic-wide.png"
+type = "image"
+title = "Stilprobe B – Einfach und kunstvoll"
+description = "Ruhige, reduzierte Kinderbuch-Landschaft mit viel Freiraum und handgemalter Wirkung."
+logical_id = "833d3241-42b2-4a8c-9c3f-91fc731cef02"
+content_hash = "sha256:716438ea360fd730124f2a5d25a7355dac4400451ac33a3f129650470539a61b"
+size = 1091837
+mtime_ms = 1789175481819
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/833d3241-42b2-4a8c-9c3f-91fc731cef02/9052dee7-ae02-454b-928a-157e07f1cf8c"
+storage_version_token = "1789175493873093"
+content_type = "image/png"
