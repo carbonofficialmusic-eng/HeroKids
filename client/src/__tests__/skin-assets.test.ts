@@ -20,7 +20,7 @@ describe("skin asset URLs", () => {
       "/skins/avatars/junior-champion.png?v=7",
     );
     expect(getSkinBackgroundUrl("junior-champion")).toBe(
-      "/skins/backgrounds/junior-champion.png?v=10",
+      "/skins/backgrounds/junior-champion.png?v=12",
     );
   });
 
@@ -31,10 +31,10 @@ describe("skin asset URLs", () => {
       "/skins/avatars/junior-champion.png?v=7",
     );
     expect(getSkinBackgroundUrl("junior-champion")).toBe(
-      "/skins/backgrounds/junior-champion.png?v=10",
+      "/skins/backgrounds/junior-champion.png?v=12",
     );
     expect(getSkinBackgroundUrl("brave-explorer")).toBe(
-      "https://littlechamps.net/skins/backgrounds/brave-explorer.png?v=10",
+      "https://littlechamps.net/skins/backgrounds/brave-explorer.png?v=12",
     );
   });
 });
