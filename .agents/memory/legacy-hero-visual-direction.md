@@ -9,6 +9,12 @@ Legacy heroes should use warm polished 3D storybook illustration with rounded ch
 
 **How to apply:** Use the supplied ensemble-style direction for future Legacy additions or revisions. Keep avatar art on white and environments character-free. Compose the central vertical phone crop as the most visually meaningful area, with recognizable detail behind and around the avatar rather than an empty central clearing; preserve enough tonal contrast for the avatar to remain readable. Preserve agreed cast diversity when regenerating the collection. Do not copy the ninja theme into other worlds; transfer only its richness, spatial depth, materials, and density of meaningful details. Vary scene composition across a series with paths, bridges, stairs, terraces, docks, furnished interiors, and asymmetrical workspaces. Limit circular foreground stages or arenas to one or two backgrounds per collection rather than making them the default.
 
+For responsive background composition, use Space Cadet as the structural reference: the central phone crop should form a complete, lightly detailed scene on its own, while landscape orientation reveals meaningful new parts of the world at both sides rather than mere decorative extensions.
+
+**Why:** The user explicitly confirmed this center-first, expanding-world composition after reviewing the abstract Forest Guardian study.
+
+**How to apply:** Place the core atmosphere and one recognizable motif in the center with controlled detail and avatar contrast. Use the outer thirds for additional landmarks, creatures-free props, vegetation, architecture, or narrative clues that reward the wider view without being required to understand the center.
+
 Kometensprint is intentionally represented by a refreshed version of the blonde, unmasked female superhero from the Little Champs logo, with turquoise suit, gold cape, and lightning emblem.
 
 **Why:** The user explicitly chose the female logo hero to replace the forest-elf version of this Legacy character.
