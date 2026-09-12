@@ -416,3 +416,17 @@ mtime_ms = 1789171268479
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/81aa079d-60c7-4c28-b961-f4cdb79cbf0e/f20b1e26-5f8a-4dc6-8ea7-232bf6685071"
 storage_version_token = "1789171282392607"
 content_type = "image/png"
+
+[[outputs]]
+id = "XbMircWaEtWUc4QEyUsTT"
+uri = "file://attached_assets/generated_images/shield-blaze-reference-style-concept.png"
+type = "image"
+title = "Shield Blaze – Stil der neuen Referenz"
+description = "Ein einzelner Legacy-Held im warmen 3D-Storybook-Stil des hochgeladenen Little-Champs-Bildes."
+logical_id = "5aa1cc4a-a9f9-49bd-8031-ab8ef718b77c"
+content_hash = "sha256:9ab5cec2bfe6e693881274e9fa4db52c3fab343c4fa158a62b0b337c6e378352"
+size = 812938
+mtime_ms = 1789171476303
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/5aa1cc4a-a9f9-49bd-8031-ab8ef718b77c/695877a5-d1d4-4b87-9304-68bd79377837"
+storage_version_token = "1789171489085082"
+content_type = "image/png"
