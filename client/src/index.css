@@ -2774,6 +2774,15 @@ html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard) .lc-task-member-completed 
   background: rgb(255, 93, 0) !important;
   box-shadow: 0 2px 0 rgba(190, 61, 0, .22), 0 4px 9px rgba(255, 93, 0, .18) !important;
 }
+
+html:not(.dark) .lc-reward-complete-button {
+  background: #f97316;
+  color: #ffffff;
+}
+
+html:not(.dark) .lc-reward-complete-button:hover {
+  background: #ea580c;
+}
 html:not(.dark) .lc-dashboard .lc-icon-bubble {
   background: rgba(255,255,255,.28);
   box-shadow: inset 0 1px rgba(255,255,255,.35);

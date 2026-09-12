@@ -1139,6 +1139,7 @@ export default function RewardsBoard() {
                       <Button
                         size="sm"
                         variant="default"
+                        className="lc-reward-complete-button"
                         onClick={() => updateStatusMutation.mutate({ 
                           id: redemption.id, 
                           status: "completed" 
