@@ -995,6 +995,11 @@ html {
 .lc-task-dialog-actions button { min-height: 2.85rem; border-radius: .7rem; }
 .lc-task-dialog-actions button[type="submit"] { color: #05283a; border-color: #79eaff; background: linear-gradient(135deg,#16bce7,#65e4f2); box-shadow: 0 4px 0 #087697; }
 .lc-task-dialog-actions button[type="button"] { border-color: rgba(115,191,226,.52); color: #e1f2ff; background: rgba(11,40,61,.75); }
+/* Give the form the full visual viewport while the on-screen keyboard is open.
+   The footer returns as soon as the field blurs (for example via iOS "Done"). */
+.lc-task-dialog:has(input:focus, textarea:focus) .lc-task-dialog-actions {
+  display: none;
+}
 @media (max-width: 480px) {
   .lc-task-dialog { width: calc(100% - .75rem); padding: .8rem; border-radius: .8rem; }
   .lc-task-dialog-members { grid-template-columns: repeat(2, minmax(0,1fr)); }
