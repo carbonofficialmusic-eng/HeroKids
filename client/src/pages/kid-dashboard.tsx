@@ -577,13 +577,12 @@ function TaskCard({
     (task.sharedMemberCompletions && task.sharedMemberCompletions.length > 1) ||
     (task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1);
 
-  // For multi-member tasks the displayed states differ from the raw status:
-  // - No yellow "waiting for approval" — suppress isPending in the UI
-  // - Green "completed & approved" only when ALL members are approved (allMembersCompleted)
-  // - If THIS member submitted but not all are approved yet → show as a neutral submitted state
-  const showAsApproved = isMultiMemberSharedTask ? allMembersCompleted : isApproved;
+  // For multi-member tasks, always reflect THIS member's approval state.
+  // Other members still being pending must not make an already-approved
+  // completion look like it is waiting for parental approval.
+  const showAsApproved = isMultiMemberSharedTask ? (isApproved || allMembersCompleted) : isApproved;
   const showAsPending  = isMultiMemberSharedTask ? false : isPending;
-  const showAsSubmitted = isMultiMemberSharedTask && (isPending || (isApproved && !allMembersCompleted));
+  const showAsSubmitted = isMultiMemberSharedTask && isPending;
 
   // Get assigned member names for message (prefer new style over legacy)
   const assignedMemberNames = task.assignedMemberCompletions?.map(m => m.displayName).join(' & ') || 
