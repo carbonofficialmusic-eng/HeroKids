@@ -472,3 +472,17 @@ mtime_ms = 1789175728272
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/f23da9f6-5f48-4b6d-b07d-23bf2a43626e/7e60228a-9296-41f6-a0e1-17c88ef2b730"
 storage_version_token = "1789175734247592"
 content_type = "image/png"
+
+[[outputs]]
+id = "hzMjZsJmCg1_GbA2LF0Us"
+uri = "file://attached_assets/generated_images/style-study-forest-guardian-abstract-centered-wide.png"
+type = "image"
+title = "Abstrakter Waldwächter – zentrale Details"
+description = "Überarbeitete Stilprobe mit einem bildstarken mittleren Telefon-Ausschnitt und ausreichend Kontrast für den gedachten Avatar."
+logical_id = "6d922cf6-432e-4b3c-86cf-fd595e092f07"
+content_hash = "sha256:3e56a58ab6425f33c745fe9215474006bcdc7bad0d65377ec4b639f663535922"
+size = 1971035
+mtime_ms = 1789175883928
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/6d922cf6-432e-4b3c-86cf-fd595e092f07/c4129703-6c3f-4ec9-a143-4d3f69d86908"
+storage_version_token = "1789175899619911"
+content_type = "image/png"
