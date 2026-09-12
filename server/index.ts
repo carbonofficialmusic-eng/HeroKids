@@ -363,10 +363,10 @@ async function autoSeedSkinsIfNeeded() {
       { id: "lightning-speedster", name: "Lightning Speedster", description: "Super-fast hero in yellow suit with electric powers!", imageUrl: "⚡", pointsRequired: 4120, bonusPoints: 0 },
       { id: "tech-hero", name: "Tech Hero", description: "High-tech hero in purple armor with advanced gadgets!", imageUrl: "🤖", pointsRequired: 4180, bonusPoints: 10 },
       { id: "nature-guardian", name: "Nature Guardian", description: "Eco-hero in green suit protecting the environment!", imageUrl: "🌿", pointsRequired: 4240, bonusPoints: 0 },
-      { id: "ice-hero", name: "Ice Hero", description: "Cool hero in blue frost suit with ice powers!", imageUrl: "❄️", pointsRequired: 4300, bonusPoints: 0 },
-      { id: "fire-hero", name: "Fire Hero", description: "Blazing hero in orange flame suit with heat powers!", imageUrl: "🔥", pointsRequired: 4360, bonusPoints: 0 },
+      { id: "ice-hero", name: "Capoeira Champion", description: "Joyful capoeira champion combining rhythm, balance, and movement!", imageUrl: "☀️", pointsRequired: 4300, bonusPoints: 0 },
+      { id: "fire-hero", name: "Kung Fu Master", description: "Focused kung fu master combining balance, patience, and skill!", imageUrl: "☯️", pointsRequired: 4360, bonusPoints: 0 },
       { id: "shadow-ninja", name: "Shadow Ninja", description: "Stealthy ninja hero in black and purple suit!", imageUrl: "🥷", pointsRequired: 4420, bonusPoints: 20 },
-      { id: "shield-hero", name: "Shield Hero", description: "Defensive hero in gold armor with energy shields!", imageUrl: "🛡️", pointsRequired: 4500, bonusPoints: 0 },
+      { id: "shield-hero", name: "Karate Heroine", description: "Confident karate heroine training focus, respect, and courage!", imageUrl: "🥋", pointsRequired: 4500, bonusPoints: 0 },
       
       // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points) - Bonus Slots: 2, 6, 8
       { id: "titan-mech", name: "Titan Mech", description: "Massive mech warrior with powerful hydraulic arms!", imageUrl: "🤖", pointsRequired: 4560, bonusPoints: 0 },
@@ -719,10 +719,10 @@ async function forceReseedSkinsIfNeeded() {
       { id: "lightning-speedster", name: "Lightning Speedster", description: "Super-fast hero in yellow suit with electric powers!", imageUrl: "⚡", pointsRequired: 4120, bonusPoints: 0 },
       { id: "tech-hero", name: "Tech Hero", description: "High-tech hero in purple armor with advanced gadgets!", imageUrl: "🤖", pointsRequired: 4180, bonusPoints: 10 },
       { id: "nature-guardian", name: "Nature Guardian", description: "Eco-hero in green suit protecting the environment!", imageUrl: "🌿", pointsRequired: 4240, bonusPoints: 0 },
-      { id: "ice-hero", name: "Ice Hero", description: "Cool hero in blue frost suit with ice powers!", imageUrl: "❄️", pointsRequired: 4300, bonusPoints: 0 },
-      { id: "fire-hero", name: "Fire Hero", description: "Blazing hero in orange flame suit with heat powers!", imageUrl: "🔥", pointsRequired: 4360, bonusPoints: 0 },
+      { id: "ice-hero", name: "Capoeira Champion", description: "Joyful capoeira champion combining rhythm, balance, and movement!", imageUrl: "☀️", pointsRequired: 4300, bonusPoints: 0 },
+      { id: "fire-hero", name: "Kung Fu Master", description: "Focused kung fu master combining balance, patience, and skill!", imageUrl: "☯️", pointsRequired: 4360, bonusPoints: 0 },
       { id: "shadow-ninja", name: "Shadow Ninja", description: "Stealthy ninja hero in black and purple suit!", imageUrl: "🥷", pointsRequired: 4420, bonusPoints: 20 },
-      { id: "shield-hero", name: "Shield Hero", description: "Defensive hero in gold armor with energy shields!", imageUrl: "🛡️", pointsRequired: 4500, bonusPoints: 0 },
+      { id: "shield-hero", name: "Karate Heroine", description: "Confident karate heroine training focus, respect, and courage!", imageUrl: "🥋", pointsRequired: 4500, bonusPoints: 0 },
       
       // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points) - Bonus Slots: 2, 6, 8
       { id: "titan-mech", name: "Titan Mech", description: "Massive mech warrior with powerful hydraulic arms!", imageUrl: "🤖", pointsRequired: 4560, bonusPoints: 0 },
