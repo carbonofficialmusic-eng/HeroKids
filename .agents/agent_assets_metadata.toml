@@ -486,3 +486,17 @@ mtime_ms = 1789175883928
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/6d922cf6-432e-4b3c-86cf-fd595e092f07/c4129703-6c3f-4ec9-a143-4d3f69d86908"
 storage_version_token = "1789175899619911"
 content_type = "image/png"
+
+[[outputs]]
+id = "JrXdw2RBiTv0SD-b8lHlH"
+uri = "file://client/public/skins/backgrounds/arcade-master.png"
+type = "image"
+title = "Arcade Master – Hintergrundbild"
+description = "Das aktuell in der App verwendete Hintergrundbild des Arcade-Master-Skins."
+logical_id = "0fdf9fe9-822b-478c-bde8-eab04fe8821b"
+content_hash = "sha256:b47ef31e96d2721e649be2f0befaee98c7afd96965ee37f1e044fc9e0441c213"
+size = 1699314
+mtime_ms = 1779902332724
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/0fdf9fe9-822b-478c-bde8-eab04fe8821b/40d80e1e-5849-415b-93ab-e9366591bb7c"
+storage_version_token = "1789245669657600"
+content_type = "image/png"
