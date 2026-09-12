@@ -32,3 +32,13 @@ description: What's required for Xcode Cloud to successfully build, sign, and ex
 - Add `<key>ITSAppUsesNonExemptEncryption</key><false/>` to skip the Export Compliance question for every future build (app only uses Apple's built-in HTTPS)
 
 **Why:** Without each of these pieces, Xcode Cloud fails at different stages — scheme not found, platforms empty, npm registry unreachable, pod install not run, code signing exit 70.
+
+## Distinguish export warnings from delivery rejection
+
+If Xcode Cloud produces an App Store IPA and Apple sends an ITMS delivery email, the binary reached App Store Connect even when distribution logs also contain a `Session Proxy Provider` authentication warning. Treat Apple's ITMS message as the actionable failure.
+
+For a closed pre-release train, increase `MARKETING_VERSION`; changing `CURRENT_PROJECT_VERSION` only changes the internal build number and does not open a new App Store version.
+
+**Why:** A build showing the session-proxy warning was initially mistaken for an Apple-side outage, but Apple had accepted the upload and rejected it because `MARKETING_VERSION` still matched the previously approved version.
+
+**How to apply:** Before changing credentials, certificates, or provisioning, check for Apple's delivery email and compare `MARKETING_VERSION` with the last approved App Store version.
