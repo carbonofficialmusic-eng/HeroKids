@@ -1125,6 +1125,9 @@ html {
   border-top: 1px solid var(--lc-editor-line);
   background: var(--lc-editor-bg);
 }
+.lc-reward-dialog:has(input:focus, textarea:focus) .lc-reward-dialog-actions {
+  display: none;
+}
 .lc-game-dialog .rounded-lg.border {
   border-color: rgba(99, 181, 225, .3);
   background: rgba(12, 41, 61, .66);
