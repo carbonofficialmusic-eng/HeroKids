@@ -13,7 +13,7 @@ For responsive background composition, use Space Cadet as the structural referen
 
 **Why:** The user explicitly confirmed this center-first, expanding-world composition after reviewing the abstract Forest Guardian study.
 
-**How to apply:** Place the core atmosphere and one recognizable motif in the center with controlled detail and avatar contrast. Use the outer thirds for additional landmarks, creatures-free props, vegetation, architecture, or narrative clues that reward the wider view without being required to understand the center.
+**How to apply:** Place the core atmosphere and one recognizable motif in the center with controlled detail and avatar contrast. The Forest Guardian may remain comparatively rich in the center, but other heroes should generally use a quieter center and shift denser discoveries toward the outer thirds. Use those sides for additional landmarks, creatures-free props, vegetation, architecture, or narrative clues that reward the wider view without being required to understand the center.
 
 Kometensprint is intentionally represented by a refreshed version of the blonde, unmasked female superhero from the Little Champs logo, with turquoise suit, gold cape, and lightning emblem.
 
