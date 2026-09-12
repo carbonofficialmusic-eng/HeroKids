@@ -14,3 +14,4 @@
 - [RevenueCat downgrade verification](revenuecat-downgrade-verification.md) — verify live entitlements before any expiration/billing event removes paid access
 - [Light-only interface design](light-only-interface-design.md) — future visual changes target only Light Mode; the approved Dark Mode must remain unchanged
 - [Legacy hero visual direction](legacy-hero-visual-direction.md) — approved modern hero style keeps the logo’s turquoise, gold-orange, and deep navy palette
+- [iOS browser rotation touch layers](ios-browser-rotation-touch-layers.md) — Replit’s iOS browser may keep stale button hit regions after rotation; repaint alone is insufficient

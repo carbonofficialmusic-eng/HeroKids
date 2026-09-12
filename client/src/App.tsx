@@ -170,7 +170,8 @@ function Router() {
   }, [isLoading]);
   // Use location-based key to force complete remount when navigating between dashboards
   const [location] = useLocation();
-  const dashboardKey = `dashboard-${location}`;
+  const [orientationEpoch, setOrientationEpoch] = useState(0);
+  const dashboardKey = `dashboard-${location}-${orientationEpoch}`;
 
   // Scroll #root (our scroll container) back to top on every navigation
   useEffect(() => {
@@ -279,73 +280,51 @@ function Router() {
   }, []);
 
   // iOS browser rotation hit-test repair:
-  // Safari/WKWebView can keep an old compositor snapshot (including its touch
-  // regions) after portrait ↔ landscape rotation. The page looks correct, but
-  // taps only work at the element's former coordinates; pressing there briefly
-  // reveals a duplicate "ghost" button. Native-only recovery helpers do not run
-  // inside the Replit iOS browser, so rebuild the root hit-test layer here.
+  // Safari/WKWebView can retain the old button compositor/touch regions after a
+  // rotation. Repainting styles is insufficient in the Replit iOS browser, so
+  // remount the visible route tree after the orientation has fully settled.
+  // Auth state and the React Query cache live above Router and remain intact.
   useEffect(() => {
-    const isIOSWebKit =
-      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-      /WebKit/.test(navigator.userAgent);
-    if (!isIOSWebKit) return;
+    const isTouchWebKit =
+      /WebKit/.test(navigator.userAgent) && navigator.maxTouchPoints > 0;
+    if (!isTouchWebKit) return;
 
-    const timers = new Set<ReturnType<typeof setTimeout>>();
-    let repaintFrame: number | null = null;
+    let isLandscape = window.innerWidth > window.innerHeight;
+    let settleTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const rebuildHitTestLayer = () => {
+    const remountAtSettledSize = () => {
       const root = document.getElementById("root");
-      if (!root) return;
-
-      const savedTop = root.scrollTop;
-      const previousPointerEvents = root.style.pointerEvents;
-      const previousVisibility = root.style.visibility;
-
-      // Remove the stale interactive/compositor layer for one frame.
-      root.style.pointerEvents = "none";
-      root.style.visibility = "hidden";
-      void document.documentElement.getBoundingClientRect();
-      void root.getBoundingClientRect();
-
-      if (repaintFrame !== null) cancelAnimationFrame(repaintFrame);
-      repaintFrame = requestAnimationFrame(() => {
-        root.style.visibility = previousVisibility;
-        root.style.pointerEvents = previousPointerEvents;
-        root.scrollTop = savedTop;
-
-        // Reading the interactive controls after restoring visibility makes
-        // WebKit rebuild their hit regions at the settled coordinates.
-        root.querySelectorAll<HTMLElement>(
-          "button, a, input, select, textarea, [role='button']",
-        ).forEach((element) => {
-          void element.getBoundingClientRect();
+      const savedTop = root?.scrollTop ?? 0;
+      setOrientationEpoch((epoch) => epoch + 1);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const currentRoot = document.getElementById("root");
+          if (currentRoot) currentRoot.scrollTop = savedTop;
         });
-        repaintFrame = null;
       });
     };
 
-    const scheduleRepair = () => {
-      timers.forEach(clearTimeout);
-      timers.clear();
-      // iOS reports several intermediate viewport sizes while rotating. Repair
-      // after the first layout and once more after browser chrome has settled.
-      [180, 500, 900].forEach((delay) => {
-        const timer = setTimeout(() => {
-          timers.delete(timer);
-          rebuildHitTestLayer();
-        }, delay);
-        timers.add(timer);
-      });
+    const detectOrientationChange = () => {
+      const nextIsLandscape = window.innerWidth > window.innerHeight;
+      if (nextIsLandscape === isLandscape) return;
+      isLandscape = nextIsLandscape;
+      if (settleTimer) clearTimeout(settleTimer);
+      settleTimer = setTimeout(remountAtSettledSize, 500);
     };
 
-    window.addEventListener("orientationchange", scheduleRepair);
-    screen.orientation?.addEventListener("change", scheduleRepair);
+    // Replit's iOS browser does not consistently expose screen.orientation or
+    // orientationchange, but it does resize the layout/visual viewports.
+    window.addEventListener("resize", detectOrientationChange);
+    window.addEventListener("orientationchange", detectOrientationChange);
+    window.visualViewport?.addEventListener("resize", detectOrientationChange);
+    screen.orientation?.addEventListener("change", detectOrientationChange);
 
     return () => {
-      window.removeEventListener("orientationchange", scheduleRepair);
-      screen.orientation?.removeEventListener("change", scheduleRepair);
-      timers.forEach(clearTimeout);
-      if (repaintFrame !== null) cancelAnimationFrame(repaintFrame);
+      window.removeEventListener("resize", detectOrientationChange);
+      window.removeEventListener("orientationchange", detectOrientationChange);
+      window.visualViewport?.removeEventListener("resize", detectOrientationChange);
+      screen.orientation?.removeEventListener("change", detectOrientationChange);
+      if (settleTimer) clearTimeout(settleTimer);
     };
   }, []);
 
