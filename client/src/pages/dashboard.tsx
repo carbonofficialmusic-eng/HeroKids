@@ -1414,8 +1414,8 @@ export default function Dashboard() {
                 {/* Row 2: Family Goals, Send Points */}
                 <Link href="/family-goals" className="w-full">
                    <Button variant="card" data-testid="button-family-goals" data-tour="tour-family-goals" className="lc-action-button lc-action-cyan w-full min-h-14 h-auto py-3 justify-start px-4 gap-3 whitespace-normal">
-                    <span className="w-11 flex-shrink-0 flex justify-center">
-                      <img src={familyGoalsIcon} alt="" className="h-11 w-11 object-contain" />
+                    <span className="lc-icon-bubble w-6 flex-shrink-0 flex justify-center">
+                      <Target className="h-5 w-5" />
                     </span>
                     <span className="text-left flex-1 text-sm leading-snug">{t("dashboard.familyGoals")}</span>
                   </Button>
