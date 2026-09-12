@@ -458,3 +458,17 @@ mtime_ms = 1789175481819
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/833d3241-42b2-4a8c-9c3f-91fc731cef02/9052dee7-ae02-454b-928a-157e07f1cf8c"
 storage_version_token = "1789175493873093"
 content_type = "image/png"
+
+[[outputs]]
+id = "TiRHfR3V74uX1L7K1d90P"
+uri = "file://attached_assets/generated_images/style-study-forest-guardian-abstract-wide.png"
+type = "image"
+title = "Abstrakter Waldwächter-Hintergrund"
+description = "Abstrakte Waldwelt im finalen 1408×768-Format, farblich und formal vom Waldwächter inspiriert, mit freier Mitte für den Avatar."
+logical_id = "f23da9f6-5f48-4b6d-b07d-23bf2a43626e"
+content_hash = "sha256:5c49b74173ba6e2bf181fb07f25a0b7eb0802ee5362b9e0c5a3b0c3a98cb440d"
+size = 1543768
+mtime_ms = 1789175728272
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/f23da9f6-5f48-4b6d-b07d-23bf2a43626e/7e60228a-9296-41f6-a0e1-17c88ef2b730"
+storage_version_token = "1789175734247592"
+content_type = "image/png"
