@@ -402,3 +402,17 @@ mtime_ms = 1789171130951
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/13ec637a-4875-49d7-b041-157bdaf7c2af/e0d6cb45-31ef-4d40-ada7-aeb5932cc819"
 storage_version_token = "1789171138884418"
 content_type = "image/png"
+
+[[outputs]]
+id = "_U7fYaBdp1WP6pm_fpjRL"
+uri = "file://attached_assets/generated_images/shield-blaze-old-legacy-minimal-refresh.png"
+type = "image"
+title = "Shield Blaze – minimal modernisierter Legacy-Entwurf"
+description = "Der ursprüngliche Legacy-Avatar wurde nur behutsam bei Linien, Schattierung und wenigen Details modernisiert."
+logical_id = "81aa079d-60c7-4c28-b961-f4cdb79cbf0e"
+content_hash = "sha256:599e99167ce45872760aa235edfe46d60746c4a1b6cac2751f12c340aa96aa5e"
+size = 771366
+mtime_ms = 1789171268479
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/81aa079d-60c7-4c28-b961-f4cdb79cbf0e/f20b1e26-5f8a-4dc6-8ea7-232bf6685071"
+storage_version_token = "1789171282392607"
+content_type = "image/png"
