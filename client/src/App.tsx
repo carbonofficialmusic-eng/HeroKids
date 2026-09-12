@@ -285,16 +285,14 @@ function Router() {
   // remount the visible route tree after the orientation has fully settled.
   // Auth state and the React Query cache live above Router and remain intact.
   useEffect(() => {
-    const isTouchWebKit =
-      /WebKit/.test(navigator.userAgent) && navigator.maxTouchPoints > 0;
-    if (!isTouchWebKit) return;
-
     let isLandscape = window.innerWidth > window.innerHeight;
-    let settleTimer: ReturnType<typeof setTimeout> | null = null;
+    const settleTimers = new Set<ReturnType<typeof setTimeout>>();
 
     const remountAtSettledSize = () => {
       const root = document.getElementById("root");
       const savedTop = root?.scrollTop ?? 0;
+      window.scrollTo(1, 0);
+      window.scrollTo(0, 0);
       setOrientationEpoch((epoch) => epoch + 1);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -304,27 +302,39 @@ function Router() {
       });
     };
 
-    const detectOrientationChange = () => {
+    const scheduleRemount = () => {
+      settleTimers.forEach(clearTimeout);
+      settleTimers.clear();
+      [350, 900].forEach((delay) => {
+        const timer = setTimeout(() => {
+          settleTimers.delete(timer);
+          remountAtSettledSize();
+        }, delay);
+        settleTimers.add(timer);
+      });
+    };
+
+    const detectViewportOrientationChange = () => {
       const nextIsLandscape = window.innerWidth > window.innerHeight;
       if (nextIsLandscape === isLandscape) return;
       isLandscape = nextIsLandscape;
-      if (settleTimer) clearTimeout(settleTimer);
-      settleTimer = setTimeout(remountAtSettledSize, 500);
+      scheduleRemount();
     };
 
-    // Replit's iOS browser does not consistently expose screen.orientation or
-    // orientationchange, but it does resize the layout/visual viewports.
-    window.addEventListener("resize", detectOrientationChange);
-    window.addEventListener("orientationchange", detectOrientationChange);
-    window.visualViewport?.addEventListener("resize", detectOrientationChange);
-    screen.orientation?.addEventListener("change", detectOrientationChange);
+    // Replit's iOS browser reports different subsets of these signals depending
+    // on how the preview is opened. Explicit orientation signals must schedule
+    // a repair even when the iframe still exposes its old width and height.
+    window.addEventListener("resize", detectViewportOrientationChange);
+    window.addEventListener("orientationchange", scheduleRemount);
+    window.visualViewport?.addEventListener("resize", detectViewportOrientationChange);
+    screen.orientation?.addEventListener("change", scheduleRemount);
 
     return () => {
-      window.removeEventListener("resize", detectOrientationChange);
-      window.removeEventListener("orientationchange", detectOrientationChange);
-      window.visualViewport?.removeEventListener("resize", detectOrientationChange);
-      screen.orientation?.removeEventListener("change", detectOrientationChange);
-      if (settleTimer) clearTimeout(settleTimer);
+      window.removeEventListener("resize", detectViewportOrientationChange);
+      window.removeEventListener("orientationchange", scheduleRemount);
+      window.visualViewport?.removeEventListener("resize", detectViewportOrientationChange);
+      screen.orientation?.removeEventListener("change", scheduleRemount);
+      settleTimers.forEach(clearTimeout);
     };
   }, []);
 
