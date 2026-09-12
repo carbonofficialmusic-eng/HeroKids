@@ -6,6 +6,7 @@ import {
   tasks,
   taskAssignments,
   taskCompletions,
+  dailyTaskProgress,
   rewards,
   rewardRedemptions,
   rewardSharingParticipants,
@@ -81,7 +82,7 @@ import {
 import { db } from "./db";
 import { eq, and, desc, gt, gte, lt, sql, inArray, isNull, isNotNull } from "drizzle-orm";
 import { startOfDay } from 'date-fns';
-import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import bcrypt from 'bcrypt';
 import { TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR } from "@shared/skin-config";
 import { getProfilePhotoObjectPaths } from "@shared/avatar-preferences";
@@ -262,6 +263,8 @@ export interface IStorage {
   getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]>;
   getTaskCompletionsByFamily(familyName: string): Promise<TaskCompletion[]>;
   getTaskCompletionsByTask(taskId: string): Promise<TaskCompletion[]>;
+  getDailyTaskProgress(taskId: string, memberId: string): Promise<number>;
+  submitDailyTaskExecution(completion: InsertTaskCompletion): Promise<{ executionCount: number; target: number; completed: boolean; completion?: TaskCompletion }>;
   getCompletionsWithOldProofPhotos(daysOld: number): Promise<TaskCompletion[]>;
   clearCompletionProofPhoto(completionId: string): Promise<void>;
   // Data cleanup
@@ -982,6 +985,7 @@ export class DatabaseStorage implements IStorage {
       // Delete ONLY completions from previous days (preserve today's completions)
       if (tasksToReset.length > 0) {
         const taskIds = tasksToReset.map(t => t.id);
+        const todayLocalDate = formatInTimeZone(now, familyTimezone, "yyyy-MM-dd");
         
         await tx
           .delete(taskCompletions)
@@ -991,6 +995,13 @@ export class DatabaseStorage implements IStorage {
               sql`${taskCompletions.completedAt} < ${startOfDayUTC}`
             )
           );
+
+        await tx
+          .delete(dailyTaskProgress)
+          .where(and(
+            inArray(dailyTaskProgress.taskId, taskIds),
+            lt(dailyTaskProgress.localDate, todayLocalDate),
+          ));
         
         // For each task, recompute completion_count from remaining completions
         // This includes any completions from today that were preserved
@@ -1130,20 +1141,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTask(id: string, taskUpdate: Partial<InsertTask>): Promise<Task> {
+    const [existingTask] = await db.select().from(tasks).where(eq(tasks.id, id));
     // Validation: prevent lowering maxCompletions below current completionCount
     if (taskUpdate.maxCompletions !== undefined && taskUpdate.maxCompletions !== null) {
-      const [existing] = await db.select().from(tasks).where(eq(tasks.id, id));
-      if (existing && taskUpdate.maxCompletions < existing.completionCount) {
+      if (existingTask && taskUpdate.maxCompletions < existingTask.completionCount) {
         throw new Error('Cannot set maxCompletions below current completion count');
       }
     }
     
-    const [updated] = await db
-      .update(tasks)
-      .set({ ...taskUpdate, updatedAt: new Date() })
-      .where(eq(tasks.id, id))
-      .returning();
-    return updated as Task;
+    return db.transaction(async (tx) => {
+      const [updated] = await tx
+        .update(tasks)
+        .set({ ...taskUpdate, updatedAt: new Date() })
+        .where(eq(tasks.id, id))
+        .returning();
+      if (taskUpdate.dailyTarget !== undefined && taskUpdate.dailyTarget !== existingTask?.dailyTarget) {
+        const maxPartialProgress = Math.max(0, taskUpdate.dailyTarget - 1);
+        await tx.update(dailyTaskProgress)
+          .set({
+            executionCount: sql`LEAST(${dailyTaskProgress.executionCount}, ${maxPartialProgress})`,
+            updatedAt: new Date(),
+          })
+          .where(eq(dailyTaskProgress.taskId, id));
+      }
+      return updated as Task;
+    });
   }
 
   async updateTaskStatus(
@@ -1702,6 +1724,52 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
+  async getDailyTaskProgress(taskId: string, memberId: string): Promise<number> {
+    const [task] = await db.select({ familyName: tasks.familyName }).from(tasks).where(eq(tasks.id, taskId));
+    if (!task) return 0;
+    const [family] = await db.select({ timezone: families.timezone }).from(families).where(eq(families.familyName, task.familyName));
+    const localDate = formatInTimeZone(new Date(), family?.timezone || "Europe/Berlin", "yyyy-MM-dd");
+    const [progress] = await db.select().from(dailyTaskProgress).where(and(
+      eq(dailyTaskProgress.taskId, taskId),
+      eq(dailyTaskProgress.memberId, memberId),
+      eq(dailyTaskProgress.localDate, localDate),
+    ));
+    return progress?.executionCount || 0;
+  }
+
+  async submitDailyTaskExecution(completionData: InsertTaskCompletion): Promise<{ executionCount: number; target: number; completed: boolean; completion?: TaskCompletion }> {
+    return db.transaction(async (tx) => {
+      const [task] = await tx.select().from(tasks).where(eq(tasks.id, completionData.taskId)).for("update");
+      if (!task) throw new Error("Task not found");
+      const target = Math.min(3, Math.max(1, task.dailyTarget || 1));
+      const [family] = await tx.select({ timezone: families.timezone }).from(families).where(eq(families.familyName, task.familyName));
+      const localDate = formatInTimeZone(new Date(), family?.timezone || "Europe/Berlin", "yyyy-MM-dd");
+      const [existing] = await tx.select().from(dailyTaskProgress).where(and(
+        eq(dailyTaskProgress.taskId, task.id),
+        eq(dailyTaskProgress.memberId, completionData.memberId),
+        eq(dailyTaskProgress.localDate, localDate),
+      )).for("update");
+      const previousCount = existing?.executionCount || 0;
+      if (previousCount >= target) throw new Error("Member already completed this task");
+      const executionCount = previousCount + 1;
+      if (existing) {
+        await tx.update(dailyTaskProgress).set({ executionCount, updatedAt: new Date() }).where(eq(dailyTaskProgress.id, existing.id));
+      } else {
+        await tx.insert(dailyTaskProgress).values({ taskId: task.id, memberId: completionData.memberId, localDate, executionCount });
+      }
+      if (executionCount < target) return { executionCount, target, completed: false };
+
+      const active = await this.hasActiveMemberCompletion(task.id, completionData.memberId, tx);
+      if (active) throw new Error("Member already completed this task");
+      const [completion] = await tx.insert(taskCompletions).values({
+        ...completionData,
+        status: task.requiresApproval ? "pending" : "approved",
+      }).returning();
+      if (!task.requiresApproval) await this._approveCompletionInternal(tx, completion.id, completion.memberId, true);
+      return { executionCount, target, completed: true, completion };
+    });
+  }
+
   async getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]> {
     return await db
       .select()
@@ -2062,15 +2130,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async rejectTaskCompletion(completionId: string, approvedBy: string, rejectionReason: string): Promise<void> {
-    await db
-      .update(taskCompletions)
-      .set({
+    await db.transaction(async (tx) => {
+      const [completion] = await tx.select().from(taskCompletions).where(eq(taskCompletions.id, completionId));
+      await tx.update(taskCompletions).set({
         status: "rejected",
         approvedBy,
         approvedAt: new Date(),
         rejectionReason,
-      })
-      .where(eq(taskCompletions.id, completionId));
+      }).where(eq(taskCompletions.id, completionId));
+      if (completion) {
+        const [task] = await tx.select().from(tasks).where(eq(tasks.id, completion.taskId));
+        if (task?.recurrence === "daily" && (task.dailyTarget || 1) > 1) {
+          const [family] = await tx.select({ timezone: families.timezone }).from(families).where(eq(families.familyName, task.familyName));
+          const localDate = formatInTimeZone(completion.completedAt || new Date(), family?.timezone || "Europe/Berlin", "yyyy-MM-dd");
+          await tx.update(dailyTaskProgress).set({
+            executionCount: sql`GREATEST(0, ${dailyTaskProgress.executionCount} - 1)`,
+            updatedAt: new Date(),
+          }).where(and(eq(dailyTaskProgress.taskId, task.id), eq(dailyTaskProgress.memberId, completion.memberId), eq(dailyTaskProgress.localDate, localDate)));
+        }
+      }
+    });
   }
 
   // Reward operations

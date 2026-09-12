@@ -16,3 +16,4 @@
 - [Legacy hero visual direction](legacy-hero-visual-direction.md) — approved modern hero style keeps the logo’s turquoise, gold-orange, and deep navy palette
 - [iOS browser rotation touch layers](ios-browser-rotation-touch-layers.md) — Replit’s iOS browser may keep stale button hit regions after rotation; repaint alone is insufficient
 - [Shared-task approval display](shared-task-approval-display.md) — each child’s card must show that child’s approval, even while other assigned members remain pending
+- [Ad-hoc TypeScript checks](ad-hoc-typescript-checks.md) — run temporary tsx scripts inside the workspace so package and ESM resolution use the project configuration

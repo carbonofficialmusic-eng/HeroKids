@@ -307,6 +307,10 @@
     "shoppingListLockedDesc": "Uppgradera till Family för att skapa inköpslisteuppgifter.",
     "shoppingItems": "Artiklar",
     "shoppingItemsDone": "artiklar klara",
+    "dailyTarget": "Utföranden per dag",
+    "dailyTargetOption": "{{count}} gånger dagligen",
+    "dailyTargetDesc": "Poäng och godkännande utlöses först efter sista utförandet.",
+    "dailyProgress": "{{completed}} av {{total}} klara",
     "shoppingItemPlaceholder": "t.ex. Mjölk, Bröd, Ägg...",
     "shoppingItemsEmpty": "Inga artiklar ännu — skriv en ovan och tryck Enter."
   },

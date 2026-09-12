@@ -302,6 +302,10 @@
     "shoppingListLockedDesc": "買い物リストタスクを作成するにはFamilyにアップグレードしてください。",
     "shoppingItems": "アイテム",
     "shoppingItemsDone": "アイテム完了",
+    "dailyTarget": "1日の実行回数",
+    "dailyTargetOption": "1日{{count}}回",
+    "dailyTargetDesc": "ポイントと承認は最後の実行後にのみ発生します。",
+    "dailyProgress": "{{total}}回中{{completed}}回完了",
     "shoppingItemPlaceholder": "例：牛乳、パン、卵...",
     "shoppingItemsEmpty": "アイテムがありません — 上に入力してEnterを押してください。"
   },

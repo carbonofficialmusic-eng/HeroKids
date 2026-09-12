@@ -302,6 +302,10 @@
     "shoppingListLockedDesc": "Actualiza a Family para crear tareas de lista de compras.",
     "shoppingItems": "Artículos",
     "shoppingItemsDone": "artículos hechos",
+    "dailyTarget": "Veces por día",
+    "dailyTargetOption": "{{count}} veces al día",
+    "dailyTargetDesc": "Los puntos y la aprobación se activan solo tras la última vez.",
+    "dailyProgress": "{{completed}} de {{total}} completado",
     "shoppingItemPlaceholder": "p.ej. Leche, Pan, Huevos...",
     "shoppingItemsEmpty": "Sin artículos aún — escribe uno arriba y presiona Enter."
   },

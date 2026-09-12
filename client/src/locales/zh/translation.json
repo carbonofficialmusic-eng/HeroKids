@@ -302,6 +302,10 @@
     "shoppingListLockedDesc": "升级到Family以创建购物清单任务。",
     "shoppingItems": "项目",
     "shoppingItemsDone": "个项目完成",
+    "dailyTarget": "每天完成次数",
+    "dailyTargetOption": "每天{{count}}次",
+    "dailyTargetDesc": "只有最后一次完成后才会获得积分并触发审批。",
+    "dailyProgress": "已完成 {{completed}} / {{total}}",
     "shoppingItemPlaceholder": "例如：牛奶、面包、鸡蛋...",
     "shoppingItemsEmpty": "还没有项目 — 在上方输入并按Enter。"
   },

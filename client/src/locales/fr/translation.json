@@ -302,6 +302,10 @@
     "shoppingListLockedDesc": "Passez à Family pour créer des tâches de liste de courses.",
     "shoppingItems": "Articles",
     "shoppingItemsDone": "articles faits",
+    "dailyTarget": "Exécutions par jour",
+    "dailyTargetOption": "{{count}} fois par jour",
+    "dailyTargetDesc": "Les points et l’approbation ne sont déclenchés qu’après la dernière exécution.",
+    "dailyProgress": "{{completed}} sur {{total}} terminé",
     "shoppingItemPlaceholder": "ex. Lait, Pain, Œufs...",
     "shoppingItemsEmpty": "Aucun article — saisissez-en un ci-dessus et appuyez sur Entrée."
   },

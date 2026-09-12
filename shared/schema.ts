@@ -229,6 +229,7 @@ export const tasks = pgTable("tasks", {
   points: integer("points").notNull().default(10),
   recurrence: recurrenceEnum("recurrence").notNull().default("none"),
   recurrenceDays: integer("recurrence_days"), // Custom recurrence interval in days (e.g., 3 for every 3 days)
+  dailyTarget: integer("daily_target").notNull().default(1), // Daily tasks may require 1-3 executions per member/day
   nextAvailableDate: timestamp("next_available_date"), // When task becomes available again after completion
   status: taskStatusEnum("status").notNull().default("active"),
   requiresProof: boolean("requires_proof").notNull().default(false),
@@ -244,6 +245,17 @@ export const tasks = pgTable("tasks", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const dailyTaskProgress = pgTable("daily_task_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  taskId: varchar("task_id").notNull().references(() => tasks.id, { onDelete: "cascade" }),
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  localDate: varchar("local_date", { length: 10 }).notNull(),
+  executionCount: integer("execution_count").notNull().default(0),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("daily_task_progress_task_member_date_unique").on(table.taskId, table.memberId, table.localDate),
+]);
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
   creator: one(familyMembers, {

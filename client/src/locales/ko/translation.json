@@ -306,6 +306,10 @@
     "shoppingListLockedDesc": "쇼핑 목록 작업을 만들려면 Family로 업그레이드하세요.",
     "shoppingItems": "항목",
     "shoppingItemsDone": "개 항목 완료",
+    "dailyTarget": "하루 완료 횟수",
+    "dailyTargetOption": "하루 {{count}}회",
+    "dailyTargetDesc": "마지막 완료 후에만 포인트와 승인이 처리됩니다.",
+    "dailyProgress": "{{total}}회 중 {{completed}}회 완료",
     "shoppingItemPlaceholder": "예: 우유, 빵, 달걀...",
     "shoppingItemsEmpty": "항목이 없습니다 — 위에 입력하고 Enter를 누르세요."
   },

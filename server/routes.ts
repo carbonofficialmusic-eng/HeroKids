@@ -2003,6 +2003,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             try {
               // Get completion status for this member
               const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
+              const dailyProgress = task.recurrence === "daily"
+                ? await storage.getDailyTaskProgress(task.id, member.id)
+                : 0;
+              (task as any).dailyProgress = dailyProgress;
               
               // For IMMEDIATE tasks: "pending" means task is blocked (waiting for approval)
               // After approval, getMemberCompletionStatus returns null, so task becomes available again
@@ -2191,6 +2195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   remainingSlots: null,
                   memberHasCompleted: ownHasSubmitted,
                   memberCompletionStatus: completionStatus,
+                  dailyProgress,
                   completions: [],
                   sharedMemberCompletions: [],
                 };
@@ -2198,7 +2203,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               // Normal mode (maxCompletions == null, single/no assignment) - if ANYONE completes it, it's done for everyone
               // Use family-wide completion status for normal tasks
-              const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
+              const familyCompletionStatus = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
+                ? completionStatus
+                : await storage.getTaskCompletionStatusForFamily(task.id);
               // For IMMEDIATE tasks: "pending" means blocked, null means available
               // For one-time tasks with approval: "pending" or "approved" means grayed out
               // For other tasks: "approved" means completed
@@ -2213,6 +2220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 remainingSlots: null,
                 memberHasCompleted: familyHasCompleted, // True if blocked/completed
                 memberCompletionStatus: familyCompletionStatus, // Family-wide status
+                dailyProgress,
                 completions: [], // No participants for non-multi tasks
               };
             } catch (err) {
@@ -2255,6 +2263,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             try {
               // Get completion status for this member
               const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
+              const dailyProgress = task.recurrence === "daily"
+                ? await storage.getDailyTaskProgress(task.id, member.id)
+                : 0;
+              (task as any).dailyProgress = dailyProgress;
               
               // For IMMEDIATE tasks: "pending" means task is blocked (waiting for approval)
               // After approval, getMemberCompletionStatus returns null, so task becomes available again
@@ -2382,7 +2394,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
               
               // For non-multi-completion tasks - if ANYONE completes it, it's done for everyone
-              const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
+              const familyCompletionStatus = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
+                ? completionStatus
+                : await storage.getTaskCompletionStatusForFamily(task.id);
               // For IMMEDIATE tasks: "pending" means blocked, null means available
               // For one-time tasks with approval: "pending" or "approved" means grayed out
               // For other tasks: "approved" means completed
@@ -2397,6 +2411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 remainingSlots: null,
                 memberHasCompleted: familyHasCompleted, // True if blocked/completed
                 memberCompletionStatus: familyCompletionStatus, // Family-wide status
+                dailyProgress,
                 completions: [], // No participants for non-multi tasks
               };
             } catch (err) {
@@ -2471,6 +2486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (parsed.recurrence === "immediate") {
         parsed.requiresApproval = true;
       }
+      if (parsed.recurrence !== "daily") parsed.dailyTarget = 1;
 
       const task = await storage.createTask(parsed);
       
@@ -2558,6 +2574,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Force requiresApproval for immediate recurrence tasks (prevents point farming)
       if (parsed.recurrence === "immediate") {
         parsed.requiresApproval = true;
+      }
+      if ((parsed.recurrence ?? existingTask.recurrence) !== "daily") {
+        parsed.dailyTarget = 1;
       }
       
       const updatedTask = await storage.updateTask(taskId, parsed);
@@ -3121,12 +3140,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create completion record (handles approval, points, and completionCount in transaction)
       let completion: Awaited<ReturnType<typeof storage.createTaskCompletion>>;
       try {
-        completion = await storage.createTaskCompletion({
+        const completionData = {
           taskId: task.id,
           memberId: member.id,
           pointsEarned: pointsPerMember,
           proofPhotoUrl: proofPhotoUrl || null,
-        });
+        };
+        if (task.recurrence === "daily" && (task.dailyTarget || 1) > 1) {
+          const dailyResult = await storage.submitDailyTaskExecution(completionData);
+          if (!dailyResult.completed || !dailyResult.completion) {
+            broadcastToFamily(member.familyName, {
+              type: "task_daily_progress",
+              taskId: task.id,
+              memberId: member.id,
+              executionCount: dailyResult.executionCount,
+              target: dailyResult.target,
+            });
+            return res.json({
+              partial: true,
+              dailyProgress: dailyResult.executionCount,
+              dailyTarget: dailyResult.target,
+            });
+          }
+          completion = dailyResult.completion;
+        } else {
+          completion = await storage.createTaskCompletion(completionData);
+        }
       } catch (err: any) {
         const msg: string = err?.message || "";
         if (msg === "Member already completed this task") {

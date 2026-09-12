@@ -308,6 +308,10 @@
     "shoppingListLockedDesc": "Upgrade to Family to create shopping list tasks.",
     "shoppingItems": "Items",
     "shoppingItemsDone": "items done",
+    "dailyTarget": "Completions per day",
+    "dailyTargetOption": "{{count}} times daily",
+    "dailyTargetDesc": "Points and approval are triggered only after the final completion.",
+    "dailyProgress": "{{completed}} of {{total}} done",
     "shoppingItemPlaceholder": "e.g. Milk, Bread, Eggs...",
     "shoppingItemsEmpty": "No items yet — type one above and press Enter."
   },

@@ -67,6 +67,7 @@ const taskFormSchema = insertTaskSchema.extend({
   isSharedTask: z.boolean().optional(),
   sharedMemberIds: z.array(z.string()).optional(),
   dueDate: z.string().optional().nullable(),
+  dailyTarget: z.number().int().min(1).max(3).default(1),
 });
 
 type TaskFormData = z.infer<typeof taskFormSchema>;
@@ -230,6 +231,7 @@ export function TaskDialog({
       isSharedTask: false,
       sharedMemberIds: [],
       dueDate: undefined,
+      dailyTarget: 1,
     },
   });
 
@@ -268,6 +270,7 @@ export function TaskDialog({
           isSharedTask: editingTask.isSharedTask || false,
           sharedMemberIds: editingTask.sharedMemberIds || [],
           dueDate: editingTask.dueDate || undefined,
+          dailyTarget: editingTask.dailyTarget || 1,
         });
         // Sync assigned members state
         setSelectedSharedMembers(editingTask.sharedMemberIds || []);
@@ -295,6 +298,7 @@ export function TaskDialog({
           isSharedTask: false,
           sharedMemberIds: [],
           dueDate: undefined,
+          dailyTarget: 1,
         });
         // Clear assigned members state
         setSelectedSharedMembers([]);
@@ -350,6 +354,7 @@ export function TaskDialog({
       submitData.recurrence = "none";
       submitData.dueDate = undefined;
     }
+    if (submitData.recurrence !== "daily") submitData.dailyTarget = 1;
     
     if (selectedSharedMembers.length > 0) {
       submitData.isSharedTask = true;
@@ -882,6 +887,32 @@ export function TaskDialog({
                         </p>
                       </div>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {recurrenceMode === "standard" && form.watch("recurrence") === "daily" && (
+                <FormField
+                  control={form.control}
+                  name="dailyTarget"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("tasks.dailyTarget")}</FormLabel>
+                      <Select value={String(field.value || 1)} onValueChange={(value) => field.onChange(Number(value))}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-daily-target">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {[1, 2, 3].map((count) => (
+                            <SelectItem key={count} value={String(count)}>
+                              {t("tasks.dailyTargetOption", { count })}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>{t("tasks.dailyTargetDesc")}</FormDescription>
                     </FormItem>
                   )}
                 />

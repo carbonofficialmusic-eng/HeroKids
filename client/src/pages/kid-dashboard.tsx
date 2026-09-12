@@ -119,6 +119,7 @@ interface TaskWithMeta extends Task {
   memberHasCompleted?: boolean;
   remainingSlots?: number | null;
   memberCompletionStatus?: "pending" | "approved" | "rejected" | null;
+  dailyProgress?: number;
   sharedMemberCompletions?: Array<{
     memberId: string;
     displayName: string;
@@ -529,6 +530,8 @@ function TaskCard({
   const isRejected = completionStatus === "rejected";
   const neverAttempted = completionStatus === null;
   const hasNoSlots = task.remainingSlots !== null && task.remainingSlots !== undefined && task.remainingSlots <= 0;
+  const dailyTarget = task.recurrence === "daily" ? (task.dailyTarget || 1) : 1;
+  const dailyProgress = Math.min(task.dailyProgress || 0, dailyTarget);
   const isInactive = task.status !== "active";
   
   // Due date availability logic for one-time tasks
@@ -626,8 +629,8 @@ function TaskCard({
       }
       return response.json();
     },
-    onSuccess: () => {
-      confetti({
+    onSuccess: (result) => {
+      if (!result.partial) confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 }
@@ -810,6 +813,11 @@ function TaskCard({
               </>
             )}
           </div>
+          {dailyTarget > 1 && !showAsPending && !showAsApproved && (
+            <p className="mt-1 text-xs font-semibold text-sky-300" data-testid={`daily-progress-${task.id}`}>
+              {t("tasks.dailyProgress", { completed: dailyProgress, total: dailyTarget })}
+            </p>
+          )}
         </div>
       </div>
     );
@@ -856,6 +864,11 @@ function TaskCard({
           : isActionable ? handleComplete : undefined}
       >
         <div className="text-center space-y-3">
+          {dailyTarget > 1 && !showAsPending && !showAsApproved && (
+            <Badge variant="secondary" data-testid={`daily-progress-${task.id}`}>
+              {t("tasks.dailyProgress", { completed: dailyProgress, total: dailyTarget })}
+            </Badge>
+          )}
           <div className={`flex justify-center p-4 rounded-2xl mx-auto w-fit shadow-inner ${
             showAsApproved ? "bg-green-500/25" : 
             showAsSubmitted ? "bg-amber-500/50" :
@@ -1840,6 +1853,9 @@ export default function KidDashboard() {
           if (t.id !== taskId) return t;
           // If task requires approval → optimistically set pending (yellow)
           // Otherwise → set approved (gray/green)
+          if ((t.dailyTarget || 1) > 1 && (t.dailyProgress || 0) + 1 < (t.dailyTarget || 1)) {
+            return { ...t, dailyProgress: (t.dailyProgress || 0) + 1 };
+          }
           if (t.requiresApproval) {
             return { ...t, memberHasCompleted: true, memberCompletionStatus: "pending" };
           }
@@ -1858,8 +1874,8 @@ export default function KidDashboard() {
         description: error.message || t("kidDashboard.taskError"),
       });
     },
-    onSuccess: () => {
-      confetti({
+    onSuccess: (result) => {
+      if (!result.partial) confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 }

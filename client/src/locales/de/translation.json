@@ -318,6 +318,10 @@
     "shoppingListLockedDesc": "Upgrade auf Family, um Einkaufslisten-Aufgaben zu erstellen.",
     "shoppingItems": "Artikel",
     "shoppingItemsDone": "Artikel erledigt",
+    "dailyTarget": "Ausführungen pro Tag",
+    "dailyTargetOption": "{{count}}-mal täglich",
+    "dailyTargetDesc": "Punkte und Genehmigung werden erst nach der letzten Ausführung ausgelöst.",
+    "dailyProgress": "{{completed}} von {{total}} erledigt",
     "shoppingItemPlaceholder": "z.B. Milch, Brot, Eier...",
     "shoppingItemsEmpty": "Noch keine Artikel — gib oben einen ein und drücke Enter."
   },

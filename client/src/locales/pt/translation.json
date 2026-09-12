@@ -308,6 +308,10 @@
     "shoppingListLockedDesc": "Upgrade para Família para criar listas de compras.",
     "shoppingItems": "Itens",
     "shoppingItemsDone": "itens concluídos",
+    "dailyTarget": "Conclusões por dia",
+    "dailyTargetOption": "{{count}} vezes por dia",
+    "dailyTargetDesc": "Os pontos e a aprovação só são acionados após a última conclusão.",
+    "dailyProgress": "{{completed}} de {{total}} concluído",
     "shoppingItemPlaceholder": "Ex.: Leite, Pão, Ovos...",
     "shoppingItemsEmpty": "Nenhum item ainda — digite um acima e pressione Enter."
   },
