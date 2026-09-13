@@ -556,3 +556,17 @@ mtime_ms = 1789325238044
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/176d3abf-71d1-4199-bb3c-e212ccd21f09/418a3dee-8ac7-4049-be5c-59f80eb2fb22"
 storage_version_token = "1789325276691245"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "1frls2YFDf7V8_Hxh889D"
+uri = "file://attached_assets/generated_images/previews/turkish-skins-installed.jpg"
+type = "image"
+title = "Eingebaute türkische Skins"
+description = "Finale Kombinationen in der App-Reihenfolge: Kappadokien-Entdecker, Mosaik-Zauberer und Tulpen-Prinzessin."
+logical_id = "81b558b8-2542-4dba-9437-a7355d028b17"
+content_hash = "sha256:3086fa0d0ec30270501f250b6c489ad08e472f66dea63b6adb4d26f59041e7a8"
+size = 574690
+mtime_ms = 1789325636956
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/81b558b8-2542-4dba-9437-a7355d028b17/a9c23226-5883-476f-988f-031d564bb60b"
+storage_version_token = "1789325660000213"
+content_type = "image/jpeg"
