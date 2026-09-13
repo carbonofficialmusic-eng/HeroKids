@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { DailyProgressBadge } from "@/components/daily-progress-badge";
-import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
+import { format, differenceInDays, isToday, isTomorrow, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronLeft, ChevronRight, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin, Gem, Hourglass, Lock, LogOut } from "lucide-react";
@@ -81,21 +81,6 @@ function getAvailableAgainDays(nextAvailableDate: Date | string | null): number 
   return Math.max(0, diff);
 }
 
-function getDueDateStatus(dueDate: Date | string | null): { status: "overdue" | "soon" | "normal" | null; daysUntil: number } {
-  if (!dueDate) return { status: null, daysUntil: 0 };
-  
-  const due = startOfDay(new Date(dueDate));
-  const today = startOfDay(new Date());
-  const daysUntil = differenceInDays(due, today);
-  
-  if (isPast(due) && daysUntil < 0) {
-    return { status: "overdue", daysUntil };
-  }
-  if (isToday(due) || isTomorrow(due)) {
-    return { status: "soon", daysUntil };
-  }
-  return { status: "normal", daysUntil };
-}
 import type { User, FamilyMember, Reward, Task, Family, RewardRedemption, FamilyGoal } from "@shared/schema";
 import familyGoalsIcon from "@assets/family-goals-icon.png";
 import { ACHIEVEMENT_BADGES } from "@/lib/achievement-badges";
@@ -257,7 +242,7 @@ function getProgressColor(percentage: number) {
 
 // Reward Card Component
 function RewardCard({ reward, currentPoints, member }: { reward: Reward; currentPoints: number; member: FamilyMember }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
   const percentage = Math.min((currentPoints / reward.pointThreshold) * 100, 100);
@@ -558,6 +543,27 @@ function TaskCard({
       daysPast,
     };
   })();
+  const isScheduledAppointment = !!task.dueDate && task.recurrence === "none";
+  const scheduledAppointmentText = (() => {
+    if (!isScheduledAppointment) return null;
+    const dateStr = String(task.dueDate).substring(0, 10);
+    const date = new Date(`${dateStr}T12:00:00`);
+    if (isNaN(date.getTime())) return null;
+    const relativeFormatter = new Intl.RelativeTimeFormat(i18n.language, { numeric: "auto" });
+    let dateText: string;
+    if (isToday(date)) {
+      dateText = relativeFormatter.format(0, "day");
+    } else if (isTomorrow(date)) {
+      dateText = relativeFormatter.format(1, "day");
+    } else {
+      dateText = new Intl.DateTimeFormat(i18n.language, {
+        day: "numeric",
+        month: "long",
+      }).format(date);
+    }
+    const capitalizedDate = dateText.charAt(0).toLocaleUpperCase(i18n.language) + dateText.slice(1);
+    return t("tasks.nextDateLabel", { date: capitalizedDate });
+  })();
   
   // Check if this is a shared task and current member is NOT assigned
   const isSharedTaskNotAssigned = task.isSharedTask && 
@@ -695,7 +701,7 @@ function TaskCard({
     statusMessage = t("kidDashboard.sharedTaskCompleted");
     statusColor = "text-green-600 dark:text-green-400";
   } else if (dueDateInfo.notYet) {
-    statusMessage = t("tasks.dueDateNotYetTooltip");
+    statusMessage = t("kidDashboard.notAvailable");
     statusColor = "text-muted-foreground";
   } else if (dueDateInfo.expired) {
     statusMessage = t("tasks.dueDateExpiredTooltip");
@@ -781,7 +787,7 @@ function TaskCard({
     return (
       <div className={`min-w-0 transition-transform duration-150 ${isActionable ? "active:scale-[0.96]" : ""}`}>
         <div
-          className={`p-2.5 rounded-2xl border transition-colors min-w-0 w-full ${borderColor} ${isActionable ? "cursor-pointer" : ""} ${!isActionable && !showAsApproved && !allSharedMembersCompleted && !showAsPending && !showAsSubmitted && !isRejected && !dueDateInfo.expired ? "opacity-70" : ""}`}
+          className={`p-2.5 rounded-2xl border transition-colors min-w-0 w-full ${borderColor} ${isActionable ? "cursor-pointer" : ""} ${!isActionable && !showAsApproved && !allSharedMembersCompleted && !showAsPending && !showAsSubmitted && !isRejected && !dueDateInfo.expired && !dueDateInfo.notYet ? "opacity-70" : ""}`}
           style={cardBg ? { background: cardBg } : undefined}
           data-task-visual-state={showAsPending || showAsSubmitted ? "submitted" : showAsApproved || allSharedMembersCompleted ? "approved" : "open"}
           data-testid={`task-card-${task.id}`}
@@ -789,7 +795,7 @@ function TaskCard({
         >
           {/* Emoji + title row */}
           <div className="flex items-start gap-2 min-w-0">
-            <span className={`text-2xl leading-none flex-shrink-0 mt-0.5 ${isActionable ? "" : "opacity-50"}`}>
+            <span className={`text-2xl leading-none flex-shrink-0 mt-0.5 ${isActionable || dueDateInfo.notYet ? "" : "opacity-50"}`}>
               {task.iconEmoji || "✅"}
             </span>
             <p className="font-bold text-sm leading-snug line-clamp-2 flex-1 min-w-0 text-white" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
@@ -851,6 +857,8 @@ function TaskCard({
             ? "border-green-500/20" 
             : dueDateInfo.expired 
             ? "border-destructive/40" 
+            : dueDateInfo.notYet
+            ? "lc-kid-scheduled-task border-cyan-400/60 shadow-lg shadow-cyan-900/15"
             : "border-blue-500/20 opacity-70"
         }`}
         style={{
@@ -865,6 +873,8 @@ function TaskCard({
               ? "linear-gradient(135deg, rgba(120,80,5,0.92) 0%, rgba(92,60,3,0.95) 55%, rgba(70,45,2,0.97) 100%)"
               : dueDateInfo.expired
               ? "rgba(239,68,68,0.15)"
+              : dueDateInfo.notYet
+              ? "linear-gradient(135deg, rgba(14,116,144,0.42) 0%, rgba(15,67,92,0.72) 52%, rgba(15,23,42,0.90) 100%)"
               : "linear-gradient(135deg, rgba(51,65,85,0.88) 0%, rgba(30,41,59,0.92) 55%, rgba(15,23,42,0.95) 100%)"
         }}
         data-task-visual-state={showAsSubmitted || showAsPending ? "submitted" : showAsApproved || allSharedMembersCompleted ? "approved" : "open"}
@@ -908,7 +918,7 @@ function TaskCard({
               <CheckCircle2 className="h-12 w-12 text-green-500" />
             ) : (
               <TaskIcon
-                className={`h-12 w-12 text-primary transition-all duration-300 ${isActionable ? "" : "opacity-40"}`}
+                className={`h-12 w-12 text-primary transition-all duration-300 ${isActionable || dueDateInfo.notYet ? "" : "opacity-40"}`}
               />
             )}
           </div>
@@ -1084,43 +1094,17 @@ function TaskCard({
             <KidShoppingListSection taskId={task.id} expanded={shoppingListExpanded} onToggle={() => setShoppingListExpanded(v => !v)} />
           )}
 
-          {/* Due Date Display with kid-friendly warnings */}
-          {task.dueDate && (() => {
-            const { status, daysUntil } = getDueDateStatus(task.dueDate);
-            
-            if (status === "overdue") {
-              return (
-                <Badge 
-                  variant="destructive" 
-                  className="gap-1 text-xs rounded-xl"
-                  data-testid={`badge-overdue-${task.id}`}
-                >
-                  <AlertTriangle className="h-3 w-3" />
-                  {t('kidDashboard.overdueHurry')}
-                </Badge>
-              );
-            }
-            
-            if (status === "soon") {
-              return (
-                <Badge 
-                  variant="secondary" 
-                  className="gap-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 rounded-xl"
-                  data-testid={`badge-due-soon-${task.id}`}
-                >
-                  <Calendar className="h-3 w-3" />
-                  {daysUntil === 0 ? t('kidDashboard.dueTodayHurry') : t('kidDashboard.dueTomorrowHurry')}
-                </Badge>
-              );
-            }
-            
-            return (
-              <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3" />
-                <span>{t('tasks.dueBy', { date: format(new Date(task.dueDate), "MMM d") })}</span>
-              </div>
-            );
-          })()}
+          {/* A manually selected calendar date is an appointment, not a deadline. */}
+          {scheduledAppointmentText && (
+            <Badge
+              variant="outline"
+              className="lc-next-date-label gap-2 px-3 py-1.5 text-sm font-bold rounded-xl"
+              data-testid={`badge-due-date-${task.id}`}
+            >
+              <Calendar className="h-4 w-4" />
+              {scheduledAppointmentText}
+            </Badge>
+          )}
 
           {statusMessage ? (
             <div className="space-y-1.5 w-full">
@@ -1137,7 +1121,7 @@ function TaskCard({
               >
                 {statusMessage}
               </div>
-              <div className="flex items-center justify-center gap-1.5 opacity-55">
+              <div className={`flex items-center justify-center gap-1.5 ${dueDateInfo.notYet ? "" : "opacity-55"}`}>
                 <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                 <span className="text-sm font-bold text-muted-foreground">{task.points}</span>
               </div>

@@ -3334,13 +3334,13 @@ html:not(.dark) .lc-dashboard .lc-weekend-unavailable-label {
   background: rgba(8, 145, 178, .3) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .24);
 }
-html:not(.dark) .lc-dashboard .lc-next-date-label {
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard) .lc-next-date-label {
   color: #18324d !important;
   border-color: rgba(59, 130, 246, .42) !important;
   background: rgba(239, 246, 255, .96) !important;
   box-shadow: 0 2px 7px rgba(37, 99, 235, .12);
 }
-.dark .lc-dashboard .lc-next-date-label {
+.dark :is(.lc-dashboard, .lc-kid-dashboard) .lc-next-date-label {
   color: #eff6ff !important;
   border-color: rgba(96, 165, 250, .48) !important;
   background: rgba(30, 64, 175, .28) !important;

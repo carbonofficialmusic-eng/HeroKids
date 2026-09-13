@@ -8,3 +8,5 @@ Die Bezeichnung und das hervorgehobene Badge „Termin“ dürfen ausschließlic
 **Why:** Wiederholungsintervalle wie „alle zwei Tage“ beschreiben einen Rhythmus. Ein daraus berechneter Wochentag darf Nutzern nicht als bewusst festgelegter Kalendertermin präsentiert werden.
 
 **How to apply:** Bei Terminanzeigen ausschließlich das explizit gesetzte Kalenderdatum berücksichtigen. Bei Intervallen eine Verfügbarkeitsangabe zeigen: für kurze Abstände relativ („Morgen“, „Übermorgen“, „In 7 Tagen“), für längere Abstände mit Datum — immer als „Wieder verfügbar“, nie als „Termin“.
+
+Feste Termine bleiben vor ihrem Datum gesperrt, müssen aber auf Eltern- und Kids Board deutlich sichtbar sein. Nicht als gewöhnliche inaktive Aufgabe ausgrauen; stattdessen den Termin klar benennen und visuell hervorheben.
