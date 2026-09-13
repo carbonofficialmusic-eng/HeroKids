@@ -15,6 +15,7 @@ import { de, enUS, fr, es, ja, ko, sv, zhCN } from "date-fns/locale";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getDevHeaders } from "@/lib/queryClient";
 import { canRetryRejectedTeamContribution } from "@shared/task-mode";
+import { DailyProgressBadge } from "@/components/daily-progress-badge";
 
 
 interface TaskCardProps {
@@ -42,6 +43,7 @@ interface TaskCardProps {
       color: string;
       hasCompleted: boolean;
       status?: "pending" | "approved" | "rejected" | null;
+      dailyProgress?: number;
     }>;
     assignedMemberCompletions?: Array<{
       memberId: string;
@@ -53,6 +55,7 @@ interface TaskCardProps {
       hasCompleted: boolean; // true only when approved
       hasSubmitted: boolean; // true when pending or approved (for UI graying)
       status: "pending" | "approved" | "rejected" | null;
+      dailyProgress?: number;
     }>;
   };
   assignedTo?: FamilyMember;
@@ -236,12 +239,19 @@ export function TaskCard({
   // Check if this member has already completed this multi-completion task
   const isCompletedByMember = task.memberHasCompleted || false;
   
-  // Check if this is a shared task and current member is NOT assigned
-  const isSharedTaskNotAssigned = task.isSharedTask && 
-    task.sharedMemberIds && 
-    task.sharedMemberIds.length > 0 && 
-    currentMemberId && 
-    !task.sharedMemberIds.includes(currentMemberId);
+  // Explicit assignments apply to parents as well as children. Parents may
+  // still see and edit every family task, but may only complete it when they
+  // are one of the selected members. Tasks without a selection stay family-wide.
+  const explicitlyAssignedMemberIds = task.assignedMemberCompletions?.length
+    ? task.assignedMemberCompletions.map(member => member.memberId)
+    : task.sharedMemberCompletions?.length
+      ? task.sharedMemberCompletions.map(member => member.memberId)
+      : task.sharedMemberIds || [];
+  const isTaskNotAssigned = Boolean(
+    currentMemberId
+    && explicitlyAssignedMemberIds.length > 0
+    && !explicitlyAssignedMemberIds.includes(currentMemberId),
+  );
   
   // Get assigned member names for tooltip (prefer assignedMemberCompletions over legacy sharedMemberCompletions)
   const assignedMemberNames = task.assignedMemberCompletions?.map(m => m.displayName).join(' & ') || 
@@ -494,7 +504,7 @@ export function TaskCard({
 
             {/* Complete button — hidden for shopping list tasks (they complete via item-checking) */}
             {onComplete && !(task as any).isShoppingList && (
-              isSharedTaskNotAssigned ? (
+              isTaskNotAssigned ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -766,6 +776,17 @@ export function TaskCard({
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {task.assignedMemberCompletions.map((member) => {
+                    if (task.dailyTarget > 1) {
+                      return (
+                        <DailyProgressBadge
+                          key={member.memberId}
+                          displayName={member.displayName}
+                          completed={member.dailyProgress || 0}
+                          total={task.dailyTarget}
+                          testId={`daily-progress-${task.id}-${member.memberId}`}
+                        />
+                      );
+                    }
                     const hasSubmitted = member.hasSubmitted ?? (member.status !== null);
                     return (
                       <Badge 
@@ -810,8 +831,16 @@ export function TaskCard({
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {task.sharedMemberCompletions.map((member) => (
-                    <Badge 
+                  {task.sharedMemberCompletions.map((member) => task.dailyTarget > 1 ? (
+                    <DailyProgressBadge
+                      key={member.memberId}
+                      displayName={member.displayName}
+                      completed={member.dailyProgress || 0}
+                      total={task.dailyTarget}
+                      testId={`daily-progress-${task.id}-${member.memberId}`}
+                    />
+                  ) : (
+                    <Badge
                       key={member.memberId} 
                       variant={member.status === "rejected" ? "destructive" : member.hasCompleted ? "default" : "outline"}
                       className={`gap-1.5 text-xs ${member.hasCompleted ? "lc-task-member-completed" : ""}`}
@@ -875,7 +904,7 @@ export function TaskCard({
 
           {/* Compact complete button — hidden for shopping list tasks */}
           {onComplete && !(task as any).isShoppingList && (
-            isSharedTaskNotAssigned ? (
+            isTaskNotAssigned ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button

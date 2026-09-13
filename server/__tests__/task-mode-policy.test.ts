@@ -3,6 +3,7 @@ import {
   hasActiveTeamContribution,
   isIndividualRecurringCompletionActive,
   isRecurringTaskSchedule,
+  resolveMemberDailyTargetState,
   isTeamCompletionInCurrentPeriod,
   shouldHideCompletedTaskFromChild,
   taskStructureChanged,
@@ -149,5 +150,35 @@ describe("task member selection policy", () => {
       ...base,
       nextMemberIds: ["liv", "peter"],
     }).assignmentChanged).toBe(true);
+  });
+
+  it("keeps an approved multi-daily task open until the member reaches the target", () => {
+    expect(resolveMemberDailyTargetState({
+      recurrence: "daily",
+      dailyTarget: 2,
+      dailyProgress: 1,
+      status: "approved",
+    })).toEqual({
+      hasCompleted: false,
+      hasSubmitted: false,
+    });
+    expect(resolveMemberDailyTargetState({
+      recurrence: "daily",
+      dailyTarget: 2,
+      dailyProgress: 2,
+      status: "approved",
+    })).toEqual({
+      hasCompleted: true,
+      hasSubmitted: true,
+    });
+    expect(resolveMemberDailyTargetState({
+      recurrence: "daily",
+      dailyTarget: 3,
+      dailyProgress: 1,
+      status: "pending",
+    })).toEqual({
+      hasCompleted: false,
+      hasSubmitted: true,
+    });
   });
 });

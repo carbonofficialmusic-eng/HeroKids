@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useMidnightRefresh } from "@/hooks/useMidnightRefresh";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { DailyProgressBadge } from "@/components/daily-progress-badge";
 import { format, differenceInDays, isToday, isTomorrow, isPast, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -505,51 +506,6 @@ function KidShoppingListSection({ taskId, expanded, onToggle }: { taskId: string
           })}
         </div>
       )}
-    </div>
-  );
-}
-
-function DailyProgressBadge({
-  displayName,
-  completed,
-  total,
-  testId,
-}: {
-  displayName?: string;
-  completed: number;
-  total: number;
-  testId?: string;
-}) {
-  const safeTotal = Math.max(1, Math.min(total, 3));
-  const safeCompleted = Math.max(0, Math.min(completed, safeTotal));
-
-  return (
-    <div
-      className="inline-flex max-w-full items-stretch overflow-hidden rounded-full border border-amber-300 bg-amber-100 shadow-sm"
-      data-testid={testId}
-      aria-label={`${displayName ? `${displayName}: ` : ""}${safeCompleted} von ${safeTotal} erledigt`}
-    >
-      {displayName && (
-        <span className="flex items-center border-r border-amber-300 bg-white/80 px-2 py-1 text-xs font-bold text-slate-700">
-          {displayName}
-        </span>
-      )}
-      <span className="flex">
-        {Array.from({ length: safeTotal }, (_, index) => {
-          const isDone = index < safeCompleted;
-          return (
-            <span
-              key={index}
-              className={`flex min-w-8 items-center justify-center px-2 py-1 text-xs font-extrabold ${
-                index > 0 ? "border-l border-white/70" : ""
-              } ${isDone ? "bg-emerald-500 text-white" : "bg-amber-300 text-amber-950"}`}
-              aria-hidden="true"
-            >
-              {isDone ? "✓" : index + 1}
-            </span>
-          );
-        })}
-      </span>
     </div>
   );
 }

@@ -75,6 +75,7 @@ import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
 import { isValidFactoryResetConfirmation } from "@shared/factory-reset";
 import {
   hasActiveTeamContribution,
+  resolveMemberDailyTargetState,
   shouldHideCompletedTaskFromChild,
   taskStructureChanged,
   validateSelectedTaskMemberIds,
@@ -2098,6 +2099,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
                       ? await storage.getDailyTaskProgress(task.id, memberId)
                       : 0;
+                    const memberProgressState = resolveMemberDailyTargetState({
+                      recurrence: task.recurrence,
+                      dailyTarget: task.dailyTarget || 1,
+                      dailyProgress: memberDailyProgress,
+                      status: memberStatus,
+                    });
                     return {
                       memberId,
                       displayName: sharedMember.displayName,
@@ -2105,8 +2112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       activeSkinId: sharedMember.activeSkinId,
                       useCustomAvatar: sharedMember.useCustomAvatar,
                       color: sharedMember.color,
-                      hasCompleted: memberStatus === "approved", // Only APPROVED counts as completed
-                      hasSubmitted: memberStatus === "approved" || memberStatus === "pending", // For UI graying
+                      ...memberProgressState,
                       status: memberStatus,
                       dailyProgress: memberDailyProgress,
                     };
@@ -2167,6 +2173,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
                       ? await storage.getDailyTaskProgress(task.id, memberId)
                       : 0;
+                    const memberProgressState = resolveMemberDailyTargetState({
+                      recurrence: task.recurrence,
+                      dailyTarget: task.dailyTarget || 1,
+                      dailyProgress: memberDailyProgress,
+                      status: memberStatus,
+                    });
                     return {
                       memberId,
                       displayName: assignedMember.displayName,
@@ -2174,8 +2186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       activeSkinId: assignedMember.activeSkinId,
                       useCustomAvatar: assignedMember.useCustomAvatar,
                       color: assignedMember.color,
-                      hasCompleted: memberStatus === "approved", // Only approved counts as completed
-                      hasSubmitted: memberStatus === "approved" || memberStatus === "pending", // For UI graying
+                      ...memberProgressState,
                       status: memberStatus,
                       dailyProgress: memberDailyProgress,
                     };
@@ -2331,6 +2342,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
                       ? await storage.getDailyTaskProgress(task.id, memberId)
                       : 0;
+                    const memberProgressState = resolveMemberDailyTargetState({
+                      recurrence: task.recurrence,
+                      dailyTarget: task.dailyTarget || 1,
+                      dailyProgress: memberDailyProgress,
+                      status: memberStatus,
+                    });
                     return {
                       memberId,
                       displayName: sharedMember.displayName,
@@ -2338,8 +2355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       activeSkinId: sharedMember.activeSkinId,
                       useCustomAvatar: sharedMember.useCustomAvatar,
                       color: sharedMember.color,
-                      hasCompleted: memberStatus === "approved", // Only APPROVED counts as completed
-                      hasSubmitted: memberStatus === "approved" || memberStatus === "pending", // For UI graying
+                      ...memberProgressState,
                       status: memberStatus,
                       dailyProgress: memberDailyProgress,
                     };
@@ -2380,6 +2396,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
                       ? await storage.getDailyTaskProgress(task.id, memberId)
                       : 0;
+                    const memberProgressState = resolveMemberDailyTargetState({
+                      recurrence: task.recurrence,
+                      dailyTarget: task.dailyTarget || 1,
+                      dailyProgress: memberDailyProgress,
+                      status: memberStatus,
+                    });
                     return {
                       memberId,
                       displayName: assignedMember.displayName,
@@ -2387,8 +2409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       activeSkinId: assignedMember.activeSkinId,
                       useCustomAvatar: assignedMember.useCustomAvatar,
                       color: assignedMember.color,
-                      hasCompleted: memberStatus === "approved", // Only approved counts as completed
-                      hasSubmitted: memberStatus === "approved" || memberStatus === "pending", // For UI display
+                      ...memberProgressState,
                       status: memberStatus,
                       dailyProgress: memberDailyProgress,
                     };

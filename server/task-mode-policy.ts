@@ -47,6 +47,29 @@ export function taskStructureChanged(options: {
   };
 }
 
+export function resolveMemberDailyTargetState(options: {
+  recurrence: Recurrence;
+  dailyTarget: number;
+  dailyProgress: number;
+  status: "pending" | "approved" | "rejected" | null;
+}): { hasCompleted: boolean; hasSubmitted: boolean } {
+  const isMultiDaily = options.recurrence === "daily" && options.dailyTarget > 1;
+  if (!isMultiDaily) {
+    return {
+      hasCompleted: options.status === "approved",
+      hasSubmitted: options.status === "approved" || options.status === "pending",
+    };
+  }
+
+  const hasCompleted = options.dailyProgress >= options.dailyTarget;
+  return {
+    hasCompleted,
+    // Pending approval blocks another submission. An approved partial
+    // completion does not: the child must be able to complete the next slot.
+    hasSubmitted: options.status === "pending" || hasCompleted,
+  };
+}
+
 /**
  * Pure validation for the editor-facing member selection shared by both
  * multi-member task modes.
