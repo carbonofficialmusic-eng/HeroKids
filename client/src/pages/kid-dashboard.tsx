@@ -75,8 +75,10 @@ import {
 // Helper to determine due date status
 function getAvailableAgainDays(nextAvailableDate: Date | string | null): number | null {
   if (!nextAvailableDate) return null;
+  const exactNextDate = new Date(nextAvailableDate);
+  if (exactNextDate <= new Date()) return null;
   const now = startOfDay(new Date());
-  const next = startOfDay(new Date(nextAvailableDate));
+  const next = startOfDay(exactNextDate);
   const diff = differenceInDays(next, now);
   return Math.max(0, diff);
 }
@@ -103,6 +105,7 @@ import logoUrl from "@assets/littlechamps_logo_opt.webp";
 // Extended Task type with metadata from API
 interface TaskWithMeta extends Task {
   memberHasCompleted?: boolean;
+  memberNextAvailableDate?: Date | string | null;
   remainingSlots?: number | null;
   memberCompletionStatus?: "pending" | "approved" | "rejected" | null;
   dailyProgress?: number;
@@ -610,7 +613,7 @@ function TaskCard({
   // Custom-days tasks have recurrence="none" but recurrenceDays > 0 — treat them as recurring too
   const isRecurringTask = (task.recurrence !== "none" && task.recurrence !== "immediate") || !!(task as any).recurrenceDays;
   const availableAgainDays = (isApproved || isPending || hasNoSlots || hasCompletedWithoutStatus) && isRecurringTask
-    ? getAvailableAgainDays((task as any).nextAvailableDate ?? null)
+    ? getAvailableAgainDays(task.memberNextAvailableDate || task.nextAvailableDate)
     : null;
 
   // Check if this is a weekdays task that is unavailable on weekends (Sat=6, Sun=0)
