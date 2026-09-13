@@ -1106,7 +1106,23 @@ function TaskCard({
             </Badge>
           )}
 
-          {statusMessage ? (
+          {isWeekendUnavailable && (
+            <Badge
+              variant="outline"
+              className="lc-next-date-label gap-2 px-3 py-1.5 text-sm font-bold rounded-xl"
+              data-testid={`badge-weekend-${task.id}`}
+            >
+              <Moon className="h-4 w-4" />
+              {t("tasks.weekendUnavailable")}
+            </Badge>
+          )}
+
+          {isWeekendUnavailable ? (
+            <div className="flex items-center justify-center gap-1.5">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+              <span className="text-sm font-bold text-muted-foreground">{task.points}</span>
+            </div>
+          ) : statusMessage ? (
             <div className="space-y-1.5 w-full">
               <div 
                 className={`text-sm px-4 py-2 rounded-full text-center font-semibold border ${
