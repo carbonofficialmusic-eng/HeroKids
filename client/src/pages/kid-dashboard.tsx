@@ -13,7 +13,7 @@ import { DailyProgressBadge } from "@/components/daily-progress-badge";
 import { format, differenceInDays, isToday, isTomorrow, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronLeft, ChevronRight, Clock, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin, Gem, Hourglass, Lock, LogOut } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Clock, Moon, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin, Gem, Hourglass, Lock, LogOut } from "lucide-react";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
