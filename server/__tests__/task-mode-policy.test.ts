@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  calculateRecurringNextAvailableDate,
   hasActiveTeamContribution,
   isIndividualRecurringCompletionActive,
   isRecurringTaskSchedule,
@@ -62,6 +63,15 @@ describe("task member selection policy", () => {
       recurrence: "none",
       recurrenceDays: 3,
     })).toBe(false);
+  });
+
+  it("calculates the personal next date for custom recurring assignments", () => {
+    expect(calculateRecurringNextAvailableDate({
+      completedAt: new Date("2026-09-13T08:00:00Z"),
+      recurrence: "none",
+      recurrenceDays: 2,
+      timezone: "Europe/Berlin",
+    })?.toISOString()).toBe("2026-09-14T22:00:00.000Z");
   });
 
   it("does not reuse an old team contribution in a new period", () => {

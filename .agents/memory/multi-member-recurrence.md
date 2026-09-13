@@ -3,7 +3,7 @@ name: Multi-member recurrence boundaries
 description: Non-obvious period rules for individual and team multi-member tasks.
 ---
 
-Individual multi-member tasks must derive recurrence availability from each member's own latest completion. Never delay one assignee's next weekly, monthly, yearly, custom, or immediate occurrence until other assignees finish.
+Individual multi-member tasks must derive recurrence availability from each member's own latest completion. Never delay one assignee's next weekly, monthly, yearly, custom, or immediate occurrence until other assignees finish. Parent cards must also display that per-member boundary instead of relying on the task's global next-available date. Family-wide recurring tasks may derive a missing display boundary from their latest approved completion.
 
 Team tasks use one shared period. When checking whether everyone contributed, include only completions from the current shared period. After a current-round rejection, the member's latest rejected status must supersede older approvals so a retry is allowed.
 

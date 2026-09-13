@@ -23,6 +23,7 @@ interface TaskCardProps {
     remainingSlots?: number | null;
     memberHasCompleted?: boolean;
     memberCompletionStatus?: "pending" | "approved" | "rejected" | null;
+    memberNextAvailableDate?: Date | string | null;
     completions?: Array<{
       id: string;
       memberId: string;
@@ -210,9 +211,10 @@ export function TaskCard({
 
   // A rejected team member may retry inside the still-locked shared period.
   // Pending/approved teammates remain unavailable until the next period.
+  const effectiveNextAvailableDate = task.memberNextAvailableDate || task.nextAvailableDate;
   const isUnavailable = !!(
-    task.nextAvailableDate
-    && new Date(task.nextAvailableDate) > new Date()
+    effectiveNextAvailableDate
+    && new Date(effectiveNextAvailableDate) > new Date()
     && !canRetryRejectedTeam
   );
   
@@ -222,8 +224,8 @@ export function TaskCard({
   
   // Format next available date for display
   const getNextAvailableText = () => {
-    if (!task.nextAvailableDate || !isUnavailable) return null;
-    const nextDate = new Date(task.nextAvailableDate);
+    if (!effectiveNextAvailableDate || !isUnavailable) return null;
+    const nextDate = new Date(effectiveNextAvailableDate);
     const today = new Date();
     if (isToday(nextDate)) return t('tasks.availableToday');
     if (isTomorrow(nextDate)) return t('tasks.availableTomorrow');

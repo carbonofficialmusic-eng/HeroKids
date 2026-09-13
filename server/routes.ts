@@ -74,6 +74,7 @@ import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
 import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
 import { isValidFactoryResetConfirmation } from "@shared/factory-reset";
 import {
+  calculateRecurringNextAvailableDate,
   hasActiveTeamContribution,
   resolveMemberDailyTargetState,
   shouldHideCompletedTaskFromChild,
@@ -2242,12 +2243,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 : task.recurrence === "none" && task.requiresApproval
                   ? (familyCompletionStatus === "pending" || familyCompletionStatus === "approved")
                   : familyCompletionStatus === "approved";
+              let derivedFamilyNextAvailableDate: Date | null = null;
+              if (familyCompletionStatus === "approved" && (task.recurrence !== "none" || task.recurrenceDays)) {
+                const latestApprovedCompletion = (await storage.getTaskCompletionsByTask(task.id))
+                  .filter(completion => completion.status === "approved" && completion.completedAt)
+                  .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())[0];
+                if (latestApprovedCompletion?.completedAt) {
+                  const family = await storage.getFamily(task.familyName);
+                  derivedFamilyNextAvailableDate = calculateRecurringNextAvailableDate({
+                    completedAt: new Date(latestApprovedCompletion.completedAt),
+                    recurrence: task.recurrence,
+                    recurrenceDays: task.recurrenceDays,
+                    timezone: family?.timezone || "Europe/Berlin",
+                  });
+                }
+              }
               
               return {
                 ...task,
                 remainingSlots: null,
                 memberHasCompleted: familyHasCompleted, // True if blocked/completed
                 memberCompletionStatus: familyCompletionStatus, // Family-wide status
+                memberNextAvailableDate: derivedFamilyNextAvailableDate,
                 dailyProgress,
                 completions: [], // No participants for non-multi tasks
               };
@@ -2388,6 +2405,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               if (assignedMemberIds.length > 1) {
                 // Multi-assignment task: Show parent the status of each assigned member
+                const taskCompletions = await storage.getTaskCompletionsByTask(task.id);
+                const family = await storage.getFamily(task.familyName);
+                const familyTimezone = family?.timezone || "Europe/Berlin";
                 const assignedMemberCompletions = await Promise.all(
                   assignedMemberIds.map(async (memberId: string) => {
                     const assignedMember = await storage.getFamilyMemberById(memberId);
@@ -2402,6 +2422,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       dailyProgress: memberDailyProgress,
                       status: memberStatus,
                     });
+                    const latestApprovedCompletion = taskCompletions
+                      .filter((completion) => completion.memberId === memberId && completion.status === "approved")
+                      .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())[0];
+                    const memberNextAvailableDate = memberStatus === "approved" && latestApprovedCompletion?.completedAt
+                      ? calculateRecurringNextAvailableDate({
+                          completedAt: new Date(latestApprovedCompletion.completedAt),
+                          recurrence: task.recurrence,
+                          recurrenceDays: task.recurrenceDays,
+                          timezone: familyTimezone,
+                        })
+                      : null;
                     return {
                       memberId,
                       displayName: assignedMember.displayName,
@@ -2412,6 +2443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       ...memberProgressState,
                       status: memberStatus,
                       dailyProgress: memberDailyProgress,
+                      nextAvailableDate: memberNextAvailableDate,
                     };
                   })
                 );
@@ -2424,6 +2456,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const isThisParentAssigned = assignedMemberIds.includes(member.id);
                 const thisParentCompletion = validCompletions.find(m => m?.memberId === member.id);
                 const thisParentHasSubmitted = thisParentCompletion?.hasSubmitted || false;
+                const nextAssignedAvailability = validCompletions
+                  .map(completion => completion?.nextAvailableDate)
+                  .filter((date): date is Date => Boolean(date))
+                  .sort((a, b) => a.getTime() - b.getTime())[0] || null;
                 
                 // Grey out if: (a) ALL completed OR (b) this parent is assigned AND has already submitted
                 const shouldGreyOut = allCompleted || (isThisParentAssigned && thisParentHasSubmitted);
@@ -2433,6 +2469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   remainingSlots: null,
                   memberHasCompleted: shouldGreyOut,
                   memberCompletionStatus: thisParentCompletion?.status || (allCompleted ? "approved" : null),
+                  memberNextAvailableDate: thisParentCompletion?.nextAvailableDate || (allCompleted ? nextAssignedAvailability : null),
                   completions: [],
                   assignedMemberCompletions: validCompletions, // Include for UI to show who completed
                 };

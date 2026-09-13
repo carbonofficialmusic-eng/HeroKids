@@ -137,6 +137,46 @@ export function isIndividualRecurringCompletionActive(options: {
     === formatInTimeZone(now, timezone, periodFormat);
 }
 
+export function calculateRecurringNextAvailableDate(options: {
+  completedAt: Date;
+  recurrence: Recurrence;
+  recurrenceDays: number | null | undefined;
+  timezone: string;
+}): Date | null {
+  const { completedAt, recurrence, recurrenceDays, timezone } = options;
+  const completedDate = formatInTimeZone(completedAt, timezone, "yyyy-MM-dd");
+  const [year, month, day] = completedDate.split("-").map(Number);
+  const completedDayOfWeek = Number(formatInTimeZone(completedAt, timezone, "i"));
+
+  const atLocalMidnight = (target: Date) => fromZonedTime(
+    `${target.getUTCFullYear()}-${String(target.getUTCMonth() + 1).padStart(2, "0")}-${String(target.getUTCDate()).padStart(2, "0")} 00:00:00`,
+    timezone,
+  );
+
+  if (recurrenceDays) {
+    return atLocalMidnight(new Date(Date.UTC(year, month - 1, day + recurrenceDays)));
+  }
+
+  switch (recurrence) {
+    case "daily":
+      return atLocalMidnight(new Date(Date.UTC(year, month - 1, day + 1)));
+    case "weekdays": {
+      const daysToAdd = completedDayOfWeek === 5 ? 3 : completedDayOfWeek === 6 ? 2 : 1;
+      return atLocalMidnight(new Date(Date.UTC(year, month - 1, day + daysToAdd)));
+    }
+    case "weekly": {
+      const daysToMonday = completedDayOfWeek === 1 ? 7 : 8 - completedDayOfWeek;
+      return atLocalMidnight(new Date(Date.UTC(year, month - 1, day + daysToMonday)));
+    }
+    case "monthly":
+      return atLocalMidnight(new Date(Date.UTC(year, month, 1)));
+    case "yearly":
+      return atLocalMidnight(new Date(Date.UTC(year + 1, 0, 1)));
+    default:
+      return null;
+  }
+}
+
 export function isTeamCompletionInCurrentPeriod(
   completedAt: Date | null,
   nextAvailableDate: Date | null,
