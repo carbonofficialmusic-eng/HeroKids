@@ -17,10 +17,10 @@ describe("skin asset URLs", () => {
     vi.spyOn(Capacitor, "isNativePlatform").mockReturnValue(false);
 
     expect(getSkinImageUrl("junior-champion")).toBe(
-      "/skins/avatars/junior-champion.png?v=9",
+      "/skins/avatars/junior-champion.png?v=10",
     );
     expect(getSkinBackgroundUrl("junior-champion")).toBe(
-      "/skins/backgrounds/junior-champion.png?v=20",
+      "/skins/backgrounds/junior-champion.png?v=21",
     );
   });
 
@@ -28,13 +28,13 @@ describe("skin asset URLs", () => {
     vi.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
 
     expect(getSkinImageUrl("junior-champion")).toBe(
-      "/skins/avatars/junior-champion.png?v=9",
+      "/skins/avatars/junior-champion.png?v=10",
     );
     expect(getSkinBackgroundUrl("junior-champion")).toBe(
-      "/skins/backgrounds/junior-champion.png?v=20",
+      "/skins/backgrounds/junior-champion.png?v=21",
     );
     expect(getSkinBackgroundUrl("brave-explorer")).toBe(
-      "https://littlechamps.net/skins/backgrounds/brave-explorer.png?v=20",
+      "https://littlechamps.net/skins/backgrounds/brave-explorer.png?v=21",
     );
   });
 });

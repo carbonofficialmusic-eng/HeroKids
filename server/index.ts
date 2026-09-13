@@ -396,7 +396,7 @@ async function autoSeedSkinsIfNeeded() {
       { id: "stream-star", name: "Pixel Inventor", description: "A brilliant game inventor building friendly robots and colorful pixel worlds!", imageUrl: "🤖", pointsRequired: 5800, bonusPoints: 15 },
       { id: "arcade-master", name: "Arcade Master", description: "Champion of classic arcade games with high scores!", imageUrl: "🕹️", pointsRequired: 5860, bonusPoints: 0 },
       { id: "console-hero", name: "Dance Captain", description: "An energetic dance champion leading every beat with confidence and joy!", imageUrl: "🕺", pointsRequired: 5920, bonusPoints: 0 },
-      { id: "level-boss", name: "Level Boss", description: "Final boss character with epic powers and style!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 20 },
+      { id: "level-boss", name: "Young Sultan", description: "A friendly young royal in a magnificent turquoise, red, and gold ceremonial outfit!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 20 },
       
       // Tier 13 - Pterosaur Sky (Flying Dinosaurs collection, 6060-6500 points) - Bonus Slots: 2, 5, 8
       { id: "pteranodon", name: "Pteranodon", description: "Majestic flying reptile with distinctive long head crest!", imageUrl: "🦅", pointsRequired: 6060, bonusPoints: 0 },
@@ -752,7 +752,7 @@ async function forceReseedSkinsIfNeeded() {
       { id: "stream-star", name: "Pixel Inventor", description: "A brilliant game inventor building friendly robots and colorful pixel worlds!", imageUrl: "🤖", pointsRequired: 5800, bonusPoints: 15 },
       { id: "arcade-master", name: "Arcade Master", description: "Champion of classic arcade games with high scores!", imageUrl: "🕹️", pointsRequired: 5860, bonusPoints: 0 },
       { id: "console-hero", name: "Dance Captain", description: "An energetic dance champion leading every beat with confidence and joy!", imageUrl: "🕺", pointsRequired: 5920, bonusPoints: 0 },
-      { id: "level-boss", name: "Level Boss", description: "Final boss character with epic powers and style!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 20 },
+      { id: "level-boss", name: "Young Sultan", description: "A friendly young royal in a magnificent turquoise, red, and gold ceremonial outfit!", imageUrl: "👑", pointsRequired: 6000, bonusPoints: 20 },
       
       // Tier 13 - Pterosaur Sky (Flying Dinosaurs collection, 6060-6500 points) - Bonus Slots: 2, 5, 8
       { id: "pteranodon", name: "Pteranodon", description: "Majestic flying reptile with distinctive long head crest!", imageUrl: "🦅", pointsRequired: 6060, bonusPoints: 0 },

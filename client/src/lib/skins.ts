@@ -13,10 +13,10 @@ export function getSkinImageUrl(skinId: string): string {
 
 // Bump these versions whenever the corresponding skin assets are updated.
 // Native WebViews and the production CDN cache these files aggressively.
-const AVATAR_VERSION = 9;
+const AVATAR_VERSION = 10;
 
 // Bump this version when background images are updated to bust the immutable cache
-const BACKGROUND_VERSION = 20;
+const BACKGROUND_VERSION = 21;
 
 export function getSkinBackgroundUrl(skinId: string): string {
   const path = `/skins/backgrounds/${skinId}.png?v=${BACKGROUND_VERSION}`;
