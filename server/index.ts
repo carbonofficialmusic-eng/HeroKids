@@ -912,6 +912,59 @@ async function ensurePinboardTable() {
   }
 }
 
+/**
+ * Before explicit team mode existed, is_shared_task only meant that a task was
+ * assigned to several children. Convert that legacy representation exactly
+ * once so existing families keep the original "each child individually"
+ * behavior. Tasks explicitly created as teams after this migration are not
+ * touched on later starts.
+ */
+async function migrateLegacyMultiTasksToIndividualMode() {
+  try {
+    await db.execute(sql`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1
+          FROM app_config
+          WHERE key = 'legacy_multi_tasks_to_individual_v1'
+        ) THEN
+          INSERT INTO task_assignments (task_id, member_id)
+          SELECT legacy_task.id, legacy_member.member_id
+          FROM tasks AS legacy_task
+          CROSS JOIN LATERAL unnest(
+            COALESCE(legacy_task.shared_member_ids, ARRAY[]::text[])
+          ) AS legacy_member(member_id)
+          WHERE legacy_task.is_shared_task = true
+            AND NOT EXISTS (
+              SELECT 1
+              FROM task_assignments AS existing_assignment
+              WHERE existing_assignment.task_id = legacy_task.id
+                AND existing_assignment.member_id = legacy_member.member_id
+            );
+
+          UPDATE tasks
+          SET
+            is_shared_task = false,
+            shared_member_ids = NULL,
+            updated_at = now()
+          WHERE is_shared_task = true;
+
+          INSERT INTO app_config (key, value, updated_at)
+          VALUES (
+            'legacy_multi_tasks_to_individual_v1',
+            'completed',
+            now()
+          );
+        END IF;
+      END
+      $$;
+    `);
+  } catch (error) {
+    console.error("Failed to migrate legacy multi tasks:", error);
+  }
+}
+
 (async () => {
   const server = await registerRoutes(app);
 
@@ -959,6 +1012,9 @@ async function ensurePinboardTable() {
   (async () => {
   // Ensure pinboard_notes table exists
   await ensurePinboardTable();
+
+  // Preserve the original independent behavior of all pre-team-mode multi tasks.
+  await migrateLegacyMultiTasksToIndividualMode();
 
   // Auto-seed character skins on first startup
   await autoSeedSkinsIfNeeded();
