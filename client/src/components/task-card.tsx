@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Moon, Info, ShoppingCart, Square, CheckSquare, ChevronDown } from "lucide-react";
+import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Clock, Moon, Info, ShoppingCart, Square, CheckSquare, ChevronDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { Task, FamilyMember, ShoppingListItem } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
