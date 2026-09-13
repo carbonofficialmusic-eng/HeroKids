@@ -3371,9 +3371,9 @@ html:not(.dark) .lc-kid-dashboard [data-task-visual-state="submitted"] .bg-white
 }
 html:not(.dark) .lc-dashboard [data-task-visual-state="approved"] {
   color: #18324d !important;
-  border-color: #dce6ec !important;
-  background: #fff !important;
-  box-shadow: 0 5px 15px rgba(32,55,82,.08), inset 0 1px rgba(255,255,255,.82) !important;
+  border-color: rgba(34, 197, 94, .5) !important;
+  background: rgba(34, 197, 94, .2) !important;
+  box-shadow: 0 5px 15px rgba(22, 101, 52, .08), inset 0 1px rgba(255,255,255,.62) !important;
 }
 html:not(.dark) .lc-dashboard [data-task-visual-state="approved"] :is(h3, [data-testid^="text-task-title-"]) {
   color: #18324d !important;
@@ -3386,6 +3386,11 @@ html:not(.dark) .lc-dashboard [data-task-visual-state="approved"] :is(.bg-muted,
   color: #36516d !important;
   border-color: #dbe8ee !important;
   background: #eef5f8 !important;
+}
+.dark .lc-dashboard [data-task-visual-state="approved"] {
+  border-color: rgba(34, 197, 94, .32) !important;
+  background: rgba(34, 197, 94, .2) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, .12), inset 0 1px rgba(134, 239, 172, .08) !important;
 }
 
 html:not(.dark) .lc-leaderboard-card {
