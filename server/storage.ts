@@ -260,7 +260,7 @@ export interface IStorage {
   getTaskAssignmentsByTask(taskId: string): Promise<string[]>;
 
   // Task completion operations
-  createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion>;
+  createTaskCompletion(completion: InsertTaskCompletion, options?: { forceApproval?: boolean }): Promise<TaskCompletion>;
   hasActiveMemberCompletion(taskId: string, memberId: string, txClient?: any): Promise<boolean>;
   getTaskCompletionsByMember(memberId: string): Promise<TaskCompletion[]>;
   getTaskCompletionsByFamily(familyName: string): Promise<TaskCompletion[]>;
@@ -1855,7 +1855,7 @@ export class DatabaseStorage implements IStorage {
     return null;
   }
 
-  async createTaskCompletion(completionData: InsertTaskCompletion): Promise<TaskCompletion> {
+  async createTaskCompletion(completionData: InsertTaskCompletion, options?: { forceApproval?: boolean }): Promise<TaskCompletion> {
     return await db.transaction(async (tx) => {
       // 1. Lock task: SELECT * FROM tasks WHERE id = taskId FOR UPDATE
       const task = await tx.select().from(tasks).where(eq(tasks.id, completionData.taskId)).for('update');
@@ -1879,15 +1879,16 @@ export class DatabaseStorage implements IStorage {
       }
       
       // 4. Insert completion
+      const approvalRequired = task[0].requiresApproval || options?.forceApproval === true;
       const [completion] = await tx.insert(taskCompletions)
         .values({
           ...completionData,
-          status: task[0].requiresApproval ? 'pending' : 'approved'
+          status: approvalRequired ? 'pending' : 'approved'
         })
         .returning();
       
       // 5. If auto-approved: run approval logic immediately
-      if (!task[0].requiresApproval) {
+      if (!approvalRequired) {
         await this._approveCompletionInternal(tx, completion.id, completion.memberId, true);
       }
       

@@ -15,6 +15,7 @@ import { setupAuth, isAuthenticated, isDev, setDevTokenActingAs, resolveWsUserId
 import { generateTokenPair, refreshAccessToken, revokeRefreshToken, registerPushToken, unregisterPushToken } from "./mobileAuth";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { shouldKeepCustomPhotoWhenSelectingSkin } from "@shared/avatar-preferences";
+import { getDueDateWindow } from "@shared/due-date-policy";
 import { ObjectPermission } from "./objectAcl";
 import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
@@ -3194,7 +3195,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Due date validation for one-time tasks with a due date
+      let forceLateDueDateApproval = false;
+      // Fixed appointments are available on their date and for one grace day.
+      // A grace-day submission always needs parent approval.
       if (task.dueDate && task.recurrence === "none") {
         const dueDateStr = String(task.dueDate).substring(0, 10);
         const family = await storage.getFamily(member.familyName);
@@ -3210,18 +3213,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        // Calculate days past due date
-        const dueMs = new Date(dueDateStr + "T00:00:00").getTime();
-        const todayMs = new Date(todayStr + "T00:00:00").getTime();
-        const daysPastDue = Math.floor((todayMs - dueMs) / (1000 * 60 * 60 * 24));
+        const dueDateWindow = getDueDateWindow(dueDateStr, todayStr);
         
-        if (daysPastDue > 3) {
+        if (dueDateWindow.expired) {
           return res.status(422).json({ 
             message: "Validation failed: Task deadline has expired",
             code: "TASK_DEADLINE_EXPIRED",
             dueDate: dueDateStr
           });
         }
+        forceLateDueDateApproval = dueDateWindow.isGraceDay;
       }
       
       // For weekdays tasks, block completion on weekends
@@ -3334,7 +3335,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           completion = dailyResult.completion;
         } else {
-          completion = await storage.createTaskCompletion(completionData);
+          completion = await storage.createTaskCompletion(completionData, {
+            forceApproval: forceLateDueDateApproval,
+          });
         }
       } catch (err: any) {
         const msg: string = err?.message || "";
@@ -3512,7 +3515,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           // Single assignment or no assignments — only auto-complete non-shared tasks.
           // isSharedTask=true means other members may still need to submit; don't complete prematurely.
-          if (task.recurrence === "none" && !task.requiresApproval && !task.isSharedTask) {
+          if (task.recurrence === "none" && !task.requiresApproval && !forceLateDueDateApproval && !task.isSharedTask) {
             await storage.updateTaskStatus(taskId, "completed");
           }
           // If requiresApproval (non-shared), task status is set to "completed" in _approveCompletionInternal
@@ -3524,7 +3527,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedMember = await storage.getFamilyMember(member.id);
       
       // Broadcast appropriate message based on whether approval was required
-      if (task.requiresApproval) {
+      const completionRequiresApproval = task.requiresApproval || forceLateDueDateApproval;
+      if (completionRequiresApproval) {
         // Broadcast pending completion to family (so parents know to approve)
         broadcastToFamily(member.familyName, {
           type: "task_completion_pending",
@@ -3597,11 +3601,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         success: true,
-        message: task.requiresApproval 
+        message: completionRequiresApproval
           ? "Task completion submitted! Awaiting parent approval."
           : `Great job! You earned ${task.points} points!`,
         completion,
-        autoApproved: !task.requiresApproval,
+        autoApproved: !completionRequiresApproval,
       });
     } catch (error: any) {
       console.error("Error completing task:", error);

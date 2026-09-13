@@ -100,6 +100,7 @@ import { Pinboard } from "@/components/pinboard";
 import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature, canUseSharedRewards, type SubscriptionTier } from "@shared/tier-config";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
+import { getDueDateWindow } from "@shared/due-date-policy";
 import logoUrl from "@assets/littlechamps_logo_opt.webp";
 
 // Extended Task type with metadata from API
@@ -533,17 +534,13 @@ function TaskCard({
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
-    if (dateStr > todayStr) return { notYet: true, expired: false, isLate: false, daysPast: 0 };
-    
-    const dueMs = new Date(dateStr + "T00:00:00").getTime();
-    const todayMs = new Date(todayStr + "T00:00:00").getTime();
-    const daysPast = Math.floor((todayMs - dueMs) / (1000 * 60 * 60 * 24));
+    const dueDateWindow = getDueDateWindow(dateStr, todayStr);
     
     return {
-      notYet: false,
-      expired: daysPast > 3,
-      isLate: daysPast >= 1 && daysPast <= 3,
-      daysPast,
+      notYet: dueDateWindow.notYet,
+      expired: dueDateWindow.expired,
+      isLate: dueDateWindow.isGraceDay,
+      daysPast: Math.max(0, dueDateWindow.daysPastDue),
     };
   })();
   const isScheduledAppointment = !!task.dueDate && task.recurrence === "none";
@@ -678,10 +675,10 @@ function TaskCard({
   let statusColor = "";
   
   if (showAsSubmitted) {
-    statusMessage = task.requiresApproval
+    statusMessage = task.requiresApproval || dueDateInfo.isLate
       ? t("kidDashboard.waitingApproval")
       : (t("kidDashboard.waitingForOthers") || "Warte auf andere Mitglieder…");
-    statusColor = task.requiresApproval ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground";
+    statusColor = task.requiresApproval || dueDateInfo.isLate ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground";
   } else if (showAsPending) {
     statusMessage = t("kidDashboard.waitingApproval");
     statusColor = "text-amber-600 dark:text-amber-400";
@@ -1914,7 +1911,13 @@ export default function KidDashboard() {
           if ((t.dailyTarget || 1) > 1 && (t.dailyProgress || 0) + 1 < (t.dailyTarget || 1)) {
             return { ...t, dailyProgress: (t.dailyProgress || 0) + 1 };
           }
-          if (t.requiresApproval) {
+          const isLateAppointment = !!t.dueDate
+            && t.recurrence === "none"
+            && getDueDateWindow(
+              String(t.dueDate).substring(0, 10),
+              format(new Date(), "yyyy-MM-dd"),
+            ).isGraceDay;
+          if (t.requiresApproval || isLateAppointment) {
             return { ...t, memberHasCompleted: true, memberCompletionStatus: "pending" };
           }
           return { ...t, memberHasCompleted: true, memberCompletionStatus: "approved" };
@@ -2058,6 +2061,9 @@ export default function KidDashboard() {
     // One-time tasks with approval: stay visible (yellow pending state) until parent approves
     // One-time tasks without approval disappear immediately (task status becomes "completed" on backend)
     // Custom-interval tasks (recurrenceDays > 0) must be excluded — they stay visible after approval
+    if (t.recurrence === "none" && t.memberCompletionStatus === "pending") {
+      return true;
+    }
     if (t.recurrence === "none" && !(t as any).recurrenceDays && t.requiresApproval && t.memberHasCompleted) {
       return t.memberCompletionStatus !== "approved";
     }

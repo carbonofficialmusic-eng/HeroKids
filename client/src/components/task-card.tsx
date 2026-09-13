@@ -15,6 +15,7 @@ import { de, enUS, fr, es, ja, ko, sv, zhCN } from "date-fns/locale";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getDevHeaders } from "@/lib/queryClient";
 import { canRetryRejectedTeamContribution } from "@shared/task-mode";
+import { getDueDateWindow } from "@shared/due-date-policy";
 import { DailyProgressBadge } from "@/components/daily-progress-badge";
 
 
@@ -277,17 +278,13 @@ export function TaskCard({
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
-    if (dateStr > todayStr) return { notYet: true, expired: false, isLate: false, daysPast: 0 };
-    
-    const dueMs = new Date(dateStr + "T00:00:00").getTime();
-    const todayMs = new Date(todayStr + "T00:00:00").getTime();
-    const daysPast = Math.floor((todayMs - dueMs) / (1000 * 60 * 60 * 24));
+    const dueDateWindow = getDueDateWindow(dateStr, todayStr);
     
     return {
-      notYet: false,
-      expired: daysPast > 3,
-      isLate: daysPast >= 1 && daysPast <= 3,
-      daysPast,
+      notYet: dueDateWindow.notYet,
+      expired: dueDateWindow.expired,
+      isLate: dueDateWindow.isGraceDay,
+      daysPast: Math.max(0, dueDateWindow.daysPastDue),
     };
   })();
   
@@ -298,7 +295,6 @@ export function TaskCard({
   // True when requiresApproval and at least one submission is still pending approval.
   // Used to show a yellow (amber) checkmark on the parent dashboard.
   const hasPendingApproval = (() => {
-    if (!task.requiresApproval) return false;
     // New-style multi-assignment (taskAssignments table)
     if (task.assignedMemberCompletions && task.assignedMemberCompletions.length > 0) {
       return task.assignedMemberCompletions.some(m => m.status === "pending");
@@ -901,7 +897,7 @@ export function TaskCard({
                 </div>
               )}
               
-              {!task.requiresApproval && (
+              {!task.requiresApproval && !hasPendingApproval && (
                 <div className="flex items-center gap-1 text-primary" data-testid={`icon-auto-approved-${task.id}`}>
                   <Zap className="h-3 w-3" />
                   <span>{t('tasks.autoApproved')}</span>
