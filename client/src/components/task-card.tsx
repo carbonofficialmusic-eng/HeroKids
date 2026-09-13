@@ -397,7 +397,9 @@ export function TaskCard({
         whileTap={onClick ? { scale: 0.98 } : undefined}
       >
         <Card
-          className={`p-2 transition-all h-full flex flex-col backdrop-blur-md ${
+          className={`p-2 transition-all h-full flex flex-col ${
+            taskVisualState === 'approved' ? 'backdrop-blur-none' : 'backdrop-blur-md'
+          } ${
             isGrayedOut ? 'bg-card/20' : 'bg-card/80 lc-task-card-open'
           } ${isWeekendUnavailable ? 'lc-task-card-weekend-unavailable' : ''} hover-elevate active-elevate-2 cursor-pointer`}
           data-task-visual-state={taskVisualState}
@@ -598,7 +600,9 @@ export function TaskCard({
       whileTap={onClick ? { scale: 0.98 } : undefined}
     >
       <Card
-        className={`p-4 transition-all min-h-[140px] h-full flex flex-col backdrop-blur-md ${
+        className={`p-4 transition-all min-h-[140px] h-full flex flex-col ${
+          taskVisualState === 'approved' ? 'backdrop-blur-none' : 'backdrop-blur-md'
+        } ${
           isGrayedOut ? 'bg-card/20' : 'bg-card/80 lc-task-card-open'
         } ${isWeekendUnavailable ? 'lc-task-card-weekend-unavailable' : ''} ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
         data-task-visual-state={taskVisualState}
