@@ -2093,6 +2093,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     const sharedMember = await storage.getFamilyMemberById(memberId);
                     if (!sharedMember) return null;
                     const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId, undefined, skipReset);
+                    const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
+                      ? await storage.getDailyTaskProgress(task.id, memberId)
+                      : 0;
                     return {
                       memberId,
                       displayName: sharedMember.displayName,
@@ -2103,6 +2106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       hasCompleted: memberStatus === "approved", // Only APPROVED counts as completed
                       hasSubmitted: memberStatus === "approved" || memberStatus === "pending", // For UI graying
                       status: memberStatus,
+                      dailyProgress: memberDailyProgress,
                     };
                   })
                 );
@@ -2158,6 +2162,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     // immediate tasks an approved completion therefore resets
                     // only that member instead of waiting for all assignees.
                     const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
+                      ? await storage.getDailyTaskProgress(task.id, memberId)
+                      : 0;
                     return {
                       memberId,
                       displayName: assignedMember.displayName,
@@ -2168,6 +2175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       hasCompleted: memberStatus === "approved", // Only approved counts as completed
                       hasSubmitted: memberStatus === "approved" || memberStatus === "pending", // For UI graying
                       status: memberStatus,
+                      dailyProgress: memberDailyProgress,
                     };
                   })
                 );
@@ -2317,6 +2325,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     const sharedMember = await storage.getFamilyMemberById(memberId);
                     if (!sharedMember) return null;
                     const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId, undefined, skipReset);
+                    const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
+                      ? await storage.getDailyTaskProgress(task.id, memberId)
+                      : 0;
                     return {
                       memberId,
                       displayName: sharedMember.displayName,
@@ -2327,6 +2338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       hasCompleted: memberStatus === "approved", // Only APPROVED counts as completed
                       hasSubmitted: memberStatus === "approved" || memberStatus === "pending", // For UI graying
                       status: memberStatus,
+                      dailyProgress: memberDailyProgress,
                     };
                   })
                 );
@@ -2362,6 +2374,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     const assignedMember = await storage.getFamilyMemberById(memberId);
                     if (!assignedMember) return null;
                     const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
+                      ? await storage.getDailyTaskProgress(task.id, memberId)
+                      : 0;
                     return {
                       memberId,
                       displayName: assignedMember.displayName,
@@ -2372,6 +2387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       hasCompleted: memberStatus === "approved", // Only approved counts as completed
                       hasSubmitted: memberStatus === "approved" || memberStatus === "pending", // For UI display
                       status: memberStatus,
+                      dailyProgress: memberDailyProgress,
                     };
                   })
                 );

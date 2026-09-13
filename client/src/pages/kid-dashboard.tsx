@@ -129,6 +129,7 @@ interface TaskWithMeta extends Task {
     color: string;
     hasCompleted: boolean;
     status?: "pending" | "approved" | "rejected" | null;
+    dailyProgress?: number;
   }>;
   assignedMemberCompletions?: Array<{
     memberId: string;
@@ -140,6 +141,7 @@ interface TaskWithMeta extends Task {
     hasCompleted: boolean; // true only when approved
     hasSubmitted: boolean; // true when pending or approved (for UI graying)
     status: "pending" | "approved" | "rejected" | null;
+    dailyProgress?: number;
   }>;
 }
 
@@ -507,6 +509,51 @@ function KidShoppingListSection({ taskId, expanded, onToggle }: { taskId: string
   );
 }
 
+function DailyProgressBadge({
+  displayName,
+  completed,
+  total,
+  testId,
+}: {
+  displayName?: string;
+  completed: number;
+  total: number;
+  testId?: string;
+}) {
+  const safeTotal = Math.max(1, Math.min(total, 3));
+  const safeCompleted = Math.max(0, Math.min(completed, safeTotal));
+
+  return (
+    <div
+      className="inline-flex max-w-full items-stretch overflow-hidden rounded-full border border-amber-300 bg-amber-100 shadow-sm dark:hidden"
+      data-testid={testId}
+      aria-label={`${displayName ? `${displayName}: ` : ""}${safeCompleted} von ${safeTotal} erledigt`}
+    >
+      {displayName && (
+        <span className="flex items-center border-r border-amber-300 bg-white/80 px-2 py-1 text-xs font-bold text-slate-700">
+          {displayName}
+        </span>
+      )}
+      <span className="flex">
+        {Array.from({ length: safeTotal }, (_, index) => {
+          const isDone = index < safeCompleted;
+          return (
+            <span
+              key={index}
+              className={`flex min-w-8 items-center justify-center px-2 py-1 text-xs font-extrabold ${
+                index > 0 ? "border-l border-white/70" : ""
+              } ${isDone ? "bg-emerald-500 text-white" : "bg-amber-300 text-amber-950"}`}
+              aria-hidden="true"
+            >
+              {isDone ? "✓" : index + 1}
+            </span>
+          );
+        })}
+      </span>
+    </div>
+  );
+}
+
 // Task Card Component
 function TaskCard({ 
   task, 
@@ -815,10 +862,18 @@ function TaskCard({
               </>
             )}
           </div>
-          {dailyTarget > 1 && !showAsPending && !showAsApproved && (
-            <p className="mt-1 text-xs font-semibold text-sky-300" data-testid={`daily-progress-${task.id}`}>
-              {t("tasks.dailyProgress", { completed: dailyProgress, total: dailyTarget })}
-            </p>
+          {dailyTarget > 1 && (
+            <div className="mt-1">
+              <DailyProgressBadge
+                displayName={member.displayName}
+                completed={dailyProgress}
+                total={dailyTarget}
+                testId={`daily-progress-${task.id}`}
+              />
+              <p className="hidden text-xs font-semibold text-sky-300 dark:block" data-testid={`daily-progress-dark-${task.id}`}>
+                {t("tasks.dailyProgress", { completed: dailyProgress, total: dailyTarget })}
+              </p>
+            </div>
           )}
         </div>
       </div>
@@ -866,10 +921,20 @@ function TaskCard({
           : isActionable ? handleComplete : undefined}
       >
         <div className="text-center space-y-3">
-          {dailyTarget > 1 && !showAsPending && !showAsApproved && (
-            <Badge variant="secondary" data-testid={`daily-progress-${task.id}`}>
-              {t("tasks.dailyProgress", { completed: dailyProgress, total: dailyTarget })}
-            </Badge>
+          {dailyTarget > 1 &&
+            !task.assignedMemberCompletions?.length &&
+            !task.sharedMemberCompletions?.length && (
+            <>
+              <DailyProgressBadge
+                displayName={member.displayName}
+                completed={dailyProgress}
+                total={dailyTarget}
+                testId={`daily-progress-${task.id}`}
+              />
+              <Badge variant="secondary" className="hidden dark:inline-flex" data-testid={`daily-progress-dark-${task.id}`}>
+                {t("tasks.dailyProgress", { completed: dailyProgress, total: dailyTarget })}
+              </Badge>
+            </>
           )}
           <div className={`flex justify-center p-4 rounded-2xl mx-auto w-fit shadow-inner ${
             showAsApproved ? "bg-green-500/25" : 
@@ -941,6 +1006,30 @@ function TaskCard({
                 <div className="flex flex-wrap justify-center gap-1">
                   {task.assignedMemberCompletions.map((m) => {
                     const hasSubmitted = m.hasSubmitted ?? (m.status !== null);
+                    if (dailyTarget > 1) {
+                      return (
+                        <div key={m.memberId}>
+                          <DailyProgressBadge
+                            displayName={m.displayName}
+                            completed={m.dailyProgress || 0}
+                            total={dailyTarget}
+                            testId={`daily-progress-${task.id}-${m.memberId}`}
+                          />
+                          <Badge
+                            variant={hasSubmitted ? "default" : "outline"}
+                            className="hidden gap-1 text-xs dark:inline-flex"
+                          >
+                            {m.displayName} · {m.status === "approved"
+                              ? t("tasks.memberStatusApproved")
+                              : m.status === "pending"
+                                ? t("tasks.memberStatusSubmitted")
+                                : m.status === "rejected"
+                                  ? t("tasks.memberStatusRejected")
+                                  : t("tasks.memberStatusOpen")}
+                          </Badge>
+                        </div>
+                      );
+                    }
                     return (
                       <Badge 
                         key={m.memberId} 
@@ -994,7 +1083,28 @@ function TaskCard({
                   {t("tasks.assignmentModeTeam")}
                 </p>
                 <div className="flex flex-wrap justify-center gap-1">
-                  {task.sharedMemberCompletions.map((m) => (
+                  {task.sharedMemberCompletions.map((m) => dailyTarget > 1 ? (
+                    <div key={m.memberId}>
+                      <DailyProgressBadge
+                        displayName={m.displayName}
+                        completed={m.dailyProgress || 0}
+                        total={dailyTarget}
+                        testId={`daily-progress-${task.id}-${m.memberId}`}
+                      />
+                      <Badge
+                        variant={m.status === "rejected" ? "destructive" : m.hasCompleted ? "default" : "outline"}
+                        className="hidden gap-1 text-xs dark:inline-flex"
+                      >
+                        {m.displayName} · {m.status === "approved" || m.hasCompleted
+                          ? t("tasks.memberStatusApproved")
+                          : m.status === "pending"
+                            ? t("tasks.memberStatusSubmitted")
+                            : m.status === "rejected"
+                              ? t("tasks.memberStatusRejected")
+                              : t("tasks.memberStatusOpen")}
+                      </Badge>
+                    </div>
+                  ) : (
                     <Badge 
                       key={m.memberId} 
                       variant={m.status === "rejected" ? "destructive" : m.hasCompleted ? "default" : "outline"}
