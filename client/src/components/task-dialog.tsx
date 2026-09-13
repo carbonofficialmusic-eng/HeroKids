@@ -161,6 +161,8 @@ export function TaskDialog({
       points: 10,
       iconEmoji: "🦷",
       requiresProof: false,
+      recurrence: "daily" as const,
+      dailyTarget: 2,
     },
     {
       id: "shopping-list",
@@ -429,6 +431,9 @@ export function TaskDialog({
     form.setValue("requiresProof", template.requiresProof && canUsePhotoProof);
     if ((template as any).recurrence) {
       form.setValue("recurrence", (template as any).recurrence);
+    }
+    if ((template as any).dailyTarget) {
+      form.setValue("dailyTarget", (template as any).dailyTarget);
     }
     if ((template as any).isShoppingList) {
       setIsShoppingList(true);
