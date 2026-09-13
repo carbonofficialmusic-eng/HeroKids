@@ -3320,6 +3320,32 @@ html:not(.dark) .lc-dashboard .lc-weekend-unavailable-label {
   box-shadow: 0 2px 7px rgba(31, 49, 69, .16);
   opacity: 1;
 }
+.lc-dashboard .lc-team-task-label,
+.lc-kid-dashboard .lc-team-task-label {
+  color: #075c70 !important;
+  border-color: rgba(8, 145, 178, .48) !important;
+  background: rgba(207, 250, 254, .9) !important;
+  box-shadow: 0 2px 7px rgba(8, 145, 178, .14);
+}
+.dark .lc-dashboard .lc-team-task-label,
+.dark .lc-kid-dashboard .lc-team-task-label {
+  color: #cffafe !important;
+  border-color: rgba(34, 211, 238, .52) !important;
+  background: rgba(8, 145, 178, .3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .24);
+}
+html:not(.dark) .lc-dashboard .lc-next-date-label {
+  color: #18324d !important;
+  border-color: rgba(59, 130, 246, .42) !important;
+  background: rgba(239, 246, 255, .96) !important;
+  box-shadow: 0 2px 7px rgba(37, 99, 235, .12);
+}
+.dark .lc-dashboard .lc-next-date-label {
+  color: #eff6ff !important;
+  border-color: rgba(96, 165, 250, .48) !important;
+  background: rgba(30, 64, 175, .28) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+}
 .dark .lc-dashboard .lc-weekend-unavailable-label {
   color: #f0f5fa !important;
   border-color: rgba(198, 213, 228, .5) !important;

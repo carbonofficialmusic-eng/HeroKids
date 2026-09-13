@@ -188,6 +188,7 @@
     "availableAgainLabel": "Disponible à nouveau",
     "availableOn": "Retour le {{date}}",
     "availableOnDate": "Retour le {{date}}",
+    "nextDateLabel": "Date : {{date}}",
     "updateDetails": "Mettez à jour les détails de cette tâche.",
     "setupNewTask": "Configurez une nouvelle tâche pour votre famille.",
     "popular": "Populaire",

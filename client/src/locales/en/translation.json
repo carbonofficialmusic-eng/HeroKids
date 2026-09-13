@@ -193,6 +193,7 @@
     "availableAgainLabel": "Available again",
     "availableOn": "Back on {{date}}",
     "availableOnDate": "Back on {{date}}",
+    "nextDateLabel": "Date: {{date}}",
     "participants": "Participants",
     "updateDetails": "Update the details for this task.",
     "setupNewTask": "Set up a new task for your family to complete.",

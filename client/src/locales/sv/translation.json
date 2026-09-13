@@ -192,6 +192,7 @@
     "availableAgainLabel": "Tillgänglig igen",
     "availableOn": "Tillbaka på {{date}}",
     "availableOnDate": "Tillbaka den {{date}}",
+    "nextDateLabel": "Datum: {{date}}",
     "participants": "Deltagare",
     "updateDetails": "Uppdatera informationen för denna uppgift.",
     "setupNewTask": "Skapa en ny uppgift för din familj att slutföra.",

@@ -949,10 +949,17 @@ function TaskCard({
             <div className="space-y-2 text-left">
               {/* Teammates section */}
               <div className="p-2 bg-primary/5 rounded-xl">
-                <p className="text-xs font-semibold text-muted-foreground mb-1.5">
-                  <Users className="h-3 w-3 inline mr-1" />
-                  {task.isSharedTask ? t("tasks.assignmentModeTeam") : t("tasks.assignmentModeIndividual")}
-                </p>
+                {task.isSharedTask ? (
+                  <Badge className="lc-team-task-label mb-2 gap-1.5 px-3 py-1 text-sm font-bold border">
+                    <Users className="h-4 w-4" />
+                    {t("tasks.sharedTaskLabel")}
+                  </Badge>
+                ) : (
+                  <p className="text-xs font-semibold text-muted-foreground mb-1.5">
+                    <Users className="h-3 w-3 inline mr-1" />
+                    {t("tasks.assignmentModeIndividual")}
+                  </p>
+                )}
                 <div className="flex flex-wrap justify-center gap-1">
                   {task.assignedMemberCompletions.map((m) => {
                     const hasSubmitted = m.hasSubmitted ?? (m.status !== null);
@@ -1016,10 +1023,10 @@ function TaskCard({
             <div className="space-y-2 text-left">
               {/* Teammates section */}
               <div className="p-2 bg-primary/5 rounded-xl">
-                <p className="text-xs font-semibold text-muted-foreground mb-1.5">
-                  <Users className="h-3 w-3 inline mr-1" />
-                  {t("tasks.assignmentModeTeam")}
-                </p>
+                <Badge className="lc-team-task-label mb-2 gap-1.5 px-3 py-1 text-sm font-bold border">
+                  <Users className="h-4 w-4" />
+                  {t("tasks.sharedTaskLabel")}
+                </Badge>
                 <div className="flex flex-wrap justify-center gap-1">
                   {task.sharedMemberCompletions.map((m) => dailyTarget > 1 ? (
                     <div key={m.memberId}>

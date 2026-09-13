@@ -188,6 +188,7 @@
     "availableAgainLabel": "次の解放",
     "availableOn": "{{date}}から再開",
     "availableOnDate": "{{date}}から再開",
+    "nextDateLabel": "日時：{{date}}",
     "updateDetails": "このタスクの詳細を更新します。",
     "setupNewTask": "家族が完了する新しいタスクを設定します。",
     "popular": "人気",

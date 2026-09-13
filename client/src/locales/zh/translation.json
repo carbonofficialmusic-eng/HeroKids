@@ -188,6 +188,7 @@
     "availableAgainLabel": "再次可用",
     "availableOn": "{{date}}再次可用",
     "availableOnDate": "{{date}}再次可用",
+    "nextDateLabel": "日期：{{date}}",
     "updateDetails": "更新此任务的详细信息。",
     "setupNewTask": "为你的家庭设置新任务。",
     "popular": "热门",

@@ -227,15 +227,17 @@ export function TaskCard({
     if (!effectiveNextAvailableDate || !isUnavailable) return null;
     const nextDate = new Date(effectiveNextAvailableDate);
     const today = new Date();
-    if (isToday(nextDate)) return t('tasks.availableToday');
-    if (isTomorrow(nextDate)) return t('tasks.availableTomorrow');
+    const relativeFormatter = new Intl.RelativeTimeFormat(i18n.language, { numeric: "auto" });
+    const capitalize = (value: string) => value.charAt(0).toLocaleUpperCase(i18n.language) + value.slice(1);
+    if (isToday(nextDate)) return t("tasks.nextDateLabel", { date: capitalize(relativeFormatter.format(0, "day")) });
+    if (isTomorrow(nextDate)) return t("tasks.nextDateLabel", { date: capitalize(relativeFormatter.format(1, "day")) });
     const daysUntil = differenceInDays(nextDate, today);
     // Show weekday name for within 7 days, full date for longer periods
     if (daysUntil <= 7) {
-      return t('tasks.availableOn', { date: format(nextDate, 'EEEE', { locale: getDateLocale() }) });
+      return t("tasks.nextDateLabel", { date: format(nextDate, "EEEE", { locale: getDateLocale() }) });
     }
     // For longer periods, show full date (e.g., "10. März" or "March 10")
-    return t('tasks.availableOnDate', { date: format(nextDate, 'd. MMMM', { locale: getDateLocale() }) });
+    return t("tasks.nextDateLabel", { date: format(nextDate, "d. MMMM", { locale: getDateLocale() }) });
   };
   
   // Check if this member has already completed this multi-completion task
@@ -434,9 +436,15 @@ export function TaskCard({
               {compactDateText && (
                 <p className={`text-xs truncate leading-tight mt-0.5 ${compactDateText.color} ${
                   isWeekendUnavailable ? 'lc-weekend-unavailable-label font-semibold' : ''
-                }`}>
+                } ${isUnavailable ? 'text-sm font-bold' : ''}`}>
                   {compactDateText.text}
                 </p>
+              )}
+              {task.isSharedTask && (
+                <Badge className="lc-team-task-label mt-1 gap-1 px-2 py-0.5 text-xs font-bold border">
+                  <Users className="h-3.5 w-3.5" />
+                  {t("tasks.sharedTaskLabel")}
+                </Badge>
               )}
               {assignedMembers && assignedMembers.length > 0 && (
                 <p className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
@@ -667,8 +675,8 @@ export function TaskCard({
             {/* Show next available date for recurring tasks - separate line so title stays visible */}
             {isUnavailable && getNextAvailableText() && (
               <div className="mb-1">
-                <Badge variant="outline" className="text-xs gap-1" data-testid={`badge-next-available-${task.id}`}>
-                  <Calendar className="h-3 w-3" />
+                <Badge variant="outline" className="lc-next-date-label text-sm gap-2 px-3 py-1.5 font-bold" data-testid={`badge-next-available-${task.id}`}>
+                  <Calendar className="h-4 w-4" />
                   {getNextAvailableText()}
                 </Badge>
               </div>
@@ -774,9 +782,16 @@ export function TaskCard({
             {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 0 && (
               <div className="mb-2" data-testid={`assigned-progress-${task.id}`}>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                  {task.isSharedTask ? (
+                    <Badge className="lc-team-task-label gap-1.5 px-3 py-1 text-sm font-bold border">
+                      <Users className="h-4 w-4" />
+                      {t("tasks.sharedTaskLabel")}
+                    </Badge>
+                  ) : (
+                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                  )}
                   <p className="text-xs font-medium text-muted-foreground">
-                    {(task.isSharedTask ? t('tasks.assignmentModeTeam') : t('tasks.assignmentModeIndividual'))} · {t('tasks.sharedProgress', {
+                    {!task.isSharedTask && `${t('tasks.assignmentModeIndividual')} · `}{t('tasks.sharedProgress', {
                       completed: task.assignedMemberCompletions.filter(m => m.hasCompleted).length,
                       total: task.assignedMemberCompletions.length
                     })}
@@ -830,9 +845,12 @@ export function TaskCard({
             {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && !task.assignedMemberCompletions && (
               <div className="mb-2" data-testid={`shared-progress-${task.id}`}>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Badge className="lc-team-task-label gap-1.5 px-3 py-1 text-sm font-bold border">
+                    <Users className="h-4 w-4" />
+                    {t("tasks.sharedTaskLabel")}
+                  </Badge>
                   <p className="text-xs font-medium text-muted-foreground">
-                    {t('tasks.assignmentModeTeam')} · {t('tasks.sharedProgress', {
+                    {t('tasks.sharedProgress', {
                       completed: task.sharedMemberCompletions.filter(m => m.hasCompleted).length,
                       total: task.sharedMemberCompletions.length
                     })}
