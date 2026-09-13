@@ -208,6 +208,18 @@ export function TaskCard({
     }
     return format(date, "d. MMMM", { locale: getDateLocale() });
   };
+
+  const getRecurringAvailabilityText = () => {
+    if (!effectiveNextAvailableDate || !isUnavailable) return null;
+    const nextDate = new Date(effectiveNextAvailableDate);
+    const daysUntil = Math.max(0, differenceInCalendarDays(nextDate, new Date()));
+    const relativeFormatter = new Intl.RelativeTimeFormat(i18n.language, { numeric: "auto" });
+    const dateText = daysUntil <= 7
+      ? relativeFormatter.format(daysUntil, "day")
+      : format(nextDate, "d. MMMM", { locale: getDateLocale() });
+    const capitalizedDate = dateText.charAt(0).toLocaleUpperCase(i18n.language) + dateText.slice(1);
+    return `${t("tasks.availableAgainLabel")}: ${capitalizedDate}`;
+  };
   
   const currentMemberProgress = task.assignedMemberCompletions?.find(
     member => member.memberId === currentMemberId,
@@ -333,6 +345,10 @@ export function TaskCard({
   if (compact) {
     // Date label shown directly on the compact card
     const compactDateText = (() => {
+      // A computed interval boundary is availability information, not a calendar appointment.
+      if (isUnavailable && getRecurringAvailabilityText()) {
+        return { text: getRecurringAvailabilityText()!, color: "text-muted-foreground" };
+      }
       // Weekend unavailable (weekdays-only task shown on Sat/Sun)
       if (isWeekendUnavailable) return { text: t('tasks.weekendUnavailable'), color: "text-muted-foreground" };
       // One-time task with due date
@@ -663,6 +679,15 @@ export function TaskCard({
               )}
             </div>
             
+            {isUnavailable && getRecurringAvailabilityText() && (
+              <div className="mb-1">
+                <Badge variant="outline" className="lc-next-date-label text-sm gap-2 px-3 py-1.5 font-bold" data-testid={`badge-next-available-${task.id}`}>
+                  <Clock className="h-4 w-4" />
+                  {getRecurringAvailabilityText()}
+                </Badge>
+              </div>
+            )}
+
             {isWeekendUnavailable && (
               <div className="mb-1">
                 <Badge
