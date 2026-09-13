@@ -500,3 +500,59 @@ mtime_ms = 1779902332724
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/0fdf9fe9-822b-478c-bde8-eab04fe8821b/40d80e1e-5849-415b-93ab-e9366591bb7c"
 storage_version_token = "1789245669657600"
 content_type = "image/png"
+
+[[outputs]]
+id = "VW1L0noCRxH0UZmGtn9Jo"
+uri = "file://attached_assets/generated_images/previews/turkish-skin-concepts.jpg"
+type = "image"
+title = "Türkische Skin-Konzepte – Vergleich"
+description = "Alle drei HeroKids-Konzepte nebeneinander: Kappadokien-Entdecker, Tulpen-Prinzessin und Mosaik-Zauberer."
+logical_id = "c89ff22b-bded-41ee-a945-19e4e4315c03"
+content_hash = "sha256:ffa8f1b32efee0d5b2df4187aae8b63b617709789bbc222bb4b1696f30cccbe6"
+size = 693588
+mtime_ms = 1789325254452
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/c89ff22b-bded-41ee-a945-19e4e4315c03/7c4dd992-295b-4d63-9e0d-3838dabb14ae"
+storage_version_token = "1789325270436822"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "A_DV92nICciDB26cfG66M"
+uri = "file://attached_assets/generated_images/previews/cappadocia-explorer-preview.jpg"
+type = "image"
+title = "1. Kappadokien-Entdecker"
+description = "Abenteurer mit Rucksack, Karte und Heißluftballon-Motiv vor Kappadokien."
+logical_id = "035bcc84-4796-4b8a-a62d-de04e3846bf5"
+content_hash = "sha256:8142873b1c1f3bac567442262c305519f8d26c91323d0a533d739fcedbaf6ee9"
+size = 467193
+mtime_ms = 1789325235612
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/035bcc84-4796-4b8a-a62d-de04e3846bf5/db37962a-c74f-4222-8896-58864cf6ea6e"
+storage_version_token = "1789325274436520"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "pnFLn_qxMm12Upr3iwM3o"
+uri = "file://attached_assets/generated_images/previews/tulip-princess-preview.jpg"
+type = "image"
+title = "2. Tulpen-Prinzessin"
+description = "Elegantes türkis-korallenfarbenes Gewand mit Tulpenmustern in einem blühenden Palastgarten."
+logical_id = "f763b717-447b-4561-a1fb-fc2ac62864a6"
+content_hash = "sha256:3fdd7ef95b6e7a3e99ec3e7ed48364e0ccb8a705c10b92d80a493e5c5ba8b09c"
+size = 643443
+mtime_ms = 1789325236700
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/f763b717-447b-4561-a1fb-fc2ac62864a6/9cba62c7-125b-49e7-84d1-b2097f416bc2"
+storage_version_token = "1789325275571423"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "OCEVxk23XRw9zfVBGk7SK"
+uri = "file://attached_assets/generated_images/previews/mosaic-wizard-preview.jpg"
+type = "image"
+title = "3. Mosaik-Zauberer"
+description = "Leuchtender Mosaikmagier in einer blau-goldenen Zauberkammer."
+logical_id = "176d3abf-71d1-4199-bb3c-e212ccd21f09"
+content_hash = "sha256:8fca6fd1bc0b85b2fbfbaf8b7f27d8639b0e9400aa3b7d45f73416e40508a142"
+size = 681221
+mtime_ms = 1789325238044
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/176d3abf-71d1-4199-bb3c-e212ccd21f09/418a3dee-8ac7-4049-be5c-59f80eb2fb22"
+storage_version_token = "1789325276691245"
+content_type = "image/jpeg"
