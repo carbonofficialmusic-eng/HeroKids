@@ -525,7 +525,7 @@ function DailyProgressBadge({
 
   return (
     <div
-      className="inline-flex max-w-full items-stretch overflow-hidden rounded-full border border-amber-300 bg-amber-100 shadow-sm dark:hidden"
+      className="inline-flex max-w-full items-stretch overflow-hidden rounded-full border border-amber-300 bg-amber-100 shadow-sm"
       data-testid={testId}
       aria-label={`${displayName ? `${displayName}: ` : ""}${safeCompleted} von ${safeTotal} erledigt`}
     >
@@ -870,9 +870,6 @@ function TaskCard({
                 total={dailyTarget}
                 testId={`daily-progress-${task.id}`}
               />
-              <p className="hidden text-xs font-semibold text-sky-300 dark:block" data-testid={`daily-progress-dark-${task.id}`}>
-                {t("tasks.dailyProgress", { completed: dailyProgress, total: dailyTarget })}
-              </p>
             </div>
           )}
         </div>
@@ -931,9 +928,6 @@ function TaskCard({
                 total={dailyTarget}
                 testId={`daily-progress-${task.id}`}
               />
-              <Badge variant="secondary" className="hidden dark:inline-flex" data-testid={`daily-progress-dark-${task.id}`}>
-                {t("tasks.dailyProgress", { completed: dailyProgress, total: dailyTarget })}
-              </Badge>
             </>
           )}
           <div className={`flex justify-center p-4 rounded-2xl mx-auto w-fit shadow-inner ${
@@ -1015,18 +1009,6 @@ function TaskCard({
                             total={dailyTarget}
                             testId={`daily-progress-${task.id}-${m.memberId}`}
                           />
-                          <Badge
-                            variant={hasSubmitted ? "default" : "outline"}
-                            className="hidden gap-1 text-xs dark:inline-flex"
-                          >
-                            {m.displayName} · {m.status === "approved"
-                              ? t("tasks.memberStatusApproved")
-                              : m.status === "pending"
-                                ? t("tasks.memberStatusSubmitted")
-                                : m.status === "rejected"
-                                  ? t("tasks.memberStatusRejected")
-                                  : t("tasks.memberStatusOpen")}
-                          </Badge>
                         </div>
                       );
                     }
@@ -1091,18 +1073,6 @@ function TaskCard({
                         total={dailyTarget}
                         testId={`daily-progress-${task.id}-${m.memberId}`}
                       />
-                      <Badge
-                        variant={m.status === "rejected" ? "destructive" : m.hasCompleted ? "default" : "outline"}
-                        className="hidden gap-1 text-xs dark:inline-flex"
-                      >
-                        {m.displayName} · {m.status === "approved" || m.hasCompleted
-                          ? t("tasks.memberStatusApproved")
-                          : m.status === "pending"
-                            ? t("tasks.memberStatusSubmitted")
-                            : m.status === "rejected"
-                              ? t("tasks.memberStatusRejected")
-                              : t("tasks.memberStatusOpen")}
-                      </Badge>
                     </div>
                   ) : (
                     <Badge 
