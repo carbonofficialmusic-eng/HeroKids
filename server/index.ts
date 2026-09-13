@@ -314,7 +314,7 @@ async function autoSeedSkinsIfNeeded() {
       { id: "ice-princess", name: "Ice Princess", description: "Frozen beauty with snowflake powers and icy elegance!", imageUrl: "❄️", pointsRequired: 1680, bonusPoints: 0 },
       { id: "rainbow-princess", name: "Rainbow Princess", description: "Magical princess surrounded by colorful stars and rainbows!", imageUrl: "🌈", pointsRequired: 1740, bonusPoints: 10 },
       { id: "nature-princess", name: "Nature Princess", description: "Green guardian princess who speaks to flowers and animals!", imageUrl: "🌸", pointsRequired: 1800, bonusPoints: 0 },
-      { id: "sun-princess", name: "Sun Princess", description: "Golden princess radiating warmth and sunshine energy!", imageUrl: "☀️", pointsRequired: 1860, bonusPoints: 0 },
+      { id: "sun-princess", name: "Tulip Princess", description: "Elegant princess wearing colorful Turkish tulip patterns!", imageUrl: "🌷", pointsRequired: 1860, bonusPoints: 0 },
       { id: "ocean-princess", name: "Ocean Princess", description: "Coral princess ruling the underwater kingdoms!", imageUrl: "🐚", pointsRequired: 1920, bonusPoints: 15 },
       { id: "fairy-princess", name: "Fairy Princess", description: "Mystical fairy princess with butterfly wings and magic dust!", imageUrl: "🧚", pointsRequired: 2000, bonusPoints: 0 },
       
@@ -371,12 +371,12 @@ async function autoSeedSkinsIfNeeded() {
       // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points) - Bonus Slots: 2, 6, 8
       { id: "titan-mech", name: "Titan Mech", description: "Massive mech warrior with powerful hydraulic arms!", imageUrl: "🤖", pointsRequired: 4560, bonusPoints: 0 },
       { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 0 },
-      { id: "iron-guardian", name: "Iron Guardian", description: "Heavy armored mech designed for defense and protection!", imageUrl: "🛡️", pointsRequired: 4680, bonusPoints: 0 },
+      { id: "iron-guardian", name: "Mosaic Wizard", description: "Magical hero glowing with colorful Anatolian mosaic patterns!", imageUrl: "🪄", pointsRequired: 4680, bonusPoints: 0 },
       { id: "plasma-bot", name: "Plasma Bot", description: "Energy-powered robot with glowing plasma core!", imageUrl: "💫", pointsRequired: 4740, bonusPoints: 0 },
       { id: "steel-samurai", name: "Popstar", description: "A joyful young singer lighting up the stage with music and confidence!", imageUrl: "🎤", pointsRequired: 4800, bonusPoints: 0 },
       { id: "thunder-mech", name: "Thunder Mech", description: "Electric mech channeling lightning through its systems!", imageUrl: "⚡", pointsRequired: 4860, bonusPoints: 15 },
       { id: "neon-droid", name: "Neon Droid", description: "Colorful robot with vibrant LED displays!", imageUrl: "✨", pointsRequired: 4920, bonusPoints: 0 },
-      { id: "battle-commander", name: "Battle Commander", description: "Elite mech leader coordinating robot squadrons!", imageUrl: "🎖️", pointsRequired: 5000, bonusPoints: 15 },
+      { id: "battle-commander", name: "Cappadocia Explorer", description: "Adventurer with a backpack and a passion for hot-air balloons!", imageUrl: "🎒", pointsRequired: 5000, bonusPoints: 15 },
       
       // Tier 11 - Manga Heroes (Unisex collection, 5060-5500 points) - Bonus Slots: 4, 5, 7
       { id: "ninja-shadow", name: "Ninja Shadow", description: "Stealthy anime ninja with shadow jutsu techniques!", imageUrl: "🥷", pointsRequired: 5060, bonusPoints: 0 },
@@ -670,7 +670,7 @@ async function forceReseedSkinsIfNeeded() {
       { id: "ice-princess", name: "Ice Princess", description: "Frozen beauty with snowflake powers and icy elegance!", imageUrl: "❄️", pointsRequired: 1680, bonusPoints: 0 },
       { id: "rainbow-princess", name: "Rainbow Princess", description: "Magical princess surrounded by colorful stars and rainbows!", imageUrl: "🌈", pointsRequired: 1740, bonusPoints: 10 },
       { id: "nature-princess", name: "Nature Princess", description: "Green guardian princess who speaks to flowers and animals!", imageUrl: "🌸", pointsRequired: 1800, bonusPoints: 0 },
-      { id: "sun-princess", name: "Sun Princess", description: "Golden princess radiating warmth and sunshine energy!", imageUrl: "☀️", pointsRequired: 1860, bonusPoints: 0 },
+      { id: "sun-princess", name: "Tulip Princess", description: "Elegant princess wearing colorful Turkish tulip patterns!", imageUrl: "🌷", pointsRequired: 1860, bonusPoints: 0 },
       { id: "ocean-princess", name: "Ocean Princess", description: "Coral princess ruling the underwater kingdoms!", imageUrl: "🐚", pointsRequired: 1920, bonusPoints: 15 },
       { id: "fairy-princess", name: "Fairy Princess", description: "Mystical fairy princess with butterfly wings and magic dust!", imageUrl: "🧚", pointsRequired: 2000, bonusPoints: 0 },
       
@@ -727,12 +727,12 @@ async function forceReseedSkinsIfNeeded() {
       // Tier 10 - Mecha Robots (Unisex collection, 4560-5000 points) - Bonus Slots: 2, 6, 8
       { id: "titan-mech", name: "Titan Mech", description: "Massive mech warrior with powerful hydraulic arms!", imageUrl: "🤖", pointsRequired: 4560, bonusPoints: 0 },
       { id: "cyber-warrior", name: "Cyber Warrior", description: "Sleek cyber robot with plasma blades and neon lights!", imageUrl: "⚔️", pointsRequired: 4620, bonusPoints: 0 },
-      { id: "iron-guardian", name: "Iron Guardian", description: "Heavy armored mech designed for defense and protection!", imageUrl: "🛡️", pointsRequired: 4680, bonusPoints: 0 },
+      { id: "iron-guardian", name: "Mosaic Wizard", description: "Magical hero glowing with colorful Anatolian mosaic patterns!", imageUrl: "🪄", pointsRequired: 4680, bonusPoints: 0 },
       { id: "plasma-bot", name: "Plasma Bot", description: "Energy-powered robot with glowing plasma core!", imageUrl: "💫", pointsRequired: 4740, bonusPoints: 0 },
       { id: "steel-samurai", name: "Popstar", description: "A joyful young singer lighting up the stage with music and confidence!", imageUrl: "🎤", pointsRequired: 4800, bonusPoints: 0 },
       { id: "thunder-mech", name: "Thunder Mech", description: "Electric mech channeling lightning through its systems!", imageUrl: "⚡", pointsRequired: 4860, bonusPoints: 15 },
       { id: "neon-droid", name: "Neon Droid", description: "Colorful robot with vibrant LED displays!", imageUrl: "✨", pointsRequired: 4920, bonusPoints: 0 },
-      { id: "battle-commander", name: "Battle Commander", description: "Elite mech leader coordinating robot squadrons!", imageUrl: "🎖️", pointsRequired: 5000, bonusPoints: 15 },
+      { id: "battle-commander", name: "Cappadocia Explorer", description: "Adventurer with a backpack and a passion for hot-air balloons!", imageUrl: "🎒", pointsRequired: 5000, bonusPoints: 15 },
       
       // Tier 11 - Manga Heroes (Unisex collection, 5060-5500 points) - Bonus Slots: 4, 5, 7
       { id: "ninja-shadow", name: "Ninja Shadow", description: "Stealthy anime ninja with shadow jutsu techniques!", imageUrl: "🥷", pointsRequired: 5060, bonusPoints: 0 },
