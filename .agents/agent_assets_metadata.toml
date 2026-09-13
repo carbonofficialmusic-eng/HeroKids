@@ -570,3 +570,17 @@ mtime_ms = 1789325636956
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/81b558b8-2542-4dba-9437-a7355d028b17/a9c23226-5883-476f-988f-031d564bb60b"
 storage_version_token = "1789325660000213"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "6O5sFICLbLT4YAPdsoaVc"
+uri = "file://attached_assets/generated_images/young-sultan-installed-preview.jpg"
+type = "image"
+title = "Der junge Sultan – finale Skin-Vorschau"
+description = "Der neue Avatar im bisherigen Level-Boss-Slot mit seinem figurenfreien Palasthintergrund."
+logical_id = "0ca681db-fd7d-4081-a90f-22b7191c2b70"
+content_hash = "sha256:af70a458db4a4bf63fee81450808ddd2f52a18fd95379060e43e38d744e3020f"
+size = 555629
+mtime_ms = 1789326513208
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/0ca681db-fd7d-4081-a90f-22b7191c2b70/656b62db-0743-43bb-9b11-33b1827b6bfb"
+storage_version_token = "1789326535400171"
+content_type = "image/jpeg"
