@@ -392,7 +392,7 @@ export function TaskCard({
         <Card
           className={`p-2 transition-all h-full flex flex-col backdrop-blur-md ${
             isGrayedOut ? 'bg-card/20' : 'bg-card/80 lc-task-card-open'
-          } hover-elevate active-elevate-2 cursor-pointer`}
+          } ${isWeekendUnavailable ? 'lc-task-card-weekend-unavailable' : ''} hover-elevate active-elevate-2 cursor-pointer`}
           data-task-visual-state={taskVisualState}
           data-testid={`card-task-${task.id}`}
           onClick={() => (task as any).isShoppingList ? setShoppingListExpanded(v => !v) : onClick?.(task)}
@@ -585,7 +585,7 @@ export function TaskCard({
       <Card
         className={`p-4 transition-all min-h-[140px] h-full flex flex-col backdrop-blur-md ${
           isGrayedOut ? 'bg-card/20' : 'bg-card/80 lc-task-card-open'
-        } ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
+        } ${isWeekendUnavailable ? 'lc-task-card-weekend-unavailable' : ''} ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
         data-task-visual-state={taskVisualState}
         data-testid={`card-task-${task.id}`}
         onClick={() => onClick?.(task)}
