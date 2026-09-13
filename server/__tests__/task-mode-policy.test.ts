@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   hasActiveTeamContribution,
   isIndividualRecurringCompletionActive,
+  isRecurringTaskSchedule,
   isTeamCompletionInCurrentPeriod,
+  shouldHideCompletedTaskFromChild,
+  taskStructureChanged,
   validateSelectedTaskMemberIds,
 } from "../task-mode-policy";
 import { canRetryRejectedTeamContribution } from "../../shared/task-mode";
@@ -96,5 +99,55 @@ describe("task member selection policy", () => {
       nextAvailableDate: nextPeriod,
       now,
     })).toBe(false);
+  });
+
+  it("does not hide custom-interval tasks as completed one-time tasks", () => {
+    expect(isRecurringTaskSchedule("none", 2)).toBe(true);
+    expect(shouldHideCompletedTaskFromChild({
+      status: "completed",
+      recurrence: "none",
+      recurrenceDays: 2,
+    })).toBe(false);
+    expect(shouldHideCompletedTaskFromChild({
+      status: "completed",
+      recurrence: "none",
+      recurrenceDays: null,
+    })).toBe(true);
+  });
+
+  it("detects schedule and multi-member edits that must reactivate a task", () => {
+    const base = {
+      previousRecurrence: "none" as const,
+      nextRecurrence: "none" as const,
+      previousRecurrenceDays: 2,
+      nextRecurrenceDays: 2,
+      previousDailyTarget: 1,
+      nextDailyTarget: 1,
+      previousIsTeamTask: false,
+      nextIsTeamTask: false,
+      previousMemberIds: ["liv", "juri"],
+      nextMemberIds: ["juri", "liv"],
+    };
+    expect(taskStructureChanged(base).changed).toBe(false);
+    expect(taskStructureChanged({
+      ...base,
+      nextIsTeamTask: true,
+    })).toEqual({
+      scheduleChanged: false,
+      assignmentChanged: true,
+      changed: true,
+    });
+    expect(taskStructureChanged({
+      ...base,
+      nextRecurrenceDays: 3,
+    })).toEqual({
+      scheduleChanged: true,
+      assignmentChanged: false,
+      changed: true,
+    });
+    expect(taskStructureChanged({
+      ...base,
+      nextMemberIds: ["liv", "peter"],
+    }).assignmentChanged).toBe(true);
   });
 });

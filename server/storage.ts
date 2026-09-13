@@ -86,7 +86,7 @@ import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import bcrypt from 'bcrypt';
 import { TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR } from "@shared/skin-config";
 import { getProfilePhotoObjectPaths } from "@shared/avatar-preferences";
-import { isIndividualRecurringCompletionActive } from "./task-mode-policy";
+import { isIndividualRecurringCompletionActive, isRecurringTaskSchedule } from "./task-mode-policy";
 
 /**
  * Default achievement templates - used by both seedDefaultAchievements and resetFamilyToFactory
@@ -1108,9 +1108,34 @@ export class DatabaseStorage implements IStorage {
     // NOTE: Daily tasks are reset by the scheduler at midnight (see scheduler.ts)
     // Only reset non-daily tasks here (weekly, monthly, custom recurrence)
     const now = new Date();
+
+    // Custom-interval tasks store recurrence="none" plus recurrenceDays.
+    // Older completion paths may have marked these recurring tasks as
+    // completed. Reactivate them once their next period has started while
+    // keeping nextAvailableDate so member completion checks can ignore the
+    // previous period's records.
+    const recurringTasksToReactivate = allTasks.filter(task => {
+      const isRecurring = isRecurringTaskSchedule(task.recurrence, task.recurrenceDays);
+      return task.status === "completed" &&
+        isRecurring &&
+        !!task.nextAvailableDate &&
+        task.nextAvailableDate <= now;
+    });
+
+    for (const task of recurringTasksToReactivate) {
+      await db
+        .update(tasks)
+        .set({
+          status: "active",
+          updatedAt: new Date(),
+        })
+        .where(eq(tasks.id, task.id));
+      task.status = "active";
+    }
+
     const tasksToReset = allTasks.filter(task => {
       // Only reset recurring multi-completion tasks
-      const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
+      const isRecurring = isRecurringTaskSchedule(task.recurrence, task.recurrenceDays);
       const isMultiCompletion = task.maxCompletions !== null;
       const needsReset = task.completionCount > 0;
       

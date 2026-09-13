@@ -75,6 +75,8 @@ import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
 import { isValidFactoryResetConfirmation } from "@shared/factory-reset";
 import {
   hasActiveTeamContribution,
+  shouldHideCompletedTaskFromChild,
+  taskStructureChanged,
   validateSelectedTaskMemberIds,
   isTeamCompletionInCurrentPeriod,
 } from "./task-mode-policy";
@@ -2258,14 +2260,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Filter logic for different task types:
         // 1. Archived tasks: Hide for everyone
-        // 2. One-time completed tasks (recurrence = "none" AND status = "completed"): Hide for everyone
+        // 2. One-time completed tasks: Hide for everyone. Custom-interval
+        //    tasks also use recurrence="none", so recurrenceDays must be empty.
         // 3. Recurring tasks: Show even if completed (they will be grayed out in UI)
         // 4. Active tasks: Always show
         const filteredTasks = resolvedTasks.filter(
           (task) => 
             task !== null &&
             task.status !== "archived" && // Hide archived
-            !(task.status === "completed" && task.recurrence === "none") // Hide one-time completed tasks
+            !shouldHideCompletedTaskFromChild(task)
         );
         
         // Disable caching for task data
@@ -2603,6 +2606,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       parsed.isSharedTask = isTeamTask;
       parsed.sharedMemberIds = isTeamTask ? selectedMemberIds : null;
+
+      const structureChange = taskStructureChanged({
+        previousRecurrence: existingTask.recurrence,
+        nextRecurrence: parsed.recurrence ?? existingTask.recurrence,
+        previousRecurrenceDays: existingTask.recurrenceDays,
+        nextRecurrenceDays: Object.prototype.hasOwnProperty.call(parsed, "recurrenceDays")
+          ? parsed.recurrenceDays
+          : existingTask.recurrenceDays,
+        previousDailyTarget: existingTask.dailyTarget || 1,
+        nextDailyTarget: parsed.dailyTarget ?? existingTask.dailyTarget ?? 1,
+        previousIsTeamTask: existingTask.isSharedTask,
+        nextIsTeamTask: isTeamTask,
+        previousMemberIds: existingTask.sharedMemberIds || [],
+        nextMemberIds: selectedMemberIds,
+      });
+      if (structureChange.changed) {
+        // A changed audience or schedule is a new active task configuration.
+        // Do not let a previous completed/locked lifecycle hide the edited task.
+        parsed.status = "active";
+      }
+      if (structureChange.scheduleChanged) {
+        // Old schedule locks must never carry over to the new recurrence.
+        parsed.nextAvailableDate = null;
+      }
       
       // Gate: task assignment / shopping list requires Family tier or higher
       if (selectedMemberIds.length > 0 || parsed.isShoppingList) {

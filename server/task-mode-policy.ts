@@ -1,5 +1,52 @@
 import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 
+type Recurrence = "none" | "daily" | "weekdays" | "weekly" | "monthly" | "yearly" | "immediate";
+
+export function isRecurringTaskSchedule(
+  recurrence: Recurrence,
+  recurrenceDays: number | null | undefined,
+): boolean {
+  return recurrence !== "none" || recurrenceDays != null;
+}
+
+export function shouldHideCompletedTaskFromChild(options: {
+  status: string;
+  recurrence: Recurrence;
+  recurrenceDays: number | null | undefined;
+}): boolean {
+  return options.status === "completed"
+    && !isRecurringTaskSchedule(options.recurrence, options.recurrenceDays);
+}
+
+export function taskStructureChanged(options: {
+  previousRecurrence: Recurrence;
+  nextRecurrence: Recurrence;
+  previousRecurrenceDays: number | null | undefined;
+  nextRecurrenceDays: number | null | undefined;
+  previousDailyTarget: number;
+  nextDailyTarget: number;
+  previousIsTeamTask: boolean;
+  nextIsTeamTask: boolean;
+  previousMemberIds: string[];
+  nextMemberIds: string[];
+}): { scheduleChanged: boolean; assignmentChanged: boolean; changed: boolean } {
+  const scheduleChanged =
+    options.previousRecurrence !== options.nextRecurrence
+    || (options.previousRecurrenceDays ?? null) !== (options.nextRecurrenceDays ?? null)
+    || options.previousDailyTarget !== options.nextDailyTarget;
+  const previousIds = [...new Set(options.previousMemberIds)].sort();
+  const nextIds = [...new Set(options.nextMemberIds)].sort();
+  const assignmentChanged =
+    options.previousIsTeamTask !== options.nextIsTeamTask
+    || previousIds.length !== nextIds.length
+    || previousIds.some((id, index) => id !== nextIds[index]);
+  return {
+    scheduleChanged,
+    assignmentChanged,
+    changed: scheduleChanged || assignmentChanged,
+  };
+}
+
 /**
  * Pure validation for the editor-facing member selection shared by both
  * multi-member task modes.
@@ -39,7 +86,7 @@ export function isIndividualRecurringCompletionActive(options: {
   status: "pending" | "approved" | "rejected";
   completedAt: Date;
   now: Date;
-  recurrence: "none" | "daily" | "weekdays" | "weekly" | "monthly" | "yearly" | "immediate";
+  recurrence: Recurrence;
   recurrenceDays: number | null;
   timezone: string;
 }): boolean {
