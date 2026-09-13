@@ -12,7 +12,7 @@ Chrome blocks cookies in cross-site iframe contexts. The Replit workspace embeds
 
 **Server (dev only):**
 - `isDev` exported constant: `process.env.NODE_ENV !== "production"`
-- `devTokenStore`: `Map<string, any>` holds `{ claims: { sub: userId }, authMethod: 'local' }`
+- `devTokenStore` keeps active entries in memory, but persists only hashed token keys, user IDs, acting-member IDs, and expirations to a private `/tmp` file so backend hot reloads do not invalidate the preview login.
 - `createDevToken(user)` / `getDevTokenUser(token)` / `deleteDevToken(token)` helpers
 - Login handler: when `isDev`, generates token, returns as `devToken` in response body
 - `isAuthenticated` middleware: before the Bearer/device-token checks, reads `X-Dev-Token` header, looks up user in `devTokenStore`, sets `req.user`
@@ -24,4 +24,4 @@ Chrome blocks cookies in cross-site iframe contexts. The Replit workspace embeds
 - `client/src/pages/landing.tsx` `onLogin`: if `result.devToken` exists, calls `storeDevToken()`
 - `client/src/components/profile-menu.tsx` `handleLogout`: calls `clearDevToken()` before POST /api/auth/logout
 
-**How to apply:** This is purely additive dev-only code. Production is not affected — `isDev` guards all token logic server-side, and `import.meta.env.DEV` guards client-side.
+**How to apply:** This is purely additive dev-only code. Production is not affected — `isDev` guards all token logic server-side, and `import.meta.env.DEV` guards client-side. Any future development-token state required across requests must survive backend hot reloads; never persist raw token values.

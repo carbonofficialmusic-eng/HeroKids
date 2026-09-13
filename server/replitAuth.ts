@@ -7,6 +7,7 @@ import * as cookieSignature from "cookie-signature";
 import { z } from "zod";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
+import fs from "fs";
 import { storage } from "./storage";
 import { pool } from "./db";
 import { verifyAccessToken } from "./mobileAuth";
@@ -150,26 +151,90 @@ function storePollKeyToken(pollKey: string, exchangeToken: string): void {
 interface DevTokenEntry {
   user: any;
   actingAsMemberId?: string | null;
+  expiresAt: number;
 }
 const devTokenStore = new Map<string, DevTokenEntry>();
+const devTokenStorePath = `/tmp/herokids-dev-tokens-${process.env.REPL_ID || "local"}.json`;
+const devTokenTtlMs = 7 * 24 * 60 * 60 * 1000;
+
+function persistDevTokenStore(): void {
+  if (!isDev) return;
+  try {
+    const serialized = Object.fromEntries(
+      [...devTokenStore.entries()].map(([tokenHash, entry]) => [
+        tokenHash,
+        {
+          userId: entry.user?.claims?.sub,
+          actingAsMemberId: entry.actingAsMemberId ?? null,
+          expiresAt: entry.expiresAt,
+        },
+      ]),
+    );
+    const temporaryPath = `${devTokenStorePath}.tmp`;
+    fs.writeFileSync(temporaryPath, JSON.stringify(serialized), { mode: 0o600 });
+    fs.renameSync(temporaryPath, devTokenStorePath);
+  } catch (error) {
+    console.error("Failed to persist dev authentication tokens:", error);
+  }
+}
+
+function restoreDevTokenStore(): void {
+  if (!isDev) return;
+  try {
+    const stored = JSON.parse(fs.readFileSync(devTokenStorePath, "utf8")) as Record<
+      string,
+      { userId?: string; actingAsMemberId?: string | null; expiresAt?: number }
+    >;
+    const now = Date.now();
+    for (const [tokenHash, entry] of Object.entries(stored)) {
+      if (!entry.userId || !entry.expiresAt || entry.expiresAt <= now) continue;
+      devTokenStore.set(tokenHash, {
+        user: createSessionUser(entry.userId),
+        actingAsMemberId: entry.actingAsMemberId ?? null,
+        expiresAt: entry.expiresAt,
+      });
+    }
+  } catch (error: any) {
+    if (error?.code !== "ENOENT") {
+      console.error("Failed to restore dev authentication tokens:", error);
+    }
+  }
+}
+
+restoreDevTokenStore();
 
 export function createDevToken(user: any): string {
   const token = crypto.randomBytes(32).toString("hex");
-  devTokenStore.set(token, { user });
+  devTokenStore.set(hashToken(token), {
+    user,
+    expiresAt: Date.now() + devTokenTtlMs,
+  });
+  persistDevTokenStore();
   return token;
 }
 
 export function getDevTokenEntry(token: string): DevTokenEntry | undefined {
-  return devTokenStore.get(token);
+  const tokenHash = hashToken(token);
+  const entry = devTokenStore.get(tokenHash);
+  if (entry && entry.expiresAt <= Date.now()) {
+    devTokenStore.delete(tokenHash);
+    persistDevTokenStore();
+    return undefined;
+  }
+  return entry;
 }
 
 export function setDevTokenActingAs(token: string, memberId: string | null): void {
-  const entry = devTokenStore.get(token);
-  if (entry) entry.actingAsMemberId = memberId;
+  const entry = devTokenStore.get(hashToken(token));
+  if (entry) {
+    entry.actingAsMemberId = memberId;
+    persistDevTokenStore();
+  }
 }
 
 export function deleteDevToken(token: string): void {
-  devTokenStore.delete(token);
+  devTokenStore.delete(hashToken(token));
+  persistDevTokenStore();
 }
 
 let _wsSessionStore: session.Store;
