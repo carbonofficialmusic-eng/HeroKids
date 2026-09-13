@@ -7,7 +7,7 @@ Daily task progress must remain visible as a segmented badge. Completed executio
 
 For tasks assigned to multiple members, every member gets an independent segmented badge rather than one combined family counter.
 
-A member counts as fully completed only when their approved daily progress reaches the target. An approved partial execution must neither increase the completed-member total nor block that member's next execution; a pending approval still blocks duplicate submission.
+A member counts as fully completed only when their approved daily progress reaches the target. An approved partial execution must neither increase the completed-member total nor block that member's next execution; a pending approval still blocks duplicate submission. A multi-member parent card may use the green completed design only when every explicitly assigned member is fully complete; a stale aggregate task status must not override the per-member progress.
 
 **Why:** The user confirmed this approach after the temporary green completion check disappeared too quickly to communicate whether the first daily execution had been recorded.
 

@@ -309,22 +309,22 @@ export function TaskCard({
     return taskStatus === "pending_approval";
   })();
 
-  // A shared task remains visually open until every assigned member has
-  // completed it, even when the currently viewed member is already done.
+  // Any explicitly assigned multi-member task remains visually open until
+  // every assigned member has completed it. The task's aggregate status can
+  // already be "completed" while individual daily targets are still open.
   const assignedCompletions = task.assignedMemberCompletions;
   const sharedCompletions = task.sharedMemberCompletions;
-  const isTeamTask = task.isSharedTask === true;
-  const hasMultipleAssignees =
-    (assignedCompletions?.length ?? 0) > 1 ||
-    (sharedCompletions?.length ?? 0) > 1;
+  const hasExplicitAssignees =
+    (assignedCompletions?.length ?? 0) > 0 ||
+    (sharedCompletions?.length ?? 0) > 0;
   const allAssigneesCompleted = assignedCompletions?.length
     ? assignedCompletions.every((member) => member.hasCompleted)
     : sharedCompletions?.length
       ? sharedCompletions.every((member) => member.hasCompleted)
       : false;
-  const isVisuallyApproved =
-    task.status === "completed" ||
-    (isTeamTask && hasMultipleAssignees ? allAssigneesCompleted : isCompletedByMember);
+  const isVisuallyApproved = hasExplicitAssignees
+    ? allAssigneesCompleted
+    : task.status === "completed" || isCompletedByMember;
   const taskVisualState = hasPendingApproval
     ? "submitted"
     : isVisuallyApproved
