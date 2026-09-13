@@ -507,7 +507,7 @@ function TaskCard({
   onOpenTaskDialog: (task: TaskWithMeta) => void;
   compact?: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const [showDetails, setShowDetails] = useState(false);
   const [shoppingListExpanded, setShoppingListExpanded] = useState(false);

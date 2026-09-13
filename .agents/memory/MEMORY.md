@@ -21,3 +21,4 @@
 - [Segmented daily progress badges](segmented-daily-progress.md) — repeated daily tasks keep visible green/yellow segments per child instead of flashing a temporary check
 - [Collective shopping-list approval](shopping-list-collective-approval.md) — one completed list creates one parent decision and credits every assigned member in full
 - [Termin vs. Wiederholungsintervall](task-date-semantics.md) — „Termin“ gilt nur für ein über den Kalender festgelegtes Datum, nie für den nächsten Intervallzeitpunkt
+- [Frontend-Build erkennt freie Variablen nicht](frontend-runtime-validation.md) — Vite/esbuild kann trotz fehlender Imports oder falschem Komponenten-Scope erfolgreich bauen
