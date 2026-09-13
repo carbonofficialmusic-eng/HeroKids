@@ -2881,16 +2881,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Delete stale pending completions first so the contributor set is always current.
         await storage.deletePendingTaskCompletionsByTask(task.id);
 
-        // Collect unique contributors (members who checked at least one item)
+        // One completed list is credited in full to every assigned member.
+        // If the task is family-wide, fall back to the actual contributors.
         const contributorIds = allItems
           .map(i => i.completedByMemberId!)
           .filter((id, idx, arr) => arr.indexOf(id) === idx);
-        const pointsPerMember = Math.floor(task.points / contributorIds.length);
-        const remainder = task.points % contributorIds.length;
+        const explicitlyAssignedIds = task.isSharedTask && task.sharedMemberIds?.length
+          ? task.sharedMemberIds
+          : await storage.getTaskAssignmentsByTask(task.id);
+        const recipientIds = explicitlyAssignedIds.length > 0
+          ? explicitlyAssignedIds
+          : contributorIds;
 
-        for (let idx = 0; idx < contributorIds.length; idx++) {
-          const memberId = contributorIds[idx];
-          const earnedPoints = pointsPerMember + (idx === 0 ? remainder : 0);
+        for (const memberId of recipientIds) {
           try {
             // createTaskCompletion respects task.requiresApproval:
             //   - false → auto-approved immediately, points awarded via _approveCompletionInternal
@@ -2899,14 +2902,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await storage.createTaskCompletion({
               taskId: task.id,
               memberId,
-              pointsEarned: earnedPoints,
+              pointsEarned: task.points,
               status: task.requiresApproval ? "pending" : "approved",
               approvedBy: null,
               proofPhotoUrl: null,
               rejectionReason: null,
             });
           } catch (err) {
-            console.error("Error creating shopping list completion for member", memberId, err);
+            console.error("Error creating collective shopping list completion for member", memberId, err);
           }
         }
 
@@ -3630,10 +3633,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get task for notifications
       const task = await storage.getTask(completion.taskId);
+      let approvedRecipientCompletions: any[] = [completion];
       
-      // Mark completion as approved - this also awards points via _approveCompletionInternal
-      // DO NOT add points manually here as it would cause double counting
-      await storage.approveTaskCompletion(completionId, member.id);
+      // A shopping list is one collective approval. Internally each recipient
+      // keeps a completion row so points/history remain attributable, but this
+      // single action approves every pending recipient with the full task value.
+      if (task?.isShoppingList) {
+        const collectiveCompletions = (await storage.getTaskCompletionsByTask(task.id))
+          .filter((item: any) => item.status === "pending");
+        approvedRecipientCompletions = collectiveCompletions;
+        for (const collectiveCompletion of collectiveCompletions) {
+          // Also repairs old pending shopping-list rows that split the points.
+          await storage.updateTaskCompletionPoints(collectiveCompletion.id, task.points);
+          await storage.approveTaskCompletion(collectiveCompletion.id, member.id);
+        }
+      } else {
+        // Mark completion as approved - this also awards points via _approveCompletionInternal.
+        await storage.approveTaskCompletion(completionId, member.id);
+      }
+      const approvedPoints = task?.isShoppingList ? task.points : completion.pointsEarned;
       
       // For IMMEDIATE team tasks: when ALL selected members are approved,
       // delete all completions so the next round starts with a clean slate.
@@ -3712,7 +3730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         completionId,
         taskId: completion.taskId,
         member: updatedChild,
-        pointsEarned: completion.pointsEarned,
+        pointsEarned: approvedPoints,
         approvedBy: member.displayName,
       });
       
@@ -3725,7 +3743,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         familyName: member.familyName,
         type: "task_approved",
         title: translateNotification(lang, "task_approved.title"),
-        message: translateNotification(lang, "task_approved.message", { task: task?.title || "Task", points: completion.pointsEarned }),
+        message: translateNotification(lang, "task_approved.message", { task: task?.title || "Task", points: approvedPoints }),
         relatedMemberId: member.id,
         relatedTaskId: completion.taskId,
         targetMemberId: childMember.id,
@@ -3737,7 +3755,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await sendPushToMembers(
           tokens,
           translateNotification(lang, "task_approved.title"),
-          translateNotification(lang, "task_approved.message", { task: task?.title || "Task", points: completion.pointsEarned }),
+          translateNotification(lang, "task_approved.message", { task: task?.title || "Task", points: approvedPoints }),
           { notificationType: "task_approved", memberId: childMember.id }
         );
       } catch (pushErr: any) {
@@ -3749,19 +3767,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'notification_update',
       });
       
-      // Process achievement events
-      await achievementEngine.processEvent({
-        type: "task_approved",
-        familyName: member.familyName,
-        memberId: childMember.id,
-        taskId: completion.taskId,
-        pointsEarned: completion.pointsEarned,
-      });
+      // Every shopping-list recipient receives the normal achievement event,
+      // even though the parent approved only one collective request.
+      for (const approvedCompletion of approvedRecipientCompletions) {
+        await achievementEngine.processEvent({
+          type: "task_approved",
+          familyName: member.familyName,
+          memberId: approvedCompletion.memberId,
+          taskId: completion.taskId,
+          pointsEarned: task?.isShoppingList ? task.points : approvedCompletion.pointsEarned,
+        });
+      }
       
       res.json({
         success: true,
         message: "Task completion approved!",
-        pointsAwarded: completion.pointsEarned,
+        pointsAwarded: approvedPoints,
         updatedMember: updatedChild,
       });
     } catch (error: any) {
@@ -3807,8 +3828,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot reject completions from another family" });
       }
       
-      // Mark completion as rejected
-      await storage.rejectTaskCompletion(completionId, member.id, reason || "Did not meet expectations");
+      // A shopping list is also rejected as one collective request so no
+      // hidden per-recipient approvals remain on the approvals page.
+      const completionTask = await storage.getTask(completion.taskId);
+      if (completionTask?.isShoppingList) {
+        const collectiveCompletions = (await storage.getTaskCompletionsByTask(completion.taskId))
+          .filter((item: any) => item.status === "pending");
+        for (const collectiveCompletion of collectiveCompletions) {
+          await storage.rejectTaskCompletion(
+            collectiveCompletion.id,
+            member.id,
+            reason || "Did not meet expectations",
+          );
+        }
+      } else {
+        await storage.rejectTaskCompletion(completionId, member.id, reason || "Did not meet expectations");
+      }
       
       // Delete proof photo now that the decision is made - it's no longer needed
       if (completion.proofPhotoUrl) {

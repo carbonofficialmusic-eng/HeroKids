@@ -281,6 +281,7 @@ export interface IStorage {
   getTaskCompletion(completionId: string): Promise<TaskCompletion | undefined>;
   deleteTaskCompletionsByTask(taskId: string): Promise<void>;
   deletePendingTaskCompletionsByTask(taskId: string): Promise<void>;
+  updateTaskCompletionPoints(completionId: string, points: number): Promise<void>;
 
   // Reward operations
   getRewardsByFamily(familyName: string): Promise<Reward[]>;
@@ -2060,6 +2061,13 @@ export class DatabaseStorage implements IStorage {
     );
   }
 
+  async updateTaskCompletionPoints(completionId: string, points: number): Promise<void> {
+    await db
+      .update(taskCompletions)
+      .set({ pointsEarned: points })
+      .where(eq(taskCompletions.id, completionId));
+  }
+
   async getPendingCompletionsByFamily(familyName: string): Promise<any[]> {
     const completions = await db
       .select({
@@ -2067,6 +2075,7 @@ export class DatabaseStorage implements IStorage {
         taskId: taskCompletions.taskId,
         taskTitle: tasks.title,
         taskPoints: tasks.points,
+        isShoppingList: tasks.isShoppingList,
         memberId: taskCompletions.memberId,
         memberName: familyMembers.displayName,
         memberAvatar: familyMembers.avatarUrl,
@@ -2086,7 +2095,27 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(desc(taskCompletions.completedAt));
     
-    return completions;
+    const visibleCompletions: any[] = [];
+    const handledShoppingTasks = new Set<string>();
+    for (const completion of completions) {
+      if (!completion.isShoppingList) {
+        visibleCompletions.push(completion);
+        continue;
+      }
+      if (handledShoppingTasks.has(completion.taskId)) continue;
+      handledShoppingTasks.add(completion.taskId);
+
+      const grouped = completions.filter(
+        item => item.isShoppingList && item.taskId === completion.taskId,
+      );
+      visibleCompletions.push({
+        ...completion,
+        memberName: grouped.map(item => item.memberName).join(", "),
+        pointsEarned: completion.taskPoints,
+        shoppingListRecipientCount: grouped.length,
+      });
+    }
+    return visibleCompletions;
   }
 
   async getActiveCompletionsByTask(taskId: string): Promise<any[]> {

@@ -19,3 +19,4 @@
 - [Ad-hoc TypeScript checks](ad-hoc-typescript-checks.md) — run temporary tsx scripts inside the workspace so package and ESM resolution use the project configuration
 - [Multi-member recurrence boundaries](multi-member-recurrence.md) — individual assignments reset per member; team rounds must ignore historical contributions
 - [Segmented daily progress badges](segmented-daily-progress.md) — repeated daily tasks keep visible green/yellow segments per child instead of flashing a temporary check
+- [Collective shopping-list approval](shopping-list-collective-approval.md) — one completed list creates one parent decision and credits every assigned member in full
