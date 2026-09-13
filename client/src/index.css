@@ -3313,6 +3313,20 @@ html:not(.dark) .lc-dashboard .lc-task-card-weekend-unavailable {
   filter: grayscale(.72) saturate(.42);
   opacity: .62;
 }
+html:not(.dark) .lc-dashboard .lc-weekend-unavailable-label {
+  color: #263b52 !important;
+  border-color: rgba(67, 88, 111, .5) !important;
+  background: rgba(255, 255, 255, .92) !important;
+  box-shadow: 0 2px 7px rgba(31, 49, 69, .16);
+  opacity: 1;
+}
+.dark .lc-dashboard .lc-weekend-unavailable-label {
+  color: #f0f5fa !important;
+  border-color: rgba(198, 213, 228, .5) !important;
+  background: rgba(49, 68, 89, .96) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+  opacity: 1;
+}
 html:not(.dark) .lc-kid-dashboard [data-task-visual-state="open"] .text-white {
   color: #18324d !important;
   text-shadow: none !important;

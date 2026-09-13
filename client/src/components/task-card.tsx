@@ -430,7 +430,9 @@ export function TaskCard({
                 )}
               </div>
               {compactDateText && (
-                <p className={`text-xs truncate leading-tight mt-0.5 ${compactDateText.color}`}>
+                <p className={`text-xs truncate leading-tight mt-0.5 ${compactDateText.color} ${
+                  isWeekendUnavailable ? 'lc-weekend-unavailable-label font-semibold' : ''
+                }`}>
                   {compactDateText.text}
                 </p>
               )}
@@ -671,7 +673,11 @@ export function TaskCard({
             )}
             {isWeekendUnavailable && (
               <div className="mb-1">
-                <Badge variant="outline" className="text-xs gap-1 text-muted-foreground" data-testid={`badge-weekend-${task.id}`}>
+                <Badge
+                  variant="outline"
+                  className="lc-weekend-unavailable-label text-xs gap-1 font-semibold"
+                  data-testid={`badge-weekend-${task.id}`}
+                >
                   <Moon className="h-3 w-3" />
                   {t('tasks.weekendUnavailable')}
                 </Badge>
