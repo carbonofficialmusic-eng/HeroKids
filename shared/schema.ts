@@ -234,11 +234,11 @@ export const tasks = pgTable("tasks", {
   status: taskStatusEnum("status").notNull().default("active"),
   requiresProof: boolean("requires_proof").notNull().default(false),
   requiresApproval: boolean("requires_approval").notNull().default(true),
-  maxCompletions: integer("max_completions"), // Multi-completion mode: null = assignment-based, number = slot-based (e.g., 3 children can complete)
+  maxCompletions: integer("max_completions"), // Multi-completion mode: null = assignment-based, number = slot-based (e.g., 3 children can complete); independent of team/individual assignment mode
   completionCount: integer("completion_count").notNull().default(0), // Performance cache: approved completions count
   iconEmoji: varchar("icon_emoji").default("⭐"),
-  isSharedTask: boolean("is_shared_task").notNull().default(false), // Shared task: all members must complete together, points split equally
-  sharedMemberIds: text("shared_member_ids").array(), // Array of member IDs who must complete this shared task together
+  isSharedTask: boolean("is_shared_task").notNull().default(false), // Team mode: all selected members complete together; each member earns full points
+  sharedMemberIds: text("shared_member_ids").array(), // Team mode stores selected IDs here; individual mode exposes its taskAssignments IDs here in API payloads
   dueDate: varchar("due_date"), // Optional due date for one-time tasks (YYYY-MM-DD format)
   isShoppingList: boolean("is_shopping_list").notNull().default(false), // Shopping list task: items can be checked off individually
   isImportant: boolean("is_important").notNull().default(false), // Pinned important task: always visible above category groups

@@ -48,12 +48,36 @@ async function autoUnpauseMembersAfterUpgrade(familyName: string, newTier: Subsc
   console.log(`✅ Auto-unpaused ${toUnpause.length} member(s) for family "${familyName}" after upgrade to ${newTier}`);
   return toUnpause.length;
 }
+
+/**
+ * Validate the member selection used by either multi-member task mode.
+ * The API deliberately keeps using sharedMemberIds as the editor-facing
+ * selection, while persistence differs by mode (assignments table versus
+ * the legacy-compatible team array).
+ */
+async function validateTaskMemberSelection(
+  familyName: string,
+  memberIds: string[],
+  isTeamTask: boolean,
+): Promise<string[]> {
+  const familyMembers = await storage.getFamilyMembersByFamily(familyName);
+  return validateSelectedTaskMemberIds(
+    memberIds,
+    familyMembers.map(member => member.id),
+    isTeamTask,
+  );
+}
 import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, getAllSkinsInOrder, TOTAL_HIDDEN_STARS, LEGACY_SKIN_ORDER } from "@shared/skin-config";
 import { eq, inArray, and, desc } from "drizzle-orm";
 import "./types";
 import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
 import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
 import { isValidFactoryResetConfirmation } from "@shared/factory-reset";
+import {
+  hasActiveTeamContribution,
+  validateSelectedTaskMemberIds,
+  isTeamCompletionInCurrentPeriod,
+} from "./task-mode-policy";
 
 // Backend notification translations for all 9 supported languages
 const notificationTranslations: Record<string, Record<string, string>> = {
@@ -2130,11 +2154,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   assignedMemberIds.map(async (memberId: string) => {
                     const assignedMember = await storage.getFamilyMemberById(memberId);
                     if (!assignedMember) return null;
-                    // For immediate recurrence multi-assignment tasks: keep "approved" status visible
-                    // so the "waiting for others" state shows until ALL members are done.
-                    // For all other task types: use normal getMemberCompletionStatus logic.
-                    const skipReset = task.recurrence === 'immediate';
-                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId, undefined, skipReset);
+                    // Individual assignments repeat independently. For
+                    // immediate tasks an approved completion therefore resets
+                    // only that member instead of waiting for all assignees.
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
                     return {
                       memberId,
                       displayName: assignedMember.displayName,
@@ -2152,22 +2175,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const validCompletions = assignedMemberCompletions.filter(Boolean);
                 // allCompleted only when ALL have approved status (not just pending)
                 const allCompleted = validCompletions.filter(m => m?.hasCompleted).length === assignedMemberIds.length;
-                
-                // For IMMEDIATE recurrence: once all members are approved → reset immediately for everyone.
-                // Show task as available again (null status for all) — no period lock like daily/weekly tasks.
-                if (task.recurrence === 'immediate' && allCompleted) {
-                  const resetCompletions = validCompletions.map(m => m ? {
-                    ...m, hasCompleted: false, hasSubmitted: false, status: null,
-                  } : null).filter(Boolean);
-                  return {
-                    ...task,
-                    remainingSlots: null,
-                    memberHasCompleted: false,
-                    memberCompletionStatus: null,
-                    completions: [],
-                    assignedMemberCompletions: resetCompletions,
-                  };
-                }
                 
                 // For children: check if THIS member has submitted (to grey out the card while pending/approved)
                 const currentMemberCompletion = validCompletions.find(m => m?.memberId === member.id);
@@ -2350,13 +2357,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               if (assignedMemberIds.length > 1) {
                 // Multi-assignment task: Show parent the status of each assigned member
-                // For immediate recurrence: keep "approved" visible so progress stays filled
-                const skipResetAssigned = task.recurrence === 'immediate';
                 const assignedMemberCompletions = await Promise.all(
                   assignedMemberIds.map(async (memberId: string) => {
                     const assignedMember = await storage.getFamilyMemberById(memberId);
                     if (!assignedMember) return null;
-                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId, undefined, skipResetAssigned);
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
                     return {
                       memberId,
                       displayName: assignedMember.displayName,
@@ -2457,13 +2462,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const parsed = insertTaskSchema.parse(req.body);
+      const isTeamTask = parsed.isSharedTask === true;
+      const selectedMemberIds = await validateTaskMemberSelection(
+        member.familyName,
+        parsed.sharedMemberIds || [],
+        isTeamTask,
+      );
+      // Individual tasks persist selected members as taskAssignments. Team
+      // tasks retain the legacy-compatible sharedMemberIds array.
+      parsed.sharedMemberIds = isTeamTask ? selectedMemberIds : null;
       
       // Gate: task assignment to specific members requires Family tier or higher
       // Gate: shopping list tasks require Family tier or higher
-      if ((parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) || parsed.isShoppingList) {
+      if (selectedMemberIds.length > 0 || parsed.isShoppingList) {
         const family = await storage.getFamily(member.familyName);
         const familyOnTrial = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
-        if (parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) {
+        if (selectedMemberIds.length > 0) {
           if (!family || (family.subscriptionTier === "free" && !familyOnTrial)) {
             return res.status(403).json({
               message: "Task assignment requires Family subscription or higher",
@@ -2489,6 +2503,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (parsed.recurrence !== "daily") parsed.dailyTarget = 1;
 
       const task = await storage.createTask(parsed);
+      await storage.replaceTaskAssignments(task.id, isTeamTask ? [] : selectedMemberIds);
+      const taskWithSelection = await storage.getTask(task.id);
       
       // If this is a shopping list task, create the items
       const rawShoppingItems = req.body.shoppingItems;
@@ -2510,10 +2526,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Broadcast new task to family
       broadcastToFamily(member.familyName, {
         type: "task_created",
-        task,
+        task: taskWithSelection,
       });
       
-      res.json(task);
+      res.json(taskWithSelection);
     } catch (error: any) {
       console.error("Error creating task:", error);
       res.status(400).json({ message: error.message || "Failed to create task" });
@@ -2547,12 +2563,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Parse and update the task
       const parsed = insertTaskSchema.partial().parse(req.body);
+      const isTeamTask = parsed.isSharedTask ?? existingTask.isSharedTask;
+      const selectionProvided = Object.prototype.hasOwnProperty.call(req.body, "sharedMemberIds");
+      let selectedMemberIds: string[];
+      if (selectionProvided) {
+        selectedMemberIds = parsed.sharedMemberIds || [];
+      } else if (isTeamTask) {
+        // Preserve an existing team's selected members when the editor sends
+        // an unrelated patch.
+        selectedMemberIds = existingTask.sharedMemberIds || [];
+      } else {
+        // getTask exposes individual selections through sharedMemberIds, but
+        // read directly as well so switching away from team mode clears any
+        // stale assignment rows.
+        selectedMemberIds = existingTask.isSharedTask
+          ? []
+          : await storage.getTaskAssignmentsByTask(taskId);
+      }
+      selectedMemberIds = await validateTaskMemberSelection(
+        member.familyName,
+        selectedMemberIds,
+        isTeamTask,
+      );
+      parsed.isSharedTask = isTeamTask;
+      parsed.sharedMemberIds = isTeamTask ? selectedMemberIds : null;
       
       // Gate: task assignment / shopping list requires Family tier or higher
-      if ((parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) || parsed.isShoppingList) {
+      if (selectedMemberIds.length > 0 || parsed.isShoppingList) {
         const family = await storage.getFamily(member.familyName);
         const familyOnTrialPatch = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
-        if (parsed.sharedMemberIds && parsed.sharedMemberIds.length > 0) {
+        if (selectedMemberIds.length > 0) {
           if (!family || (family.subscriptionTier === "free" && !familyOnTrialPatch)) {
             return res.status(403).json({
               message: "Task assignment requires Family subscription or higher",
@@ -2580,6 +2620,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const updatedTask = await storage.updateTask(taskId, parsed);
+      // Reconcile only the assignment-table representation. Team and
+      // unassigned tasks must not retain stale individual assignments.
+      await storage.replaceTaskAssignments(taskId, isTeamTask ? [] : selectedMemberIds);
+      const taskWithSelection = await storage.getTask(taskId);
 
       // If shopping items are provided on edit, replace existing unchecked items
       const rawShoppingItems = req.body.shoppingItems;
@@ -2599,10 +2643,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Broadcast task update to family
       broadcastToFamily(member.familyName, {
         type: "task_updated",
-        task: updatedTask,
+        task: taskWithSelection,
       });
 
-      res.json(updatedTask);
+      res.json(taskWithSelection);
     } catch (error: any) {
       console.error("Error updating task:", error);
       res.status(400).json({ message: error.message || "Failed to update task" });
@@ -3105,9 +3149,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(403).json({ message: "Forbidden: You are not assigned to this shared task" });
         }
         
-        const hasAlreadyCompleted = await storage.hasActiveMemberCompletion(taskId, member.id);
-        if (hasAlreadyCompleted) {
+        const memberStatus = await storage.getMemberCompletionStatus(
+          taskId,
+          member.id,
+          undefined,
+          task.recurrence === "immediate",
+        );
+        if (hasActiveTeamContribution(memberStatus)) {
           return res.status(422).json({ message: "Validation failed: You have already completed your part of this task" });
+        }
+      }
+
+      // Individual multi-member tasks use taskAssignments rather than the
+      // sharedMemberIds team representation. Enforce membership and the same
+      // per-member duplicate guard before accepting a submission.
+      if (!task.isSharedTask) {
+        const individualAssignedIds = await storage.getTaskAssignmentsByTask(taskId);
+        if (individualAssignedIds.length > 0) {
+          if (!individualAssignedIds.includes(member.id)) {
+            return res.status(403).json({ message: "Forbidden: You are not assigned to this task" });
+          }
+          const hasAlreadyCompleted = await storage.hasActiveMemberCompletion(taskId, member.id);
+          if (hasAlreadyCompleted) {
+            return res.status(422).json({ message: "Validation failed: You have already completed your part of this task" });
+          }
         }
       }
       
@@ -3133,8 +3198,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         uploadedPhotos.delete(proofPhotoUrl);
       }
       
-      // Each member gets FULL points (no splitting - this was changed from shared task behavior)
-      // The isSharedTask feature now just means multiple specific members can each complete and each get full points
+      // Each selected member gets the full point value in both assignment
+      // modes. Team mode differs by requiring every contribution before the
+      // task/period is complete, not by splitting points.
       const pointsPerMember = task.points;
       
       // Create completion record (handles approval, points, and completionCount in transaction)
@@ -3196,22 +3262,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (updatedTask?.maxCompletions) {
             shouldSetNextAvailableDate = (updatedTask.completionCount >= updatedTask.maxCompletions);
           } else if (task.isSharedTask) {
-            const sharedTargetIds = (task.sharedMemberIds && task.sharedMemberIds.length > 0)
+            // Team mode starts its next shared period only after every selected
+            // member has contributed.
+            const targetIds = (task.sharedMemberIds && task.sharedMemberIds.length > 0)
               ? task.sharedMemberIds
               : await storage.getTaskAssignmentsByTask(taskId);
-            if (sharedTargetIds.length > 0) {
+            if (targetIds.length > 0) {
               const allCurrentCompletions = await storage.getTaskCompletionsByTask(taskId);
               const submittedMemberIds = allCurrentCompletions
-                .filter((c: any) => c.status === "pending" || c.status === "approved")
+                .filter((c: any) => (
+                  (c.status === "pending" || c.status === "approved")
+                  && isTeamCompletionInCurrentPeriod(
+                    c.completedAt,
+                    task.nextAvailableDate ? new Date(task.nextAvailableDate) : null,
+                    new Date(),
+                  )
+                ))
                 .map((c: any) => c.memberId);
-              shouldSetNextAvailableDate = sharedTargetIds.every((id: string) => submittedMemberIds.includes(id));
+              shouldSetNextAvailableDate = targetIds.every((id: string) => submittedMemberIds.includes(id));
             } else {
               shouldSetNextAvailableDate = true;
             }
           } else {
-            shouldSetNextAvailableDate = true;
+            const individualAssignedIds = await storage.getTaskAssignmentsByTask(taskId);
+            // Individual recurring assignments derive availability from each
+            // member's own completion period and must not apply a global lock.
+            shouldSetNextAvailableDate = individualAssignedIds.length === 0;
           }
-          
+
           if (shouldSetNextAvailableDate) {
             // Calculate next available date based on recurrence
             const now = new Date();
@@ -3493,19 +3571,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // DO NOT add points manually here as it would cause double counting
       await storage.approveTaskCompletion(completionId, member.id);
       
-      // For IMMEDIATE multi-assignment tasks: when ALL assigned members are approved,
+      // For IMMEDIATE team tasks: when ALL selected members are approved,
       // delete all completions so the next round starts with a clean slate.
       // Without this, old "approved" completions from round N bleed into round N+1
       // causing the task to appear fully completed (0/2) before anyone has submitted.
-      if (task?.recurrence === "immediate") {
-        // Support both new-style taskAssignments and legacy sharedMemberIds
-        const immediateAssignedIds = await storage.getTaskAssignmentsByTask(task.id);
+      if (task?.recurrence === "immediate" && task.isSharedTask) {
         const sharedIds: string[] = (task.sharedMemberIds && (task.sharedMemberIds as string[]).length > 0)
           ? (task.sharedMemberIds as string[])
           : [];
-        const targetIds = immediateAssignedIds.length > 1
-          ? immediateAssignedIds
-          : sharedIds.length > 1 ? sharedIds : [];
+        const targetIds = sharedIds.length > 1 ? sharedIds : [];
 
         if (targetIds.length > 1) {
           const allCompletionsNow = await storage.getTaskCompletionsByTask(task.id);

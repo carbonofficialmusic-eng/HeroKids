@@ -14,12 +14,14 @@ import { format, isToday, isTomorrow, isPast, differenceInDays, parse, type Loca
 import { de, enUS, fr, es, ja, ko, sv, zhCN } from "date-fns/locale";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getDevHeaders } from "@/lib/queryClient";
+import { canRetryRejectedTeamContribution } from "@shared/task-mode";
 
 
 interface TaskCardProps {
   task: Task & {
     remainingSlots?: number | null;
     memberHasCompleted?: boolean;
+    memberCompletionStatus?: "pending" | "approved" | "rejected" | null;
     completions?: Array<{
       id: string;
       memberId: string;
@@ -39,6 +41,7 @@ interface TaskCardProps {
       useCustomAvatar: boolean;
       color: string;
       hasCompleted: boolean;
+      status?: "pending" | "approved" | "rejected" | null;
     }>;
     assignedMemberCompletions?: Array<{
       memberId: string;
@@ -190,8 +193,25 @@ export function TaskCard({
     return localeMap[i18n.language] || enUS;
   };
   
-  // Check if task is currently unavailable (future nextAvailableDate)
-  const isUnavailable = !!(task.nextAvailableDate && new Date(task.nextAvailableDate) > new Date());
+  const currentMemberProgress = task.assignedMemberCompletions?.find(
+    member => member.memberId === currentMemberId,
+  ) || task.sharedMemberCompletions?.find(
+    member => member.memberId === currentMemberId,
+  );
+  const currentMemberStatus = currentMemberProgress?.status ?? task.memberCompletionStatus;
+  const canRetryRejectedTeam = canRetryRejectedTeamContribution({
+    isTeamTask: task.isSharedTask,
+    memberStatus: currentMemberStatus,
+    nextAvailableDate: task.nextAvailableDate,
+  });
+
+  // A rejected team member may retry inside the still-locked shared period.
+  // Pending/approved teammates remain unavailable until the next period.
+  const isUnavailable = !!(
+    task.nextAvailableDate
+    && new Date(task.nextAvailableDate) > new Date()
+    && !canRetryRejectedTeam
+  );
   
   // Check if this is a weekdays-only task that's unavailable on weekends (Sat=6, Sun=0)
   const todayDow = new Date().getDay();
@@ -226,6 +246,9 @@ export function TaskCard({
   // Get assigned member names for tooltip (prefer assignedMemberCompletions over legacy sharedMemberCompletions)
   const assignedMemberNames = task.assignedMemberCompletions?.map(m => m.displayName).join(' & ') || 
     task.sharedMemberCompletions?.map(m => m.displayName).join(' & ') || '';
+  const assignedMembers = task.assignedMemberCompletions?.length
+    ? task.assignedMemberCompletions
+    : task.sharedMemberCompletions;
   
   // Due date availability logic for one-time tasks
   const dueDateInfo = (() => {
@@ -249,7 +272,8 @@ export function TaskCard({
   })();
   
   // Task should appear grayed out if it's unavailable OR completed by this member OR due date not yet reached OR expired OR weekend-only unavailable OR awaiting approval
-  const isGrayedOut = isUnavailable || isCompletedByMember || dueDateInfo.notYet || dueDateInfo.expired || isWeekendUnavailable || task.status === "pending_approval" || task.status === "completed";
+  const taskStatus = task.status as string;
+  const isGrayedOut = isUnavailable || isCompletedByMember || dueDateInfo.notYet || dueDateInfo.expired || isWeekendUnavailable || taskStatus === "pending_approval" || task.status === "completed";
 
   // True when requiresApproval and at least one submission is still pending approval.
   // Used to show a yellow (amber) checkmark on the parent dashboard.
@@ -272,13 +296,14 @@ export function TaskCard({
     const memberStatus = (task as any).memberCompletionStatus;
     if (memberStatus === "pending") return true;
     // Fallback: task's own status field (set for one-time tasks)
-    return task.status === "pending_approval";
+    return taskStatus === "pending_approval";
   })();
 
   // A shared task remains visually open until every assigned member has
   // completed it, even when the currently viewed member is already done.
   const assignedCompletions = task.assignedMemberCompletions;
   const sharedCompletions = task.sharedMemberCompletions;
+  const isTeamTask = task.isSharedTask === true;
   const hasMultipleAssignees =
     (assignedCompletions?.length ?? 0) > 1 ||
     (sharedCompletions?.length ?? 0) > 1;
@@ -289,7 +314,7 @@ export function TaskCard({
       : false;
   const isVisuallyApproved =
     task.status === "completed" ||
-    (hasMultipleAssignees ? allAssigneesCompleted : isCompletedByMember);
+    (isTeamTask && hasMultipleAssignees ? allAssigneesCompleted : isCompletedByMember);
   const taskVisualState = hasPendingApproval
     ? "submitted"
     : isVisuallyApproved
@@ -399,6 +424,21 @@ export function TaskCard({
                   {compactDateText.text}
                 </p>
               )}
+              {assignedMembers && assignedMembers.length > 0 && (
+                <p className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
+                  {task.isSharedTask ? t("tasks.assignmentModeTeam") : t("tasks.assignmentModeIndividual")}:{" "}
+                  {assignedMembers.map((member) => {
+                    const status = member.status === "approved" || member.hasCompleted
+                      ? t("tasks.memberStatusApproved")
+                      : member.status === "pending" || (member as any).hasSubmitted
+                        ? t("tasks.memberStatusSubmitted")
+                        : member.status === "rejected"
+                          ? t("tasks.memberStatusRejected")
+                          : t("tasks.memberStatusOpen");
+                    return `${member.displayName}: ${status}`;
+                  }).join(" · ")}
+                </p>
+              )}
             </div>
 
             {/* Info popover — secondary details (points, assignee, recurrence) */}
@@ -430,6 +470,23 @@ export function TaskCard({
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Users className="h-3 w-3 shrink-0" />
                     <span className="truncate">{assigneeLabel}</span>
+                  </div>
+                )}
+                {assignedMembers && assignedMembers.length > 0 && (
+                  <div className="space-y-0.5 border-t pt-1">
+                    <div className="font-medium">
+                      {task.isSharedTask ? t("tasks.assignmentModeTeam") : t("tasks.assignmentModeIndividual")}
+                    </div>
+                    {assignedMembers.map((member) => {
+                      const status = member.status === "approved" || member.hasCompleted
+                        ? t("tasks.memberStatusApproved")
+                        : member.status === "pending" || (member as any).hasSubmitted
+                          ? t("tasks.memberStatusSubmitted")
+                          : member.status === "rejected"
+                            ? t("tasks.memberStatusRejected")
+                            : t("tasks.memberStatusOpen");
+                      return <div key={member.memberId} className="text-muted-foreground truncate">{member.displayName}: {status}</div>;
+                    })}
                   </div>
                 )}
               </PopoverContent>
@@ -696,12 +753,12 @@ export function TaskCard({
             )}
 
             {/* Multi-Assignment Task Progress (new style - uses taskAssignments) */}
-            {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1 && (
+            {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 0 && (
               <div className="mb-2" data-testid={`assigned-progress-${task.id}`}>
                 <div className="flex items-center gap-2 mb-1.5">
                   <Users className="h-3.5 w-3.5 text-muted-foreground" />
                   <p className="text-xs font-medium text-muted-foreground">
-                    {t('tasks.sharedProgress', {
+                    {(task.isSharedTask ? t('tasks.assignmentModeTeam') : t('tasks.assignmentModeIndividual'))} · {t('tasks.sharedProgress', {
                       completed: task.assignedMemberCompletions.filter(m => m.hasCompleted).length,
                       total: task.assignedMemberCompletions.length
                     })}
@@ -713,7 +770,7 @@ export function TaskCard({
                     return (
                       <Badge 
                         key={member.memberId} 
-                        variant={hasSubmitted ? "default" : "outline"}
+                        variant={member.status === "rejected" ? "destructive" : hasSubmitted ? "default" : "outline"}
                         className={`gap-1.5 text-xs ${member.hasCompleted ? "lc-task-member-completed" : ""}`}
                         data-testid={`assigned-member-${member.memberId}`}
                       >
@@ -726,8 +783,13 @@ export function TaskCard({
                             {member.displayName[0]}
                           </AvatarFallback>
                         </Avatar>
-                        {member.displayName}
-                        {member.status === "approved" ? " ✓" : member.status === "pending" ? " ⏳" : ""}
+                        {member.displayName} · {member.status === "approved"
+                          ? t("tasks.memberStatusApproved")
+                          : member.status === "pending"
+                            ? t("tasks.memberStatusSubmitted")
+                            : member.status === "rejected"
+                              ? t("tasks.memberStatusRejected")
+                              : t("tasks.memberStatusOpen")}
                       </Badge>
                     );
                   })}
@@ -741,7 +803,7 @@ export function TaskCard({
                 <div className="flex items-center gap-2 mb-1.5">
                   <Users className="h-3.5 w-3.5 text-muted-foreground" />
                   <p className="text-xs font-medium text-muted-foreground">
-                    {t('tasks.sharedProgress', {
+                    {t('tasks.assignmentModeTeam')} · {t('tasks.sharedProgress', {
                       completed: task.sharedMemberCompletions.filter(m => m.hasCompleted).length,
                       total: task.sharedMemberCompletions.length
                     })}
@@ -751,7 +813,7 @@ export function TaskCard({
                   {task.sharedMemberCompletions.map((member) => (
                     <Badge 
                       key={member.memberId} 
-                      variant={member.hasCompleted ? "default" : "outline"}
+                      variant={member.status === "rejected" ? "destructive" : member.hasCompleted ? "default" : "outline"}
                       className={`gap-1.5 text-xs ${member.hasCompleted ? "lc-task-member-completed" : ""}`}
                       data-testid={`shared-member-${member.memberId}`}
                     >
@@ -764,8 +826,13 @@ export function TaskCard({
                           {member.displayName[0]}
                         </AvatarFallback>
                       </Avatar>
-                      {member.displayName}
-                      {member.hasCompleted ? " ✓" : ""}
+                      {member.displayName} · {member.status === "approved" || member.hasCompleted
+                        ? t("tasks.memberStatusApproved")
+                        : member.status === "pending"
+                          ? t("tasks.memberStatusSubmitted")
+                          : member.status === "rejected"
+                            ? t("tasks.memberStatusRejected")
+                            : t("tasks.memberStatusOpen")}
                     </Badge>
                   ))}
                 </div>

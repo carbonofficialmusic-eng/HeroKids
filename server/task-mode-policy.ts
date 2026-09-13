@@ -1,0 +1,78 @@
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
+
+/**
+ * Pure validation for the editor-facing member selection shared by both
+ * multi-member task modes.
+ */
+export function validateSelectedTaskMemberIds(
+  memberIds: string[],
+  familyMemberIds: Iterable<string>,
+  isTeamTask: boolean,
+): string[] {
+  const uniqueIds = Array.from(new Set(memberIds));
+  if (uniqueIds.length !== memberIds.length) {
+    throw new Error("Selected task members must be unique");
+  }
+  if (isTeamTask && uniqueIds.length < 2) {
+    throw new Error("Team tasks require at least two family members");
+  }
+
+  const familyIds = new Set(familyMemberIds);
+  const invalidIds = uniqueIds.filter(id => !familyIds.has(id));
+  if (invalidIds.length > 0) {
+    throw new Error("Selected task members must belong to your family");
+  }
+  return uniqueIds;
+}
+
+/**
+ * Team members stay blocked after either submitting or being approved until
+ * every teammate has finished and the immediate team round is reset.
+ */
+export function hasActiveTeamContribution(
+  status: "pending" | "approved" | "rejected" | null,
+): boolean {
+  return status === "pending" || status === "approved";
+}
+
+export function isIndividualRecurringCompletionActive(options: {
+  status: "pending" | "approved" | "rejected";
+  completedAt: Date;
+  now: Date;
+  recurrence: "none" | "daily" | "weekdays" | "weekly" | "monthly" | "yearly" | "immediate";
+  recurrenceDays: number | null;
+  timezone: string;
+}): boolean {
+  const { status, completedAt, now, recurrence, recurrenceDays, timezone } = options;
+  if (status === "pending") return true;
+  if (status === "rejected") return false;
+
+  if (recurrenceDays) {
+    const completedDate = formatInTimeZone(completedAt, timezone, "yyyy-MM-dd");
+    const [year, month, day] = completedDate.split("-").map(Number);
+    const nextDate = new Date(Date.UTC(year, month - 1, day + recurrenceDays));
+    const nextDateString = `${nextDate.getUTCFullYear()}-${String(nextDate.getUTCMonth() + 1).padStart(2, "0")}-${String(nextDate.getUTCDate()).padStart(2, "0")} 00:00:00`;
+    return now < fromZonedTime(nextDateString, timezone);
+  }
+
+  const periodFormat = recurrence === "weekly"
+    ? "RRRR-'W'II"
+    : recurrence === "monthly"
+      ? "yyyy-MM"
+      : recurrence === "yearly"
+        ? "yyyy"
+        : null;
+  if (!periodFormat) return false;
+  return formatInTimeZone(completedAt, timezone, periodFormat)
+    === formatInTimeZone(now, timezone, periodFormat);
+}
+
+export function isTeamCompletionInCurrentPeriod(
+  completedAt: Date | null,
+  nextAvailableDate: Date | null,
+  now: Date,
+): boolean {
+  if (!completedAt) return false;
+  if (!nextAvailableDate || nextAvailableDate > now) return true;
+  return completedAt >= nextAvailableDate;
+}

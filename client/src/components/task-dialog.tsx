@@ -198,6 +198,10 @@ export function TaskDialog({
 
   // State for assigned member selection
   const [selectedSharedMembers, setSelectedSharedMembers] = useState<string[]>([]);
+  // A task assigned to multiple members can either track each person
+  // independently or require every selected team member to contribute.
+  // Existing shared tasks load as team tasks for backwards compatibility.
+  const [assignmentMode, setAssignmentMode] = useState<"individual" | "team">("individual");
   const [showAllMembers, setShowAllMembers] = useState(false);
   const [activeCategory, setActiveCategory] = useState<EmojiCategoryKey>("household");
   
@@ -234,6 +238,7 @@ export function TaskDialog({
       dailyTarget: 1,
     },
   });
+  const displayedPoints = form.watch("points");
 
   // Reset form when dialog opens or editingTask changes
   useEffect(() => {
@@ -274,6 +279,7 @@ export function TaskDialog({
         });
         // Sync assigned members state
         setSelectedSharedMembers(editingTask.sharedMemberIds || []);
+         setAssignmentMode(editingTask.isSharedTask ? "team" : "individual");
         // Sync shopping list state — items loaded separately via editingShoppingItems query
         setIsImportant((editingTask as any).isImportant || false);
         setIsShoppingList((editingTask as any).isShoppingList || false);
@@ -302,6 +308,7 @@ export function TaskDialog({
         });
         // Clear assigned members state
         setSelectedSharedMembers([]);
+        setAssignmentMode("individual");
         // Clear important + shopping list state
         setIsImportant(false);
         setIsShoppingList(false);
@@ -356,13 +363,11 @@ export function TaskDialog({
     }
     if (submitData.recurrence !== "daily") submitData.dailyTarget = 1;
     
-    if (selectedSharedMembers.length > 0) {
-      submitData.isSharedTask = true;
-      submitData.sharedMemberIds = selectedSharedMembers;
-    } else {
-      submitData.isSharedTask = false;
-      submitData.sharedMemberIds = [];
-    }
+    // Keep the selected members for both modes. `isSharedTask` is the mode
+    // discriminator: only a multi-member team task uses the legacy shared
+    // completion semantics. A zero/one-member assignment is always individual.
+    submitData.sharedMemberIds = selectedSharedMembers;
+    submitData.isSharedTask = selectedSharedMembers.length >= 2 && assignmentMode === "team";
     
     submitData.maxCompletions = undefined;
     
@@ -692,6 +697,9 @@ export function TaskDialog({
                                   newSelection = [...selectedSharedMembers, member.id];
                                 }
                                 setSelectedSharedMembers(newSelection);
+                                if (newSelection.length < 2) {
+                                  setAssignmentMode("individual");
+                                }
                                 field.onChange(newSelection.length > 0);
                               }}
                               data-testid={`badge-assign-${member.id}`}
@@ -718,6 +726,36 @@ export function TaskDialog({
                             {showAllMembers ? t("common.showLess", { defaultValue: "Show less" }) : t("common.showMore", { defaultValue: "Show more" })}
                             {!showAllMembers && ` (${allMembers.length - 6})`}
                           </button>
+                        )}
+                        {selectedSharedMembers.length >= 2 && (
+                          <div className="rounded-md border p-3 space-y-2" data-testid="assignment-mode">
+                            <FormLabel className="text-sm">{t("tasks.multiMemberModeLabel")}</FormLabel>
+                            <RadioGroup
+                              value={assignmentMode}
+                              onValueChange={(value) => {
+                                if (value === "individual" || value === "team") {
+                                  setAssignmentMode(value);
+                                  field.onChange(value === "team");
+                                }
+                              }}
+                              className="gap-2"
+                            >
+                              <label className="flex items-start gap-2 cursor-pointer">
+                                <RadioGroupItem value="individual" className="mt-0.5" data-testid="radio-mode-individual" />
+                                <span className="space-y-0.5">
+                                  <span className="block text-sm font-medium">{t("tasks.multiMemberModeIndividual")}</span>
+                                  <span className="block text-xs text-muted-foreground">{t("tasks.multiMemberModeIndividualDesc", { points: displayedPoints })}</span>
+                                </span>
+                              </label>
+                              <label className="flex items-start gap-2 cursor-pointer">
+                                <RadioGroupItem value="team" className="mt-0.5" data-testid="radio-mode-team" />
+                                <span className="space-y-0.5">
+                                  <span className="block text-sm font-medium">{t("tasks.multiMemberModeTeam")}</span>
+                                  <span className="block text-xs text-muted-foreground">{t("tasks.multiMemberModeTeamDesc", { points: displayedPoints })}</span>
+                                </span>
+                              </label>
+                            </RadioGroup>
+                          </div>
                         )}
                       </div>
                     ) : (

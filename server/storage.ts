@@ -86,6 +86,7 @@ import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import bcrypt from 'bcrypt';
 import { TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR } from "@shared/skin-config";
 import { getProfilePhotoObjectPaths } from "@shared/avatar-preferences";
+import { isIndividualRecurringCompletionActive } from "./task-mode-policy";
 
 /**
  * Default achievement templates - used by both seedDefaultAchievements and resetFamilyToFactory
@@ -254,6 +255,7 @@ export interface IStorage {
 
   // Task assignment operations
   createTaskAssignment(assignment: InsertTaskAssignment): Promise<void>;
+  replaceTaskAssignments(taskId: string, memberIds: string[]): Promise<void>;
   getTaskAssignmentsByMember(memberId: string): Promise<string[]>;
   getTaskAssignmentsByTask(taskId: string): Promise<string[]>;
 
@@ -1081,6 +1083,15 @@ export class DatabaseStorage implements IStorage {
   // Task operations
   async getTask(id: string): Promise<Task | undefined> {
     const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    if (!task) return undefined;
+
+    // Individual multi-member tasks store their selected members in the
+    // assignment table. Expose that selection through the task representation
+    // as well, so editors can round-trip it without a second endpoint.
+    if (!task.isSharedTask) {
+      const assignmentIds = await this.getTaskAssignmentsByTask(id);
+      return { ...task, sharedMemberIds: assignmentIds };
+    }
     return task;
   }
 
@@ -1132,7 +1143,28 @@ export class DatabaseStorage implements IStorage {
       task.nextAvailableDate = null;
     }
     
-    return allTasks;
+    if (allTasks.length === 0) return allTasks;
+
+    // Keep the persisted representation unambiguous: team tasks use
+    // sharedMemberIds, while individual multi-member tasks use rows in
+    // taskAssignments. The latter still expose their selected IDs in the
+    // task payload for editing.
+    const assignments = await db
+      .select({ taskId: taskAssignments.taskId, memberId: taskAssignments.memberId })
+      .from(taskAssignments)
+      .where(inArray(taskAssignments.taskId, allTasks.map(task => task.id)));
+    const assignmentMap = new Map<string, string[]>();
+    for (const assignment of assignments) {
+      const ids = assignmentMap.get(assignment.taskId) || [];
+      ids.push(assignment.memberId);
+      assignmentMap.set(assignment.taskId, ids);
+    }
+
+    return allTasks.map(task => (
+      task.isSharedTask
+        ? task
+        : { ...task, sharedMemberIds: assignmentMap.get(task.id) || [] }
+    ));
   }
 
   async createTask(taskData: InsertTask): Promise<Task> {
@@ -1260,6 +1292,18 @@ export class DatabaseStorage implements IStorage {
     await db.insert(taskAssignments).values(assignmentData);
   }
 
+  async replaceTaskAssignments(taskId: string, memberIds: string[]): Promise<void> {
+    const uniqueMemberIds = Array.from(new Set(memberIds));
+    await db.transaction(async (tx) => {
+      await tx.delete(taskAssignments).where(eq(taskAssignments.taskId, taskId));
+      if (uniqueMemberIds.length > 0) {
+        await tx.insert(taskAssignments).values(
+          uniqueMemberIds.map(memberId => ({ taskId, memberId }))
+        );
+      }
+    });
+  }
+
   async getTaskAssignmentsByMember(memberId: string): Promise<string[]> {
     const assignments = await db
       .select()
@@ -1287,6 +1331,7 @@ export class DatabaseStorage implements IStorage {
         recurrenceDays: tasks.recurrenceDays,
         familyName: tasks.familyName,
         nextAvailableDate: tasks.nextAvailableDate,
+        isSharedTask: tasks.isSharedTask,
       })
       .from(tasks)
       .where(eq(tasks.id, taskId));
@@ -1339,6 +1384,66 @@ export class DatabaseStorage implements IStorage {
     // Be period-aware — if nextAvailableDate has passed, a new period started
     // and old completions from before the period boundary should NOT block.
     const isRecurring = task.recurrence !== 'none' || task.recurrenceDays != null;
+    if (isRecurring && !task.isSharedTask) {
+      const [assignment] = await client
+        .select({ memberId: taskAssignments.memberId })
+        .from(taskAssignments)
+        .where(and(
+          eq(taskAssignments.taskId, taskId),
+          eq(taskAssignments.memberId, memberId),
+        ))
+        .limit(1);
+      if (assignment) {
+        const [family] = await client
+          .select({ timezone: families.timezone })
+          .from(families)
+          .where(eq(families.familyName, task.familyName));
+        const [latestCompletion] = await client
+          .select({
+            status: taskCompletions.status,
+            completedAt: taskCompletions.completedAt,
+          })
+          .from(taskCompletions)
+          .where(and(
+            eq(taskCompletions.taskId, taskId),
+            eq(taskCompletions.memberId, memberId),
+            inArray(taskCompletions.status, ["pending", "approved", "rejected"]),
+          ))
+          .orderBy(desc(taskCompletions.completedAt))
+          .limit(1);
+        if (!latestCompletion?.completedAt) return false;
+        return isIndividualRecurringCompletionActive({
+          status: latestCompletion.status,
+          completedAt: latestCompletion.completedAt,
+          now: new Date(),
+          recurrence: task.recurrence,
+          recurrenceDays: task.recurrenceDays,
+          timezone: family?.timezone || "Europe/Berlin",
+        });
+      }
+    }
+    if (
+      isRecurring
+      && task.isSharedTask
+      && task.nextAvailableDate
+      && new Date(task.nextAvailableDate) > new Date()
+    ) {
+      // A future team boundary is written once every member has submitted the
+      // current round. From then on the latest member status defines whether
+      // that contribution is still active: a rejection must supersede older
+      // approved rows so the member can retry.
+      const [latestCompletion] = await client
+        .select({ status: taskCompletions.status })
+        .from(taskCompletions)
+        .where(and(
+          eq(taskCompletions.taskId, taskId),
+          eq(taskCompletions.memberId, memberId),
+          inArray(taskCompletions.status, ["pending", "approved", "rejected"]),
+        ))
+        .orderBy(desc(taskCompletions.completedAt))
+        .limit(1);
+      return latestCompletion?.status === "pending" || latestCompletion?.status === "approved";
+    }
     if (isRecurring && task.nextAvailableDate) {
       const now = new Date();
       const nextDate = new Date(task.nextAvailableDate);
@@ -1386,6 +1491,7 @@ export class DatabaseStorage implements IStorage {
         recurrenceDays: tasks.recurrenceDays,
         familyName: tasks.familyName,
         nextAvailableDate: tasks.nextAvailableDate,
+        isSharedTask: tasks.isSharedTask,
       })
       .from(tasks)
       .where(eq(tasks.id, taskId));
@@ -1455,6 +1561,45 @@ export class DatabaseStorage implements IStorage {
     // whether we are in a new period. Old completions from previous periods must be ignored.
     const isRecurring = task.recurrence !== 'none' || task.recurrenceDays !== null;
     if (isRecurring) {
+      if (!task.isSharedTask) {
+        const [assignment] = await client
+          .select({ memberId: taskAssignments.memberId })
+          .from(taskAssignments)
+          .where(and(
+            eq(taskAssignments.taskId, taskId),
+            eq(taskAssignments.memberId, memberId),
+          ))
+          .limit(1);
+        if (assignment) {
+          const [family] = await client
+            .select({ timezone: families.timezone })
+            .from(families)
+            .where(eq(families.familyName, task.familyName));
+          const [latestCompletion] = await client
+            .select({
+              status: taskCompletions.status,
+              completedAt: taskCompletions.completedAt,
+            })
+            .from(taskCompletions)
+            .where(and(
+              eq(taskCompletions.taskId, taskId),
+              eq(taskCompletions.memberId, memberId),
+              inArray(taskCompletions.status, ["pending", "approved", "rejected"]),
+            ))
+            .orderBy(desc(taskCompletions.completedAt))
+            .limit(1);
+          if (!latestCompletion?.completedAt) return null;
+          if (latestCompletion.status === "rejected") return "rejected";
+          return isIndividualRecurringCompletionActive({
+            status: latestCompletion.status,
+            completedAt: latestCompletion.completedAt,
+            now: new Date(),
+            recurrence: task.recurrence,
+            recurrenceDays: task.recurrenceDays,
+            timezone: family?.timezone || "Europe/Berlin",
+          }) ? latestCompletion.status : null;
+        }
+      }
       const now = new Date();
       const nextDate = task.nextAvailableDate ? new Date(task.nextAvailableDate) : null;
       

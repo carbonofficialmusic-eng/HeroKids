@@ -1,0 +1,100 @@
+import { describe, expect, it } from "vitest";
+import {
+  hasActiveTeamContribution,
+  isIndividualRecurringCompletionActive,
+  isTeamCompletionInCurrentPeriod,
+  validateSelectedTaskMemberIds,
+} from "../task-mode-policy";
+import { canRetryRejectedTeamContribution } from "../../shared/task-mode";
+
+describe("task member selection policy", () => {
+  const familyIds = ["child-a", "child-b", "child-c"];
+
+  it("accepts unique family members for individual mode", () => {
+    expect(validateSelectedTaskMemberIds(["child-a", "child-b"], familyIds, false))
+      .toEqual(["child-a", "child-b"]);
+  });
+
+  it("requires at least two members for team mode", () => {
+    expect(() => validateSelectedTaskMemberIds(["child-a"], familyIds, true))
+      .toThrow("at least two");
+  });
+
+  it("rejects duplicate or foreign member IDs", () => {
+    expect(() => validateSelectedTaskMemberIds(["child-a", "child-a"], familyIds, false))
+      .toThrow("unique");
+    expect(() => validateSelectedTaskMemberIds(["child-a", "other"], familyIds, false))
+      .toThrow("belong to your family");
+  });
+
+  it("keeps an immediate team contribution blocked through approval", () => {
+    expect(hasActiveTeamContribution("pending")).toBe(true);
+    expect(hasActiveTeamContribution("approved")).toBe(true);
+    expect(hasActiveTeamContribution("rejected")).toBe(false);
+    expect(hasActiveTeamContribution(null)).toBe(false);
+  });
+
+  it("resets individual recurring completions without waiting for teammates", () => {
+    const base = {
+      status: "approved" as const,
+      completedAt: new Date("2026-09-07T10:00:00Z"),
+      timezone: "Europe/Berlin",
+    };
+    expect(isIndividualRecurringCompletionActive({
+      ...base,
+      now: new Date("2026-09-12T10:00:00Z"),
+      recurrence: "weekly",
+      recurrenceDays: null,
+    })).toBe(true);
+    expect(isIndividualRecurringCompletionActive({
+      ...base,
+      now: new Date("2026-09-14T10:00:00Z"),
+      recurrence: "weekly",
+      recurrenceDays: null,
+    })).toBe(false);
+    expect(isIndividualRecurringCompletionActive({
+      ...base,
+      now: new Date("2026-09-10T10:00:00Z"),
+      recurrence: "none",
+      recurrenceDays: 3,
+    })).toBe(false);
+  });
+
+  it("does not reuse an old team contribution in a new period", () => {
+    const boundary = new Date("2026-09-14T00:00:00Z");
+    const now = new Date("2026-09-14T10:00:00Z");
+    expect(isTeamCompletionInCurrentPeriod(
+      new Date("2026-09-08T10:00:00Z"),
+      boundary,
+      now,
+    )).toBe(false);
+    expect(isTeamCompletionInCurrentPeriod(
+      new Date("2026-09-14T09:00:00Z"),
+      boundary,
+      now,
+    )).toBe(true);
+  });
+
+  it("lets only the rejected team member retry during the shared lock", () => {
+    const nextPeriod = new Date("2026-09-21T00:00:00Z");
+    const now = new Date("2026-09-15T10:00:00Z");
+    expect(canRetryRejectedTeamContribution({
+      isTeamTask: true,
+      memberStatus: "rejected",
+      nextAvailableDate: nextPeriod,
+      now,
+    })).toBe(true);
+    expect(canRetryRejectedTeamContribution({
+      isTeamTask: true,
+      memberStatus: "approved",
+      nextAvailableDate: nextPeriod,
+      now,
+    })).toBe(false);
+    expect(canRetryRejectedTeamContribution({
+      isTeamTask: false,
+      memberStatus: "rejected",
+      nextAvailableDate: nextPeriod,
+      now,
+    })).toBe(false);
+  });
+});

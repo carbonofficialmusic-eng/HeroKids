@@ -128,6 +128,7 @@ interface TaskWithMeta extends Task {
     useCustomAvatar: boolean;
     color: string;
     hasCompleted: boolean;
+    status?: "pending" | "approved" | "rejected" | null;
   }>;
   assignedMemberCompletions?: Array<{
     memberId: string;
@@ -562,12 +563,13 @@ function TaskCard({
     !task.sharedMemberIds.includes(member.id);
   
   // Check if all assigned members have completed (for multi-assignment tasks)
-  const allAssignedMembersCompleted = task.assignedMemberCompletions && 
+  const isTeamTask = task.isSharedTask === true;
+  const allAssignedMembersCompleted = isTeamTask && task.assignedMemberCompletions &&
     task.assignedMemberCompletions.length > 1 &&
     task.assignedMemberCompletions.every((m: { hasCompleted: boolean }) => m.hasCompleted);
   
   // Check if all shared task members have completed (for recurring shared tasks graying) - legacy
-  const allSharedMembersCompleted = task.isSharedTask && 
+  const allSharedMembersCompleted = isTeamTask &&
     task.sharedMemberCompletions && 
     task.sharedMemberCompletions.length > 0 &&
     task.sharedMemberCompletions.every((m: { hasCompleted: boolean }) => m.hasCompleted);
@@ -576,9 +578,9 @@ function TaskCard({
   const allMembersCompleted = allAssignedMembersCompleted || allSharedMembersCompleted;
 
   // Is this a task shared between 2+ people?
-  const isMultiMemberSharedTask =
-    (task.sharedMemberCompletions && task.sharedMemberCompletions.length > 1) ||
-    (task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1);
+  const isMultiMemberSharedTask = isTeamTask &&
+    ((task.sharedMemberCompletions && task.sharedMemberCompletions.length > 1) ||
+      (task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1));
 
   // For multi-member tasks, always reflect THIS member's approval state.
   // Other members still being pending must not make an already-approved
@@ -928,13 +930,13 @@ function TaskCard({
           </div>
           
           {/* Multi-Assignment Task Info - Show teammates who need to complete (new style) */}
-          {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 1 && (
+          {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 0 && (
             <div className="space-y-2 text-left">
               {/* Teammates section */}
               <div className="p-2 bg-primary/5 rounded-xl">
                 <p className="text-xs font-semibold text-muted-foreground mb-1.5">
                   <Users className="h-3 w-3 inline mr-1" />
-                  {t("kidDashboard.sharedWith")}
+                  {task.isSharedTask ? t("tasks.assignmentModeTeam") : t("tasks.assignmentModeIndividual")}
                 </p>
                 <div className="flex flex-wrap justify-center gap-1">
                   {task.assignedMemberCompletions.map((m) => {
@@ -954,8 +956,13 @@ function TaskCard({
                             {m.displayName[0]}
                           </AvatarFallback>
                         </Avatar>
-                        {m.displayName}
-                        {m.status === "approved" ? " ✓" : m.status === "pending" ? " ⏳" : ""}
+                        {m.displayName} · {m.status === "approved"
+                          ? t("tasks.memberStatusApproved")
+                          : m.status === "pending"
+                            ? t("tasks.memberStatusSubmitted")
+                            : m.status === "rejected"
+                              ? t("tasks.memberStatusRejected")
+                              : t("tasks.memberStatusOpen")}
                       </Badge>
                     );
                   })}
@@ -978,19 +985,19 @@ function TaskCard({
           )}
 
           {/* Legacy Shared Task Info - Show teammates and description (using sharedMemberIds) */}
-          {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 1 && !task.assignedMemberCompletions && (
+          {task.isSharedTask && task.sharedMemberCompletions && task.sharedMemberCompletions.length > 0 && !task.assignedMemberCompletions && (
             <div className="space-y-2 text-left">
               {/* Teammates section */}
               <div className="p-2 bg-primary/5 rounded-xl">
                 <p className="text-xs font-semibold text-muted-foreground mb-1.5">
                   <Users className="h-3 w-3 inline mr-1" />
-                  {t("kidDashboard.sharedWith")}
+                  {t("tasks.assignmentModeTeam")}
                 </p>
                 <div className="flex flex-wrap justify-center gap-1">
                   {task.sharedMemberCompletions.map((m) => (
                     <Badge 
                       key={m.memberId} 
-                      variant={m.hasCompleted ? "default" : "outline"}
+                      variant={m.status === "rejected" ? "destructive" : m.hasCompleted ? "default" : "outline"}
                       className="lc-multi-task-member-badge gap-1 text-xs"
                     >
                       <Avatar className="h-4 w-4">
@@ -1002,8 +1009,13 @@ function TaskCard({
                           {m.displayName[0]}
                         </AvatarFallback>
                       </Avatar>
-                      {m.displayName}
-                      {m.hasCompleted && " ✓"}
+                      {m.displayName} · {m.status === "approved" || m.hasCompleted
+                        ? t("tasks.memberStatusApproved")
+                        : m.status === "pending"
+                          ? t("tasks.memberStatusSubmitted")
+                          : m.status === "rejected"
+                            ? t("tasks.memberStatusRejected")
+                            : t("tasks.memberStatusOpen")}
                     </Badge>
                   ))}
                 </div>
@@ -1942,7 +1954,7 @@ export default function KidDashboard() {
     // Multi-Completion Tasks (slot-based)
     if (t.maxCompletions !== null) {
       // Recurring Multi-Tasks: Always show (grayed out when all slots filled)
-      if (t.recurrence !== "none") {
+      if (t.recurrence !== "none" || !!t.recurrenceDays) {
         return true;
       }
       // One-time Multi-Tasks: Hide when ALL slots are filled (remainingSlots <= 0)
@@ -1950,11 +1962,11 @@ export default function KidDashboard() {
     }
     
     // Multi-Assignment Tasks (new style - using taskAssignments, each member gets full points)
-    if (t.assignedMemberCompletions && t.assignedMemberCompletions.length > 1) {
+    if (t.assignedMemberCompletions && t.assignedMemberCompletions.length > 0 && !t.isSharedTask) {
       const allMembersCompleted = t.assignedMemberCompletions.every((m: { hasCompleted: boolean }) => m.hasCompleted);
       
       // Recurring: Always show (grayed out when all completed)
-      if (t.recurrence !== "none") {
+      if (t.recurrence !== "none" || !!t.recurrenceDays) {
         return true;
       }
       
