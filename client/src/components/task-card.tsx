@@ -10,7 +10,7 @@ import type { Task, FamilyMember, ShoppingListItem } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { format, isToday, isTomorrow, isPast, differenceInDays, parse, type Locale } from "date-fns";
+import { format, isToday, isTomorrow, isPast, differenceInCalendarDays, parse, type Locale } from "date-fns";
 import { de, enUS, fr, es, ja, ko, sv, zhCN } from "date-fns/locale";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getDevHeaders } from "@/lib/queryClient";
@@ -196,6 +196,18 @@ export function TaskCard({
     };
     return localeMap[i18n.language] || enUS;
   };
+
+  const getScheduledDateText = (date: Date) => {
+    const relativeFormatter = new Intl.RelativeTimeFormat(i18n.language, { numeric: "auto" });
+    const capitalize = (value: string) => value.charAt(0).toLocaleUpperCase(i18n.language) + value.slice(1);
+    if (isToday(date)) return capitalize(relativeFormatter.format(0, "day"));
+    if (isTomorrow(date)) return capitalize(relativeFormatter.format(1, "day"));
+    const daysUntil = differenceInCalendarDays(date, new Date());
+    if (daysUntil > 1 && daysUntil <= 7) {
+      return format(date, "EEEE", { locale: getDateLocale() });
+    }
+    return format(date, "d. MMMM", { locale: getDateLocale() });
+  };
   
   const currentMemberProgress = task.assignedMemberCompletions?.find(
     member => member.memberId === currentMemberId,
@@ -221,24 +233,6 @@ export function TaskCard({
   // Check if this is a weekdays-only task that's unavailable on weekends (Sat=6, Sun=0)
   const todayDow = new Date().getDay();
   const isWeekendUnavailable = task.recurrence === 'weekdays' && (todayDow === 0 || todayDow === 6) && !isUnavailable;
-  
-  // Format next available date for display
-  const getNextAvailableText = () => {
-    if (!effectiveNextAvailableDate || !isUnavailable) return null;
-    const nextDate = new Date(effectiveNextAvailableDate);
-    const today = new Date();
-    const relativeFormatter = new Intl.RelativeTimeFormat(i18n.language, { numeric: "auto" });
-    const capitalize = (value: string) => value.charAt(0).toLocaleUpperCase(i18n.language) + value.slice(1);
-    if (isToday(nextDate)) return t("tasks.nextDateLabel", { date: capitalize(relativeFormatter.format(0, "day")) });
-    if (isTomorrow(nextDate)) return t("tasks.nextDateLabel", { date: capitalize(relativeFormatter.format(1, "day")) });
-    const daysUntil = differenceInDays(nextDate, today);
-    // Show weekday name for within 7 days, full date for longer periods
-    if (daysUntil <= 7) {
-      return t("tasks.nextDateLabel", { date: format(nextDate, "EEEE", { locale: getDateLocale() }) });
-    }
-    // For longer periods, show full date (e.g., "10. März" or "March 10")
-    return t("tasks.nextDateLabel", { date: format(nextDate, "d. MMMM", { locale: getDateLocale() }) });
-  };
   
   // Check if this member has already completed this multi-completion task
   const isCompletedByMember = task.memberHasCompleted || false;
@@ -339,8 +333,6 @@ export function TaskCard({
   if (compact) {
     // Date label shown directly on the compact card
     const compactDateText = (() => {
-      // Unavailable (completed, waiting for reset) — highest priority
-      if (isUnavailable && getNextAvailableText()) return { text: getNextAvailableText()!, color: "text-muted-foreground" };
       // Weekend unavailable (weekdays-only task shown on Sat/Sun)
       if (isWeekendUnavailable) return { text: t('tasks.weekendUnavailable'), color: "text-muted-foreground" };
       // One-time task with due date
@@ -348,13 +340,12 @@ export function TaskCard({
         const dateStr = typeof task.dueDate === "string" ? task.dueDate.substring(0, 10) : String(task.dueDate).substring(0, 10);
         const dueDate = parse(dateStr, "yyyy-MM-dd", new Date());
         if (isNaN(dueDate.getTime())) return null;
-        const locale = getDateLocale();
         if (dueDateInfo.expired) return { text: t('tasks.dueDateExpired'), color: "text-destructive" };
         if (dueDateInfo.isLate) return { text: t('tasks.dueDateLate', { days: dueDateInfo.daysPast }), color: "text-amber-600 dark:text-amber-400" };
-        if (isToday(dueDate)) return { text: t('kidDashboard.dueTodayHurry'), color: "text-amber-600 dark:text-amber-400" };
-        if (isTomorrow(dueDate)) return { text: t('kidDashboard.dueTomorrowHurry'), color: "text-muted-foreground" };
-        if (dueDateInfo.notYet) return { text: t('tasks.dueDateNotYet', { date: format(dueDate, "d. MMM", { locale }) }), color: "text-muted-foreground" };
-        return { text: format(dueDate, "d. MMM", { locale }), color: "text-muted-foreground" };
+        return {
+          text: t('tasks.nextDateLabel', { date: getScheduledDateText(dueDate) }),
+          color: isToday(dueDate) ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground",
+        };
       }
       // Currently available recurring task — show the recurrence cadence so parents know when it repeats
       const r = task.recurrence;
@@ -672,15 +663,6 @@ export function TaskCard({
               )}
             </div>
             
-            {/* Show next available date for recurring tasks - separate line so title stays visible */}
-            {isUnavailable && getNextAvailableText() && (
-              <div className="mb-1">
-                <Badge variant="outline" className="lc-next-date-label text-sm gap-2 px-3 py-1.5 font-bold" data-testid={`badge-next-available-${task.id}`}>
-                  <Calendar className="h-4 w-4" />
-                  {getNextAvailableText()}
-                </Badge>
-              </div>
-            )}
             {isWeekendUnavailable && (
               <div className="mb-1">
                 <Badge
@@ -701,10 +683,8 @@ export function TaskCard({
               if (isNaN(dueDate.getTime())) return null;
               const locale = getDateLocale();
               const dueDateIsToday = isToday(dueDate);
-              const dueDateIsTomorrow = isTomorrow(dueDate);
-              
               let colorClass = "text-muted-foreground";
-              let badgeText = format(dueDate, "EEEE, d. MMM", { locale });
+               let badgeText = t('tasks.nextDateLabel', { date: getScheduledDateText(dueDate) });
               
               if (dueDateInfo.expired) {
                 colorClass = "text-destructive";
@@ -712,20 +692,14 @@ export function TaskCard({
               } else if (dueDateInfo.isLate) {
                 colorClass = "text-amber-600 dark:text-amber-400";
                 badgeText = t('tasks.dueDateLate', { days: dueDateInfo.daysPast });
-              } else if (dueDateIsToday) {
-                colorClass = "text-amber-600 dark:text-amber-400";
-                badgeText = t('kidDashboard.dueTodayHurry');
-              } else if (dueDateInfo.notYet) {
-                colorClass = "text-muted-foreground";
-                badgeText = t('tasks.dueDateNotYet', { date: format(dueDate, "EEEE, d. MMM", { locale }) });
-              } else if (dueDateIsTomorrow) {
-                badgeText = t('kidDashboard.dueTomorrowHurry');
+               } else if (dueDateIsToday) {
+                 colorClass = "text-amber-600 dark:text-amber-400";
               }
 
               return (
                 <div className="mb-1">
-                  <Badge variant="outline" className={`text-xs gap-1 ${colorClass}`} data-testid={`badge-due-date-${task.id}`}>
-                    <CalendarDays className="h-3 w-3" />
+                  <Badge variant="outline" className={`lc-next-date-label text-sm gap-2 px-3 py-1.5 font-bold ${colorClass}`} data-testid={`badge-due-date-${task.id}`}>
+                    <CalendarDays className="h-4 w-4" />
                     {badgeText}
                   </Badge>
                 </div>

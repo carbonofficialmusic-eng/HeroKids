@@ -491,7 +491,13 @@ export function TaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`lc-task-dialog ${editingTask ? "is-editing" : "is-creating"} max-w-2xl overflow-hidden [&>button.absolute]:hidden`} data-testid="dialog-create-task" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent
+        className={`lc-task-dialog ${editingTask ? "is-editing" : "is-creating"} max-w-2xl overflow-hidden [&>button.absolute]:hidden`}
+        data-testid="dialog-create-task"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader className="lc-task-dialog-header">
           <DialogTitle className="text-2xl font-accent">
             {editingTask ? t('tasks.editTask') : t('tasks.createTask')}
