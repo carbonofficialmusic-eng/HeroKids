@@ -183,8 +183,26 @@ export function TaskDialog({
   const [isShoppingList, setIsShoppingList] = useState(false);
   const [shoppingItems, setShoppingItems] = useState<{ text: string }[]>([]);
   const [newItemText, setNewItemText] = useState("");
+  const shoppingItemInputRef = useRef<HTMLInputElement>(null);
   // Ref to avoid overwriting user edits with stale query re-fetches
   const shoppingItemsInitialized = useRef(false);
+
+  const addShoppingItem = () => {
+    const text = newItemText.trim();
+    if (!text) return;
+
+    setShoppingItems(prev => [...prev, { text }]);
+    setNewItemText("");
+
+    // Keep mobile keyboards open and place the cursor back into the emptied
+    // field so the next product can be entered immediately.
+    shoppingItemInputRef.current?.focus({ preventScroll: true });
+    requestAnimationFrame(() => {
+      if (!shoppingItemInputRef.current) return;
+      shoppingItemInputRef.current.focus({ preventScroll: true });
+      scrollFieldIntoView(shoppingItemInputRef.current);
+    });
+  };
 
   // Fetch existing shopping list items when editing a shopping-list task
   const { data: editingShoppingItems } = useQuery<any[]>({
@@ -1184,6 +1202,7 @@ export function TaskDialog({
                     </div>
                     <div className="flex gap-2">
                       <Input
+                        ref={shoppingItemInputRef}
                         value={newItemText}
                         onChange={(e) => setNewItemText(e.target.value)}
                         placeholder={t('tasks.shoppingItemPlaceholder', { defaultValue: 'z.B. Milch, Brot, Eier...' })}
@@ -1191,10 +1210,7 @@ export function TaskDialog({
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            if (newItemText.trim()) {
-                              setShoppingItems(prev => [...prev, { text: newItemText.trim() }]);
-                              setNewItemText("");
-                            }
+                            addShoppingItem();
                           }
                         }}
                         data-testid="input-shopping-item"
@@ -1203,12 +1219,7 @@ export function TaskDialog({
                         type="button"
                         variant="outline"
                         size="icon"
-                        onClick={() => {
-                          if (newItemText.trim()) {
-                            setShoppingItems(prev => [...prev, { text: newItemText.trim() }]);
-                            setNewItemText("");
-                          }
-                        }}
+                        onClick={addShoppingItem}
                         data-testid="button-add-shopping-item"
                       >
                         <Plus className="h-4 w-4" />
