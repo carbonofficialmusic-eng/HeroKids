@@ -23,3 +23,22 @@ export function getDueDateWindow(dueDateKey: string, todayKey: string): DueDateW
     isGraceDay: daysPastDue === 1,
   };
 }
+
+type FixedAppointmentTask = {
+  dueDate?: string | null;
+  recurrence?: string | null;
+};
+
+export function isFixedAppointment(task: FixedAppointmentTask): boolean {
+  return Boolean(task.dueDate && task.recurrence === "none");
+}
+
+export function sortFixedAppointments<T extends FixedAppointmentTask>(tasks: T[]): T[] {
+  return tasks
+    .map((task, index) => ({ task, index }))
+    .sort((a, b) => {
+      const dateOrder = String(a.task.dueDate).localeCompare(String(b.task.dueDate));
+      return dateOrder !== 0 ? dateOrder : a.index - b.index;
+    })
+    .map(({ task }) => task);
+}

@@ -141,6 +141,7 @@
     "sendPointsAmount": "积分数量",
     "sendPointsConfirm": "发送积分",
     "importantTasks": "重要",
+    "appointmentTasks": "日程",
     "sendPointsMax": "每次最多 1,000 积分"
   },
   "tasks": {
@@ -309,6 +310,8 @@
     "pts": "积分",
     "important": "重要",
     "importantDesc": "重要任务始终显示在顶部，与当前筛选无关。",
+    "appointmentCategory": "日程",
+    "appointmentCategoryDesc": "设置固定日期的任务会自动归入日程。清除日期后即可重新选择普通类别。",
     "shoppingList": "购物清单",
     "shoppingListDesc": "所有家庭成员都可以勾选项目，积分平均分配。",
     "shoppingListLockedDesc": "升级到Family以创建购物清单任务。",

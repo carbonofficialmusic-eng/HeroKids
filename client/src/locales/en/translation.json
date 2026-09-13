@@ -146,6 +146,7 @@
     "sendPointsAmount": "Number of points",
     "sendPointsConfirm": "Send Points",
     "importantTasks": "Important",
+    "appointmentTasks": "Appointments",
     "sendPointsMax": "Maximum 1,000 points per transfer"
   },
   "tasks": {
@@ -315,6 +316,8 @@
     "pts": "pts",
     "important": "Important",
     "importantDesc": "Important tasks are always shown at the top, regardless of the active filter.",
+    "appointmentCategory": "Appointments",
+    "appointmentCategoryDesc": "Tasks with a fixed date are automatically placed under Appointments. Clear the date to choose a regular category again.",
     "shoppingList": "Shopping List",
     "shoppingListDesc": "Items can be checked off by all family members. Points are split equally.",
     "shoppingListLockedDesc": "Upgrade to Family to create shopping list tasks.",

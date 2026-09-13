@@ -146,6 +146,7 @@
     "sendPointsAmount": "Número de pontos",
     "sendPointsConfirm": "Enviar Pontos",
     "importantTasks": "Importantes",
+    "appointmentTasks": "Compromissos",
     "sendPointsMax": "Máximo de 1.000 pontos por transferência"
   },
   "tasks": {
@@ -315,6 +316,8 @@
     "pts": "pts",
     "important": "Importante",
     "importantDesc": "Tarefas importantes são sempre exibidas no topo, independentemente do filtro ativo.",
+    "appointmentCategory": "Compromissos",
+    "appointmentCategoryDesc": "As tarefas com data fixa são colocadas automaticamente em Compromissos. Limpe a data para voltar a escolher uma categoria normal.",
     "shoppingList": "Lista de Compras",
     "shoppingListDesc": "Os itens podem ser marcados por todos os membros da família. Os pontos são divididos igualmente.",
     "shoppingListLockedDesc": "Upgrade para Família para criar listas de compras.",

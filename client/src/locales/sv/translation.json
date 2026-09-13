@@ -145,6 +145,7 @@
     "sendPointsAmount": "Antal poäng",
     "sendPointsConfirm": "Skicka poäng",
     "importantTasks": "Viktigt",
+    "appointmentTasks": "Tider",
     "sendPointsMax": "Maximalt 1 000 poäng per överföring"
   },
   "tasks": {
@@ -314,6 +315,8 @@
     "pts": "p",
     "important": "Viktigt",
     "importantDesc": "Viktiga uppgifter visas alltid överst, oavsett aktivt filter.",
+    "appointmentCategory": "Tider",
+    "appointmentCategoryDesc": "Uppgifter med ett fast datum placeras automatiskt under Tider. Ta bort datumet för att välja en vanlig kategori igen.",
     "shoppingList": "Inköpslista",
     "shoppingListDesc": "Artiklar kan bockas av av alla familjemedlemmar. Poängen delas lika.",
     "shoppingListLockedDesc": "Uppgradera till Family för att skapa inköpslisteuppgifter.",

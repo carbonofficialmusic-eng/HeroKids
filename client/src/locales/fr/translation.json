@@ -141,6 +141,7 @@
     "sendPointsAmount": "Nombre de points",
     "sendPointsConfirm": "Envoyer des points",
     "importantTasks": "Important",
+    "appointmentTasks": "Rendez-vous",
     "sendPointsMax": "Maximum 1 000 points par transfert"
   },
   "tasks": {
@@ -309,6 +310,8 @@
     },
     "important": "Important",
     "importantDesc": "Les tâches importantes sont toujours affichées en haut, quel que soit le filtre actif.",
+    "appointmentCategory": "Rendez-vous",
+    "appointmentCategoryDesc": "Les tâches avec une date fixe sont automatiquement classées dans Rendez-vous. Effacez la date pour choisir à nouveau une catégorie normale.",
     "shoppingList": "Liste de courses",
     "shoppingListDesc": "Les articles peuvent être cochés par tous les membres de la famille. Les points sont partagés.",
     "shoppingListLockedDesc": "Passez à Family pour créer des tâches de liste de courses.",

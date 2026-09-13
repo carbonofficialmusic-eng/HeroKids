@@ -259,6 +259,10 @@ export function TaskDialog({
     },
   });
   const displayedPoints = form.watch("points");
+  const selectedDueDate = form.watch("dueDate");
+  const hasFixedAppointment = recurrenceMode === "standard"
+    && form.watch("recurrence") === "none"
+    && Boolean(selectedDueDate);
 
   // Reset form when dialog opens or editingTask changes
   useEffect(() => {
@@ -568,8 +572,14 @@ export function TaskDialog({
               name="iconEmoji"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('tasks.category')}</FormLabel>
-                  <div className="lc-task-dialog-category-tabs">
+                  <FormLabel>{hasFixedAppointment ? t("tasks.appointmentCategory") : t('tasks.category')}</FormLabel>
+                  {hasFixedAppointment ? (
+                    <div className="flex items-start gap-2 rounded-xl border border-cyan-400/40 bg-cyan-500/10 px-3 py-2 text-sm" data-testid="notice-appointment-category">
+                      <CalendarIcon className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-300" />
+                      <span>{t("tasks.appointmentCategoryDesc")}</span>
+                    </div>
+                  ) : (
+                    <div className="lc-task-dialog-category-tabs">
                     {(Object.entries(emojiCategories) as [EmojiCategoryKey, typeof emojiCategories[EmojiCategoryKey]][]).map(([categoryKey, category]) => (
                       <button
                         key={categoryKey}
@@ -588,7 +598,8 @@ export function TaskDialog({
                         {categoryNames?.[categoryKey as keyof typeof categoryNames] || t(category.label)}
                       </button>
                     ))}
-                  </div>
+                    </div>
+                  )}
                   <div id="task-category-symbols" role="tabpanel" className="lc-task-dialog-symbol-row">
                     {emojiCategories[activeCategory].emojis.map((icon) => (
                       <Button

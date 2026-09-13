@@ -51,7 +51,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronLeft, ChevronRight, ChevronDown, Calendar, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin, TrendingUp, CheckCircle2, Coins } from "lucide-react";
+import { Plus, Trophy, Gift, Star, Crown, BarChart3, Settings, Trash2, Pencil, Lightbulb, Check, X, MessageCircle, MessageSquare, ClipboardCheck, Target, Sparkles, Info, ChevronLeft, ChevronRight, ChevronDown, Calendar, CalendarDays, Zap, RefreshCw, LayoutList, LayoutGrid, AlertTriangle, Pin, TrendingUp, CheckCircle2, Coins } from "lucide-react";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { isToday, isThisWeek, parseISO, startOfDay, addDays } from "date-fns";
@@ -69,6 +69,7 @@ import { celebrateTaskCompletion } from "@/lib/confetti";
 import logoUrl from "@assets/littlechamps_logo_opt.webp";
 import familyGoalsIcon from "@assets/family-goals-icon.png";
 import { ACHIEVEMENT_BADGES } from "@/lib/achievement-badges";
+import { isFixedAppointment, sortFixedAppointments } from "@shared/due-date-policy";
 
 // Custom hook for sticky sidebar on desktop
 
@@ -1171,8 +1172,9 @@ export default function Dashboard() {
     return sortedGroups;
   };
 
-  const importantActiveTasks = activeTasks.filter(t => (t as any).isImportant);
-  const regularActiveTasks = activeTasks.filter(t => !(t as any).isImportant);
+  const fixedAppointmentTasks = sortFixedAppointments(activeTasks.filter(isFixedAppointment));
+  const importantActiveTasks = activeTasks.filter(t => (t as any).isImportant && !isFixedAppointment(t));
+  const regularActiveTasks = activeTasks.filter(t => !(t as any).isImportant && !isFixedAppointment(t));
   const filteredTasks = filterTasksByDate(regularActiveTasks);
   const groupedTasks = groupTasksByCategory(filteredTasks);
   const hasMultipleCategories = Object.keys(groupedTasks).length > 1;
@@ -1579,6 +1581,71 @@ export default function Dashboard() {
                       <CollapsibleContent key={`important-${orientationLayoutEpoch}`} className="pt-2">
                         <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
                           {importantActiveTasks.map((task) => (
+                            <div key={task.id} className={`relative min-w-0${dashboardView === "list" ? " group min-h-[140px]" : ""}`}>
+                              <TaskCard
+                                task={task}
+                                showAssignee
+                                compact={dashboardView === "grid"}
+                                onClick={handleTaskClick}
+                                onComplete={() => {
+                                  if (task.requiresProof) { setTaskToComplete(task); setCompletionDialogOpen(true); }
+                                  else { completeTaskMutation.mutate({ taskId: task.id }); }
+                                }}
+                                isCompleting={completeTaskMutation.isPending}
+                                currentMemberId={member?.id}
+                              />
+                              {dashboardView === "list" && (
+                                <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                                    onClick={(e) => { e.stopPropagation(); setSelectedTask(task); setTaskDialogOpen(true); }}
+                                    data-testid={`button-edit-task-${task.id}`}>
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                                    onClick={(e) => { e.stopPropagation(); deleteTaskMutation.mutate(task.id); }}
+                                    disabled={deleteTaskMutation.isPending}
+                                    data-testid={`button-delete-task-${task.id}`}>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+
+                  {/* Fixed appointments — always directly below Important and filter-independent */}
+                  {fixedAppointmentTasks.length > 0 && (
+                    <Collapsible
+                      open={!collapsedCategories.has("__appointments__")}
+                      onOpenChange={() => toggleCategory("__appointments__")}
+                      data-testid="section-appointment-tasks"
+                    >
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-between p-3 h-auto hover-elevate"
+                          data-testid="button-category-appointments"
+                        >
+                          <div className="flex items-center gap-2">
+                            <CalendarDays className="h-4 w-4 text-cyan-600 dark:text-cyan-300" />
+                            <span className="font-semibold bg-muted px-2 py-0.5 rounded-md text-sm text-cyan-700 dark:text-cyan-300">
+                              {t("dashboard.appointmentTasks")}
+                            </span>
+                            <Badge variant="secondary" className="text-xs">{fixedAppointmentTasks.length}</Badge>
+                          </div>
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${
+                              collapsedCategories.has("__appointments__") ? "-rotate-90" : ""
+                            }`}
+                          />
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent key={`appointments-${orientationLayoutEpoch}`} className="pt-2">
+                        <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
+                          {fixedAppointmentTasks.map((task) => (
                             <div key={task.id} className={`relative min-w-0${dashboardView === "list" ? " group min-h-[140px]" : ""}`}>
                               <TaskCard
                                 task={task}

@@ -146,6 +146,7 @@
     "sendPointsAmount": "Anzahl Punkte",
     "sendPointsConfirm": "Punkte senden",
     "importantTasks": "Wichtig",
+    "appointmentTasks": "Termine",
     "sendPointsMax": "Maximal 1.000 Punkte pro Übertragung"
   },
   "tasks": {
@@ -325,6 +326,8 @@
     },
     "important": "Wichtig",
     "importantDesc": "Wichtige Aufgaben werden immer oben angezeigt, unabhängig vom aktiven Filter.",
+    "appointmentCategory": "Termine",
+    "appointmentCategoryDesc": "Aufgaben mit festem Datum werden automatisch unter „Termine“ einsortiert. Entferne das Datum, um wieder eine normale Kategorie zu wählen.",
     "shoppingList": "Einkaufsliste",
     "shoppingListDesc": "Artikel können von allen Familienmitgliedern abgehakt werden. Punkte werden aufgeteilt.",
     "shoppingListLockedDesc": "Upgrade auf Family, um Einkaufslisten-Aufgaben zu erstellen.",

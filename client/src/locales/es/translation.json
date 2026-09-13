@@ -141,6 +141,7 @@
     "sendPointsAmount": "Cantidad de puntos",
     "sendPointsConfirm": "Enviar puntos",
     "importantTasks": "Importante",
+    "appointmentTasks": "Citas",
     "sendPointsMax": "Máximo 1.000 puntos por transferencia"
   },
   "tasks": {
@@ -309,6 +310,8 @@
     },
     "important": "Importante",
     "importantDesc": "Las tareas importantes siempre se muestran arriba, independientemente del filtro activo.",
+    "appointmentCategory": "Citas",
+    "appointmentCategoryDesc": "Las tareas con una fecha fija se colocan automáticamente en Citas. Borra la fecha para volver a elegir una categoría normal.",
     "shoppingList": "Lista de compras",
     "shoppingListDesc": "Los artículos pueden ser marcados por todos los miembros de la familia. Los puntos se dividen por igual.",
     "shoppingListLockedDesc": "Actualiza a Family para crear tareas de lista de compras.",

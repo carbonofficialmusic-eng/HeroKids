@@ -145,6 +145,7 @@
     "sendPointsAmount": "포인트 수",
     "sendPointsConfirm": "포인트 보내기",
     "importantTasks": "중요",
+    "appointmentTasks": "일정",
     "sendPointsMax": "이체당 최대 1,000포인트"
   },
   "tasks": {
@@ -313,6 +314,8 @@
     },
     "important": "중요",
     "importantDesc": "중요한 작업은 활성 필터에 관계없이 항상 위에 표시됩니다.",
+    "appointmentCategory": "일정",
+    "appointmentCategoryDesc": "날짜가 정해진 할 일은 자동으로 일정에 표시됩니다. 일반 카테고리를 다시 선택하려면 날짜를 지우세요.",
     "shoppingList": "쇼핑 목록",
     "shoppingListDesc": "모든 가족 구성원이 항목을 체크할 수 있습니다. 포인트는 균등하게 분배됩니다.",
     "shoppingListLockedDesc": "쇼핑 목록 작업을 만들려면 Family로 업그레이드하세요.",

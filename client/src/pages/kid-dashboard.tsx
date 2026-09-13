@@ -13,7 +13,7 @@ import { DailyProgressBadge } from "@/components/daily-progress-badge";
 import { format, differenceInDays, isToday, isTomorrow, startOfDay, parseISO, addDays } from "date-fns";
 import { filterKidTasksByDate as filterKidTasksByDateUtil } from "@/lib/task-filters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronLeft, ChevronRight, Clock, Moon, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, Pin, Gem, Hourglass, Lock, LogOut } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Clock, Moon, MessageSquare, RefreshCw, LayoutGrid, LayoutList, Camera, CalendarDays, Pin, Gem, Hourglass, Lock, LogOut } from "lucide-react";
 import { RewardIconDisplay } from "@/lib/reward-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -100,7 +100,7 @@ import { Pinboard } from "@/components/pinboard";
 import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature, canUseSharedRewards, type SubscriptionTier } from "@shared/tier-config";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
-import { getDueDateWindow } from "@shared/due-date-policy";
+import { getDueDateWindow, isFixedAppointment, sortFixedAppointments } from "@shared/due-date-policy";
 import logoUrl from "@assets/littlechamps_logo_opt.webp";
 
 // Extended Task type with metadata from API
@@ -2166,8 +2166,9 @@ export default function KidDashboard() {
     return sortedGroups;
   };
 
-  const importantMyTasks = myTasks.filter(t => (t as any).isImportant);
-  const regularMyTasks = myTasks.filter(t => !(t as any).isImportant);
+  const fixedAppointmentTasks = sortFixedAppointments(myTasks.filter(isFixedAppointment));
+  const importantMyTasks = myTasks.filter(t => (t as any).isImportant && !isFixedAppointment(t));
+  const regularMyTasks = myTasks.filter(t => !(t as any).isImportant && !isFixedAppointment(t));
   const filteredKidTasks = filterKidTasksByDate(regularMyTasks);
   const groupedKidTasks = groupKidTasksByCategory(filteredKidTasks);
   const hasMultipleCategories = Object.keys(groupedKidTasks).length > 1;
@@ -2958,7 +2959,43 @@ export default function KidDashboard() {
             </Collapsible>
           )}
 
-          {filteredKidTasks.length === 0 ? (
+          {/* Fixed appointments — always directly below Important and filter-independent */}
+          {fixedAppointmentTasks.length > 0 && (
+            <Collapsible
+              open={!collapsedCategories.has("__appointments__")}
+              onOpenChange={() => toggleCategory("__appointments__")}
+              data-testid="section-appointment-tasks-kid"
+              className="mb-4"
+            >
+              <div>
+                <CollapsibleTrigger asChild>
+                  <div className="px-4 py-2.5 flex items-center justify-between cursor-pointer transition-colors rounded-xl bg-white/8 border border-white/10 mb-1 hover-elevate">
+                    <div className="flex items-center gap-3">
+                      <CalendarDays className="h-4 w-4 text-cyan-300 flex-shrink-0" />
+                      <span className="font-bold text-base px-2.5 py-0.5 rounded-md text-cyan-200" style={{ fontFamily: "Fredoka, sans-serif", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+                        {t("dashboard.appointmentTasks")}
+                      </span>
+                      <Badge variant="secondary" className="rounded-full">{fixedAppointmentTasks.length}</Badge>
+                    </div>
+                    <div className="p-1 bg-card border border-border rounded-lg flex-shrink-0">
+                      <ChevronDown className={`h-4 w-4 transition-transform ${!collapsedCategories.has("__appointments__") ? "rotate-180" : ""}`} />
+                    </div>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2 mt-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2"}>
+                    {fixedAppointmentTasks.map((task) => (
+                      <div key={task.id} className="min-w-0">
+                        <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+          )}
+
+          {filteredKidTasks.length === 0 && fixedAppointmentTasks.length === 0 && importantMyTasks.length === 0 ? (
             <Card className="lc-empty-state p-8 text-center bg-card rounded-2xl">
               <CheckCircle2 className="lc-empty-state-icon h-16 w-16 mx-auto mb-4 text-green-500" />
               {myTasks.length === 0 ? (

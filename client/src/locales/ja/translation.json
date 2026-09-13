@@ -141,6 +141,7 @@
     "sendPointsAmount": "ポイント数",
     "sendPointsConfirm": "ポイントを送る",
     "importantTasks": "重要",
+    "appointmentTasks": "予定",
     "sendPointsMax": "1回の転送につき最大1,000ポイント"
   },
   "tasks": {
@@ -309,6 +310,8 @@
     },
     "important": "重要",
     "importantDesc": "重要なタスクは、アクティブなフィルターに関係なく、常に上部に表示されます。",
+    "appointmentCategory": "予定",
+    "appointmentCategoryDesc": "日付が決まっているタスクは自動的に「予定」に表示されます。通常のカテゴリーを選ぶには日付を削除してください。",
     "shoppingList": "買い物リスト",
     "shoppingListDesc": "アイテムはすべての家族がチェックできます。ポイントは均等に分けられます。",
     "shoppingListLockedDesc": "買い物リストタスクを作成するにはFamilyにアップグレードしてください。",
