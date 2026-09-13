@@ -2161,8 +2161,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 return null;
               }
 
-              if (assignedMemberIds.length > 1) {
-                // Multi-assignment task: Each assigned member completes independently, gets full points
+              if (assignedMemberIds.length > 0) {
+                // Explicit assignment task: Each assigned member completes independently, gets full points.
+                // Include single-member assignments so cards can always show who is responsible.
                 // Box grays out for members who submitted (pending/approved), stays active for others
                 const assignedMemberCompletions = await Promise.all(
                   assignedMemberIds.map(async (memberId: string) => {
@@ -2404,8 +2405,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Check if task is assigned to specific members (parent view)
               const assignedMemberIds = await storage.getTaskAssignmentsByTask(task.id);
               
-              if (assignedMemberIds.length > 1) {
-                // Multi-assignment task: Show parent the status of each assigned member
+              if (assignedMemberIds.length > 0) {
+                // Explicit assignment task: Show parent the status of every assigned member,
+                // including a single assignee.
                 const taskCompletions = await storage.getTaskCompletionsByTask(task.id);
                 const family = await storage.getFamily(task.familyName);
                 const familyTimezone = family?.timezone || "Europe/Berlin";
