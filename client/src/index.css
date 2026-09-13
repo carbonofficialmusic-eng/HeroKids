@@ -3305,6 +3305,14 @@ html:not(.dark) .lc-dashboard .lc-task-card-weekend-unavailable {
   filter: grayscale(.72) saturate(.42);
   opacity: .62;
 }
+.dark .lc-dashboard .lc-task-card-weekend-unavailable {
+  color: rgba(190, 200, 211, .72) !important;
+  border-color: rgba(126, 145, 164, .24) !important;
+  background: rgba(23, 39, 57, .46) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .12) !important;
+  filter: grayscale(.72) saturate(.42);
+  opacity: .62;
+}
 html:not(.dark) .lc-kid-dashboard [data-task-visual-state="open"] .text-white {
   color: #18324d !important;
   text-shadow: none !important;
