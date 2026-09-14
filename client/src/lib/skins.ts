@@ -2,13 +2,17 @@ import { resolveAvatarUrl } from "@/lib/avatarAssets";
 import { isNativePlatform } from "@/lib/platform";
 import { STARTER_SKIN_ID } from "@shared/skin-config";
 
-// Avatars and the free starter background remain part of the local iOS web bundle.
-// Other backgrounds are excluded from that bundle and loaded on demand from the
-// production server. Web builds keep relative URLs so they use their own host.
+// Only the free starter avatar/background remain part of the local iOS web
+// bundle. Other skin assets are loaded after discovery from the production
+// server. Web builds keep relative URLs so they use their own host.
 const NATIVE_SKIN_ASSET_ORIGIN = "https://littlechamps.net";
 
 export function getSkinImageUrl(skinId: string): string {
-  return `/skins/avatars/${skinId}.png?v=${AVATAR_VERSION}`;
+  const path = `/skins/avatars/${skinId}.png?v=${AVATAR_VERSION}`;
+  const hasLocalNativeAsset = skinId === STARTER_SKIN_ID;
+  return isNativePlatform() && !hasLocalNativeAsset
+    ? `${NATIVE_SKIN_ASSET_ORIGIN}${path}`
+    : path;
 }
 
 // Bump these versions whenever the corresponding skin assets are updated.
@@ -24,6 +28,46 @@ export function getSkinBackgroundUrl(skinId: string): string {
   return isNativePlatform() && !hasLocalNativeAsset
     ? `${NATIVE_SKIN_ASSET_ORIGIN}${path}`
     : path;
+}
+
+let revealedAssetDownloadQueue: Promise<void> = Promise.resolve();
+const revealedAssetDownloads = new Map<string, Promise<void>>();
+
+function loadImageIntoHttpCache(url: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error(`Failed to download skin asset: ${url}`));
+    image.src = url;
+  });
+}
+
+/**
+ * Downloads one newly revealed native skin at a time. The immutable server
+ * response and versioned URL let the WebView reuse the files from its HTTP
+ * cache. Locked cards never call this helper.
+ */
+export function cacheRevealedSkinAssets(skinId: string): Promise<void> {
+  if (!isNativePlatform() || skinId === STARTER_SKIN_ID) {
+    return Promise.resolve();
+  }
+  const existingDownload = revealedAssetDownloads.get(skinId);
+  if (existingDownload) {
+    return existingDownload;
+  }
+
+  const download = async () => {
+    await loadImageIntoHttpCache(getSkinImageUrl(skinId));
+    await loadImageIntoHttpCache(getSkinBackgroundUrl(skinId));
+  };
+
+  const queuedDownload = revealedAssetDownloadQueue.then(download, download);
+  revealedAssetDownloads.set(skinId, queuedDownload);
+  queuedDownload.catch(() => {
+    revealedAssetDownloads.delete(skinId);
+  });
+  revealedAssetDownloadQueue = queuedDownload.catch(() => undefined);
+  return queuedDownload;
 }
 
 // All valid skin IDs — used to check whether a URL exists.

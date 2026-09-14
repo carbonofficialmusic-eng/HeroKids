@@ -27,9 +27,9 @@ interface Skin {
   id: string;
   name: string;
   imageUrl: string;
-  isUnlocked: boolean;
+  isDiscovered: boolean;
   isActive: boolean;
-  canUnlock: boolean;
+  canDiscover: boolean;
 }
 
 interface SkinsResponse {
@@ -117,7 +117,7 @@ export function MessageRenderer({ message }: MessageRendererProps) {
         // Skin emoticon
         const skinId = code.substring(5); // Remove "skin:" prefix
         const skin = skins.find((s) => s.id === skinId);
-        const skinImage = SKIN_IMAGES[skinId];
+        const skinImage = skin?.isDiscovered ? SKIN_IMAGES[skinId] : undefined;
         
         if (skin && skinImage) {
           parts.push(

@@ -15,7 +15,7 @@ import { SuccessCelebration } from "@/components/success-celebration";
 import { Link, useLocation } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { SKIN_IMAGES, SKIN_BACKGROUNDS } from "@/lib/skins";
+import { cacheRevealedSkinAssets, SKIN_IMAGES, SKIN_BACKGROUNDS } from "@/lib/skins";
 import { getAllSkinsInOrder, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR, LEGACY_SKIN_ORDER } from "@shared/skin-config";
 import type { FamilyMember, Family } from "@shared/schema";
 import { useTranslation } from "react-i18next";
@@ -196,12 +196,36 @@ export default function SkinsGallery() {
       const res = await apiRequest("POST", "/api/skins/discover", { skinId });
       return await res.json();
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       setDiscoverDialogSkinId(null); // Close the popup
       const skin = data?.skins.find(s => s.id === result.skinId);
       const skinName = skin?.id
         ? t(`skinNames.${skin.id}`, { defaultValue: skin.name })
         : "Skin";
+
+      const revealedSkinIds = [result.skinId, result.legacySkinAwarded]
+        .filter((skinId): skinId is string => Boolean(skinId));
+      let assetDownloadFailed = false;
+      for (const revealedSkinId of revealedSkinIds) {
+        try {
+          await cacheRevealedSkinAssets(revealedSkinId);
+        } catch (error) {
+          assetDownloadFailed = true;
+          console.error("Failed to cache revealed skin assets", {
+            skinId: revealedSkinId,
+            error,
+          });
+        }
+      }
+      if (assetDownloadFailed) {
+        toast({
+          title: t("skins.assetDownloadFailedTitle", { defaultValue: "Skin freigeschaltet" }),
+          description: t("skins.assetDownloadFailedDescription", {
+            defaultValue: "Avatar und Hintergrund konnten noch nicht geladen werden. Bitte prüfe die Internetverbindung und versuche es erneut.",
+          }),
+          variant: "destructive",
+        });
+      }
       
       // Check if a star was found - show star animation first
       if (result.starFound) {
