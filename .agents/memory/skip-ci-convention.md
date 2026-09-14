@@ -1,6 +1,6 @@
 ---
 name: Skip CI Convention
-description: How to commit with [skip ci] to avoid unnecessary Xcode Cloud builds for web-only changes
+description: When Push is actually needed and why [skip ci] cannot reliably prevent unnecessary Xcode Cloud builds.
 ---
 
 # Skip CI Convention
@@ -11,6 +11,7 @@ The user wants to avoid unnecessary Xcode Cloud builds. Every push can trigger a
 - **Web/server-only change** → append `[skip ci]` to the commit message
 - **iOS files changed** (`ios/` or `capacitor.config.ts`) → commit normally (no `[skip ci]`)
 - **Operational guarantee:** `[skip ci]` documents intent but does not reliably suppress Xcode Cloud. Use Xcode Cloud workflow start conditions/file filters, temporarily disable the workflow, or cancel an unwanted build.
+- **Release guidance:** For web, server, and managed database schema changes, recommend only Replit Deploy/Publish. Ask the user to Push only when GitHub must be updated or a native iOS build is intentionally required.
 
 ## How to apply in practice
 `gitPush()` auto-commits and doesn't allow custom messages. Instead:
