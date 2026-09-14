@@ -4538,7 +4538,8 @@ html.dark :is(
    palette. Ready rewards and violet bonus rewards remain untouched. */
 html.dark :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"],
 html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] {
   color: #FFF7EA !important;
@@ -4548,21 +4549,24 @@ html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state=
 }
 html.dark :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"] :is(h3, svg),
 html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] :is(h3, svg) {
   color: #FFF7EA !important;
 }
 html.dark :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"] .text-muted-foreground,
 html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .text-muted-foreground {
   color: #DCEBFA !important;
 }
 html.dark :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-illustration,
 html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-page-illustration {
   border-color: #6F93B8 !important;
@@ -4570,7 +4574,8 @@ html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state=
 }
 html.dark :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-progress,
 html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-progress {
   border-color: rgba(111, 147, 184, 0.65) !important;
@@ -4578,7 +4583,8 @@ html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state=
 }
 html.dark :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-progress > div,
 html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-progress span {
   background: #79B8E8 !important;
@@ -4586,7 +4592,8 @@ html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state=
 }
 html.dark :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"] :is(.lc-reward-points-badge, [data-testid^="badge-reward-points-"]),
 html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] [data-testid^="badge-reward-points-"] {
   color: #FFF7EA !important;
@@ -4596,7 +4603,8 @@ html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state=
 }
 html.dark :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"] .lc-redeem-button:disabled,
 html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-page-button:disabled {
   color: #FFF7EA !important;
