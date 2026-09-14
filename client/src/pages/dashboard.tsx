@@ -1797,7 +1797,12 @@ export default function Dashboard() {
                   </div>
                   <div className={dashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid md:grid-cols-2 gap-4"}>
                     {activeRewards.slice(0, 4).map((reward, rewardIndex) => (
-                      <Card key={reward.id} className={`lc-reward-card relative overflow-visible ${dashboardView === "grid" ? "p-2" : "p-6"}${dashboardView !== "grid" && rewardIndex === 3 ? " hidden md:block" : ""}`} data-testid={`card-reward-${reward.id}`}>
+                      <Card
+                        key={reward.id}
+                        className={`lc-reward-card relative overflow-visible ${dashboardView === "grid" ? "p-2" : "p-6"}${dashboardView !== "grid" && rewardIndex === 3 ? " hidden md:block" : ""}`}
+                        data-reward-visual-state={member.totalPoints >= reward.pointThreshold ? "ready" : "locked"}
+                        data-testid={`card-reward-${reward.id}`}
+                      >
                         {isRealParent && dashboardView === "list" && (
                           <div className="absolute top-2 right-2 flex gap-1">
                             <Button

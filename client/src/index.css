@@ -4534,3 +4534,82 @@ html.dark :is(
   box-shadow: 0 10px 24px rgba(109,40,217,.18), inset 0 1px rgba(255,255,255,.10) !important;
 }
 
+/* Rewards that are not yet affordable use one steel/slate-blue palette.
+   Ready rewards and violet bonus rewards remain untouched. */
+:is(
+  .lc-dashboard,
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
+) .lc-reward-card[data-reward-visual-state="locked"],
+.lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] {
+  color: #FFF7EA !important;
+  border-color: #6F93B8 !important;
+  background: linear-gradient(145deg, #334A62 0%, #223245 100%) !important;
+  box-shadow: 0 8px 22px rgba(7, 15, 24, 0.32) !important;
+}
+:is(
+  .lc-dashboard,
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
+) .lc-reward-card[data-reward-visual-state="locked"] :is(h3, svg),
+.lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] :is(h3, svg) {
+  color: #FFF7EA !important;
+}
+:is(
+  .lc-dashboard,
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
+) .lc-reward-card[data-reward-visual-state="locked"] .text-muted-foreground,
+.lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .text-muted-foreground {
+  color: #DCEBFA !important;
+}
+:is(
+  .lc-dashboard,
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
+) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-illustration,
+.lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-page-illustration {
+  border-color: #6F93B8 !important;
+  background: rgba(20, 32, 45, 0.30) !important;
+}
+:is(
+  .lc-dashboard,
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
+) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-progress,
+.lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-progress {
+  border-color: rgba(111, 147, 184, 0.65) !important;
+  background: #14202D !important;
+}
+:is(
+  .lc-dashboard,
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
+) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-progress > div,
+.lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-progress span {
+  background: #79B8E8 !important;
+  box-shadow: none !important;
+}
+:is(
+  .lc-dashboard,
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
+) .lc-reward-card[data-reward-visual-state="locked"] :is(.lc-reward-points-badge, [data-testid^="badge-reward-points-"]),
+.lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] [data-testid^="badge-reward-points-"] {
+  color: #FFF7EA !important;
+  border-color: rgba(121, 184, 232, 0.75) !important;
+  background: rgba(121, 184, 232, 0.14) !important;
+  box-shadow: none !important;
+}
+:is(
+  .lc-dashboard,
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
+) .lc-reward-card[data-reward-visual-state="locked"] .lc-redeem-button:disabled,
+.lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-page-button:disabled {
+  color: #FFF7EA !important;
+  border-color: #5D7FA3 !important;
+  background: #263A50 !important;
+  box-shadow: none !important;
+}
+
