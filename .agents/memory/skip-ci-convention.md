@@ -5,11 +5,12 @@ description: How to commit with [skip ci] to avoid unnecessary Xcode Cloud build
 
 # Skip CI Convention
 
-The user wants to avoid unnecessary Xcode Cloud builds. Every push to `main` triggers a build — but native builds are only needed when `ios/` or `capacitor.config.ts` actually changed.
+The user wants to avoid unnecessary Xcode Cloud builds. Every push can trigger a build. Xcode Cloud has already started a build despite `[skip ci]`, so the marker must not be treated as a reliable control.
 
 ## The Rule
 - **Web/server-only change** → append `[skip ci]` to the commit message
 - **iOS files changed** (`ios/` or `capacitor.config.ts`) → commit normally (no `[skip ci]`)
+- **Operational guarantee:** `[skip ci]` documents intent but does not reliably suppress Xcode Cloud. Use Xcode Cloud workflow start conditions/file filters, temporarily disable the workflow, or cancel an unwanted build.
 
 ## How to apply in practice
 `gitPush()` auto-commits and doesn't allow custom messages. Instead:
@@ -31,7 +32,7 @@ git commit -m "fix: describe the change"
 await gitPush({ branch: "main", provider: "github" });
 ```
 
-**Why:** `gitPush` manages GitHub OAuth; manual `git push` doesn't have those credentials. So always use `gitPush` for the push step — just make sure the commit is already made via ShellExec first.
+**Why:** `gitPush` manages GitHub OAuth; manual `git push` doesn't have those credentials. Xcode Cloud behavior is controlled by its own workflow configuration and may ignore conventional commit markers.
 
 ## iOS files that require a real build
 - Anything under `ios/`

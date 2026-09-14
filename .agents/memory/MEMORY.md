@@ -10,7 +10,7 @@
 - [Period-blind hasActiveMemberCompletion bug](recurring-task-period-guard.md) — hasActiveMemberCompletion must filter by nextAvailableDate for recurrenceDays/weekly/monthly/yearly tasks or old-period completions block new-period submissions
 - [iOS IAP Spinner — Paywall was the real source](ios-iap-spinner.md) — first-open-paywall.tsx had Loader2 spinner on rcLoading with NO safety timeout; pricing.tsx fix alone was insufficient
 - [iOS IAP Downgrade & Cancel Flow](ios-iap-downgrade-cancel.md) — 6 fixes needed: RC retry loop, Fallback B (unsubscribe_detected_at), client cancel-sync gate removed, CANCELLATION+PRODUCT_CHANGE webhooks, CapApp.openUrl, iOS/web branch split in pricing.tsx
-- [Skip CI Convention](skip-ci-convention.md) — web-only pushes get [skip ci] in commit msg; iOS builds only when ios/ or capacitor.config.ts changed; use ShellExec for commit, gitPush() for push
+- [Skip CI Convention](skip-ci-convention.md) — `[skip ci]` documents intent but does not reliably stop Xcode Cloud; workflow filters or manual cancellation are required
 - [RevenueCat downgrade verification](revenuecat-downgrade-verification.md) — verify live entitlements before any expiration/billing event removes paid access
 - [Light-only interface design](light-only-interface-design.md) — future visual changes target only Light Mode; the approved Dark Mode must remain unchanged
 - [Legacy hero visual direction](legacy-hero-visual-direction.md) — approved modern hero style keeps the logo’s turquoise, gold-orange, and deep navy palette
