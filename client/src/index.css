@@ -4627,4 +4627,12 @@ html:not(.dark) :is(
   background: #79B8E8 !important;
   box-shadow: none !important;
 }
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-progress {
+  border-color: rgba(111, 147, 184, 0.85) !important;
+  background: #14202D !important;
+}
+html:not(.dark) .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state="locked"] .lc-reward-progress span {
+  background: #79B8E8 !important;
+  box-shadow: none !important;
+}
 
