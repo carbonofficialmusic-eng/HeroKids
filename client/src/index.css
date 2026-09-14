@@ -4609,20 +4609,23 @@ html.dark .lc-active-rewards-page .lc-reward-page-card[data-reward-visual-state=
    use the blue progress treatment from the approved reference. */
 html:not(.dark) :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"] :is(h3, svg) {
   color: #1F2F46 !important;
 }
 html:not(.dark) :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-progress {
   border-color: rgba(111, 147, 184, 0.85) !important;
   background: #14202D !important;
 }
 html:not(.dark) :is(
   .lc-dashboard,
-  .lc-kid-dashboard
+  .lc-kid-dashboard,
+  .lc-rewards-board-page
 ) .lc-reward-card[data-reward-visual-state="locked"] .lc-reward-progress > div {
   background: #79B8E8 !important;
   box-shadow: none !important;
