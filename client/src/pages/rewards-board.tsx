@@ -59,6 +59,7 @@ type RedemptionWithDetails = {
     title: string;
     description: string | null;
     pointThreshold: number;
+    iconEmoji?: string;
   };
   member: {
     id: string;

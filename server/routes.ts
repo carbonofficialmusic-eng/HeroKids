@@ -4300,8 +4300,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const redemptionsWithDetails = await Promise.all(redemptions.map(async (redemption) => {
         const base = {
           ...redemption,
-          rewardTitle: rewardsMap.get(redemption.rewardId)?.title || "Belohnung",
-          rewardIconEmoji: rewardsMap.get(redemption.rewardId)?.iconEmoji || "🎁",
+          rewardTitle: redemption.reward?.title || rewardsMap.get(redemption.rewardId)?.title || "Belohnung",
+          rewardIconEmoji: redemption.reward?.iconEmoji || rewardsMap.get(redemption.rewardId)?.iconEmoji || "🎁",
         };
         
         // Include participants for shared rewards (active or finalized)
@@ -4856,6 +4856,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the redemption
       const redemption = await storage.getRewardRedemption(redemptionId);
       if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+
+      const redemptionOwner = await storage.getFamilyMemberById(redemption.memberId);
+      if (!redemptionOwner || redemptionOwner.familyName !== member.familyName) {
         return res.status(404).json({ message: "Redemption not found" });
       }
       

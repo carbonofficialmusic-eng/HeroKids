@@ -2360,7 +2360,10 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(rewards)
-      .where(eq(rewards.familyName, familyName))
+      .where(and(
+        eq(rewards.familyName, familyName),
+        eq(rewards.isDeleted, false),
+      ))
       .orderBy(desc(rewards.createdAt));
   }
 
@@ -2388,7 +2391,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteReward(id: string): Promise<void> {
-    await db.delete(rewards).where(eq(rewards.id, id));
+    await db
+      .update(rewards)
+      .set({
+        isDeleted: true,
+        isActive: false,
+        updatedAt: new Date(),
+      })
+      .where(eq(rewards.id, id));
   }
   
   // Reward redemption operations
@@ -2416,6 +2426,7 @@ export class DatabaseStorage implements IStorage {
           title: rewards.title,
           description: rewards.description,
           pointThreshold: rewards.pointThreshold,
+          iconEmoji: rewards.iconEmoji,
         },
         member: {
           id: familyMembers.id,

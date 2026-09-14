@@ -381,6 +381,7 @@ export const rewards = pgTable("rewards", {
   description: text("description"),
   pointThreshold: integer("point_threshold").notNull(),
   isActive: boolean("is_active").notNull().default(true),
+  isDeleted: boolean("is_deleted").notNull().default(false),
   oneTimeOnly: boolean("one_time_only").notNull().default(false),
   iconEmoji: varchar("icon_emoji").notNull().default("🎁"),
   createdAt: timestamp("created_at").defaultNow(),
