@@ -24,3 +24,4 @@
 - [Frontend-Build erkennt freie Variablen nicht](frontend-runtime-validation.md) — Vite/esbuild kann trotz fehlender Imports oder falschem Komponenten-Scope erfolgreich bauen
 - [Gesperrte Belohnungen nach Theme](locked-reward-theme-split.md) — Light Mode nutzt helle Karten mit blauem Fortschritt; nur Dark Mode nutzt vollständig stahlblaue Karten
 - [Native Skin-Downloads](native-skin-downloads.md) — nur der Starter-Skin wird gebündelt; weitere Avatare und Hintergründe laden seriell erst nach dem Aufdecken
+- [Punkte-Rückerstattungen](point-refund-invariant.md) — Rückerstattungen müssen exakt einmal erfolgen und dürfen verfügbare Punkte nie über den Lebenszeitverdienst erhöhen

@@ -79,6 +79,7 @@ import {
   type ShoppingListItem,
   type InsertShoppingListItem,
 } from "@shared/schema";
+import { clampAvailablePoints } from "@shared/point-balance";
 import { db } from "./db";
 import { eq, and, desc, gt, gte, lt, sql, inArray, isNull, isNotNull } from "drizzle-orm";
 import { startOfDay } from 'date-fns';
@@ -295,6 +296,7 @@ export interface IStorage {
   getRewardRedemptionsByFamily(familyName: string): Promise<any[]>;
   getRewardRedemptionsByMember(memberId: string): Promise<RewardRedemption[]>;
   updateRewardRedemptionStatus(id: string, status: string): Promise<void>;
+  cancelRewardRedemption(id: string): Promise<{ memberId: string; pointsRefunded: number; rewardId: string }>;
   
   // Reward sharing operations
   getRewardRedemption(id: string): Promise<RewardRedemption | undefined>;
@@ -913,9 +915,10 @@ export class DatabaseStorage implements IStorage {
     weeklyPoints: number,
     monthlyPoints: number
   ): Promise<void> {
+    const safeTotalPoints = clampAvailablePoints(totalEarned, totalPoints);
     await db
       .update(familyMembers)
-      .set({ totalEarned, totalPoints, weeklyPoints, monthlyPoints, updatedAt: new Date() })
+      .set({ totalEarned, totalPoints: safeTotalPoints, weeklyPoints, monthlyPoints, updatedAt: new Date() })
       .where(eq(familyMembers.id, id));
   }
 
@@ -2523,10 +2526,14 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(rewardRedemptions)
         .where(eq(rewardRedemptions.id, redemptionId))
+        .for("update")
         .limit(1);
 
       if (!redemption) {
         throw new Error("Redemption not found");
+      }
+      if (redemption.sharingStatus !== "sharing_active") {
+        throw new Error("Sharing is not active for this reward");
       }
 
       // Get all participants
@@ -2540,24 +2547,35 @@ export class DatabaseStorage implements IStorage {
         throw new Error("Cannot finalize sharing without any participants");
       }
 
+      const lockedMembers = new Map<string, FamilyMember>();
+      const memberIds = [...new Set([
+        redemption.memberId,
+        ...participants.map(participant => participant.memberId),
+      ])].sort();
+      for (const memberId of memberIds) {
+        const [lockedMember] = await tx
+          .select()
+          .from(familyMembers)
+          .where(eq(familyMembers.id, memberId))
+          .for("update")
+          .limit(1);
+        if (!lockedMember) {
+          throw new Error(`Member ${memberId} not found`);
+        }
+        lockedMembers.set(memberId, lockedMember);
+      }
+
       // Total participants = participants + original buyer
       const totalParticipants = participants.length + 1;
       const pointsPerPerson = Math.ceil(redemption.originalPointsSpent / totalParticipants);
       
       // Validate all participants have enough points BEFORE making any changes
       for (const participant of participants) {
-        const [member] = await tx
-          .select()
-          .from(familyMembers)
-          .where(eq(familyMembers.id, participant.memberId))
-          .limit(1);
+        const member = lockedMembers.get(participant.memberId)!;
+        const availablePoints = clampAvailablePoints(member.totalEarned, member.totalPoints);
 
-        if (!member) {
-          throw new Error(`Member ${participant.memberId} not found`);
-        }
-
-        if (member.totalPoints < pointsPerPerson) {
-          throw new Error(`Member ${member.displayName} doesn't have enough points (needs ${pointsPerPerson}, has ${member.totalPoints})`);
+        if (availablePoints < pointsPerPerson) {
+          throw new Error(`Member ${member.displayName} doesn't have enough points (needs ${pointsPerPerson}, has ${availablePoints})`);
         }
       }
 
@@ -2566,42 +2584,40 @@ export class DatabaseStorage implements IStorage {
 
       // Refund points to original buyer
       if (originalBuyerRefund > 0) {
-        const [originalBuyer] = await tx
-          .select()
-          .from(familyMembers)
-          .where(eq(familyMembers.id, redemption.memberId))
-          .limit(1);
+        const originalBuyer = lockedMembers.get(redemption.memberId);
 
         if (originalBuyer) {
+          const currentPoints = clampAvailablePoints(originalBuyer.totalEarned, originalBuyer.totalPoints);
+          const nextPoints = clampAvailablePoints(originalBuyer.totalEarned, currentPoints + originalBuyerRefund);
+          const actualRefund = nextPoints - currentPoints;
           await tx
             .update(familyMembers)
             .set({
-              totalPoints: originalBuyer.totalPoints + originalBuyerRefund,
+              totalPoints: nextPoints,
             })
             .where(eq(familyMembers.id, redemption.memberId));
 
           // Add to points history
-          await tx.insert(pointsHistory).values({
-            memberId: redemption.memberId,
-            points: originalBuyerRefund,
-            reason: `Refund from sharing reward (${totalParticipants} people)`,
-          });
+          if (actualRefund > 0) {
+            await tx.insert(pointsHistory).values({
+              memberId: redemption.memberId,
+              points: actualRefund,
+              reason: `Refund from sharing reward (${totalParticipants} people)`,
+            });
+          }
         }
       }
 
       // Deduct points from each participant
       for (const participant of participants) {
-        const [member] = await tx
-          .select()
-          .from(familyMembers)
-          .where(eq(familyMembers.id, participant.memberId))
-          .limit(1);
+        const member = lockedMembers.get(participant.memberId);
 
         if (member) {
+          const currentPoints = clampAvailablePoints(member.totalEarned, member.totalPoints);
           await tx
             .update(familyMembers)
             .set({
-              totalPoints: member.totalPoints - pointsPerPerson,
+              totalPoints: currentPoints - pointsPerPerson,
             })
             .where(eq(familyMembers.id, participant.memberId));
 
@@ -2711,6 +2727,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(rewardRedemptions)
         .where(eq(rewardRedemptions.id, redemptionId))
+        .for("update")
         .limit(1);
 
       if (!redemption) {
@@ -2721,41 +2738,55 @@ export class DatabaseStorage implements IStorage {
       const memberId = redemption.memberId;
       const rewardId = redemption.rewardId;
 
-      if (redemption.sharingStatus === "sharing_active" || redemption.sharingStatus === "sharing_finalized") {
-        if (redemption.sharingStatus === "sharing_finalized") {
-          const participants = await tx
-            .select()
-            .from(rewardSharingParticipants)
-            .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
-          
-          for (const participant of participants) {
-            if (participant.pointsContributed && participant.pointsContributed > 0) {
-              await tx
-                .update(familyMembers)
-                .set({
-                  totalPoints: sql`${familyMembers.totalPoints} + ${participant.pointsContributed}`,
-                })
-                .where(eq(familyMembers.id, participant.memberId));
-            }
+      const refundsByMember = new Map<string, number>([[memberId, pointsToRefund]]);
+      if (redemption.sharingStatus === "sharing_finalized") {
+        const participants = await tx
+          .select()
+          .from(rewardSharingParticipants)
+          .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
+
+        for (const participant of participants) {
+          if (participant.pointsContributed && participant.pointsContributed > 0) {
+            refundsByMember.set(
+              participant.memberId,
+              (refundsByMember.get(participant.memberId) ?? 0) + participant.pointsContributed,
+            );
           }
         }
+      }
+
+      let pointsRefunded = 0;
+      for (const [refundMemberId, requestedRefund] of [...refundsByMember.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+        const [refundMember] = await tx
+          .select()
+          .from(familyMembers)
+          .where(eq(familyMembers.id, refundMemberId))
+          .for("update")
+          .limit(1);
+
+        if (!refundMember) continue;
+        const currentPoints = clampAvailablePoints(refundMember.totalEarned, refundMember.totalPoints);
+        const nextPoints = clampAvailablePoints(refundMember.totalEarned, currentPoints + requestedRefund);
+        await tx
+          .update(familyMembers)
+          .set({ totalPoints: nextPoints, updatedAt: new Date() })
+          .where(eq(familyMembers.id, refundMemberId));
+        if (refundMemberId === memberId) {
+          pointsRefunded = Math.max(0, nextPoints - currentPoints);
+        }
+      }
+
+      if (redemption.sharingStatus === "sharing_active" || redemption.sharingStatus === "sharing_finalized") {
         await tx
           .delete(rewardSharingParticipants)
           .where(eq(rewardSharingParticipants.redemptionId, redemptionId));
       }
 
       await tx
-        .update(familyMembers)
-        .set({
-          totalPoints: sql`${familyMembers.totalPoints} + ${pointsToRefund}`,
-        })
-        .where(eq(familyMembers.id, memberId));
-
-      await tx
         .delete(rewardRedemptions)
         .where(eq(rewardRedemptions.id, redemptionId));
 
-      return { memberId, pointsRefunded: pointsToRefund, rewardId };
+      return { memberId, pointsRefunded, rewardId };
     });
   }
 

@@ -19,7 +19,8 @@ import { getDueDateWindow } from "@shared/due-date-policy";
 import { ObjectPermission } from "./objectAcl";
 import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, childDeviceSessions, users, pinboardNotes } from "@shared/schema";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, goalContributions, childDeviceSessions, users, pinboardNotes } from "@shared/schema";
+import { clampAvailablePoints } from "@shared/point-balance";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier, SubscriptionTierLegacy } from "@shared/tier-config";
 import { resolveFallbackD, isFamilySubNewerThanFamilyPro } from "./lib/rc-tier-resolver";
@@ -6422,43 +6423,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family goal not found" });
       }
       
-      // Get all contributions to this goal for refund calculation
-      const contributions = await storage.getGoalContributionsByGoal(id);
-      
-      // Group contributions by member and sum up their total contributions
-      const contributionsByMember = new Map<string, number>();
-      for (const contribution of contributions) {
-        const current = contributionsByMember.get(contribution.memberId) || 0;
-        contributionsByMember.set(contribution.memberId, current + contribution.points);
-      }
-      
       // Use database transaction to ensure atomicity of refunds and deletion
+      let refundedMemberCount = 0;
       await db.transaction(async (tx) => {
+        const [lockedGoal] = await tx
+          .select()
+          .from(familyGoals)
+          .where(eq(familyGoals.id, id))
+          .for("update")
+          .limit(1);
+        if (!lockedGoal || lockedGoal.familyName !== member.familyName) {
+          throw new Error("Family goal not found");
+        }
+
+        const contributions = await tx
+          .select()
+          .from(goalContributions)
+          .where(eq(goalContributions.goalId, id));
+        const contributionsByMember = new Map<string, number>();
+        for (const contribution of contributions) {
+          contributionsByMember.set(
+            contribution.memberId,
+            (contributionsByMember.get(contribution.memberId) ?? 0) + contribution.points,
+          );
+        }
+        refundedMemberCount = contributionsByMember.size;
+
         // Refund points to each contributor within the transaction
-        const refundPromises = Array.from(contributionsByMember.entries()).map(async ([memberId, refundAmount]) => {
+        for (const [memberId, refundAmount] of [...contributionsByMember.entries()].sort(([a], [b]) => a.localeCompare(b))) {
           // Get fresh member data within transaction
           const [contributor] = await tx
             .select()
             .from(familyMembers)
-            .where(eq(familyMembers.id, memberId));
+            .where(eq(familyMembers.id, memberId))
+            .for("update")
+            .limit(1);
           
           if (contributor) {
-            // Update all point fields to match storage layer behavior
+            const currentPoints = clampAvailablePoints(contributor.totalEarned, contributor.totalPoints);
+            const nextPoints = clampAvailablePoints(contributor.totalEarned, currentPoints + refundAmount);
             await tx
               .update(familyMembers)
               .set({
-                totalEarned: contributor.totalEarned,
-                totalPoints: contributor.totalPoints + refundAmount,
-                weeklyPoints: contributor.weeklyPoints,
-                monthlyPoints: contributor.monthlyPoints,
+                totalPoints: nextPoints,
                 updatedAt: new Date(),
               })
               .where(eq(familyMembers.id, memberId));
           }
-        });
-        
-        // Wait for all refunds to complete
-        await Promise.all(refundPromises);
+        }
         
         // Delete the goal (contributions will be cascade deleted)
         await tx
@@ -6473,7 +6485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Invalidate member queries for point updates
-      if (contributionsByMember.size > 0) {
+      if (refundedMemberCount > 0) {
         broadcastToFamily(member.familyName, {
           type: 'member-updated',
         });
