@@ -398,11 +398,11 @@ export default function FamilyGoals() {
                             </Badge>
                           )}
                           <div className="flex flex-wrap items-center gap-2 mt-3">
-                            <Badge variant="secondary" className="gap-1 text-xs">
+                            <Badge variant="secondary" className="lc-goal-info-badge gap-1 text-xs">
                               <Calendar className="h-3 w-3" />
                               {goal.contributionPeriod === "weekly" ? t("familyGoals.weekly") : t("familyGoals.monthly")}
                             </Badge>
-                            <Badge variant="secondary" className="gap-1 text-xs">
+                            <Badge variant="secondary" className="lc-goal-info-badge gap-1 text-xs">
                               <Coins className="h-3 w-3" />
                               {t("familyGoals.pointsAmount", { amount: goal.contributionAmount })}
                             </Badge>
@@ -465,6 +465,7 @@ export default function FamilyGoals() {
                             </div>
                           ) : (
                             <Button
+                              className="lc-goal-contribute-button"
                               onClick={() => contributeMutation.mutate(goal.id)}
                               disabled={contributeMutation.isPending || member.totalPoints < goal.contributionAmount}
                               data-testid={`button-contribute-${goal.id}`}

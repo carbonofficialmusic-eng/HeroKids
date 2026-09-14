@@ -2843,6 +2843,27 @@ html:not(.dark) .lc-rewards-board-page .lc-rewards-board-card {
 html:not(.dark) .lc-goal-management-card h3,
 html:not(.dark) .lc-approvals-page h2,
 html:not(.dark) .lc-rewards-board-page h2 { color: #1b3048; }
+html:not(.dark) .lc-goal-management-card .lc-goal-info-badge {
+  color: #fff !important;
+  border-color: #f47a20 !important;
+  background: linear-gradient(135deg, #ff9d3c, #f47a20) !important;
+  box-shadow: 0 2px 4px rgba(205, 89, 12, .22);
+}
+html:not(.dark) .lc-goal-management-card .lc-goal-contribute-button {
+  color: #5a3b00 !important;
+  border-color: #e8b82e !important;
+  background: linear-gradient(135deg, #ffe477, #ffc83d) !important;
+  box-shadow: 0 3px 0 #d6a21f, 0 6px 10px rgba(183, 127, 9, .18) !important;
+}
+html:not(.dark) .lc-goal-management-card .lc-goal-contribute-button:hover {
+  filter: brightness(1.04);
+}
+html:not(.dark) .lc-goal-management-card .lc-goal-contribute-button:disabled {
+  color: #8a7548 !important;
+  border-color: #e4d49f !important;
+  background: #f3e7bd !important;
+  box-shadow: 0 2px 0 #d5c58f !important;
+}
 
 /* Dialogs and chat: same dimensions, lighter surfaces only. */
 html:not(.dark) .lc-game-dialog,
