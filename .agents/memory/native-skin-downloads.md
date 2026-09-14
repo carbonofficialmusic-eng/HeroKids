@@ -8,3 +8,5 @@ Im nativen iOS-Build bleiben nur Avatar und Hintergrund von `junior-champion` lo
 **Why:** Die bisher lokal gebündelten Skin-Medien machten die App über 300 MB groß. Im normalen Betrieb stehen höchstens wenige Karten zum Aufdecken an, daher ist ein bedarfsgesteuerter Download sinnvoller als ein großes Start-Bundle.
 
 **How to apply:** Neue Skin-Anzeigen müssen den Aufdeckstatus prüfen, bevor sie Original-URLs verwenden. Der iOS-Sync muss bei jedem Build hart sicherstellen, dass genau ein lokaler Avatar und ein lokaler Hintergrund übrig bleiben. Web-Assets bleiben vollständig auf littlechamps.net verfügbar.
+
+**Live bestätigt:** Am 14. September 2026 lud die bereits über den App Store installierte App die ausgelagerten Bilder erfolgreich von der URL statt aus dem nativen Bundle.
