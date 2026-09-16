@@ -2080,6 +2080,8 @@ export class DatabaseStorage implements IStorage {
         taskTitle: tasks.title,
         taskPoints: tasks.points,
         isShoppingList: tasks.isShoppingList,
+        isSharedTask: tasks.isSharedTask,
+        sharedMemberIds: tasks.sharedMemberIds,
         memberId: taskCompletions.memberId,
         memberName: familyMembers.displayName,
         memberAvatar: familyMembers.avatarUrl,
@@ -2100,23 +2102,32 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(taskCompletions.completedAt));
     
     const visibleCompletions: any[] = [];
-    const handledShoppingTasks = new Set<string>();
+    const handledCollectiveTasks = new Set<string>();
     for (const completion of completions) {
-      if (!completion.isShoppingList) {
+      if (!completion.isShoppingList && !completion.isSharedTask) {
         visibleCompletions.push(completion);
         continue;
       }
-      if (handledShoppingTasks.has(completion.taskId)) continue;
-      handledShoppingTasks.add(completion.taskId);
+      if (handledCollectiveTasks.has(completion.taskId)) continue;
+      handledCollectiveTasks.add(completion.taskId);
 
       const grouped = completions.filter(
-        item => item.isShoppingList && item.taskId === completion.taskId,
+        item => item.taskId === completion.taskId,
       );
+      if (
+        completion.isSharedTask
+        && completion.sharedMemberIds?.length
+        && grouped.length < completion.sharedMemberIds.length
+      ) {
+        continue;
+      }
       visibleCompletions.push({
         ...completion,
         memberName: grouped.map(item => item.memberName).join(", "),
         pointsEarned: completion.taskPoints,
-        shoppingListRecipientCount: grouped.length,
+        ...(completion.isShoppingList
+          ? { shoppingListRecipientCount: grouped.length }
+          : { teamRecipientCount: grouped.length }),
       });
     }
     return visibleCompletions;

@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "python-3.11", "postgresql-16"]
+modules = ["web", "python-3.11", "postgresql-16", "nodejs-22"]
 run = "npm run dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
@@ -84,6 +84,7 @@ VITE_REVENUECAT_IOS_KEY = "appl_gzlXiKvjqKZFhpWZzgMalMXBAJT"
 ADMIN_EMAIL = "sonoastudio@me.com"
 APNS_KEY_ID = "DQT69WC98R"
 APNS_BUNDLE_ID = "app.herokids.com"
+APNS_TEAM_ID = "L834576FM4"
 
 [userenv.production]
 APP_BASE_URL = "https://littlechamps.net"

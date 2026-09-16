@@ -69,7 +69,7 @@ import { celebrateTaskCompletion } from "@/lib/confetti";
 import logoUrl from "@assets/littlechamps_logo_opt.webp";
 import familyGoalsIcon from "@assets/family-goals-icon.png";
 import { ACHIEVEMENT_BADGES } from "@/lib/achievement-badges";
-import { isFixedAppointment, sortFixedAppointments } from "@shared/due-date-policy";
+import { getLocalDateKey, isFixedAppointment, sortFixedAppointments } from "@shared/due-date-policy";
 
 // Custom hook for sticky sidebar on desktop
 
@@ -125,6 +125,7 @@ export default function Dashboard() {
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
   const [requestRewardDialogOpen, setRequestRewardDialogOpen] = useState(false);
+
   const [requestToEdit, setRequestToEdit] = useState<any>(null);
   const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
   const [switchMemberDialogOpen, setSwitchMemberDialogOpen] = useState(false);
@@ -1172,7 +1173,7 @@ export default function Dashboard() {
     return sortedGroups;
   };
 
-  const fixedAppointmentTasks = sortFixedAppointments(activeTasks.filter(isFixedAppointment));
+  const fixedAppointmentTasks = sortFixedAppointments(activeTasks.filter(isFixedAppointment), getLocalDateKey());
   const importantActiveTasks = activeTasks.filter(t => (t as any).isImportant && !isFixedAppointment(t));
   const regularActiveTasks = activeTasks.filter(t => !(t as any).isImportant && !isFixedAppointment(t));
   const filteredTasks = filterTasksByDate(regularActiveTasks);
@@ -1350,7 +1351,7 @@ export default function Dashboard() {
                     <button
                       data-testid="button-scroll-to-pinboard"
                       data-tour="tour-pinboard"
-                      className="lc-icon-button flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate"
+                      className={`${isNativePlatform() ? "" : "lg:hidden"} lc-icon-button flex items-center gap-2 bg-muted/60 px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate`}
                       onClick={() => {
                         const el = document.getElementById("pinboard");
                         if (el) scrollToPinboard(el);

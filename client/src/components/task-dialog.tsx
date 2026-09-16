@@ -123,6 +123,7 @@ export function TaskDialog({
 }: TaskDialogProps) {
   const isOnTrial = !!(trialEndsAt && new Date(trialEndsAt) > new Date());
   const canAssignMembers = subscriptionTier !== "free" || isOnTrial;
+  const canUseDailyMultiTask = subscriptionTier !== "free" || isOnTrial;
   const canUseShoppingList = subscriptionTier !== "free" || isOnTrial;
   const canUsePhotoProof = subscriptionTier !== "free" || isOnTrial;
   const { t, i18n } = useTranslation();
@@ -455,7 +456,7 @@ export function TaskDialog({
       form.setValue("recurrence", (template as any).recurrence);
     }
     if ((template as any).dailyTarget) {
-      form.setValue("dailyTarget", (template as any).dailyTarget);
+      form.setValue("dailyTarget", canUseDailyMultiTask ? (template as any).dailyTarget : 1);
     }
     if ((template as any).isShoppingList) {
       setIsShoppingList(true);
@@ -975,15 +976,27 @@ export function TaskDialog({
                   name="dailyTarget"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("tasks.dailyTarget")}</FormLabel>
-                      <Select value={String(field.value || 1)} onValueChange={(value) => field.onChange(Number(value))}>
+                      <div className="flex items-center gap-2">
+                        <FormLabel>{t("tasks.dailyTarget")}</FormLabel>
+                        {!canUseDailyMultiTask && (
+                          <Badge variant="secondary" className="text-xs gap-1">
+                            <Lock className="w-3 h-3" />
+                            Family
+                          </Badge>
+                        )}
+                      </div>
+                      <Select
+                        value={String(canUseDailyMultiTask ? (field.value || 1) : 1)}
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        disabled={!canUseDailyMultiTask}
+                      >
                         <FormControl>
                           <SelectTrigger data-testid="select-daily-target">
                             <SelectValue />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {[1, 2, 3].map((count) => (
+                          {(canUseDailyMultiTask ? [1, 2, 3] : [1]).map((count) => (
                             <SelectItem key={count} value={String(count)}>
                               {t("tasks.dailyTargetOption", { count })}
                             </SelectItem>

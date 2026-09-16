@@ -4,17 +4,25 @@ set -e
 
 echo "=== HeroKids Xcode Cloud Post-Clone ==="
 
-# Install Node.js if not already available
+# Capacitor 8 requires Node.js 22 or newer. Pin Xcode Cloud to Node 22 so a
+# preinstalled older/newer Homebrew default cannot change the build behavior.
 export HOMEBREW_NO_AUTO_UPDATE=1
-if ! command -v node > /dev/null 2>&1; then
-  echo "Node not found, installing via brew..."
-  brew install node
-else
-  echo "Node already available: $(node --version)"
+if ! brew list node@22 > /dev/null 2>&1; then
+  echo "Installing Node 22 via Homebrew..."
+  brew install node@22
 fi
+export PATH="$(brew --prefix node@22)/bin:$PATH"
 
 node --version
 npm --version
+
+case "$(node --version)" in
+  v22.*) ;;
+  *)
+    echo "ERROR: Capacitor 8 requires Node 22 in this Xcode Cloud workflow."
+    exit 1
+    ;;
+esac
 
 # Navigate to repo root
 cd "$CI_PRIMARY_REPOSITORY_PATH"
@@ -25,6 +33,8 @@ echo "Working directory: $(pwd)"
 echo "Patching package-lock.json registry URLs..."
 sed -i '' 's|https://package-firewall.replit.local/npm/|https://registry.npmjs.org/|g' package-lock.json
 sed -i '' 's|http://package-firewall.replit.local/npm/|https://registry.npmjs.org/|g' package-lock.json
+sed -i '' 's|https://package-firewall.replit.internal/npm/|https://registry.npmjs.org/|g' package-lock.json
+sed -i '' 's|http://package-firewall.replit.internal/npm/|https://registry.npmjs.org/|g' package-lock.json
 
 echo "Installing npm dependencies..."
 npm ci

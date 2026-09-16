@@ -186,3 +186,21 @@ export function isTeamCompletionInCurrentPeriod(
   if (!nextAvailableDate || nextAvailableDate > now) return true;
   return completedAt >= nextAvailableDate;
 }
+
+type TeamSubmission = {
+  memberId: string;
+  status: string;
+};
+
+export function hasEveryTeamMemberSubmitted(
+  targetMemberIds: string[],
+  submissions: TeamSubmission[],
+): boolean {
+  if (targetMemberIds.length === 0) return false;
+  const submittedMemberIds = new Set(
+    submissions
+      .filter((submission) => submission.status === "pending" || submission.status === "approved")
+      .map((submission) => submission.memberId),
+  );
+  return targetMemberIds.every((memberId) => submittedMemberIds.has(memberId));
+}

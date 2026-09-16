@@ -25,7 +25,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { RewardIconDisplay } from "@/lib/reward-icon";
-import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 
 const REWARD_IMAGE_ICONS = [
   { value: "/reward-icons/ice-cream.png",     label: "Eis" },
@@ -84,6 +83,8 @@ export function RewardDialog({
   });
 
   useEffect(() => {
+    if (!open) return;
+
     if (reward) {
       form.reset({
         familyName: reward.familyName,
@@ -105,18 +106,28 @@ export function RewardDialog({
         iconEmoji: "/reward-icons/gift.png",
       });
     }
-  }, [reward, familyName, form]);
+  }, [open, reward, familyName, form]);
 
   const handleSubmit = (data: RewardFormData) => {
     onSubmit(data);
-    if (!isEditing) {
-      form.reset();
-    }
+  };
+
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    // This is a controlled editor. Radix can interpret browser viewport
+    // movement during input focus as a dismiss interaction. Closing remains
+    // explicit through Cancel or the successful mutation in the parent.
+    if (nextOpen) onOpenChange(true);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="lc-game-dialog lc-reward-dialog max-w-md overflow-hidden [&>button.absolute]:hidden" data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"} onOpenAutoFocus={(e) => e.preventDefault()}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+      <DialogContent
+        className="lc-game-dialog lc-reward-dialog max-w-md overflow-hidden [&>button.absolute]:hidden"
+        data-testid={isEditing ? "dialog-edit-reward" : "dialog-create-reward"}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader className="lc-game-dialog-header">
           <DialogTitle className="text-2xl font-accent">{isEditing ? t('rewards.editReward') : t('rewards.createReward')}</DialogTitle>
           <DialogDescription>
@@ -125,14 +136,37 @@ export function RewardDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form id="reward-dialog-form" onSubmit={form.handleSubmit(handleSubmit)} className="lc-game-dialog-form lc-reward-dialog-form space-y-6">
+          <form
+            id="reward-dialog-form"
+            onSubmit={form.handleSubmit(handleSubmit)}
+            onFocusCapture={(event) => {
+              if (!(event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)) return;
+              const field = event.target;
+              const formElement = event.currentTarget;
+              window.setTimeout(() => {
+                if (document.activeElement !== field) return;
+                const formRect = formElement.getBoundingClientRect();
+                const fieldRect = field.getBoundingClientRect();
+                formElement.scrollBy({
+                  top: fieldRect.top - formRect.top - 12,
+                  behavior: "smooth",
+                });
+              }, 350);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && event.target instanceof HTMLInputElement) {
+                event.preventDefault();
+              }
+            }}
+            className="lc-game-dialog-form lc-reward-dialog-form space-y-6"
+          >
 
             {/* Icon Picker */}
             <FormField
               control={form.control}
               name="iconEmoji"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="lc-reward-icon-picker">
                   <FormLabel className="block text-center">{t('rewards.icon')}</FormLabel>
 
                   {/* Preview */}
@@ -192,7 +226,6 @@ export function RewardDialog({
                     <Input
                       placeholder={t('rewards.rewardTitlePlaceholder')}
                       {...field}
-                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-reward-title"
                     />
                   </FormControl>
@@ -212,7 +245,6 @@ export function RewardDialog({
                       placeholder={t('rewards.descriptionPlaceholder')}
                       {...field}
                       value={field.value || ""}
-                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-reward-description"
                     />
                   </FormControl>
@@ -234,7 +266,6 @@ export function RewardDialog({
                       step={10}
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      onFocus={(e) => scrollFieldIntoView(e.currentTarget)}
                       data-testid="input-reward-points"
                     />
                   </FormControl>

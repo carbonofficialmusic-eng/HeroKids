@@ -286,6 +286,7 @@ function Router() {
   // Auth state and the React Query cache live above Router and remain intact.
   useEffect(() => {
     let isLandscape = window.innerWidth > window.innerHeight;
+    let viewportWidth = window.innerWidth;
     const settleTimers = new Set<ReturnType<typeof setTimeout>>();
 
     const remountAtSettledSize = () => {
@@ -315,6 +316,14 @@ function Router() {
     };
 
     const detectViewportOrientationChange = () => {
+      const nextViewportWidth = window.innerWidth;
+      const widthChanged = Math.abs(nextViewportWidth - viewportWidth) > 80;
+      viewportWidth = nextViewportWidth;
+
+      // Opening the iOS keyboard can reduce innerHeight enough to make a
+      // portrait viewport look landscape. A real rotation also changes width.
+      if (!widthChanged) return;
+
       const nextIsLandscape = window.innerWidth > window.innerHeight;
       if (nextIsLandscape === isLandscape) return;
       isLandscape = nextIsLandscape;

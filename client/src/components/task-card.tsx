@@ -15,7 +15,7 @@ import { de, enUS, fr, es, ja, ko, sv, zhCN } from "date-fns/locale";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getDevHeaders } from "@/lib/queryClient";
 import { canRetryRejectedTeamContribution } from "@shared/task-mode";
-import { getDueDateWindow } from "@shared/due-date-policy";
+import { getDueDateWindow, getLocalDateKey } from "@shared/due-date-policy";
 import { DailyProgressBadge } from "@/components/daily-progress-badge";
 
 
@@ -287,6 +287,9 @@ export function TaskCard({
       daysPast: Math.max(0, dueDateWindow.daysPastDue),
     };
   })();
+  const isDueToday = !!task.dueDate
+    && task.recurrence === "none"
+    && String(task.dueDate).substring(0, 10) === getLocalDateKey();
   
   // Task should appear grayed out if it's unavailable OR completed by this member OR due date not yet reached OR expired OR weekend-only unavailable OR awaiting approval
   const taskStatus = task.status as string;
@@ -336,6 +339,10 @@ export function TaskCard({
     : isVisuallyApproved
       ? "approved"
       : "open";
+  const showDueTodayHighlight = isDueToday
+    && taskVisualState === "open"
+    && !isGrayedOut
+    && !isTaskNotAssigned;
 
   // ── Compact (grid) rendering ──────────────────────────────────────────────
   if (compact) {
@@ -397,15 +404,21 @@ export function TaskCard({
         whileTap={onClick ? { scale: 0.98 } : undefined}
       >
         <Card
-          className={`p-2 transition-all h-full flex flex-col ${
+          className={`relative p-2 transition-all h-full flex flex-col ${
             taskVisualState === 'approved' ? 'backdrop-blur-none' : 'backdrop-blur-md'
           } ${
             isGrayedOut ? 'bg-card/20' : 'bg-card/80 lc-task-card-open'
-          } ${isWeekendUnavailable ? 'lc-task-card-weekend-unavailable' : ''} hover-elevate active-elevate-2 cursor-pointer`}
+          } ${isWeekendUnavailable ? 'lc-task-card-weekend-unavailable' : ''} ${showDueTodayHighlight ? 'lc-task-due-today' : ''} hover-elevate active-elevate-2 cursor-pointer`}
           data-task-visual-state={taskVisualState}
           data-testid={`card-task-${task.id}`}
           onClick={() => (task as any).isShoppingList ? setShoppingListExpanded(v => !v) : onClick?.(task)}
         >
+          {showDueTodayHighlight && (
+            <div className="lc-due-today-badge lc-due-today-badge-compact" data-testid={`badge-due-today-${task.id}`}>
+              <CalendarDays className="h-3 w-3" />
+              {t("tasks.todayBadge")}
+            </div>
+          )}
           <div className="flex items-start gap-1.5 flex-1">
             {/* Compact emoji */}
             <motion.div
@@ -600,15 +613,21 @@ export function TaskCard({
       whileTap={onClick ? { scale: 0.98 } : undefined}
     >
       <Card
-        className={`p-4 transition-all min-h-[140px] h-full flex flex-col ${
+        className={`relative p-4 transition-all min-h-[140px] h-full flex flex-col ${
           taskVisualState === 'approved' ? 'backdrop-blur-none' : 'backdrop-blur-md'
         } ${
           isGrayedOut ? 'bg-card/20' : 'bg-card/80 lc-task-card-open'
-        } ${isWeekendUnavailable ? 'lc-task-card-weekend-unavailable' : ''} ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
+        } ${isWeekendUnavailable ? 'lc-task-card-weekend-unavailable' : ''} ${showDueTodayHighlight ? 'lc-task-due-today' : ''} ${onClick ? 'hover-elevate active-elevate-2 cursor-pointer' : ''}`}
         data-task-visual-state={taskVisualState}
         data-testid={`card-task-${task.id}`}
         onClick={() => onClick?.(task)}
       >
+        {showDueTodayHighlight && (
+          <div className="lc-due-today-badge" data-testid={`badge-due-today-${task.id}`}>
+            <CalendarDays className="h-4 w-4" />
+            {t("tasks.todayBadge")}
+          </div>
+        )}
         <div className="flex items-start gap-3 flex-1">
           {/* Icon with points in star */}
           <div className="relative flex-shrink-0">

@@ -21,6 +21,9 @@ const config: CapacitorConfig = {
     scheme: 'LittleChamps',
   },
   plugins: {
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'banner', 'list'],
+    },
     StatusBar: {
       overlay: true,
       style: 'LIGHT',

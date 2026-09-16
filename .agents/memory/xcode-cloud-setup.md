@@ -11,8 +11,8 @@ description: What's required for Xcode Cloud to successfully build, sign, and ex
 
 ## ci_post_clone.sh critical points
 
-- Use `HOMEBREW_NO_AUTO_UPDATE=1 brew install node` (skip slow Homebrew tap update)
-- Patch package-lock.json before npm ci: `sed -i '' 's|https://package-firewall.replit.local/npm/|https://registry.npmjs.org/|g' package-lock.json` — Replit's internal registry doesn't exist outside Replit
+- Pin Node 22 with Homebrew (`node@22`) and prepend its bin directory to PATH; Capacitor 8 requires Node 22 and Xcode Cloud's preinstalled/default Node may differ.
+- Patch both `package-firewall.replit.local` and `package-firewall.replit.internal` lockfile URLs before npm ci — neither Replit registry exists outside Replit.
 - Run `pod install` (not `pod install --repo-update`) at end
 
 ## project.pbxproj required settings
@@ -32,6 +32,8 @@ description: What's required for Xcode Cloud to successfully build, sign, and ex
 - Add `<key>ITSAppUsesNonExemptEncryption</key><false/>` to skip the Export Compliance question for every future build (app only uses Apple's built-in HTTPS)
 
 **Why:** Without each of these pieces, Xcode Cloud fails at different stages — scheme not found, platforms empty, npm registry unreachable, pod install not run, code signing exit 70.
+
+For Push Notifications, keep all three native declarations aligned: the production `aps-environment` entitlement, `CODE_SIGN_ENTITLEMENTS` in Debug and Release, and `com.apple.Push` enabled under the target's `SystemCapabilities`.
 
 ## Distinguish export warnings from delivery rejection
 

@@ -99,28 +99,23 @@ export function RewardRequestDialog({
   });
 
   useEffect(() => {
-    if (request) {
-      form.reset({
-        title: request.title,
-        description: request.description || "",
-        pointThreshold: request.pointThreshold,
-      });
-    } else {
+    if (!open) {
       form.reset({
         title: "",
         description: "",
         pointThreshold: 50,
       });
+    } else if (request) {
+      form.reset({
+        title: request.title,
+        description: request.description || "",
+        pointThreshold: request.pointThreshold,
+      });
     }
-  }, [request, form]);
+  }, [open, request?.id, form]);
 
   const handleSubmit = (data: RewardRequestFormData) => {
     onSubmit(data);
-    form.reset({
-      title: "",
-      description: "",
-      pointThreshold: 50,
-    });
   };
 
   return (

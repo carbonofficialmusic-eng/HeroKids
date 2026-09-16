@@ -144,6 +144,11 @@
                                                 CreatedOnToolsVersion = 9.2;
                                                 LastSwiftMigration = 1100;
                                                 ProvisioningStyle = Automatic;
+                                                SystemCapabilities = {
+                                                        com.apple.Push = {
+                                                                enabled = 1;
+                                                        };
+                                                };
                                         };
                                 };
                         };
@@ -153,6 +158,14 @@
                         hasScannedForEncodings = 0;
                         knownRegions = (
                                 en,
+                                de,
+                                fr,
+                                es,
+                                ja,
+                                "zh-Hans",
+                                ko,
+                                sv,
+                                pt,
                                 Base,
                         );
                         mainGroup = 504EC2FB1FED79650016851F;

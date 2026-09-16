@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  getLocalDateKey,
   getDueDateWindow,
   isFixedAppointment,
+  isFixedAppointmentDueToday,
   sortFixedAppointments,
 } from "../../shared/due-date-policy";
 
@@ -57,5 +59,24 @@ describe("fixed appointment category", () => {
       "same-second",
       "later",
     ]);
+  });
+
+  it("puts today's appointments before older and future appointments", () => {
+    const tasks = [
+      { id: "past", dueDate: "2026-10-07", recurrence: "none" },
+      { id: "future", dueDate: "2026-10-09", recurrence: "none" },
+      { id: "today", dueDate: "2026-10-08", recurrence: "none" },
+    ];
+
+    expect(sortFixedAppointments(tasks, "2026-10-08").map((task) => task.id)).toEqual([
+      "today",
+      "past",
+      "future",
+    ]);
+    expect(isFixedAppointmentDueToday(tasks[2], "2026-10-08")).toBe(true);
+  });
+
+  it("formats a local calendar key without converting through UTC", () => {
+    expect(getLocalDateKey(new Date(2026, 9, 8, 23, 45))).toBe("2026-10-08");
   });
 });

@@ -584,3 +584,115 @@ mtime_ms = 1789326513208
 storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/0ca681db-fd7d-4081-a90f-22b7191c2b70/656b62db-0743-43bb-9b11-33b1827b6bfb"
 storage_version_token = "1789326535400171"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "wJ_IoH_C1M00lc2pZIpFe"
+uri = "file://screenshots/due-today-parent-light.jpg"
+type = "image"
+title = "Eltern – Hell"
+description = "Aufgabenkarte mit hervorgehobener Heute-Markierung im Vergleich zu normalen Karten."
+logical_id = "8bbd42aa-77ac-41bf-aac5-17f03f01f038"
+content_hash = "sha256:c22ce13376961aa7c0075caa545b515bdcb33fcbb0f9a799df56adc469cca864"
+size = 28637
+mtime_ms = 1789560890256
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/8bbd42aa-77ac-41bf-aac5-17f03f01f038/0f502ed8-f98b-4e27-b09a-6ccb11e48980"
+storage_version_token = "1789561343280799"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "gh7d1PKZi6fh40HPD-LyU"
+uri = "file://screenshots/due-today-parent-dark.jpg"
+type = "image"
+title = "Eltern – Dunkel"
+description = "Aufgabenkarte mit hervorgehobener Heute-Markierung im Vergleich zu normalen Karten."
+logical_id = "9bfe89a7-8c88-49b2-8ad2-cd9096ba76d7"
+content_hash = "sha256:0cd56ab84103cc1a82c707cd229defb842831a18af631d1ba1a4af242b9e582b"
+size = 30295
+mtime_ms = 1789560891808
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/9bfe89a7-8c88-49b2-8ad2-cd9096ba76d7/2aed59cf-b625-4122-afe2-b593a846c79a"
+storage_version_token = "1789561343952292"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "CyuFZ8xjIIy2hdEydFMxT"
+uri = "file://screenshots/due-today-kid-light.jpg"
+type = "image"
+title = "Kinder – Hell"
+description = "Aufgabenkarte mit hervorgehobener Heute-Markierung im Vergleich zu normalen Karten."
+logical_id = "07a65af5-5db3-4430-9494-1eb7311f45df"
+content_hash = "sha256:7f1e1e12d4d6fe20fac8a966cd8164b1b3649803de923c81fe2c4b4fd3e1edcb"
+size = 28742
+mtime_ms = 1789560894404
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/07a65af5-5db3-4430-9494-1eb7311f45df/bd2fd5be-517e-4eb9-8a3f-dccfeea0df7d"
+storage_version_token = "1789561344584312"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "kHnvnLnzcY1K-q_6Ffexr"
+uri = "file://screenshots/due-today-kid-dark.jpg"
+type = "image"
+title = "Kinder – Dunkel"
+description = "Aufgabenkarte mit hervorgehobener Heute-Markierung im Vergleich zu normalen Karten."
+logical_id = "3946fc35-473e-4f9c-b07e-45ea9e9bb0de"
+content_hash = "sha256:234833c169ad0cb77cd671bd0e4174c810c03a6909be009cecc94ff67837b5d9"
+size = 30337
+mtime_ms = 1789560895956
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/3946fc35-473e-4f9c-b07e-45ea9e9bb0de/c1bf0cee-5266-4f9a-bdef-7790d0ac7ba0"
+storage_version_token = "1789561345211940"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "qr3d-5Mg_DPYdP_NE7G0f"
+uri = "file://screenshots/due-today-parent-light-v2.jpg"
+type = "image"
+title = "Eltern – Hell, angepasst"
+description = "Heute-Terminkarte nach der neuen Vorgabe; noch nicht in die echte App integriert."
+logical_id = "41b4c60c-d7a6-4ae8-a95b-34fc14d5ec04"
+content_hash = "sha256:c2a2b84968935be1f5c6d65f48d052a3827c076ef949b9003ba8e0686abb4547"
+size = 28195
+mtime_ms = 1789562572912
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/41b4c60c-d7a6-4ae8-a95b-34fc14d5ec04/b439424a-5cbb-4734-9ce0-aa18e049c94a"
+storage_version_token = "1789562595132462"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "pCbkqih1E2-7UTzR1_V-f"
+uri = "file://screenshots/due-today-parent-dark-v2.jpg"
+type = "image"
+title = "Eltern – Dunkel, angepasst"
+description = "Heute-Terminkarte nach der neuen Vorgabe; noch nicht in die echte App integriert."
+logical_id = "2fef8183-d791-453c-96ab-8a72ebbdf36f"
+content_hash = "sha256:6e8393a3869deebec30ab54e2d85df76b7b78e0249bedacea808b3983498dbd4"
+size = 29883
+mtime_ms = 1789562574888
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/2fef8183-d791-453c-96ab-8a72ebbdf36f/9c95b47a-ca30-4ff6-bd7b-32617247709d"
+storage_version_token = "1789562595888856"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "RtBLqLueebpf8xblJLLqy"
+uri = "file://screenshots/due-today-kid-light-v2.jpg"
+type = "image"
+title = "Kinder – Hell, angepasst"
+description = "Heute-Terminkarte nach der neuen Vorgabe; noch nicht in die echte App integriert."
+logical_id = "2b0c6544-d30e-4808-a0d0-cfbc625ffab0"
+content_hash = "sha256:df0a1190f93bbc0a693386359b1d415c2273518550d2b77965c5a88232f80399"
+size = 27168
+mtime_ms = 1789562576512
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/2b0c6544-d30e-4808-a0d0-cfbc625ffab0/3ccf25ce-6171-4892-9ffd-726fc5fe5440"
+storage_version_token = "1789562596530151"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "J012veMac-YlFwZ2mcMLT"
+uri = "file://screenshots/due-today-kid-dark-v2.jpg"
+type = "image"
+title = "Kinder – Dunkel, angepasst"
+description = "Heute-Terminkarte nach der neuen Vorgabe; noch nicht in die echte App integriert."
+logical_id = "80650c6d-3a85-4727-ba71-74f3d8490a37"
+content_hash = "sha256:cb6e35bfeeb6fb38e934dcd165deffbeb1d306e4f8a140db304f047dd6022894"
+size = 28563
+mtime_ms = 1789562578156
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/80650c6d-3a85-4727-ba71-74f3d8490a37/1941c97d-5c57-48b2-b617-fba820b1f429"
+storage_version_token = "1789562597227203"
+content_type = "image/jpeg"

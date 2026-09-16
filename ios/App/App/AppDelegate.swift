@@ -1,9 +1,9 @@
 import UIKit
 import Capacitor
 
-// APNs push notifications are enabled via the aps-environment entitlement (production)
-// in App.entitlements. PushNotificationsPlugin handles token registration and
-// forwards device tokens to the server via /api/device-tokens/register.
+// APNs push notifications are enabled via the aps-environment entitlement
+// in App.entitlements. These delegate callbacks forward APNs registration
+// results to Capacitor's PushNotifications plugin.
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -37,6 +37,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         DispatchQueue.main.async {
             self.window?.rootViewController?.setNeedsStatusBarAppearanceUpdate()
         }
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        NotificationCenter.default.post(
+            name: .capacitorDidRegisterForRemoteNotifications,
+            object: deviceToken
+        )
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NotificationCenter.default.post(
+            name: .capacitorDidFailToRegisterForRemoteNotifications,
+            object: error
+        )
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

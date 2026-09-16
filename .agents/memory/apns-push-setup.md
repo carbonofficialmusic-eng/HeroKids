@@ -20,7 +20,7 @@ description: How iOS push notifications are implemented in HeroKids — APNs JWT
 ## Secrets required
 - `APNS_KEY_ID` — 10-char key ID (DQT69WC98R)
 - `APNS_TEAM_ID` — 10-char team ID (L834576FM4)
-- `APNS_BUNDLE_ID` — com.herokids.app
+- `APNS_BUNDLE_ID` — must exactly match the native app identifier `app.herokids.com`
 - `APNS_PRIVATE_KEY` — full .p8 file contents including BEGIN/END lines
 
 ## Trigger points (routes.ts)
@@ -32,3 +32,13 @@ description: How iOS push notifications are implemented in HeroKids — APNs JWT
 - `client/src/hooks/usePushNotifications.ts` — requests permission, registers with APNs, POSTs token to `/api/device-tokens/register`.
 - Called in `Router()` in App.tsx with `usePushNotifications(isAuthenticated)`.
 - Uses `@capacitor/push-notifications` (dynamic import — no-ops on web).
+- Capacitor v8 requires both APNs registration callbacks in `AppDelegate.swift`; they must post `.capacitorDidRegisterForRemoteNotifications` and `.capacitorDidFailToRegisterForRemoteNotifications` so the JavaScript listeners receive the result.
+- Configure PushNotifications `presentationOptions` with badge, sound, banner, and list when notifications must remain visibly testable while the app is in the foreground.
+
+## Native build handoff
+
+**Rule:** The Replit toolchain uses Node 22, Capacitor CLI/Core/iOS are aligned on 8.5, and the production iOS sync has completed. Continue by running Xcode Cloud, validating the generated push-capable provisioning profile, and testing token registration and delivery through the resulting TestFlight build.
+
+**Why:** APNs server configuration, source callbacks, entitlement, Xcode capability, and native sync are prepared. CocoaPods, signing, APNs device registration, and final delivery still require macOS/Xcode Cloud and a physical iPhone.
+
+**How to apply:** Do not recreate or resync the APNs setup from older Capacitor versions. Run a new Xcode Cloud build, install it from TestFlight, grant notification permission, then inspect device-token registration and APNs response logs.

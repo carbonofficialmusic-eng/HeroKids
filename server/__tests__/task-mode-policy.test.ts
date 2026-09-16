@@ -6,6 +6,7 @@ import {
   isRecurringTaskSchedule,
   resolveMemberDailyTargetState,
   isTeamCompletionInCurrentPeriod,
+  hasEveryTeamMemberSubmitted,
   shouldHideCompletedTaskFromChild,
   taskStructureChanged,
   validateSelectedTaskMemberIds,
@@ -18,6 +19,21 @@ describe("task member selection policy", () => {
   it("accepts unique family members for individual mode", () => {
     expect(validateSelectedTaskMemberIds(["child-a", "child-b"], familyIds, false))
       .toEqual(["child-a", "child-b"]);
+  });
+
+  it("waits for every team member before requesting collective approval", () => {
+    const targetIds = ["liv", "juri", "peter"];
+
+    expect(hasEveryTeamMemberSubmitted(targetIds, [
+      { memberId: "liv", status: "pending" },
+      { memberId: "juri", status: "pending" },
+    ])).toBe(false);
+
+    expect(hasEveryTeamMemberSubmitted(targetIds, [
+      { memberId: "liv", status: "pending" },
+      { memberId: "juri", status: "pending" },
+      { memberId: "peter", status: "pending" },
+    ])).toBe(true);
   });
 
   it("requires at least two members for team mode", () => {

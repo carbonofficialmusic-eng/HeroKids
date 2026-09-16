@@ -16,6 +16,7 @@
 - [Legacy hero visual direction](legacy-hero-visual-direction.md) — approved modern hero style keeps the logo’s turquoise, gold-orange, and deep navy palette
 - [iOS browser rotation touch layers](ios-browser-rotation-touch-layers.md) — Replit’s iOS browser may keep stale button hit regions after rotation; repaint alone is insufficient
 - [Shared-task approval display](shared-task-approval-display.md) — each child’s card must show that child’s approval, even while other assigned members remain pending
+- [Collective team-task approval](team-task-collective-approval.md) — team submissions stay individual, but parent approval and full-point payout happen once for the whole team
 - [Ad-hoc TypeScript checks](ad-hoc-typescript-checks.md) — run temporary tsx scripts inside the workspace so package and ESM resolution use the project configuration
 - [Multi-member recurrence boundaries](multi-member-recurrence.md) — individual assignments reset per member; team rounds must ignore historical contributions
 - [Segmented daily progress badges](segmented-daily-progress.md) — repeated daily tasks keep visible green/yellow segments per child instead of flashing a temporary check
@@ -26,3 +27,6 @@
 - [Native Skin-Downloads](native-skin-downloads.md) — nur der Starter-Skin wird gebündelt; weitere Avatare und Hintergründe laden seriell erst nach dem Aufdecken
 - [Punkte-Rückerstattungen](point-refund-invariant.md) — Rückerstattungen müssen exakt einmal erfolgen und dürfen verfügbare Punkte nie über den Lebenszeitverdienst erhöhen
 - [Eingelöste Belohnungen bleiben erhalten](redeemed-reward-archive.md) — Shop-Löschung archiviert nur die Vorlage; Einlösung, Anzeige und Aktionen bleiben bestehen
+- [App-Store-Version zurückstufen](app-store-version-downgrade.md) — höhere TestFlight-Versionsreihen müssen entfernt oder abgelaufen sein, bevor eine niedrigere Version auswählbar wird
+- [App-Store-Sprachanzeige](app-store-language-display.md) — Web-Übersetzungen zählen nicht; iOS muss unterstützte Sprachen im App-Bundle ausdrücklich deklarieren
+- [Heutige Terminkarten](due-today-card-design.md) — offene Termine am exakten Tag stehen zuerst und erhalten die freigegebene HEUTE-Hervorhebung

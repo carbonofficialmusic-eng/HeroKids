@@ -100,7 +100,8 @@ import { Pinboard } from "@/components/pinboard";
 import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature, canUseSharedRewards, type SubscriptionTier } from "@shared/tier-config";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
-import { getDueDateWindow, isFixedAppointment, sortFixedAppointments } from "@shared/due-date-policy";
+import { getDueDateWindow, getLocalDateKey, isFixedAppointment, sortFixedAppointments } from "@shared/due-date-policy";
+import { isTaskAssignedToMember } from "@shared/task-assignment-visibility";
 import logoUrl from "@assets/littlechamps_logo_opt.webp";
 
 // Extended Task type with metadata from API
@@ -543,6 +544,9 @@ function TaskCard({
       daysPast: Math.max(0, dueDateWindow.daysPastDue),
     };
   })();
+  const isDueToday = !!task.dueDate
+    && task.recurrence === "none"
+    && String(task.dueDate).substring(0, 10) === getLocalDateKey();
   const isScheduledAppointment = !!task.dueDate && task.recurrence === "none";
   const scheduledAppointmentText = (() => {
     if (!isScheduledAppointment) return null;
@@ -570,6 +574,7 @@ function TaskCard({
     task.sharedMemberIds && 
     task.sharedMemberIds.length > 0 && 
     !task.sharedMemberIds.includes(member.id);
+  const isNotAssignedToCurrentMember = !isTaskAssignedToMember(task, member.id);
   
   // Check if all assigned members have completed (for multi-assignment tasks)
   const isTeamTask = task.isSharedTask === true;
@@ -624,7 +629,8 @@ function TaskCard({
   // 4. Is assigned to this member (for shared tasks)
   // 5. Not all assigned members have completed yet
   // NOT actionable if: pending, approved, has completion without status, inactive, no slots, not assigned to shared task, all members completed, due date not yet reached, due date expired, or weekday-only task on a weekend
-  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned && !allMembersCompleted && !dueDateInfo.notYet && !dueDateInfo.expired && !isWeekendUnavailable;
+  const isActionable = (neverAttempted && !hasCompletedWithoutStatus || isRejected) && !isInactive && !hasNoSlots && !isSharedTaskNotAssigned && !isNotAssignedToCurrentMember && !allMembersCompleted && !dueDateInfo.notYet && !dueDateInfo.expired && !isWeekendUnavailable;
+  const showDueTodayHighlight = isDueToday && isActionable && !isRejected;
   
   const TaskIcon = getTaskIcon(task.title);
 
@@ -787,12 +793,18 @@ function TaskCard({
     return (
       <div className={`min-w-0 transition-transform duration-150 ${isActionable ? "active:scale-[0.96]" : ""}`}>
         <div
-          className={`p-2.5 rounded-2xl border transition-colors min-w-0 w-full ${borderColor} ${isActionable ? "cursor-pointer" : ""} ${!isActionable && !showAsApproved && !allSharedMembersCompleted && !showAsPending && !showAsSubmitted && !isRejected && !dueDateInfo.expired && !dueDateInfo.notYet ? "opacity-70" : ""}`}
+          className={`relative p-2.5 rounded-2xl border transition-colors min-w-0 w-full ${borderColor} ${showDueTodayHighlight ? "lc-task-due-today" : ""} ${isActionable ? "cursor-pointer" : ""} ${!isActionable && !showAsApproved && !allSharedMembersCompleted && !showAsPending && !showAsSubmitted && !isRejected && !dueDateInfo.expired && !dueDateInfo.notYet ? "opacity-70" : ""}`}
           style={cardBg ? { background: cardBg } : undefined}
           data-task-visual-state={showAsPending || showAsSubmitted ? "submitted" : showAsApproved || allSharedMembersCompleted ? "approved" : "open"}
           data-testid={`task-card-${task.id}`}
           onClick={isActionable ? handleComplete : undefined}
         >
+          {showDueTodayHighlight && (
+            <div className="lc-due-today-badge lc-due-today-badge-compact" data-testid={`badge-due-today-${task.id}`}>
+              <CalendarDays className="h-3 w-3" />
+              {t("tasks.todayBadge")}
+            </div>
+          )}
           {/* Emoji + title row */}
           <div className="flex items-start gap-2 min-w-0">
             <span className={`text-2xl leading-none flex-shrink-0 mt-0.5 ${isActionable || dueDateInfo.notYet ? "" : "opacity-50"}`}>
@@ -842,7 +854,7 @@ function TaskCard({
   return (
     <div className={`min-w-0 ${isActionable ? "active:scale-[0.97] transition-transform duration-150" : ""}`}>
       <Card
-        className={`p-5 transition-colors border-2 rounded-2xl min-w-0 w-full ${
+        className={`relative p-5 transition-colors border-2 rounded-2xl min-w-0 w-full ${showDueTodayHighlight ? "lc-task-due-today" : ""} ${
           isActionable && !isRejected 
             ? "cursor-pointer border-blue-500/30 shadow-lg" 
             : isActionable && isRejected 
@@ -883,6 +895,12 @@ function TaskCard({
           ? () => setShoppingListExpanded(v => !v)
           : isActionable ? handleComplete : undefined}
       >
+        {showDueTodayHighlight && (
+          <div className="lc-due-today-badge" data-testid={`badge-due-today-${task.id}`}>
+            <CalendarDays className="h-4 w-4" />
+            {t("tasks.todayBadge")}
+          </div>
+        )}
         <div className="text-center space-y-3">
           {dailyTarget > 1 &&
             !task.assignedMemberCompletions?.length &&
@@ -2000,6 +2018,12 @@ export default function KidDashboard() {
 
   // Filter tasks: different logic for multi-completion vs multi-assignment vs normal tasks
   const myTasks = tasks.filter(t => {
+    // The kid-style board can also be opened by a parent. Filter its audience
+    // here rather than relying only on the child-specific API response.
+    if (!isTaskAssignedToMember(t, member.id)) {
+      return false;
+    }
+
     // Multi-Completion Tasks (slot-based)
     if (t.maxCompletions !== null) {
       // Recurring Multi-Tasks: Always show (grayed out when all slots filled)
@@ -2166,7 +2190,7 @@ export default function KidDashboard() {
     return sortedGroups;
   };
 
-  const fixedAppointmentTasks = sortFixedAppointments(myTasks.filter(isFixedAppointment));
+  const fixedAppointmentTasks = sortFixedAppointments(myTasks.filter(isFixedAppointment), getLocalDateKey());
   const importantMyTasks = myTasks.filter(t => (t as any).isImportant && !isFixedAppointment(t));
   const regularMyTasks = myTasks.filter(t => !(t as any).isImportant && !isFixedAppointment(t));
   const filteredKidTasks = filterKidTasksByDate(regularMyTasks);
@@ -2305,7 +2329,7 @@ export default function KidDashboard() {
                 </Link>
                 <button
                   data-testid="button-scroll-to-pinboard-kid"
-                  className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate"
+                  className={`${isNativePlatform() ? "" : "lg:hidden"} flex items-center gap-2 bg-card px-3 py-1.5 rounded-xl border border-border cursor-pointer hover-elevate`}
                   onClick={() => {
                     const el = document.getElementById("pinboard");
                     if (el) scrollToPinboard(el);

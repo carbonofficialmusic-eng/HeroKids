@@ -1102,7 +1102,7 @@ html {
 }
 .lc-reward-dialog {
   grid-template-rows: auto minmax(0, 1fr) auto;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 .lc-reward-dialog-form {
   width: 100%;
@@ -1126,6 +1126,16 @@ html {
   background: var(--lc-editor-bg);
 }
 .lc-reward-dialog:has(input:focus, textarea:focus) .lc-reward-dialog-actions {
+  visibility: hidden;
+  pointer-events: none;
+}
+.lc-reward-dialog:has(input:focus, textarea:focus) .lc-reward-icon-picker {
+  display: none;
+}
+.lc-reward-dialog:has(input:focus, textarea:focus) .lc-game-dialog-header {
+  padding-bottom: .3rem;
+}
+.lc-reward-dialog:has(input:focus, textarea:focus) .lc-game-dialog-header [data-slot="dialog-description"] {
   display: none;
 }
 .lc-game-dialog .rounded-lg.border {
@@ -3366,6 +3376,66 @@ html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard) .lc-next-date-label {
   border-color: rgba(96, 165, 250, .48) !important;
   background: rgba(30, 64, 175, .28) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+}
+
+/* A fixed appointment that is actionable today. Status colors still win
+   because cards only receive this class while their visual state is open. */
+:is(.lc-dashboard, .lc-kid-dashboard) .lc-task-due-today {
+  --lc-due-today-glow: rgba(255, 100, 124, .30);
+  border: 2px solid #ff647c !important;
+  box-shadow: 0 0 18px var(--lc-due-today-glow) !important;
+  animation: lc-due-today-arrival 1.2s ease-out 1;
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard) .lc-task-due-today {
+  --lc-due-today-glow: rgba(255, 93, 0, .26);
+  border-color: #ff5d00 !important;
+  box-shadow: 0 0 18px var(--lc-due-today-glow) !important;
+}
+:is(.lc-dashboard, .lc-kid-dashboard) .lc-due-today-badge {
+  position: absolute;
+  z-index: 4;
+  top: .75rem;
+  right: .75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .35rem .65rem;
+  border: 1px solid rgba(255, 255, 255, .28);
+  border-radius: .7rem;
+  color: #fff;
+  background: linear-gradient(135deg, #ff7a59, #ff4f7b);
+  box-shadow: 0 4px 10px rgba(255, 79, 123, .28);
+  font-size: .72rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .025em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.lc-dashboard .lc-due-today-badge:not(.lc-due-today-badge-compact) {
+  top: -.6rem;
+}
+html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard) .lc-due-today-badge {
+  background: linear-gradient(135deg, #ff8d20, #ff5d00);
+  box-shadow: 0 4px 10px rgba(255, 93, 0, .24);
+}
+:is(.lc-dashboard, .lc-kid-dashboard) .lc-due-today-badge-compact {
+  top: -.55rem;
+  right: .5rem;
+  padding: .28rem .5rem;
+  font-size: .65rem;
+}
+@keyframes lc-due-today-arrival {
+  0%, 100% { filter: brightness(1); }
+  42% {
+    filter: brightness(1.12);
+    box-shadow: 0 0 28px var(--lc-due-today-glow);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.lc-dashboard, .lc-kid-dashboard) .lc-task-due-today {
+    animation: none;
+  }
 }
 .dark .lc-dashboard .lc-weekend-unavailable-label {
   color: #f0f5fa !important;

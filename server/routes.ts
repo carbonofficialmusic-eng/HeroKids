@@ -83,6 +83,7 @@ import {
   taskStructureChanged,
   validateSelectedTaskMemberIds,
   isTeamCompletionInCurrentPeriod,
+  hasEveryTeamMemberSubmitted,
 } from "./task-mode-policy";
 
 // Backend notification translations for all 9 supported languages
@@ -2544,6 +2545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const parsed = insertTaskSchema.parse(req.body);
       const isTeamTask = parsed.isSharedTask === true;
+      const usesDailyMultiTask = parsed.recurrence === "daily" && (parsed.dailyTarget || 1) > 1;
       const selectedMemberIds = await validateTaskMemberSelection(
         member.familyName,
         parsed.sharedMemberIds || [],
@@ -2555,7 +2557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Gate: task assignment to specific members requires Family tier or higher
       // Gate: shopping list tasks require Family tier or higher
-      if (selectedMemberIds.length > 0 || parsed.isShoppingList) {
+      if (selectedMemberIds.length > 0 || parsed.isShoppingList || usesDailyMultiTask) {
         const family = await storage.getFamily(member.familyName);
         const familyOnTrial = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
         if (selectedMemberIds.length > 0) {
@@ -2572,6 +2574,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               message: "Shopping list tasks require a Family subscription or higher",
               code: "TIER_REQUIRED",
               feature: "shoppingList",
+            });
+          }
+        }
+        if (usesDailyMultiTask) {
+          if (!family || (!hasFeature(family.subscriptionTier as SubscriptionTier, "multiTask") && !familyOnTrial)) {
+            return res.status(403).json({
+              message: "Multiple daily completions require Family subscription or higher",
+              code: "TIER_REQUIRED",
+              feature: "multiTask",
             });
           }
         }
@@ -2645,6 +2656,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse and update the task
       const parsed = insertTaskSchema.partial().parse(req.body);
       const isTeamTask = parsed.isSharedTask ?? existingTask.isSharedTask;
+      const usesDailyMultiTask =
+        (parsed.recurrence ?? existingTask.recurrence) === "daily"
+        && (parsed.dailyTarget ?? existingTask.dailyTarget ?? 1) > 1;
       const selectionProvided = Object.prototype.hasOwnProperty.call(req.body, "sharedMemberIds");
       let selectedMemberIds: string[];
       if (selectionProvided) {
@@ -2694,7 +2708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Gate: task assignment / shopping list requires Family tier or higher
-      if (selectedMemberIds.length > 0 || parsed.isShoppingList) {
+      if (selectedMemberIds.length > 0 || parsed.isShoppingList || usesDailyMultiTask) {
         const family = await storage.getFamily(member.familyName);
         const familyOnTrialPatch = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
         if (selectedMemberIds.length > 0) {
@@ -2711,6 +2725,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               message: "Shopping list tasks require a Family subscription or higher",
               code: "TIER_REQUIRED",
               feature: "shoppingList",
+            });
+          }
+        }
+        if (usesDailyMultiTask) {
+          if (!family || (!hasFeature(family.subscriptionTier as SubscriptionTier, "multiTask") && !familyOnTrialPatch)) {
+            return res.status(403).json({
+              message: "Multiple daily completions require Family subscription or higher",
+              code: "TIER_REQUIRED",
+              feature: "multiTask",
             });
           }
         }
@@ -3531,7 +3554,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Broadcast appropriate message based on whether approval was required
       const completionRequiresApproval = task.requiresApproval || forceLateDueDateApproval;
-      if (completionRequiresApproval) {
+      let teamReadyForApproval = true;
+      if (completionRequiresApproval && task.isSharedTask) {
+        const targetIds = task.sharedMemberIds?.length
+          ? task.sharedMemberIds
+          : await storage.getTaskAssignmentsByTask(task.id);
+        const currentTeamSubmissions = (await storage.getTaskCompletionsByTask(task.id))
+          .filter((item: any) => isTeamCompletionInCurrentPeriod(
+            item.completedAt,
+            task.nextAvailableDate ? new Date(task.nextAvailableDate) : null,
+            new Date(),
+          ));
+        teamReadyForApproval = hasEveryTeamMemberSubmitted(targetIds, currentTeamSubmissions);
+      }
+
+      if (completionRequiresApproval && teamReadyForApproval) {
         // Broadcast pending completion to family (so parents know to approve)
         broadcastToFamily(member.familyName, {
           type: "task_completion_pending",
@@ -3574,7 +3611,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Broadcast notification update
         broadcastToFamily(member.familyName, { type: "notification_update" });
-      } else {
+      } else if (!completionRequiresApproval) {
         // Broadcast auto-approved completion
         broadcastToFamily(member.familyName, {
           type: "task_completion_approved",
@@ -3679,15 +3716,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const task = await storage.getTask(completion.taskId);
       let approvedRecipientCompletions: any[] = [completion];
       
-      // A shopping list is one collective approval. Internally each recipient
-      // keeps a completion row so points/history remain attributable, but this
-      // single action approves every pending recipient with the full task value.
-      if (task?.isShoppingList) {
+      // Shopping lists and team tasks use one collective approval. Internally
+      // each recipient keeps a completion row so points/history remain
+      // attributable, but this single action approves every pending recipient.
+      if (task?.isShoppingList || task?.isSharedTask) {
         const collectiveCompletions = (await storage.getTaskCompletionsByTask(task.id))
-          .filter((item: any) => item.status === "pending");
+          .filter((item: any) => (
+            item.status === "pending"
+            && (
+              task.isShoppingList
+              || !task.sharedMemberIds?.length
+              || task.sharedMemberIds.includes(item.memberId)
+            )
+          ));
         approvedRecipientCompletions = collectiveCompletions;
+        if (
+          task.isSharedTask
+          && !hasEveryTeamMemberSubmitted(
+            task.sharedMemberIds?.length
+              ? task.sharedMemberIds
+              : await storage.getTaskAssignmentsByTask(task.id),
+            collectiveCompletions,
+          )
+        ) {
+          return res.status(422).json({ message: "Not all team members have submitted yet" });
+        }
         for (const collectiveCompletion of collectiveCompletions) {
-          // Also repairs old pending shopping-list rows that split the points.
+          // Also repairs old collective rows that split the points.
           await storage.updateTaskCompletionPoints(collectiveCompletion.id, task.points);
           await storage.approveTaskCompletion(collectiveCompletion.id, member.id);
         }
@@ -3695,7 +3750,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Mark completion as approved - this also awards points via _approveCompletionInternal.
         await storage.approveTaskCompletion(completionId, member.id);
       }
-      const approvedPoints = task?.isShoppingList ? task.points : completion.pointsEarned;
+      const approvedPoints = task?.isShoppingList || task?.isSharedTask
+        ? task.points
+        : completion.pointsEarned;
       
       // For IMMEDIATE team tasks: when ALL selected members are approved,
       // delete all completions so the next round starts with a clean slate.
@@ -3819,7 +3876,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           familyName: member.familyName,
           memberId: approvedCompletion.memberId,
           taskId: completion.taskId,
-          pointsEarned: task?.isShoppingList ? task.points : approvedCompletion.pointsEarned,
+          pointsEarned: task?.isShoppingList || task?.isSharedTask
+            ? task.points
+            : approvedCompletion.pointsEarned,
         });
       }
       
@@ -3872,12 +3931,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot reject completions from another family" });
       }
       
-      // A shopping list is also rejected as one collective request so no
-      // hidden per-recipient approvals remain on the approvals page.
+      // Shopping lists and team tasks are rejected as one collective request
+      // so no hidden per-recipient approvals remain on the approvals page.
       const completionTask = await storage.getTask(completion.taskId);
-      if (completionTask?.isShoppingList) {
+      if (completionTask?.isShoppingList || completionTask?.isSharedTask) {
         const collectiveCompletions = (await storage.getTaskCompletionsByTask(completion.taskId))
-          .filter((item: any) => item.status === "pending");
+          .filter((item: any) => (
+            item.status === "pending"
+            && (
+              completionTask.isShoppingList
+              || !completionTask.sharedMemberIds?.length
+              || completionTask.sharedMemberIds.includes(item.memberId)
+            )
+          ));
         for (const collectiveCompletion of collectiveCompletions) {
           await storage.rejectTaskCompletion(
             collectiveCompletion.id,
