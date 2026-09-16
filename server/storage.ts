@@ -278,6 +278,7 @@ export interface IStorage {
   cleanupOldEmailReadinessChecks(keepCount: number): Promise<number>;
   getPendingCompletionsByFamily(familyName: string): Promise<any[]>;
   approveTaskCompletion(completionId: string, approvedBy: string): Promise<void>;
+  autoApproveTaskCompletions(completionIds: string[]): Promise<void>;
   rejectTaskCompletion(completionId: string, approvedBy: string, rejectionReason: string): Promise<void>;
   getTaskCompletion(completionId: string): Promise<TaskCompletion | undefined>;
   deleteTaskCompletionsByTask(taskId: string): Promise<void>;
@@ -2210,7 +2211,7 @@ export class DatabaseStorage implements IStorage {
     return completions;
   }
 
-  private async _approveCompletionInternal(tx: any, completionId: string, approvedBy: string, skipApprovalUpdate: boolean = false): Promise<void> {
+  private async _approveCompletionInternal(tx: any, completionId: string, approvedBy: string | null, skipApprovalUpdate: boolean = false): Promise<void> {
     // 1. Lock completion
     const [completion] = await tx.select().from(taskCompletions)
       .where(eq(taskCompletions.id, completionId))
@@ -2340,6 +2341,14 @@ export class DatabaseStorage implements IStorage {
   async approveTaskCompletion(completionId: string, approvedBy: string): Promise<void> {
     await db.transaction(async (tx) => {
       await this._approveCompletionInternal(tx, completionId, approvedBy);
+    });
+  }
+
+  async autoApproveTaskCompletions(completionIds: string[]): Promise<void> {
+    await db.transaction(async (tx) => {
+      for (const completionId of completionIds) {
+        await this._approveCompletionInternal(tx, completionId, null);
+      }
     });
   }
 

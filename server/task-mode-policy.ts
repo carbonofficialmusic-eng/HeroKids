@@ -204,3 +204,29 @@ export function hasEveryTeamMemberSubmitted(
   );
   return targetMemberIds.every((memberId) => submittedMemberIds.has(memberId));
 }
+
+export function resolveCompletionCoordination(options: {
+  isTeamTask: boolean;
+  requiresApproval: boolean;
+  forceApproval: boolean;
+  allTeamMembersSubmitted: boolean;
+}): {
+  deferAwardOnCreate: boolean;
+  requestParentApproval: boolean;
+  autoApproveTeam: boolean;
+  autoApproved: boolean;
+} {
+  const requestParentApproval = options.requiresApproval || options.forceApproval;
+  const autoApproveTeam = options.isTeamTask
+    && !requestParentApproval
+    && options.allTeamMembersSubmitted;
+
+  return {
+    // Every team contribution must wait until the full team has submitted.
+    // Regular approval-required tasks already defer inside storage.
+    deferAwardOnCreate: options.isTeamTask,
+    requestParentApproval,
+    autoApproveTeam,
+    autoApproved: options.isTeamTask ? autoApproveTeam : !requestParentApproval,
+  };
+}

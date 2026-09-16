@@ -84,6 +84,7 @@ import {
   validateSelectedTaskMemberIds,
   isTeamCompletionInCurrentPeriod,
   hasEveryTeamMemberSubmitted,
+  resolveCompletionCoordination,
 } from "./task-mode-policy";
 
 // Backend notification translations for all 9 supported languages
@@ -3361,8 +3362,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           completion = dailyResult.completion;
         } else {
-          completion = await storage.createTaskCompletion(completionData, {
+          const initialCoordination = resolveCompletionCoordination({
+            isTeamTask: task.isSharedTask,
+            requiresApproval: task.requiresApproval,
             forceApproval: forceLateDueDateApproval,
+            allTeamMembersSubmitted: false,
+          });
+          completion = await storage.createTaskCompletion(completionData, {
+            // Team contributions must never award points independently. They
+            // remain pending until the final teammate submits.
+            forceApproval: forceLateDueDateApproval || initialCoordination.deferAwardOnCreate,
           });
         }
       } catch (err: any) {
@@ -3552,23 +3561,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get updated member data
       const updatedMember = await storage.getFamilyMember(member.id);
       
-      // Broadcast appropriate message based on whether approval was required
-      const completionRequiresApproval = task.requiresApproval || forceLateDueDateApproval;
-      let teamReadyForApproval = true;
-      if (completionRequiresApproval && task.isSharedTask) {
-        const targetIds = task.sharedMemberIds?.length
+      // Coordinate team completion before broadcasting or returning a result.
+      // With approval enabled, the final submission exposes one parent
+      // decision. Without approval, the final submission releases every
+      // teammate's pending completion and awards everyone together.
+      const targetTeamMemberIds = task.isSharedTask
+        ? (task.sharedMemberIds?.length
           ? task.sharedMemberIds
-          : await storage.getTaskAssignmentsByTask(task.id);
-        const currentTeamSubmissions = (await storage.getTaskCompletionsByTask(task.id))
+          : await storage.getTaskAssignmentsByTask(task.id))
+        : [];
+      const currentTeamSubmissions = task.isSharedTask
+        ? (await storage.getTaskCompletionsByTask(task.id))
           .filter((item: any) => isTeamCompletionInCurrentPeriod(
             item.completedAt,
             task.nextAvailableDate ? new Date(task.nextAvailableDate) : null,
             new Date(),
-          ));
-        teamReadyForApproval = hasEveryTeamMemberSubmitted(targetIds, currentTeamSubmissions);
+          ))
+        : [];
+      let teamReadyForApproval = true;
+      if (task.isSharedTask) {
+        teamReadyForApproval = hasEveryTeamMemberSubmitted(
+          targetTeamMemberIds,
+          currentTeamSubmissions,
+        );
+      }
+      const coordination = resolveCompletionCoordination({
+        isTeamTask: task.isSharedTask,
+        requiresApproval: task.requiresApproval,
+        forceApproval: forceLateDueDateApproval,
+        allTeamMembersSubmitted: teamReadyForApproval,
+      });
+
+      if (coordination.autoApproveTeam) {
+        const targetIds = new Set(targetTeamMemberIds);
+        const pendingTeamCompletions = currentTeamSubmissions.filter(
+          (item: any) => item.status === "pending" && targetIds.has(item.memberId),
+        );
+        for (const teamCompletion of pendingTeamCompletions) {
+          await storage.updateTaskCompletionPoints(teamCompletion.id, task.points);
+        }
+        await storage.autoApproveTaskCompletions(
+          pendingTeamCompletions.map((teamCompletion: any) => teamCompletion.id),
+        );
+        completion = { ...completion, status: "approved" };
       }
 
-      if (completionRequiresApproval && teamReadyForApproval) {
+      if (coordination.requestParentApproval && teamReadyForApproval) {
         // Broadcast pending completion to family (so parents know to approve)
         broadcastToFamily(member.familyName, {
           type: "task_completion_pending",
@@ -3611,7 +3649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Broadcast notification update
         broadcastToFamily(member.familyName, { type: "notification_update" });
-      } else if (!completionRequiresApproval) {
+      } else if (coordination.autoApproved) {
         // Broadcast auto-approved completion
         broadcastToFamily(member.familyName, {
           type: "task_completion_approved",
@@ -3641,11 +3679,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         success: true,
-        message: completionRequiresApproval
-          ? "Task completion submitted! Awaiting parent approval."
-          : `Great job! You earned ${task.points} points!`,
+        message: task.isSharedTask && !teamReadyForApproval
+          ? "Team contribution submitted! Waiting for the other team members."
+          : coordination.requestParentApproval
+            ? "Task completion submitted! Awaiting parent approval."
+            : `Great job! You earned ${task.points} points!`,
         completion,
-        autoApproved: !completionRequiresApproval,
+        autoApproved: coordination.autoApproved,
       });
     } catch (error: any) {
       console.error("Error completing task:", error);

@@ -7,6 +7,7 @@ import {
   resolveMemberDailyTargetState,
   isTeamCompletionInCurrentPeriod,
   hasEveryTeamMemberSubmitted,
+  resolveCompletionCoordination,
   shouldHideCompletedTaskFromChild,
   taskStructureChanged,
   validateSelectedTaskMemberIds,
@@ -34,6 +35,62 @@ describe("task member selection policy", () => {
       { memberId: "juri", status: "pending" },
       { memberId: "peter", status: "pending" },
     ])).toBe(true);
+  });
+
+  it("defers team points and requests one approval only after everyone submits", () => {
+    expect(resolveCompletionCoordination({
+      isTeamTask: true,
+      requiresApproval: true,
+      forceApproval: false,
+      allTeamMembersSubmitted: false,
+    })).toEqual({
+      deferAwardOnCreate: true,
+      requestParentApproval: true,
+      autoApproveTeam: false,
+      autoApproved: false,
+    });
+
+    expect(resolveCompletionCoordination({
+      isTeamTask: true,
+      requiresApproval: true,
+      forceApproval: false,
+      allTeamMembersSubmitted: true,
+    }).autoApproveTeam).toBe(false);
+  });
+
+  it("awards a no-approval team only after the final contribution", () => {
+    const beforeFinalSubmission = resolveCompletionCoordination({
+      isTeamTask: true,
+      requiresApproval: false,
+      forceApproval: false,
+      allTeamMembersSubmitted: false,
+    });
+    expect(beforeFinalSubmission.deferAwardOnCreate).toBe(true);
+    expect(beforeFinalSubmission.autoApproved).toBe(false);
+    expect(beforeFinalSubmission.autoApproveTeam).toBe(false);
+
+    const afterFinalSubmission = resolveCompletionCoordination({
+      isTeamTask: true,
+      requiresApproval: false,
+      forceApproval: false,
+      allTeamMembersSubmitted: true,
+    });
+    expect(afterFinalSubmission.requestParentApproval).toBe(false);
+    expect(afterFinalSubmission.autoApproveTeam).toBe(true);
+    expect(afterFinalSubmission.autoApproved).toBe(true);
+  });
+
+  it("still forces parent approval for a late fixed-date team submission", () => {
+    expect(resolveCompletionCoordination({
+      isTeamTask: true,
+      requiresApproval: false,
+      forceApproval: true,
+      allTeamMembersSubmitted: true,
+    })).toMatchObject({
+      requestParentApproval: true,
+      autoApproveTeam: false,
+      autoApproved: false,
+    });
   });
 
   it("requires at least two members for team mode", () => {

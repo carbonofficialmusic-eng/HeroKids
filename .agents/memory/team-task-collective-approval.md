@@ -7,6 +7,8 @@ For a team task requiring parental approval, each participant submits separately
 
 Approving that request approves every participant’s pending completion and awards the task’s full point value to every assigned participant. Rejecting it rejects the collective submission so no hidden approvals remain.
 
-**Why:** Team mode represents one shared result. Separate parent decisions could approve and pay only part of the team before the shared work was complete.
+For a team task without parental approval, individual contributions must still remain unpaid until every assigned participant has submitted. The final contribution atomically approves all current team completions and awards the full task value to every participant together.
 
-**How to apply:** Keep per-member completion rows for progress, attribution, history, and points, but expose one approval item only after the complete target member set has submitted. Do not apply this rule to individual assignment mode.
+**Why:** Team mode represents one shared result. Separate decisions or immediate per-person payouts could complete and pay only part of the team before the shared work was complete.
+
+**How to apply:** Keep per-member completion rows for progress, attribution, history, and points, but defer every team payout until the complete target member set has submitted. With approval, expose one collective approval item; without approval, release every team payout atomically after the final contribution. Do not apply this rule to individual assignment mode.
