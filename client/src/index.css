@@ -1005,6 +1005,189 @@ html {
   .lc-task-dialog-members { grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
 
+/* Task editor — the light Little Champs palette. This override is deliberately
+   guarded by html:not(.dark) so the approved night treatment above is left
+   byte-for-byte in spirit and behavior. */
+html:not(.dark) .lc-task-dialog {
+  --lc-task-bg: #fffdf9;
+  --lc-task-panel: #f2f8fa;
+  --lc-task-panel-2: #e7f5f7;
+  --lc-task-line: #dbe7ea;
+  --lc-task-cyan: #079fc3;
+  --lc-task-text: #18304b;
+  --lc-task-muted: #637486;
+  color: var(--lc-task-text);
+  border-color: #d6e4e7;
+  border-radius: 1.15rem;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(255, 205, 94, .16), transparent 15rem),
+    linear-gradient(145deg, #fffefa 0%, #f9fcfb 72%, #f4faf9 100%);
+  box-shadow: 0 24px 58px rgba(27, 54, 71, .22), 0 3px 10px rgba(30, 69, 85, .08);
+}
+html:not(.dark) .lc-task-dialog-header {
+  padding: .25rem .25rem .8rem;
+  border-bottom-color: #dce9e9;
+}
+html:not(.dark) .lc-task-dialog-header [data-slot="dialog-title"] {
+  color: #142c49;
+  font-weight: 800;
+  letter-spacing: -.025em;
+}
+html:not(.dark) .lc-task-dialog-header [data-slot="dialog-description"],
+html:not(.dark) .lc-task-dialog .text-muted-foreground {
+  color: #68798a;
+}
+html:not(.dark) .lc-task-dialog-form > * {
+  border-bottom-color: #e1ebed;
+}
+html:not(.dark) .lc-task-dialog label,
+html:not(.dark) .lc-task-dialog [data-slot="form-label"] {
+  color: #30455b;
+  font-weight: 700;
+}
+html:not(.dark) .lc-task-dialog input,
+html:not(.dark) .lc-task-dialog textarea,
+html:not(.dark) .lc-task-dialog [data-slot="select-trigger"] {
+  color: #1b3047;
+  border-color: #d5e0e4;
+  background: #fffefa;
+  box-shadow: 0 1px 2px rgba(24, 54, 68, .04), inset 0 1px rgba(255,255,255,.85);
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+html:not(.dark) .lc-task-dialog input:focus,
+html:not(.dark) .lc-task-dialog textarea:focus,
+html:not(.dark) .lc-task-dialog [data-slot="select-trigger"]:focus {
+  border-color: #14afd0;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(20, 175, 208, .14);
+}
+html:not(.dark) .lc-task-dialog input::placeholder,
+html:not(.dark) .lc-task-dialog textarea::placeholder { color: #9aa9b2; }
+html:not(.dark) .lc-task-dialog [data-slot="card"],
+html:not(.dark) .lc-task-dialog .rounded-lg.border,
+html:not(.dark) .lc-task-dialog .rounded-md.border-dashed {
+  border-color: #d5e3e6;
+  background: #f3f8f9;
+  box-shadow: 0 1px 2px rgba(25, 62, 78, .035);
+}
+html:not(.dark) .lc-task-dialog [data-slot="card"]:hover {
+  border-color: #56c6d9;
+  background: #eefafb;
+}
+html:not(.dark) .lc-task-dialog-section-heading {
+  padding-top: .55rem;
+}
+html:not(.dark) .lc-task-dialog-section-heading h3 {
+  color: #183451;
+  font-size: 1.03rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+html:not(.dark) .lc-task-dialog-section-number {
+  width: 1.85rem;
+  height: 1.85rem;
+  color: #fff;
+  background: linear-gradient(145deg, #0aa7c8, #28c9dc);
+  box-shadow: inset 0 1px rgba(255,255,255,.45), 0 2px 0 #087d9c;
+}
+html:not(.dark) .lc-task-dialog-category-tab {
+  color: #53677a;
+  border-color: #d1e0e3;
+  background: #eef5f6;
+  transition: transform .16s ease, border-color .16s ease, background-color .16s ease;
+}
+html:not(.dark) .lc-task-dialog-category-tab:hover {
+  border-color: #76cddb;
+  background: #e5f7f8;
+}
+html:not(.dark) .lc-task-dialog-category-tab.is-active {
+  color: #fff;
+  border-color: #0b9fbf;
+  background: linear-gradient(145deg, #069abf, #25c3d4);
+  box-shadow: 0 2px 0 #08718b;
+}
+html:not(.dark) .lc-task-dialog .lc-task-dialog-symbol {
+  border-color: #d2e1e4;
+  background: #eef5f6;
+  box-shadow: 0 1px 2px rgba(28, 68, 85, .05);
+}
+html:not(.dark) .lc-task-dialog .lc-task-dialog-symbol:hover {
+  border-color: #67c8d7;
+  background: #e9f9fa;
+}
+html:not(.dark) .lc-task-dialog .lc-task-dialog-symbol.is-selected {
+  border-color: #08a1c2;
+  background: linear-gradient(145deg, #079fc1, #27c5d7);
+  box-shadow: inset 0 1px rgba(255,255,255,.48), 0 2px 0 #087c98;
+}
+html:not(.dark) .lc-task-dialog [data-testid="slider-task-points"] {
+  background: #e8eef0;
+  border: 1px solid #d4dfe2;
+}
+html:not(.dark) .lc-task-dialog [data-testid="slider-task-points"] [role="slider"] {
+  border-color: #c5f5f7;
+  background: #0ca8ca;
+  box-shadow: 0 2px 0 #087d9c, 0 0 0 2px rgba(12,168,202,.12);
+}
+html:not(.dark) .lc-task-dialog [data-testid="radio-recurrence-mode"] > div,
+html:not(.dark) .lc-task-dialog [data-testid^="radio-"] + label {
+  color: #42586e;
+}
+html:not(.dark) .lc-task-dialog [role="radiogroup"] {
+  border-color: #d8e5e7;
+  background: #f2f7f8;
+}
+html:not(.dark) .lc-task-dialog-member {
+  color: #4d6275;
+  border-color: #d3e1e4;
+  background: #eef4f5;
+  transition: transform .16s ease, border-color .16s ease, background-color .16s ease;
+}
+html:not(.dark) .lc-task-dialog-member:hover {
+  border-color: #54c3d4;
+  background: #e7f8f9;
+}
+html:not(.dark) .lc-task-dialog-member.is-selected {
+  color: #fff;
+  border-color: #079dbd;
+  background: linear-gradient(145deg, #0797b8, #16aec5);
+  box-shadow: inset 0 1px rgba(255,255,255,.3), 0 2px 0 #08718b;
+}
+html:not(.dark) .lc-task-dialog-show-more { color: #078cab; font-weight: 700; }
+html:not(.dark) .lc-task-dialog [role="switch"][data-state="unchecked"] {
+  border-color: #b9cfd7;
+  background: #dce9ec;
+}
+html:not(.dark) .lc-task-dialog [role="switch"][data-state="unchecked"] > span {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(23, 52, 67, .2);
+}
+html:not(.dark) .lc-task-dialog-actions {
+  border-top-color: #dce8e9;
+  background: rgba(255, 253, 249, .94);
+  backdrop-filter: blur(8px);
+}
+html:not(.dark) .lc-task-dialog-actions button {
+  min-height: 2.95rem;
+  border-radius: .78rem;
+}
+html:not(.dark) .lc-task-dialog-actions button[type="submit"] {
+  color: #fff;
+  border-color: #0794b2;
+  background: linear-gradient(135deg, #0aa8cc, #25c2d7);
+  box-shadow: 0 3px 0 #087b98, 0 7px 14px rgba(7, 156, 190, .18);
+}
+html:not(.dark) .lc-task-dialog-actions button[type="submit"]:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+html:not(.dark) .lc-task-dialog-actions button[type="button"] {
+  color: #526579;
+  border-color: #d4e0e3;
+  background: #f5f9fa;
+  box-shadow: 0 1px 2px rgba(25, 62, 78, .05);
+}
+
 /* Shared Little Champs editor language. These classes intentionally do not
    touch the base dialog primitives: each workflow gets one bounded scroll
    owner and keeps its existing form/handler contract. */
