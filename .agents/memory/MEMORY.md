@@ -30,3 +30,4 @@
 - [App-Store-Version zurückstufen](app-store-version-downgrade.md) — höhere TestFlight-Versionsreihen müssen entfernt oder abgelaufen sein, bevor eine niedrigere Version auswählbar wird
 - [App-Store-Sprachanzeige](app-store-language-display.md) — Web-Übersetzungen zählen nicht; iOS muss unterstützte Sprachen im App-Bundle ausdrücklich deklarieren
 - [Heutige Terminkarten](due-today-card-design.md) — offene Termine am exakten Tag stehen zuerst und erhalten die freigegebene HEUTE-Hervorhebung
+- [GitHub-Connector für Branch-Sync](github-connector-branch-sync.md) — Connector-Zugriff authentifiziert kein lokales git push; kompakte Git-Tree-Updates vermeiden Proxy-502
