@@ -957,7 +957,7 @@ export default function RewardsBoard() {
             <Card key={redemption.id} className="lc-rewards-board-card" data-testid={`card-redemption-${redemption.id}`}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3 flex-1">
+                  <div className="flex min-w-0 items-center gap-3 flex-1">
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={getAvatarUrl(redemption.member.activeSkinId, redemption.member.avatarUrl, (redemption.member as any).useCustomAvatar, (redemption.member as any).updatedAt)} />
                       <AvatarFallback 
@@ -967,7 +967,7 @@ export default function RewardsBoard() {
                         {redemption.member.displayName[0]}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <CardTitle className="text-xl font-accent">
                         {redemption.reward.title}
                       </CardTitle>
@@ -979,7 +979,9 @@ export default function RewardsBoard() {
                       </CardDescription>
                     </div>
                   </div>
-                  {getStatusBadge(redemption.status)}
+                  <div className="shrink-0">
+                    {getStatusBadge(redemption.status)}
+                  </div>
                 </div>
               </CardHeader>
 
