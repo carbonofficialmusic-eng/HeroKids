@@ -657,14 +657,19 @@ export default function Dashboard() {
       return await response.json();
     },
     onSuccess: (data: any) => {
+      // The page can stay mounted when switching parent -> parent, so routing
+      // alone does not unmount the controlled dialog. Close it explicitly as
+      // soon as the server confirms the profile switch.
+      setSwitchMemberDialogOpen(false);
+
       // Invalidate member-related queries but keep auth data intact
       // This prevents the FamilySetup flash during navigation
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       
-      // Navigate immediately via client-side routing - dialog will be gone
-      // once the new page renders. A full page reload (window.location.href)
+      // Navigate immediately via client-side routing. A full page reload
+      // (window.location.href)
       // would trigger a native WebView navigation on iOS, which briefly shows
       // the "Be right back!" outage fallback screen even on a normal switch.
       if (data?.member?.role === "child") {

@@ -1885,14 +1885,19 @@ export default function KidDashboard() {
       return await response.json();
     },
     onSuccess: (data: any) => {
+      // Close the controlled dialog explicitly before routing. In particular,
+      // child -> child stays on the same page component, so navigation alone
+      // does not unmount the open dialog.
+      setSwitchMemberDialogOpen(false);
+
       // Invalidate member-related queries but keep auth data intact
       // This prevents the FamilySetup flash during navigation
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       
-      // Navigate immediately via client-side routing - dialog will be gone
-      // once the new page renders. A full page reload (window.location.href)
+      // Navigate immediately via client-side routing. A full page reload
+      // (window.location.href)
       // would trigger a native WebView navigation on iOS, which briefly shows
       // the "Be right back!" outage fallback screen even on a normal switch.
       if (data?.member?.role === "child") {
