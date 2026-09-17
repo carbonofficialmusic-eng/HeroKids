@@ -3,8 +3,8 @@ name: Nativer iOS-Ausfallbildschirm
 description: Verbindliche Strategie für den vollständig lokalen iOS-Fallback bei Ausfällen der Remote-WebView.
 ---
 
-Die iOS-App legt einen nativen UIKit-Ausfallbildschirm über die Remote-WebView, bis sowohl die Produktions-Startseite mit 2xx antwortet als auch React sein Bereitschaftssignal gesetzt hat. Jede neue Hauptnavigation blendet den Schutz erneut ein.
+Der native UIKit-Ausfallbildschirm bleibt beim normalen App-Start und bei jeder WebView-Navigation verborgen. Er darf nur erscheinen, wenn die Produktions-Startseite nach einer Start-Schonfrist mehrfach hintereinander wirklich nicht erreichbar war. Eine erreichbare Seite mit noch nicht aufgebautem React-Root ist kein Ausfall.
 
-**Why:** Die native App lädt im Normalbetrieb eine Remote-URL. Scheitert schon deren HTML-Navigation, können weder React noch ein webbasierter Status-Guard zuverlässig erscheinen.
+**Why:** Das sofortige Einblenden bei `isLoading` ließ nach dem Splash-Screen und bei Profilwechseln fälschlich „Gleich zurück!“ aufblitzen. Auch ein leerer React-Root während des normalen Starts wurde zu früh als Fehler gewertet.
 
-**How to apply:** Server- und WebView-Bereitschaft gemeinsam prüfen, veraltete Antworten über Generationen verwerfen, im Vordergrund sofort neu prüfen und WebView-Neuladeversuche begrenzen.
+**How to apply:** Navigation und React-Aufbau dürfen den Screen niemals auslösen. Nur wiederholte HTTP-/Netzwerkfehler nach der Schonfrist zählen; eine erfolgreiche Serverantwort setzt die Fehlerfolge zurück. Keine Reload-Schleife bei kurzzeitig leerem Root starten.

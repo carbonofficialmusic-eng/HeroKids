@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowLeft, Home, Key, Mail, MailCheck, Loader2 } from "lucide-react";
+import { ArrowLeft, Key, Mail, MailCheck, Loader2 } from "lucide-react";
 import type { FamilyMember } from "@shared/schema";
 
 export default function AccountPage() {
@@ -120,7 +120,10 @@ export default function AccountPage() {
   }
 
   const isParent = member?.role === "parent";
-  const backHref = isParent ? "/dashboard" : "/kid-dashboard";
+  const backHref = isParent ? "/settings" : "/kid-dashboard";
+  const backLabel = isParent
+    ? t("settings.backToSettings")
+    : t("rewardsBoard.backToDashboard");
 
   return (
     <div className="lc-account-page min-h-screen p-6" style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top))", paddingLeft: 'max(1.5rem, env(safe-area-inset-left))', paddingRight: 'max(1.5rem, env(safe-area-inset-right))' }}>
@@ -133,8 +136,8 @@ export default function AccountPage() {
             className="lc-account-back mb-4 gap-2 bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
             data-testid="button-back-account"
           >
-            <Home className="h-4 w-4" />
-            {t("rewardsBoard.backToDashboard")}
+            <ArrowLeft className="h-4 w-4" />
+            {backLabel}
           </Button>
         </Link>
 

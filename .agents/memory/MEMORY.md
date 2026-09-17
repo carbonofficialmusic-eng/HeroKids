@@ -35,3 +35,4 @@
 - [Aufgaben-Kategorien immer anzeigen](kid-dashboard-category-headers.md) — Eltern- und Kinderansicht zeigen jede befüllte Kategorie samt Anzahl, auch bei nur einer Aufgabe
 - [Deploy-Fallback für Web-Navigation](deploy-fallback.md) — ein gecachter Service Worker ersetzt kurze 5xx-Deploy-Antworten für wiederkehrende Webnutzer
 - [Nativer iOS-Ausfallbildschirm](native-ios-outage-fallback.md) — die Remote-WebView wird bei Start, Navigation und Serverausfall durch einen lokalen UIKit-Fallback abgedeckt
+- [Device-Push-Token-Bindung](device-push-token-member-binding.md) — ein physisches Gerät darf immer nur einem Mitglied zugeordnet sein, sonst kommen Family-Pushes mehrfach an
