@@ -7,4 +7,4 @@ description: Sicherer API-Fallback, wenn die lokale Git-Remote trotz aktiver Rep
 
 **Why:** Der lokale Push kann wegen fehlender HTTPS-Anmeldung scheitern, obwohl der Connector `repo`-Schreibrechte hat. Ein vollständiger rekursiver Tree-Request kann über den Connector mit HTTP 502 scheitern; ein kleiner Tree mit `base_tree` und nur geänderten oder gelöschten Einträgen funktioniert.
 
-**How to apply:** Remote-Ref und Parent-SHA vor jedem Schreibvorgang vergleichen. Neue Blobs hochladen, einen kompakten Tree auf dem vorhandenen Remote-Tree aufbauen, einen Commit mit dem geprüften Parent erzeugen und die Branch-Ref nur mit `force: false` aktualisieren. Abschließend Remote-Tree-SHA und lokalen Tree-SHA vergleichen.
+**How to apply:** Remote-Ref und Parent-SHA vor jedem Schreibvorgang vergleichen. Neue Blobs hochladen, einen kompakten Tree auf dem vorhandenen Remote-Tree aufbauen, einen Commit mit dem geprüften Parent erzeugen und die Branch-Ref nur mit `force: false` aktualisieren. Connector-Fehler 502/503/504 pro Blob mit begrenztem Backoff wiederholen; sie können vor dem Ref-Update transient auftreten. Abschließend Remote-Tree-SHA und lokalen Tree-SHA vergleichen.
