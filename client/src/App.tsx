@@ -38,6 +38,7 @@ import Admin from "@/pages/admin";
 import Privacy from "@/pages/privacy";
 import Impressum from "@/pages/impressum";
 import Terms from "@/pages/terms";
+import Contact from "@/pages/contact";
 import IosTest from "@/pages/ios-test";
 import AccountPage from "@/pages/account";
 import AuthClose from "@/pages/auth-close";
@@ -564,6 +565,7 @@ function Router() {
           <Route path="/privacy" component={Privacy} />
           <Route path="/impressum" component={Impressum} />
           <Route path="/terms" component={Terms} />
+          <Route path="/contact" component={Contact} />
           <Route path="/admin" component={Admin} />
           <Route path="/dashboard">
             <RedirectToLanding />
@@ -621,6 +623,7 @@ function Router() {
         <Route path="/privacy" component={Privacy} />
         <Route path="/impressum" component={Impressum} />
         <Route path="/terms" component={Terms} />
+        <Route path="/contact" component={Contact} />
         <Route path="/admin" component={Admin} />
         <Route path="/ios-test">
           <IosTest variant="a" />

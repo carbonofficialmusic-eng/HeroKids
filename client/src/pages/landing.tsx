@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star, CheckCircle2, Shield, Heart, ArrowRight, Play, Gamepad2, Gift, Sparkles, Loader2, Smartphone, Check, Trophy, Users, Crown } from "lucide-react";
+import { Star, CheckCircle2, Shield, Heart, ArrowRight, Play, Gamepad2, Gift, Sparkles, Loader2, Smartphone, Check, Trophy, Users, Crown, Instagram, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -512,12 +512,25 @@ export default function Landing() {
           <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "1.15rem", marginBottom: "2rem" }} data-testid="text-cta-subtitle">
             {t('landing.joinThousands')}
           </p>
-          <button
-            onClick={() => document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth" })}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 2.5rem", height: 56, borderRadius: 999, background: C.bg, color: C.fg, fontWeight: 800, fontSize: "1.1rem", border: "none", cursor: "pointer", boxShadow: "0 12px 32px -8px rgba(0,0,0,0.5)" }}
-          >
-            {t('landing.cta.button')}
-          </button>
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.75rem" }}>
+            <button
+              onClick={() => document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth" })}
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 2.5rem", height: 56, borderRadius: 999, background: C.bg, color: C.fg, fontWeight: 800, fontSize: "1.1rem", border: "none", cursor: "pointer", boxShadow: "0 12px 32px -8px rgba(0,0,0,0.5)" }}
+            >
+              {t('landing.cta.button')}
+            </button>
+            <a
+              href="https://apps.apple.com/de/app/little-champs-chore-rewards/id6778834955"
+              target="_blank"
+              rel="noreferrer"
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 1.5rem", height: 56, borderRadius: 999, background: "rgba(31,36,46,0.92)", color: "#fff", fontWeight: 800, fontSize: "1rem", textDecoration: "none", boxShadow: "0 12px 32px -8px rgba(0,0,0,0.45)" }}
+              data-testid="link-landing-app-store"
+            >
+              <Smartphone style={{ width: 20, height: 20 }} />
+              {t('landing.footer.appStore')}
+              <ExternalLink style={{ width: 16, height: 16, opacity: 0.7 }} />
+            </a>
+          </div>
           <p style={{ color: "rgba(255,255,255,0.55)", marginTop: "0.75rem", fontSize: "0.875rem" }}>{t('landing.cta.noCreditCard')}</p>
         </div>
       </section>
@@ -530,10 +543,17 @@ export default function Landing() {
             <span className="hk-display" style={{ fontWeight: 700, color: C.fg }}>Little Champs</span>
           </div>
           <p>© {new Date().getFullYear()} Little Champs {t('landing.footer.rights')}</p>
-          <div style={{ display: "flex", gap: "1.5rem" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "1rem 1.5rem" }}>
             <button onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })} style={{ background: "none", border: "none", color: C.fgMuted, cursor: "pointer", fontSize: "0.875rem", padding: 0 }}>{t('landing.nav.pricing') || 'Pricing'}</button>
+            <a href="https://apps.apple.com/de/app/little-champs-chore-rewards/id6778834955" target="_blank" rel="noreferrer" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.appStore')}</a>
+            <a href="https://www.instagram.com/littlechampsapp/" target="_blank" rel="noreferrer" style={{ color: C.fgMuted, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <Instagram style={{ width: 14, height: 14 }} />
+              {t('landing.footer.instagram')}
+            </a>
             <Link href="/privacy" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.privacy')}</Link>
             <Link href="/impressum" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.imprint')}</Link>
+            <Link href="/terms" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.terms')}</Link>
+            <Link href="/contact" style={{ color: C.fgMuted, textDecoration: "none" }}>{t('landing.footer.contact')}</Link>
           </div>
         </div>
       </footer>

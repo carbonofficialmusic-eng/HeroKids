@@ -38,7 +38,7 @@ export default function Impressum() {
 
           <div>
             <h2 className="text-base font-semibold text-foreground mb-2">Kontakt</h2>
-            <p>E-Mail: <a href="mailto:noreply@littlechamps.net" className="text-foreground underline">noreply@littlechamps.net</a></p>
+            <p>E-Mail: <a href="mailto:info@littlechamps.net" className="text-foreground underline">info@littlechamps.net</a></p>
           </div>
 
           <div>

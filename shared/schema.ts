@@ -97,6 +97,12 @@ export const families = pgTable("families", {
   billingSubscriptionId: varchar("billing_subscription_id"), // Stripe subscription ID
   tierExpiresAt: timestamp("tier_expires_at"), // When subscription expires (for grace periods)
   showLeaderboard: boolean("show_leaderboard").notNull().default(true), // Parents can hide leaderboard from children
+  pushChat: boolean("push_chat").notNull().default(true),
+  pushPinboard: boolean("push_pinboard").notNull().default(true),
+  pushTasks: boolean("push_tasks").notNull().default(true),
+  pushRewards: boolean("push_rewards").notNull().default(true),
+  childPushQuietStart: varchar("child_push_quiet_start", { length: 5 }).notNull().default("20:00"),
+  childPushQuietEnd: varchar("child_push_quiet_end", { length: 5 }).notNull().default("07:00"),
   singleDeviceMode: boolean("single_device_mode").notNull().default(false), // Enable PIN protection for member switching
   language: varchar("language", { length: 2 }).notNull().default("en"), // Family language (de, en, fr, es, ja, zh, ko, sv, pt)
   timezone: varchar("timezone", { length: 50 }).notNull().default("Europe/Berlin"), // IANA timezone (e.g., "America/New_York", "Asia/Tokyo")

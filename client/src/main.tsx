@@ -10,4 +10,15 @@ window.addEventListener("vite:preloadError", () => {
   window.location.reload();
 });
 
+// Keep a self-contained deploy fallback available for returning web users.
+// During a deployment handover the proxy can briefly return a 5xx response
+// before React loads, so the in-app ServerStatusGuard cannot render yet.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/deploy-fallback-sw.js").catch((error) => {
+      console.warn("Deploy fallback service worker could not be registered:", error);
+    });
+  });
+}
+
 createRoot(document.getElementById("root")!).render(<App />);

@@ -9,7 +9,7 @@ import bcrypt from "bcrypt";
 import Stripe from "stripe";
 import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 import { storage } from "./storage";
-import { sendPushToMembers } from "./apns";
+import { sendPushToMembers, queueChatPush, cancelQueuedChatPush, isChildPushQuietHours } from "./apns";
 import { db } from "./db";
 import { setupAuth, isAuthenticated, isDev, setDevTokenActingAs, resolveWsUserId } from "./replitAuth";
 import { generateTokenPair, refreshAccessToken, revokeRefreshToken, registerPushToken, unregisterPushToken } from "./mobileAuth";
@@ -24,6 +24,62 @@ import { clampAvailablePoints } from "@shared/point-balance";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier, SubscriptionTierLegacy } from "@shared/tier-config";
 import { resolveFallbackD, isFamilySubNewerThanFamilyPro } from "./lib/rc-tier-resolver";
+
+type PushRole = "parent" | "child";
+const pushPolicy: Record<string, { setting: "pushChat" | "pushPinboard" | "pushTasks" | "pushRewards"; roles: PushRole[] }> = {
+  chat_message: { setting: "pushChat", roles: ["parent", "child"] },
+  pinboard_posted: { setting: "pushPinboard", roles: ["parent", "child"] },
+  task_pending: { setting: "pushTasks", roles: ["parent"] },
+  task_rejected: { setting: "pushTasks", roles: ["child"] },
+  reward_redeemed: { setting: "pushRewards", roles: ["parent"] },
+  reward_request: { setting: "pushRewards", roles: ["parent"] },
+  reward_request_approved: { setting: "pushRewards", roles: ["child"] },
+  reward_request_declined: { setting: "pushRewards", roles: ["child"] },
+};
+
+const chatBatchText: Record<string, { one: string; many: string }> = {
+  en: { one: "1 new chat message", many: "{{count}} new chat messages" },
+  de: { one: "1 neue Chat-Nachricht", many: "{{count}} neue Chat-Nachrichten" },
+  fr: { one: "1 nouveau message du chat", many: "{{count}} nouveaux messages du chat" },
+  es: { one: "1 mensaje nuevo del chat", many: "{{count}} mensajes nuevos del chat" },
+  ja: { one: "新しいチャットメッセージ1件", many: "新しいチャットメッセージ{{count}}件" },
+  zh: { one: "1条新聊天消息", many: "{{count}}条新聊天消息" },
+  ko: { one: "새 채팅 메시지 1개", many: "새 채팅 메시지 {{count}}개" },
+  sv: { one: "1 nytt chattmeddelande", many: "{{count}} nya chattmeddelanden" },
+  pt: { one: "1 nova mensagem no chat", many: "{{count}} novas mensagens no chat" },
+};
+
+/** Best-effort APNs delivery: policy/settings and provider failures never affect an API request. */
+async function sendPolicyPush(
+  familyName: string,
+  recipientIds: string[],
+  type: string,
+  title: string,
+  body: string,
+  senderId?: string,
+) {
+  try {
+    const policy = pushPolicy[type];
+    if (!policy) return;
+    const family = await storage.getFamily(familyName);
+    if (!family || !family[policy.setting]) return;
+    const members = await storage.getFamilyMembersByFamily(familyName);
+    const allowed = new Set(members
+      .filter(m => recipientIds.includes(m.id) && m.id !== senderId && policy.roles.includes(m.role as PushRole)
+        && !(m.role === "child" && isChildPushQuietHours(
+          new Date(),
+          family.timezone,
+          family.childPushQuietStart,
+          family.childPushQuietEnd,
+        )))
+      .map(m => m.id));
+    if (!allowed.size) return;
+    const tokens = await storage.getDevicePushTokensForMembers(Array.from(allowed));
+    await sendPushToMembers(tokens, title, body, { notificationType: type, memberId: senderId });
+  } catch (error: any) {
+    console.error(`[APNs] ${type} push error:`, error?.message || error);
+  }
+}
 
 /**
  * After a tier upgrade, automatically un-pause members that are now within the new tier's member limit.
@@ -1069,6 +1125,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Zod schema for family settings update
   const updateFamilySettingsSchema = z.object({
     showLeaderboard: z.boolean().optional(),
+    pushChat: z.boolean().optional(),
+    pushPinboard: z.boolean().optional(),
+    pushTasks: z.boolean().optional(),
+    pushRewards: z.boolean().optional(),
+    childPushQuietStart: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
+    childPushQuietEnd: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
     singleDeviceMode: z.boolean().optional(),
     language: z.enum(["de", "en", "fr", "es", "ja", "zh", "ko", "sv", "pt"]).optional(),
     timezone: z.string().optional(),
@@ -1086,6 +1148,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }).nullable().optional(),
   }).refine(data => 
     data.showLeaderboard !== undefined || 
+    data.pushChat !== undefined ||
+    data.pushPinboard !== undefined ||
+    data.pushTasks !== undefined ||
+    data.pushRewards !== undefined ||
+    data.childPushQuietStart !== undefined ||
+    data.childPushQuietEnd !== undefined ||
     data.singleDeviceMode !== undefined ||
     data.language !== undefined ||
     data.timezone !== undefined ||
@@ -3630,22 +3698,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           relatedMemberId: member.id,
         }, member.id);
 
-        // Send APNs push to all parent devices
-        try {
-          const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
-          const parentIds = allMembers
-            .filter(m => m.role === "parent" && m.id !== member.id)
-            .map(m => m.id);
-          const tokens = await storage.getDevicePushTokensForMembers(parentIds);
-          await sendPushToMembers(
-            tokens,
-            translateNotification(lang, "task_pending.title", { name: member.displayName, task: task.title }),
-            translateNotification(lang, "task_pending.message", { points: task.points }),
-            { notificationType: "task_pending", memberId: member.id }
-          );
-        } catch (pushErr: any) {
-          console.error("[APNs] task_pending push error:", pushErr.message);
-        }
+        const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+        await sendPolicyPush(member.familyName, allMembers.map(m => m.id), "task_pending",
+          translateNotification(lang, "task_pending.title", { name: member.displayName, task: task.title }),
+          translateNotification(lang, "task_pending.message", { points: task.points }), member.id);
         
         // Broadcast notification update
         broadcastToFamily(member.familyName, { type: "notification_update" });
@@ -3890,18 +3946,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         targetMemberId: childMember.id,
       });
 
-      // Send APNs push to the child's devices
-      try {
-        const tokens = await storage.getDevicePushTokensForMember(childMember.id);
-        await sendPushToMembers(
-          tokens,
-          translateNotification(lang, "task_approved.title"),
-          translateNotification(lang, "task_approved.message", { task: task?.title || "Task", points: approvedPoints }),
-          { notificationType: "task_approved", memberId: childMember.id }
-        );
-      } catch (pushErr: any) {
-        console.error("[APNs] task_approved push error:", pushErr.message);
-      }
+      // task_approved remains an in-app notification only (no APNs alert).
 
       // Broadcast notification update to refresh child's bell
       broadcastToFamily(member.familyName, {
@@ -3974,6 +4019,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Shopping lists and team tasks are rejected as one collective request
       // so no hidden per-recipient approvals remain on the approvals page.
       const completionTask = await storage.getTask(completion.taskId);
+      let rejectedRecipientIds = [childMember.id];
       if (completionTask?.isShoppingList || completionTask?.isSharedTask) {
         const collectiveCompletions = (await storage.getTaskCompletionsByTask(completion.taskId))
           .filter((item: any) => (
@@ -3991,6 +4037,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             reason || "Did not meet expectations",
           );
         }
+        rejectedRecipientIds = collectiveCompletions.map(item => item.memberId);
       } else {
         await storage.rejectTaskCompletion(completionId, member.id, reason || "Did not meet expectations");
       }
@@ -4039,18 +4086,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         targetMemberId: childMember.id,
       });
 
-      // Send APNs push to the child's devices
-      try {
-        const tokens = await storage.getDevicePushTokensForMember(childMember.id);
-        await sendPushToMembers(
-          tokens,
-          translateNotification(lang, "task_rejected.title"),
-          translateNotification(lang, "task_rejected.message", { task: task?.title || "Task", reason: reason || defaultReason }),
-          { notificationType: "task_rejected", memberId: childMember.id }
-        );
-      } catch (pushErr: any) {
-        console.error("[APNs] task_rejected push error:", pushErr.message);
-      }
+      await sendPolicyPush(member.familyName, rejectedRecipientIds, "task_rejected",
+        translateNotification(lang, "task_rejected.title"),
+        translateNotification(lang, "task_rejected.message", { task: task?.title || "Task", reason: reason || defaultReason }),
+        member.id);
 
       // Broadcast notification update to refresh child's bell
       broadcastToFamily(member.familyName, {
@@ -4338,27 +4377,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         relatedRewardId: reward.id,
         relatedMemberId: member.id,
       });
-
-      // Send APNs push to all parent devices
-      try {
-        const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
-        const parentIds = allMembers
-          .filter(m => m.role === "parent" && m.id !== member.id)
-          .map(m => m.id);
-        const tokens = await storage.getDevicePushTokensForMembers(parentIds);
-        await sendPushToMembers(
-          tokens,
-          translateNotification(lang, "reward_redeemed.title", { name: member.displayName }),
-          translateNotification(lang, "reward_redeemed.message", { reward: reward.title, points: reward.pointThreshold }),
-          { notificationType: "reward_redeemed", memberId: member.id }
-        );
-      } catch (pushErr: any) {
-        console.error("[APNs] reward_redeemed push error:", pushErr.message);
-      }
+      const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+      await sendPolicyPush(member.familyName, allMembers.map(m => m.id), "reward_redeemed",
+        translateNotification(lang, "reward_redeemed.title", { name: member.displayName }),
+        translateNotification(lang, "reward_redeemed.message", { reward: reward.title, points: reward.pointThreshold }),
+        member.id);
 
       // Broadcast notification update
       broadcastToFamily(member.familyName, { type: "notification_update" });
-      
       res.json({ 
         redemption: {
           ...redemption,
@@ -4630,10 +4656,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: translateNotification(lang, "reward_request.message", { reward: title, points: pointThreshold }),
         relatedMemberId: member.id,
       });
+      const requestMembers = await storage.getFamilyMembersByFamily(member.familyName);
+      await sendPolicyPush(member.familyName, requestMembers.map(m => m.id), "reward_request",
+        translateNotification(lang, "reward_request.title", { name: member.displayName }),
+        translateNotification(lang, "reward_request.message", { reward: title, points: pointThreshold }), member.id);
       
       // Broadcast notification update
       broadcastToFamily(member.familyName, { type: "notification_update" });
-      
       res.status(201).json(request);
     } catch (error: any) {
       console.error("Error creating reward request:", error);
@@ -4784,11 +4813,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type: "reward_request_approved",
             title: translateNotification(lang, "reward_request_approved.title"),
             message: translateNotification(lang, "reward_request_approved.message", { reward: request.title }),
-            targetMemberId: request.requester.id,
+            targetMemberId: request.requestedBy,
             relatedMemberId: member.id,
           });
           // Broadcast notification update so the child's bell refreshes in real time
           broadcastToFamily(member.familyName, { type: "notification_update" });
+           await sendPolicyPush(member.familyName, [request.requestedBy], "reward_request_approved",
+             translateNotification(lang, "reward_request_approved.title"),
+             translateNotification(lang, "reward_request_approved.message", { reward: request.title }), member.id);
         } catch (notifErr: any) {
           console.error("[reward_request_approved] notification error:", notifErr.message);
         }
@@ -4804,10 +4836,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type: "reward_request_declined",
             title: translateNotification(lang, "reward_request_declined.title"),
             message: translateNotification(lang, "reward_request_declined.message", { reward: request.title }),
-            targetMemberId: request.requester.id,
+            targetMemberId: request.requestedBy,
             relatedMemberId: member.id,
           });
           broadcastToFamily(member.familyName, { type: "notification_update" });
+           await sendPolicyPush(member.familyName, [request.requestedBy], "reward_request_declined",
+             translateNotification(lang, "reward_request_declined.title"),
+             translateNotification(lang, "reward_request_declined.message", { reward: request.title }), member.id);
         } catch (notifErr: any) {
           console.error("[reward_request_declined] notification error:", notifErr.message);
         }
@@ -5804,29 +5839,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
-      // Send APNs push to all other family members
-      try {
-        const lang = family.language || "en";
-        const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
-        const otherMemberIds = allMembers
-          .filter(m => m.id !== member.id)
-          .map(m => m.id);
-        if (otherMemberIds.length > 0) {
-          const tokens = await storage.getDevicePushTokensForMembers(otherMemberIds);
-          if (tokens.length > 0) {
-            const preview = newMessage.message.length > 100
-              ? newMessage.message.slice(0, 97) + "…"
-              : newMessage.message;
-            await sendPushToMembers(
-              tokens,
+      const lang = family.language || "en";
+      const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+      const recipientIds = allMembers.filter(m => m.id !== member.id).map(m => m.id);
+      if (family.pushChat) {
+        try {
+          const tokensByMember = await Promise.all(recipientIds.map(async id => ({
+            id, tokens: await storage.getDevicePushTokensForMember(id),
+          })));
+          for (const recipient of tokensByMember) {
+            const recipientMember = allMembers.find(m => m.id === recipient.id);
+            if (recipientMember?.role === "child" && isChildPushQuietHours(
+              new Date(),
+              family.timezone,
+              family.childPushQuietStart,
+              family.childPushQuietEnd,
+            )) {
+              continue;
+            }
+            queueChatPush(recipient.id, recipient.tokens,
               translateNotification(lang, "chat_message.title", { name: member.displayName }),
-              translateNotification(lang, "chat_message.message", { preview }),
-              { notificationType: "chat_message", memberId: member.id }
-            );
+              count => (chatBatchText[lang] || chatBatchText.en)[count === 1 ? "one" : "many"].replace("{{count}}", String(count)),
+              async () => {
+                const currentFamily = await storage.getFamily(member.familyName);
+                if (!currentFamily?.pushChat) return false;
+                return recipientMember?.role !== "child"
+                  || !isChildPushQuietHours(
+                    new Date(),
+                    currentFamily.timezone,
+                    currentFamily.childPushQuietStart,
+                    currentFamily.childPushQuietEnd,
+                  );
+              });
           }
+        } catch (pushErr: any) {
+          console.error("[APNs] chat_message push error:", pushErr?.message || pushErr);
         }
-      } catch (pushErr: any) {
-        console.error("[APNs] chat_message push error:", pushErr.message);
       }
 
       res.status(201).json(newMessage);
@@ -5912,6 +5960,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.updateLastReadChatAt(member.id);
+      cancelQueuedChatPush(member.id);
       res.json({ success: true });
     } catch (error: any) {
       console.error("Error marking messages as read:", error);
@@ -5996,6 +6045,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createNotificationForParents(member.familyName, pinboardNotification, member.id);
       await storage.createNotificationForSiblings(member.familyName, pinboardNotification, member.id);
       broadcastToFamily(member.familyName, { type: "notification_update" });
+      const pinboardMembers = await storage.getFamilyMembersByFamily(member.familyName);
+      await sendPolicyPush(member.familyName, pinboardMembers.map(m => m.id), "pinboard_posted",
+        translateNotification(lang, "pinboard_posted.title", { name: member.displayName }),
+        translateNotification(lang, "pinboard_posted.message"), member.id);
 
       res.status(201).json(note);
     } catch (error: any) {

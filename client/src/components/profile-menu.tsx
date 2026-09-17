@@ -160,7 +160,7 @@ export function ProfileMenu({
             </DropdownMenuItem>
           </>
         )}
-        {!!user?.email && (
+        {!isParent && !!user?.email && (
           <DropdownMenuItem asChild>
             <Link href="/account" data-testid="menu-item-account-settings">
               <KeyRound className="mr-2 h-4 w-4" />

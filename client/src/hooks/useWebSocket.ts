@@ -36,6 +36,9 @@ export function useWebSocket(familyName: string | null, mobileToken?: string, op
           if (devToken) joinMsg.devToken = devToken;
         }
         ws.send(JSON.stringify(joinMsg));
+
+        // Reconcile anything that changed while this client was disconnected.
+        queryClient.refetchQueries({ queryKey: ["/api/tasks"], type: "active" });
       };
 
       ws.onmessage = (event) => {
@@ -45,8 +48,22 @@ export function useWebSocket(familyName: string | null, mobileToken?: string, op
           switch (data.type) {
             case "task_created":
             case "task_updated":
-            case "task_deleted":
               // Invalidate tasks and pending count
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
+              break;
+
+            case "task_deleted":
+              // Remove it synchronously so every connected client updates before
+              // the reconciliation request completes.
+              if (data.taskId) {
+                queryClient.setQueryData<Array<{ id: string }>>(
+                  ["/api/tasks"],
+                  (current) => current?.filter((task) => task.id !== data.taskId) ?? []
+                );
+              }
               queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
               queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
               queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
@@ -280,7 +297,7 @@ export function useWebSocket(familyName: string | null, mobileToken?: string, op
     } catch (error) {
       console.error("Error creating WebSocket connection:", error);
     }
-  }, [familyName]);
+  }, [familyName, mobileToken]);
 
   useEffect(() => {
     connect();

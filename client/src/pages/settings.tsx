@@ -15,7 +15,7 @@ import { AddMemberDialog } from "@/components/add-member-dialog";
 import { MemberOnboardingModal } from "@/components/member-onboarding-modal";
 import { EditMemberDialog } from "@/components/edit-member-dialog";
 import { DeviceLinkDialog } from "@/components/device-link-dialog";
-import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin, Infinity, HelpCircle, Bell, BellOff, Mail } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trophy, UserPlus, Trash2, RotateCcw, Pencil, Key, Copy, Check, Languages, Smartphone, BarChart3, Users, Sparkles, CreditCard, ExternalLink, AlertTriangle, UserX, Tag, MapPin, Infinity, HelpCircle, Bell, BellOff, Mail, Globe2, Instagram } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +38,16 @@ import { FEEDBACK_MAILTO } from "@/lib/feedback";
 import { isValidFactoryResetConfirmation } from "@shared/factory-reset";
 
 type FamilyMemberWithLimit = FamilyMember & { isOverLimit?: boolean; accountEmail?: string | null };
+
+async function openExternalUrl(url: string) {
+  if (isNativePlatform()) {
+    const { Browser } = await import("@capacitor/browser");
+    await Browser.open({ url });
+    return;
+  }
+
+  window.open(url, "_blank", "noopener,noreferrer");
+}
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
@@ -65,13 +75,15 @@ export default function Settings() {
   const [deviceLinkDialogOpen, setDeviceLinkDialogOpen] = useState(false);
   const [localSkinCardCost, setLocalSkinCardCost] = useState<number | null>(null);
   const [pushPermission, setPushPermission] = useState<"granted" | "denied" | "prompt" | null>(null);
+  const [mobileSectionOpen, setMobileSectionOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<"family" | "security" | "motivation" | "notifications" | "app" | "help">("family");
   useEffect(() => {
     if (!isNativePlatform()) return;
     (async () => {
       try {
         const { PushNotifications } = await import("@capacitor/push-notifications");
         const result = await PushNotifications.checkPermissions();
-        setPushPermission(result.receive);
+        setPushPermission(result.receive === "prompt-with-rationale" ? "prompt" : result.receive);
       } catch {
         // not available in this build
       }
@@ -110,6 +122,12 @@ export default function Settings() {
   const updateSettingsMutation = useMutation({
     mutationFn: async (settings: { 
       showLeaderboard?: boolean;
+      pushChat?: boolean;
+      pushPinboard?: boolean;
+      pushTasks?: boolean;
+      pushRewards?: boolean;
+      childPushQuietStart?: string;
+      childPushQuietEnd?: string;
       singleDeviceMode?: boolean;
       language?: "de" | "en" | "fr" | "es" | "ja" | "zh" | "ko" | "sv" | "pt";
       timezone?: string;
@@ -487,6 +505,14 @@ export default function Settings() {
 
   // Auto-detect browser timezone
   const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const settingsGroups = [
+    ["family", Users, "Familie & Mitglieder", "Mitglieder, Familiencode und Geräte"],
+    ["security", Key, "Zugang & Sicherheit", "Einzelgerät-Modus und Eltern-PINs"],
+    ["motivation", Trophy, "Aufgaben & Motivation", "Punkte, Preise und Rangliste"],
+    ["notifications", Bell, "Benachrichtigungen", "Push-Mitteilungen verwalten"],
+    ["app", Smartphone, "App & Konto", "Sprache, Konto und Abo"],
+    ["help", HelpCircle, "Hilfe & Informationen", "Tour, Kontakt und Rechtliches"],
+  ] as const;
 
   return (
     <div className="lc-settings-page min-h-screen">
@@ -496,7 +522,13 @@ export default function Settings() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setLocation("/")}
+            onClick={() => {
+              if (mobileSectionOpen) {
+                setMobileSectionOpen(false);
+                return;
+              }
+              setLocation("/");
+            }}
             data-testid="button-back"
             className="bg-card/90 backdrop-blur-sm border-border"
           >
@@ -508,8 +540,79 @@ export default function Settings() {
           </div>
         </div>
 
+        <div className="md:grid md:grid-cols-[15rem_minmax(0,1fr)] md:items-start md:gap-8">
+          {/* Mobile overview: selecting a group opens its focused content. */}
+          <div className={`${mobileSectionOpen ? "hidden" : "block"} md:hidden`}>
+            <div className="mb-3">
+              <h2 className="text-lg font-semibold">{t("settings.group.chooseSection", "Einstellungen")}</h2>
+              <p className="text-sm text-muted-foreground">{t("settings.manageExperience")}</p>
+            </div>
+            <div className="space-y-2">
+              {settingsGroups.map(([id, Icon, label, description]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => { setActiveSection(id); setMobileSectionOpen(true); }}
+                  className="flex w-full items-center gap-3 rounded-xl border bg-card px-4 py-4 text-left shadow-sm transition-colors hover:bg-muted/60"
+                >
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold">{t(`settings.group.${id}`, label)}</span>
+                    <span className="block text-sm text-muted-foreground">{t(`settings.group.${id}Desc`, description)}</span>
+                  </span>
+                  <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop persistent navigation rail. */}
+          <nav className="hidden md:block md:sticky md:top-6" aria-label={t("settings.familySettings")}>
+            <div className="rounded-2xl border bg-card/70 p-2 shadow-sm backdrop-blur-sm">
+              <p className="px-3 pb-2 pt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("settings.familySettings")}
+              </p>
+              <div className="space-y-1" role="tablist">
+                {settingsGroups.map(([id, Icon, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeSection === id}
+                    onClick={() => setActiveSection(id)}
+                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors ${
+                      activeSection === id
+                        ? "bg-primary/10 text-foreground"
+                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0 text-primary" />
+                    <span className="truncate text-sm font-semibold">{t(`settings.group.${id}`, label)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </nav>
+
+          <main className={`${mobileSectionOpen ? "block" : "hidden"} md:block min-w-0`}>
+            <div className="mb-4 md:hidden">
+              <Button
+                type="button"
+                variant="ghost"
+                className="-ml-2 gap-1 text-muted-foreground"
+                onClick={() => setMobileSectionOpen(false)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                {t("settings.group.allSections", "Alle Einstellungen")}
+              </Button>
+            </div>
+
         {/* Settings Cards */}
         <div className="lc-settings-sections space-y-4">
+          {activeSection === "family" && (
+            <div className="space-y-4">
           {/* Family Members Settings */}
           <Card>
             <CardHeader>
@@ -728,7 +831,11 @@ export default function Settings() {
               </p>
             </CardContent>
           </Card>
+            </div>
+          )}
 
+          {activeSection === "app" && (
+            <div className="space-y-4">
           {/* Language Settings */}
           <Card>
             <CardHeader>
@@ -774,7 +881,7 @@ export default function Settings() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <span className="text-xl">🕐</span>
+                <Globe2 className="h-5 w-5 text-primary" />
                 <CardTitle>{t('settings.timezoneTitle')}</CardTitle>
               </div>
               <CardDescription>
@@ -811,13 +918,17 @@ export default function Settings() {
               {familyData?.timezone !== browserTimezone && (
                 <div className="p-3 rounded-lg bg-muted/50 border border-muted">
                   <p className="text-sm text-muted-foreground">
-                    💡 <strong>{t('settings.timezoneNote')}</strong> {t('settings.timezoneMismatch', { set: familyData?.timezone, browser: browserTimezone })}
+                    <strong>{t('settings.timezoneNote')}</strong> {t('settings.timezoneMismatch', { set: familyData?.timezone, browser: browserTimezone })}
                   </p>
                 </div>
               )}
             </CardContent>
           </Card>
+            </div>
+          )}
 
+          {activeSection === "security" && (
+            <div className="space-y-4">
           {/* Single Device Mode */}
           <Card>
             <CardHeader>
@@ -916,7 +1027,11 @@ export default function Settings() {
               </CardContent>
             </Card>
           )}
+            </div>
+          )}
 
+          {activeSection === "motivation" && (
+            <div className="space-y-4">
           {/* Motivation Settings - Skin Card Cost */}
           <Card>
             <CardHeader>
@@ -1168,9 +1283,11 @@ export default function Settings() {
               </Button>
             </CardContent>
           </Card>
+            </div>
+          )}
 
           {/* Subscription Management - show for active paid subscriptions and lifetime purchasers */}
-          {familyData?.subscriptionTier !== 'free' && familyData?.subscriptionStatus === 'active' && (
+          {activeSection === "app" && familyData?.subscriptionTier !== 'free' && familyData?.subscriptionStatus === 'active' && (
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -1226,7 +1343,7 @@ export default function Settings() {
           )}
 
           {/* Account Settings — link to dedicated /account page */}
-          {user?.email && (
+          {activeSection === "app" && user?.email && (
             <Card id="account">
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -1247,7 +1364,7 @@ export default function Settings() {
           )}
 
           {/* Feedback */}
-          <Card>
+          {activeSection === "help" && <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-primary" />
@@ -1266,10 +1383,10 @@ export default function Settings() {
                 info@littlechamps.net
               </p>
             </CardContent>
-          </Card>
+          </Card>}
 
           {/* Onboarding Tour */}
-          <Card>
+          {activeSection === "help" && <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" />
@@ -1298,46 +1415,137 @@ export default function Settings() {
                 {t('settings.restartTour', 'Tour neu starten')}
               </Button>
             </CardContent>
-          </Card>
+          </Card>}
 
-          {/* Push Notification Status — native only */}
-          {isNativePlatform() && pushPermission !== null && (
-            <Card className={pushPermission !== "granted" ? "border-amber-500/50" : ""}>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  {pushPermission === "granted"
-                    ? <Bell className="h-5 w-5 text-green-500" />
-                    : <BellOff className="h-5 w-5 text-amber-500" />}
-                  <CardTitle>{t('settings.pushNotificationsTitle', 'Push-Benachrichtigungen')}</CardTitle>
+          {/* Family push notification preferences */}
+          {activeSection === "notifications" && <Card className={isNativePlatform() && pushPermission === "denied" ? "border-amber-500/50" : ""}>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                {isNativePlatform() && pushPermission === "denied"
+                  ? <BellOff className="h-5 w-5 text-amber-500" />
+                  : <Bell className="h-5 w-5 text-primary" />}
+                <CardTitle>{t('settings.pushNotificationsTitle')}</CardTitle>
+              </div>
+              <CardDescription>{t('settings.pushNotificationsPreferencesDesc')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {([
+                ["pushChat", "pushNotificationsChat", "pushNotificationsChatDesc"],
+                ["pushPinboard", "pushNotificationsPinboard", "pushNotificationsPinboardDesc"],
+                ["pushTasks", "pushNotificationsTasks", "pushNotificationsTasksDesc"],
+                ["pushRewards", "pushNotificationsRewards", "pushNotificationsRewardsDesc"],
+              ] as const).map(([field, labelKey, descriptionKey]) => (
+                <div key={field} className="flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <Label htmlFor={`switch-${field}`} className="text-base">{t(`settings.${labelKey}`)}</Label>
+                    <p className="text-sm text-muted-foreground">{t(`settings.${descriptionKey}`)}</p>
+                  </div>
+                  <Switch
+                    id={`switch-${field}`}
+                    checked={familyData?.[field] ?? true}
+                    onCheckedChange={(checked) => updateSettingsMutation.mutate({ [field]: checked })}
+                    disabled={updateSettingsMutation.isPending}
+                    data-testid={`switch-${field}`}
+                  />
                 </div>
-                <CardDescription>
-                  {pushPermission === "granted"
-                    ? t('settings.pushNotificationsGranted', 'Push-Benachrichtigungen sind aktiviert.')
-                    : t('settings.pushNotificationsDenied', 'Push-Benachrichtigungen sind deaktiviert. Du erhältst keine Hinweise auf neue Aufgaben, Chats oder Belohnungen.')}
-                </CardDescription>
-              </CardHeader>
-              {pushPermission !== "granted" && (
-                <CardContent>
-                  <Button
-                    variant="outline"
-                    className="w-full border-amber-500/50 text-amber-700 dark:text-amber-400"
-                    onClick={async () => {
-                      try {
-                        const { App: CapApp } = await import("@capacitor/app");
-                        await CapApp.openUrl({ url: "app-settings:" });
-                      } catch {}
-                    }}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    {t('settings.pushNotificationsOpenSettings', 'In Einstellungen öffnen')}
-                  </Button>
-                </CardContent>
+              ))}
+
+              <div className="border-t pt-4">
+                <div className="space-y-1">
+                  <Label className="text-base">{t('settings.pushNotificationsQuietHours')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('settings.pushNotificationsQuietHoursDesc')}</p>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="child-push-quiet-start">{t('settings.pushNotificationsQuietStart')}</Label>
+                    <Input
+                      id="child-push-quiet-start"
+                      type="time"
+                      value={familyData?.childPushQuietStart ?? "20:00"}
+                      onChange={(event) => updateSettingsMutation.mutate({ childPushQuietStart: event.target.value })}
+                      disabled={updateSettingsMutation.isPending}
+                      data-testid="input-child-push-quiet-start"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="child-push-quiet-end">{t('settings.pushNotificationsQuietEnd')}</Label>
+                    <Input
+                      id="child-push-quiet-end"
+                      type="time"
+                      value={familyData?.childPushQuietEnd ?? "07:00"}
+                      onChange={(event) => updateSettingsMutation.mutate({ childPushQuietEnd: event.target.value })}
+                      disabled={updateSettingsMutation.isPending}
+                      data-testid="input-child-push-quiet-end"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {isNativePlatform() && pushPermission !== null && (
+                <div className={`rounded-lg border p-3 text-sm ${pushPermission === "granted" ? "border-green-500/30 bg-green-500/5" : "border-amber-500/40 bg-amber-500/5"}`}>
+                  <p>
+                    {pushPermission === "granted"
+                      ? t('settings.pushNotificationsGranted')
+                      : t('settings.pushNotificationsDenied')}
+                  </p>
+                  {pushPermission !== "granted" && (
+                    <Button
+                      variant="outline"
+                      className="mt-3 w-full border-amber-500/50 text-amber-700 dark:text-amber-400"
+                      onClick={async () => {
+                        try {
+                          window.location.href = "app-settings:";
+                        } catch {}
+                      }}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      {t('settings.pushNotificationsOpenSettings')}
+                    </Button>
+                  )}
+                </div>
               )}
-            </Card>
-          )}
+            </CardContent>
+          </Card>}
+
+          {/* About Little Champs — parent settings only */}
+          {activeSection === "help" && <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Globe2 className="h-5 w-5 text-primary" />
+                <CardTitle>{t('settings.aboutLittleChamps')}</CardTitle>
+              </div>
+              <CardDescription>{t('settings.aboutLittleChampsDesc')}</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3 sm:grid-cols-2">
+              <Button
+                variant="outline"
+                className="h-auto min-h-11 justify-between gap-3 whitespace-normal text-left"
+                onClick={() => void openExternalUrl("https://littlechamps.net")}
+                data-testid="link-settings-website"
+              >
+                <span className="flex items-center gap-2">
+                  <Globe2 className="h-4 w-4 shrink-0" />
+                  {t('settings.visitWebsite')}
+                </span>
+                <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto min-h-11 justify-between gap-3 whitespace-normal text-left"
+                onClick={() => void openExternalUrl("https://www.instagram.com/littlechampsapp/")}
+                data-testid="link-settings-instagram"
+              >
+                <span className="flex items-center gap-2">
+                  <Instagram className="h-4 w-4 shrink-0" />
+                  {t('settings.visitInstagram')}
+                </span>
+                <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+              </Button>
+            </CardContent>
+          </Card>}
 
           {/* Factory Reset Settings */}
-          <Card className="lc-settings-danger border-destructive/50">
+          {activeSection === "help" && <Card className="lc-settings-danger border-destructive/50">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-5 w-5 text-destructive" />
@@ -1386,10 +1594,10 @@ export default function Settings() {
                 </>
               )}
             </CardContent>
-          </Card>
+          </Card>}
 
           {/* Legal links */}
-          <div className="flex justify-center gap-6 pt-2 pb-4">
+          {activeSection === "help" && <div className="flex justify-center gap-6 pt-2 pb-4">
             <a
               href="/privacy"
               data-testid="link-settings-privacy"
@@ -1404,7 +1612,9 @@ export default function Settings() {
             >
               {t('landing.footer.imprint')}
             </a>
-          </div>
+          </div>}
+        </div>
+          </main>
         </div>
       </div>
 

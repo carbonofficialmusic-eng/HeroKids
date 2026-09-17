@@ -1744,6 +1744,9 @@ export default function KidDashboard() {
     queryKey: ["/api/tasks"],
     enabled: !!member,
     staleTime: 5 * 60 * 1000,
+    refetchInterval: 30 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   // Fetch family goals
@@ -2195,7 +2198,6 @@ export default function KidDashboard() {
   const regularMyTasks = myTasks.filter(t => !(t as any).isImportant && !isFixedAppointment(t));
   const filteredKidTasks = filterKidTasksByDate(regularMyTasks);
   const groupedKidTasks = groupKidTasksByCategory(filteredKidTasks);
-  const hasMultipleCategories = Object.keys(groupedKidTasks).length > 1;
 
   const toggleCategory = (category: string) => {
     setCollapsedCategories(prev => {
@@ -3040,7 +3042,7 @@ export default function KidDashboard() {
                 </>
               )}
             </Card>
-          ) : hasMultipleCategories ? (
+          ) : (
             <div className="space-y-4">
               {Object.entries(groupedKidTasks).map(([category, categoryTasks]) => (
                 <Collapsible
@@ -3076,14 +3078,6 @@ export default function KidDashboard() {
                     </CollapsibleContent>
                   </div>
                 </Collapsible>
-              ))}
-            </div>
-          ) : (
-            <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
-              {filteredKidTasks.map((task, index) => (
-                <div key={task.id} className="min-w-0">
-                  <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
-                </div>
               ))}
             </div>
           )}

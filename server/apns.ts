@@ -1,4 +1,4 @@
-import https from "https";
+import http2 from "http2";
 import crypto from "crypto";
 
 interface ApnsPayload {
@@ -17,6 +17,71 @@ interface ApnsPayload {
 
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
+function parseApnsPrivateKey(value: string): crypto.KeyObject {
+  let normalized = value.trim();
+
+  if (
+    normalized.length >= 2
+    && ((normalized.startsWith('"') && normalized.endsWith('"'))
+      || (normalized.startsWith("'") && normalized.endsWith("'")))
+  ) {
+    normalized = normalized.slice(1, -1).trim();
+  }
+
+  normalized = normalized
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\n")
+    .trim();
+
+  const pemMatch = normalized.match(
+    /-----BEGIN ((?:EC )?PRIVATE KEY)-----([\s\S]*?)-----END \1-----/
+  );
+  if (pemMatch) {
+    const [, label, encodedBody] = pemMatch;
+    const compactBody = encodedBody.replace(/\s/g, "");
+    const pemBody = compactBody.match(/.{1,64}/g)?.join("\n") || compactBody;
+    return crypto.createPrivateKey(
+      `-----BEGIN ${label}-----\n${pemBody}\n-----END ${label}-----`
+    );
+  }
+
+  const base64Value = normalized
+    .replace(/^base64:/i, "")
+    .replace(/\s/g, "");
+  if (!base64Value || !/^[A-Za-z0-9+/=_-]+$/.test(base64Value)) {
+    throw new Error("APNS_PRIVATE_KEY is not a valid Apple .p8 private key");
+  }
+
+  try {
+    const decoded = Buffer.from(base64Value, "base64");
+    if (decoded.toString("utf8", 0, 40).includes("-----BEGIN")) {
+      return crypto.createPrivateKey(decoded);
+    }
+    return crypto.createPrivateKey({ key: decoded, format: "der", type: "pkcs8" });
+  } catch {
+    throw new Error("APNS_PRIVATE_KEY is not a valid Apple .p8 private key");
+  }
+}
+
+export function createApnsProviderToken(
+  keyId: string,
+  teamId: string,
+  privateKey: string,
+  issuedAt = Math.floor(Date.now() / 1000)
+): string {
+  const header = Buffer.from(JSON.stringify({ alg: "ES256", kid: keyId })).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({ iss: teamId, iat: issuedAt })).toString("base64url");
+  const signingInput = `${header}.${payload}`;
+  const key = parseApnsPrivateKey(privateKey);
+  const signature = crypto.sign("sha256", Buffer.from(signingInput), {
+    key,
+    dsaEncoding: "ieee-p1363",
+  });
+
+  return `${signingInput}.${signature.toString("base64url")}`;
+}
+
 function generateApnsJwt(): string {
   const keyId = process.env.APNS_KEY_ID;
   const teamId = process.env.APNS_TEAM_ID;
@@ -26,20 +91,7 @@ function generateApnsJwt(): string {
     throw new Error("APNS_KEY_ID, APNS_TEAM_ID, and APNS_PRIVATE_KEY must be set");
   }
 
-  const header = Buffer.from(JSON.stringify({ alg: "ES256", kid: keyId })).toString("base64url");
-  const now = Math.floor(Date.now() / 1000);
-  const payload = Buffer.from(JSON.stringify({ iss: teamId, iat: now })).toString("base64url");
-  const signingInput = `${header}.${payload}`;
-
-  const sign = crypto.createSign("SHA256");
-  sign.update(signingInput);
-
-  const normalizedKey = privateKey.includes("-----BEGIN")
-    ? privateKey.replace(/\\n/g, "\n")
-    : `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----`;
-
-  const signature = sign.sign(normalizedKey, "base64url");
-  return `${signingInput}.${signature}`;
+  return createApnsProviderToken(keyId, teamId, privateKey);
 }
 
 function getJwtToken(): string {
@@ -78,41 +130,66 @@ export async function sendApnsPush(
   const jwt = getJwtToken();
 
   return new Promise((resolve, reject) => {
-    const options: https.RequestOptions = {
-      hostname: "api.push.apple.com",
-      port: 443,
-      path: `/3/device/${deviceToken}`,
-      method: "POST",
-      headers: {
-        authorization: `bearer ${jwt}`,
-        "apns-topic": bundleId,
-        "apns-push-type": "alert",
-        "apns-priority": "10",
-        "content-type": "application/json",
-        "content-length": Buffer.byteLength(bodyStr),
-      },
+    const client = http2.connect("https://api.push.apple.com");
+    let settled = false;
+
+    const finish = (error?: Error) => {
+      if (settled) return;
+      settled = true;
+      client.close();
+      error ? reject(error) : resolve();
     };
 
-    const req = https.request(options, (res) => {
-      let data = "";
-      res.on("data", (chunk) => (data += chunk));
-      res.on("end", () => {
-        if (res.statusCode === 200) {
-          resolve();
-        } else {
-          console.error(`[APNs] Push failed ${res.statusCode}:`, data);
-          resolve();
-        }
-      });
+    client.setTimeout(10_000, () => {
+      client.destroy();
+      finish(new Error("APNs request timed out"));
     });
 
-    req.on("error", (err) => {
-      console.error("[APNs] Request error:", err.message);
-      resolve();
+    client.on("error", (error) => {
+      finish(new Error(`APNs connection error: ${error.message}`));
     });
 
-    req.write(bodyStr);
-    req.end();
+    const req = client.request({
+      ":method": "POST",
+      ":path": `/3/device/${deviceToken}`,
+      authorization: `bearer ${jwt}`,
+      "apns-topic": bundleId,
+      "apns-push-type": "alert",
+      "apns-priority": "10",
+      "content-type": "application/json",
+      "content-length": Buffer.byteLength(bodyStr),
+    });
+
+    let statusCode = 0;
+    let responseBody = "";
+    let apnsId = "";
+
+    req.setEncoding("utf8");
+    req.on("response", (headers) => {
+      statusCode = Number(headers[":status"] || 0);
+      apnsId = String(headers["apns-id"] || "");
+    });
+    req.on("data", (chunk) => {
+      responseBody += chunk;
+    });
+    req.on("end", () => {
+      if (statusCode === 200) {
+        finish();
+        return;
+      }
+
+      let reason = responseBody;
+      try {
+        reason = JSON.parse(responseBody)?.reason || responseBody;
+      } catch {
+        // Keep the raw APNs response when it is not JSON.
+      }
+      finish(new Error(`APNs rejected push (${statusCode || "no status"}${apnsId ? `, id ${apnsId}` : ""}): ${reason || "unknown reason"}`));
+    });
+    req.on("error", (error) => {
+      finish(new Error(`APNs request error: ${error.message}`));
+    });
+    req.end(bodyStr);
   });
 }
 
@@ -123,7 +200,99 @@ export async function sendPushToMembers(
   extra?: { notificationType?: string; memberId?: string }
 ): Promise<void> {
   if (!deviceTokens.length) return;
-  await Promise.allSettled(
+  const results = await Promise.allSettled(
     deviceTokens.map((token) => sendApnsPush(token, title, body, extra))
   );
+  const failures = results.filter((result): result is PromiseRejectedResult => result.status === "rejected");
+  const notificationType = extra?.notificationType || "unknown";
+
+  console.log(`[APNs] ${notificationType}: accepted ${results.length - failures.length}/${results.length}`);
+  for (const failure of failures) {
+    console.error(`[APNs] ${notificationType}:`, failure.reason instanceof Error ? failure.reason.message : String(failure.reason));
+  }
+}
+
+const chatBatches = new Map<string, {
+  tokens: string[];
+  title: string;
+  count: number;
+  timer: NodeJS.Timeout;
+  body?: (count: number) => string;
+  canSend?: () => boolean | Promise<boolean>;
+}>();
+const CHAT_BATCH_WINDOW_MS = 5 * 60 * 1000;
+
+/** Determine whether a time falls inside the family's child push quiet period. */
+export function isChildPushQuietHours(
+  date: Date,
+  timezone: string,
+  quietStart = "20:00",
+  quietEnd = "07:00",
+): boolean {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(date);
+    const hour = Number(parts.find(part => part.type === "hour")?.value);
+    const minute = Number(parts.find(part => part.type === "minute")?.value);
+    const parseTime = (value: string) => {
+      const [hours, minutes] = value.split(":").map(Number);
+      if (!Number.isInteger(hours) || !Number.isInteger(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+        throw new Error("Invalid quiet time");
+      }
+      return hours * 60 + minutes;
+    };
+    const nowMinutes = hour * 60 + minute;
+    const startMinutes = parseTime(quietStart);
+    const endMinutes = parseTime(quietEnd);
+    if (startMinutes === endMinutes) return false;
+    return startMinutes < endMinutes
+      ? nowMinutes >= startMinutes && nowMinutes < endMinutes
+      : nowMinutes >= startMinutes || nowMinutes < endMinutes;
+  } catch {
+    // Invalid timezone should not suppress delivery.
+    return false;
+  }
+}
+
+/** Cancel a recipient's pending chat alert when they have read the chat. */
+export function cancelQueuedChatPush(recipientId: string): boolean {
+  const batch = chatBatches.get(recipientId);
+  if (!batch) return false;
+  clearTimeout(batch.timer);
+  chatBatches.delete(recipientId);
+  return true;
+}
+
+/** Queue chat alerts per recipient so bursts produce at most one alert per window. */
+export function queueChatPush(
+  recipientId: string,
+  deviceTokens: string[],
+  title: string,
+  body?: (count: number) => string,
+  canSend?: () => boolean | Promise<boolean>,
+): void {
+  if (!deviceTokens.length) return;
+  const existing = chatBatches.get(recipientId);
+  if (existing) {
+    existing.count += 1;
+    return;
+  }
+  const timer = setTimeout(async () => {
+    const batch = chatBatches.get(recipientId);
+    chatBatches.delete(recipientId);
+    if (!batch) return;
+    try {
+      if (batch.canSend && !(await batch.canSend())) return;
+      const bodyText = batch.body?.(batch.count) || (batch.count === 1 ? "1 new chat message" : `${batch.count} new chat messages`);
+      await sendPushToMembers(batch.tokens, batch.title, bodyText, { notificationType: "chat_message" });
+    } catch (error: any) {
+      console.error("[APNs] chat batch error:", error?.message || error);
+    }
+  }, CHAT_BATCH_WINDOW_MS);
+  timer.unref?.();
+  chatBatches.set(recipientId, { tokens: deviceTokens, title, count: 1, timer, body, canSend });
 }

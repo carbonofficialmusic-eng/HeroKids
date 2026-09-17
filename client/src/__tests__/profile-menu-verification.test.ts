@@ -42,7 +42,13 @@ const member = {
   updatedAt: new Date("2026-04-21T00:00:00.000Z"),
 };
 
-const renderProfileMenu = (isEmailVerified: boolean) => {
+const renderProfileMenu = (
+  isEmailVerified: boolean,
+  options: { isParent?: boolean; isRealParent?: boolean } = {},
+) => {
+  const isParent = options.isParent ?? true;
+  const isRealParent = options.isRealParent ?? true;
+
   queryClient.setQueryData(["/api/auth/user"], {
     id: "user-parent",
     email: "sonoastudio@me.com",
@@ -56,9 +62,9 @@ const renderProfileMenu = (isEmailVerified: boolean) => {
       QueryClientProvider,
       { client: queryClient },
       createElement(ProfileMenu, {
-        member,
-        isParent: true,
-        isRealParent: true,
+        member: { ...member, role: isParent ? "parent" : "child" },
+        isParent,
+        isRealParent,
         familyMemberCount: 1,
         onEditProfile: vi.fn(),
         onSwitchMember: vi.fn(),
@@ -115,5 +121,23 @@ describe("profile menu email verification", () => {
     await user.click(screen.getByTestId("button-profile-menu"));
 
     expect(screen.queryByTestId("menu-item-resend-verification")).toBeNull();
+  });
+
+  it("keeps account settings out of the parent dropdown", async () => {
+    const user = userEvent.setup();
+    renderProfileMenu(true);
+
+    await user.click(screen.getByTestId("button-profile-menu"));
+
+    expect(screen.queryByTestId("menu-item-account-settings")).toBeNull();
+  });
+
+  it("keeps account settings in the child dropdown", async () => {
+    const user = userEvent.setup();
+    renderProfileMenu(true, { isParent: false, isRealParent: false });
+
+    await user.click(screen.getByTestId("button-profile-menu"));
+
+    expect(screen.getByTestId("menu-item-account-settings")).toBeTruthy();
   });
 });

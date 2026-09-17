@@ -393,6 +393,9 @@ export default function Dashboard() {
     queryKey: ["/api/tasks"],
     enabled: !!member,
     staleTime: 5 * 60 * 1000,
+    refetchInterval: 30 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   // Fetch rewards
@@ -1178,7 +1181,6 @@ export default function Dashboard() {
   const regularActiveTasks = activeTasks.filter(t => !(t as any).isImportant && !isFixedAppointment(t));
   const filteredTasks = filterTasksByDate(regularActiveTasks);
   const groupedTasks = groupTasksByCategory(filteredTasks);
-  const hasMultipleCategories = Object.keys(groupedTasks).length > 1;
 
   // Toggle category collapse and persist to localStorage
   const toggleCategory = (category: string) => {

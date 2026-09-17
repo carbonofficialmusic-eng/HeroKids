@@ -31,3 +31,7 @@
 - [App-Store-Sprachanzeige](app-store-language-display.md) — Web-Übersetzungen zählen nicht; iOS muss unterstützte Sprachen im App-Bundle ausdrücklich deklarieren
 - [Heutige Terminkarten](due-today-card-design.md) — offene Termine am exakten Tag stehen zuerst und erhalten die freigegebene HEUTE-Hervorhebung
 - [GitHub-Connector für Branch-Sync](github-connector-branch-sync.md) — Connector-Zugriff authentifiziert kein lokales git push; kompakte Git-Tree-Updates vermeiden Proxy-502
+- [Zurückhaltende Kinder-Push-Policy](child-push-policy.md) — Kinder erhalten nur soziale Hinweise, Belohnungsentscheidungen und handlungsrelevante Ablehnungen
+- [Aufgaben-Kategorien immer anzeigen](kid-dashboard-category-headers.md) — Eltern- und Kinderansicht zeigen jede befüllte Kategorie samt Anzahl, auch bei nur einer Aufgabe
+- [Deploy-Fallback für Web-Navigation](deploy-fallback.md) — ein gecachter Service Worker ersetzt kurze 5xx-Deploy-Antworten für wiederkehrende Webnutzer
+- [Nativer iOS-Ausfallbildschirm](native-ios-outage-fallback.md) — die Remote-WebView wird bei Start, Navigation und Serverausfall durch einen lokalen UIKit-Fallback abgedeckt

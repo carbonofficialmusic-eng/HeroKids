@@ -11,21 +11,21 @@ description: How iOS push notifications are implemented in HeroKids — APNs JWT
 
 ## Architecture
 
-- `server/apns.ts` — JWT-based APNs HTTP/2 call using Node's built-in `https`. Caches JWT for 50 min (APNs tokens expire after 1 hour). Uses `api.push.apple.com` (production — covers TestFlight too).
+- `server/apns.ts` — JWT-based APNs call using Node's built-in `node:http2`. Never replace this with `https.request`: Apple's provider API requires HTTP/2. Caches JWT for 50 min and uses `api.push.apple.com` (production, including TestFlight).
 - `device_push_tokens` table — stores memberId + token + platform, unique constraint on (memberId, token).
 - `server/storage.ts` — `upsertDevicePushToken`, `removeDevicePushToken`, `getDevicePushTokensForMember`, `getDevicePushTokensForMembers`.
 - `POST /api/device-tokens/register` — called by iOS app on startup to store token.
 - `POST /api/device-tokens/unregister` — called on logout.
 
 ## Secrets required
-- `APNS_KEY_ID` — 10-char key ID (DQT69WC98R)
-- `APNS_TEAM_ID` — 10-char team ID (L834576FM4)
+- `APNS_KEY_ID` — Apple push key ID
+- `APNS_TEAM_ID` — Apple developer team ID
 - `APNS_BUNDLE_ID` — must exactly match the native app identifier `app.herokids.com`
 - `APNS_PRIVATE_KEY` — full .p8 file contents including BEGIN/END lines
 
 ## Trigger points (routes.ts)
 - `task_pending` → push to all parents (excl. self)
-- `task_approved` → push to child who submitted
+- `task_approved` → in-app notification only; no child push
 - `task_rejected` → push to child who submitted
 
 ## Client side
@@ -37,8 +37,16 @@ description: How iOS push notifications are implemented in HeroKids — APNs JWT
 
 ## Native build handoff
 
-**Rule:** The Replit toolchain uses Node 22, Capacitor CLI/Core/iOS are aligned on 8.5, and the production iOS sync has completed. Continue by running Xcode Cloud, validating the generated push-capable provisioning profile, and testing token registration and delivery through the resulting TestFlight build.
+**Rule:** The currently distributed native app contains working push support. Server-only APNs fixes should be published through Replit without pushing to the GitHub branch that triggers Xcode Cloud.
 
-**Why:** APNs server configuration, source callbacks, entitlement, Xcode capability, and native sync are prepared. CocoaPods, signing, APNs device registration, and final delivery still require macOS/Xcode Cloud and a physical iPhone.
+**Why:** Device registration and push receipt from the installed TestFlight app are confirmed in production. Additional native builds add delay and do not affect provider-side protocol, signing, delivery rules, or web settings.
 
-**How to apply:** Do not recreate or resync the APNs setup from older Capacitor versions. Run a new Xcode Cloud build, install it from TestFlight, grant notification permission, then inspect device-token registration and APNs response logs.
+**How to apply:** Publish backend changes in Replit, trigger a real task or chat event, and inspect APNs acceptance/rejection logs. Create a new native build only when native push registration code, entitlements, or capabilities change.
+
+## Provider protocol requirement
+
+**Rule:** APNs delivery must use a real HTTP/2 client and log the accepted/attempted count plus Apple's rejection reason without exposing device tokens.
+
+**Why:** Device registration, trigger execution, and token lookup can all succeed while delivery fails if the provider request uses ordinary HTTP/1.1 HTTPS. The Apple `.p8` secret may also be stored as a one-line PEM; it must be reconstructed before OpenSSL can parse it. JWT ES256 signatures must use the 64-byte IEEE-P1363 representation, not OpenSSL's default DER representation.
+
+**How to apply:** Keep APNs requests on `node:http2`, normalize multiline, escaped-newline, one-line PEM, and base64 PKCS#8 key formats, use IEEE-P1363 signing, treat non-200 responses as rejected deliveries, and retain per-type summaries.

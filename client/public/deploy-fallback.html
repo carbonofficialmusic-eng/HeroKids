@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#101422" />
+    <title>Little Champs</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { width: 100%; min-height: 100%; margin: 0; }
+      body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: calc(2rem + env(safe-area-inset-top)) 2rem calc(2rem + env(safe-area-inset-bottom));
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        background: rgb(16, 20, 34);
+        color: white;
+        font-family: Nunito, ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif;
+        text-align: center;
+      }
+      img { width: 160px; height: 160px; object-fit: contain; }
+      h1 { margin: 0 0 8px; font-size: 22px; font-weight: 800; }
+      p { max-width: 280px; margin: 0; color: rgba(255,255,255,.6); font-size: 14px; line-height: 1.5; }
+      button {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 28px;
+        background: #5bc4c0;
+        color: white;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:disabled { opacity: .6; cursor: default; }
+    </style>
+  </head>
+  <body>
+    <img src="/favicon.png" alt="Little Champs" />
+    <div>
+      <h1 id="title">Gleich zurück!</h1>
+      <p id="description">Little Champs wird gerade aktualisiert. In wenigen Augenblicken geht es weiter.</p>
+    </div>
+    <button id="retry" type="button">Erneut versuchen</button>
+    <script>
+      const translations = {
+        de: ["Gleich zurück!", "Little Champs wird gerade aktualisiert. In wenigen Augenblicken geht es weiter.", "Erneut versuchen", "Prüfe …"],
+        en: ["Be right back!", "Little Champs is being updated. It will be available again in a moment.", "Try again", "Checking…"],
+        es: ["¡Volvemos enseguida!", "Little Champs se está actualizando. Volverá a estar disponible en unos instantes.", "Intentar de nuevo", "Comprobando…"],
+        fr: ["De retour dans un instant !", "Little Champs est en cours de mise à jour. L’application sera bientôt de nouveau disponible.", "Réessayer", "Vérification…"]
+      };
+      const language = navigator.language.slice(0, 2);
+      const copy = translations[language] || translations.en;
+      const title = document.getElementById("title");
+      const description = document.getElementById("description");
+      const retry = document.getElementById("retry");
+      title.textContent = copy[0];
+      description.textContent = copy[1];
+      retry.textContent = copy[2];
+
+      async function check() {
+        retry.disabled = true;
+        retry.textContent = copy[3];
+        try {
+          const response = await fetch("/api/auth/user", { credentials: "include", cache: "no-store" });
+          if (response.status < 500) {
+            location.reload();
+            return;
+          }
+        } catch (_) {}
+        retry.disabled = false;
+        retry.textContent = copy[2];
+      }
+
+      retry.addEventListener("click", check);
+      setInterval(check, 8000);
+    </script>
+  </body>
+</html>

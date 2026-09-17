@@ -19,6 +19,7 @@ const SPA_ROUTES = new Set([
   "/privacy",
   "/impressum",
   "/terms",
+  "/contact",
   "/admin",
   "/dashboard",
   "/my-rewards",

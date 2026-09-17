@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <script>
@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
     <title>Little Champs - Gamified Family Task Management</title>
     <meta name="description" content="Little Champs helps families organize household tasks playfully. Children earn points, climb leaderboards, and win rewards for completing chores. Perfect for families with kids aged 6-15." />
+    <link rel="canonical" href="https://littlechamps.net/" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="manifest" href="/manifest.json" />
     <!-- PWA / iOS standalone mode -->
@@ -20,14 +21,34 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://littlechamps.net/" />
+    <meta property="og:site_name" content="Little Champs" />
     <meta property="og:title" content="Little Champs - Gamified Family Task Management" />
     <meta property="og:description" content="Turn household chores into a fun family game! Kids earn points, compete on leaderboards, and win rewards." />
-    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image" content="https://littlechamps.net/og-image.png" />
+    <meta property="og:image:alt" content="Little Champs – die spielerische Aufgaben- und Belohnungs-App für Familien" />
     
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content="Little Champs - Gamified Family Task Management" />
-    <meta property="twitter:description" content="Turn household chores into a fun family game! Kids earn points, compete on leaderboards, and win rewards." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Little Champs - Gamified Family Task Management" />
+    <meta name="twitter:description" content="Turn household chores into a fun family game! Kids earn points, compete on leaderboards, and win rewards." />
+    <meta name="twitter:image" content="https://littlechamps.net/og-image.png" />
+    <meta name="twitter:image:alt" content="Little Champs – die spielerische Aufgaben- und Belohnungs-App für Familien" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://littlechamps.net/#organization",
+        "name": "Little Champs",
+        "url": "https://littlechamps.net/",
+        "logo": "https://littlechamps.net/favicon.png",
+        "sameAs": [
+          "https://www.instagram.com/littlechampsapp/",
+          "https://apps.apple.com/de/app/little-champs-chore-rewards/id6778834955"
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
