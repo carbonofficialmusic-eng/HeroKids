@@ -8,6 +8,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import http from "http";
 import { startPointsResetScheduler } from "./scheduler";
 import { db } from "./db";
+import { storage } from "./storage";
 import { skins, familyMembers, starPlacements, achievementDefinitions } from "../shared/schema";
 import { sql, eq, and, notInArray } from "drizzle-orm";
 import Stripe from "stripe";
@@ -1012,6 +1013,19 @@ async function migrateLegacyMultiTasksToIndividualMode() {
   (async () => {
   // Ensure pinboard_notes table exists
   await ensurePinboardTable();
+
+  // One-time cleanup: drop stale device-push-token rows left over from before
+  // a token registration cleared other members' rows for the same physical
+  // device. Prevents duplicate pushes to a device shared/switched across
+  // multiple family member profiles.
+  try {
+    const removed = await storage.dedupeDevicePushTokens();
+    if (removed > 0) {
+      console.log(`[Push] Removed ${removed} duplicate device push token row(s)`);
+    }
+  } catch (error) {
+    console.error("Failed to dedupe device push tokens:", error);
+  }
 
   // Preserve the original independent behavior of all pre-team-mode multi tasks.
   await migrateLegacyMultiTasksToIndividualMode();

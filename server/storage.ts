@@ -81,7 +81,7 @@ import {
 } from "@shared/schema";
 import { clampAvailablePoints } from "@shared/point-balance";
 import { db } from "./db";
-import { eq, and, desc, gt, gte, lt, sql, inArray, isNull, isNotNull } from "drizzle-orm";
+import { eq, and, desc, gt, gte, lt, sql, inArray, isNull, isNotNull, ne } from "drizzle-orm";
 import { startOfDay } from 'date-fns';
 import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import bcrypt from 'bcrypt';
@@ -4344,6 +4344,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertDevicePushToken(memberId: string, token: string, platform = "ios"): Promise<void> {
+    // A physical device can only be logged in as one family member at a time.
+    // If this same token is still registered under other members (e.g. from a
+    // prior profile switch on a shared/test device), drop those stale rows first
+    // so the device doesn't receive duplicate push notifications for every
+    // family-wide event.
+    await db
+      .delete(devicePushTokens)
+      .where(and(eq(devicePushTokens.token, token), ne(devicePushTokens.memberId, memberId)));
+
     await db
       .insert(devicePushTokens)
       .values({ memberId, token, platform })
@@ -4371,7 +4380,31 @@ export class DatabaseStorage implements IStorage {
       .select({ token: devicePushTokens.token })
       .from(devicePushTokens)
       .where(inArray(devicePushTokens.memberId, memberIds));
-    return rows.map((r) => r.token);
+    // A single physical device should only be registered to one member, but
+    // stale rows from before that constraint existed can still make the same
+    // token appear for several recipients. Dedup defensively so one device
+    // never receives the same push more than once.
+    return Array.from(new Set(rows.map((r) => r.token)));
+  }
+
+  // One-time cleanup for tokens registered under more than one member before
+  // upsertDevicePushToken started clearing stale cross-member rows. Keeps the
+  // most recently updated row per token and drops the rest. Safe to call
+  // repeatedly; it is a no-op once no duplicates remain.
+  async dedupeDevicePushTokens(): Promise<number> {
+    const result = await db.execute(sql`
+      DELETE FROM ${devicePushTokens}
+      WHERE id IN (
+        SELECT id FROM (
+          SELECT id, ROW_NUMBER() OVER (
+            PARTITION BY token ORDER BY updated_at DESC, created_at DESC
+          ) AS rn
+          FROM ${devicePushTokens}
+        ) ranked
+        WHERE rn > 1
+      )
+    `);
+    return (result as any).rowCount ?? 0;
   }
 
   async getAppConfig(key: string): Promise<string | null> {

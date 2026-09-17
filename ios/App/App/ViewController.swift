@@ -28,6 +28,17 @@ class ViewController: CAPBridgeViewController {
     private var webViewLoadingObservation: NSKeyValueObservation?
     private var webViewNavigationGeneration = 0
 
+    // The outage screen must never be the first thing a user sees, and it must
+    // never flash on ordinary in-app navigations (member switch, route change,
+    // a reload after a photo upload, etc.). It is reserved for a genuinely
+    // unreachable server/app, confirmed by several failed checks in a row,
+    // and only after the app has had a reasonable amount of time to complete
+    // its normal startup load.
+    private let launchTime = Date()
+    private let startupGracePeriod: TimeInterval = 8
+    private var consecutiveFailureCount = 0
+    private let failureThresholdToShowFallback = 2
+
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNativeFallback()
@@ -136,8 +147,9 @@ class ViewController: CAPBridgeViewController {
             statusDescriptionLabel.widthAnchor.constraint(lessThanOrEqualToConstant: 280)
         ])
 
-        fallbackView.isHidden = false
-        view.bringSubviewToFront(fallbackView)
+        // The launch storyboard/splash already covers normal startup. Do not
+        // follow it with an outage screen while the WebView loads normally.
+        fallbackView.isHidden = true
     }
 
     private func observeWebViewNavigations() {
@@ -150,8 +162,6 @@ class ViewController: CAPBridgeViewController {
 
                 if isLoading {
                     self.webViewNavigationGeneration += 1
-                    self.fallbackView.isHidden = false
-                    self.view.bringSubviewToFront(self.fallbackView)
                 } else {
                     self.checkServerHealth(forceFreshCheck: true)
                 }
@@ -214,7 +224,7 @@ class ViewController: CAPBridgeViewController {
                 self.retryButton.setTitle(self.localizedFallbackCopy.retry, for: .normal)
 
                 guard serverAvailable else {
-                    self.applyServerAvailability(false)
+                    self.recordConfirmedFailure()
                     self.scheduleHealthCheck(after: 8)
                     return
                 }
@@ -222,14 +232,19 @@ class ViewController: CAPBridgeViewController {
                 self.checkWebViewReadiness { readiness in
                     switch readiness {
                     case .ready:
+                        self.consecutiveFailureCount = 0
                         self.applyServerAvailability(true)
                         self.scheduleHealthCheck(after: 45)
                     case .loading:
                         self.scheduleHealthCheck(after: 1)
                     case .failed:
-                        self.applyServerAvailability(false)
-                        self.webView?.reload()
-                        self.scheduleHealthCheck(after: 8)
+                        // A successful HTTP response followed by a temporarily
+                        // empty root is common during normal startup and route
+                        // changes. An HTTP-successful page must never trigger
+                        // the outage screen or a reload loop. Only repeated
+                        // failures to reach littlechamps.net may show it.
+                        self.consecutiveFailureCount = 0
+                        self.scheduleHealthCheck(after: 2)
                     }
                 }
             }
@@ -273,6 +288,19 @@ class ViewController: CAPBridgeViewController {
             fallbackView.isHidden = false
             view.bringSubviewToFront(fallbackView)
         }
+    }
+
+    private func recordConfirmedFailure() {
+        consecutiveFailureCount += 1
+
+        let startupGracePeriodHasElapsed =
+            Date().timeIntervalSince(launchTime) >= startupGracePeriod
+        guard startupGracePeriodHasElapsed,
+              consecutiveFailureCount >= failureThresholdToShowFallback else {
+            return
+        }
+
+        applyServerAvailability(false)
     }
 
     private func scheduleHealthCheck(after interval: TimeInterval) {
