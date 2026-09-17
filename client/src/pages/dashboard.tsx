@@ -59,7 +59,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { apiRequest, queryClient, getDevHeaders } from "@/lib/queryClient";
 import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import type { FamilyMember, Task, Reward, RewardRequest, FamilyGoal, GoalContribution } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
@@ -118,6 +118,7 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const { height: vvHeight, offsetTop: vvOffsetTop } = useVisualViewport();
   const [orientationLayoutEpoch, setOrientationLayoutEpoch] = useState(0);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
@@ -662,11 +663,14 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       
-      // Navigate immediately - dialog will be gone when new page loads
+      // Navigate immediately via client-side routing - dialog will be gone
+      // once the new page renders. A full page reload (window.location.href)
+      // would trigger a native WebView navigation on iOS, which briefly shows
+      // the "Be right back!" outage fallback screen even on a normal switch.
       if (data?.member?.role === "child") {
-        window.location.href = "/kid-dashboard";
+        navigate("/kid-dashboard");
       } else if (data?.member?.role === "parent") {
-        window.location.href = "/dashboard";
+        navigate("/dashboard");
       }
     },
     onError: (error: any) => {

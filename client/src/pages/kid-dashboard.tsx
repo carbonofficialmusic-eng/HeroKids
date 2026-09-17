@@ -1891,11 +1891,14 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       
-      // Navigate immediately - dialog will be gone when new page loads
+      // Navigate immediately via client-side routing - dialog will be gone
+      // once the new page renders. A full page reload (window.location.href)
+      // would trigger a native WebView navigation on iOS, which briefly shows
+      // the "Be right back!" outage fallback screen even on a normal switch.
       if (data?.member?.role === "child") {
-        window.location.href = "/kid-dashboard";
+        navigate("/kid-dashboard");
       } else if (data?.member?.role === "parent") {
-        window.location.href = "/dashboard";
+        navigate("/dashboard");
       }
     },
     onError: (error: any) => {
