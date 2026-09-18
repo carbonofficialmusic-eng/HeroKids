@@ -19,7 +19,7 @@ import { getDueDateWindow } from "@shared/due-date-policy";
 import { ObjectPermission } from "./objectAcl";
 import { achievementEngine } from "./achievementEngine";
 import { wsClients, broadcastToFamily } from "./websocket";
-import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, goalContributions, childDeviceSessions, users, pinboardNotes } from "@shared/schema";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, goalContributions, childDeviceSessions, users, pinboardNotes, starPlacements } from "@shared/schema";
 import { clampAvailablePoints } from "@shared/point-balance";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier, SubscriptionTierLegacy } from "@shared/tier-config";
@@ -125,7 +125,7 @@ async function validateTaskMemberSelection(
     isTeamTask,
   );
 }
-import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD } from "@shared/skin-config";
+import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, LEGACY_SKIN_ORDER, MIXED_SKIN_ORDER, TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import { eq, inArray, and, desc } from "drizzle-orm";
 import "./types";
 import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
@@ -5358,6 +5358,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching skins:", error);
       res.status(500).json({ message: "Failed to fetch skins" });
+    }
+  });
+
+  // Hidden seven-tap test helper: unlock the complete skin/star collection for
+  // the currently selected profile. Factory reset returns it to a clean state.
+  app.post("/api/skins/prefetch", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      let member = result.member;
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        member = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+      }
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Ensure this member has exactly the normal placement set before marking
+      // it found, including profiles reset by an older deployed app version.
+      await storage.initializeStarPlacements(member.id);
+      const now = new Date();
+
+      await db.transaction(async (tx) => {
+        await tx.update(familyMembers)
+          .set({
+            unlockedSkins: [...MIXED_SKIN_ORDER, ...LEGACY_SKIN_ORDER],
+            discoveredSkinIds: [...MIXED_SKIN_ORDER],
+            earnedLegacySkinIds: [...LEGACY_SKIN_ORDER],
+            starsFound: TOTAL_HIDDEN_STARS,
+            updatedAt: now,
+          })
+          .where(eq(familyMembers.id, member.id));
+
+        await tx.update(starPlacements)
+          .set({ found: true, foundAt: now })
+          .where(eq(starPlacements.memberId, member.id));
+      });
+
+      broadcastToFamily(member.familyName, {
+        type: "skin_discovered",
+        memberId: member.id,
+        allSkinsUnlocked: true,
+        totalStarsFound: TOTAL_HIDDEN_STARS,
+      });
+
+      res.json({
+        message: "All skins and stars unlocked",
+        starsFound: TOTAL_HIDDEN_STARS,
+        discoveredSkins: MIXED_SKIN_ORDER.length,
+        legacySkins: LEGACY_SKIN_ORDER.length,
+      });
+    } catch (error: any) {
+      console.error("Error unlocking all skins:", error);
+      res.status(500).json({ message: "Failed to unlock all skins" });
     }
   });
 

@@ -107,6 +107,46 @@ export default function SkinsGallery() {
   const [parentalGateQ, setParentalGateQ] = useState({ question: "", answer: 0 });
   const [parentalGateInput, setParentalGateInput] = useState("");
   const [parentalGateError, setParentalGateError] = useState(false);
+  const cheatTapCountRef = useRef(0);
+  const cheatTapResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handlePointsBadgeTap = async () => {
+    cheatTapCountRef.current += 1;
+    if (cheatTapResetRef.current) {
+      clearTimeout(cheatTapResetRef.current);
+    }
+    cheatTapResetRef.current = setTimeout(() => {
+      cheatTapCountRef.current = 0;
+    }, 2000);
+
+    if (cheatTapCountRef.current < 7) return;
+
+    cheatTapCountRef.current = 0;
+    if (cheatTapResetRef.current) {
+      clearTimeout(cheatTapResetRef.current);
+      cheatTapResetRef.current = null;
+    }
+
+    try {
+      await apiRequest("POST", "/api/skins/prefetch", {});
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/skins"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/stars"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/family-members"] }),
+      ]);
+      toast({
+        title: t("common.success"),
+        description: "Alle Skins und Sterne wurden freigeschaltet.",
+      });
+    } catch (error: any) {
+      toast({
+        title: t("common.error"),
+        description: error?.message || "Freischaltung fehlgeschlagen.",
+        variant: "destructive",
+      });
+    }
+  };
 
   function generateMathQ() {
     const ops = [
@@ -577,7 +617,11 @@ export default function SkinsGallery() {
             </Link>
             
             <div className="flex flex-wrap items-center gap-2">
-               <Badge variant="secondary" className="lc-points-chip text-sm font-bold whitespace-nowrap">
+               <Badge
+                 variant="secondary"
+                 className="lc-points-chip text-sm font-bold whitespace-nowrap select-none"
+                 onClick={handlePointsBadgeTap}
+               >
                 <Trophy className="h-4 w-4 mr-1" />
                 {totalEarned} {t('common.points')}
               </Badge>

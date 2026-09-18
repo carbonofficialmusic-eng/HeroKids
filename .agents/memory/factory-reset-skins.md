@@ -7,4 +7,4 @@ description: Verbindliche Ausgangslage für profilgetrennte Skin- und Sternstän
 
 **Why:** Globale Client-Caches und verzögert erzeugte Sternpositionen führten nach Profilwechseln zu widersprüchlichen Sternzahlen und Freischaltungen. Eine versteckte Produktions-Testfunktion konnte außerdem dauerhaft alle Skins eines Profils freischalten.
 
-**How to apply:** Alle profilabhängigen Abfragen müssen die Mitglieds-ID im Cache-Schlüssel tragen und beim Profilwechsel invalidiert werden. Factory Reset löscht Client-Caches auf allen verbundenen Geräten. Test-/Cheat-Endpunkte dürfen in Produktion nicht existieren.
+**How to apply:** Alle profilabhängigen Abfragen müssen die Mitglieds-ID im Cache-Schlüssel tragen und beim Profilwechsel invalidiert werden. Factory Reset löscht Client-Caches auf allen verbundenen Geräten. Die ausdrücklich gewünschte versteckte 7-Klick-Funktion schaltet nur das aktive Profil frei und muss Sternpositionen, Zähler, Karten und Legacy-Skins atomar synchron halten.
