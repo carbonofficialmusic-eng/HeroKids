@@ -650,6 +650,13 @@
     "addressedTo": "{{name}} 宛て",
     "selectedMember": "選択したメンバー",
     "parentVisibilityNotice": "保護者は子ども同士の指定メッセージを含むすべてのメッセージを見ることができます。",
+    "conversations": "会話",
+    "childConversations": "子ども同士の会話",
+    "withMember": "{{name}}とのチャット",
+    "toMember": "{{name}}宛て",
+    "broadcastHint": "家族全員がこのメッセージを見られます。",
+    "directHint": "この会話を見られるのはあなたと{{name}}だけです。",
+    "oversightReadOnly": "保護者専用の閲覧画面です。ここから返信はできません。",
     "errorLoadingChat": "チャットの読み込みエラー"
   },
   "settings": {

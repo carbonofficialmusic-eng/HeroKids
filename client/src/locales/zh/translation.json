@@ -650,6 +650,13 @@
     "addressedTo": "发送给 {{name}}",
     "selectedMember": "所选成员",
     "parentVisibilityNotice": "提示：家长可以查看所有消息，包括孩子之间的定向消息。",
+    "conversations": "对话",
+    "childConversations": "孩子之间的对话",
+    "withMember": "与 {{name}} 聊天",
+    "toMember": "发送给 {{name}}",
+    "broadcastHint": "全家人都可以看到这条消息。",
+    "directHint": "只有你和 {{name}} 能看到这段对话。",
+    "oversightReadOnly": "仅供家长查看。这里不能回复。",
     "errorLoadingChat": "加载聊天时出错"
   },
   "settings": {

@@ -1,18 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Lock, MessageCircle, ArrowLeft, EyeOff } from "lucide-react";
+import { Send, Lock, MessageCircle, ArrowLeft, EyeOff, Users, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Link } from "wouter";
-import { EmoticonPicker } from "@/components/emoticon-picker";
 import { MessageRenderer } from "@/components/message-renderer";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EmoticonPicker } from "@/components/emoticon-picker";
 
 interface ChatMessage {
   id: string;
@@ -20,374 +19,151 @@ interface ChatMessage {
   createdAt: Date;
   memberId: string;
   memberName: string;
-  memberColor: string;
-  memberAvatarUrl: string | null;
-  memberActiveSkinId: string | null;
+  memberColor?: string;
   targetMemberId: string | null;
-  isTargeted: boolean;
   targetMemberName: string | null;
+  isTargeted: boolean;
+}
+interface FamilyMember {
+  id: string;
+  displayName: string;
+  role: string;
+  color?: string;
+  avatarUrl?: string | null;
 }
 
 export default function Chat() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [messageText, setMessageText] = useState("");
-  const [targetMemberId, setTargetMemberId] = useState<string>("all");
-  // Track the visual viewport height directly — most reliable approach for
-  // iOS WKWebView keyboard avoidance. vv.height shrinks when keyboard opens.
-  const [vvHeight, setVvHeight] = useState(() =>
-    window.visualViewport ? window.visualViewport.height : window.innerHeight
-  );
+  const [conversation, setConversation] = useState("all");
+  const [vvHeight, setVvHeight] = useState(() => window.visualViewport?.height ?? window.innerHeight);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Use member query directly - works for both Replit Auth and Device Sessions
   const { data: member, isLoading: memberLoading } = useQuery<any>({
-    queryKey: ["/api/family-members/current"],
-    staleTime: 5 * 60 * 1000,
+    queryKey: ["/api/family-members/current"], staleTime: 5 * 60 * 1000,
   });
-
-  // Real (non-acting-as) member — to detect if we're acting as someone else
   const { data: realMember } = useQuery<any>({
-    queryKey: ["/api/family-members/real"],
-    staleTime: 5 * 60 * 1000,
+    queryKey: ["/api/family-members/real"], staleTime: 5 * 60 * 1000,
   });
-  const { data: familyMembers = [] } = useQuery<any[]>({
-    queryKey: ["/api/family-members"],
-    enabled: !!member,
-    staleTime: 5 * 60 * 1000,
+  const { data: familyMembers = [] } = useQuery<FamilyMember[]>({
+    queryKey: ["/api/family-members"], enabled: !!member, staleTime: 5 * 60 * 1000,
   });
-
-  // True when a parent has switched into a child's profile
-  const isActingAs = !!(member && realMember && member.id !== realMember.id);
-
   const { data: messages = [], isLoading, error } = useQuery<ChatMessage[]>({
-    queryKey: ["/api/chat"],
-    enabled: !!member, // Enable when member is loaded (works for Device Sessions)
-    refetchInterval: 5000, // Refetch every 5 seconds as fallback
-    staleTime: 5 * 60 * 1000,
+    queryKey: ["/api/chat"], enabled: !!member, refetchInterval: 5000, staleTime: 5 * 60 * 1000,
   });
+  const isActingAs = !!(member && realMember && member.id !== realMember.id);
+  const isParent = member?.role === "parent";
+  const dashboardUrl = member?.role === "child" ? "/kid-dashboard" : "/dashboard";
+  const selectedMember = familyMembers.find((candidate) => candidate.id === conversation);
 
-  const isChild = member?.role === "child";
-  const dashboardUrl = isChild ? "/kid-dashboard" : "/dashboard";
+  useEffect(() => {
+    if (conversation !== "all" && conversation !== "oversight" && (!selectedMember || selectedMember.id === member?.id)) {
+      setConversation("all");
+    }
+  }, [conversation, selectedMember, member?.id]);
+
+  const visibleMessages = useMemo(() => {
+    if (conversation === "all") return messages.filter((message) => !message.isTargeted);
+    if (conversation === "oversight") {
+      if (!isParent) return [];
+      const children = new Set(familyMembers.filter((candidate) => candidate.role === "child").map((candidate) => candidate.id));
+      return messages.filter((message) => message.isTargeted && children.has(message.memberId) && !!message.targetMemberId && children.has(message.targetMemberId));
+    }
+    return messages.filter((message) => message.isTargeted && !!selectedMember &&
+      ((message.memberId === member?.id && message.targetMemberId === selectedMember.id) ||
+       (message.memberId === selectedMember.id && message.targetMemberId === member?.id)));
+  }, [conversation, familyMembers, isParent, member?.id, messages, selectedMember]);
 
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ message, target }: { message: string; target: string }) => {
-      return await apiRequest("POST", "/api/chat", { message, targetMemberId: target === "all" ? null : target });
-    },
+    mutationFn: async ({ message, target }: { message: string; target: string | null }) =>
+      apiRequest("POST", "/api/chat", { message, targetMemberId: target }),
     onSuccess: () => {
       setMessageText("");
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-      // Scroll to bottom after sending
       setTimeout(scrollToBottom, 100);
     },
-    onError: (error: any) => {
-      const description = error.message === "acting_as_member"
-        ? t('chat.readOnlyActingAs', { name: member?.displayName ?? "" })
-        : (error.message || t('errors.tryAgain'));
-      toast({
-        title: t('chat.failedToSend'),
-        description,
-        variant: "destructive",
-      });
-    },
+    onError: (sendError: any) => toast({
+      title: t("chat.failedToSend"),
+      description: sendError.message === "acting_as_member"
+        ? t("chat.readOnlyActingAs", { name: member?.displayName ?? "" })
+        : (sendError.message || t("errors.tryAgain")),
+      variant: "destructive",
+    }),
   });
-
   const markAsReadMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/chat/mark-read", {});
-    },
-    onSuccess: () => {
-      // Invalidate unread count query
-      queryClient.invalidateQueries({ queryKey: ["/api/chat/unread-count"] });
-    },
+    mutationFn: () => apiRequest("POST", "/api/chat/mark-read", {}),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/chat/unread-count"] }),
   });
-
-  const scrollToBottom = () => {
-    // Scroll the ScrollArea viewport directly to avoid affecting window scroll
-    if (scrollAreaRef.current) {
-      const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (viewport) {
-        viewport.scrollTop = viewport.scrollHeight;
-        return;
-      }
-    }
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  // Sync container size with the visual viewport.
-  // vv.height shrinks when the iOS keyboard opens, so the container
-  // automatically stops at the top of the keyboard — no offset math needed.
+  function scrollToBottom() {
+    const viewport = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement | null;
+    if (viewport) viewport.scrollTop = viewport.scrollHeight;
+    else messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
   useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-
-    let prevHeight = vv.height;
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    let previous = viewport.height;
     const onViewportChange = () => {
-      setVvHeight(vv.height);
-      // Keyboard just opened (height shrank significantly) → scroll to newest msg
-      if (vv.height < prevHeight - 50) {
-        setTimeout(scrollToBottom, 120);
-      }
-      prevHeight = vv.height;
+      setVvHeight(viewport.height);
+      if (viewport.height < previous - 50) setTimeout(scrollToBottom, 120);
+      previous = viewport.height;
     };
-
-    vv.addEventListener("resize", onViewportChange);
-    vv.addEventListener("scroll", onViewportChange);
-    return () => {
-      vv.removeEventListener("resize", onViewportChange);
-      vv.removeEventListener("scroll", onViewportChange);
-    };
+    viewport.addEventListener("resize", onViewportChange);
+    viewport.addEventListener("scroll", onViewportChange);
+    return () => { viewport.removeEventListener("resize", onViewportChange); viewport.removeEventListener("scroll", onViewportChange); };
   }, []);
-
-  // Scroll to bottom when messages change
+  useEffect(() => { scrollToBottom(); }, [visibleMessages.length]);
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // Mark messages as read when user views chat
-  useEffect(() => {
-    if (messages.length > 0 && !isLoading) {
-      markAsReadMutation.mutate();
-    }
+    if (messages.length > 0 && !isLoading) markAsReadMutation.mutate();
   }, [messages.length, isLoading]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!messageText.trim() || sendMessageMutation.isPending) return;
-    sendMessageMutation.mutate({ message: messageText.trim(), target: targetMemberId });
+  const handleSendMessage = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!messageText.trim() || sendMessageMutation.isPending || conversation === "oversight") return;
+    sendMessageMutation.mutate({ message: messageText.trim(), target: conversation === "all" ? null : conversation });
   };
-
-  const handleSelectEmoticon = (emoticon: string) => {
-    setMessageText((prev) => prev + emoticon + " ");
-  };
-
-  // Container is pinned to the top-left corner and sized to exactly the
-  // visual viewport height. When the keyboard opens, vvHeight shrinks and
-  // the container automatically "lifts" its bottom edge above the keyboard.
-  // We avoid using `bottom` + calculated offset because that approach has
-  // a CSS-cascade conflict with `inset` in iOS WKWebView.
   const isKeyboardOpen = vvHeight < window.innerHeight - 80;
-  // In keyboard-open mode shrink the top padding so more space is available
-  // for the message list and input. Without this, the Card header alone (~48px)
-  // consumes almost all available height in landscape and the input is clipped.
   const safeTopStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: `${vvHeight}px`,
-    paddingTop: isKeyboardOpen ? '0.25rem' : 'max(1rem, env(safe-area-inset-top))',
-    paddingBottom: isKeyboardOpen ? 0 : 'env(safe-area-inset-bottom)',
-    paddingLeft: 'max(1rem, env(safe-area-inset-left))',
-    paddingRight: 'max(1rem, env(safe-area-inset-right))',
+    position: "fixed", top: 0, left: 0, right: 0, height: `${vvHeight}px`,
+    paddingTop: isKeyboardOpen ? "0.25rem" : "max(1rem, env(safe-area-inset-top))",
+    paddingBottom: isKeyboardOpen ? 0 : "env(safe-area-inset-bottom)",
+    paddingLeft: "max(1rem, env(safe-area-inset-left))", paddingRight: "max(1rem, env(safe-area-inset-right))",
   };
-  const backBtn = (
-    <Link href={dashboardUrl}>
-      <Button
-        variant="outline"
-        size="sm"
-        className="bg-background/30 backdrop-blur-sm border-border/40 hover:bg-background/60"
-        data-testid="button-back-to-dashboard"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        {t('settings.backToDashboard')}
-      </Button>
-    </Link>
-  );
+  const backBtn = <Link href={dashboardUrl}><Button variant="outline" size="sm" className="bg-background/30 backdrop-blur-sm border-border/40" data-testid="button-back-to-dashboard"><ArrowLeft className="w-4 h-4 mr-2" />{t("settings.backToDashboard")}</Button></Link>;
 
-  if (isLoading || memberLoading) {
-    return (
-      <div className="p-4 flex flex-col items-center" style={safeTopStyle}>
-        <div className="w-full lg:max-w-3xl flex items-center gap-3 mb-4 shrink-0">
-          {backBtn}
-          <h1 className="text-2xl font-bold">{t('chat.title')}</h1>
-        </div>
-        <div className="flex items-center justify-center flex-1" data-testid="loading-chat">
-          <div className="animate-pulse">{t('chat.loadingChat')}</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle tier restriction error
+  if (isLoading || memberLoading) return <div className="p-4 flex flex-col items-center" style={safeTopStyle}><div className="w-full lg:max-w-3xl flex items-center gap-3 mb-4">{backBtn}<h1 className="text-2xl font-bold">{t("chat.title")}</h1></div><div className="flex-1 flex items-center" data-testid="loading-chat"><div className="animate-pulse">{t("chat.loadingChat")}</div></div></div>;
   if (error) {
-    const errorMessage = (error as any)?.message || "An error occurred";
+    const errorMessage = (error as any)?.message || t("errors.tryAgain");
     const isTierError = errorMessage.includes("Family+") || errorMessage.includes("tier");
-    
-    if (isTierError) {
-      return (
-        <div className="p-4 overflow-y-auto" style={safeTopStyle} data-testid="chat-upgrade-prompt">
-          <div className="flex items-center gap-3 mb-4 shrink-0">
-            {backBtn}
-            <h1 className="text-2xl font-bold">{t('chat.title')}</h1>
-          </div>
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <div className="flex items-center gap-3 mb-2">
-                <Lock className="w-8 h-8 text-muted-foreground" />
-                <CardTitle>{t('chat.title')}</CardTitle>
-              </div>
-              <CardDescription>{t('chat.connectRealtime')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h3 className="font-semibold mb-2">{t('chat.upgradeToUnlock')}</h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  {t('chat.upgradeToFamilyPlus')}
-                </p>
-                <ul className="text-sm text-muted-foreground space-y-1 mt-3">
-                  <li>• {t('chat.realTimeMessaging')}</li>
-                  <li>• {t('chat.shareUpdates')}</li>
-                  <li>• {t('chat.stayConnected')}</li>
-                  <li>• {t('chat.plusAllBenefits')}</li>
-                </ul>
-              </div>
-              <Link href="/pricing">
-                <Button className="w-full" data-testid="button-upgrade">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  {t('chat.upgradeToFamilyPlusButton')}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
-
-    // Other errors
-    toast({
-      title: t('chat.errorLoadingChat'),
-      description: errorMessage,
-      variant: "destructive",
-    });
-    return null;
+    return <div className="p-4 overflow-y-auto" style={safeTopStyle}><div className="flex items-center gap-3 mb-4">{backBtn}<h1 className="text-2xl font-bold">{t("chat.title")}</h1></div><Card className="max-w-2xl mx-auto"><CardHeader><CardTitle><Lock className="w-6 h-6 inline mr-2" />{isTierError ? t("chat.upgradeToUnlock") : t("chat.errorLoadingChat")}</CardTitle></CardHeader><CardContent className="space-y-4"><p className="text-muted-foreground">{isTierError ? t("chat.upgradeToFamilyPlus") : errorMessage}</p>{isTierError && <Link href="/pricing"><Button className="w-full" data-testid="button-upgrade"><MessageCircle className="w-4 h-4 mr-2" />{t("chat.upgradeToFamilyPlusButton")}</Button></Link>}</CardContent></Card></div>;
   }
 
+  const conversationTitle = conversation === "all" ? t("chat.allMembers") : conversation === "oversight" ? t("chat.childConversations") : t("chat.withMember", { name: selectedMember?.displayName });
   return (
-    <div
-      className={`lc-chat-page ${isKeyboardOpen ? "is-keyboard-open" : ""} flex flex-col items-center`}
-      style={safeTopStyle}
-      data-testid="page-chat"
-    >
-      <div className={`w-full lg:max-w-3xl flex flex-col flex-1 min-h-0 px-4 ${isKeyboardOpen ? 'pb-0' : 'pb-4'}`}>
-        <div className={`flex items-center gap-3 shrink-0 ${isKeyboardOpen ? 'mb-1' : 'mb-4'}`}>
-          {backBtn}
-          <h1 className="text-2xl font-bold" data-testid="heading-chat">
-            {t('chat.title')}
-          </h1>
-        </div>
-
+    <div className={`lc-chat-page ${isKeyboardOpen ? "is-keyboard-open" : ""} flex flex-col items-center`} style={safeTopStyle} data-testid="page-chat">
+      <div className={`w-full lg:max-w-4xl flex flex-col flex-1 min-h-0 px-4 ${isKeyboardOpen ? "pb-0" : "pb-4"}`}>
+        <div className={`flex items-center gap-3 shrink-0 ${isKeyboardOpen ? "mb-1" : "mb-4"}`}>{backBtn}<h1 className="text-2xl font-bold" data-testid="heading-chat">{t("chat.title")}</h1></div>
         <Card className="lc-chat-card flex-1 flex flex-col min-h-0 overflow-hidden">
-          {!isKeyboardOpen && (
-            <CardHeader className="border-b shrink-0 py-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5" />
-                  {t('chat.messages')}
-                </CardTitle>
-                <span className="text-sm text-muted-foreground">
-                  {t(messages.length === 1 ? 'chat.messageCount' : 'chat.messageCount_other', { count: messages.length })}
-                </span>
-              </div>
-            </CardHeader>
-          )}
+          {!isKeyboardOpen && <CardHeader className="border-b shrink-0 py-3"><div className="flex items-center justify-between"><CardTitle className="flex items-center gap-2"><MessageCircle className="w-5 h-5" />{conversationTitle}</CardTitle><span className="text-sm text-muted-foreground">{t(visibleMessages.length === 1 ? "chat.messageCount" : "chat.messageCount_other", { count: visibleMessages.length })}</span></div></CardHeader>}
           <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
-            {/* Messages area — scrolls independently */}
-            <ScrollArea className="flex-1 min-h-0 p-4" ref={scrollAreaRef}>
-              <div className="space-y-4" data-testid="chat-messages">
-                {messages.length === 0 ? (
-                  <div className="lc-empty-state text-center py-12">
-                    <MessageCircle className="lc-empty-state-icon w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p className="lc-empty-state-description">{t('chat.noMessagesStart')}</p>
-                  </div>
-                ) : (
-                  messages.map((msg, index) => (
-                    <div
-                      key={msg.id}
-                      className="flex gap-3 items-start"
-                      data-testid={`chat-message-${index}`}
-                    >
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                        style={{ backgroundColor: msg.memberColor }}
-                      >
-                        {msg.memberName.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline gap-2 mb-1">
-                          <span className="font-semibold text-sm" data-testid={`text-message-author-${index}`}>
-                            {msg.memberName}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(msg.createdAt), "h:mm a")}
-                          </span>
-                           {msg.isTargeted && (
-                             <span className="text-xs text-primary">
-                               {t("chat.addressedTo", { name: msg.targetMemberName || t("chat.selectedMember") })}
-                             </span>
-                           )}
-                        </div>
-                        <div className="text-sm break-words" data-testid={`text-message-content-${index}`}>
-                          <MessageRenderer message={msg.message} />
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
-
-            {/* Input area — always pinned at bottom */}
-            {isActingAs ? (
-              <div className="border-t p-4 flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 shrink-0" data-testid="chat-readonly-notice">
-                <EyeOff className="w-4 h-4 flex-shrink-0" />
-                <span>{t('chat.readOnlyActingAs', 'Nur lesen — du bist als {{name}} angemeldet. Melde dich mit deinem eigenen Account an, um zu schreiben.', { name: member?.displayName })}</span>
-              </div>
-            ) : (
-              <div className={`border-t px-4 pt-3 ${isKeyboardOpen ? "pb-1" : "pb-0"}`}>
-                <p className="text-xs text-muted-foreground mb-2">{t("chat.parentVisibilityNotice")}</p>
-                <Select value={targetMemberId} onValueChange={setTargetMemberId} disabled={sendMessageMutation.isPending}>
-                  <SelectTrigger className="w-full" data-testid="select-chat-recipient">
-                    <SelectValue placeholder={t("chat.sendTo")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("chat.allMembers")}</SelectItem>
-                    {familyMembers.filter((candidate: any) => candidate.id !== member?.id).map((candidate: any) => (
-                      <SelectItem key={candidate.id} value={candidate.id}>
-                        {t("chat.sendToMember", { name: candidate.displayName })}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {!isActingAs && (
-              <form
-                onSubmit={handleSendMessage}
-                className={`lc-chat-composer flex gap-2 shrink-0 ${isKeyboardOpen ? 'py-2 px-3' : 'p-4'}`}
-                data-testid="form-send-message"
-              >
-                <EmoticonPicker onSelectEmoticon={handleSelectEmoticon} />
-                <Input
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  placeholder={t('chat.typeMessage')}
-                  maxLength={1000}
-                  disabled={sendMessageMutation.isPending}
-                  className="flex-1"
-                  data-testid="input-message"
-                />
-                <Button
-                  type="submit"
-                  disabled={!messageText.trim() || sendMessageMutation.isPending}
-                  data-testid="button-send-message"
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </form>
-            )}
+            <nav className="border-b px-3 py-2 flex gap-2 overflow-x-auto shrink-0" aria-label={t("chat.conversations")} data-testid="select-chat-recipient">
+              <Button variant={conversation === "all" ? "default" : "ghost"} size="sm" onClick={() => setConversation("all")} data-testid="button-chat-all"><Users className="w-4 h-4 mr-1.5" />{t("chat.allMembers")}</Button>
+              {familyMembers.filter((candidate) => candidate.id !== member?.id).map((candidate) => <Button key={candidate.id} variant={conversation === candidate.id ? "default" : "ghost"} size="sm" onClick={() => setConversation(candidate.id)} data-testid={`button-chat-member-${candidate.id}`}><span className="w-2.5 h-2.5 rounded-full mr-1.5 ring-2 ring-offset-1 ring-offset-background" style={{ backgroundColor: candidate.color || "hsl(var(--primary))", outlineColor: candidate.color || "hsl(var(--primary))" }} />{candidate.displayName}</Button>)}
+              {isParent && <Button variant={conversation === "oversight" ? "default" : "ghost"} size="sm" onClick={() => setConversation("oversight")} data-testid="button-chat-oversight"><ShieldCheck className="w-4 h-4 mr-1.5" />{t("chat.childConversations")}</Button>}
+            </nav>
+            {conversation === "oversight" && <div className="px-4 py-2 text-xs text-muted-foreground bg-muted/30 border-b flex items-center gap-2"><EyeOff className="w-3.5 h-3.5" />{t("chat.oversightReadOnly")}</div>}
+            <ScrollArea className="flex-1 min-h-0 p-4" ref={scrollAreaRef}><div className="space-y-4" data-testid="chat-messages">
+              {visibleMessages.length === 0 ? <div className="lc-empty-state text-center py-12"><MessageCircle className="lc-empty-state-icon w-12 h-12 mx-auto mb-3 opacity-50" /><p className="lc-empty-state-description">{t("chat.noMessagesStart")}</p></div> :
+                visibleMessages.map((msg, index) => <div key={msg.id} className="flex gap-3 items-start" data-testid={`chat-message-${index}`}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ring-2 ring-offset-2 ring-offset-background" style={{ backgroundColor: msg.memberColor || "hsl(var(--primary))", outlineColor: msg.memberColor || "hsl(var(--primary))" }}>{msg.memberName.charAt(0).toUpperCase()}</div>
+                  <div className="flex-1 min-w-0"><div className="flex items-baseline gap-2 mb-1 flex-wrap"><span className="font-semibold text-sm" data-testid={`text-message-author-${index}`}>{msg.memberName}</span>{conversation === "oversight" && <span className="text-xs text-primary">{t("chat.toMember", { name: msg.targetMemberName || t("chat.selectedMember") })}</span>}<span className="text-xs text-muted-foreground">{format(new Date(msg.createdAt), "h:mm a")}</span></div><div className="text-sm break-words" data-testid={`text-message-content-${index}`}><MessageRenderer message={msg.message} /></div></div>
+                </div>)}
+              <div ref={messagesEndRef} />
+            </div></ScrollArea>
+             {!isActingAs && conversation !== "oversight" && <><div className="border-t px-4 pt-3"><p className="text-xs text-muted-foreground mb-2">{t("chat.parentVisibilityNotice")}</p><p className="text-xs font-medium text-primary">{conversation === "all" ? t("chat.broadcastHint") : t("chat.directHint", { name: selectedMember?.displayName })}</p></div><form onSubmit={handleSendMessage} className={`lc-chat-composer flex gap-2 shrink-0 ${isKeyboardOpen ? "py-2 px-3" : "p-4"}`} data-testid="form-send-message"><EmoticonPicker onSelectEmoticon={(emoticon) => setMessageText((previous) => previous + emoticon + " ")} /><Input value={messageText} onChange={(event) => setMessageText(event.target.value)} placeholder={t("chat.typeMessage")} maxLength={1000} disabled={sendMessageMutation.isPending} className="flex-1" data-testid="input-message" /><Button type="submit" disabled={!messageText.trim() || sendMessageMutation.isPending} data-testid="button-send-message"><Send className="w-4 h-4" /></Button></form></>}
+            {conversation === "oversight" && <div className="border-t p-4 flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 shrink-0"><EyeOff className="w-4 h-4 flex-shrink-0" />{t("chat.oversightReadOnly")}</div>}
+            {isActingAs && <div className="border-t p-4 flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 shrink-0" data-testid="chat-readonly-notice"><EyeOff className="w-4 h-4 flex-shrink-0" /><span>{t("chat.readOnlyActingAs", { name: member?.displayName })}</span></div>}
           </CardContent>
         </Card>
       </div>

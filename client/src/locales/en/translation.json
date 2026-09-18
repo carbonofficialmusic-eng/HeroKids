@@ -679,6 +679,13 @@
     "addressedTo": "To {{name}}",
     "selectedMember": "selected member",
     "parentVisibilityNotice": "Note: Parents can see all messages, including targeted messages between children.",
+    "conversations": "Conversations",
+    "childConversations": "Child conversations",
+    "withMember": "Chat with {{name}}",
+    "toMember": "To {{name}}",
+    "broadcastHint": "Everyone in the family can see this message.",
+    "directHint": "Only you and {{name}} can see this conversation.",
+    "oversightReadOnly": "Parent view only. This conversation cannot be answered here.",
     "errorLoadingChat": "Error loading chat"
   },
   "feedback": {

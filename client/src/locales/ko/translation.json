@@ -654,6 +654,13 @@
     "addressedTo": "{{name}}에게",
     "selectedMember": "선택한 구성원",
     "parentVisibilityNotice": "안내: 부모는 아이들끼리 주고받은 지정 메시지를 포함한 모든 메시지를 볼 수 있습니다.",
+    "conversations": "대화",
+    "childConversations": "아이들 대화",
+    "withMember": "{{name}}님과 채팅",
+    "toMember": "{{name}}님에게",
+    "broadcastHint": "가족 모두가 이 메시지를 볼 수 있습니다.",
+    "directHint": "나와 {{name}}님만 이 대화를 볼 수 있습니다.",
+    "oversightReadOnly": "부모 전용 보기입니다. 여기에서는 답장할 수 없습니다.",
     "errorLoadingChat": "채팅 로딩 오류"
   },
   "settings": {

@@ -650,6 +650,13 @@
     "addressedTo": "Para {{name}}",
     "selectedMember": "miembro seleccionado",
     "parentVisibilityNotice": "Aviso: los padres pueden ver todos los mensajes, incluidos los dirigidos entre niños.",
+    "conversations": "Conversaciones",
+    "childConversations": "Conversaciones de los niños",
+    "withMember": "Chat con {{name}}",
+    "toMember": "Para {{name}}",
+    "broadcastHint": "Toda la familia puede ver este mensaje.",
+    "directHint": "Solo tú y {{name}} pueden ver esta conversación.",
+    "oversightReadOnly": "Vista solo para padres. No se puede responder aquí.",
     "errorLoadingChat": "Error al cargar el chat"
   },
   "settings": {

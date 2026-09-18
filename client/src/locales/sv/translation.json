@@ -678,6 +678,13 @@
     "addressedTo": "Till {{name}}",
     "selectedMember": "vald medlem",
     "parentVisibilityNotice": "Obs: Föräldrar kan se alla meddelanden, även riktade meddelanden mellan barn.",
+    "conversations": "Konversationer",
+    "childConversations": "Barnens konversationer",
+    "withMember": "Chatt med {{name}}",
+    "toMember": "Till {{name}}",
+    "broadcastHint": "Alla i familjen kan se det här meddelandet.",
+    "directHint": "Bara du och {{name}} kan se den här konversationen.",
+    "oversightReadOnly": "Endast föräldravisning. Det går inte att svara här.",
     "errorLoadingChat": "Fel vid laddning av chatt"
   },
   "settings": {
