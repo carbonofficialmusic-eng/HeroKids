@@ -37,3 +37,4 @@
 - [Nativer iOS-Ausfallbildschirm](native-ios-outage-fallback.md) — die Remote-WebView wird bei Start, Navigation und Serverausfall durch einen lokalen UIKit-Fallback abgedeckt
 - [Device-Push-Token-Bindung](device-push-token-member-binding.md) — ein physisches Gerät darf immer nur einem Mitglied zugeordnet sein, sonst kommen Family-Pushes mehrfach an
 - [Factory Reset für Skins und Sterne](factory-reset-skins.md) — Reset erzeugt pro Mitglied sofort einen getrennten, sauberen Skin- und Sternzustand
+- [Chat-Push-Bündelung](chat-push-batching.md) — erste Nachricht sofort senden; weitere Nachrichten desselben Absenders nach 90 Sekunden Ruhe zusammenfassen

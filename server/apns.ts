@@ -213,6 +213,7 @@ export async function sendPushToMembers(
 }
 
 const chatBatches = new Map<string, {
+  recipientId: string;
   tokens: string[];
   title: string;
   count: number;
@@ -220,7 +221,7 @@ const chatBatches = new Map<string, {
   body?: (count: number) => string;
   canSend?: () => boolean | Promise<boolean>;
 }>();
-const CHAT_BATCH_WINDOW_MS = 5 * 60 * 1000;
+const CHAT_BATCH_WINDOW_MS = 90 * 1000;
 
 /** Determine whether a time falls inside the family's child push quiet period. */
 export function isChildPushQuietHours(
@@ -260,39 +261,76 @@ export function isChildPushQuietHours(
 
 /** Cancel a recipient's pending chat alert when they have read the chat. */
 export function cancelQueuedChatPush(recipientId: string): boolean {
-  const batch = chatBatches.get(recipientId);
-  if (!batch) return false;
-  clearTimeout(batch.timer);
-  chatBatches.delete(recipientId);
-  return true;
+  let cancelled = false;
+  chatBatches.forEach((batch, key) => {
+    if (batch.recipientId !== recipientId) return;
+    clearTimeout(batch.timer);
+    chatBatches.delete(key);
+    cancelled = true;
+  });
+  return cancelled;
 }
 
-/** Queue chat alerts per recipient so bursts produce at most one alert per window. */
+function scheduleChatSummary(batchKey: string): NodeJS.Timeout {
+  const timer = setTimeout(async () => {
+    const batch = chatBatches.get(batchKey);
+    chatBatches.delete(batchKey);
+    if (!batch || batch.count === 0) return;
+    try {
+      if (batch.canSend && !(await batch.canSend())) return;
+      const bodyText = batch.body?.(batch.count) || (batch.count === 1 ? "1 new chat message" : `${batch.count} new chat messages`);
+      await sendPushToMembers(batch.tokens, batch.title, bodyText, { notificationType: "chat_message" });
+    } catch (error: any) {
+      console.error("[APNs] chat summary error:", error?.message || error);
+    }
+  }, CHAT_BATCH_WINDOW_MS);
+  timer.unref?.();
+  return timer;
+}
+
+/**
+ * Send the first message immediately, then summarize additional messages from
+ * the same sender after 90 seconds of inactivity.
+ */
 export function queueChatPush(
   recipientId: string,
   deviceTokens: string[],
   title: string,
   body?: (count: number) => string,
   canSend?: () => boolean | Promise<boolean>,
+  senderId = "all",
 ): void {
   if (!deviceTokens.length) return;
-  const existing = chatBatches.get(recipientId);
+  const batchKey = `${recipientId}:${senderId}`;
+  const existing = chatBatches.get(batchKey);
   if (existing) {
     existing.count += 1;
+    existing.tokens = deviceTokens;
+    existing.title = title;
+    existing.body = body;
+    existing.canSend = canSend;
+    clearTimeout(existing.timer);
+    existing.timer = scheduleChatSummary(batchKey);
     return;
   }
-  const timer = setTimeout(async () => {
-    const batch = chatBatches.get(recipientId);
-    chatBatches.delete(recipientId);
-    if (!batch) return;
+
+  void (async () => {
     try {
-      if (batch.canSend && !(await batch.canSend())) return;
-      const bodyText = batch.body?.(batch.count) || (batch.count === 1 ? "1 new chat message" : `${batch.count} new chat messages`);
-      await sendPushToMembers(batch.tokens, batch.title, bodyText, { notificationType: "chat_message" });
+      if (canSend && !(await canSend())) return;
+      const bodyText = body?.(1) || "1 new chat message";
+      await sendPushToMembers(deviceTokens, title, bodyText, { notificationType: "chat_message" });
     } catch (error: any) {
-      console.error("[APNs] chat batch error:", error?.message || error);
+      console.error("[APNs] immediate chat push error:", error?.message || error);
     }
-  }, CHAT_BATCH_WINDOW_MS);
-  timer.unref?.();
-  chatBatches.set(recipientId, { tokens: deviceTokens, title, count: 1, timer, body, canSend });
+  })();
+
+  chatBatches.set(batchKey, {
+    recipientId,
+    tokens: deviceTokens,
+    title,
+    count: 0,
+    timer: scheduleChatSummary(batchKey),
+    body,
+    canSend,
+  });
 }

@@ -5917,7 +5917,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     currentFamily.childPushQuietStart,
                     currentFamily.childPushQuietEnd,
                   );
-              });
+              },
+              member.id);
           }
         } catch (pushErr: any) {
           console.error("[APNs] chat_message push error:", pushErr?.message || pushErr);
