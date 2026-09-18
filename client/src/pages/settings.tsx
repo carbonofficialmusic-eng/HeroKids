@@ -525,13 +525,7 @@ export default function Settings() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => {
-              if (mobileSectionOpen) {
-                setMobileSectionOpen(false);
-                return;
-              }
-              setLocation("/");
-            }}
+            onClick={() => setLocation("/dashboard")}
             data-testid="button-back"
             className="bg-card/90 backdrop-blur-sm border-border"
           >
