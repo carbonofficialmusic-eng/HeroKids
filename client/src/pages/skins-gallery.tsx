@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest, ApiError } from "@/lib/queryClient";
 import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -182,8 +182,15 @@ export default function SkinsGallery() {
     starStats: { starsFound: number; totalStars: number; earnedLegacySkinIds: string[] };
     starPlacements: Record<string, boolean>; // skinId -> found
   }>({
-    queryKey: ["/api/skins"],
-    placeholderData: keepPreviousData,
+    // Skin progress is member-specific. Keep a separate cache entry for every
+    // profile so switching members can never display the previous member's
+    // stars, discoveries, or unlocked avatars.
+    queryKey: ["/api/skins", memberData?.id],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/skins");
+      return response.json();
+    },
+    enabled: !!memberData?.id,
     staleTime: 5 * 60 * 1000,
   });
   
