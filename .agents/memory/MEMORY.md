@@ -36,3 +36,4 @@
 - [Deploy-Fallback für Web-Navigation](deploy-fallback.md) — ein gecachter Service Worker ersetzt kurze 5xx-Deploy-Antworten für wiederkehrende Webnutzer
 - [Nativer iOS-Ausfallbildschirm](native-ios-outage-fallback.md) — die Remote-WebView wird bei Start, Navigation und Serverausfall durch einen lokalen UIKit-Fallback abgedeckt
 - [Device-Push-Token-Bindung](device-push-token-member-binding.md) — ein physisches Gerät darf immer nur einem Mitglied zugeordnet sein, sonst kommen Family-Pushes mehrfach an
+- [Factory Reset für Skins und Sterne](factory-reset-skins.md) — Reset erzeugt pro Mitglied sofort einen getrennten, sauberen Skin- und Sternzustand
