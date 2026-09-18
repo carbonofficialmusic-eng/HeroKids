@@ -7,4 +7,4 @@ Kinder erhalten Push-Nachrichten nur für gebündelte neue Chatnachrichten, neue
 
 **Why:** Kinder sollen nicht regelmäßig zum Telefon gelockt oder mit Erfolgs- und Aufgabenmeldungen überhäuft werden. Push ist sozialen Nachrichten, abgeschlossenen Belohnungsentscheidungen und Ereignissen vorbehalten, bei denen das Kind reagieren muss.
 
-**How to apply:** Neue Kinder-Push-Typen nur ergänzen, wenn sie einer dieser Kategorien entsprechen. Chatmeldungen bündeln, bei geöffnetem Chat verwerfen und die von Eltern festgelegte familienlokale Ruhezeit beachten; Standard ist 20:00 bis 07:00 Uhr.
+**How to apply:** Neue Kinder-Push-Typen nur ergänzen, wenn sie einer dieser Kategorien entsprechen. Chatmeldungen bündeln und bei geöffnetem Chat verwerfen. Die familienlokale Ruhezeit ist standardmäßig von 20:00 bis 07:00 Uhr aktiv, kann von Eltern aber vollständig ausgeschaltet werden; dann dürfen die gespeicherten Zeiten keine Push-Nachrichten blockieren.

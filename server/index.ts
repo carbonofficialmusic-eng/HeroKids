@@ -1061,6 +1061,11 @@ async function migrateLegacyMultiTasksToIndividualMode() {
     await db.execute(sql`ALTER TABLE families ADD COLUMN IF NOT EXISTS is_lifetime_purchase boolean NOT NULL DEFAULT false`);
   } catch (_e) { /* ignore */ }
 
+  // Quiet hours were historically always active; preserve that behavior by default.
+  try {
+    await db.execute(sql`ALTER TABLE families ADD COLUMN IF NOT EXISTS child_push_quiet_enabled boolean NOT NULL DEFAULT true`);
+  } catch (e) { console.warn("child_push_quiet_enabled migration warning:", e); }
+
   // Ensure icon_emoji column exists on rewards
   try {
     await db.execute(sql`ALTER TABLE rewards ADD COLUMN IF NOT EXISTS icon_emoji varchar NOT NULL DEFAULT '🎁'`);

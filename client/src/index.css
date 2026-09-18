@@ -3348,6 +3348,17 @@ html:not(.dark) .lc-settings-header button {
   background: #fff !important;
   box-shadow: 0 2px 8px rgba(32,55,82,.07);
 }
+html:not(.dark) .lc-settings-header p {
+  color: #40566f !important;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(255,255,255,.9);
+}
+html:not(.dark) .lc-settings-mobile-back {
+  color: #18324d !important;
+  border: 1px solid #d5e0e8 !important;
+  background: rgba(255,255,255,.94) !important;
+  box-shadow: 0 2px 8px rgba(32,55,82,.12) !important;
+}
 html:not(.dark) .lc-account-section,
 html:not(.dark) .lc-settings-page .bg-card,
 html:not(.dark) .lc-settings-page .bg-card\/50,

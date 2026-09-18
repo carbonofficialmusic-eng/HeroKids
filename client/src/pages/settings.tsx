@@ -126,6 +126,7 @@ export default function Settings() {
       pushPinboard?: boolean;
       pushTasks?: boolean;
       pushRewards?: boolean;
+      childPushQuietEnabled?: boolean;
       childPushQuietStart?: string;
       childPushQuietEnd?: string;
       singleDeviceMode?: boolean;
@@ -540,10 +541,6 @@ export default function Settings() {
         <div className="md:grid md:grid-cols-[15rem_minmax(0,1fr)] md:items-start md:gap-8">
           {/* Mobile overview: selecting a group opens its focused content. */}
           <div className={`${mobileSectionOpen ? "hidden" : "block"} md:hidden`}>
-            <div className="mb-3">
-              <h2 className="text-lg font-semibold">{t("settings.group.chooseSection", "Einstellungen")}</h2>
-              <p className="text-sm text-muted-foreground">{t("settings.manageExperience")}</p>
-            </div>
             <div className="space-y-2">
               {settingsGroups.map(([id, Icon, label, description]) => (
                 <button
@@ -598,7 +595,7 @@ export default function Settings() {
               <Button
                 type="button"
                 variant="ghost"
-                className="-ml-2 gap-1 text-muted-foreground"
+                className="lc-settings-mobile-back -ml-2 gap-1"
                 onClick={() => setMobileSectionOpen(false)}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -1453,11 +1450,20 @@ export default function Settings() {
               ))}
 
               <div className="border-t pt-4">
-                <div className="space-y-1">
-                  <Label className="text-base">{t('settings.pushNotificationsQuietHours')}</Label>
-                  <p className="text-sm text-muted-foreground">{t('settings.pushNotificationsQuietHoursDesc')}</p>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="switch-childPushQuietEnabled" className="text-base">{t('settings.pushNotificationsQuietHours')}</Label>
+                    <p className="text-sm text-muted-foreground">{t('settings.pushNotificationsQuietHoursDesc')}</p>
+                  </div>
+                  <Switch
+                    id="switch-childPushQuietEnabled"
+                    checked={familyData?.childPushQuietEnabled ?? true}
+                    onCheckedChange={(checked) => updateSettingsMutation.mutate({ childPushQuietEnabled: checked })}
+                    disabled={updateSettingsMutation.isPending}
+                    data-testid="switch-childPushQuietEnabled"
+                  />
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className={`mt-3 grid grid-cols-2 gap-3 transition-opacity ${familyData?.childPushQuietEnabled === false ? "opacity-45" : ""}`}>
                   <div className="space-y-2">
                     <Label htmlFor="child-push-quiet-start">{t('settings.pushNotificationsQuietStart')}</Label>
                     <Input
@@ -1465,7 +1471,7 @@ export default function Settings() {
                       type="time"
                       value={familyData?.childPushQuietStart ?? "20:00"}
                       onChange={(event) => updateSettingsMutation.mutate({ childPushQuietStart: event.target.value })}
-                      disabled={updateSettingsMutation.isPending}
+                      disabled={updateSettingsMutation.isPending || familyData?.childPushQuietEnabled === false}
                       data-testid="input-child-push-quiet-start"
                     />
                   </div>
@@ -1476,7 +1482,7 @@ export default function Settings() {
                       type="time"
                       value={familyData?.childPushQuietEnd ?? "07:00"}
                       onChange={(event) => updateSettingsMutation.mutate({ childPushQuietEnd: event.target.value })}
-                      disabled={updateSettingsMutation.isPending}
+                      disabled={updateSettingsMutation.isPending || familyData?.childPushQuietEnabled === false}
                       data-testid="input-child-push-quiet-end"
                     />
                   </div>

@@ -102,6 +102,7 @@ export const families = pgTable("families", {
   pushPinboard: boolean("push_pinboard").notNull().default(true),
   pushTasks: boolean("push_tasks").notNull().default(true),
   pushRewards: boolean("push_rewards").notNull().default(true),
+  childPushQuietEnabled: boolean("child_push_quiet_enabled").notNull().default(true),
   childPushQuietStart: varchar("child_push_quiet_start", { length: 5 }).notNull().default("20:00"),
   childPushQuietEnd: varchar("child_push_quiet_end", { length: 5 }).notNull().default("07:00"),
   singleDeviceMode: boolean("single_device_mode").notNull().default(false), // Enable PIN protection for member switching

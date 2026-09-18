@@ -67,7 +67,7 @@ async function sendPolicyPush(
     const members = await storage.getFamilyMembersByFamily(familyName);
     const allowed = new Set(members
       .filter(m => recipientIds.includes(m.id) && m.id !== senderId && policy.roles.includes(m.role as PushRole)
-        && !(m.role === "child" && isChildPushQuietHours(
+        && !(m.role === "child" && family.childPushQuietEnabled && isChildPushQuietHours(
           new Date(),
           family.timezone,
           family.childPushQuietStart,
@@ -1131,6 +1131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     pushPinboard: z.boolean().optional(),
     pushTasks: z.boolean().optional(),
     pushRewards: z.boolean().optional(),
+    childPushQuietEnabled: z.boolean().optional(),
     childPushQuietStart: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
     childPushQuietEnd: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
     singleDeviceMode: z.boolean().optional(),
@@ -1154,6 +1155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     data.pushPinboard !== undefined ||
     data.pushTasks !== undefined ||
     data.pushRewards !== undefined ||
+    data.childPushQuietEnabled !== undefined ||
     data.childPushQuietStart !== undefined ||
     data.childPushQuietEnd !== undefined ||
     data.singleDeviceMode !== undefined ||
@@ -5922,7 +5924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })));
           for (const recipient of tokensByMember) {
             const recipientMember = allMembers.find(m => m.id === recipient.id);
-             if (recipientMember?.role === "child" && isChildPushQuietHours(
+             if (recipientMember?.role === "child" && family.childPushQuietEnabled && isChildPushQuietHours(
               new Date(),
               family.timezone,
               family.childPushQuietStart,
@@ -5936,7 +5938,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               async () => {
                 const currentFamily = await storage.getFamily(member.familyName);
                 if (!currentFamily?.pushChat) return false;
-                return recipientMember?.role !== "child"
+                 return recipientMember?.role !== "child"
+                   || !currentFamily.childPushQuietEnabled
                   || !isChildPushQuietHours(
                     new Date(),
                     currentFamily.timezone,
