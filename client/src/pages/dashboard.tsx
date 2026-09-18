@@ -412,8 +412,14 @@ export default function Dashboard() {
     totalStars: number;
     earnedLegacySkinIds: string[];
   }>({
-    queryKey: ["/api/stars"],
-    enabled: !!member,
+    // Star progress belongs to the active member. A global cache key can show
+    // the previous profile's count after a member switch.
+    queryKey: ["/api/stars", member?.id],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/stars");
+      return response.json();
+    },
+    enabled: !!member?.id,
     staleTime: 5 * 60 * 1000,
   });
   
@@ -668,6 +674,7 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stars"] });
       
       // Navigate immediately via client-side routing. A full page reload
       // (window.location.href)

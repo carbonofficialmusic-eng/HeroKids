@@ -1896,6 +1896,7 @@ export default function KidDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/skins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stars"] });
       
       // Navigate immediately via client-side routing. A full page reload
       // (window.location.href)
