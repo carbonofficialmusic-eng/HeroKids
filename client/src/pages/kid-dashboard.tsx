@@ -1859,10 +1859,12 @@ export default function KidDashboard() {
       return await response.json();
     },
     onSuccess: (data: any) => {
-      // Close the controlled dialog explicitly before routing. In particular,
-      // child -> child stays on the same page component, so navigation alone
-      // does not unmount the open dialog.
-      setSwitchMemberDialogOpen(false);
+      // Update the active profile immediately while the switch dialog still
+      // covers the dashboard. This prevents the previous profile from flashing
+      // between the dialog closing and the member query finishing its refetch.
+      if (data?.member) {
+        queryClient.setQueryData(["/api/family-members/current"], data.member);
+      }
 
       // Invalidate member-related queries but keep auth data intact
       // This prevents the FamilySetup flash during navigation
@@ -1881,6 +1883,12 @@ export default function KidDashboard() {
       } else if (data?.member?.role === "parent") {
         navigate("/dashboard");
       }
+
+      // Keep the dialog visible until React has painted the destination
+      // dashboard with the newly cached member, then remove the cover.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setSwitchMemberDialogOpen(false));
+      });
     },
     onError: (error: any) => {
       toast({

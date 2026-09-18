@@ -40,3 +40,4 @@
 - [Chat-Push-Bündelung](chat-push-batching.md) — erste Nachricht sofort senden; weitere Nachrichten desselben Absenders nach 90 Sekunden Ruhe zusammenfassen
 - [Gezielte Chatnachrichten](targeted-family-chat.md) — Kinder sehen nur Broadcasts und eigene Ziele; Eltern behalten Aufsicht ohne Push/Badge für fremde Ziele
 - [Eltern-Aufgaben ohne Eltern-Push](parent-task-push-policy.md) — offene Eltern-Abgaben bleiben sichtbar, lösen aber keine Push-Mitteilung an andere Eltern aus
+- [Nahtloser Mitgliederwechsel](member-switch-transition.md) — User Switch bleibt als Abdeckung offen, bis das neue Profil im Zieldashboard gerendert ist
