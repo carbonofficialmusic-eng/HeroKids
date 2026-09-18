@@ -85,7 +85,7 @@ import { eq, and, desc, gt, gte, lt, sql, inArray, isNull, isNotNull, ne } from 
 import { startOfDay } from 'date-fns';
 import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import bcrypt from 'bcrypt';
-import { TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR } from "@shared/skin-config";
+import { MIXED_SKIN_ORDER, STARTER_SKIN_ID, TOTAL_HIDDEN_STARS, STARS_PER_LEGACY_AVATAR } from "@shared/skin-config";
 import { getProfilePhotoObjectPaths } from "@shared/avatar-preferences";
 import { isIndividualRecurringCompletionActive, isRecurringTaskSchedule } from "./task-mode-policy";
 
@@ -3049,6 +3049,22 @@ export class DatabaseStorage implements IStorage {
         return []; // No members, nothing to reset
       }
 
+      // Prepare a complete clean set of hidden-star positions before deleting
+      // any family data. Factory reset must leave every member immediately
+      // usable; it must not depend on a later /api/stars or /api/skins request
+      // to lazily repair missing placements.
+      const allSkinRows = await tx.select({ id: skins.id }).from(skins);
+      const existingSkinIds = new Set(allSkinRows.map(skin => skin.id));
+      // Only place stars on standard skins that the gallery can actually
+      // render. Obsolete DB rows must never receive an unreachable star.
+      const starEligibleSkinIds = MIXED_SKIN_ORDER
+        .filter(id => id !== STARTER_SKIN_ID && existingSkinIds.has(id));
+      if (starEligibleSkinIds.length < TOTAL_HIDDEN_STARS) {
+        throw new Error(
+          `Factory reset requires ${TOTAL_HIDDEN_STARS} star-eligible skins, found ${starEligibleSkinIds.length}`,
+        );
+      }
+
       // Get all family tasks (we'll need task IDs for assignments)
       const familyTasks = await tx
         .select()
@@ -3127,7 +3143,7 @@ export class DatabaseStorage implements IStorage {
       await tx.delete(familyGoals)
         .where(eq(familyGoals.familyName, familyName));
 
-      // 13. Delete all star placements for family members (so they get redistributed)
+      // 13. Delete all previous star placements.
       for (const memberId of memberIds) {
         await tx.delete(starPlacements)
           .where(eq(starPlacements.memberId, memberId));
@@ -3135,7 +3151,6 @@ export class DatabaseStorage implements IStorage {
 
       // 14. Reset all family member stats to zero (including PIN codes, starsFound, Legacy skins, and profile photos)
       // Give everyone the starter skin as a teaser, and assign a random default avatar icon
-      const STARTER_SKIN = "junior-champion";
       const DEFAULT_AVATARS = ["default:fox", "default:bear", "default:rabbit", "default:cat", "default:penguin", "default:lion"];
       
       for (const memberId of memberIds) {
@@ -3150,9 +3165,10 @@ export class DatabaseStorage implements IStorage {
             monthlyPoints: 0,
             rewardsRedeemed: 0,
             unlockedSkins: [],
-            discoveredSkinIds: [STARTER_SKIN],
+            discoveredSkinIds: [STARTER_SKIN_ID],
             earnedLegacySkinIds: [], // Reset HeroKids Legacy avatars earned through stars
             activeSkinId: null, // No skin selected - use avatarUrl instead
+            useThemeBackground: true,
             avatarUrl: randomAvatar, // Set random default avatar icon (resolved by frontend)
             useCustomAvatar: false, // Show skins when one is selected
             avatarHistory: [], // Remove all references to previously uploaded profile photos
@@ -3161,6 +3177,18 @@ export class DatabaseStorage implements IStorage {
             updatedAt: new Date(),
           })
           .where(eq(familyMembers.id, memberId));
+
+        // Create all hidden-star positions inside the same transaction. Every
+        // position starts undiscovered, so immediately after reset both the
+        // dashboard and skins page see 0/TOTAL_HIDDEN_STARS consistently.
+        const shuffledSkinIds = [...starEligibleSkinIds].sort(() => Math.random() - 0.5);
+        await tx.insert(starPlacements).values(
+          shuffledSkinIds.slice(0, TOTAL_HIDDEN_STARS).map(skinId => ({
+            memberId,
+            skinId,
+            found: false,
+          })),
+        );
       }
 
       // 15. Create default achievements using shared template (only Weekly Champion and Perfect Week enabled)

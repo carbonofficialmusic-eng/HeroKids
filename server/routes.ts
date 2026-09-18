@@ -1259,36 +1259,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Perform factory reset
       const profilePhotoPaths = await storage.resetFamilyToFactory(member.familyName);
 
-      const objectStorageService = new ObjectStorageService();
-      const profilePhotoCleanupResults = await Promise.all(
-        profilePhotoPaths.map(async (path) => ({
-          path,
-          deleted: await objectStorageService.deleteObjectEntity(path),
-        })),
-      );
-      const failedProfilePhotoDeletes = profilePhotoCleanupResults.filter((result) => !result.deleted);
-      if (failedProfilePhotoDeletes.length > 0) {
-        console.warn("[AUDIT] Factory reset profile photo cleanup incomplete", {
-          ...auditContext,
-          result: "profile_photo_cleanup_incomplete",
-          timestamp: new Date().toISOString(),
-          failedCount: failedProfilePhotoDeletes.length,
-        });
-      }
+      // The database reset is complete. Tell all connected family clients
+      // immediately so they cannot keep acting on pre-reset stars/skins while
+      // slower object-storage cleanup runs.
+      broadcastToFamily(member.familyName, {
+        type: "factory_reset",
+        message: "Family has been reset to factory settings",
+      });
 
       console.warn("[AUDIT] Family factory reset completed", {
         ...auditContext,
         result: "completed",
         timestamp: new Date().toISOString(),
       });
-      
-      // Broadcast reset to all family members
-      broadcastToFamily(member.familyName, {
-        type: "factory_reset",
-        message: "Family has been reset to factory settings",
-      });
-      
       res.json({ message: "Family reset to factory settings successfully" });
+
+      // Profile photos are outside the database transaction. Delete them as
+      // best-effort cleanup after responding; failures cannot invalidate the
+      // already successful family reset.
+      void (async () => {
+        const objectStorageService = new ObjectStorageService();
+        const profilePhotoCleanupResults = await Promise.all(
+          profilePhotoPaths.map(async (path) => ({
+            path,
+            deleted: await objectStorageService.deleteObjectEntity(path),
+          })),
+        );
+        const failedProfilePhotoDeletes = profilePhotoCleanupResults.filter((result) => !result.deleted);
+        if (failedProfilePhotoDeletes.length > 0) {
+          console.warn("[AUDIT] Factory reset profile photo cleanup incomplete", {
+            ...auditContext,
+            result: "profile_photo_cleanup_incomplete",
+            timestamp: new Date().toISOString(),
+            failedCount: failedProfilePhotoDeletes.length,
+          });
+        }
+      })().catch((error) => {
+        console.warn("[AUDIT] Factory reset profile photo cleanup failed", {
+          ...auditContext,
+          result: "profile_photo_cleanup_failed",
+          timestamp: new Date().toISOString(),
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
     } catch (error) {
       console.error("[AUDIT] Family factory reset failed", {
         ...auditContext,

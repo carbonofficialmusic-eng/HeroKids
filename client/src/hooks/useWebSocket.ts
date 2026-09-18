@@ -37,8 +37,9 @@ export function useWebSocket(familyName: string | null, mobileToken?: string, op
         }
         ws.send(JSON.stringify(joinMsg));
 
-        // Reconcile anything that changed while this client was disconnected.
-        queryClient.refetchQueries({ queryKey: ["/api/tasks"], type: "active" });
+        // Reconcile anything that changed while this client was disconnected,
+        // including a factory reset whose one-shot websocket event was missed.
+        queryClient.refetchQueries({ type: "active" });
       };
 
       ws.onmessage = (event) => {
@@ -46,6 +47,14 @@ export function useWebSocket(familyName: string | null, mobileToken?: string, op
           const data = JSON.parse(event.data);
 
           switch (data.type) {
+            case "factory_reset":
+              // A factory reset replaces virtually all family/game state.
+              // Remove every cached response and reload so other connected
+              // devices cannot continue displaying pre-reset stars or skins.
+              queryClient.clear();
+              window.location.replace("/");
+              break;
+
             case "task_created":
             case "task_updated":
               // Invalidate tasks and pending count

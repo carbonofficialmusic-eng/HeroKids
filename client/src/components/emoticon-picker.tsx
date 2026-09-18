@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SKIN_IMAGES } from "@/lib/skins";
+import { apiRequest } from "@/lib/queryClient";
+import type { FamilyMember } from "@shared/schema";
 import {
   Smile,
   Heart,
@@ -79,9 +81,19 @@ export function EmoticonPicker({ onSelectEmoticon }: EmoticonPickerProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
 
+  const { data: member } = useQuery<FamilyMember>({
+    queryKey: ["/api/family-members/current"],
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Fetch all skins and filter for discovered ones
   const { data: skinsData } = useQuery<SkinsResponse>({
-    queryKey: ["/api/skins"],
+    queryKey: ["/api/skins", member?.id],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/skins");
+      return response.json();
+    },
+    enabled: !!member?.id,
     staleTime: 5 * 60 * 1000,
   });
 

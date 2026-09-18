@@ -304,6 +304,9 @@ export default function Settings() {
     onSuccess: () => {
       setShowFactoryResetDialog(false);
       setFactoryResetConfirmation("");
+      // Factory reset replaces all family/game state. Drop every member-scoped
+      // cache entry before reloading so no pre-reset stars or skins survive.
+      queryClient.clear();
       // Ensure dark theme persists after reset, then force a full page reload
       // so the inline theme script in index.html runs fresh and avoids a white flash.
       localStorage.setItem("theme", "dark");

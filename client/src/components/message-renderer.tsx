@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { SKIN_IMAGES } from "@/lib/skins";
+import { apiRequest } from "@/lib/queryClient";
+import type { FamilyMember } from "@shared/schema";
 
 interface Skin {
   id: string;
@@ -88,9 +90,19 @@ const EMOTICON_COLORS: Record<string, string> = {
 };
 
 export function MessageRenderer({ message }: MessageRendererProps) {
+  const { data: member } = useQuery<FamilyMember>({
+    queryKey: ["/api/family-members/current"],
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Fetch all skins to render skin emoticons
   const { data: skinsData } = useQuery<SkinsResponse>({
-    queryKey: ["/api/skins"],
+    queryKey: ["/api/skins", member?.id],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/skins");
+      return response.json();
+    },
+    enabled: !!member?.id,
     staleTime: 5 * 60 * 1000,
   });
 
