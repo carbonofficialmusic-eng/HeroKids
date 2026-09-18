@@ -807,7 +807,7 @@ export default function SkinsGallery() {
                   {/* Background toggle - only show when a skin is active */}
                   {memberData?.activeSkinId && (
                     <Button
-                      className="w-full"
+                      className={`w-full min-w-0 ${isLandscapeMobile ? "h-auto min-h-9 px-1.5 py-1 text-[11px] leading-tight whitespace-normal" : ""}`}
                       variant="ghost"
                       size="sm"
                       onClick={() => toggleBackgroundMutation.mutate(!memberData.useThemeBackground)}
@@ -816,13 +816,13 @@ export default function SkinsGallery() {
                     >
                       {memberData.useThemeBackground !== false ? (
                         <>
-                          <ImageOff className="h-4 w-4 mr-2" />
-                          {t('skins.hideBackground')}
+                          <ImageOff className={`h-4 w-4 shrink-0 ${isLandscapeMobile ? "mr-1" : "mr-2"}`} />
+                          <span className="min-w-0 text-center break-words">{t('skins.hideBackground')}</span>
                         </>
                       ) : (
                         <>
-                          <Image className="h-4 w-4 mr-2" />
-                          {t('skins.showBackground')}
+                          <Image className={`h-4 w-4 shrink-0 ${isLandscapeMobile ? "mr-1" : "mr-2"}`} />
+                          <span className="min-w-0 text-center break-words">{t('skins.showBackground')}</span>
                         </>
                       )}
                     </Button>
