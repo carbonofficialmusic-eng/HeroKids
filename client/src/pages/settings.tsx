@@ -659,6 +659,19 @@ export default function Settings() {
                   }).map((familyMember) => {
                     const isCurrentUser = familyMember.id === member?.id;
                     const isOverLimit = familyMember.isOverLimit === true;
+                    const hasActiveDeviceSessions = (familyMember as any).hasActiveDeviceSessions === true;
+                    const accountStatusTitle = hasActiveDeviceSessions
+                      ? t('settings.deviceLinked')
+                      : familyMember.userId
+                        ? (familyMember.accountEmail
+                          ? `${t('settings.accountLinked')}: ${familyMember.accountEmail}`
+                          : t('settings.accountLinked'))
+                        : t('settings.noAccountLinked');
+                    const accountStatusColor = hasActiveDeviceSessions
+                      ? 'text-yellow-500'
+                      : familyMember.userId
+                        ? 'text-green-500'
+                        : 'text-red-500';
                     return (
                       <div
                         key={familyMember.id}
@@ -710,25 +723,17 @@ export default function Settings() {
                                   setDeviceLinkDialogOpen(true);
                                 }}
                                 data-testid={`button-link-device-${familyMember.id}`}
-                                title={familyMember.userId
-                                  ? (familyMember.accountEmail
-                                    ? `${t('settings.accountLinked')}: ${familyMember.accountEmail}`
-                                    : t('settings.accountLinked'))
-                                  : (familyMember as any).hasActiveDeviceSessions
-                                    ? t('settings.deviceLinked')
-                                    : t('settings.noAccountLinked')}
+                                title={accountStatusTitle}
                               >
-                                <Smartphone className={`h-4 w-4 ${familyMember.userId ? 'text-green-500' : (familyMember as any).hasActiveDeviceSessions ? 'text-yellow-500' : 'text-red-500'}`} />
+                                <Smartphone className={`h-4 w-4 ${accountStatusColor}`} />
                               </Button>
                             ) : (
                               <span
                                 className="flex items-center justify-center h-9 w-9"
-                                title={familyMember.accountEmail
-                                  ? `${t('settings.accountLinked')}: ${familyMember.accountEmail}`
-                                  : t('settings.accountLinked')}
+                                title={accountStatusTitle}
                                 data-testid={`icon-account-status-${familyMember.id}`}
                               >
-                                <Smartphone className="h-4 w-4 text-green-500" />
+                                <Smartphone className={`h-4 w-4 ${accountStatusColor}`} />
                               </span>
                             )
                           )}

@@ -1536,10 +1536,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Batch-check active device sessions for child members without a web account
-      const childMembersWithoutAccount = members.filter(m => m.role === "child" && !m.userId);
+      // Device-link sessions belong to the member and remain relevant even if
+      // the member later gains an account or changes role.
+      const membersToCheckForDeviceSessions = members;
       const deviceSessionResults = await Promise.all(
-        childMembersWithoutAccount.map(m =>
+        membersToCheckForDeviceSessions.map(m =>
           storage.getActiveDeviceSessionsForMember(m.id).then(s => ({ id: m.id, hasActive: s.length > 0 }))
         )
       );

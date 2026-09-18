@@ -42,3 +42,4 @@
 - [Eltern-Aufgaben ohne Eltern-Push](parent-task-push-policy.md) — offene Eltern-Abgaben bleiben sichtbar, lösen aber keine Push-Mitteilung an andere Eltern aus
 - [Nahtloser Mitgliederwechsel](member-switch-transition.md) — User Switch bleibt als Abdeckung offen, bis das neue Profil im Zieldashboard gerendert ist
 - [Sofort wiederholbare Aufgaben](immediate-task-badge.md) — ein gleichnamiges Badge erklärt den Rücksprung nach Genehmigung; Light orange, Dark blau
+- [Device-Link-Statusfarbe](device-link-status-color.md) — aktive Device-Link-Sitzungen werden rollen- und kontounabhängig gelb dargestellt
