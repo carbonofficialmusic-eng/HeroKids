@@ -131,6 +131,7 @@ import "./types";
 import { registerAdminEmailHealthRoutes } from "./adminEmailHealthRoutes";
 import { registerAdminMemberAccountRoutes } from "./adminMemberAccountRoutes";
 import { isValidFactoryResetConfirmation } from "@shared/factory-reset";
+import { createNotificationPreview } from "./notification-preview";
 import {
   calculateRecurringNextAvailableDate,
   hasActiveTeamContribution,
@@ -6103,11 +6104,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Notify all other family members about the new pinboard note
       const family = await storage.getFamily(member.familyName);
       const lang = family?.language || "en";
+      const messagePreview = createNotificationPreview(note.message);
       const pinboardNotification = {
         familyName: member.familyName,
         type: "pinboard_posted" as const,
         title: translateNotification(lang, "pinboard_posted.title", { name: member.displayName }),
-        message: translateNotification(lang, "pinboard_posted.message"),
+        message: messagePreview,
         relatedMemberId: member.id,
         isRead: false,
       };
@@ -6117,7 +6119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pinboardMembers = await storage.getFamilyMembersByFamily(member.familyName);
       await sendPolicyPush(member.familyName, pinboardMembers.map(m => m.id), "pinboard_posted",
         translateNotification(lang, "pinboard_posted.title", { name: member.displayName }),
-        translateNotification(lang, "pinboard_posted.message"), member.id);
+        messagePreview, member.id);
 
       res.status(201).json(note);
     } catch (error: any) {
