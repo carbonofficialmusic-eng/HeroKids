@@ -24,6 +24,7 @@ import { clampAvailablePoints } from "@shared/point-balance";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
 import type { SubscriptionTier, SubscriptionTierLegacy } from "@shared/tier-config";
 import { resolveFallbackD, isFamilySubNewerThanFamilyPro } from "./lib/rc-tier-resolver";
+import { shouldSendTaskPendingPush } from "./task-push-policy";
 
 type PushRole = "parent" | "child";
 const pushPolicy: Record<string, { setting: "pushChat" | "pushPinboard" | "pushTasks" | "pushRewards"; roles: PushRole[] }> = {
@@ -3712,10 +3713,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           relatedMemberId: member.id,
         }, member.id);
 
-        const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
-        await sendPolicyPush(member.familyName, allMembers.map(m => m.id), "task_pending",
-          translateNotification(lang, "task_pending.title", { name: member.displayName, task: task.title }),
-          translateNotification(lang, "task_pending.message", { points: task.points }), member.id);
+        if (shouldSendTaskPendingPush(member.role)) {
+          const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+          await sendPolicyPush(member.familyName, allMembers.map(m => m.id), "task_pending",
+            translateNotification(lang, "task_pending.title", { name: member.displayName, task: task.title }),
+            translateNotification(lang, "task_pending.message", { points: task.points }), member.id);
+        }
         
         // Broadcast notification update
         broadcastToFamily(member.familyName, { type: "notification_update" });

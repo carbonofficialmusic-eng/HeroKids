@@ -39,3 +39,4 @@
 - [Factory Reset für Skins und Sterne](factory-reset-skins.md) — Reset erzeugt pro Mitglied sofort einen getrennten, sauberen Skin- und Sternzustand
 - [Chat-Push-Bündelung](chat-push-batching.md) — erste Nachricht sofort senden; weitere Nachrichten desselben Absenders nach 90 Sekunden Ruhe zusammenfassen
 - [Gezielte Chatnachrichten](targeted-family-chat.md) — Kinder sehen nur Broadcasts und eigene Ziele; Eltern behalten Aufsicht ohne Push/Badge für fremde Ziele
+- [Eltern-Aufgaben ohne Eltern-Push](parent-task-push-policy.md) — offene Eltern-Abgaben bleiben sichtbar, lösen aber keine Push-Mitteilung an andere Eltern aus
