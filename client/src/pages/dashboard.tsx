@@ -793,13 +793,22 @@ export default function Dashboard() {
         return old.map((t) => {
           if (t.id !== taskId) return t;
           const needsApproval = (t as any).requiresApproval;
+          const markCurrentMemberPending = (completions: any[] | undefined) =>
+            completions?.map((completion) =>
+              completion.memberId === member?.id
+                ? { ...completion, hasCompleted: true, status: "pending" }
+                : completion
+            );
           return {
             ...t,
             memberHasCompleted: true,
-            // Immediately show yellow pending state for approval tasks
+            // Keep the task active while the request is in flight. Setting the
+            // aggregate status to pending_approval would make activeTasks
+            // briefly filter the card out before the server response arrives.
             ...(needsApproval ? {
               memberCompletionStatus: "pending",
-              status: "pending_approval",
+              assignedMemberCompletions: markCurrentMemberPending((t as any).assignedMemberCompletions),
+              sharedMemberCompletions: markCurrentMemberPending((t as any).sharedMemberCompletions),
             } : {}),
           };
         });
