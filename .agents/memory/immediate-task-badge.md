@@ -7,4 +7,4 @@ Aufgaben mit sofortiger Wiederholung heißen im Aufgabenformular und auf Eltern-
 
 **Why:** „Sofort wieder verfügbar“ erklärte den Zustandswechsel nicht deutlich genug, weil diese Aufgaben keinen dauerhaften grünen Abschlussstatus haben.
 
-**How to apply:** Das Badge ist im Light Mode orange und im Dark Mode blau. Teamaufgaben-Badges folgen auf beiden Dashboards derselben Farblogik.
+**How to apply:** Das Badge nutzt im Light Mode exakt das kräftige Landingpage-Markenorange mit weißer Schrift, nicht ein helles Pastell-Orange. Im Dark Mode ist es blau. Teamaufgaben-Badges folgen auf beiden Dashboards derselben Farblogik.
