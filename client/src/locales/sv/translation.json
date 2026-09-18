@@ -672,6 +672,12 @@
     "messageCount_other": "{{count}} meddelanden",
     "noMessagesStart": "Inga meddelanden ännu. Starta konversationen!",
     "failedToSend": "Kunde inte skicka meddelande",
+    "sendTo": "Skicka till",
+    "allMembers": "Alla familjemedlemmar",
+    "sendToMember": "Till {{name}}",
+    "addressedTo": "Till {{name}}",
+    "selectedMember": "vald medlem",
+    "parentVisibilityNotice": "Obs: Föräldrar kan se alla meddelanden, även riktade meddelanden mellan barn.",
     "errorLoadingChat": "Fel vid laddning av chatt"
   },
   "settings": {

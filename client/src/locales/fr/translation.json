@@ -644,6 +644,12 @@
     "messageCount_other": "{{count}} messages",
     "noMessagesStart": "Pas encore de messages. Lancez la conversation !",
     "failedToSend": "Échec de l'envoi du message",
+    "sendTo": "Envoyer à",
+    "allMembers": "Tous les membres",
+    "sendToMember": "À {{name}}",
+    "addressedTo": "À {{name}}",
+    "selectedMember": "membre sélectionné",
+    "parentVisibilityNotice": "Information : les parents peuvent voir tous les messages, y compris ceux adressés entre enfants.",
     "errorLoadingChat": "Erreur lors du chargement du chat"
   },
   "settings": {

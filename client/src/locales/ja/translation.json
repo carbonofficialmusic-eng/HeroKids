@@ -644,6 +644,12 @@
     "messageCount_other": "{{count}}件のメッセージ",
     "noMessagesStart": "まだメッセージがありません。会話を始めましょう！",
     "failedToSend": "メッセージの送信に失敗しました",
+    "sendTo": "送信先",
+    "allMembers": "家族全員",
+    "sendToMember": "{{name}} 宛て",
+    "addressedTo": "{{name}} 宛て",
+    "selectedMember": "選択したメンバー",
+    "parentVisibilityNotice": "保護者は子ども同士の指定メッセージを含むすべてのメッセージを見ることができます。",
     "errorLoadingChat": "チャットの読み込みエラー"
   },
   "settings": {

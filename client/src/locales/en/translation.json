@@ -673,6 +673,12 @@
     "messageCount_other": "{{count}} messages",
     "noMessagesStart": "No messages yet. Start the conversation!",
     "failedToSend": "Failed to send message",
+    "sendTo": "Send to",
+    "allMembers": "All family members",
+    "sendToMember": "To {{name}}",
+    "addressedTo": "To {{name}}",
+    "selectedMember": "selected member",
+    "parentVisibilityNotice": "Note: Parents can see all messages, including targeted messages between children.",
     "errorLoadingChat": "Error loading chat"
   },
   "feedback": {

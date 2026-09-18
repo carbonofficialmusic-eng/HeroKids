@@ -683,6 +683,12 @@
     "messageCount_other": "{{count}} Nachrichten",
     "noMessagesStart": "Noch keine Nachrichten. Starte die Unterhaltung!",
     "failedToSend": "Nachricht konnte nicht gesendet werden",
+    "sendTo": "Senden an",
+    "allMembers": "Alle Familienmitglieder",
+    "sendToMember": "An {{name}}",
+    "addressedTo": "An {{name}}",
+    "selectedMember": "ausgewähltes Mitglied",
+    "parentVisibilityNotice": "Hinweis: Eltern können alle Nachrichten sehen, auch gezielte Nachrichten zwischen Kindern.",
     "errorLoadingChat": "Fehler beim Laden des Chats"
   },
   "feedback": {

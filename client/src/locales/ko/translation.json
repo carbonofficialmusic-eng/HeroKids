@@ -648,6 +648,12 @@
     "messageCount_other": "메시지 {{count}}개",
     "noMessagesStart": "아직 메시지가 없습니다. 대화를 시작하세요!",
     "failedToSend": "메시지 전송 실패",
+    "sendTo": "받는 사람",
+    "allMembers": "모든 가족 구성원",
+    "sendToMember": "{{name}}에게",
+    "addressedTo": "{{name}}에게",
+    "selectedMember": "선택한 구성원",
+    "parentVisibilityNotice": "안내: 부모는 아이들끼리 주고받은 지정 메시지를 포함한 모든 메시지를 볼 수 있습니다.",
     "errorLoadingChat": "채팅 로딩 오류"
   },
   "settings": {

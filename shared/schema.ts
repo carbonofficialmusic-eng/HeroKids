@@ -536,9 +536,13 @@ export const chatMessages = pgTable("chat_messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   familyName: varchar("family_name").notNull().references(() => families.familyName, { onDelete: "cascade" }),
   memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  targetMemberId: varchar("target_member_id").references(() => familyMembers.id, { onDelete: "set null" }),
+  isTargeted: boolean("is_targeted").notNull().default(false),
   message: text("message").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  targetCreatedAtIdx: index("chat_messages_target_created_at_idx").on(table.targetMemberId, table.createdAt),
+}));
 
 export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
   family: one(families, {
@@ -547,6 +551,10 @@ export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
   }),
   member: one(familyMembers, {
     fields: [chatMessages.memberId],
+    references: [familyMembers.id],
+  }),
+  targetMember: one(familyMembers, {
+    fields: [chatMessages.targetMemberId],
     references: [familyMembers.id],
   }),
 }));

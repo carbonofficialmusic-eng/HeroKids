@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { Link } from "wouter";
 import { EmoticonPicker } from "@/components/emoticon-picker";
 import { MessageRenderer } from "@/components/message-renderer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ChatMessage {
   id: string;
@@ -22,12 +23,16 @@ interface ChatMessage {
   memberColor: string;
   memberAvatarUrl: string | null;
   memberActiveSkinId: string | null;
+  targetMemberId: string | null;
+  isTargeted: boolean;
+  targetMemberName: string | null;
 }
 
 export default function Chat() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [messageText, setMessageText] = useState("");
+  const [targetMemberId, setTargetMemberId] = useState<string>("all");
   // Track the visual viewport height directly — most reliable approach for
   // iOS WKWebView keyboard avoidance. vv.height shrinks when keyboard opens.
   const [vvHeight, setVvHeight] = useState(() =>
@@ -47,6 +52,11 @@ export default function Chat() {
     queryKey: ["/api/family-members/real"],
     staleTime: 5 * 60 * 1000,
   });
+  const { data: familyMembers = [] } = useQuery<any[]>({
+    queryKey: ["/api/family-members"],
+    enabled: !!member,
+    staleTime: 5 * 60 * 1000,
+  });
 
   // True when a parent has switched into a child's profile
   const isActingAs = !!(member && realMember && member.id !== realMember.id);
@@ -62,8 +72,8 @@ export default function Chat() {
   const dashboardUrl = isChild ? "/kid-dashboard" : "/dashboard";
 
   const sendMessageMutation = useMutation({
-    mutationFn: async (message: string) => {
-      return await apiRequest("POST", "/api/chat", { message });
+    mutationFn: async ({ message, target }: { message: string; target: string }) => {
+      return await apiRequest("POST", "/api/chat", { message, targetMemberId: target === "all" ? null : target });
     },
     onSuccess: () => {
       setMessageText("");
@@ -145,7 +155,7 @@ export default function Chat() {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageText.trim() || sendMessageMutation.isPending) return;
-    sendMessageMutation.mutate(messageText.trim());
+    sendMessageMutation.mutate({ message: messageText.trim(), target: targetMemberId });
   };
 
   const handleSelectEmoticon = (emoticon: string) => {
@@ -312,6 +322,11 @@ export default function Chat() {
                           <span className="text-xs text-muted-foreground">
                             {format(new Date(msg.createdAt), "h:mm a")}
                           </span>
+                           {msg.isTargeted && (
+                             <span className="text-xs text-primary">
+                               {t("chat.addressedTo", { name: msg.targetMemberName || t("chat.selectedMember") })}
+                             </span>
+                           )}
                         </div>
                         <div className="text-sm break-words" data-testid={`text-message-content-${index}`}>
                           <MessageRenderer message={msg.message} />
@@ -331,9 +346,27 @@ export default function Chat() {
                 <span>{t('chat.readOnlyActingAs', 'Nur lesen — du bist als {{name}} angemeldet. Melde dich mit deinem eigenen Account an, um zu schreiben.', { name: member?.displayName })}</span>
               </div>
             ) : (
+              <div className={`border-t px-4 pt-3 ${isKeyboardOpen ? "pb-1" : "pb-0"}`}>
+                <p className="text-xs text-muted-foreground mb-2">{t("chat.parentVisibilityNotice")}</p>
+                <Select value={targetMemberId} onValueChange={setTargetMemberId} disabled={sendMessageMutation.isPending}>
+                  <SelectTrigger className="w-full" data-testid="select-chat-recipient">
+                    <SelectValue placeholder={t("chat.sendTo")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("chat.allMembers")}</SelectItem>
+                    {familyMembers.filter((candidate: any) => candidate.id !== member?.id).map((candidate: any) => (
+                      <SelectItem key={candidate.id} value={candidate.id}>
+                        {t("chat.sendToMember", { name: candidate.displayName })}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {!isActingAs && (
               <form
                 onSubmit={handleSendMessage}
-                className={`lc-chat-composer border-t flex gap-2 shrink-0 ${isKeyboardOpen ? 'py-2 px-3' : 'p-4'}`}
+                className={`lc-chat-composer flex gap-2 shrink-0 ${isKeyboardOpen ? 'py-2 px-3' : 'p-4'}`}
                 data-testid="form-send-message"
               >
                 <EmoticonPicker onSelectEmoticon={handleSelectEmoticon} />

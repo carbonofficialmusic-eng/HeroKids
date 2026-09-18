@@ -347,7 +347,7 @@ export interface IStorage {
   getAchievementAwardsByMember(memberId: string): Promise<Array<AchievementAward & { achievementDefinition: AchievementDefinition }>>;
 
   // Chat operations (Family+ and Enterprise tier)
-  getChatMessages(familyName: string, limit?: number): Promise<any[]>;
+  getChatMessages(familyName: string, viewerMemberId: string, limit?: number): Promise<any[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   updateLastReadChatAt(memberId: string): Promise<void>;
   getUnreadMessageCount(memberId: string, familyName: string): Promise<number>;
@@ -3492,7 +3492,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Chat operations
-  async getChatMessages(familyName: string, limit: number = 50): Promise<any[]> {
+  async getChatMessages(familyName: string, viewerMemberId: string, limit: number = 50): Promise<any[]> {
+    const [viewer] = await db
+      .select({ id: familyMembers.id, role: familyMembers.role })
+      .from(familyMembers)
+      .where(and(eq(familyMembers.id, viewerMemberId), eq(familyMembers.familyName, familyName)));
+    if (!viewer) return [];
+
+    const visibility = viewer.role === "parent"
+      ? eq(chatMessages.familyName, familyName)
+      : and(
+          eq(chatMessages.familyName, familyName),
+          sql`(${chatMessages.isTargeted} = false OR ${chatMessages.memberId} = ${viewerMemberId} OR ${chatMessages.targetMemberId} = ${viewerMemberId})`,
+        );
     const messages = await db
       .select({
         id: chatMessages.id,
@@ -3503,10 +3515,16 @@ export class DatabaseStorage implements IStorage {
         memberColor: familyMembers.color,
         memberAvatarUrl: familyMembers.avatarUrl,
         memberActiveSkinId: familyMembers.activeSkinId,
+        targetMemberId: chatMessages.targetMemberId,
+        isTargeted: chatMessages.isTargeted,
+        targetMemberName: sql<string | null>`(
+          SELECT display_name FROM family_members target_member
+          WHERE target_member.id = ${chatMessages.targetMemberId}
+        )`,
       })
       .from(chatMessages)
       .innerJoin(familyMembers, eq(chatMessages.memberId, familyMembers.id))
-      .where(eq(chatMessages.familyName, familyName))
+      .where(visibility)
       .orderBy(desc(chatMessages.createdAt))
       .limit(limit);
 
@@ -3543,7 +3561,8 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(chatMessages.familyName, familyName),
           gt(chatMessages.createdAt, lastReadAt),
-          sql`${chatMessages.memberId} != ${memberId}` // Don't count own messages
+          sql`${chatMessages.memberId} != ${memberId}`,
+          sql`(${chatMessages.isTargeted} = false OR ${chatMessages.targetMemberId} = ${memberId})`,
         )
       );
 

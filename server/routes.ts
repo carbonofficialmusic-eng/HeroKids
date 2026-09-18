@@ -18,7 +18,7 @@ import { shouldKeepCustomPhotoWhenSelectingSkin } from "@shared/avatar-preferenc
 import { getDueDateWindow } from "@shared/due-date-policy";
 import { ObjectPermission } from "./objectAcl";
 import { achievementEngine } from "./achievementEngine";
-import { wsClients, broadcastToFamily } from "./websocket";
+import { wsClients, broadcastToFamily, broadcastToFamilyMembers } from "./websocket";
 import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, goalContributions, childDeviceSessions, users, pinboardNotes, starPlacements } from "@shared/schema";
 import { clampAvailablePoints } from "@shared/point-balance";
 import { getMaxMembers, hasFeature, canAddMember, getMaxSkins, TIER_CONFIG, getAllTiers } from "@shared/tier-config";
@@ -5795,7 +5795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch chat messages with clamped limit
       const rawLimit = parseInt(req.query.limit as string) || 50;
       const limit = Math.min(Math.max(rawLimit, 1), 100); // Clamp between 1 and 100
-      const messages = await storage.getChatMessages(member.familyName, limit);
+       const messages = await storage.getChatMessages(member.familyName, member.id, limit);
       
       res.json(messages);
     } catch (error: any) {
@@ -5850,10 +5850,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Validate request using schema
-      const validationResult = insertChatMessageSchema.safeParse({
+       const requestedTargetId = req.body.targetMemberId === undefined || req.body.targetMemberId === null || req.body.targetMemberId === ""
+         ? null
+         : String(req.body.targetMemberId);
+       const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+       const targetMember = requestedTargetId ? allMembers.find(candidate => candidate.id === requestedTargetId) : undefined;
+       if (requestedTargetId && (!targetMember || targetMember.id === member.id)) {
+         return res.status(400).json({ message: "Invalid chat recipient" });
+       }
+
+       const validationResult = insertChatMessageSchema.safeParse({
         familyName: member.familyName,
         memberId: member.id,
         message: req.body.message,
+         targetMemberId: requestedTargetId,
+         isTargeted: requestedTargetId !== null,
       });
       
       if (!validationResult.success) {
@@ -5871,8 +5882,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create chat message
       const newMessage = await storage.createChatMessage(validationResult.data);
       
-      // Broadcast to family via WebSocket
-      broadcastToFamily(member.familyName, {
+       const chatPayload = {
         type: "chat_message",
         message: {
           id: newMessage.id,
@@ -5883,12 +5893,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           memberColor: member.color,
           memberAvatarUrl: member.avatarUrl,
           memberActiveSkinId: member.activeSkinId,
+           targetMemberId: newMessage.targetMemberId,
+           isTargeted: newMessage.isTargeted,
+           targetMemberName: targetMember?.displayName || null,
         },
-      });
+       };
+       if (newMessage.targetMemberId) {
+         broadcastToFamilyMembers(member.familyName, chatPayload, client =>
+           client.role === "parent" || client.memberId === member.id || client.memberId === newMessage.targetMemberId
+         );
+       } else {
+         broadcastToFamily(member.familyName, chatPayload);
+       }
 
       const lang = family.language || "en";
-      const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
-      const recipientIds = allMembers.filter(m => m.id !== member.id).map(m => m.id);
+       const recipientIds = newMessage.targetMemberId
+         ? allMembers.filter(m => m.id === newMessage.targetMemberId).map(m => m.id)
+         : allMembers.filter(m => m.id !== member.id).map(m => m.id);
       if (family.pushChat) {
         try {
           const tokensByMember = await Promise.all(recipientIds.map(async id => ({
@@ -5896,7 +5917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })));
           for (const recipient of tokensByMember) {
             const recipientMember = allMembers.find(m => m.id === recipient.id);
-            if (recipientMember?.role === "child" && isChildPushQuietHours(
+             if (recipientMember?.role === "child" && isChildPushQuietHours(
               new Date(),
               family.timezone,
               family.childPushQuietStart,
@@ -5985,7 +6006,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ count: 0 }); // Return 0 if feature not available
       }
       
-      const count = await storage.getUnreadMessageCount(member.id, member.familyName);
+       const count = await storage.getUnreadMessageCount(member.id, member.familyName);
       res.json({ count });
     } catch (error: any) {
       console.error("Error getting unread message count:", error);
@@ -9208,6 +9229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   wss.on("connection", (ws: WebSocket, req: any) => {
     const cookieHeader = req.headers?.cookie as string | undefined;
     let familyName: string | null = null;
+    let connectedMember: { id: string; role: "parent" | "child" } | null = null;
     let joined = false;
 
     ws.on("message", async (message: string) => {
@@ -9230,24 +9252,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return;
           }
 
-          let authorizedFamily: string | null = null;
+           let authorizedFamily: string | null = null;
+           let authorizedMember: { id: string; role: "parent" | "child" } | null = null;
 
           if (userId.startsWith("mobile:")) {
             const memberId = userId.slice("mobile:".length);
             const member = await storage.getFamilyMember(memberId);
-            if (member?.familyName === requestedFamily) {
+             if (member && member.familyName === requestedFamily) {
               authorizedFamily = requestedFamily;
+               authorizedMember = { id: member.id, role: member.role };
             }
           } else if (userId.startsWith("device:")) {
             const memberId = userId.slice("device:".length);
             const member = await storage.getFamilyMember(memberId);
-            if (member?.familyName === requestedFamily) {
+             if (member && member.familyName === requestedFamily) {
               authorizedFamily = requestedFamily;
+               authorizedMember = { id: member.id, role: member.role };
             }
           } else {
             const member = await storage.getFamilyMemberByUserId(userId);
-            if (member?.familyName === requestedFamily) {
+             if (member && member.familyName === requestedFamily) {
               authorizedFamily = requestedFamily;
+               authorizedMember = { id: member.id, role: member.role };
             }
           }
 
@@ -9256,13 +9282,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return;
           }
 
-          familyName = authorizedFamily;
+           if (!authorizedMember) {
+             ws.close(4403, "Forbidden");
+             return;
+           }
+           familyName = authorizedFamily;
+           connectedMember = authorizedMember;
           joined = true;
 
           if (!wsClients.has(familyName)) {
             wsClients.set(familyName, new Set());
           }
-          wsClients.get(familyName)!.add(ws);
+           wsClients.get(familyName)!.add({ ws, memberId: connectedMember.id, role: connectedMember.role });
 
           console.log(`Client joined family: ${familyName}`);
         }
@@ -9273,9 +9304,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     ws.on("close", () => {
       if (familyName) {
-        const clients = wsClients.get(familyName);
+         const clients = wsClients.get(familyName);
         if (clients) {
-          clients.delete(ws);
+           clients.forEach(client => {
+             if (client.ws === ws) clients.delete(client);
+           });
           if (clients.size === 0) {
             wsClients.delete(familyName);
           }

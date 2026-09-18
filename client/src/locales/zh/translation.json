@@ -644,6 +644,12 @@
     "messageCount_other": "{{count}}条消息",
     "noMessagesStart": "还没有消息。开始对话吧！",
     "failedToSend": "发送消息失败",
+    "sendTo": "发送给",
+    "allMembers": "所有家庭成员",
+    "sendToMember": "发送给 {{name}}",
+    "addressedTo": "发送给 {{name}}",
+    "selectedMember": "所选成员",
+    "parentVisibilityNotice": "提示：家长可以查看所有消息，包括孩子之间的定向消息。",
     "errorLoadingChat": "加载聊天时出错"
   },
   "settings": {
