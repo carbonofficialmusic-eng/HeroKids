@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Clock, Moon, Info, ShoppingCart, Square, CheckSquare, ChevronDown } from "lucide-react";
+import { Camera, CheckCircle, Zap, Star, Users, Lock, Calendar, CalendarDays, Clock, Moon, Info, ShoppingCart, Square, CheckSquare, ChevronDown, RefreshCw } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { Task, FamilyMember, ShoppingListItem } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
@@ -458,11 +458,21 @@ export function TaskCard({
                   {compactDateText.text}
                 </p>
               )}
-              {task.isSharedTask && (
-                <Badge className="lc-team-task-label mt-1 gap-1 px-2 py-0.5 text-xs font-bold border">
-                  <Users className="h-3.5 w-3.5" />
-                  {t("tasks.sharedTaskLabel")}
-                </Badge>
+              {(task.isSharedTask || task.recurrence === "immediate") && (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {task.isSharedTask && (
+                    <Badge className="lc-team-task-label gap-1 px-2 py-0.5 text-xs font-bold border">
+                      <Users className="h-3.5 w-3.5" />
+                      {t("tasks.sharedTaskLabel")}
+                    </Badge>
+                  )}
+                  {task.recurrence === "immediate" && (
+                    <Badge className="lc-immediate-task-label gap-1 px-2 py-0.5 text-xs font-bold border" data-testid={`badge-immediate-${task.id}`}>
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      {t("tasks.immediate")}
+                    </Badge>
+                  )}
+                </div>
               )}
               {assignedMembers && assignedMembers.length > 0 && (
                 <p className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
@@ -697,6 +707,13 @@ export function TaskCard({
                 </Badge>
               )}
             </div>
+
+            {task.recurrence === "immediate" && (
+              <Badge className="lc-immediate-task-label mb-2 gap-1.5 px-3 py-1 text-sm font-bold border" data-testid={`badge-immediate-${task.id}`}>
+                <RefreshCw className="h-4 w-4" />
+                {t("tasks.immediate")}
+              </Badge>
+            )}
             
             {isUnavailable && getRecurringAvailabilityText() && (
               <div className="mb-1">

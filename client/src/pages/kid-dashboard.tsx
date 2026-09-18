@@ -945,6 +945,12 @@ function TaskCard({
               </Badge>
             )}
           </div>
+          {task.recurrence === "immediate" && (
+            <Badge className="lc-immediate-task-label mx-auto gap-1.5 px-3 py-1 text-sm font-bold border" data-testid={`badge-immediate-${task.id}`}>
+              <RefreshCw className="h-4 w-4" />
+              {t("tasks.immediate")}
+            </Badge>
+          )}
           
           {/* Multi-Assignment Task Info - Show teammates who need to complete (new style) */}
           {task.assignedMemberCompletions && task.assignedMemberCompletions.length > 0 && (

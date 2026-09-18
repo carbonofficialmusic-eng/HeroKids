@@ -3536,16 +3536,30 @@ html:not(.dark) .lc-dashboard .lc-weekend-unavailable-label {
 }
 .lc-dashboard .lc-team-task-label,
 .lc-kid-dashboard .lc-team-task-label {
-  color: #075c70 !important;
-  border-color: rgba(8, 145, 178, .48) !important;
-  background: rgba(207, 250, 254, .9) !important;
-  box-shadow: 0 2px 7px rgba(8, 145, 178, .14);
+  color: #9a3412 !important;
+  border-color: rgba(249, 115, 22, .5) !important;
+  background: rgba(255, 237, 213, .96) !important;
+  box-shadow: 0 2px 7px rgba(234, 88, 12, .14);
 }
 .dark .lc-dashboard .lc-team-task-label,
 .dark .lc-kid-dashboard .lc-team-task-label {
-  color: #cffafe !important;
-  border-color: rgba(34, 211, 238, .52) !important;
-  background: rgba(8, 145, 178, .3) !important;
+  color: #dbeafe !important;
+  border-color: rgba(96, 165, 250, .52) !important;
+  background: rgba(37, 99, 235, .3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .24);
+}
+.lc-dashboard .lc-immediate-task-label,
+.lc-kid-dashboard .lc-immediate-task-label {
+  color: #9a3412 !important;
+  border-color: rgba(249, 115, 22, .5) !important;
+  background: rgba(255, 237, 213, .96) !important;
+  box-shadow: 0 2px 7px rgba(234, 88, 12, .14);
+}
+.dark .lc-dashboard .lc-immediate-task-label,
+.dark .lc-kid-dashboard .lc-immediate-task-label {
+  color: #dbeafe !important;
+  border-color: rgba(96, 165, 250, .52) !important;
+  background: rgba(37, 99, 235, .3) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .24);
 }
 html:not(.dark) :is(.lc-dashboard, .lc-kid-dashboard) .lc-next-date-label {
