@@ -10,6 +10,7 @@ packages = ["imagemagick"]
 deploymentTarget = "gce"
 build = ["npm", "run", "build"]
 run = ["npm", "run", "start"]
+ignorePorts = false
 
 [[ports]]
 localPort = 5000
