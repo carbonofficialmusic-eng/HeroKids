@@ -13,6 +13,7 @@ import {
   pgEnum,
   unique,
   serial,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -168,7 +169,7 @@ export const familyMembers = pgTable("family_members", {
   useCustomAvatar: boolean("use_custom_avatar").notNull().default(false), // Use custom avatar instead of skin avatar (background stays from skin)
   useThemeBackground: boolean("use_theme_background").notNull().default(true), // Show themed background from active skin (can be disabled to keep avatar only)
   avatarHistory: jsonb("avatar_history").$type<string[]>().default(sql`'[]'::jsonb`), // Last 3 uploaded avatar URLs for quick selection
-  lastReadChatAt: timestamp("last_read_chat_at"), // When member last viewed chat messages
+  lastReadChatAt: timestamp("last_read_chat_at"), // Legacy baseline from before chats were separated
   excludeFromLeaderboard: boolean("exclude_from_leaderboard").notNull().default(false), // Exclude member from leaderboard competition
   isPaused: boolean("is_paused").notNull().default(false), // Manually paused by parent after downgrade overflow
   createdAt: timestamp("created_at").defaultNow(),
@@ -557,6 +558,14 @@ export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
     fields: [chatMessages.targetMemberId],
     references: [familyMembers.id],
   }),
+}));
+
+export const chatConversationReads = pgTable("chat_conversation_reads", {
+  memberId: varchar("member_id").notNull().references(() => familyMembers.id, { onDelete: "cascade" }),
+  conversationKey: varchar("conversation_key").notNull(),
+  lastReadAt: timestamp("last_read_at").notNull().defaultNow(),
+}, (table) => ({
+  memberConversationPk: primaryKey({ columns: [table.memberId, table.conversationKey] }),
 }));
 
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({

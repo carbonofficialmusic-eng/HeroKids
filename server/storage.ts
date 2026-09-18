@@ -14,6 +14,7 @@ import {
   pointsHistory,
   skins,
   chatMessages,
+  chatConversationReads,
   achievementDefinitions,
   achievementMembers,
   achievementAwards,
@@ -79,6 +80,7 @@ import {
   type ShoppingListItem,
   type InsertShoppingListItem,
 } from "@shared/schema";
+import { calculateConversationUnreadCounts } from "./chat-unread";
 import { clampAvailablePoints } from "@shared/point-balance";
 import { db } from "./db";
 import { eq, and, desc, gt, gte, lt, sql, inArray, isNull, isNotNull, ne } from "drizzle-orm";
@@ -349,8 +351,8 @@ export interface IStorage {
   // Chat operations (Family+ and Enterprise tier)
   getChatMessages(familyName: string, viewerMemberId: string, limit?: number): Promise<any[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
-  updateLastReadChatAt(memberId: string): Promise<void>;
-  getUnreadMessageCount(memberId: string, familyName: string): Promise<number>;
+  updateLastReadChatAt(memberId: string, conversationKey: string): Promise<void>;
+  getUnreadMessageCounts(memberId: string, familyName: string): Promise<{ count: number; conversations: Record<string, number> }>;
 
   // Family Goals operations
   getFamilyGoalsByFamily(familyName: string): Promise<FamilyGoal[]>;
@@ -3537,36 +3539,63 @@ export class DatabaseStorage implements IStorage {
     return newMessage;
   }
 
-  async updateLastReadChatAt(memberId: string): Promise<void> {
+  async updateLastReadChatAt(memberId: string, conversationKey: string): Promise<void> {
     await db
-      .update(familyMembers)
-      .set({ lastReadChatAt: new Date() })
-      .where(eq(familyMembers.id, memberId));
+      .insert(chatConversationReads)
+      .values({ memberId, conversationKey, lastReadAt: new Date() })
+      .onConflictDoUpdate({
+        target: [chatConversationReads.memberId, chatConversationReads.conversationKey],
+        set: { lastReadAt: new Date() },
+      });
   }
 
-  async getUnreadMessageCount(memberId: string, familyName: string): Promise<number> {
+  async getUnreadMessageCounts(memberId: string, familyName: string): Promise<{ count: number; conversations: Record<string, number> }> {
     const [member] = await db
-      .select({ lastReadChatAt: familyMembers.lastReadChatAt })
+      .select({
+        lastReadChatAt: familyMembers.lastReadChatAt,
+      })
       .from(familyMembers)
       .where(eq(familyMembers.id, memberId));
 
-    if (!member) return 0;
+    if (!member) return { count: 0, conversations: {} };
 
-    const lastReadAt = member.lastReadChatAt || new Date(0);
+    const legacyReadAt = member.lastReadChatAt || new Date(0);
+    const conversationReads = await db
+      .select({
+        conversationKey: chatConversationReads.conversationKey,
+        lastReadAt: chatConversationReads.lastReadAt,
+      })
+      .from(chatConversationReads)
+      .where(eq(chatConversationReads.memberId, memberId));
+    const readAtByConversation = new Map(
+      conversationReads.map(read => [read.conversationKey, read.lastReadAt]),
+    );
 
-    const [result] = await db
-      .select({ count: sql<number>`count(*)` })
+    const incomingMessages = await db
+      .select({
+        createdAt: chatMessages.createdAt,
+        memberId: chatMessages.memberId,
+        isTargeted: chatMessages.isTargeted,
+      })
       .from(chatMessages)
       .where(
         and(
           eq(chatMessages.familyName, familyName),
-          gt(chatMessages.createdAt, lastReadAt),
           sql`${chatMessages.memberId} != ${memberId}`,
           sql`(${chatMessages.isTargeted} = false OR ${chatMessages.targetMemberId} = ${memberId})`,
         )
       );
 
-    return Number(result?.count || 0);
+    const conversations = calculateConversationUnreadCounts(
+      incomingMessages,
+      legacyReadAt,
+      readAtByConversation,
+    );
+
+    return {
+      count: Object.values(conversations).reduce((sum, count) => sum + count, 0),
+      conversations,
+    };
   }
 
   // Family Goals operations

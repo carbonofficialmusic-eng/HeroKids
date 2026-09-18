@@ -31,6 +31,10 @@ interface FamilyMember {
   color?: string;
   avatarUrl?: string | null;
 }
+interface ChatUnreadCounts {
+  count: number;
+  conversations: Record<string, number>;
+}
 
 export default function Chat() {
   const { t } = useTranslation();
@@ -51,6 +55,11 @@ export default function Chat() {
   });
   const { data: messages = [], isLoading, error } = useQuery<ChatMessage[]>({
     queryKey: ["/api/chat"], enabled: !!member, refetchInterval: 5000, staleTime: 5 * 60 * 1000,
+  });
+  const { data: unreadCounts } = useQuery<ChatUnreadCounts>({
+    queryKey: ["/api/chat/unread-count"],
+    enabled: !!member,
+    refetchInterval: 5000,
   });
   const isActingAs = !!(member && realMember && member.id !== realMember.id);
   const isParent = member?.role === "parent";
@@ -92,8 +101,16 @@ export default function Chat() {
     }),
   });
   const markAsReadMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/chat/mark-read", {}),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/chat/unread-count"] }),
+    mutationFn: (conversationKey: string) => apiRequest("POST", "/api/chat/mark-read", { conversationKey }),
+    onSuccess: (_response, conversationKey) => {
+      queryClient.setQueryData<ChatUnreadCounts>(["/api/chat/unread-count"], (current) => {
+        if (!current) return current;
+        const conversations = { ...current.conversations };
+        const removed = conversations[conversationKey] || 0;
+        delete conversations[conversationKey];
+        return { count: Math.max(0, current.count - removed), conversations };
+      });
+    },
   });
   function scrollToBottom() {
     const viewport = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement | null;
@@ -115,8 +132,10 @@ export default function Chat() {
   }, []);
   useEffect(() => { scrollToBottom(); }, [visibleMessages.length]);
   useEffect(() => {
-    if (messages.length > 0 && !isLoading) markAsReadMutation.mutate();
-  }, [messages.length, isLoading]);
+    if (!isLoading && conversation !== "oversight") {
+      markAsReadMutation.mutate(conversation);
+    }
+  }, [conversation, visibleMessages.length, isLoading]);
 
   const handleSendMessage = (event: React.FormEvent) => {
     event.preventDefault();
@@ -148,8 +167,8 @@ export default function Chat() {
           {!isKeyboardOpen && <CardHeader className="border-b shrink-0 py-3"><div className="flex items-center justify-between"><CardTitle className="flex items-center gap-2"><MessageCircle className="w-5 h-5" />{conversationTitle}</CardTitle><span className="text-sm text-muted-foreground">{t(visibleMessages.length === 1 ? "chat.messageCount" : "chat.messageCount_other", { count: visibleMessages.length })}</span></div></CardHeader>}
           <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
             <nav className="border-b px-3 py-2 flex gap-2 overflow-x-auto shrink-0" aria-label={t("chat.conversations")} data-testid="select-chat-recipient">
-              <Button variant={conversation === "all" ? "default" : "ghost"} size="sm" onClick={() => setConversation("all")} data-testid="button-chat-all"><Users className="w-4 h-4 mr-1.5" />{t("chat.allMembers")}</Button>
-              {familyMembers.filter((candidate) => candidate.id !== member?.id).map((candidate) => <Button key={candidate.id} variant={conversation === candidate.id ? "default" : "ghost"} size="sm" onClick={() => setConversation(candidate.id)} data-testid={`button-chat-member-${candidate.id}`}><span className="w-2.5 h-2.5 rounded-full mr-1.5 ring-2 ring-offset-1 ring-offset-background" style={{ backgroundColor: candidate.color || "hsl(var(--primary))", outlineColor: candidate.color || "hsl(var(--primary))" }} />{candidate.displayName}</Button>)}
+               <Button variant={conversation === "all" ? "default" : "ghost"} size="sm" className="relative overflow-visible" onClick={() => setConversation("all")} data-testid="button-chat-all"><Users className="w-4 h-4 mr-1.5" />{t("chat.allMembers")}{!!unreadCounts?.conversations.all && <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-[11px] font-bold flex items-center justify-center shadow" data-testid="badge-chat-unread-all">{unreadCounts.conversations.all > 99 ? "99+" : unreadCounts.conversations.all}</span>}</Button>
+               {familyMembers.filter((candidate) => candidate.id !== member?.id).map((candidate) => <Button key={candidate.id} variant={conversation === candidate.id ? "default" : "ghost"} size="sm" className="relative overflow-visible" onClick={() => setConversation(candidate.id)} data-testid={`button-chat-member-${candidate.id}`}><span className="w-2.5 h-2.5 rounded-full mr-1.5 ring-2 ring-offset-1 ring-offset-background" style={{ backgroundColor: candidate.color || "hsl(var(--primary))", outlineColor: candidate.color || "hsl(var(--primary))" }} />{candidate.displayName}{!!unreadCounts?.conversations[candidate.id] && <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-[11px] font-bold flex items-center justify-center shadow" data-testid={`badge-chat-unread-${candidate.id}`}>{unreadCounts.conversations[candidate.id] > 99 ? "99+" : unreadCounts.conversations[candidate.id]}</span>}</Button>)}
               {isParent && <Button variant={conversation === "oversight" ? "default" : "ghost"} size="sm" onClick={() => setConversation("oversight")} data-testid="button-chat-oversight"><ShieldCheck className="w-4 h-4 mr-1.5" />{t("chat.childConversations")}</Button>}
             </nav>
             {conversation === "oversight" && <div className="px-4 py-2 text-xs text-muted-foreground bg-muted/30 border-b flex items-center gap-2"><EyeOff className="w-3.5 h-3.5" />{t("chat.oversightReadOnly")}</div>}

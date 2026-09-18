@@ -260,10 +260,11 @@ export function isChildPushQuietHours(
 }
 
 /** Cancel a recipient's pending chat alert when they have read the chat. */
-export function cancelQueuedChatPush(recipientId: string): boolean {
+export function cancelQueuedChatPush(recipientId: string, conversationKey?: string): boolean {
   let cancelled = false;
   chatBatches.forEach((batch, key) => {
     if (batch.recipientId !== recipientId) return;
+    if (conversationKey && key !== `${recipientId}:${conversationKey}`) return;
     clearTimeout(batch.timer);
     chatBatches.delete(key);
     cancelled = true;
@@ -298,10 +299,10 @@ export function queueChatPush(
   title: string,
   body?: (count: number) => string,
   canSend?: () => boolean | Promise<boolean>,
-  senderId = "all",
+  conversationKey = "all",
 ): void {
   if (!deviceTokens.length) return;
-  const batchKey = `${recipientId}:${senderId}`;
+  const batchKey = `${recipientId}:${conversationKey}`;
   const existing = chatBatches.get(batchKey);
   if (existing) {
     existing.count += 1;

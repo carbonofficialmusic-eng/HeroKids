@@ -5940,7 +5940,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     currentFamily.childPushQuietEnd,
                   );
               },
-              member.id);
+              newMessage.targetMemberId ? member.id : "all");
           }
         } catch (pushErr: any) {
           console.error("[APNs] chat_message push error:", pushErr?.message || pushErr);
@@ -6004,11 +6004,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check tier access — also allow during active 7-day trial
       const chatOnTrial3 = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
       if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat") && !chatOnTrial3) {
-        return res.json({ count: 0 }); // Return 0 if feature not available
+        return res.json({ count: 0, conversations: {} }); // Return 0 if feature not available
       }
       
-       const count = await storage.getUnreadMessageCount(member.id, member.familyName);
-      res.json({ count });
+      const unread = await storage.getUnreadMessageCounts(member.id, member.familyName);
+      res.json(unread);
     } catch (error: any) {
       console.error("Error getting unread message count:", error);
       res.status(500).json({ message: "Failed to get unread count" });
@@ -6029,8 +6029,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Family member not found" });
       }
       
-      await storage.updateLastReadChatAt(member.id);
-      cancelQueuedChatPush(member.id);
+      const conversationKey = !req.body?.conversationKey || req.body.conversationKey === "all"
+        ? "all"
+        : String(req.body.conversationKey);
+      if (conversationKey !== "all") {
+        const conversationMember = await storage.getFamilyMemberById(conversationKey);
+        if (!conversationMember || conversationMember.familyName !== member.familyName || conversationMember.id === member.id) {
+          return res.status(400).json({ message: "Invalid chat conversation" });
+        }
+      }
+
+      await storage.updateLastReadChatAt(member.id, conversationKey);
+      cancelQueuedChatPush(member.id, conversationKey);
       res.json({ success: true });
     } catch (error: any) {
       console.error("Error marking messages as read:", error);

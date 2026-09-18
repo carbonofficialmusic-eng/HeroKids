@@ -96,4 +96,13 @@ describe("APNs chat batching", () => {
     expect(cancelQueuedChatPush("member-reading-chat")).toBe(true);
     expect(cancelQueuedChatPush("member-reading-chat")).toBe(false);
   });
+
+  it("only cancels the conversation that was actually read", () => {
+    queueChatPush("member-with-threads", ["device-token"], "Family Chat", undefined, undefined, "all");
+    queueChatPush("member-with-threads", ["device-token"], "Direct Chat", undefined, undefined, "sender-1");
+
+    expect(cancelQueuedChatPush("member-with-threads", "all")).toBe(true);
+    expect(cancelQueuedChatPush("member-with-threads", "all")).toBe(false);
+    expect(cancelQueuedChatPush("member-with-threads", "sender-1")).toBe(true);
+  });
 });

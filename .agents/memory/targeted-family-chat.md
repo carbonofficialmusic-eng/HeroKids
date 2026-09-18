@@ -7,6 +7,8 @@ Gezielte Nachrichten sind keine privaten Nachrichten. Sichtbar sind sie für Abs
 
 Die freigegebene Chatdarstellung trennt „Alle“ von direkten Gesprächen pro Familienmitglied. Eltern erhalten zusätzlich eine schreibgeschützte Übersicht der Kind-zu-Kind-Unterhaltungen; direkte Eltern-Chats bleiben davon getrennt.
 
+Lesestatus, Zähler und das Abbrechen gebündelter Pushs gelten pro Gespräch. Das Öffnen von „Alle“ darf Direktnachrichten weder als gelesen markieren noch deren Push-Mitteilungen abbrechen.
+
 **Why:** Kinder sollen einzelne Familienmitglieder ansprechen können, während die elterliche Aufsicht transparent erhalten bleibt und Eltern nicht durch jede Kind-zu-Kind-Unterhaltung gestört werden.
 
 **How to apply:** Sichtbarkeit immer serverseitig erzwingen. Die Zielklassifizierung dauerhaft getrennt von der löschbaren Ziel-ID speichern, damit das Löschen eines Mitglieds eine ehemals gezielte Nachricht niemals in einen Broadcast umwandelt.
