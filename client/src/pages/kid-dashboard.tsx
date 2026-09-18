@@ -505,15 +505,18 @@ function TaskCard({
   task, 
   member, 
   onOpenTaskDialog,
+  onCompleteTask,
+  isCompleting,
   compact = false,
 }: { 
   task: TaskWithMeta; 
   member: FamilyMember;
   onOpenTaskDialog: (task: TaskWithMeta) => void;
+  onCompleteTask: (taskId: string) => void;
+  isCompleting: boolean;
   compact?: boolean;
 }) {
   const { t, i18n } = useTranslation();
-  const { toast } = useToast();
   const [showDetails, setShowDetails] = useState(false);
   const [shoppingListExpanded, setShoppingListExpanded] = useState(false);
   
@@ -634,45 +637,16 @@ function TaskCard({
   
   const TaskIcon = getTaskIcon(task.title);
 
-  const completeMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`/api/tasks/${task.id}/complete`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...getDevHeaders() },
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
-        throw new Error(errorData.message || "Failed to complete task");
-      }
-      return response.json();
-    },
-    onSuccess: (result) => {
-      if (!result.partial) confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: t("kidDashboard.error"),
-        description: error.message || t("kidDashboard.taskError"),
-      });
-    },
-  });
-
   const handleComplete = () => {
-    if (!isActionable || completeMutation.isPending) return;
+    if (!isActionable || isCompleting) return;
     
     // If task requires photo proof, open dialog for photo upload
     if (task.requiresProof) {
       onOpenTaskDialog(task);
     } else {
-      // No photo needed, complete directly
-      completeMutation.mutate();
+      // Use the same optimistic page-level mutation as proof submissions so
+      // yellow/pending state appears immediately instead of after a refetch.
+      onCompleteTask(task.id);
     }
   };
   
@@ -825,7 +799,7 @@ function TaskCard({
           </div>
           {/* Points / status row */}
           <div className="mt-1.5 flex items-center gap-1">
-            {completeMutation.isPending ? (
+            {isCompleting ? (
               <Loader2 className="h-3 w-3 animate-spin text-primary" />
             ) : statusMessage ? (
               <p className={`text-xs leading-tight truncate ${statusColor}`}>{statusMessage}</p>
@@ -924,7 +898,7 @@ function TaskCard({
             isActionable ? "bg-gradient-to-br from-primary/25 to-primary/15 shadow-primary/15" :
             "bg-white/10"
           }`}>
-            {completeMutation.isPending ? (
+            {isCompleting ? (
               <Loader2 className="h-12 w-12 text-primary animate-spin" />
             ) : showAsApproved ? (
               <CheckCircle2 className="h-12 w-12 text-green-500" />
@@ -2986,7 +2960,14 @@ export default function KidDashboard() {
                   <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2 mt-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2"}>
                     {importantMyTasks.map((task, index) => (
                       <div key={task.id} className="min-w-0">
-                        <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
+                        <TaskCard
+                          task={task}
+                          member={member}
+                          onOpenTaskDialog={handleOpenTaskDialog}
+                          onCompleteTask={(taskId) => completeTaskMutation.mutate({ taskId })}
+                          isCompleting={completeTaskMutation.isPending && completeTaskMutation.variables?.taskId === task.id}
+                          compact={kidDashboardView === "grid"}
+                        />
                       </div>
                     ))}
                   </div>
@@ -3022,7 +3003,14 @@ export default function KidDashboard() {
                   <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2 mt-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2"}>
                     {fixedAppointmentTasks.map((task) => (
                       <div key={task.id} className="min-w-0">
-                        <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
+                        <TaskCard
+                          task={task}
+                          member={member}
+                          onOpenTaskDialog={handleOpenTaskDialog}
+                          onCompleteTask={(taskId) => completeTaskMutation.mutate({ taskId })}
+                          isCompleting={completeTaskMutation.isPending && completeTaskMutation.variables?.taskId === task.id}
+                          compact={kidDashboardView === "grid"}
+                        />
                       </div>
                     ))}
                   </div>
@@ -3081,7 +3069,14 @@ export default function KidDashboard() {
                       <div className={kidDashboardView === "grid" ? "grid grid-cols-2 gap-2 mt-2" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2"}>
                         {categoryTasks.map((task, index) => (
                           <div key={task.id} className="min-w-0">
-                            <TaskCard task={task} member={member} onOpenTaskDialog={handleOpenTaskDialog} compact={kidDashboardView === "grid"} />
+                            <TaskCard
+                              task={task}
+                              member={member}
+                              onOpenTaskDialog={handleOpenTaskDialog}
+                              onCompleteTask={(taskId) => completeTaskMutation.mutate({ taskId })}
+                              isCompleting={completeTaskMutation.isPending && completeTaskMutation.variables?.taskId === task.id}
+                              compact={kidDashboardView === "grid"}
+                            />
                           </div>
                         ))}
                       </div>
