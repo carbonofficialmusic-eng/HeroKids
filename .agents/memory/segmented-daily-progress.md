@@ -11,4 +11,4 @@ A member counts as fully completed only when their approved daily progress reach
 
 **Why:** The user confirmed this approach after the temporary green completion check disappeared too quickly to communicate whether the first daily execution had been recorded.
 
-**How to apply:** Use this pattern anywhere repeated-daily progress appears in parent and child views, with readable Light and Dark variants. Keep the badge fully green after the final execution until the normal daily reset. Points and approval still happen only after the final required execution.
+**How to apply:** Use this pattern anywhere repeated-daily progress appears in parent and child views, with readable Light and Dark variants. Update every segment optimistically, including the final one, so no server refetch delay is visible. Keep the badge fully green after the final execution until the normal daily reset. Points and approval still happen only after the final required execution.

@@ -1927,8 +1927,10 @@ export default function KidDashboard() {
           if (t.id !== taskId) return t;
           // If task requires approval → optimistically set pending (yellow)
           // Otherwise → set approved (gray/green)
-          if ((t.dailyTarget || 1) > 1 && (t.dailyProgress || 0) + 1 < (t.dailyTarget || 1)) {
-            return { ...t, dailyProgress: (t.dailyProgress || 0) + 1 };
+           const dailyTarget = t.dailyTarget || 1;
+           const nextDailyProgress = Math.min((t.dailyProgress || 0) + 1, dailyTarget);
+           if (dailyTarget > 1 && nextDailyProgress < dailyTarget) {
+             return { ...t, dailyProgress: nextDailyProgress };
           }
           const isLateAppointment = !!t.dueDate
             && t.recurrence === "none"
@@ -1937,9 +1939,19 @@ export default function KidDashboard() {
               format(new Date(), "yyyy-MM-dd"),
             ).isGraceDay;
           if (t.requiresApproval || isLateAppointment) {
-            return { ...t, memberHasCompleted: true, memberCompletionStatus: "pending" };
+             return {
+               ...t,
+               dailyProgress: dailyTarget > 1 ? nextDailyProgress : t.dailyProgress,
+               memberHasCompleted: true,
+               memberCompletionStatus: "pending",
+             };
           }
-          return { ...t, memberHasCompleted: true, memberCompletionStatus: "approved" };
+           return {
+             ...t,
+             dailyProgress: dailyTarget > 1 ? nextDailyProgress : t.dailyProgress,
+             memberHasCompleted: true,
+             memberCompletionStatus: "approved",
+           };
         }) : old
       );
       return { previousTasks };
