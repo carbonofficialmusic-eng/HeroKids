@@ -136,7 +136,7 @@ export function TaskDialog({
     return familyMembers.length;
   }, [familyMembers]);
   
-  // Predefined task templates (4 popular templates in 2x2 grid)
+  // Predefined task templates
   const taskTemplates = [
     {
       id: "clean-room",
@@ -173,6 +173,25 @@ export function TaskDialog({
       iconEmoji: "🛒",
       requiresProof: false,
       isShoppingList: true,
+    },
+    {
+      id: "tidy-desk",
+      title: t('taskTemplates.tidyDesk.title'),
+      description: t('taskTemplates.tidyDesk.description'),
+      points: 20,
+      iconEmoji: "🧽",
+      requiresProof: false,
+      recurrence: "weekly" as const,
+    },
+    {
+      id: "put-away-toys",
+      title: t('taskTemplates.putAwayToys.title'),
+      description: t('taskTemplates.putAwayToys.description'),
+      points: 20,
+      iconEmoji: "🧺",
+      requiresProof: false,
+      recurrence: "daily" as const,
+      dailyTarget: 1,
     },
   ];
   

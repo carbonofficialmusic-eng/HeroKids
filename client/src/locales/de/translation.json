@@ -362,6 +362,14 @@
       "title": "Einkaufsliste",
       "description": ""
     },
+    "tidyDesk": {
+      "title": "Schreibtisch aufräumen",
+      "description": "Den Schreibtisch ordentlich aufräumen"
+    },
+    "putAwayToys": {
+      "title": "Spielzeug wegräumen",
+      "description": "Spielzeug an seinen Platz zurückräumen"
+    },
     "dishes": {
       "title": "Abwaschen",
       "description": "Geschirr spülen und abtrocknen, Spüle reinigen"

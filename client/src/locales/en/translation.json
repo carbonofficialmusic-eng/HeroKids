@@ -352,6 +352,14 @@
       "title": "Shopping List",
       "description": ""
     },
+    "tidyDesk": {
+      "title": "Tidy Desk",
+      "description": "Tidy and organize the desk"
+    },
+    "putAwayToys": {
+      "title": "Put Away Toys",
+      "description": "Return toys to their proper places"
+    },
     "dishes": {
       "title": "Do the Dishes",
       "description": "Wash and dry all dishes, clean the sink"
