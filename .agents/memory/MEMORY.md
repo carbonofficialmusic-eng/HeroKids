@@ -28,7 +28,7 @@
 - [Punkte-Rückerstattungen](point-refund-invariant.md) — Rückerstattungen müssen exakt einmal erfolgen und dürfen verfügbare Punkte nie über den Lebenszeitverdienst erhöhen
 - [Eingelöste Belohnungen bleiben erhalten](redeemed-reward-archive.md) — Shop-Löschung archiviert nur die Vorlage; Einlösung, Anzeige und Aktionen bleiben bestehen
 - [App-Store-Version zurückstufen](app-store-version-downgrade.md) — höhere TestFlight-Versionsreihen müssen entfernt oder abgelaufen sein, bevor eine niedrigere Version auswählbar wird
-- [App-Store-Sprachanzeige](app-store-language-display.md) — Web-Übersetzungen zählen nicht; iOS muss unterstützte Sprachen im App-Bundle ausdrücklich deklarieren
+- [App-Store-Sprachanzeige](app-store-language-display.md) — Sprachlisten allein reichen nicht; der iOS-Build braucht echte lokalisierte `*.lproj`-Ressourcen
 - [Heutige Terminkarten](due-today-card-design.md) — offene Termine am exakten Tag stehen zuerst und erhalten die freigegebene HEUTE-Hervorhebung
 - [GitHub-Connector für Branch-Sync](github-connector-branch-sync.md) — Connector-Zugriff authentifiziert kein lokales git push; kompakte Git-Tree-Updates vermeiden Proxy-502
 - [Zurückhaltende Kinder-Push-Policy](child-push-policy.md) — Kinder erhalten nur soziale Hinweise, Belohnungsentscheidungen und handlungsrelevante Ablehnungen
