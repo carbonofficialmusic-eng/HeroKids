@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { kickScrollReset, kickHeaderRepaint, isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
 import { isNativePlatform } from "@/lib/platform";
+import { trackEvent } from "@/lib/analytics";
 import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { Link, useLocation } from "wouter";
 import confetti from "canvas-confetti";
@@ -1471,6 +1472,7 @@ export default function KidDashboard() {
       return await apiRequest("POST", "/api/reward-requests", data);
     },
     onSuccess: () => {
+      trackEvent("reward_requested", { actor_role: "child" });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
     },
@@ -1966,7 +1968,13 @@ export default function KidDashboard() {
         description: error.message || t("kidDashboard.taskError"),
       });
     },
-    onSuccess: (result) => {
+    onSuccess: (result, variables) => {
+      trackEvent("task_completed", {
+        actor_role: "child",
+        auto_approved: result.autoApproved === true,
+        partial: result.partial === true,
+        proof_attached: Boolean(variables.proofPhotoUrl),
+      });
       if (!result.partial) confetti({
         particleCount: 100,
         spread: 70,

@@ -18,6 +18,7 @@ import { Locale } from "date-fns";
 import { de, enUS, fr, es, ja, zhCN, ko, sv } from "date-fns/locale";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
+import { trackEvent } from "@/lib/analytics";
 
 const dateFnsLocales: Record<string, Locale> = {
   de, en: enUS, fr, es, ja, zh: zhCN, ko, sv
@@ -137,6 +138,7 @@ export default function Approvals() {
       return await res.json();
     },
     onSuccess: (data) => {
+      trackEvent("task_approved", { method: "single" });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
@@ -225,6 +227,10 @@ export default function Approvals() {
           failCount++;
         }
       }
+    }
+
+    if (successCount > 0) {
+      trackEvent("task_approved", { method: "bulk", count: successCount });
     }
 
     queryClient.invalidateQueries({ queryKey: ["/api/tasks/completions/pending"] });

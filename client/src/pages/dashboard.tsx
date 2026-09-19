@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { clearPhotoUsed } from "@/lib/cameraUtils";
 import { isNativePlatform } from "@/lib/platform";
+import { trackEvent } from "@/lib/analytics";
 import { filterTasksByDate as filterTasksByDateUtil } from "@/lib/task-filters";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -605,7 +606,10 @@ export default function Dashboard() {
     mutationFn: async (data: any) => {
       return await apiRequest("POST", "/api/family-members", data);
     },
-    onSuccess: () => {
+    onSuccess: (_result, variables) => {
+      trackEvent("family_profile_created", {
+        role: variables?.role === "child" ? "child" : "parent",
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       toast({
         title: t("auth.welcome"),
@@ -619,7 +623,10 @@ export default function Dashboard() {
     mutationFn: async (data: any) => {
       return await apiRequest("POST", "/api/join-family", data);
     },
-    onSuccess: () => {
+    onSuccess: (_result, variables) => {
+      trackEvent("family_joined", {
+        role: variables?.role === "child" ? "child" : "parent",
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       toast({
         title: t("toast.welcomeFamily"),
@@ -837,7 +844,13 @@ export default function Dashboard() {
       }
       toast({ variant: "destructive", title, description });
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: any, variables) => {
+      trackEvent("task_completed", {
+        actor_role: member?.role || "parent",
+        auto_approved: data.autoApproved === true,
+        partial: data.partial === true,
+        proof_attached: Boolean(variables.proofPhotoUrl),
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"], refetchType: 'active' });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"], refetchType: 'active' });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"], refetchType: 'active' });
@@ -924,6 +937,10 @@ export default function Dashboard() {
       return data;
     },
     onSuccess: (data: any) => {
+      trackEvent("reward_redeemed", {
+        points_spent: data?.redemption?.pointsSpent || 0,
+        actor_role: member?.role || "parent",
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-redemptions"] });
@@ -999,6 +1016,7 @@ export default function Dashboard() {
       return await apiRequest("POST", "/api/reward-requests", data);
     },
     onSuccess: () => {
+      trackEvent("reward_requested", { actor_role: member?.role || "parent" });
       queryClient.invalidateQueries({ queryKey: ["/api/reward-requests"] });
       setRequestRewardDialogOpen(false);
     },

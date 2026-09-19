@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Smartphone, Link2, Loader2, CheckCircle, ArrowLeft } from "lucide-react";
 import confetti from "canvas-confetti";
+import { trackEvent } from "@/lib/analytics";
 
 interface DeviceSession {
   authenticated: boolean;
@@ -45,6 +46,7 @@ export default function LinkDevice() {
       return res.json();
     },
     onSuccess: (data) => {
+      trackEvent("device_linked", { role: data.role || "child" });
       setLinkSuccess(true);
       setLinkedMemberName(data.memberName);
       confetti({

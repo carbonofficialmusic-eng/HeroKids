@@ -22,6 +22,7 @@ import {
   getIntroductoryOffer,
 } from "@/lib/revenuecat";
 import { recordPaidSince } from "@/hooks/useAppReview";
+import { trackEvent } from "@/lib/analytics";
 
 type BillingCycle = "monthly" | "yearly";
 
@@ -160,12 +161,17 @@ export default function Pricing() {
       const res = await apiRequest("POST", "/api/create-checkout-session", { tier, billingCycle: cycle });
       return await res.json();
     },
-    onSuccess: (data: { sessionId: string; url: string }) => {
+    onSuccess: (data: { sessionId: string; url: string }, variables) => {
       if (!data.url) {
         setProcessingTier(null);
         toast({ title: t("pricing.toastCheckoutError"), description: t("pricing.toastNoCheckoutUrl"), variant: "destructive" });
         return;
       }
+      trackEvent("checkout_started", {
+        platform: "web",
+        plan: variables.tier,
+        billing_cycle: variables.cycle,
+      });
       window.location.href = data.url;
     },
     onError: (error: any) => {
@@ -253,6 +259,11 @@ export default function Pricing() {
 
       // Start the 30-day review-prompt timer on first paid purchase
       recordPaidSince();
+      trackEvent("subscription_activated", {
+        platform: "ios",
+        plan: tierId,
+        billing_cycle: cycle,
+      });
 
       toast({
         title: isLifetimePurchase ? "Lifetime-Zugang aktiviert!" : "Abonnement aktiviert!",

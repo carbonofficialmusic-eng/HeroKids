@@ -12,6 +12,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient, storeDevToken } from "@/lib/queryClient";
 import { isNativePlatform } from "@/lib/platform";
+import { trackEvent } from "@/lib/analytics";
 import logoUrl from "@assets/littlechamps_logo_opt.webp";
 
 // ─── module-level timers (survive component unmount) ─────────────────────────
@@ -217,6 +218,7 @@ export default function NativeLoginScreen() {
         toast({ title: t("landing.auth.accountCreated"), description: t("landing.auth.verificationSent") });
       }
       sessionStorage.setItem("herokids_registration_complete", "true");
+      trackEvent("account_registered", { platform: "native" });
       await finishAuth(result.user, "/setup");
     } catch (e: any) { setFormMessage(e.message || t("landing.auth.registerFailed")); }
     finally { setIsSubmitting(false); }

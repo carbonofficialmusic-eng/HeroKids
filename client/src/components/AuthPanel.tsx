@@ -14,6 +14,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient, storeDevToken } from "@/lib/queryClient";
 import { isNativePlatform } from "@/lib/platform";
+import { trackEvent } from "@/lib/analytics";
 
 // ─── Native Google Login (module-level, survives component unmount) ───────────
 let _nativeGooglePollInterval: ReturnType<typeof setInterval> | null = null;
@@ -226,6 +227,7 @@ export function AuthPanel() {
         toast({ title: t('landing.auth.accountCreated'), description: t('landing.auth.verificationSent') });
       }
       sessionStorage.setItem("herokids_registration_complete", "true");
+      trackEvent("account_registered", { platform: isNativePlatform() ? "native" : "web" });
       await finishAuth(result.user, "/setup");
     } catch (e: any) { setFormMessage(e.message || t('landing.auth.registerFailed')); }
     finally { setIsSubmitting(false); }
