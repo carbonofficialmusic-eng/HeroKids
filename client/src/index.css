@@ -959,6 +959,8 @@ html {
 .lc-task-dialog-template-homework { background: linear-gradient(135deg,#6330cf,#a54cf0) !important; }
 .lc-task-dialog-template-brush-teeth { background: linear-gradient(135deg,#199c4a,#69d644) !important; }
 .lc-task-dialog-template-shopping-list { background: linear-gradient(135deg,#d94d0e,#ff8d20) !important; }
+.lc-task-dialog-template-tidy-desk { background: linear-gradient(135deg,#d49a00,#f4c430) !important; }
+.lc-task-dialog-template-put-away-toys { background: linear-gradient(135deg,#db2777,#f45aa5) !important; }
 .lc-task-dialog-template.is-locked { filter: saturate(.55); }
 .lc-task-dialog [data-testid="slider-task-points"] {
   height: 1.2rem; padding: .35rem .2rem; border-radius: .5rem; background: rgba(4,18,33,.45);
