@@ -1,0 +1,13 @@
+{
+  "id": "net.littlechamps.app.tv",
+  "version": "1.0.61",
+  "vendor": "Little Champs",
+  "type": "web",
+  "main": "index.html",
+  "title": "Little Champs TV",
+  "icon": "icon.png",
+  "largeIcon": "largeicon.png",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true,
+  "requiredACG": []
+}

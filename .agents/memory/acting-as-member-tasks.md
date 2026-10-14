@@ -1,18 +1,18 @@
 ---
-name: actingAsMemberId Override in GET /api/tasks
-description: The GET /api/tasks handler used wrong condition to apply actingAsMemberId, breaking child task view when a parent switches to a child member.
+name: actingAsMemberId in member-scoped task endpoints
+description: Task and appointment endpoints must consistently resolve a parent's acting-as child before filtering data.
 ---
 
 ## The Rule
-In `GET /api/tasks`, the condition to apply the actingAsMemberId override must be `req.user.authMethod !== "device"`, NOT `!req.user.authMethod`.
+Every member-scoped task or appointment endpoint must resolve a validated `actingAsMemberId` for non-device sessions before filtering visibility or completion state. The condition must be `req.user.authMethod !== "device"`, NOT `!req.user.authMethod`.
 
 ## Why
 `!req.user.authMethod` evaluates to `false` for local email/password auth (where `authMethod = "local"`), so the override was silently skipped. Parents switching to child members always saw tasks through the parent's own completion status, causing shared tasks to appear locked for children.
 
-Other endpoints (complete, approve, etc.) already use `!result.isDeviceSession` or `req.user.authMethod !== "device"` which work correctly.
+An endpoint that resolves only the account-linked parent can leak appointments assigned to other children into a switched child view, even when the main task endpoint is correct.
 
 ## How to Apply
-Any new handler in `GET /api/tasks` (or similar top-level task endpoints) that resolves the member must use:
+Any task, appointment, calendar, or completion handler that resolves the current member must use the shared acting-as semantics:
 ```javascript
 if (req.session?.actingAsMemberId && req.user.authMethod !== "device") {
   const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);

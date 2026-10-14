@@ -1,40 +1,22 @@
 ---
-name: iOS IAP Downgrade & Cancel Flow
-description: Fixes required to make Apple subscription downgrades (FamilyPro→Family) and cancellations reflect immediately in the app.
+name: iOS-Aboänderungen und Kündigungen
+description: StoreKit-Verzögerungen, geplante Herabstufungen und native Link-Prüfgrenzen.
 ---
 
-# iOS IAP Downgrade & Cancellation Flow
+RevenueCats REST-Zustand kann nach einem StoreKit-Kauf verzögert sein. Kurz erneut prüfen und nur serverseitig belegte Käufe oder Aboänderungen akzeptieren; eine Kaufbestätigung aus dem Client allein darf keinen bezahlten Tarif freischalten.
 
-## Key Rules
+**Why:** Ein sofortiger REST-Abgleich kann einen echten Kauf noch nicht sehen, während unüberprüfte Client-Angaben beliebig nachgebildet werden können.
 
-**Why:** Apple's subscription system differs from Stripe in several important ways that caused every downgrade/cancel to silently fail until all of these were fixed.
+**How to apply:** StoreKit-/RevenueCat-Synchronisation muss begrenzte Wiederholungen und nachvollziehbare Server-Belege verwenden. Bei fehlenden Belegen eine wiederholbare Synchronisationsmeldung zurückgeben, statt erfundenen Zugriff zu vergeben.
 
-### 1 — RC REST API lags after a fresh StoreKit purchase
-After `purchaseRCStoreProduct()` confirms a purchase, the RC REST API (`/v1/subscribers/...`) may not yet reflect the new entitlement. The server must retry up to 3× with ~2 s gaps before giving up.
-**Where:** `server/routes.ts` → `/api/revenuecat-sync` — `fetchRCSubscriber` retry loop.
+Eine geplante Apple-Herabstufung aktiviert den günstigeren Tarif nicht zwingend sofort. Kündigung und tatsächliches Ende des bezahlten Zugriffs sind unterschiedliche Ereignisse.
 
-### 2 — Apple scheduled downgrade: entitlement is never immediately active
-When downgrading FamilyPro → Family, Apple does NOT activate the `family` entitlement immediately — it schedules the switch for the next billing period. RC will never show `family` as active right after purchase. Instead, accept the claim when FamilyPro subscription has `unsubscribe_detected_at` set (Fallback B).
-**Where:** `server/routes.ts` → `/api/revenuecat-sync` — Fallback B block.
+**Why:** Apple lässt bereits bezahlte Zeit normalerweise weiterlaufen; ein alter Ablauf-Webhook kann zudem nach einem neuen Kauf eintreffen.
 
-### 3 — Client cancel-sync must always call the server
-The client was gated on `if (!tier)` (no active entitlement at all), which meant it never ran when FamilyPro was cancelled-but-not-expired (entitlement still active, `unsubscribe_detected_at` set). Remove the client gate — let the server decide via the RC REST API check.
-**Where:** `client/src/pages/pricing.tsx` and `client/src/App.tsx` cancel-sync useEffects.
+**How to apply:** Kündigungsstatus und aktuellen Tarif getrennt behandeln. Vor Zugriffsentzug den aktuellen Anbieterzustand prüfen; die zusätzliche Erinnerung zur Downgrade-Verifikation beachten.
 
-### 4 — RC webhook: handle CANCELLATION and PRODUCT_CHANGE
-- `CANCELLATION` → immediately set DB to free/canceled (same as EXPIRATION).
-- `PRODUCT_CHANGE` → fires when Apple's scheduled downgrade actually takes effect; update DB to new tier.
-Both were missing and caused DB to stay on old tier.
-**Where:** `server/routes.ts` → `/api/revenuecat-webhook` switch statement.
+Native Links und Web-Links müssen getrennt behandelt werden. Cordovas `_system`-Konvention ist keine verlässliche Capacitor-Schnittstelle, und ältere Hinweise auf bestimmte Plugin-Methoden sind gegen die tatsächlich installierte Plugin-Version zu prüfen.
 
-### 5 — `window.open("itms-apps://...", "_system")` hangs WKWebView
-Cordova convention `_system` does not work in Capacitor. WKWebView tries to navigate to the URL and shows a blank "Laden..." screen. Use `CapApp.openUrl({ url })` from `@capacitor/app` instead.
-**Where:** `client/src/pages/pricing.tsx` — cancel subscription button onClick.
+**Why:** WKWebView kann bei nicht unterstützten System-URL-Übergaben auf einem leeren Ladebildschirm bleiben. Die installierte Capacitor-App-Schnittstelle bietet nicht jede historisch dokumentierte Methode.
 
-### 6 — iOS/Web branch split in pricing.tsx
-The pricing page has a `isNativePlatform() ? (iOS branch) : (Web branch)` ternary. Any iOS-specific UI (cancel button, RC purchase buttons) must be placed inside the iOS branch. Easy to accidentally insert code into the wrong branch.
-
-## How to apply
-- Any new IAP server endpoint that verifies an entitlement must include the retry loop and both fallbacks (subscription record + FamilyPro-cancelled).
-- Any new link/button that opens a system URL on iOS must use `CapApp.openUrl()`.
-- When adding UI to the pricing page, always confirm which ternary branch you are editing.
+**How to apply:** Unterstützte Plugin-Typen prüfen, Fehlerpfade erhalten und das Öffnen der Apple-Aboverwaltung auf einem echten iPhone testen. Ein erfolgreicher Web-Build bestätigt dieses native Verhalten nicht.

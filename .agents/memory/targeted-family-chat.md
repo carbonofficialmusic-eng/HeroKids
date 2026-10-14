@@ -7,6 +7,8 @@ Gezielte Nachrichten sind keine privaten Nachrichten. Sichtbar sind sie für Abs
 
 Die freigegebene Chatdarstellung trennt „Alle“ von direkten Gesprächen pro Familienmitglied. Eltern erhalten zusätzlich eine schreibgeschützte Übersicht der Kind-zu-Kind-Unterhaltungen; direkte Eltern-Chats bleiben davon getrennt.
 
+Direkte Gesprächsziele zeigen nur Mitglieder mit eigenem registriertem Konto oder aktivem Device Link. Reine User-Switch-Profile können nicht selbst schreiben und gehören deshalb nicht in die Empfängerliste oder Kind-zu-Kind-Übersicht.
+
 Lesestatus, Zähler und das Abbrechen gebündelter Pushs gelten pro Gespräch. Das Öffnen von „Alle“ darf Direktnachrichten weder als gelesen markieren noch deren Push-Mitteilungen abbrechen.
 
 **Why:** Kinder sollen einzelne Familienmitglieder ansprechen können, während die elterliche Aufsicht transparent erhalten bleibt und Eltern nicht durch jede Kind-zu-Kind-Unterhaltung gestört werden.

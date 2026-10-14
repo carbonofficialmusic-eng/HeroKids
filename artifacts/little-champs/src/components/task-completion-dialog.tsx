@@ -1,0 +1,375 @@
+import { useState, useRef, useEffect } from "react";
+import { getDevHeaders } from "@/lib/queryClient";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CalendarDays, Camera, Clock, Upload, X } from "lucide-react";
+import type { Task } from "@shared/schema";
+import { useTranslation } from "react-i18next";
+import { Capacitor } from "@capacitor/core";
+import { isPhotoPickerCancelError, kickScrollReset, markPhotoUsed, kickHeaderRepaint } from "@/lib/cameraUtils";
+import { formatAppointmentTime } from "@/lib/appointment-time";
+import { getLocalDateKey } from "@shared/due-date-policy";
+
+function useVisualViewport() {
+  const getVV = () => ({
+    height: window.visualViewport?.height ?? window.innerHeight,
+    offsetTop: window.visualViewport?.offsetTop ?? 0,
+  });
+  const [vv, setVV] = useState(getVV);
+  useEffect(() => {
+    const vvEl = window.visualViewport;
+    if (!vvEl) return;
+    const update = () => setVV({ height: vvEl.height, offsetTop: vvEl.offsetTop });
+    vvEl.addEventListener('resize', update);
+    vvEl.addEventListener('scroll', update);
+    return () => {
+      vvEl.removeEventListener('resize', update);
+      vvEl.removeEventListener('scroll', update);
+    };
+  }, []);
+  return vv;
+}
+
+interface TaskCompletionDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  task: Task | null;
+  onComplete: (taskId: string, proofPhotoUrl?: string) => void;
+  isSubmitting?: boolean;
+}
+
+async function dataUrlToFile(dataUrl: string, filename: string): Promise<File> {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  return new File([blob], filename, { type: blob.type || "image/jpeg" });
+}
+
+export function TaskCompletionDialog({
+  open,
+  onOpenChange,
+  task,
+  onComplete,
+  isSubmitting = false,
+}: TaskCompletionDialogProps) {
+  const { t, i18n } = useTranslation();
+  const [uploadedPhoto, setUploadedPhoto] = useState<File | null>(null);
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const isCapturingRef = useRef(false);
+  const { height: vvHeight, offsetTop: vvOffsetTop } = useVisualViewport();
+
+  const platform = Capacitor.getPlatform();
+  const isNativeMobile = platform === "ios" || platform === "android";
+
+  const dialogStyle: React.CSSProperties = {
+    position: 'fixed',
+    left: '50%',
+    // Shift center down by half the safe-area difference so the dialog sits
+    // in the middle of the truly visible area (below Dynamic Island / status
+    // bar and above the home indicator).
+    top: `calc(${vvOffsetTop + vvHeight / 2}px + (env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) / 2)`,
+    transform: 'translate(-50%, -50%)',
+    maxHeight: `calc(${vvHeight - 24}px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))`,
+    overflowY: 'auto',
+    width: 'min(calc(100vw - 2rem), 32rem)',
+  };
+
+  useEffect(() => {
+    if (!open) {
+      setUploadedPhoto(null);
+      setUploadedPhotoUrl(null);
+      setPreviewUrl(null);
+      setIsUploading(false);
+      setCameraError(null);
+      isCapturingRef.current = false;
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  }, [open]);
+
+  const handleNativePhotoCapture = async () => {
+    if (isCapturingRef.current) return;
+    isCapturingRef.current = true;
+    setCameraError(null);
+    try {
+      const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+      const photo = await Camera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Prompt,
+      });
+      if (photo.dataUrl) {
+        markPhotoUsed();
+        kickScrollReset();
+        kickHeaderRepaint();
+        setPreviewUrl(photo.dataUrl);
+        const file = await dataUrlToFile(photo.dataUrl, "proof-photo.jpg");
+        setUploadedPhoto(file);
+      }
+    } catch (error: unknown) {
+      if (isPhotoPickerCancelError(error)) return;
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("Camera error:", msg);
+      if (/denied|permission|not allowed/i.test(msg)) {
+        setCameraError(t("tasks.cameraPermissionDenied", "Kamera-Zugriff verweigert. Bitte in den Einstellungen aktivieren."));
+      } else {
+        setCameraError(t("tasks.cameraError", "Kamera konnte nicht geöffnet werden. Bitte erneut versuchen."));
+      }
+    } finally {
+      isCapturingRef.current = false;
+    }
+  };
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      markPhotoUsed();
+      kickScrollReset();
+      kickHeaderRepaint();
+      setUploadedPhoto(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setUploadedPhoto(null);
+    setPreviewUrl(null);
+    setUploadedPhotoUrl(null);
+    setCameraError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!task) return;
+
+    if (task.requiresProof && uploadedPhoto && !uploadedPhotoUrl) {
+      setIsUploading(true);
+      try {
+        const urlResponse = await fetch("/api/tasks/upload-proof-url", {
+          method: "POST",
+        });
+
+        if (!urlResponse.ok) {
+          const error = await urlResponse.json();
+          alert(error.message || "Failed to get upload URL");
+          setIsUploading(false);
+          return;
+        }
+
+        const { uploadURL } = await urlResponse.json();
+
+        const uploadResponse = await fetch(uploadURL, {
+          method: "PUT",
+          body: uploadedPhoto,
+          headers: {
+            "Content-Type": uploadedPhoto.type || "image/jpeg",
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          alert("Failed to upload photo to storage");
+          setIsUploading(false);
+          return;
+        }
+
+        const aclResponse = await fetch(`/api/tasks/${task.id}/proof-photo`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...getDevHeaders(),
+          },
+          body: JSON.stringify({ photoUrl: uploadURL }),
+        });
+
+        if (!aclResponse.ok) {
+          const error = await aclResponse.json();
+          alert(error.message || "Failed to finalize upload");
+          setIsUploading(false);
+          return;
+        }
+
+        const { photoUrl } = await aclResponse.json();
+        setUploadedPhotoUrl(photoUrl);
+        onComplete(task.id, photoUrl);
+        setIsUploading(false);
+      } catch (error) {
+        console.error("Error uploading photo:", error);
+        alert("Failed to upload photo. Please try again.");
+        setIsUploading(false);
+        return;
+      }
+    } else {
+      onComplete(task.id, uploadedPhotoUrl || undefined);
+    }
+  };
+
+  if (!task) return null;
+  const isFixedAppointment = task.recurrence === "none" && Boolean(task.dueDate);
+  const isFutureFixedAppointment = isFixedAppointment
+    && String(task.dueDate).slice(0, 10) > getLocalDateKey();
+  const canSubmit = (!task.requiresProof || (task.requiresProof && uploadedPhoto))
+    && !isFutureFixedAppointment;
+  const appointmentDate = isFixedAppointment
+    ? new Intl.DateTimeFormat(i18n.language, {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date(`${String(task.dueDate).slice(0, 10)}T12:00:00`))
+    : null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        style={dialogStyle}
+        data-testid="dialog-complete-task"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <DialogHeader>
+          <DialogTitle>{t("tasks.completeTask")}</DialogTitle>
+          <DialogDescription>
+            {t("tasks.confirmCompletion")}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 landscape:space-y-2">
+          <div className="flex items-center gap-3 landscape:gap-2 p-4 landscape:p-2 rounded-lg bg-muted/50">
+            <div className="text-4xl landscape:text-2xl">{task.iconEmoji}</div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg landscape:text-base truncate">{task.title}</h3>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge className="gradient-achievement text-white border-0">
+                  +{task.points} {t("dashboard.pointsLabel")}
+                </Badge>
+                {task.requiresProof && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Camera className="h-3 w-3" />
+                    <span>{t("tasks.photoRequired")}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {isFixedAppointment && (
+            <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3 text-sm">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-primary" />
+                <span className="font-medium">{appointmentDate}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>{formatAppointmentTime(task.dueTime, task.durationMinutes, t("calendar.allDay", "Ganztägig"))}</span>
+              </div>
+              {isFutureFixedAppointment && (
+                <p className="font-medium text-amber-600 dark:text-amber-400">
+                  {t("tasks.appointmentNotYetAvailable", {
+                    defaultValue: "Dieser Termin kann erst am angegebenen Datum abgeschlossen werden.",
+                  })}
+                </p>
+              )}
+              {task.description && (
+                <p className="whitespace-pre-wrap text-muted-foreground">{task.description}</p>
+              )}
+            </div>
+          )}
+
+          {task.requiresProof && (
+            <div className="space-y-2">
+              <div className="text-sm font-medium">{t("tasks.uploadPhotoProof")}</div>
+
+              {!previewUrl ? (
+                <div className="border-2 border-dashed rounded-lg p-8 landscape:p-3 text-center">
+                  {!isNativeMobile && (
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoSelect}
+                      className="hidden"
+                      data-testid="input-photo-upload"
+                    />
+                  )}
+                  <Camera className="h-12 w-12 landscape:h-6 landscape:w-6 mx-auto mb-3 landscape:mb-1 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mb-3 landscape:mb-2 landscape:hidden">
+                    {t("tasks.takePhoto")}
+                  </p>
+                  {cameraError && (
+                    <p className="text-sm text-destructive mb-3 landscape:mb-1" data-testid="text-camera-error">
+                      {cameraError}
+                    </p>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={isNativeMobile ? handleNativePhotoCapture : () => fileInputRef.current?.click()}
+                    data-testid="button-choose-photo"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {t("tasks.choosePhoto")}
+                  </Button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <img
+                    src={previewUrl}
+                    alt={t("tasks.choosePhoto")}
+                    className="w-full h-48 landscape:h-24 object-cover rounded-lg"
+                    data-testid="img-photo-preview"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={handleRemovePhoto}
+                    data-testid="button-remove-photo"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isSubmitting || isUploading}
+            data-testid="button-cancel-complete"
+          >
+            {t("common.cancel")}
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={!canSubmit || isSubmitting || isUploading}
+            data-testid="button-submit-complete"
+          >
+            {isSubmitting || isUploading ? t("tasks.submitting") : t("tasks.completeAndEarn")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

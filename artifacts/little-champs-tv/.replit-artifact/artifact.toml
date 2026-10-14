@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/tv/"
+title = "Little Champs TV"
+description = "LG-webOS-TV-Begleitapp für Aufgaben und Skins mit Fernbedienung"
+version = "1.0.0"
+id = "artifacts/little-champs-tv"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/tv/" ]
+localPort = 18658
+
+[services.development]
+run = "pnpm --filter @workspace/little-champs-tv run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/little-champs-tv", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/little-champs-tv/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18658"
+BASE_PATH = "/tv/"

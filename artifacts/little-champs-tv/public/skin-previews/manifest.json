@@ -1,0 +1,1022 @@
+{
+  "recipe": {
+    "avatars": {
+      "resize": "256x256>",
+      "quality": 82
+    },
+    "backgrounds": {
+      "resize": "384x216>",
+      "quality": 80
+    }
+  },
+  "files": {
+    "avatars/allosaurus.webp": {
+      "sourceSha256": "f088ffad15d69c3b2884cb2a28f07125e8b65c3c24a42889890a4c1628ce4aa9",
+      "previewSha256": "86aaea1b8e6f2854db1709732506a36305b2e11e52533aa9be830b71fd34bb6f"
+    },
+    "avatars/anhanguera.webp": {
+      "sourceSha256": "d82340924a61ea6dadabba9ec6c1fdbd8e99379bf3899c2133d3f6508eed4831",
+      "previewSha256": "9130a2df8ef5eabb7ccceb9ce8e21fe3fe274a9dce155de3ccaafee102f52d43"
+    },
+    "avatars/ankylosaurus.webp": {
+      "sourceSha256": "a9e2a0d788c77337e9cc035652f99cea2444a1cd93e06b20f8d4f2126a292f7f",
+      "previewSha256": "e2fc21a6feea7bc9e39ab8151c3f9c7069d1dbd7ad1518564d2d61b0a407094b"
+    },
+    "avatars/arcade-master.webp": {
+      "sourceSha256": "4dbe640a4c309f81f08ca1220f5a33ac849872e1bb8bbe860f4f50ecb346f822",
+      "previewSha256": "102254a422e9802ddd451f9cd39f2a60697d721a80203b2589a71b46125431c9"
+    },
+    "avatars/art-master.webp": {
+      "sourceSha256": "b4c98d17d0ab618f182c3153d34870288e0ed65d5c4829371eb21a89cfcc0bbc",
+      "previewSha256": "900e720ff94ce1818867cbacf111e328b510f42df0497c2b266809b6de7d88f6"
+    },
+    "avatars/astronaut-kid.webp": {
+      "sourceSha256": "1199bf2479af1062d8eb20cabde0550b84cb72a0ab27c226a178330e5e68adb0",
+      "previewSha256": "3b4c5c604f91f116248bef385f4616c0a497ec5f2507d68686ec3fe7206a2f9b"
+    },
+    "avatars/ballerina-pink.webp": {
+      "sourceSha256": "406e8caf52e24938664ef5f424f119aeb90e920f82470f4eec8a0929855cb60b",
+      "previewSha256": "8f0eb06fb611706ab6e1d894a28e1615a9d60034d64cca4bdffbdc33efa3a77e"
+    },
+    "avatars/bat-boy.webp": {
+      "sourceSha256": "cf57397c0ba24cc5bf1dc790fe9ce06d1e51bd53b0c84f39e9da34a7edcd5e07",
+      "previewSha256": "43c98c62796d5a548311da510c213cf611a508fdde8e2db90c625438088e4a4e"
+    },
+    "avatars/battle-commander.webp": {
+      "sourceSha256": "eb7bb771685534db36fc4811be4cc32f39c54e1e0f2cecd945ce482aba26929f",
+      "previewSha256": "317d3d5a440c510308898bfcda8240f781d14d24b6ee369aeacbbeb9fdb7b8d9"
+    },
+    "avatars/blood-moon-vampire.webp": {
+      "sourceSha256": "d8e2df94610682a0c53d73b55265ff0a040319bddd22e1230424b6bb46b9c61d",
+      "previewSha256": "4b4927a9646973daf10b689e8928b74f2d81b283290458dbf557343094568ef0"
+    },
+    "avatars/bloom-guardian.webp": {
+      "sourceSha256": "c992034017e9a3efcdccdf1503743adaea56da4cdb14aff5fd546855ad3fb7f9",
+      "previewSha256": "084d4f42edc8d3fd4e689b0582da07643bffd4de0117d152f50adfa802decb48"
+    },
+    "avatars/blue-ballerina.webp": {
+      "sourceSha256": "03d7315a1f8f9426ec0c01f56f12cf3d663406d53d56ae214114cb37cdc91630",
+      "previewSha256": "0d8bd8931d93faa6feba0366737983dfa6277167ae27cf174c1377e6d86c0af2"
+    },
+    "avatars/book-wizard.webp": {
+      "sourceSha256": "9a83ba26812a5b1de2357bc02b049b9d4150f1536852fe293ae147df99a8e611",
+      "previewSha256": "9a071d4e7c6f8f7366ec946bd9aa41a81d39fa6b9b897e35aeb63f7cb3d8cf2a"
+    },
+    "avatars/brachiosaurus.webp": {
+      "sourceSha256": "63558c18c0d7ee1673ca6ca256fee659b7c8500d66b943728e7ecda2e4da3535",
+      "previewSha256": "a053b260526237d2a9adf669058494db661ccb5ca73c67dab362e9144c0deb4b"
+    },
+    "avatars/brave-explorer.webp": {
+      "sourceSha256": "3ae1e38e60d84db73432e965e91ec150521d9bdf0c262934ceb79e4d51e5b86e",
+      "previewSha256": "2bb51d8e6b6c26f33765e9b570f9ef17a909dc5cec09461c7da767ce9dc716c3"
+    },
+    "avatars/brave-knight.webp": {
+      "sourceSha256": "21a60c8fbf728aecda4edaade239211598737cb8931ae6faef225909bbff5868",
+      "previewSha256": "9b3e57f956070d2c5fd3d868ea6a6fd0f2a89bfab0983be6995c31504d3f2873"
+    },
+    "avatars/breeze-captain.webp": {
+      "sourceSha256": "5e13443d3161fcf6be0c79b2e755fd57253bf58db71ff364153ab61cf9f3cea1",
+      "previewSha256": "4d4581e3d70e1bf3f5f8ae2808fa7a85eb28ad1d7668d2c3d78126b65e2709d8"
+    },
+    "avatars/bright-mind.webp": {
+      "sourceSha256": "1643a4339d5e3a052240e56111fb0eba8afe4563ec7cd6920d9073bf7ebc4c8f",
+      "previewSha256": "4106096f71429f8f39839346789bbe6580741b20fcb6990e2a8253182d29489a"
+    },
+    "avatars/bunny-girl.webp": {
+      "sourceSha256": "f99fd6f679890f56e56c793a9b2cc79ea9a834ffa643465e0b433e1e0e4aa2cf",
+      "previewSha256": "f3132de0d3f550d749622dc67f2336cbfde602157610894a2c973b14de033a87"
+    },
+    "avatars/cat-fighter.webp": {
+      "sourceSha256": "b50847fb742b6f9e02fa2533056bbcdfa134093df9ca0ad9cd8203303c2aa210",
+      "previewSha256": "a6f10f895b17c55bf564ace2a164681430eb5d4a71c09dbe59bf4c6e5f4336cb"
+    },
+    "avatars/cat-girl.webp": {
+      "sourceSha256": "362caaa659e33457bc971448c3a1947f8c04f22ff417afd3860141098c59aa9c",
+      "previewSha256": "c68da7a6a6f1ed48c94b984a0e0b36b91ff1c88b9bce7adbb4aafc2eb9bb4e2b"
+    },
+    "avatars/classic-superhero.webp": {
+      "sourceSha256": "34bc29a4d40f9c2f0427b9a3bb8e4a1a9b8b4eef1cb8c1632415369139b32b68",
+      "previewSha256": "be34804e8f3f58f24ce8344f272e986d57b8d735af472f03125af043c4ba7fa7"
+    },
+    "avatars/classic-vampire.webp": {
+      "sourceSha256": "a2a336b8cd0f2c2dfe70380da276daf376e7ce9b410a962ad87317d0972772f6",
+      "previewSha256": "4afa5eae32487132b1fd216bd59b2ef465cb8b558caae8741b924cd95c17a4ce"
+    },
+    "avatars/comet-dash.webp": {
+      "sourceSha256": "695fd9f32e0bf5f3297f4d3620e16b0664a602ddd71edf7d7e8e37cb29d979f4",
+      "previewSha256": "dedb52c03449ac3a6608cc8b2ff26ee7096969818ebb3662b323450bead6fb64"
+    },
+    "avatars/console-hero.webp": {
+      "sourceSha256": "66a1715ee4d0a35981618fbcabc5f2e5a06bc6406e4b6340ad31742ed2fb26a8",
+      "previewSha256": "80b4b7b1e6a92b44e8de4262fa27677a425648852ef89a221ce60ddda8b7eec7"
+    },
+    "avatars/controller-king.webp": {
+      "sourceSha256": "a10c64f7b1752de7ca165709a0bd7819946e560ce9808d0645b2716a2ce01c85",
+      "previewSha256": "4b7e8b49287285afe685580dd4d82a569bb6a7c22087d3388db3cfce40f35750"
+    },
+    "avatars/cosmic-drifter.webp": {
+      "sourceSha256": "6df1a13beb0da1aa3d2c499e05913da9414199bf39329c45db96fed062f559dc",
+      "previewSha256": "5cbc1a3fc39fc2656c4028ff4f250adef774b9e953e4eed75a9a61b4f3e080fe"
+    },
+    "avatars/crystal-mage.webp": {
+      "sourceSha256": "6536611cc2f7d9a3f81064b9eb7642bd6c3a346356a4a923cf310ffe1bd70ca1",
+      "previewSha256": "5e3db4563521e87c6173a75312ef0fc9de6068fb220427c11eb395439bd4956f"
+    },
+    "avatars/cyber-warrior.webp": {
+      "sourceSha256": "5d954cc4162e469851dec10b2434ed3411c9bde7f39ff2ea0eb8f38f98c32588",
+      "previewSha256": "8e3e6ad5b02c074ed6a2f9156674a035a1f3df1eeacc4c7057c31d41de605dbd"
+    },
+    "avatars/deer-girl.webp": {
+      "sourceSha256": "00ff92345527dc4f804e5dfb93e91266001683dc562b4627d604376d317dbae3",
+      "previewSha256": "ba66a3fedab8d6f035a69d3145789d81a5a9d0f37731b86807cbba9dbe3d078e"
+    },
+    "avatars/detective-kid.webp": {
+      "sourceSha256": "b5bbb5c7b38593e6ad8b7a4d335eccab98074c4b4b63063c2d4e7a0f3b27014f",
+      "previewSha256": "d2f20b87ba8ee1db926003b7f40106e45c4e8ee91318d7c8bfc8113754b72b6e"
+    },
+    "avatars/dimorphodon.webp": {
+      "sourceSha256": "fcdfba8c7b041c5ced20b756bb815461f21cd5d619351edb1bd9019319e95aed",
+      "previewSha256": "1add8dc3416bad0070425a9e94903f1b8957c8251016324cb358246c91010bf2"
+    },
+    "avatars/dragon-slayer.webp": {
+      "sourceSha256": "3b893e5abd7e02d5e0cf0815712eaf38e650212291dc2d3a22de293823e065c5",
+      "previewSha256": "6254d9c0d8156d1c77c2fdd795cd68ac4fe5110672cbaa5808f6086f0af9b54c"
+    },
+    "avatars/dsungaripterus.webp": {
+      "sourceSha256": "3eba020db24f6e0f5f80ad4f30e2a1679ca12d22b2383dc619ec94e40cffa854",
+      "previewSha256": "212d082f36eec89e07a1005f812be1266ac86f935f72e752bfcf611ea76070c3"
+    },
+    "avatars/elemental-master.webp": {
+      "sourceSha256": "1d9082917d62dbabc8283bf5f0b340ea15efd08abaf72a91076ddf6339623c59",
+      "previewSha256": "03f3a5ba75a34a208945419f8210946fd2f48ef096d0a52fb7b681e77a0ae2ce"
+    },
+    "avatars/fairy-princess.webp": {
+      "sourceSha256": "7688a917d35c28fc7bc49042e2408980caee9a5c51e5d53f4f87448226366f1a",
+      "previewSha256": "09057ee4d5e45c04d151394e90cc89b9f1d760ed6f655c87dcab3a6f5b212799"
+    },
+    "avatars/fire-hero.webp": {
+      "sourceSha256": "f60e47c3a7aae6b0e4673f43b1b9b736e901921004af839d8a6eb21a96432434",
+      "previewSha256": "3a6fc9eaa61ee4680cadb3adc21764557bcb0a4ca2d3736189ba3dda4d4713f5"
+    },
+    "avatars/fire-phoenix.webp": {
+      "sourceSha256": "d567abdcb022433784e3f29bb497cc4c539d44e95e60485d4021ab9a851725e5",
+      "previewSha256": "11ce6d81ec1284cbb3e958d132ab176f0f69de5b88153fa37333568cf8911abe"
+    },
+    "avatars/forest-guard.webp": {
+      "sourceSha256": "3c973bb7c8a6396cfedf0aa94d2c26a55246d63eb4703c4ab7862cf16aff674d",
+      "previewSha256": "ff5e991945c56a537bc5391fce2aa5add1378e723baa8cdae233e98f125209c0"
+    },
+    "avatars/fox-girl.webp": {
+      "sourceSha256": "bdb87f56814ad48b425124bba48c33029cc9aaaae5fa9d1df00afe6a84b4f640",
+      "previewSha256": "4ebf708094478c50a1feb0cbe21f5db335e9e038930dd857942b1e9b0496a856"
+    },
+    "avatars/galaxy-scout.webp": {
+      "sourceSha256": "9a6d858b73abb48e9379a5e13dac71238af069838c61cdd79714521cb2c9bc1d",
+      "previewSha256": "e93447dd03bb0916c57c0c8d733fcf2fb09dc80a8871c156bdad1e755419f1b9"
+    },
+    "avatars/golden-ballerina.webp": {
+      "sourceSha256": "566e135b8ace349111c80e7f225a52efc845c34a15d2e74b89730b0c3f29dcac",
+      "previewSha256": "2294fc56e59d4d8b226fa154e8bee8276edaabfd85512a6cfa84f8fa05cc6322"
+    },
+    "avatars/gothic-vampire.webp": {
+      "sourceSha256": "84a8ae91e5fb6a3ab3a9071ed8f7ab110921ea52fdfb3e06026f3dff5e5e5cb9",
+      "previewSha256": "257eb1f5fb58b137bf33d231bf5163c09591841dc48432963300e0c586011ef2"
+    },
+    "avatars/green-alien.webp": {
+      "sourceSha256": "a49d95892671a6a0bdf6c1ea6c33c0086530bcd449923f2436728e45829f3987",
+      "previewSha256": "e0084cd9653cca867e61e2f591e2c1d950fcf298cfaff37cf9b796a91e0e9709"
+    },
+    "avatars/heart-shield.webp": {
+      "sourceSha256": "39f2eabb5de31b95eb04ae45a2eb93a84498f3202a25468d73ef28579c556d5e",
+      "previewSha256": "d7cdaf7170b540541c5a35aee3eb6939118917848bd651f62c0e17769f7cf671"
+    },
+    "avatars/ice-hero.webp": {
+      "sourceSha256": "cd3f64b45c8f7a7b0314be768524aa5b3e6819ca4c2b5b89db54bede06206a96",
+      "previewSha256": "4f15d3422cddb23d2fd4006f22353c140a13dc42a697867a5c7932c6dcbb6624"
+    },
+    "avatars/ice-princess.webp": {
+      "sourceSha256": "ac6890567be5e5955ee332ecff787ab3fa7658a6267dca28217c826a29934755",
+      "previewSha256": "484dd179b18b6a005a2f0ec35ef1c6aa31d0f8e03700f216e313957e9bccc05c"
+    },
+    "avatars/iron-guardian.webp": {
+      "sourceSha256": "210c3cde2cc9245fff32f2c018207e8f65be1dfa93ba9cb8e049c52e86bc79d0",
+      "previewSha256": "fb9c4e970be48ca4b16ad925cca044e65475e8a5ec549ed79fe1788f00364ca9"
+    },
+    "avatars/junior-champion.webp": {
+      "sourceSha256": "a1a80ce0a39bd4e13800fc000d4e2e94ddd1536226ac7f64044bc9f98702d1c3",
+      "previewSha256": "814e4f27c34fc3a8374f2ec74e2078dfc627b32744e9d8241346e38a60852a8c"
+    },
+    "avatars/kitchen-hero.webp": {
+      "sourceSha256": "6f9955dff7cc1f4e601c9ae629a214a5d449ae4c90fe2282e122cb9d4fcf800b",
+      "previewSha256": "d31c41a8765f42d95285f5e3835579bb7cde95fe0a7adf15cda321550e8476d7"
+    },
+    "avatars/level-boss.webp": {
+      "sourceSha256": "a09f8fa112509c4990c69e02f2d53efa2002fe7e210c1987713e01a0c9ededfe",
+      "previewSha256": "55e874cb53541f1bda5bb4ebd024d2b5d6392aa33ce43d01ab2ed25395f2d631"
+    },
+    "avatars/lightning-speedster.webp": {
+      "sourceSha256": "06980db39855eaab2e6f805c25f9d50b368c0bc43b5001f174ccf9e3f2da2f69",
+      "previewSha256": "3fcea0df7faa56bedbe01a1d93bc7e1f36f7db01faaec046cb7a136d17daba8d"
+    },
+    "avatars/luna-beacon.webp": {
+      "sourceSha256": "9fa8c3bb702171a49b3b2899d8c5e7f64513ca1fb2ad96af5059c94041cf48be",
+      "previewSha256": "7e89a8e491acec7e58d8b06545a0137960673ff7bf731a624cd64115b1b6417e"
+    },
+    "avatars/magical-girl.webp": {
+      "sourceSha256": "aade904472ce3020b0edb8a5873330707ba5e472bac2e6c28115462a006c9bb4",
+      "previewSha256": "edad05d6aa82201a454d83486ab65bfe69bd3d5d0c2b1ed11fe3ce8ba2eafce8"
+    },
+    "avatars/mint-ballerina.webp": {
+      "sourceSha256": "8d93e14b31650f2c0a3668ac0c6b6fa014dc4336e9202435369dda0bcc321e92",
+      "previewSha256": "fcb7cc21e967517189dcd7358b1b8f6bc1f5193d95904d3f045139e3f8fd0ac7"
+    },
+    "avatars/moon-walker.webp": {
+      "sourceSha256": "a6076c9862f93fc5c8501620ff9792d88d2a9a15675fe77ec3a2303d35040ed3",
+      "previewSha256": "0736e3b9c2a33ebb83c277b04489ef8a37e1448ac27fad3508e5017883662b74"
+    },
+    "avatars/moonlight-vampire.webp": {
+      "sourceSha256": "ec3ae9bf135aaf7ae3f3f7f2469312d465bca3186fe1b542c00815debd570608",
+      "previewSha256": "049dd2ffe7b39fb19dac18ad01b89c163307a71f8687125c0e04daab232b234c"
+    },
+    "avatars/nature-guardian.webp": {
+      "sourceSha256": "3f88fdf88b6108ee136681936d1baf9f505272d73dd12ed4225ee4e768eae2f9",
+      "previewSha256": "a9c20aaa2f43e91dad7659d309ad2b9c91e7c632e223d1b1dcc2aa7b846f5d34"
+    },
+    "avatars/nature-princess.webp": {
+      "sourceSha256": "7b821ca947d3f068369697db82c78d722fbfd73c0d32df89ef561af48d7309c2",
+      "previewSha256": "597833da95d94b07e7f67decf1b9ca3c96b5ee756ac979e550678ea876b3d26c"
+    },
+    "avatars/nature-scout.webp": {
+      "sourceSha256": "6985ea3bdc14f2be6d881e9bd659810849e9db03beeb04e721fed5963c651e71",
+      "previewSha256": "0aea0a5686b594438bb99dec727bcc9a91ee3cf838bb5f30cacd1b1e0bdd5fbb"
+    },
+    "avatars/nemicolopterus.webp": {
+      "sourceSha256": "2f55d2ff8871d51743159feaffebf2756fe6044bf45afa1afbfac967457e6a48",
+      "previewSha256": "0def47be7a5c588d722308ddcecddc4de1ca89d65466f268cd70a056753a75ee"
+    },
+    "avatars/neon-droid.webp": {
+      "sourceSha256": "adefebe7859b96c6c3105ad83ee6d573a23e1ab0eee82a20b80cd0f4cf67db34",
+      "previewSha256": "ef1019fda8e05fa191fc45bd73dfe0aa8c718bfdea341bba7b7fee0b61905ffa"
+    },
+    "avatars/neon-rebel.webp": {
+      "sourceSha256": "79fb7683196c2c8cf5e43d6c54b37714702c4690b331832811d0ab6559adc5d2",
+      "previewSha256": "9e7420d78f3230f3eb519bae3994cef0bfbb81da822ebc8e8957af96862fc84f"
+    },
+    "avatars/night-hunter.webp": {
+      "sourceSha256": "8087b21eebf4c0ddf5e6b24548ae6cba9986748ae881b3d34f697e601196955c",
+      "previewSha256": "89c4c438496ba2387e63add41f803338ad8bc3f341b1ed4a31e979bc7ed1d046"
+    },
+    "avatars/ninja-shadow.webp": {
+      "sourceSha256": "969737de95a1765729a2a8879c82fd6aa373c3235bbf0f53bdb8586cada1a422",
+      "previewSha256": "69851cf69da05d4e3f518fa35d54233fc82fb6fd91fb5880f8910f07e204dc87"
+    },
+    "avatars/ocean-guardian.webp": {
+      "sourceSha256": "6fb3a42dddf260e4201a10310eeb5a096913e2e09c93e2cb496855f439154da2",
+      "previewSha256": "0075672100f552033915265a307829c7c9773a5086f943291bf3e604ef90b0ad"
+    },
+    "avatars/ocean-princess.webp": {
+      "sourceSha256": "b333fbd98c3f5ebf344c9b149f043a4eea7ae9d2f92884157bb24108a6ed0530",
+      "previewSha256": "b08e13ec797d7289df5d6997accdb3c87a6bc6589760ef129d2c1da7736d24be"
+    },
+    "avatars/panda-girl.webp": {
+      "sourceSha256": "dacd5cd15bfcc49fb2bbe1f7ea60c5c624158542fb22af65a0c9ab2a5d8a375a",
+      "previewSha256": "b3afe2c6c7abf1735752eeadb072e39ddf7ed9729e91b90effe0590fca1818ae"
+    },
+    "avatars/peach-ballerina.webp": {
+      "sourceSha256": "02a1abba3fb69f7d90126f3a3db6bfd7cb98cc98d5acbeea16fb0309c4cc4e1c",
+      "previewSha256": "163eebca5ca860740b2d974f5224aceb255808915d3c0e135afa35f85d82d984"
+    },
+    "avatars/pirate-captain.webp": {
+      "sourceSha256": "63dcf4d6c3a9143aacfb1010d820ef1347f06c0e28198fd8c06e07c6ebcf53dc",
+      "previewSha256": "f47d417ac4b60f2b60cfa64f0683e4d4e20ce61c33871d91de3603c89646cba4"
+    },
+    "avatars/pixel-warrior.webp": {
+      "sourceSha256": "a109904e890aef0b251efd3283dedeb0e8ec8260d46e9bb06c7f3728935650d3",
+      "previewSha256": "082139f0c809acffdb4df5b8492259ba444e6094ef057b12ebc9af542939a606"
+    },
+    "avatars/plasma-bot.webp": {
+      "sourceSha256": "ec20b303edec2e1a062e7a96ab55dbd6d8e347f95dda52ce3e081662bca18c49",
+      "previewSha256": "98da6b355cf9bb2fbd144f0cc0ce4edf2e8cfca69d2df169a7c22952a8c4403c"
+    },
+    "avatars/princess-tiara.webp": {
+      "sourceSha256": "57a32ef86f349388d2d6c0e806196d944e7abd6d7dbb65f6c637e31b09caaef8",
+      "previewSha256": "ab8fe82480df427e40caa134307eb275686dbbcd1cdb701ccfc718791c4be983"
+    },
+    "avatars/pro-gamer.webp": {
+      "sourceSha256": "37ba92d269b3683b1a26d8e72f6ca401678a93ba91896f19f446ff6f7c15010a",
+      "previewSha256": "31e18be1c0d371333f601dd5f2f97c0bd1ba747bba259ee187f3b39e5afd50de"
+    },
+    "avatars/pteranodon.webp": {
+      "sourceSha256": "d32e1dcfcac55d3edff496eaf0baa66a1e577c8d93d5e4028d32fe5c49d12c1b",
+      "previewSha256": "2ede2e7f0a7e20f8cb262f0a02bfdde485c66efa2feb95c466cbc446ea0c4b4f"
+    },
+    "avatars/pterodactylus.webp": {
+      "sourceSha256": "9e271c6528cb935cc9d7b6a10cdf5b2919e2e9f79d74bbedd7a3e54620a7235d",
+      "previewSha256": "f1a1171b376a2f350995ddc61efe8e63894aebdd52716490adf16711ced58674"
+    },
+    "avatars/puppy-girl.webp": {
+      "sourceSha256": "3f9ebd32cc4f9a213c38db3665cac6710f42f141da30336c711a3fecf7af57a3",
+      "previewSha256": "8416bb5b7e373b99d97cd86a7e3a86c588a2effe0bb1eba5c69f6420b522a889"
+    },
+    "avatars/purple-ballerina.webp": {
+      "sourceSha256": "1727d286defaa1955d52f5516f294db0e4f914c2b8bdd92f11e48ec3c134994a",
+      "previewSha256": "c1a549ff3eeec12a5fdbbc0d0f73ed405cfc9fa90402315e0def15105216c62e"
+    },
+    "avatars/purple-princess.webp": {
+      "sourceSha256": "fd5ca676060cbb74572b464d06f19496bbca1a0ab0df6c57221e5fb0fa6820e0",
+      "previewSha256": "12f4eacfe2b7380a20669bd019ccdebacfe9bafdbc4800d72f8568d1a6698e40"
+    },
+    "avatars/quetzalcoatlus.webp": {
+      "sourceSha256": "a3ce54313d61bafdb58b7d629827e9bee345f36f14954c7877b85bd1784e96c6",
+      "previewSha256": "1841a9612a2b5b9d6fb8e49aa17c04273e7270e134552879d71f49e7c4c42805"
+    },
+    "avatars/raccoon-girl.webp": {
+      "sourceSha256": "9545b443271bff8b5b1ae2332085f65428a6e16264f9fd346c503af1c91f8462",
+      "previewSha256": "f09f0b103963a7391e32a734bf62535c9c7f5ad4d5f77cb28007fc090ec31ec5"
+    },
+    "avatars/rainbow-ballerina.webp": {
+      "sourceSha256": "5a4ee663288c5096ac31a8bb76a7e373ccc7d90db5be82d9f2d29f0d75751c92",
+      "previewSha256": "547b0c914a53ce523592bbd1265beff66dfa880b1704eae0d9fe96a64245374c"
+    },
+    "avatars/rainbow-princess.webp": {
+      "sourceSha256": "43a3b4cbbda73d225430858f55c8410ba4da71d8f8948ef29ef8234cb4f9dee4",
+      "previewSha256": "0e6b00bf5f78079ea1a25ff7482171fd743a11d0d19f4e37471bc30d94145bff"
+    },
+    "avatars/rhamphorhynchus.webp": {
+      "sourceSha256": "1c0ea38f8728044ab64444c1342f7365f015566f8d32f8c41ff752dcdc7113cb",
+      "previewSha256": "8a3d65d4dafe65f1d72a8e1ca138ce295814a0d0fa6a27437e0e82db0e6e50eb"
+    },
+    "avatars/robot-astronaut.webp": {
+      "sourceSha256": "1713f91f90527bea1931b34b149a133e63ba34e6b19556eb8f6b1c2851e8db8b",
+      "previewSha256": "10c971cb919c2e7acf07644f63e279280dff420bb6226baa811dc3a58040e5f7"
+    },
+    "avatars/rock-star.webp": {
+      "sourceSha256": "572fb5f2898949c20479d29714724fdddb3c6c319f70a7514a93bf893c58a778",
+      "previewSha256": "4aa492a48cb790ed680a0be3091fefd8981b8809700ddeb8af4f71a594c77586"
+    },
+    "avatars/rocket-pilot.webp": {
+      "sourceSha256": "cea99f9f7f64b8a2ccde7b56103dc6554c34425730a988456962ad00771fb4f4",
+      "previewSha256": "2a2fbacad99b6d9b7c788a44871f64d6ed43d8df5b8ec9e484ce1adff403b5f9"
+    },
+    "avatars/samurai-hero.webp": {
+      "sourceSha256": "598ec38f811811bf5f89b606bd79f29691f699b6851e00947d04edd19bf5594f",
+      "previewSha256": "41ec1759d6e0aaa31744db456ce71484480c0da2ba093d48d812d3acf7ec9cd8"
+    },
+    "avatars/school-hero.webp": {
+      "sourceSha256": "b551f0ac4cf010d352161d7c7eef943324c4e14b1023134d2967e68fa2fb259b",
+      "previewSha256": "3c1e545a3fa522ff1d481469e6f1f1d39cf0637f4550686e69abe9e11153f7d5"
+    },
+    "avatars/shadow-ninja.webp": {
+      "sourceSha256": "5bf0f55242149b36be01b46b2f88c887aeaff1b191aeb90adf7cf88eeefb3f87",
+      "previewSha256": "b1596508959321304bdf17fe1b54cbb87d4856afb833e7f4a395c58dd64ffdc3"
+    },
+    "avatars/shadow-vampire.webp": {
+      "sourceSha256": "df88176ff07eeef1ce3aaed65ca8d8ff4424e7a91cb929086bbbb67ad293f49a",
+      "previewSha256": "568f064a15b0b6d20e95ca00c3142c2381f68134d4db8e9c00f5944b7d952fd9"
+    },
+    "avatars/shield-blaze.webp": {
+      "sourceSha256": "c99bfe32c49dd3bc38e8fc46fb7df02fb7196a4e6a8ef779068e23567af11079",
+      "previewSha256": "b7f0ffdd2ef1ca0af67137402f7815052b543ba1471d83e96050d6335902693f"
+    },
+    "avatars/shield-hero.webp": {
+      "sourceSha256": "b8b7e936ed3b8ed4484d0e06e1b08e14c8695557a4a824e63660019277d050f5",
+      "previewSha256": "61d43b7bc5decfc61a8baf98853b6fefbacc49357f30ce346613329508cc50f6"
+    },
+    "avatars/skater-kid.webp": {
+      "sourceSha256": "b320671b9aeb23fb1ed41d049c9eef7e7a62c1a414650e12241f28cd45e563ee",
+      "previewSha256": "cb7e02e29641d18ea4986b8f30882a3f5c0d6f0ccd83c9d0ecca9b93e66d03b5"
+    },
+    "avatars/sky-knight.webp": {
+      "sourceSha256": "e019984c095ac2a0d237620b1c065ce7ad69b33f7af5da6069cce3ddbebac558",
+      "previewSha256": "8335d1abcdb0d994cebc6ac3ff2d30c25e729937568fbc412fd4cd22c6ebb941"
+    },
+    "avatars/sky-spark.webp": {
+      "sourceSha256": "01e7b28847bdb499a444e5987552863ab788c1f2cf52886a3c262bda63a98a60",
+      "previewSha256": "947377026a1cedbf8603d0f1507728f5ca3f30ffa03b6202fbf600eee1e0f34f"
+    },
+    "avatars/space-cadet-blue.webp": {
+      "sourceSha256": "9951ee97cc26bead63b11bd04450225159dada60e4fca0a2ef7e671eed027a19",
+      "previewSha256": "c161232c6d386d453fa24088630499c1422f7bb95d32b603bb6c32a9dfdad058"
+    },
+    "avatars/speed-runner.webp": {
+      "sourceSha256": "e2621a36df1fa61340f5505513edb6d7ed7d43646900d6c06fd8f41bc1b40d09",
+      "previewSha256": "1df3f1e8b44c9b6850703d4546af6abacf812f6cc8ed40179a6be237ed9f0a57"
+    },
+    "avatars/spinosaurus.webp": {
+      "sourceSha256": "ff75259377d258303bec791844630d96677e12e8bb6c9a2c1bd7909db9afe993",
+      "previewSha256": "76b5cd3217685f6639b018a58fa26396bf55e0ac243915a37e3af1fe169a5a46"
+    },
+    "avatars/spirit-fox.webp": {
+      "sourceSha256": "6bb43b44b49f895c6ec9157cfb50579ad65531a42e402bed9ce37bee54dd7a97",
+      "previewSha256": "5c7fbfad3ffc71717025bfc00b4ca557271f3a0016f06aa2be6f9a7f55ced3e9"
+    },
+    "avatars/squirrel-girl.webp": {
+      "sourceSha256": "c08072c7dff19f791dd0b73c7f2bc25ffaf577b5c4815d725f4fed513b0adf94",
+      "previewSha256": "2d06258e60fdc292e75e76380e97eff8aa2119f70a023a7b37168b8441c90760"
+    },
+    "avatars/star-cadet.webp": {
+      "sourceSha256": "682a09e866ef0e14c5742ba1f07a98d15e470ab117a4e6ededdcea610136eb31",
+      "previewSha256": "45645fd7f86732d1dc81e34f6401e77d3910754447712b8a9eb193c0659c6115"
+    },
+    "avatars/star-captain.webp": {
+      "sourceSha256": "620af5b994ef0f373388b3647163f17812660d02cba761bd2210bb4488ca2a9b",
+      "previewSha256": "a02f043e6ce36de2999d1f852628dfe48cb93f4f3a4b1776e1a32c275394b2da"
+    },
+    "avatars/star-guardian.webp": {
+      "sourceSha256": "c185e7d0d1440f96e45ac302250f0cb8d6d62479baf248a63947c484f8990524",
+      "previewSha256": "5c0da64dbe4c5d0f0c05146baa4122f99bade5c73261cdfdb90d62e9dc927c97"
+    },
+    "avatars/steel-samurai.webp": {
+      "sourceSha256": "fbe829d8ddd81e9ed0e63a0de8457d02e1e5310607cf649d4d70aeb0a9f2d513",
+      "previewSha256": "d302df1fe83659d6c1cd652c0fcd701980d6d812d117a7a16ee8f8ee35fcc49c"
+    },
+    "avatars/stegosaurus.webp": {
+      "sourceSha256": "4c0b5e9c89cdd69423f58d45466a45566a2c213ccb1928d591a93205abf13e26",
+      "previewSha256": "83bd247d4f28ab494fde49e156cbef71afa14cbfa5434e8868d776347bc03750"
+    },
+    "avatars/storm-runner.webp": {
+      "sourceSha256": "674ee8abbf82d6d43758b40c30c076eb4773f5a7f9ae93a566effffc44fa49b8",
+      "previewSha256": "9ef3e0423cd206ef01e83507a8fab4ffa5def09bb05173128ad34fb2c306cebe"
+    },
+    "avatars/stream-star.webp": {
+      "sourceSha256": "a2e059a3a0a951aa13e1fcd24ba3bad7d74827afd9e1fef5e94480d14c850f32",
+      "previewSha256": "ba6ae88a5d18ed9f98dba574939ed38011845a5446d05b75b0b4134eda1b4075"
+    },
+    "avatars/sun-princess.webp": {
+      "sourceSha256": "149b71fcd276586f684a85679f25461194b3b10088bfd709bbea0b05ef491f23",
+      "previewSha256": "b9370520650809f7a7898e9537c8995e3e8dfdf9b09fda9d9b04839355e336df"
+    },
+    "avatars/sunrise-spark.webp": {
+      "sourceSha256": "b1514ae9caba2e89adcec8e454131de0176f765a7a6ece93dc51e860395bc02c",
+      "previewSha256": "d681102c2db16bf4e783b1dfb7cd26077e964ecd5deb207580ba496e168254b0"
+    },
+    "avatars/swan-ballerina.webp": {
+      "sourceSha256": "81a80baa188e18b6b62401eac3fd5baed0179fd6f24497c0856ebcaed1b0f018",
+      "previewSha256": "f39468a63ed27af8cb3f50af674691457b8d892d05474a4f8d582dfbfd225286"
+    },
+    "avatars/t-rex.webp": {
+      "sourceSha256": "5449272a8e58ada83cc36b47145878d9ad550dc002b0eaf1389bb2f69f982423",
+      "previewSha256": "e69500f448d4ecb992a863f5ca9dc1632963868c15a5c8be610ef7fe75d3f5ec"
+    },
+    "avatars/tapejara.webp": {
+      "sourceSha256": "233424b38d06c2e4465f42bee5a407efe613463720f1dcd32b0642df0446d8fc",
+      "previewSha256": "fd6b9859e6c753dc1dbad7f8509d395f6a6d704187eb5126a59c81a0718180d0"
+    },
+    "avatars/tech-hero.webp": {
+      "sourceSha256": "efdbd92f25cc8d5e8e26541007ea2cb5e348eb66f22bee9ee150954f47e15715",
+      "previewSha256": "4e7b0d1c609394ceb97dc558d97abce567c6eccc4d8c4518a6aa292b3ad2e57d"
+    },
+    "avatars/tech-ninja.webp": {
+      "sourceSha256": "17076155f783c91c4a1e62d2efa468ef0b099443dd16e6e93d51d311638c9d4e",
+      "previewSha256": "f74f8a2977f719d490ba1a2f2b020e4ada2b9621f01fad7a60119420feccfc9e"
+    },
+    "avatars/thunder-bolt.webp": {
+      "sourceSha256": "861d5813d304b3d7c103e71315d645f041c0e09a303a7e79a05b76fe58027c10",
+      "previewSha256": "1a4177c35f316f73a92299e41290f6b674eb9de0504df4245792ef40f85ac841"
+    },
+    "avatars/thunder-champion.webp": {
+      "sourceSha256": "3e32dd1c1e2d89e9eade5d13415c00d843a03a44c029b36842d82eab0f9c2094",
+      "previewSha256": "37971ca8207c6a357fd3b1af76678c1def44317c1323987b6372c170e7703954"
+    },
+    "avatars/thunder-mech.webp": {
+      "sourceSha256": "34a6861cf41611019d7a215afb4786e489ef3c7725b646158bddc6566340dfe2",
+      "previewSha256": "055dfa94cfcaa7a45b6fe361bf79f0b48eebe4ced54ae289ffc0b47c77e51445"
+    },
+    "avatars/titan-mech.webp": {
+      "sourceSha256": "84397a8a012c87fd8977e81e0beb349fbe65982b3f588904c51696b807a6c5a4",
+      "previewSha256": "fc31f5c58624d90915c0c896a4ab4472a27d627bd94f0c6069d376479c7e4058"
+    },
+    "avatars/triceratops.webp": {
+      "sourceSha256": "bd371b731141901477f1733073ef8cd688bada02496e3890f178a56c3a9b5b6e",
+      "previewSha256": "3deea1229221800a27047631cd0475a3d8c8c69183278ac1e6ab9825cc4de303"
+    },
+    "avatars/turbo-trail.webp": {
+      "sourceSha256": "3e4fc06d9abc77c8acbb51edf18492678f58d1309e495b0d224ba0196db7ed53",
+      "previewSha256": "b06b8bddcd283541d6d28b01f11e2457941bde9c21f32135630bc7d3fef2e025"
+    },
+    "avatars/vampire-prince.webp": {
+      "sourceSha256": "3dfea0db9bf948ad0006067f08a74c0b0ac1eb27b4d5a731c185fab9335f6a8f",
+      "previewSha256": "dc3c780092f482ef27072678a2f1b12823f73223732b97d8954821e3ba1f9ab7"
+    },
+    "avatars/velociraptor.webp": {
+      "sourceSha256": "8140beb3fcfb3f43f103cabaf3e9015b8014ceb0972845831f30773a2dce4450",
+      "previewSha256": "bd8365e6e5f5d161f529aaff5bb9957121fbe24d676a632c6ecb71d9ca592bc8"
+    },
+    "avatars/vr-champion.webp": {
+      "sourceSha256": "f7d638323a26cb657d2c12f8878bd239ce267c8eb56b89b21985d2e62769dc18",
+      "previewSha256": "345a2cab38d7049d31cf6e71876cbdf57fbfb6412519dcdb2ff73dd43689f2e7"
+    },
+    "avatars/wave-glider.webp": {
+      "sourceSha256": "fa69434525256936c4402ad9304ddc474038918d4ae4fb8180a529c9cd5c7203",
+      "previewSha256": "fc5fc483db20b8b3707f1b216e469e94c8b6031e1eeef9c9b640636967d24ff1"
+    },
+    "avatars/wizard-kid.webp": {
+      "sourceSha256": "c8dea789ba7c8f1fb7eada9174a15e9dcb7a6281d986f9fa2a192141c47b4722",
+      "previewSha256": "caf1b851090a9626c8fac9faf80e6d24e5aa4982e00a8e2aea23c5f654908c4f"
+    },
+    "backgrounds/allosaurus.webp": {
+      "sourceSha256": "1eb7a1ee0a74b13c992e341abeb81280c32f6db744bb025a6a461923e8f13664",
+      "previewSha256": "197539fc747cda970a12c4108e7e204d9fc9133553b1aa44e1b3180ab916cc60"
+    },
+    "backgrounds/anhanguera.webp": {
+      "sourceSha256": "6b962a002f3bb09b50808d35ad24f040e6e3a5a22ea95975be982143ca6e2915",
+      "previewSha256": "7017f0b9274e34cfa5353efaacff8f04a26f30b0c4836e83b0ea7a4749241703"
+    },
+    "backgrounds/ankylosaurus.webp": {
+      "sourceSha256": "bf2f5cc74e105d338c0e843b00577e82130729d6353ecd14231f94715651c904",
+      "previewSha256": "98414dcd26ba2bf569c2531d696b8ad2646f914c6153efddd312978a8d7756a7"
+    },
+    "backgrounds/arcade-master.webp": {
+      "sourceSha256": "e7d2f596629c057fa3b359e0b1a20dbef86f87cc137120054fb64991f9990659",
+      "previewSha256": "69be2777bd95efc8fa1fdb501ea675b17034c5709fa7c012377a023ad8717f62"
+    },
+    "backgrounds/art-master.webp": {
+      "sourceSha256": "0fdb16e55725220a876bab13a4c99bd14f27fb3d0a54081e7bb90e8230f6dcd9",
+      "previewSha256": "2e18281b893a18386c0837e2f7e64610193de7e75054151e6b7ef2d7b5093c49"
+    },
+    "backgrounds/astronaut-kid.webp": {
+      "sourceSha256": "8ea2d004da9795e80a1928e6e4633e3b1d0eef735a9c4fc56be4f522bc3acd7b",
+      "previewSha256": "ea30b93388ad4fe8899baa129138947024cccbfdc30b080ea7cd5be0e730f854"
+    },
+    "backgrounds/ballerina-pink.webp": {
+      "sourceSha256": "225b38d006eed8c92a042b13fa3c7d17cbfcd78d16e4712e485fe221e3350f5b",
+      "previewSha256": "39934f7004662e8a4a0a4fff064744938423ca55a8477199b8d4b48b66939201"
+    },
+    "backgrounds/bat-boy.webp": {
+      "sourceSha256": "e69a3094368cbb0f5b6aa6d0e11c5df55922fe70c0f19bb9366bcbb6a70ce300",
+      "previewSha256": "2c1f30179e4d4f60ae1a08a238b9876667f504ef813de5bea634e75bd38c1115"
+    },
+    "backgrounds/battle-commander.webp": {
+      "sourceSha256": "52a353ff99d6c7bb1230076e5e1ebda08077d582bedcc5b923f1048198a5b9db",
+      "previewSha256": "f4b7a0db2208c066b32efe88e30c66f9fadf39d7d7d7ff7b584c5e48c668ee3d"
+    },
+    "backgrounds/blood-moon-vampire.webp": {
+      "sourceSha256": "f9d2864143c7a63f51adcb66f8eb6670e60902ffba6bc68dae51d68184e68326",
+      "previewSha256": "94d7b49b7b1cffe43e70f6d642de62fffa0233d0c64019f327b13d2035d3eff4"
+    },
+    "backgrounds/bloom-guardian.webp": {
+      "sourceSha256": "9914f4e130353278892894d5312cffbcb43455a9b72c4c739d1a238035c7b305",
+      "previewSha256": "031e5278eab707e6bc9d072b339e2426b99bc9edf6a2ece9bcd210c19f12052c"
+    },
+    "backgrounds/blue-ballerina.webp": {
+      "sourceSha256": "5847034923c98a47bd35a89ed20da97b5708fcebf6929dce12ba05e5a05b48ec",
+      "previewSha256": "1c701e3fd06adf9830167cabeeb36086ad729a6c75979046d20ab096289fa4d1"
+    },
+    "backgrounds/book-wizard.webp": {
+      "sourceSha256": "28210fa56c608413bb867cf0e315f570f7f093e94a99101bb248c8b111c7a353",
+      "previewSha256": "54edd47067091c001c54dbd408af444f1aea7d1a47bbf9768158c9268758578f"
+    },
+    "backgrounds/brachiosaurus.webp": {
+      "sourceSha256": "b2e570b16c58543d34eec357c909e4d4fc001bf159b5fd3c3844b48c6b270152",
+      "previewSha256": "2c5a722566f0b3cca553da5cb5f4fbed017a2358e2fc6541ccfdf57775b13fe4"
+    },
+    "backgrounds/brave-explorer.webp": {
+      "sourceSha256": "d27b733e951cc8f83c3bb920bb71973154f64759f94351204ef123493c21efa2",
+      "previewSha256": "9fc1b56a2b3ccdeee58b8cc690c32edbc841604b00de950515d54ca7977fadee"
+    },
+    "backgrounds/brave-knight.webp": {
+      "sourceSha256": "ea87178a43079cbd4f19dd0e0e7dd0cea13efb089324f30ea3b8ad87782ad74d",
+      "previewSha256": "36d69e8096ccce3c6efc0598b281409db715b4572f7aa36132ff6afdf5584103"
+    },
+    "backgrounds/breeze-captain.webp": {
+      "sourceSha256": "94f2ce12d89acd74b0cb7b93ae1177c0e79bf048deb98548d62fd7d8299ced0b",
+      "previewSha256": "7a6267ad1559819014ebb6e87e2397282a42cd5affc91fcf10dbb733982fc22e"
+    },
+    "backgrounds/bright-mind.webp": {
+      "sourceSha256": "5446e0b10403e925f822a1b9370558a392c86e7b03d67521bbac21c42a2efb87",
+      "previewSha256": "4fe915ede2c78ebef71cde3c4062e89d5376b010c5eff315e6004dc2c7f08b00"
+    },
+    "backgrounds/bunny-girl.webp": {
+      "sourceSha256": "f1aa762ebbcee439c900b8754206b65212b15591f551a329988d94441e468966",
+      "previewSha256": "12ec95f36ce292d78b9374c10e7ee73d2167af965e64539e6db9abde0f2e9db9"
+    },
+    "backgrounds/cat-fighter.webp": {
+      "sourceSha256": "12bbf1311369b7401e4ee9935a9d84adb91fbc5a6a07702fd45bc43550c04558",
+      "previewSha256": "ad821edec088a9716b77fa9a26d18a10702129cf3c7423c884787c13bf6e8d68"
+    },
+    "backgrounds/cat-girl.webp": {
+      "sourceSha256": "2798ecac3e67083125760a066c7c19da96e7b9fca61e1caa7b34056673e85bfa",
+      "previewSha256": "645cdfba6b2c3790e3860bbfaf3dbddcc7af0b8b0138768abec1351162c00b82"
+    },
+    "backgrounds/classic-superhero.webp": {
+      "sourceSha256": "7cd1939d45cb255d5b68429bdbd0513df629bc5b657a6c8d2a2a95effe5c04b7",
+      "previewSha256": "f9943e092d030ab5d6378022de7c0fc848e94583062f7eb1e7fed32d0c66d89e"
+    },
+    "backgrounds/classic-vampire.webp": {
+      "sourceSha256": "c50b1503fb8ab0f147caae2959e800eb07d53cd0863b75b42f6acd9e0286116b",
+      "previewSha256": "c730ff4978d57b13370a1f6d1afcd3a9f83c29866aa955191516521af2c14bdc"
+    },
+    "backgrounds/comet-dash.webp": {
+      "sourceSha256": "495bb89c7ff8e475d6c2c33c8db731b38a200b8462ee12a64fc46c2bc3058ddc",
+      "previewSha256": "9deb258cdac2a98bc8abf31df549b990ef9ebf6dda22e09fbf4fa01fb2b67f84"
+    },
+    "backgrounds/console-hero.webp": {
+      "sourceSha256": "c96534705250143c887a434759568e058e3938a48fd8d4bb49abdc658ac3e8a7",
+      "previewSha256": "84814f4e04738d4ac3c2373a7f91c54231ebde8251344fd97902d46740fb79c4"
+    },
+    "backgrounds/controller-king.webp": {
+      "sourceSha256": "683051d100472c294b4d019989975b3337ce459613370bd660ff958d25917f1b",
+      "previewSha256": "aa2e98b0b492ac4149ee22d2154c28c59875f95d27cd6a7085c5236500c665e2"
+    },
+    "backgrounds/cosmic-drifter.webp": {
+      "sourceSha256": "822b7ec95ba543a4baa5162cc8b29a6c1050f679ed8922245c781f5cae9ba704",
+      "previewSha256": "a64acf41f208f2651b79a326e07041e9d9102b94420ba9e120e2b9c98e32b826"
+    },
+    "backgrounds/crystal-mage.webp": {
+      "sourceSha256": "ebaad5740801ba132e2af5a12306ea49ee737bf66a857f99a6c657d3a34990f2",
+      "previewSha256": "fc9e1f119985d5680b7606983ef0dc311a8a45738eb8ba46a21aee61c757c480"
+    },
+    "backgrounds/cyber-warrior.webp": {
+      "sourceSha256": "7f33591521e271ef635b011adfeccd688609708642c428b1183b27b09e82a021",
+      "previewSha256": "85f70b3c5f009018799f27002ef227c73f96628d288a0a645ff6fe1363e35c51"
+    },
+    "backgrounds/deer-girl.webp": {
+      "sourceSha256": "b98fc7d59b5f054f53bd7e9e96b5e5bcfd8115651572ac41ed870b522623e9bb",
+      "previewSha256": "0b4480c5bf3bb46e7131c743b9d9be002dd117e5f5a4e6766e8a03919f342994"
+    },
+    "backgrounds/detective-kid.webp": {
+      "sourceSha256": "8891d16c4ca5d77f10dc3eadbf8e378a586965b781293d7ec79025e142e30802",
+      "previewSha256": "fe64a8b14e43b6f8a7b1e4c5439326101f3f7436d345aa13afe6bf07916d60e4"
+    },
+    "backgrounds/dimorphodon.webp": {
+      "sourceSha256": "42b200003bfe6824cddc9b47538db35a7b7682a624d81f2e328f8bc333cadb06",
+      "previewSha256": "76eef0fc0a23a0ec3d508585f77f2b10773fc780a7b510bbcc837a7fcd5afa67"
+    },
+    "backgrounds/dragon-slayer.webp": {
+      "sourceSha256": "3e4746369bc451cc8b7c1f321a9e5027c78ba7b5257ed75ef0b70d3992bd5e87",
+      "previewSha256": "39d39d48cffffe7bbec71864058724cd6c03a6975d8a09b544eff7699434ff3b"
+    },
+    "backgrounds/dsungaripterus.webp": {
+      "sourceSha256": "d0c7052d904d3e82fbc83a6100886c1f82f079c4e89ae6cbca98a1a8395ca45f",
+      "previewSha256": "605d9cbfccb995a1af2cc6eeeb87e59629c7eb69437b7764634f42ae8f0acbde"
+    },
+    "backgrounds/elemental-master.webp": {
+      "sourceSha256": "5b60807a3ddc6e7fcb8f12b2e3e644f94e9c148c8c27216b229f33bdf6c2a02a",
+      "previewSha256": "a7811e33e23b885b611c18350ea3123fa0e2e98e1df789351e3bb46e5a795222"
+    },
+    "backgrounds/fairy-princess.webp": {
+      "sourceSha256": "a80a44f13b683e65895105ed03d08b93717d93628db6c47d8f12896b98bf4049",
+      "previewSha256": "54801054f060a3fb2d5e263dbd99401854454f690e5f1822d87ad66ea91cdcc3"
+    },
+    "backgrounds/fire-hero.webp": {
+      "sourceSha256": "d25af6b2ba28528492169b849dcd3e649aa15640e7977775d2a1cfd316c52283",
+      "previewSha256": "2d3cb1a026f52e70140f2ec0d0e9060d5f2d059435480945940dd0275c2b9527"
+    },
+    "backgrounds/fire-phoenix.webp": {
+      "sourceSha256": "394ac52b7f1fa0ffa8aa8fd799be434083b566eaba71e509c16cbdeca45f7823",
+      "previewSha256": "06d5ba8202462fa9501ddaf99aba64e845497799c6d2e8712a3a7ec097bd1b66"
+    },
+    "backgrounds/forest-guard.webp": {
+      "sourceSha256": "c19ae5666b9b8484c7d417ae667fe3eb6c9547f4fd582c4a8a0d4ada0743bfc2",
+      "previewSha256": "10b8fcafa60c55c58c73eaab875208851d5e287555a5650df3b6a1683e00d5ef"
+    },
+    "backgrounds/fox-girl.webp": {
+      "sourceSha256": "36e063926678b1e2ea4ada9db9c68c66502a3275a108ee5cd16772ca216330e4",
+      "previewSha256": "d60cd75e3a7937d6780c0989e47b9474550ffddb745a3dc7a4c93a0692526f1c"
+    },
+    "backgrounds/galaxy-scout.webp": {
+      "sourceSha256": "cc062db88c5fcb770ed86055bb0954095a17710c5076b9ebaa9d5e3d15263e52",
+      "previewSha256": "62c7057cca93b68283232eefac936845bedc8a038f011b7c80f5220ee11f5605"
+    },
+    "backgrounds/golden-ballerina.webp": {
+      "sourceSha256": "d6b4d139c79db64b7bf117ac66f794ab151cb244d0099ea904a7d67f7923d547",
+      "previewSha256": "30bb9eeddfd6ac2ff057c19e8b02221b66de994b5d03bf0634a6b67b74e99819"
+    },
+    "backgrounds/gothic-vampire.webp": {
+      "sourceSha256": "f309d992efee5a54b187488a3e263121bb2713b96dfdbdac94e212882de7d469",
+      "previewSha256": "af0f0d54bfdc1b7977b1d44d901c7e39633912c00ffc53ebef03d2710080fad4"
+    },
+    "backgrounds/green-alien.webp": {
+      "sourceSha256": "56c5f3133c4bd9233d18f0b04772bf80981952acf8d69026f60445fbc7aa7272",
+      "previewSha256": "1c9b42e3bd02b17c9f88f676b7541ce21b980538db7646d8bb538761a8653bde"
+    },
+    "backgrounds/heart-shield.webp": {
+      "sourceSha256": "2c2b13e7b17ecb355e3c9d692df602e7b2f35be21f025de3467b6bcba565954c",
+      "previewSha256": "dc482eeb00cd450b696eb8faa880358725f4f7b004e36a504ca00579f56c7cc6"
+    },
+    "backgrounds/ice-hero.webp": {
+      "sourceSha256": "b7bda6e598711eecc5319df8c6e94b98b8e554cebb072865299b2671df47f1d6",
+      "previewSha256": "2e54d94228cde431e0180a7f732918c5fe393195a127af0a96ccce5a57d2b709"
+    },
+    "backgrounds/ice-princess.webp": {
+      "sourceSha256": "5b6b769445d152aa49110a3072a735e7dafe67207f4e50e4434bfeab3a2dc17c",
+      "previewSha256": "a545160f2a6a9f801d24e7ff8eb9013232d93f7e7c0e1481c17ed230d191c7a5"
+    },
+    "backgrounds/iron-guardian.webp": {
+      "sourceSha256": "2eac5437f5d17ff994acd9d9695804bf9725fb2c454830e35c6a937286ab57ed",
+      "previewSha256": "0411d0febc46ffd92761b843f4ba96ccd93ff84ce8c37af4ac9d75e2eca2dcbf"
+    },
+    "backgrounds/junior-champion.webp": {
+      "sourceSha256": "e1a6637c58436db3d4e198abeec2e556af4689e744fdffef9414b8bbca4cc05d",
+      "previewSha256": "64ad2c845c9d9a221b9fe516e53d69ebb21f777094065f5bcb435385d48660bb"
+    },
+    "backgrounds/kitchen-hero.webp": {
+      "sourceSha256": "b95389274f92c2bde764d11e5b39317fb086038e2951dbaf62c99fa93962ef32",
+      "previewSha256": "d525ec5fba21f2eed0f1d7ff65e9d7c9d017de38579ebb6ac8c8c516f75ec0c7"
+    },
+    "backgrounds/level-boss.webp": {
+      "sourceSha256": "3456ba8ba11e0e478d17f3e0cc77c71c9ccab3ad3f9d69b75db54dff85bd2d30",
+      "previewSha256": "02622487c2fddbe26aacd6ea182247346b14f26097a01000832161a15d92add9"
+    },
+    "backgrounds/lightning-speedster.webp": {
+      "sourceSha256": "26b26e534da2f145bf52087f071b8cb6a11f049e7d01e40fe00875be76f3243d",
+      "previewSha256": "d0725ecccbb918f70ccadf663607d44ffabd757c824403f3477ba8e587ec591a"
+    },
+    "backgrounds/luna-beacon.webp": {
+      "sourceSha256": "7b7ebc04d66941c6e85af6068cbf9b68fa5d81d8ba1c666f9d69564254329486",
+      "previewSha256": "2da4df19d1cf944d0888b91e94d1dd7e636057a8d1bb70078f69fd6b77f4f4d7"
+    },
+    "backgrounds/magical-girl.webp": {
+      "sourceSha256": "e3ea83e63e8fac77b4ace66c44eed514314c77b9ed86256d57bde63fc48c2623",
+      "previewSha256": "76b9e7d73c650fa12d9cc30cb45628f364d90dfc01eae04747f3d979f4fb963d"
+    },
+    "backgrounds/mint-ballerina.webp": {
+      "sourceSha256": "3168f1e7ad1aaa91f05c867538b9509d0ef6ca9b2bc5b0fb9c607973c5835f0c",
+      "previewSha256": "3c7c8672cd296251be11301519b9061c37fd6d33f1e949c426cfb6f640f16c6d"
+    },
+    "backgrounds/moon-walker.webp": {
+      "sourceSha256": "7554b81b8a6d27394a8255a3bdc454118415403a3333ab758d5d213236f43a78",
+      "previewSha256": "9f8aca4ae564e8e4bbd9b13e05e6c493b631da4a0f311eb1ae5115c09975a576"
+    },
+    "backgrounds/moonlight-vampire.webp": {
+      "sourceSha256": "973a3e0166a67a6ffcdd87558922c7a61a091e28c941c397b87ac4273aeba801",
+      "previewSha256": "f72ff181d2d74607e0d372e77e782b4fd59d92c2d24d8f77f34f1c1c79429b9d"
+    },
+    "backgrounds/nature-guardian.webp": {
+      "sourceSha256": "576f6e67c0c266a75abcb739cded4e8ab460a95a289774532f98af21bd3fc4fe",
+      "previewSha256": "a02273cb038e493f84524bd547c10ca9893705ee55c65fb072e064661b028cfd"
+    },
+    "backgrounds/nature-princess.webp": {
+      "sourceSha256": "5d80a344754ad4344b8edb2ed042c14919b6b4fe7d1ab07bf52b764ae069ea70",
+      "previewSha256": "86053d176ef637ae0929828b1bd8fc6e4931e36c5301e928de22990c8fe64b46"
+    },
+    "backgrounds/nature-scout.webp": {
+      "sourceSha256": "88d393bb74693dff744f07f3f6c0b7b68f342baab7cfd2557ea2cfcc6f0da602",
+      "previewSha256": "dd9270f27469987e637ed841db4368e4d76d7b386bb95e9f4cc258aa1273a2b4"
+    },
+    "backgrounds/nemicolopterus.webp": {
+      "sourceSha256": "57b335b7ef334bde61cbc38460364edb79482b5586f50695135edfcc7e8d0a6c",
+      "previewSha256": "92f8fa1e46cbaa2e77b405a72d6300d2607ba77b2847a3a7ce538f6f032f70b1"
+    },
+    "backgrounds/neon-droid.webp": {
+      "sourceSha256": "15b7150894033593365350d2b4b7ac6da811fd94851503280f07e2e2870f974a",
+      "previewSha256": "67a26302eb787cea124799860064f3037008bf4b0ed1d003646efd7aa6877575"
+    },
+    "backgrounds/neon-rebel.webp": {
+      "sourceSha256": "bf48d274c69444fb14abbec1f9ca36b785ead5364bd035d1e289bc8b9949187a",
+      "previewSha256": "349019b1ac6efa8f8c63b70fafe183b07440fc34bc6fdaf9bc8d7a08a727581e"
+    },
+    "backgrounds/night-hunter.webp": {
+      "sourceSha256": "53e3ea92ba2cefaf33786719d77e6c3ad3b68581a6694d69b1c3b38878d0a749",
+      "previewSha256": "47e16c399bf7d6aac591b63deb3b2638e40f073c3d3805f5a6535e8e973192f0"
+    },
+    "backgrounds/ninja-shadow.webp": {
+      "sourceSha256": "12ba329c23d6a003b4341b093411a498a1d8e2c4eb141676258f7cb201e4d910",
+      "previewSha256": "5a1b10427fd4bc0c367229fe2b61f57b94da12f03e4d8b814d65e975cfa3ac3d"
+    },
+    "backgrounds/ocean-guardian.webp": {
+      "sourceSha256": "411562a58e7fc474d7a0e9c7c650368858621970b99b9703672502554d16759a",
+      "previewSha256": "c4bc2bd04f81c7f3ee8d5e182a8ec7e2f7ea2e8078b5e01b37f7a973026a2f52"
+    },
+    "backgrounds/ocean-princess.webp": {
+      "sourceSha256": "6636d10423badf5e31a32d6e1057380edaa7fae45d20a6cdf8b6a7f6e4a0ed4a",
+      "previewSha256": "51e18f9b0d75e31f339370036f8d4ac92eb94809ccb8b1c66565dd83a23e0dba"
+    },
+    "backgrounds/panda-girl.webp": {
+      "sourceSha256": "6c257bf62899457decaea0c1b64cd16633ebb9de2da632907226c7f4bb7e7697",
+      "previewSha256": "2662f32c1005bf3dfd0d462442af2634c3c76e5567c3fc6f25ed746c30b55385"
+    },
+    "backgrounds/peach-ballerina.webp": {
+      "sourceSha256": "edb81cc525ae278a94b9b60f54eb139a9e37304e6e8cdac4e3abaf3648ba2d91",
+      "previewSha256": "dc75134e29c87656a559ca6b95bea13176b520e3c6a5d4c12b0ec9db4a43cb82"
+    },
+    "backgrounds/pirate-captain.webp": {
+      "sourceSha256": "d167edd33def1041edf3903a403c46d1f0ca074f0c25a7e25bf8b9848092a617",
+      "previewSha256": "860ec93e6c37a1ca3dfb192355b47db5f2c64b3154a6856c1bcd4df761dcd75d"
+    },
+    "backgrounds/pixel-warrior.webp": {
+      "sourceSha256": "b2a8499bf72045b0b63127dc2d644c5f66b28da7375feef90d90f58bde2ea1ea",
+      "previewSha256": "cb5178db1849dbe69902aacbd796aeb01d5829a95d6e823512cceeee6ec81939"
+    },
+    "backgrounds/plasma-bot.webp": {
+      "sourceSha256": "50d5b8b0f69145a7685f01337519e95ac8588e9d34d715504d26c8717ebb02b6",
+      "previewSha256": "fff1e3b02d3296ddf5914362181322c222939f2b311c8653e76191886e55ae2b"
+    },
+    "backgrounds/princess-tiara.webp": {
+      "sourceSha256": "accf06979f70c508d68fd5afacbc29b52a342ff117683029575e2ebe208ba75d",
+      "previewSha256": "b88c6f1ce3e451f42d5d55fd27e674f1ca12f3aa128a151e211c2b0b5273067d"
+    },
+    "backgrounds/pro-gamer.webp": {
+      "sourceSha256": "ef20abf485d5276ccde3a6b6e97ed6cf19be047f0a1a758da662433c5108db7c",
+      "previewSha256": "2a8c41d441ae7a354866afddf345df6382476be13061c8002b07a6ce7d13b077"
+    },
+    "backgrounds/pteranodon.webp": {
+      "sourceSha256": "8a8d41e67e7d8c21777a7d88643342ed261ddf66ddbe54e3052bf5307136e56c",
+      "previewSha256": "11064933875e05d4c559e9dd73a6eecb7766efa09024de4f0a7506c157305c6b"
+    },
+    "backgrounds/pterodactylus.webp": {
+      "sourceSha256": "ecda1157a6b519c925ef56760121405435adc958c6e8443e618667fe3a9a7cb5",
+      "previewSha256": "baf9f47990d91e47e25d59ca90ad6fea3a749275447e2713f5cf357248def7e6"
+    },
+    "backgrounds/puppy-girl.webp": {
+      "sourceSha256": "cb04a4439dafad81ff8574f8460a6743fc15b2b3b5e3b3c17368a5746d072cf9",
+      "previewSha256": "abc85d358bd17fefad081dcc5899c79bde66f5e509b8a95696e60cfcfe93ce5c"
+    },
+    "backgrounds/purple-ballerina.webp": {
+      "sourceSha256": "bd151eee3b28492a0a9bb6ec50d223b5eee1bec4c0c2972de845b585f2dc765c",
+      "previewSha256": "79b8d81e1b09adcf63f229b0df1db5a883350c29dfe78ab241dd9d2450a6791f"
+    },
+    "backgrounds/purple-princess.webp": {
+      "sourceSha256": "db00354eb2a3c5c97d1dc9ebf78c7102f9323f8e233fb0a97aadfb418440bf6c",
+      "previewSha256": "d71950d7aa099f5e84c45f86438a54e377a8adb33c5465ed521545b7cbd5fb40"
+    },
+    "backgrounds/quetzalcoatlus.webp": {
+      "sourceSha256": "c5977ccaecf920788e6155516ab33b0f9f52a7fc3c9714e2befc1356f5247181",
+      "previewSha256": "292bbcd4c3574a52e10122190616cf2ebf5266f77306d09f25a6a7d0d9fd171a"
+    },
+    "backgrounds/raccoon-girl.webp": {
+      "sourceSha256": "6c2cb99e9bb1e9d5bf85b209f335a62f0da44c85529837a87c59876fe293adcd",
+      "previewSha256": "33a603b0353d691ed3280f1c06695a32508790ed2e0781ac23c5708a678bfc0f"
+    },
+    "backgrounds/rainbow-ballerina.webp": {
+      "sourceSha256": "42c266f90e18edbae34ab84eb1e1355d1ce45e5923da2c7addb70c14f42493c2",
+      "previewSha256": "3b92b3825fe101b682743f3b8344d6882b1698e4387ed06736b44c79fca0a84c"
+    },
+    "backgrounds/rainbow-princess.webp": {
+      "sourceSha256": "229bb6fb83ce0de4e09107a2a0b063b0987e604e749027c7eb3394abedb36f9b",
+      "previewSha256": "430e71c82e71272674b284c71e4b7fe6e75e0c96e004da3d7051df8e6ccad6b4"
+    },
+    "backgrounds/rhamphorhynchus.webp": {
+      "sourceSha256": "33343737afb20266c6ed0e3f081ea532d447587b4beef2ad6788badf43d64255",
+      "previewSha256": "189f6c0a798488a32652567bef5f14599b49d352da851ec572b7eb38cda70338"
+    },
+    "backgrounds/robot-astronaut.webp": {
+      "sourceSha256": "9b048d513535be8ecabb204410f2a1d371a80c29e5d90dae729f5d0e017b1001",
+      "previewSha256": "a55e6269be6a317eacce2c8e290109f505ada8fa734e38790e8cb2d74459f70a"
+    },
+    "backgrounds/rock-star.webp": {
+      "sourceSha256": "c8e89031330e8b2a2dd4ae9ee8fe9db453b78f370446a34db9095568709bbcd4",
+      "previewSha256": "3fecf09996d58cbd776e0d49ba4bf1c65909a8f3e33512996c1cef9de6cf3307"
+    },
+    "backgrounds/rocket-pilot.webp": {
+      "sourceSha256": "53054d5f048e75415ee91301a3e5f6ac57cebf9b6fdf5bad58843922710db2de",
+      "previewSha256": "e5d25e34696584571d3f102dadc4e089858847e14d403ce6e4aafb70b98279a2"
+    },
+    "backgrounds/samurai-hero.webp": {
+      "sourceSha256": "1555210838473570718d4f749fdf9cc9a0f1ba6f49cb49b16e08daf2e283a6cc",
+      "previewSha256": "9528675631a22c11f85f69a7531e785642302191dd3973e61b8fe0cb737bd604"
+    },
+    "backgrounds/school-hero.webp": {
+      "sourceSha256": "c1ac11f9afa27c1af8ddeda3ada943405fb4cb60dece01e885b5b042e3415fdb",
+      "previewSha256": "cdfc266c4273c5d4d78782de201c4b3fa6fe81a675ec0b284051fc65a7162dfe"
+    },
+    "backgrounds/shadow-ninja.webp": {
+      "sourceSha256": "bed13307a9ad95444ac18aee161e3e1b2ce362739d427a4deee334968ba5fc88",
+      "previewSha256": "e7387ac29ae2e95eca478434d92c952e926a3334e3181bb333ae83e3b3358e30"
+    },
+    "backgrounds/shadow-vampire.webp": {
+      "sourceSha256": "e2afd4e2f5cb19b960ccd41b65ab6570ec2732d84597e9e7c6efe023820e084b",
+      "previewSha256": "9f009f10856c359768c63b665c8014a92feae8fe08508292d6f125ef57683e8c"
+    },
+    "backgrounds/shield-blaze.webp": {
+      "sourceSha256": "bfded06c509e1133a701db43db28d6ed04a7bceca54adc81c2e0779ba6b54965",
+      "previewSha256": "89ee46fa355173a3e6698caf9df528e6922dd620ab0661900b92d80fc2dc534a"
+    },
+    "backgrounds/shield-hero.webp": {
+      "sourceSha256": "7715930feb08f2789d692b2ed3ec3c25f20198f902df46d3cefb778eb7e39a80",
+      "previewSha256": "a20114a146ddcf0efb9ff28c02181b9ba2f3c67f70ab83be5dd3545cb4cb7fe3"
+    },
+    "backgrounds/skater-kid.webp": {
+      "sourceSha256": "9523457ee2a2302c5885186b308b56ac25769a5069c82d630b869d74fcee9829",
+      "previewSha256": "2c59c088c78e61a58486aa47cd947b6fe9d1a4543233a7ee9e633b7c8bfd3fd8"
+    },
+    "backgrounds/sky-knight.webp": {
+      "sourceSha256": "d5ef5a89acb418fa122fdc86d79d84d5ddd3175f8a56ea8ef9df7b6ccb6252a0",
+      "previewSha256": "9af6612b5b5dff3d5a4482d54a12498fc89d0020cf865b80bbfcaee3721185d7"
+    },
+    "backgrounds/sky-spark.webp": {
+      "sourceSha256": "3cd991ce156d705a526d8ddec9fdba0b73cb8fba11fce73767ce0106f5069c12",
+      "previewSha256": "de0e19c70da668cbeb9a8dadd6b6bb2fcc4ca686802f1ab556b77a48daa58158"
+    },
+    "backgrounds/space-cadet-blue.webp": {
+      "sourceSha256": "435193f8d1442356c397b765c6b3369ff8e7daf794970904a3f9272892718d48",
+      "previewSha256": "eaa4eb76ac6e5a845ba1820717b4825b5ad34affcfb5d6bfc9b5945e080c91dc"
+    },
+    "backgrounds/speed-runner.webp": {
+      "sourceSha256": "07fe76be84bef78626dbb35f638492c548e245abaf84549892924f5eea57328f",
+      "previewSha256": "5931430d588a71cd2acb52cbfac1ed4e86e9cd2cbef24f67c01380deb4f1cadb"
+    },
+    "backgrounds/spinosaurus.webp": {
+      "sourceSha256": "0fa68d790f99c84f1877e15489accc28f8135e20fbf256b8356431b463fbf30f",
+      "previewSha256": "f11c070443e1ec324fbf02b197e5b172f117a440eef4c9a5c0fa99628b43cb2c"
+    },
+    "backgrounds/spirit-fox.webp": {
+      "sourceSha256": "08004a9dd43a2c8fd4461487265fd386a3a8eeccb93e6e514ab9d6407f39837d",
+      "previewSha256": "a0a3306ed970aba432b68ba25d1009f75433fbac2e96e723d840d49835a44c4b"
+    },
+    "backgrounds/squirrel-girl.webp": {
+      "sourceSha256": "3283c5a069f28014e44613e40fb25104f257a0c7c354877b9bd175415e7c252d",
+      "previewSha256": "e299ab5a2f23f2bcb5d2823fba0268b6e78cb22a1d6024170381e4c460e3a9ee"
+    },
+    "backgrounds/star-cadet.webp": {
+      "sourceSha256": "357090de6a3aa850c68c837c61ddc9c032ead15a443e676c45922396e9ad93f8",
+      "previewSha256": "ddc5d9c61b10422bef045d89409f11db255023982646de746322c8ec4dcaadac"
+    },
+    "backgrounds/star-captain.webp": {
+      "sourceSha256": "2e3baaac6cac77e89694e8c6c03ca2945074d45af94c1db8b5c48bccdf972b04",
+      "previewSha256": "1655ee2d134f659f6f87052c658f030bdbb14dbaa3a92550e0f7f2de88e85c56"
+    },
+    "backgrounds/star-guardian.webp": {
+      "sourceSha256": "2fdad798f73652f01c52a7ca04170cfec0af5d622dfa2422a97531c4604226a2",
+      "previewSha256": "cccb23d037d1c80ee41d2941cfc001d69864af45f5237ea159ea985931e8a233"
+    },
+    "backgrounds/steel-samurai.webp": {
+      "sourceSha256": "33f37cc208280807c8391174ef62f6a344f4efb8d9550ab12a38e92920923749",
+      "previewSha256": "23ff216cbddef00c4083fa9cecb169a21f4b3ffdf33cb5b3d5b35e99ca86eb80"
+    },
+    "backgrounds/stegosaurus.webp": {
+      "sourceSha256": "33fffb3ccf91e71b70f5f1a267e3cc5ebc3affb164f5349901dfefc5ea902743",
+      "previewSha256": "fe03087754773abab0ac60a902550a7096e9009eeb8ee80a0f4990fd908a5d2b"
+    },
+    "backgrounds/storm-runner.webp": {
+      "sourceSha256": "75537bb1846c347be10c9e97709ebc9fe736951619f48190d6a70fa3a5712265",
+      "previewSha256": "0eff93af986bbbf5c2efc25506bb48dea4ccf8df492efd7dc617ae5e27ef9045"
+    },
+    "backgrounds/stream-star.webp": {
+      "sourceSha256": "0a2852aa87c11b00508889e38a66868ebbe5cbc57104e9a5c95477287b4432b0",
+      "previewSha256": "0255f2b092304deafe47370883eb469c3617d20c81a9ec8ece07b4e3ebc8948f"
+    },
+    "backgrounds/sun-princess.webp": {
+      "sourceSha256": "45f65d6a623e245485f9696953bbe36b5bb080711fe97592920a52eaa436970a",
+      "previewSha256": "94af5781631a2fcb3246069afaac7b018ab36893384a865967b1e6d6cbbb22bf"
+    },
+    "backgrounds/sunrise-spark.webp": {
+      "sourceSha256": "ccd3fb0ffe04ca23b8bee9f1217af07c9093167a4258f91bbc7dbf1c426f3bb8",
+      "previewSha256": "b664796edafc78f1d62e28c13ebc08b46722ca920ec0feb87bc0c2b9607a11fb"
+    },
+    "backgrounds/swan-ballerina.webp": {
+      "sourceSha256": "46a78a941037a105c45d4bf328e59002f54ffda4448affa0fb76240f39f7600c",
+      "previewSha256": "74c08ff063a1d8c1b596666de725f13985f6c282ca3ec077244cb6ec530aa1ac"
+    },
+    "backgrounds/t-rex.webp": {
+      "sourceSha256": "79d61fb9ecde60ff471ad1d1774f395e489cf5a2ffad8150f5018257a2e31d2c",
+      "previewSha256": "dac510ef5291ee1ef3975c336381a11a10fe9572ec62838a9f870c09cf4c9950"
+    },
+    "backgrounds/tapejara.webp": {
+      "sourceSha256": "e2df1fcf668af8c82d0a2a9e6277414ea1a1eb3892302c609a74d27ce9b5819f",
+      "previewSha256": "b69ae9aedb3eb7a0661a1b915474254a1737af24c639842f4d5dc095b80408dc"
+    },
+    "backgrounds/tech-hero.webp": {
+      "sourceSha256": "cb18415ce713594a04468ef3ef45e66e0afb2125943a77332775fa50db8ac925",
+      "previewSha256": "2c0dd89584d7947b19e1d4d46311cc8e368a16d4e6e32a3bec34f13990ae9ab2"
+    },
+    "backgrounds/tech-ninja.webp": {
+      "sourceSha256": "fe26298447e77922b6c00e5fcaa98a9a7e52c779626d95cd669abef4954abb76",
+      "previewSha256": "189346cffecc081b11228ef1fc3b8862723dbb8713e09925a8100e4af7fd8130"
+    },
+    "backgrounds/thunder-bolt.webp": {
+      "sourceSha256": "6d107f5efc3a5f6094fcdce5ef6f3511de17b117e84e343f3ec5397ceffbfaae",
+      "previewSha256": "5fc99a168d28f30d26896155e0fad9038a8a88ee3880332f6f9aebbbd21cb134"
+    },
+    "backgrounds/thunder-champion.webp": {
+      "sourceSha256": "c11cabe9422050155bd8432f8321c50ec25818d1d3f7ab42af2405e1e116406b",
+      "previewSha256": "972b597b132d2171e6e271c532e18e913b90a73303489155cae1f499accc5683"
+    },
+    "backgrounds/thunder-mech.webp": {
+      "sourceSha256": "8f37ae5ae348b0697d800b392857b7fbe4a0aaf2dc199a3814736fa9d0c88872",
+      "previewSha256": "bc672ab0f756b8a798427684c13ff6d10b6770562f7f8cc968f4935a953e8de9"
+    },
+    "backgrounds/titan-mech.webp": {
+      "sourceSha256": "9f08ef94789d1648946d538edd253b252aedc94adbc4239faeac5e0d65830b33",
+      "previewSha256": "eecc71da6ebd535551e28ac6f753c9975a079a6cd3d7c1f90e73a8b60f3a6255"
+    },
+    "backgrounds/triceratops.webp": {
+      "sourceSha256": "f599f663aaea68ce71c9fb1ed88832951ed6661bf0ce9c59dd40dac61fe6107c",
+      "previewSha256": "90cbe0f8f9f9343ac95410765115563f51d14f8a9cc667227f7a08d4731e3b6c"
+    },
+    "backgrounds/turbo-trail.webp": {
+      "sourceSha256": "dedab276c2ebb157b0d5343adb92638acf063dd8d3647eb18d772aabe3cc22f2",
+      "previewSha256": "266f9892d9c940d043700f6c73bb21ccde56a5f226f6fa417d0baf6f5a7e8ef9"
+    },
+    "backgrounds/vampire-prince.webp": {
+      "sourceSha256": "4bf279b352e0a2ca9a8bf7f4e8cb5055731f863acb23718981213277b64395f7",
+      "previewSha256": "3435594d325f3f1b8131acdcf28fab70a656e5fb57c139db3caea9de2935e026"
+    },
+    "backgrounds/velociraptor.webp": {
+      "sourceSha256": "4a1ac0300b3dd10f6a9d5e38ed5becfe7b7631520134039c11b6beb68c0e1b7e",
+      "previewSha256": "6933ca70f581f3ac1023e5b92189d3e587231240f5ce61993f750de56bb7c4de"
+    },
+    "backgrounds/vr-champion.webp": {
+      "sourceSha256": "446e967503b656a62ffd28195fc9814cb6b97ffa2db1f1a36efbbd28d7c22ebd",
+      "previewSha256": "5fd025886c2cc66b841c4cdaff5d3c29443b9c134518881ca130b81e9f5451ab"
+    },
+    "backgrounds/wave-glider.webp": {
+      "sourceSha256": "9a1b92e0892e11317a41ddf3f3525c69fa6bfcae99e5bc7d8a57295623bb6e7e",
+      "previewSha256": "31c3928639c017cd92be5294e6502f919ab5ddb5e498bb5c60dd41cbce39d460"
+    },
+    "backgrounds/wizard-kid.webp": {
+      "sourceSha256": "6fbbb02b78579715989b6015ab60feb02437e2490c9f9d71439ce7b3c9e6b067",
+      "previewSha256": "08ac8f2b49c78da434071b44072da527fb05c7f37672ccb33749658457b33072"
+    }
+  }
+}

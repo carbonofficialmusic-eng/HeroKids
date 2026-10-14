@@ -1,4 +1,5 @@
 import * as React from "react"
+import type { DialogPortalProps } from "@radix-ui/react-dialog"
 import { Drawer as DrawerPrimitive } from "vaul"
 
 import { cn } from "@/lib/utils"
@@ -16,7 +17,12 @@ Drawer.displayName = "Drawer"
 
 const DrawerTrigger = DrawerPrimitive.Trigger
 
-const DrawerPortal = DrawerPrimitive.Portal
+// Vaul's Portal is declared against its own React type dependency. Keep its
+// published props explicit and adapt only the component signature across the
+// React 18/19 type boundary; the app and Vaul share the same runtime React.
+const VaulPortal = DrawerPrimitive.Portal as unknown as React.ComponentType<DialogPortalProps>
+const DrawerPortal = (props: DialogPortalProps) =>
+  React.createElement(VaulPortal, props)
 
 const DrawerClose = DrawerPrimitive.Close
 

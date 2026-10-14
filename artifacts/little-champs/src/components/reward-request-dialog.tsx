@@ -1,0 +1,236 @@
+import { useForm } from "react-hook-form";
+import { zod4Resolver } from "@/lib/zod4-resolver";
+import { z } from "zod/v4";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Lightbulb, Pencil } from "lucide-react";
+
+const rewardRequestFormSchema = z.object({
+  title: z.string().min(1, "Please enter a reward title"),
+  description: z.string().optional(),
+  pointThreshold: z.number().min(1, "Points must be at least 1"),
+});
+
+type RewardRequestFormData = z.infer<typeof rewardRequestFormSchema>;
+
+interface RewardRequestDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: RewardRequestFormData) => void;
+  isSubmitting?: boolean;
+  rewardRequest?: { id: string; title: string; description: string | null; pointThreshold: number } | null;
+}
+
+function useVisualViewport() {
+  const getVV = () => ({
+    height: window.visualViewport?.height ?? window.innerHeight,
+    offsetTop: window.visualViewport?.offsetTop ?? 0,
+  });
+  const [vv, setVV] = useState(getVV);
+  useEffect(() => {
+    const vvEl = window.visualViewport;
+    if (!vvEl) return;
+    const update = () => setVV({ height: vvEl.height, offsetTop: vvEl.offsetTop });
+    vvEl.addEventListener('resize', update);
+    vvEl.addEventListener('scroll', update);
+    return () => {
+      vvEl.removeEventListener('resize', update);
+      vvEl.removeEventListener('scroll', update);
+    };
+  }, []);
+  return vv;
+}
+
+function scrollInputIntoView(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  const el = e.currentTarget;
+  setTimeout(() => {
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, 320);
+}
+
+export function RewardRequestDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+  isSubmitting = false,
+  rewardRequest = null,
+}: RewardRequestDialogProps) {
+  const { t } = useTranslation();
+  const isEditing = !!rewardRequest;
+  const { height: vvHeight, offsetTop: vvOffsetTop } = useVisualViewport();
+
+  const dialogStyle: React.CSSProperties = {
+    position: 'fixed',
+    left: '50%',
+    top: `${vvOffsetTop + vvHeight / 2}px`,
+    transform: 'translate(-50%, -50%)',
+    maxHeight: `${vvHeight - 48}px`,
+    overflowY: 'auto',
+    width: 'min(calc(100% - 1rem), 28rem)',
+  };
+
+  const form = useForm<RewardRequestFormData>({
+    resolver: zod4Resolver(rewardRequestFormSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      pointThreshold: 50,
+    },
+  });
+
+  useEffect(() => {
+    if (!open) {
+      form.reset({
+        title: "",
+        description: "",
+        pointThreshold: 50,
+      });
+    } else if (rewardRequest) {
+      form.reset({
+        title: rewardRequest.title,
+        description: rewardRequest.description || "",
+        pointThreshold: rewardRequest.pointThreshold,
+      });
+    }
+  }, [open, rewardRequest?.id, form]);
+
+  const handleSubmit = (data: RewardRequestFormData) => {
+    onSubmit(data);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        style={dialogStyle}
+        className="lc-game-dialog lc-request-dialog"
+        data-testid={isEditing ? "dialog-edit-request" : "dialog-request-reward"}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <DialogHeader className="lc-game-dialog-header">
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <Pencil className="h-6 w-6 text-primary" />
+            ) : (
+              <Lightbulb className="h-6 w-6 text-primary" />
+            )}
+            <DialogTitle className="text-2xl font-accent">
+              {isEditing ? t('rewards.editRewardRequest') : t('rewards.requestReward')}
+            </DialogTitle>
+          </div>
+          <DialogDescription>
+            {isEditing
+              ? t('rewards.adjustRewardDetails')
+              : t('rewards.tellParentsWhatYouWant')
+            }
+          </DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="lc-game-dialog-form space-y-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('rewards.whatRewardDoYouWant')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={t('rewards.rewardRequestPlaceholder')}
+                      {...field}
+                      onFocus={scrollInputIntoView}
+                      data-testid="input-request-title"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('rewards.tellUsMore')}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={t('rewards.tellUsMorePlaceholder')}
+                      {...field}
+                      value={field.value || ""}
+                      onFocus={scrollInputIntoView}
+                      data-testid="input-request-description"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="pointThreshold"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('rewards.howManyPoints')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      min="1"
+                      placeholder="50"
+                      {...field}
+                      value={field.value === 0 ? "" : field.value}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? 0 : parseInt(val) || 0);
+                      }}
+                      onFocus={scrollInputIntoView}
+                      data-testid="input-request-points"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="lc-game-dialog-actions flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                data-testid="button-cancel-request"
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                data-testid={isEditing ? "button-save-request" : "button-submit-request"}
+              >
+                {isSubmitting ? (isEditing ? t('rewards.saving') : t('rewards.sending')) : (isEditing ? t('rewards.saveChanges') : t('rewards.sendRequest'))}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}

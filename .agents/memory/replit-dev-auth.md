@@ -24,4 +24,18 @@ Chrome blocks cookies in cross-site iframe contexts. The Replit workspace embeds
 - `client/src/pages/landing.tsx` `onLogin`: if `result.devToken` exists, calls `storeDevToken()`
 - `client/src/components/profile-menu.tsx` `handleLogout`: calls `clearDevToken()` before POST /api/auth/logout
 
+## Development session durability
+
+Development cookie sessions must survive API workflow restarts in a session table isolated from production sessions. Keep the dev-token fallback for embedded previews where cookies are blocked; persistent cookies alone do not replace it.
+
+**Why:** In the iOS Replit preview, an API restart discarded the in-memory development cookie session. The interface could still show a cached family member while every protected request, including member switching, returned `Unauthorized` before PIN validation.
+
+**How to apply:** When changing development authentication, preserve restart-safe, isolated session storage and have the frontend recheck the actual auth endpoint on a generic 401 rather than treating a cached user as proof of a live session. Do not log out for an incorrect PIN.
+
+When bundling `connect-pg-simple` for an isolated development session table, include its table template alongside the bundle and give the development table its own primary-key and expiry-index names.
+
+**Why:** The bundled library resolves the template relative to the built output, not its package directory. Its stock index name also conflicts with the existing session table because PostgreSQL index names are schema-wide; this made authenticated requests fail intermittently with 500 responses.
+
+**How to apply:** Keep the development session template and its constraint/index names isolated whenever changing the backend build or session-store configuration. Confirm an authenticated request still works after restarting the built server.
+
 **How to apply:** This is purely additive dev-only code. Production is not affected — `isDev` guards all token logic server-side, and `import.meta.env.DEV` guards client-side. Any future development-token state required across requests must survive backend hot reloads; never persist raw token values.

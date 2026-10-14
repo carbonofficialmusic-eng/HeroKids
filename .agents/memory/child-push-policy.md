@@ -8,3 +8,9 @@ Kinder erhalten Push-Nachrichten nur für gebündelte neue Chatnachrichten, neue
 **Why:** Kinder sollen nicht regelmäßig zum Telefon gelockt oder mit Erfolgs- und Aufgabenmeldungen überhäuft werden. Push ist sozialen Nachrichten, abgeschlossenen Belohnungsentscheidungen und Ereignissen vorbehalten, bei denen das Kind reagieren muss.
 
 **How to apply:** Neue Kinder-Push-Typen nur ergänzen, wenn sie einer dieser Kategorien entsprechen. Chatmeldungen bündeln und bei geöffnetem Chat verwerfen. Die familienlokale Ruhezeit ist standardmäßig von 20:00 bis 07:00 Uhr aktiv, kann von Eltern aber vollständig ausgeschaltet werden; dann dürfen die gespeicherten Zeiten keine Push-Nachrichten blockieren.
+
+Bei einem User Switch auf einem gemeinsam genutzten Elterngerät darf die Elternmeldung über eine eingereichte Kinderaufgabe nicht auf genau dem Gerät erscheinen, das die Aufgabe eingereicht hat. Andere Elterngeräte erhalten die Meldung weiterhin.
+
+**Why:** Ein nicht registriertes Kind ohne Device Link würde sonst während seines aktiven Profils wie ein Empfänger der eigenen Aufgabenmeldung wirken, obwohl der Push technisch an das Elterngerät adressiert ist.
+
+**How to apply:** Bei Aufgabenabgaben das auslösende physische Gerät nur aus der zugehörigen Eltern-Pushzustellung ausschließen; die In-App-Benachrichtigung und Zustellung an andere Elterngeräte bleiben unverändert.

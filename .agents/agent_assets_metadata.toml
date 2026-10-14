@@ -1,698 +1,856 @@
 uploads = []
-
-[[generated]]
-id = "Wl6Zh0Fhfdu9HDlySH8Mb"
-uri = "file://attached_assets/generated_images/nemicolopterus_white_bg.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "1HKSlZ3p2lW6_49pcQPhh"
-uri = "file://attached_assets/generated_images/nemicolopterus_forest_canopy_scene.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "PV_T49jv1YC8C8yLkY685"
-uri = "file://attached_assets/generated_images/skater_kid_adventure_avatar.png"
-type = "image"
-title = "skater kid adventure avatar"
-
-[[generated]]
-id = "bOV66GD57tfKRGPJP9hDt"
-uri = "file://attached_assets/generated_images/skater_kid_skatepark_scene.png"
-type = "image"
-title = "skatepark urban background"
-
-[[generated]]
-id = "mbmZNUVFcperjl8Z7BhfX"
-uri = "file://attached_assets/generated_images/city_skyline_hero_signal.png"
-type = "image"
-title = "city skyline hero background no text"
-
-[[generated]]
-id = "S7wHfBc_x50ZYIqRHsHWi"
-uri = "file://artifacts/mockup-sandbox/public/images/herokids_hero.png"
-type = "image"
-title = "Cinematic hero family task management"
-
-[[generated]]
-id = "oDDiICFQO5vSl5GxMgSW6"
-uri = "file://artifacts/mockup-sandbox/public/images/herokids_ui.png"
-type = "image"
-title = "Dark mode gamified UI teaser"
-
-[[generated]]
-id = "9nh-uU-e-Ul8fQUhwVmWn"
-uri = "file://artifacts/mockup-sandbox/public/images/herokids-hero.png"
-type = "image"
-title = "Happy family high fiving illustration"
-
-[[generated]]
-id = "KyWTXcAWfepKEA4hgHkZJ"
-uri = "file://artifacts/mockup-sandbox/public/images/herokids-rewards.png"
-type = "image"
-title = "Gamified phone task list illustration"
-
-[[generated]]
-id = "_Iq149XO9JyTs3-hpe06p"
-uri = "file://artifacts/mockup-sandbox/public/images/herokids-mascot.png"
-type = "image"
-title = "Kid superhero character illustration"
-
-[[generated]]
-id = "xYDwthiD5ENvMRuVFX41C"
-uri = "file://client/public/skins/backgrounds/wave-glider.png"
-type = "image"
-title = "wave-glider-legacy"
-
-[[generated]]
-id = "tK4vuB8lTdiOZvTg4R278"
-uri = "file://client/public/skins/backgrounds/forest-guard.png"
-type = "image"
-title = "forest-guard-legacy"
-
-[[generated]]
-id = "IdAsN2LoJU-nInOmxSbFO"
-uri = "file://client/public/reward-icons/ice-cream.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "Yul_F2fVFacXtVxd2Zs5Q"
-uri = "file://client/public/reward-icons/cinema.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "VCmIZXkeJoReFOlukimlb"
-uri = "file://client/public/reward-icons/board-game.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "gshHeAVB5TIHe8mLBElQB"
-uri = "file://client/public/reward-icons/amusement-park.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "AsqKeG7mZZSbxpZP4cgHo"
-uri = "file://client/public/reward-icons/pizza.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "e1Ym7Dk_zcic3KMGos_Rh"
-uri = "file://client/public/reward-icons/bicycle.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "6LyK-_zWnw_BiIh5L9MOm"
-uri = "file://client/public/reward-icons/football.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "Hz0nRqdo1qBpKltLtChuw"
-uri = "file://client/public/reward-icons/books.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "COD4TGk7ZJydjlah42W0O"
-uri = "file://client/public/reward-icons/baking.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "3_7CWzf9pnocNvdxHl19q"
-uri = "file://client/public/reward-icons/trophy.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "gf5sVMVNHw8KWHIfKwlNr"
-uri = "file://client/public/reward-icons/gaming.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "IamilrheY1Px4oMaRtWyD"
-uri = "file://client/public/reward-icons/gift.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "dEyXfN_SKmD-8IgaaPVI_"
-uri = "file://client/public/nav-icons/bonus.png"
-type = "image"
-title = "bonus-star-3d"
-
-[[generated]]
-id = "ZvHBptpvg1wg76lAIJidc"
-uri = "file://client/public/nav-icons/shop.png"
-type = "image"
-title = "reward-shop-3d"
-
-[[generated]]
-id = "SSkwobRw5PLP-5JIXNGpX"
-uri = "file://client/public/nav-icons/chest.png"
-type = "image"
-title = "treasure-chest-3d"
-
-[[generated]]
-id = "kA-kYNSLJU5pLK5B_9uZP"
-uri = "file://client/public/nav-icons/clipboard.png"
-type = "image"
-title = "task-clipboard-3d"
-
-[[generated]]
-id = "D0KUqxLIPgBuG735htQ7f"
-uri = "file://client/public/nav-icons/trophy.png"
-type = "image"
-title = "leaderboard-trophy-3d"
-
-[[generated]]
-id = "qk00YM0RHrX4cUkl4VqyI"
-uri = "file://client/public/nav-icons/pinboard.png"
-type = "image"
-title = "pinboard-3d-icon"
-
-[[generated]]
-id = "XWml4VitIcrQgidB5GAZM"
-uri = "file://attached_assets/generated_images/a_single_3d_pixar_7d22.png"
-type = "image"
-title = "generated_image"
-
-[[generated]]
-id = "B05Gz0n8dC6JoZgllpbjK"
-uri = "file://client/public/reward-icons/dice.png"
-type = "image"
-title = "3d dice reward icon"
-
-[[generated]]
-id = "O-vo6Lh9XG9luhXe-gHmy"
-uri = "file://client/public/reward-icons/guitar.png"
-type = "image"
-title = "3d guitar reward icon"
-
-[[generated]]
-id = "JVvx7kL3o-3YMhMMFp7Y9"
-uri = "file://client/public/reward-icons/circus.png"
-type = "image"
-title = "3d circus tent reward icon"
-
-[[generated]]
-id = "D4YCqrFvuWLGlSlO6PaIA"
-uri = "file://client/public/reward-icons/bowling-pin.png"
-type = "image"
-title = "3d bowling pin reward icon"
-
-[[generated]]
-id = "X4hT3DgOceJw5dv4Ge2l0"
-uri = "file://client/public/reward-icons/clock.png"
-type = "image"
-title = "3d classic clock reward icon"
-
-[[generated]]
-id = "Ped072qs2fu1UiLPCnkoK"
-uri = "file://client/public/reward-icons/carnival-mask.png"
-type = "image"
-title = "3d carnival mask reward icon"
-
-[[generated]]
-id = "vKuAYhZAP-RI8vQqvJfAy"
-uri = "file://client/src/assets/family-goals-icon.png"
-type = "image"
-title = "generated_image"
+generated = []
 
 [[outputs]]
-id = "jDcqlYKu7xhdwjCsAa7Eo"
-uri = "file://client/public/skins/backgrounds/neon-droid.png"
-type = "image"
-title = "Neon Droid – Hintergrundbild"
-logical_id = "10627836-bab3-4da7-828c-b76703d5115e"
+id = "Eu6nVSYmvgcXKzVdLodbW"
+uri = "file://attached_assets/little-champs-lg-webos-stage.zip"
+type = "unspecified"
+title = "Little Champs für LG – Paketdateien"
+description = "Vorbereitete webOS-App-Dateien für den Paketbau auf deinem Mac; noch kein installierbares IPK."
+logical_id = "521992a8-c4cb-42fb-ae79-0c4f1cc25ea7"
+content_hash = "sha256:e62419a0c9d32706328b6e4da1c223de9ea7e40b037f7c4f53790e52b258a61c"
+size = 373675
+mtime_ms = 1790724937674
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/521992a8-c4cb-42fb-ae79-0c4f1cc25ea7/77e7987b-9d18-4db8-a02d-482ae7189bc4"
+storage_version_token = "1790724946054888"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "lgjuJDieXqGd0dKwqcbrZ"
-uri = "file://client/public/skins/backgrounds/brave-explorer.png"
-type = "image"
-title = "Mutiger Entdecker – Hintergrundbild"
-logical_id = "b64dad99-c5f0-410b-afd4-5ebd8f828c42"
+id = "lrSSfu_PN8Qz4oIdBm2mp"
+uri = "file://attached_assets/little-champs-lg-family-tv-1.0.3.zip"
+type = "unspecified"
+title = "Little Champs TV – LG webOS 5 (1.0.3)"
+description = "Installierbares Familien-TV-Update; ZIP mit LG-webOS-Installationsdateien."
+logical_id = "3a5b001c-f6d0-434e-9e28-2338d841eb7e"
+content_hash = "sha256:6279ac459df259e11db92278602cf5dfe689b17d5fb2926b02808c13404dd6c1"
+size = 378075
+mtime_ms = 1790728186109
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/3a5b001c-f6d0-434e-9e28-2338d841eb7e/9eda263f-2966-485e-bb01-eb3c4eb59ed2"
+storage_version_token = "1790728468436785"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "NPg128LAV2Htggw48V_VU"
-uri = "file://ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png"
-type = "image"
-title = "Splash Screen (neu)"
-logical_id = "08ff22ea-7a93-43ae-891a-194519da0173"
+id = "JwN4EZBMpaF-Wy_obd8DR"
+uri = "file://attached_assets/little-champs-lg-family-tv-1.0.4.zip"
+type = "unspecified"
+title = "Little Champs TV für LG webOS 5 – Version 1.0.4"
+description = "Aktualisiertes Installationsarchiv mit Dark Mode, Aufgabenzuständen und lokal mitgelieferten Skin-Bildern."
+logical_id = "4de7017b-b136-40e4-9d72-d84d337c9419"
+content_hash = "sha256:e6f836fe4f1bfafebc0b68c1ba633119b1ca235a4c49fbb08503e6b381d5a0a6"
+size = 24446477
+mtime_ms = 1790744976398
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/4de7017b-b136-40e4-9d72-d84d337c9419/22b4450a-4be2-42cc-b70c-c781f3122e6c"
+storage_version_token = "1790745015686647"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "LLBrQ-QkaoLMCAvL80b41"
-uri = "file://ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
-type = "image"
-title = "App Icon (neu)"
-logical_id = "86addfbc-0f93-42e2-b607-50aef312c962"
+id = "lMynzDx4pux98rd6q4rkn"
+uri = "file://attached_assets/little-champs-lg-family-tv-1.0.5.zip"
+type = "unspecified"
+title = "Little Champs TV für LG webOS 5 – Version 1.0.5"
+description = "Aktualisiertes LG-Installationsarchiv mit iPad-orientiertem Kartenraster."
+logical_id = "124cf50d-553e-4cbe-9d6e-7319dc5b03f8"
+content_hash = "sha256:3cb0d3a7ee2781eb882c50890599c6fe5d23548af3d79e6ed275d85c0b919309"
+size = 24446473
+mtime_ms = 1790745474365
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/124cf50d-553e-4cbe-9d6e-7319dc5b03f8/87c72b5d-9016-4f3e-bcbb-9c93188a9b5d"
+storage_version_token = "1790745515065346"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "5BnPfBDCsaaPaAVIJQKlB"
-uri = "file://IOS_SANDBOX_PURCHASE_GUIDE.md"
-type = "text"
-title = "Anleitung: iOS Sandbox-Kauf testen (Task #149)"
-logical_id = "24d4f9c8-1c0d-49cf-b48a-025a4616dd8d"
+id = "CebnqsZliXTwHvNRafJap"
+uri = "file://attached_assets/little-champs-lg-family-tv-1.0.6.zip"
+type = "unspecified"
+title = "Little Champs TV für LG webOS 5 – Version 1.0.6"
+description = "LG-Archiv mit zentralem Logo, Profilbild links und separater Punktekarte im oberen Bereich."
+logical_id = "4289f9a4-ac8a-4934-80df-04fe2a30d212"
+content_hash = "sha256:f6ff72a56ef4904334272a9063deed3b9843d630c402019bccd20ff8e1423ca8"
+size = 24447098
+mtime_ms = 1790764649524
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/4289f9a4-ac8a-4934-80df-04fe2a30d212/4f0d32b2-7169-437b-89a6-f9087c18ad40"
+storage_version_token = "1790764704855501"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "t_0DqSfL7zwcp9mYvAXp1"
-uri = "file://attached_assets/generated_images/legacy-hero-modern-concept.png"
-type = "image"
-title = "Moderner Legacy-Held – Entwurf"
-description = "Unverbindlicher Charakterentwurf in Türkis, Goldorange und Marineblau. Noch nicht in die App eingebaut."
-logical_id = "74b3e6fe-85b6-4167-8152-9f62cc510090"
-content_hash = "sha256:79705efe661aa3ec9ae8a9338f7314ec207100954516dc4487f5993edf151508"
-size = 1090078
-mtime_ms = 1789168068271
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/74b3e6fe-85b6-4167-8152-9f62cc510090/eba836da-5281-4218-9198-9dcf13cbc8e2"
-storage_version_token = "1789168086032605"
-content_type = "image/png"
+id = "v0b6EJjDYlJ1KVjGd7vZA"
+uri = "file://attached_assets/little-champs-lg-family-tv-1.0.7.zip"
+type = "unspecified"
+title = "Little Champs TV für LG webOS 5 – Version 1.0.7"
+description = "Kompaktere Aufgaben- und Skin-Ansicht, kleineres Logo und sichtbarer Skin-Hintergrund."
+logical_id = "bde48c7a-1f5c-421d-ab9e-fdeb47a4bb29"
+content_hash = "sha256:9eef6a3410076cd8a2def2a6deb924e1ba21ebf465686e0b85170befc317b2ab"
+size = 24447299
+mtime_ms = 1790769066682
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/bde48c7a-1f5c-421d-ab9e-fdeb47a4bb29/7d840ad7-4d67-4352-8ee0-309bbc918706"
+storage_version_token = "1790769134283885"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "1ngU6km4DkS7odjgHAk9N"
-uri = "file://attached_assets/generated_images/legacy-hero-modern-background-concept.png"
-type = "image"
-title = "Legacy-Helden-Hintergrund – Entwurf"
-description = "Passender moderner Zukunftsstadt-Hintergrund im bestehenden Little-Champs-Farbkonzept. Noch nicht eingebaut."
-logical_id = "c33fbe13-b983-464d-a4a2-3be3f6bc6f3e"
-content_hash = "sha256:cd6c49679498c45fa88cbbf48cf3bdb61945cef3c0cc296f4a688a3fba94957a"
-size = 1626750
-mtime_ms = 1789168073475
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/c33fbe13-b983-464d-a4a2-3be3f6bc6f3e/244ddd8c-c20a-483c-8695-23617f7d9b7d"
-storage_version_token = "1789168087334513"
-content_type = "image/png"
+id = "0J2T5dWhcL9yAEEHCrWMy"
+uri = "file://attached_assets/little-champs-lg-family-tv-1.0.8.zip"
+type = "unspecified"
+title = "Little Champs TV für LG webOS 5 – Version 1.0.8"
+description = "Aufgabenkarten ohne Erledigt-Button sind nun mit der Fernbedienung fokussierbar und dienen als zusätzliche Scroll-Stopps."
+logical_id = "5711ab85-14e9-4295-ac7b-5f705f2bfc66"
+content_hash = "sha256:0baa16ea97b7f0799077089f895abd96e15b127800c161533e7ac26035626e13"
+size = 24447368
+mtime_ms = 1790769369731
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/5711ab85-14e9-4295-ac7b-5f705f2bfc66/d198d305-4715-48b4-9f66-d7f9c5463f51"
+storage_version_token = "1790769400264956"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "sZD8rL_yuMCHftaPsQPiw"
-uri = "file://attached_assets/generated_images/legacy-pastel-star-guardian-concept.png"
-type = "image"
-title = "Star Guardian – Pastell-Entwurf"
-description = "Rothaarige Heldin in weicher, klassischer Little-Champs-Superheldenrichtung."
-logical_id = "9b226d92-89ce-4bf2-894d-691cb7652f23"
-content_hash = "sha256:1d62d8e3cfaa6094b806dde5fc86e9150d2133b6421b888cc22c5af8e7743d36"
-size = 1011737
-mtime_ms = 1789170610084
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/9b226d92-89ce-4bf2-894d-691cb7652f23/f52ba55c-b1c3-485e-b93f-9cae816a42ae"
-storage_version_token = "1789170633020449"
-content_type = "image/png"
+id = "O2OhqnvDJ4_kQotunYTL2"
+uri = "file://artifacts/little-champs-tv/dist/little-champs-tv-webos-1.0.9.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.9 – webOS-Paketdateien"
+description = "ZIP mit der fertig vorbereiteten LG-webOS-App. Auf einem Mac mit LG webOS CLI per ares-package in eine installierbare IPK umwandeln."
+logical_id = "8cc63d67-f576-45aa-bb24-0cd6d12338dc"
+content_hash = "sha256:82b9e6c8e4647998154da9b3f0d02da5ef079c775796b547fd6cf831496ebcbf"
+size = 24448501
+mtime_ms = 1790770950054
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/8cc63d67-f576-45aa-bb24-0cd6d12338dc/f8239643-eb59-488a-860e-df4373f9bb49"
+storage_version_token = "1790770988120560"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "RrtjmhyAwVJjkPOc5LZWK"
-uri = "file://attached_assets/generated_images/legacy-pastel-star-guardian-background-concept.png"
-type = "image"
-title = "Star Guardian – Pastell-Hintergrund"
-description = "Märchenhafte Sternwarte mit zentralem Motiv für Telefon-Ausschnitte."
-logical_id = "65b3bed0-269a-4a04-b8d1-3d63a4dd2c5f"
-content_hash = "sha256:7adf76bddc58fe09f7a43a98f63139092b5fb7eb9b1f95c674ef4edaf2459921"
-size = 1390941
-mtime_ms = 1789170619631
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/65b3bed0-269a-4a04-b8d1-3d63a4dd2c5f/9aa07ff4-3c33-42b6-9770-acd58f064abe"
-storage_version_token = "1789170634236997"
-content_type = "image/png"
+id = "XAMplULYfte8Kw10b0TNA"
+uri = "file://artifacts/little-champs-tv/dist/little-champs-tv-webos-1.0.10-replit-test.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.10 – Replit-Testpaket"
+description = "LG-webOS-Paketdateien für den laufenden Replit-Entwicklungsserver, nicht für die veröffentlichte App. Auf dem Mac mit ares-package eine IPK erstellen."
+logical_id = "eeded99f-d4e1-4770-96da-515ce53e63ef"
+content_hash = "sha256:c3b15b559a13886e51f71846353e292634420cf61a9aee9a40de72af4db777b3"
+size = 24448556
+mtime_ms = 1790771601444
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/eeded99f-d4e1-4770-96da-515ce53e63ef/ab317dc7-9792-4035-ba83-50910f9fea27"
+storage_version_token = "1790771676568284"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "Hro1RwHmzS3h9U9bxlfZC"
-uri = "file://attached_assets/generated_images/legacy-pastel-shield-blaze-concept.png"
-type = "image"
-title = "Shield Blaze – Pastell-Entwurf"
-description = "Materie-Heldin mit klassischem Kostüm und sanften Kristallfarben."
-logical_id = "47a7a2c3-9dd5-416d-af97-f4d760a6fc82"
-content_hash = "sha256:a38b4a311d49809a4bb79f37dc8ea5c70fdef2bdea2fec8eb9475e88bf46c4bb"
-size = 1136049
-mtime_ms = 1789170613304
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/47a7a2c3-9dd5-416d-af97-f4d760a6fc82/59d69783-8dc4-4860-86ac-60b259f029e7"
-storage_version_token = "1789170635412747"
-content_type = "image/png"
+id = "9SIGOii18T5htVSKkykr4"
+uri = "file://artifacts/little-champs-tv/dist/little-champs-tv-webos-1.0.11-replit-test.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.11 – Replit-Testpaket"
+description = "LG-webOS-Testpaket mit TV-only-Anpassungen und Replit-Entwicklungsadresse. ZIP auf dem Mac mit ares-package zur IPK paketieren."
+logical_id = "3bf8592b-e58f-46f0-9ce7-58060b0f47e8"
+content_hash = "sha256:e6530a57b73ef245bdd803a635d17ff315c3c7e77de36219ba8705684c99393e"
+size = 24447216
+mtime_ms = 1790773185794
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/3bf8592b-e58f-46f0-9ce7-58060b0f47e8/20ab6a37-c344-4437-838a-124a155d536c"
+storage_version_token = "1790773288164854"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "1ldyIqd6mXWFiuUXxgv2b"
-uri = "file://attached_assets/generated_images/legacy-pastel-shield-blaze-background-concept.png"
-type = "image"
-title = "Shield Blaze – Pastell-Hintergrund"
-description = "Natürliche Kristallwelt statt futuristischem Portal."
-logical_id = "7edcc0f8-f445-4ba7-a24c-74dcbe47ba5c"
-content_hash = "sha256:d8d29ee51cffb4b514314f36f9acc9d5c761069c6cc4cbc49b0c4cd4529dd029"
-size = 1719939
-mtime_ms = 1789170620139
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/7edcc0f8-f445-4ba7-a24c-74dcbe47ba5c/cfe5f254-c779-419c-9f1b-c7ebb5cc46ef"
-storage_version_token = "1789170636626694"
-content_type = "image/png"
+id = "g4az-w3JbAnkFZdyD-Oo5"
+uri = "file://artifacts/little-champs-tv/dist/little-champs-tv-webos-1.0.12-replit-test.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.12 – Replit-Testpaket"
+description = "LG-webOS-Testpaket mit grünen transparenten Karten für erledigte Aufgaben; auf dem Mac zur IPK paketieren."
+logical_id = "2b611dff-0389-4795-9f5f-f9e7e7226686"
+content_hash = "sha256:be4da1a5d32bdc11f688d859c889302a88b8e7d1f53d85eac1bae38beeddd50c"
+size = 24447223
+mtime_ms = 1790773410447
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/2b611dff-0389-4795-9f5f-f9e7e7226686/5c56a4ca-1fb8-4fb1-9008-a141814f9e25"
+storage_version_token = "1790773433479260"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "awE5DkU9tF7Hk6eicDEZ0"
-uri = "file://attached_assets/generated_images/legacy-pastel-logo-star-guardian-concept.png"
-type = "image"
-title = "Star Guardian – Logo-näher"
-description = "Pastelliger 3D-Avatar mit klarer Türkis-Gold-Silhouette und klassischer Logo-Heldenwirkung."
-logical_id = "95b1726d-99e9-444a-a83b-37e59e73bf61"
-content_hash = "sha256:12447c8a3e625c7dc4861117acca221bc65161bf52ff9cac96623ed28963b9aa"
-size = 1001970
-mtime_ms = 1789170798839
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/95b1726d-99e9-444a-a83b-37e59e73bf61/f3c98984-d951-4275-bbda-531a942e7177"
-storage_version_token = "1789170809155867"
-content_type = "image/png"
+id = "R4CjYlss8PylrjM-rSW0T"
+uri = "file://artifacts/little-champs-tv/dist/little-champs-tv-webos-1.0.13-replit-test.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.13 – Replit-Testpaket"
+description = "LG-webOS-Testpaket mit feststehender Navigation und zusätzlichem Sicherheitsabstand für Aufgaben am unteren Bildrand. ZIP auf dem Mac zur IPK paketieren."
+logical_id = "79d7f613-4c2e-456d-94e7-c8a5b856f918"
+content_hash = "sha256:0224fffd0167022627ac64f0b30ef8ac58bc6ef8b68d8374c412ed20e2d79321"
+size = 24447423
+mtime_ms = 1790773752689
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/79d7f613-4c2e-456d-94e7-c8a5b856f918/346fdd68-07f2-4262-936f-28f39b5057a9"
+storage_version_token = "1790773798405696"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "DyNfaU5VtSDFszuJdDwPE"
-uri = "file://attached_assets/generated_images/legacy-pastel-logo-shield-blaze-concept.png"
-type = "image"
-title = "Shield Blaze – Logo-näher"
-description = "Pastelliger Materie-Avatar mit kräftigeren Konturen, Cape und vereinfachtem Heldensymbol."
-logical_id = "2bcb8e66-65f4-427c-b4e3-e7ed5e080883"
-content_hash = "sha256:29648a8c836617277c52df57ce5ce4d417bec53eec5a74ebeba9d07ab5bca455"
-size = 1061531
-mtime_ms = 1789170800599
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/2bcb8e66-65f4-427c-b4e3-e7ed5e080883/3e62e678-829d-4bc1-9604-3d8b545fd547"
-storage_version_token = "1789170810238944"
-content_type = "image/png"
+id = "GNbJ1aEDW1iqapoVEOgoW"
+uri = "file://artifacts/little-champs-tv/dist/little-champs-tv-webos-1.0.14-replit-test.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.14 – Testpaket"
+description = "webOS-Paket für den Replit-Entwicklungsserver; mit Fokus- und Reihenfolgekorrekturen."
+logical_id = "e1688cbb-570b-4074-8701-91f2e0c5b9f4"
+content_hash = "sha256:a21e3ef6add731be01948cc93fa6fee72e3c6dd21418dab52821c98294139661"
+size = 24447482
+mtime_ms = 1790775691733
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/e1688cbb-570b-4074-8701-91f2e0c5b9f4/68d74391-99dd-4186-9e9a-d0f0a03fe1c9"
+storage_version_token = "1790775743626255"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "iLnnPaLD_dmUzLWtiWg00"
-uri = "file://attached_assets/generated_images/legacy-ultra-simple-logo-hero-concept.png"
-type = "image"
-title = "Legacy-Heldin – stark vereinfachter Logo-Stil"
-description = "Einfacher Maskenheld mit großen Farbflächen, klarer Kontur und klassischer Little-Champs-Silhouette."
-logical_id = "50b8992b-3b91-4d9e-91f9-bf7e1c9c59e3"
-content_hash = "sha256:739d6856037144e17c36536f7206462ecdce049f1259b7b7eeb9c588aab3c440"
-size = 965073
-mtime_ms = 1789171028500
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/50b8992b-3b91-4d9e-91f9-bf7e1c9c59e3/dbc57a3c-a97e-4dd2-80f4-1662debe4fe5"
-storage_version_token = "1789171037217245"
-content_type = "image/png"
+id = "nrl7JRm4Rtl1UjQXlusK4"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.14_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.14 – fertige IPK"
+description = "Direkt installierbares webOS-Testpaket; kein ares-package auf dem Mac nötig."
+logical_id = "d4309f9e-93e4-4618-a6b5-05aa3d30f0ac"
+content_hash = "sha256:76cce760095e126ee28b393cd9820a0e19330016b058638742d22f1023e8a757"
+size = 24429958
+mtime_ms = 1790776305876
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/d4309f9e-93e4-4618-a6b5-05aa3d30f0ac/f8abe02f-fa29-4b77-947c-cf8853ec701c"
+storage_version_token = "1790776316828042"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "nlNKdkhKlveiF3ywAHNT4"
-uri = "file://attached_assets/generated_images/legacy-balanced-logo-hero-concept.png"
-type = "image"
-title = "Legacy-Heldin – mittlerer Detailgrad"
-description = "Logo-nahe Farbflächen und klassische Heldensilhouette, ergänzt um dezente Kostümdetails und ein klar erkennbares Kraft-Element."
-logical_id = "13ec637a-4875-49d7-b041-157bdaf7c2af"
-content_hash = "sha256:c7ed499ddb05c6f71c4bab363df4853b40b9bef6113856ba7777282a06f46bdd"
-size = 1066223
-mtime_ms = 1789171130951
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/13ec637a-4875-49d7-b041-157bdaf7c2af/e0d6cb45-31ef-4d40-ada7-aeb5932cc819"
-storage_version_token = "1789171138884418"
-content_type = "image/png"
+id = "gSFhmTnbRMHsmpuER1cDl"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.15_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.15 – korrigierte IPK"
+description = "TV-Testpaket mit korrigiertem webOS-Archivformat; noch nicht am echten LG-TV bestätigt."
+logical_id = "13f00821-ff09-460f-a9de-e87c31b42608"
+content_hash = "sha256:28b5cfa9cc47224c2ac4d685eeb11f9c6843b024af02f060954ce68134d24b09"
+size = 24429736
+mtime_ms = 1790776659757
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/13f00821-ff09-460f-a9de-e87c31b42608/9546b0da-a1c6-425b-ad71-01be08fb196f"
+storage_version_token = "1790776704387794"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "_U7fYaBdp1WP6pm_fpjRL"
-uri = "file://attached_assets/generated_images/shield-blaze-old-legacy-minimal-refresh.png"
-type = "image"
-title = "Shield Blaze – minimal modernisierter Legacy-Entwurf"
-description = "Der ursprüngliche Legacy-Avatar wurde nur behutsam bei Linien, Schattierung und wenigen Details modernisiert."
-logical_id = "81aa079d-60c7-4c28-b961-f4cdb79cbf0e"
-content_hash = "sha256:599e99167ce45872760aa235edfe46d60746c4a1b6cac2751f12c340aa96aa5e"
-size = 771366
-mtime_ms = 1789171268479
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/81aa079d-60c7-4c28-b961-f4cdb79cbf0e/f20b1e26-5f8a-4dc6-8ea7-232bf6685071"
-storage_version_token = "1789171282392607"
-content_type = "image/png"
+id = "09cEI79aAQAh9UaInc9GH"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.16_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.16 – Eltern-Skin-Fokus"
+description = "LG-webOS-Testpaket für den Replit-Entwicklungsserver; bleibt nach Ausrüsten auf der Skin-Karte."
+logical_id = "5df16f4c-719f-42a7-a112-ad39677915c5"
+content_hash = "sha256:e140335c4c4da13c815c4bf13c35eb7367e42f2abba2e7e5c4720199b80a4c38"
+size = 24431082
+mtime_ms = 1790777528297
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/5df16f4c-719f-42a7-a112-ad39677915c5/18dc215b-9d72-440d-ba48-163adae42c83"
+storage_version_token = "1790777589745290"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "XbMircWaEtWUc4QEyUsTT"
-uri = "file://attached_assets/generated_images/shield-blaze-reference-style-concept.png"
-type = "image"
-title = "Shield Blaze – Stil der neuen Referenz"
-description = "Ein einzelner Legacy-Held im warmen 3D-Storybook-Stil des hochgeladenen Little-Champs-Bildes."
-logical_id = "5aa1cc4a-a9f9-49bd-8031-ab8ef718b77c"
-content_hash = "sha256:9ab5cec2bfe6e693881274e9fa4db52c3fab343c4fa158a62b0b337c6e378352"
-size = 812938
-mtime_ms = 1789171476303
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/5aa1cc4a-a9f9-49bd-8031-ab8ef718b77c/695877a5-d1d4-4b87-9304-68bd79377837"
-storage_version_token = "1789171489085082"
-content_type = "image/png"
+id = "KFeql9e1fMCx1kWqVkPMN"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.17_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.17 – Skin-Galerie"
+description = "webOS-Testpaket: vier Karten je Reihe und hervorgehobener Legacy-Block mit Sterne-Fortschritt; verwendet nur den Replit-Entwicklungsserver."
+logical_id = "b42af633-7450-4a51-ba10-f004b5123dbe"
+content_hash = "sha256:2c31b7e05a7102bcefafc77e7b7b8ca0aa4e96c706167d8a0d1bef1a6cc17304"
+size = 24431600
+mtime_ms = 1790778084248
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/b42af633-7450-4a51-ba10-f004b5123dbe/51f8741f-d437-469f-b65d-2f6847670fa3"
+storage_version_token = "1790778142032988"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "NeTcVO0jTRbjGYJbLhm_G"
-uri = "file://attached_assets/generated_images/style-study-abstract-artistic-wide.png"
-type = "image"
-title = "Stilprobe A – Abstrakt"
-description = "Malerische, grafische Formen mit Papier- und Gouache-Textur. Ausdrucksstark, aber ohne digitalen Gaming-Look."
-logical_id = "825f0988-26b4-401f-843b-1a6e15b23ab5"
-content_hash = "sha256:87254b2fa5fa5a23d8f5ecd361926762d049e5fa3886be454ef3b879f8644393"
-size = 1394974
-mtime_ms = 1789175480867
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/825f0988-26b4-401f-843b-1a6e15b23ab5/f1ac75b6-d12d-44ca-a88e-61c655587049"
-storage_version_token = "1789175492564274"
-content_type = "image/png"
+id = "mh96PRwdrxSaKUMoz_bme"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.18_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.18 – Aufgabenboard"
+description = "webOS-Testpaket mit klappbaren Kategorien, Wichtig und Termine sowie einer Karte für weitere anstehende Termine. Verbindet sich ausschließlich mit dem Replit-Entwicklungsserver."
+logical_id = "96496b5b-9c23-47c7-8d66-61f2997e57ed"
+content_hash = "sha256:e6ef0f06665ed8b4cc7cd45a39fcb11d11fc51d6226542679d61b5143866e07d"
+size = 24434292
+mtime_ms = 1790779170528
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/96496b5b-9c23-47c7-8d66-61f2997e57ed/f2c0be90-e255-49a4-ad8f-5538d9fb9a04"
+storage_version_token = "1790779256146104"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "jwFL6kO-ngj1sOlrh0PYi"
-uri = "file://attached_assets/generated_images/style-study-simple-artistic-wide.png"
-type = "image"
-title = "Stilprobe B – Einfach und kunstvoll"
-description = "Ruhige, reduzierte Kinderbuch-Landschaft mit viel Freiraum und handgemalter Wirkung."
-logical_id = "833d3241-42b2-4a8c-9c3f-91fc731cef02"
-content_hash = "sha256:716438ea360fd730124f2a5d25a7355dac4400451ac33a3f129650470539a61b"
-size = 1091837
-mtime_ms = 1789175481819
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/833d3241-42b2-4a8c-9c3f-91fc731cef02/9052dee7-ae02-454b-928a-157e07f1cf8c"
-storage_version_token = "1789175493873093"
-content_type = "image/png"
+id = "2shhX3Le3LiMnhxvCxKdU"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.19_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.19 – webOS-5-Korrektur"
+description = "Korrigiertes LG-webOS-Testpaket; nutzt weiterhin ausschließlich den Replit-Entwicklungsserver."
+logical_id = "d2ce7827-caa8-4e11-b15b-eebc3bd95a1b"
+content_hash = "sha256:3093fe28c2d71ae6cb7c5d987f5ae9a79faf0223ff997904eda95e4a92276ac1"
+size = 24434618
+mtime_ms = 1790781522104
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/d2ce7827-caa8-4e11-b15b-eebc3bd95a1b/5022e224-032b-4a35-86f9-9204415ce6f5"
+storage_version_token = "1790781641352317"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "TiRHfR3V74uX1L7K1d90P"
-uri = "file://attached_assets/generated_images/style-study-forest-guardian-abstract-wide.png"
-type = "image"
-title = "Abstrakter Waldwächter-Hintergrund"
-description = "Abstrakte Waldwelt im finalen 1408×768-Format, farblich und formal vom Waldwächter inspiriert, mit freier Mitte für den Avatar."
-logical_id = "f23da9f6-5f48-4b6d-b07d-23bf2a43626e"
-content_hash = "sha256:5c49b74173ba6e2bf181fb07f25a0b7eb0802ee5362b9e0c5a3b0c3a98cb440d"
-size = 1543768
-mtime_ms = 1789175728272
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/f23da9f6-5f48-4b6d-b07d-23bf2a43626e/7e60228a-9296-41f6-a0e1-17c88ef2b730"
-storage_version_token = "1789175734247592"
-content_type = "image/png"
+id = "VM7zR0VNW_5qonX-qFKfq"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.20_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.20 – dezentere Kategorien"
+description = "LG-webOS-Testpaket mit zurückhaltenderen Kategoriebalken auf Eltern- und Kinderboard; nutzt weiterhin den Replit-Entwicklungsserver."
+logical_id = "52f4ca92-5ba6-4e15-ae62-189ed5ce3665"
+content_hash = "sha256:297a3b1678fc4e2a626f3ca8e2b74892ad17c9e70609fabe81260bc0644ed462"
+size = 24434362
+mtime_ms = 1790782024592
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/52f4ca92-5ba6-4e15-ae62-189ed5ce3665/88a21f33-b772-4867-a2f8-11193f87ed5b"
+storage_version_token = "1790782050925816"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "hzMjZsJmCg1_GbA2LF0Us"
-uri = "file://attached_assets/generated_images/style-study-forest-guardian-abstract-centered-wide.png"
-type = "image"
-title = "Abstrakter Waldwächter – zentrale Details"
-description = "Überarbeitete Stilprobe mit einem bildstarken mittleren Telefon-Ausschnitt und ausreichend Kontrast für den gedachten Avatar."
-logical_id = "6d922cf6-432e-4b3c-86cf-fd595e092f07"
-content_hash = "sha256:3e56a58ab6425f33c745fe9215474006bcdc7bad0d65377ec4b639f663535922"
-size = 1971035
-mtime_ms = 1789175883928
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/6d922cf6-432e-4b3c-86cf-fd595e092f07/c4129703-6c3f-4ec9-a143-4d3f69d86908"
-storage_version_token = "1789175899619911"
-content_type = "image/png"
+id = "4xWCepT6I0sA7BPEAKoAY"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.21_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.21 – Testpaket"
+description = "LG-webOS-Testpaket mit dezenteren Kategorien, mehr Abstand und korrigierter Fernbedienungs-Navigation. Verbindet sich nur mit dem Replit-Entwicklungsserver."
+logical_id = "fd1f58ea-34cf-4305-ae28-f4cf4155f85b"
+content_hash = "sha256:c8ab8382f312665eb8dd3cc4a4b30b2a4f9f487aca5997972ee4070f43a8df62"
+size = 24434752
+mtime_ms = 1790788021837
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/fd1f58ea-34cf-4305-ae28-f4cf4155f85b/b0541056-fe47-4c99-b76f-da55f9446a6d"
+storage_version_token = "1790788105860141"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "JrXdw2RBiTv0SD-b8lHlH"
-uri = "file://client/public/skins/backgrounds/arcade-master.png"
-type = "image"
-title = "Arcade Master – Hintergrundbild"
-description = "Das aktuell in der App verwendete Hintergrundbild des Arcade-Master-Skins."
-logical_id = "0fdf9fe9-822b-478c-bde8-eab04fe8821b"
-content_hash = "sha256:b47ef31e96d2721e649be2f0befaee98c7afd96965ee37f1e044fc9e0441c213"
-size = 1699314
-mtime_ms = 1779902332724
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/0fdf9fe9-822b-478c-bde8-eab04fe8821b/40d80e1e-5849-415b-93ab-e9366591bb7c"
-storage_version_token = "1789245669657600"
-content_type = "image/png"
+id = "e861W6E4IxeyoQbQAEwLa"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.22_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.22 – Testpaket"
+description = "Nach dem Entdecken bleibt die Avatar-Karte ausgewählt. LG-webOS-Paket nur für den Replit-Entwicklungsserver."
+logical_id = "02db8aea-9fa9-4880-8bd0-b83e8edee1bf"
+content_hash = "sha256:97aba6a91fa248d7e5445c3599cb2e6bd8a00a60b408e8f1777e0c8ce2cd4650"
+size = 24433732
+mtime_ms = 1790788496453
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/02db8aea-9fa9-4880-8bd0-b83e8edee1bf/6a2ef4a7-296d-4400-9d29-224025def8fe"
+storage_version_token = "1790788613468506"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "VW1L0noCRxH0UZmGtn9Jo"
-uri = "file://attached_assets/generated_images/previews/turkish-skin-concepts.jpg"
-type = "image"
-title = "Türkische Skin-Konzepte – Vergleich"
-description = "Alle drei HeroKids-Konzepte nebeneinander: Kappadokien-Entdecker, Tulpen-Prinzessin und Mosaik-Zauberer."
-logical_id = "c89ff22b-bded-41ee-a945-19e4e4315c03"
-content_hash = "sha256:ffa8f1b32efee0d5b2df4187aae8b63b617709789bbc222bb4b1696f30cccbe6"
-size = 693588
-mtime_ms = 1789325254452
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/c89ff22b-bded-41ee-a945-19e4e4315c03/7c4dd992-295b-4d63-9e0d-3838dabb14ae"
-storage_version_token = "1789325270436822"
-content_type = "image/jpeg"
+id = "pOrJOC-MLDu7slfBSyo8U"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.23_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.23 – Testpaket"
+description = "Bei Aufgaben-Bestätigungen ist „Ja, erledigt“ sofort vorausgewählt. LG-webOS-Paket nur für den Replit-Entwicklungsserver."
+logical_id = "403b5efc-2fb9-47e8-b275-c8ad0d6a84dd"
+content_hash = "sha256:d2212ef73dd74501c3775f71a27641470bf33f9f9ded6b0e9c2b6454c574cb76"
+size = 24434094
+mtime_ms = 1790788772373
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/403b5efc-2fb9-47e8-b275-c8ad0d6a84dd/884bc13e-610e-4220-b46e-4d3fc07ea90f"
+storage_version_token = "1790788826384112"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "A_DV92nICciDB26cfG66M"
-uri = "file://attached_assets/generated_images/previews/cappadocia-explorer-preview.jpg"
-type = "image"
-title = "1. Kappadokien-Entdecker"
-description = "Abenteurer mit Rucksack, Karte und Heißluftballon-Motiv vor Kappadokien."
-logical_id = "035bcc84-4796-4b8a-a62d-de04e3846bf5"
-content_hash = "sha256:8142873b1c1f3bac567442262c305519f8d26c91323d0a533d739fcedbaf6ee9"
-size = 467193
-mtime_ms = 1789325235612
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/035bcc84-4796-4b8a-a62d-de04e3846bf5/db37962a-c74f-4222-8896-58864cf6ea6e"
-storage_version_token = "1789325274436520"
-content_type = "image/jpeg"
+id = "29Tx1IqLzxEwnY6dCAL3B"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.24_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.24 – Testpaket"
+description = "Ohne manuelle Aktualisieren-Buttons in Aufgabenboard und Skin-Galerie; automatische Aktualisierung bleibt aktiv. Nur Replit-Entwicklungsserver."
+logical_id = "2a5e9f85-bfe7-4387-867b-007ddf6000db"
+content_hash = "sha256:58b3bf2d676dc992847da1f03510c197ce05172b3ad4b74af01930f92acb7147"
+size = 24434148
+mtime_ms = 1790789192037
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/2a5e9f85-bfe7-4387-867b-007ddf6000db/ef69d9bb-00fb-46d1-9500-3c6551266829"
+storage_version_token = "1790789219629520"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "pnFLn_qxMm12Upr3iwM3o"
-uri = "file://attached_assets/generated_images/previews/tulip-princess-preview.jpg"
-type = "image"
-title = "2. Tulpen-Prinzessin"
-description = "Elegantes türkis-korallenfarbenes Gewand mit Tulpenmustern in einem blühenden Palastgarten."
-logical_id = "f763b717-447b-4561-a1fb-fc2ac62864a6"
-content_hash = "sha256:3fdd7ef95b6e7a3e99ec3e7ed48364e0ccb8a705c10b92d80a493e5c5ba8b09c"
-size = 643443
-mtime_ms = 1789325236700
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/f763b717-447b-4561-a1fb-fc2ac62864a6/9cba62c7-125b-49e7-84d1-b2097f416bc2"
-storage_version_token = "1789325275571423"
-content_type = "image/jpeg"
+id = "mEmnX-84B8LucsCIMgcy7"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.25_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.25 – IPK erneut herunterladen"
+description = "LG-webOS-Testpaket, 24 MB; verwendet ausschließlich den Replit-Entwicklungsserver."
+logical_id = "59538962-6664-4c17-9a3b-e5e0a4d4a833"
+content_hash = "sha256:06b32e2fc67759d2a1054258a3d5481a2c10393f8b949cc4db43839d5e200b73"
+size = 24434342
+mtime_ms = 1790789644530
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/59538962-6664-4c17-9a3b-e5e0a4d4a833/ac1a26a2-895f-4361-8ac2-3c05adabee62"
+storage_version_token = "1790793746704632"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "OCEVxk23XRw9zfVBGk7SK"
-uri = "file://attached_assets/generated_images/previews/mosaic-wizard-preview.jpg"
-type = "image"
-title = "3. Mosaik-Zauberer"
-description = "Leuchtender Mosaikmagier in einer blau-goldenen Zauberkammer."
-logical_id = "176d3abf-71d1-4199-bb3c-e212ccd21f09"
-content_hash = "sha256:8fca6fd1bc0b85b2fbfbaf8b7f27d8639b0e9400aa3b7d45f73416e40508a142"
-size = 681221
-mtime_ms = 1789325238044
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/176d3abf-71d1-4199-bb3c-e212ccd21f09/418a3dee-8ac7-4049-be5c-59f80eb2fb22"
-storage_version_token = "1789325276691245"
-content_type = "image/jpeg"
+id = "2KunP1jOlHahGSHeCyNDl"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.26_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.26 – LG-Testpaket"
+description = "Legacy-Skins 6×2, verbessertes Scrollen, Standard-PIN 0000 für Eltern ohne eigene PIN. Nur Replit-Entwicklungsserver."
+logical_id = "c9c98ac2-ead5-467d-bf9a-967cbb6a0e9c"
+content_hash = "sha256:813be590d6ee7e2dcdc30ee1b15efd69173d9e1603d65b5375f8ee5ef7813cbb"
+size = 24434866
+mtime_ms = 1790795089005
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/c9c98ac2-ead5-467d-bf9a-967cbb6a0e9c/90a88174-bb82-46dd-bbfe-5c292661aaa2"
+storage_version_token = "1790795134234133"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "1frls2YFDf7V8_Hxh889D"
-uri = "file://attached_assets/generated_images/previews/turkish-skins-installed.jpg"
-type = "image"
-title = "Eingebaute türkische Skins"
-description = "Finale Kombinationen in der App-Reihenfolge: Kappadokien-Entdecker, Mosaik-Zauberer und Tulpen-Prinzessin."
-logical_id = "81b558b8-2542-4dba-9437-a7355d028b17"
-content_hash = "sha256:3086fa0d0ec30270501f250b6c489ad08e472f66dea63b6adb4d26f59041e7a8"
-size = 574690
-mtime_ms = 1789325636956
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/81b558b8-2542-4dba-9437-a7355d028b17/a9c23226-5883-476f-988f-031d564bb60b"
-storage_version_token = "1789325660000213"
-content_type = "image/jpeg"
+id = "jkCqd9sshBus-cgJ6YxfZ"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.27_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.27 – Testpaket"
+description = "Ohne manuellen Aktualisieren-Button auf Belohnungsseiten; automatische Aktualisierung und Fehler-Retry bleiben erhalten. Nur Replit-Entwicklungsserver."
+logical_id = "b2a1fc55-1cbb-4c20-bee3-20a6b96b89ab"
+content_hash = "sha256:b9074c1eb71d874263a7e2f0b1680cc40456f557eb1543a3583f138fe9efba50"
+size = 24434752
+mtime_ms = 1790795240045
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/b2a1fc55-1cbb-4c20-bee3-20a6b96b89ab/f39e8275-80c2-41ed-b034-281f08a17182"
+storage_version_token = "1790795271896284"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "6O5sFICLbLT4YAPdsoaVc"
-uri = "file://attached_assets/generated_images/young-sultan-installed-preview.jpg"
-type = "image"
-title = "Der junge Sultan – finale Skin-Vorschau"
-description = "Der neue Avatar im bisherigen Level-Boss-Slot mit seinem figurenfreien Palasthintergrund."
-logical_id = "0ca681db-fd7d-4081-a90f-22b7191c2b70"
-content_hash = "sha256:af70a458db4a4bf63fee81450808ddd2f52a18fd95379060e43e38d744e3020f"
-size = 555629
-mtime_ms = 1789326513208
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/0ca681db-fd7d-4081-a90f-22b7191c2b70/656b62db-0743-43bb-9b11-33b1827b6bfb"
-storage_version_token = "1789326535400171"
-content_type = "image/jpeg"
+id = "qwWzRgHHNz8ev-npsvJq6"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.28_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.28 – LG-Testpaket"
+description = "Skin-Ausrüsten ohne Bestätigungsfenster; eine Erfolgsmeldung erscheint nur beim Sternfund. Nur Replit-Entwicklungsserver."
+logical_id = "0d90e12b-8dd1-48b8-b37c-a9db337df00b"
+content_hash = "sha256:a3558fcc6210011b313466f8e240f4f0a75bc0fb5da34e200caa00b1cd6f793c"
+size = 24434514
+mtime_ms = 1790796191393
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/0d90e12b-8dd1-48b8-b37c-a9db337df00b/773e6d5f-e494-4797-bfd0-77e19c29a2b8"
+storage_version_token = "1790796229018454"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "wJ_IoH_C1M00lc2pZIpFe"
-uri = "file://screenshots/due-today-parent-light.jpg"
-type = "image"
-title = "Eltern – Hell"
-description = "Aufgabenkarte mit hervorgehobener Heute-Markierung im Vergleich zu normalen Karten."
-logical_id = "8bbd42aa-77ac-41bf-aac5-17f03f01f038"
-content_hash = "sha256:c22ce13376961aa7c0075caa545b515bdcb33fcbb0f9a799df56adc469cca864"
-size = 28637
-mtime_ms = 1789560890256
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/8bbd42aa-77ac-41bf-aac5-17f03f01f038/0f502ed8-f98b-4e27-b09a-6ccb11e48980"
-storage_version_token = "1789561343280799"
-content_type = "image/jpeg"
+id = "Yv9ApChx98B0rdpOfEU_J"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.29_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.29 – LG-Testpaket"
+description = "Elternprofile ohne eigene PIN akzeptieren wie beim normalen Mitgliederwechsel die Standard-PIN 0000. Nur Replit-Entwicklungsserver."
+logical_id = "bb8a282b-ee7f-4153-8d8f-4b1364edbcbc"
+content_hash = "sha256:e5fb2c7e764bdbc0395a14565a7c5f970cae9b29a4878fd0272520a65838a947"
+size = 24434670
+mtime_ms = 1790796937789
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/bb8a282b-ee7f-4153-8d8f-4b1364edbcbc/ff530538-5204-47f8-be3b-81fe8d3954e3"
+storage_version_token = "1790797087457890"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "gh7d1PKZi6fh40HPD-LyU"
-uri = "file://screenshots/due-today-parent-dark.jpg"
-type = "image"
-title = "Eltern – Dunkel"
-description = "Aufgabenkarte mit hervorgehobener Heute-Markierung im Vergleich zu normalen Karten."
-logical_id = "9bfe89a7-8c88-49b2-8ad2-cd9096ba76d7"
-content_hash = "sha256:0cd56ab84103cc1a82c707cd229defb842831a18af631d1ba1a4af242b9e582b"
-size = 30295
-mtime_ms = 1789560891808
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/9bfe89a7-8c88-49b2-8ad2-cd9096ba76d7/2aed59cf-b625-4122-afe2-b593a846c79a"
-storage_version_token = "1789561343952292"
-content_type = "image/jpeg"
+id = "s-lLFIOgVTtaegGs7vBsB"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.30_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.30 – LG-Testpaket"
+description = "Sternfund zeigt nur „Du hast einen Stern gefunden“. Für den Replit-Entwicklungsserver gebaut; nicht veröffentlicht."
+logical_id = "c8ea734c-7efe-412d-a1e6-e9e0f07fe94a"
+content_hash = "sha256:aad0cc93dc260eefe31b69f60f5b7140ec350c0cc402cced20f0d8492a318476"
+size = 24434712
+mtime_ms = 1790797546685
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/c8ea734c-7efe-412d-a1e6-e9e0f07fe94a/49771bc8-1ee8-4aa1-a73c-00b19d8e2ca5"
+storage_version_token = "1790797600461441"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "CyuFZ8xjIIy2hdEydFMxT"
-uri = "file://screenshots/due-today-kid-light.jpg"
-type = "image"
-title = "Kinder – Hell"
-description = "Aufgabenkarte mit hervorgehobener Heute-Markierung im Vergleich zu normalen Karten."
-logical_id = "07a65af5-5db3-4430-9494-1eb7311f45df"
-content_hash = "sha256:7f1e1e12d4d6fe20fac8a966cd8164b1b3649803de923c81fe2c4b4fd3e1edcb"
-size = 28742
-mtime_ms = 1789560894404
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/07a65af5-5db3-4430-9494-1eb7311f45df/bd2fd5be-517e-4eb9-8a3f-dccfeea0df7d"
-storage_version_token = "1789561344584312"
-content_type = "image/jpeg"
+id = "0W_EI7jVkjYhP-ZrxznQx"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.31_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.31 – LG-Testpaket"
+description = "Transparente Kategorien mit deutlicherem Icon, Namen und Pfeil; größere Profilabstände. Nur Replit-Entwicklungsserver."
+logical_id = "b259518f-66c7-4424-9e45-420584450f34"
+content_hash = "sha256:d23d1e0cc51e34dc62400798f499dea015fcba716e452fc1532dfbc94457bb66"
+size = 24434212
+mtime_ms = 1790798068610
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/b259518f-66c7-4424-9e45-420584450f34/080f0b2c-405d-4c22-9580-4c1faf8e1784"
+storage_version_token = "1790798117411698"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "kHnvnLnzcY1K-q_6Ffexr"
-uri = "file://screenshots/due-today-kid-dark.jpg"
-type = "image"
-title = "Kinder – Dunkel"
-description = "Aufgabenkarte mit hervorgehobener Heute-Markierung im Vergleich zu normalen Karten."
-logical_id = "3946fc35-473e-4f9c-b07e-45ea9e9bb0de"
-content_hash = "sha256:234833c169ad0cb77cd671bd0e4174c810c03a6909be009cecc94ff67837b5d9"
-size = 30337
-mtime_ms = 1789560895956
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/3946fc35-473e-4f9c-b07e-45ea9e9bb0de/c1bf0cee-5266-4f9a-bdef-7790d0ac7ba0"
-storage_version_token = "1789561345211940"
-content_type = "image/jpeg"
+id = "HC0OrQ-LlzyDdNAPxUWE_"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.32_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.32 – LG-Testpaket"
+description = "„Meine Wünsche“ ist mit der Fernbedienung erreichbar; Shop- und Belohnungs-Icon leicht verkleinert. Nur Entwicklungsserver."
+logical_id = "eb61f2ec-1ce0-4b0a-ad19-3dad3b019531"
+content_hash = "sha256:a23a3b80267a39c3d26f4d5dd3fc0387da31b9c5d1ee18f0c744652d9a951f99"
+size = 24435200
+mtime_ms = 1790798398950
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/eb61f2ec-1ce0-4b0a-ad19-3dad3b019531/fa669a5d-d76a-4554-bd00-2b61f79330da"
+storage_version_token = "1790798453119593"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "qr3d-5Mg_DPYdP_NE7G0f"
-uri = "file://screenshots/due-today-parent-light-v2.jpg"
-type = "image"
-title = "Eltern – Hell, angepasst"
-description = "Heute-Terminkarte nach der neuen Vorgabe; noch nicht in die echte App integriert."
-logical_id = "41b4c60c-d7a6-4ae8-a95b-34fc14d5ec04"
-content_hash = "sha256:c2a2b84968935be1f5c6d65f48d052a3827c076ef949b9003ba8e0686abb4547"
-size = 28195
-mtime_ms = 1789562572912
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/41b4c60c-d7a6-4ae8-a95b-34fc14d5ec04/b439424a-5cbb-4734-9ce0-aa18e049c94a"
-storage_version_token = "1789562595132462"
-content_type = "image/jpeg"
+id = "JbKhfjkCITJ5qdLzpBiGX"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.33_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.33 – LG-Testpaket"
+description = "Ohne erklärende Unterzeilen unter den Überschriften der TV-Elternseiten. Nur Replit-Entwicklungsserver."
+logical_id = "43a8f630-0747-49f7-ac68-720d59466e3a"
+content_hash = "sha256:d239d08d433de390fb27780612efe4f743bb3674fe5473fa1359e629bd4fd06b"
+size = 24434460
+mtime_ms = 1790798838098
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/43a8f630-0747-49f7-ac68-720d59466e3a/fd98e5fd-750c-4c41-9799-ac62814737dd"
+storage_version_token = "1790798883506214"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "pCbkqih1E2-7UTzR1_V-f"
-uri = "file://screenshots/due-today-parent-dark-v2.jpg"
-type = "image"
-title = "Eltern – Dunkel, angepasst"
-description = "Heute-Terminkarte nach der neuen Vorgabe; noch nicht in die echte App integriert."
-logical_id = "2fef8183-d791-453c-96ab-8a72ebbdf36f"
-content_hash = "sha256:6e8393a3869deebec30ab54e2d85df76b7b78e0249bedacea808b3983498dbd4"
-size = 29883
-mtime_ms = 1789562574888
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/2fef8183-d791-453c-96ab-8a72ebbdf36f/9c95b47a-ca30-4ff6-bd7b-32617247709d"
-storage_version_token = "1789562595888856"
-content_type = "image/jpeg"
+id = "GKfcVtXXjxstbWdN49cjU"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.34_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.34 – Schwamm-Icon"
+description = "Körperpflege zeigt den Schwamm als mitgeliefertes Bild. Testpaket ausschließlich für den Replit-Entwicklungsserver."
+logical_id = "51cda2be-8a82-4a81-9479-e061e1d1e694"
+content_hash = "sha256:c1f354f705f5cd1dedd1a8bd9dd37e9e0efd33bf57dc1fac059d1af2e1d4a730"
+size = 24435338
+mtime_ms = 1790799131752
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/51cda2be-8a82-4a81-9479-e061e1d1e694/3912fb9a-dbbc-411d-bebc-860fa862f4f7"
+storage_version_token = "1790799243848809"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "RtBLqLueebpf8xblJLLqy"
-uri = "file://screenshots/due-today-kid-light-v2.jpg"
-type = "image"
-title = "Kinder – Hell, angepasst"
-description = "Heute-Terminkarte nach der neuen Vorgabe; noch nicht in die echte App integriert."
-logical_id = "2b0c6544-d30e-4808-a0d0-cfbc625ffab0"
-content_hash = "sha256:df0a1190f93bbc0a693386359b1d415c2273518550d2b77965c5a88232f80399"
-size = 27168
-mtime_ms = 1789562576512
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/2b0c6544-d30e-4808-a0d0-cfbc625ffab0/3ccf25ce-6171-4892-9ffd-726fc5fe5440"
-storage_version_token = "1789562596530151"
-content_type = "image/jpeg"
+id = "3Dvv1wMPRWiMk1J0zA3nS"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.35_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.35 – Kategorienabstand"
+description = "Mehr Abstand zwischen Kategorie-Icons und Kategorienamen. LG-Testpaket für den Replit-Entwicklungsserver."
+logical_id = "127628f2-9a5d-4084-87c9-9c9f226f8aec"
+content_hash = "sha256:2f81b0a8c987b13f2f3fdfe856d8dc252ecb98fe89336d8591898de817ad9c3d"
+size = 24435300
+mtime_ms = 1790799420738
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/127628f2-9a5d-4084-87c9-9c9f226f8aec/6ae67c35-2168-4747-901a-6fb2c184c4e8"
+storage_version_token = "1790799540510661"
+content_type = "application/octet-stream"
 
 [[outputs]]
-id = "J012veMac-YlFwZ2mcMLT"
-uri = "file://screenshots/due-today-kid-dark-v2.jpg"
-type = "image"
-title = "Kinder – Dunkel, angepasst"
-description = "Heute-Terminkarte nach der neuen Vorgabe; noch nicht in die echte App integriert."
-logical_id = "80650c6d-3a85-4727-ba71-74f3d8490a37"
-content_hash = "sha256:cb6e35bfeeb6fb38e934dcd165deffbeb1d306e4f8a140db304f047dd6022894"
-size = 28563
-mtime_ms = 1789562578156
-storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/80650c6d-3a85-4727-ba71-74f3d8490a37/1941c97d-5c57-48b2-b617-fba820b1f429"
-storage_version_token = "1789562597227203"
-content_type = "image/jpeg"
+id = "QRwMbmpxiAT1bs07TQjjp"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.36_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.36 – Fokus auf Weiter"
+description = "Beim Fenster zur ausstehenden Elternfreigabe liegt die Auswahl direkt auf dem blauen Weiter-Schalter. LG-Testpaket für den Entwicklungsserver."
+logical_id = "0331ad82-2bdb-45f8-bae3-3ce5220f1c4b"
+content_hash = "sha256:6774a0c8453e866f7755b7079e9bc8c4aae2a9157c4466baeb12fa5601f3d963"
+size = 24435744
+mtime_ms = 1790799713742
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/0331ad82-2bdb-45f8-bae3-3ce5220f1c4b/c131aaae-a26e-4ffb-900a-0ffbfa050d00"
+storage_version_token = "1790799806513664"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "pF1GkG88PfqeZLEpros3K"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.37_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.37 – Logo und Profilwahl"
+description = "Logo aus Skins, Shop und Schatzkiste entfernt; Profilwahl mit Logo und kompakteren Mitgliedskarten. Nur Entwicklungsserver."
+logical_id = "cadb5839-2a98-4bfb-8b2a-1907ea1a9215"
+content_hash = "sha256:81383b314f2c3de6c9e30f97ae0237856170823a3f5b1c2e31590bcd16c377d4"
+size = 24435702
+mtime_ms = 1790800014677
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/cadb5839-2a98-4bfb-8b2a-1907ea1a9215/a81945b7-cd45-4038-a1c8-4fc1972c84d0"
+storage_version_token = "1790800109231218"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "Ug8FYIBfeg_ywPq1kc1pp"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.38_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.38 – Footer korrigiert"
+description = "Falschen Schriftzug unten rechts entfernt; Fernbedienungshinweise bleiben. LG-Testpaket für den Entwicklungsserver."
+logical_id = "de1b07b5-f21d-4c5d-a1aa-4a683e909dd6"
+content_hash = "sha256:18bf58b07440b3ce887f33a2f7a5eeef73f477727f0086028a4be9d7de81cdb1"
+size = 24436146
+mtime_ms = 1790800601583
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/de1b07b5-f21d-4c5d-a1aa-4a683e909dd6/1d4fcf0c-8222-4152-826f-ec1130c895e4"
+storage_version_token = "1790800677488171"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "c1tHYw_UB74wP0Rmtj153"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.39_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.39 – Skin-Galerie ohne Untertext"
+description = "Text unter Deine Skin-Galerie entfernt. LG-Testpaket für den Entwicklungsserver."
+logical_id = "1de1667c-e049-468d-baf5-8cac7b5ff484"
+content_hash = "sha256:c8447fe6e7c614dd9c9995c1c30f30e2132d03414cd5c31d4f0b527500f19bc4"
+size = 24436150
+mtime_ms = 1790800826334
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/1de1667c-e049-468d-baf5-8cac7b5ff484/f7255b7b-6369-489d-bd42-7af614e798fe"
+storage_version_token = "1790800915622957"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "xis-gWgVIBoiKXN7Lyj6D"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.40_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.40 – Profilwahl ohne Untertext"
+description = "Untertext unter Wer ist heute dran? entfernt. LG-Testpaket für den Entwicklungsserver."
+logical_id = "4bf425de-47a2-4b61-bcd9-690cd629329f"
+content_hash = "sha256:9964d10794a11c9c54be9f79d91530580f08980d37ea899d93397088af2c57f2"
+size = 24435598
+mtime_ms = 1790801067350
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/4bf425de-47a2-4b61-bcd9-690cd629329f/58c0010a-4737-47d8-aea5-0034ec443d7b"
+storage_version_token = "1790801160683259"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "8fbHFo18HhAE9A3GHc9N8"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.41_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.41 – Fokus beim Belohnungskauf"
+description = "Beim Kaufen oder Einlösen ist im Bestätigungsfenster der blaue Bestätigen-Button ausgewählt. LG-Testpaket für den Entwicklungsserver."
+logical_id = "1a9eff9d-82ae-4f08-b71b-f9fdf8130cab"
+content_hash = "sha256:2537268add525fe6792d22747d4e289a98b4be4cbd8cb825b2dfa1296fe8ab22"
+size = 24435914
+mtime_ms = 1790801338007
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/1a9eff9d-82ae-4f08-b71b-f9fdf8130cab/904563ea-ee34-4778-8751-2fbcc905e982"
+storage_version_token = "1790801440825239"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "bbniwk1Ysz29RWGyXhR64"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.42_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.42 – Kinder-Aufgaben ohne Untertext"
+description = "Untertext auf der Aufgaben-Seite der Kinder entfernt. LG-Testpaket für den Entwicklungsserver."
+logical_id = "8f1eebe5-3642-4c00-98e5-fd06a22470b0"
+content_hash = "sha256:5db00ec4b5c80c57a99379d6bcf6bfa10904085fc79f0fd5443f36280d4eefa4"
+size = 24436500
+mtime_ms = 1790801981021
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/8f1eebe5-3642-4c00-98e5-fd06a22470b0/873213cb-fedc-4b80-8cc2-84b7b57d8aee"
+storage_version_token = "1790802082629681"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "BiPtVIeLwyNRgtk0tlbYp"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.45_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.45 – ZIP"
+description = "ZIP mit der fertigen LG-webOS-IPK. Kein erneutes Paketieren auf dem Mac nötig."
+logical_id = "e6cdbde6-ecf7-4d4f-a2b5-d090833ece3e"
+content_hash = "sha256:e6da92ff03ce9567d54ff5a67b8131d27c326109c2cc3dbf3b9b1ebe3d9a9855"
+size = 27806600
+mtime_ms = 1790867549897
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/e6cdbde6-ecf7-4d4f-a2b5-d090833ece3e/03549be5-dd3f-43ec-a2a8-fd759975a90e"
+storage_version_token = "1790867707288768"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "ov4EOR5VrDzXGw_iT6PuV"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.46_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.46 – ZIP"
+description = "Fertige LG-webOS-IPK mit mehr Abstand zwischen Profilbild und Text. Entwicklungsserver unverändert."
+logical_id = "9cc1e6c0-772f-4b81-a31d-fb4870d3f996"
+content_hash = "sha256:765fd399db528c0d2dc22c91f19e40fbe62e6afff277bec6c641bdf97df3d052"
+size = 27805762
+mtime_ms = 1790972188507
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/9cc1e6c0-772f-4b81-a31d-fb4870d3f996/12b1b0b3-39ac-4021-8587-49fc4a631959"
+storage_version_token = "1790972249848868"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "ii5azQIPzRg7P0ppz0_iW"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.47_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.47 – ZIP"
+description = "Alle täglichen Ausführungen werden grün angezeigt; Elternfreigabe und Punktevergabe bleiben unverändert. Enthält die fertige IPK."
+logical_id = "714ff0e4-5961-44f9-ba63-01ea70d4ffe8"
+content_hash = "sha256:22d2bad0dc4b98c40dca6ca68c1d26a8f0da298501ddf5f028bc67435efc8259"
+size = 27805552
+mtime_ms = 1790972658811
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/714ff0e4-5961-44f9-ba63-01ea70d4ffe8/b8412fda-ab62-4fdf-a604-720652e08573"
+storage_version_token = "1790972686992730"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "iM0tG9wXIEujB7bQdZERe"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.48_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.48 – ZIP"
+description = "Eingereichte Einkaufslisten erhalten die gelblich-bräunliche Kartenfarbe. Enthält die fertige IPK; Entwicklungsserver bleibt unverändert."
+logical_id = "57e9a7b3-8440-4f79-9ced-7b6f895e9614"
+content_hash = "sha256:142a730ae0ae02ae6dd6376f3bfeaa8fd3a11da9e3dea3c67c8fcfe587ce3031"
+size = 27805054
+mtime_ms = 1790973221078
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/57e9a7b3-8440-4f79-9ced-7b6f895e9614/e6d64240-3a9c-4c4e-96bf-87a9ed094ab3"
+storage_version_token = "1790973314346512"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "xiyhikut2Ge-hfrAyaefj"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.49_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.49 – ZIP"
+description = "Auch auf Kinder- und Eltern-Dashboards stehen Dein Profil und Name mit 36 Pixel Abstand neben dem Profilbild. Enthält die fertig gebaute IPK; Entwicklungsserver unverändert."
+logical_id = "7f6f1a3c-b3c8-423a-bbeb-c537901eb2d5"
+content_hash = "sha256:5490c78a269e589840dda47f6d7682474d5d3ecaee5f15637265ae11c4838101"
+size = 27807114
+mtime_ms = 1790973793251
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/7f6f1a3c-b3c8-423a-bbeb-c537901eb2d5/f742f2c3-ff26-46be-a2e2-bf18dc5f589c"
+storage_version_token = "1790973827331226"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "8vR9qR0pUYEPsgoqtZEyH"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.50_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.50 – ZIP"
+description = "Navigationsbuttons sind in Kinder- und Elternansicht vertikal mittig im Balken. Enthält die fertige IPK; Entwicklungsserver unverändert."
+logical_id = "07a5d10f-bcb3-49c4-a0ca-fd13ae4079f8"
+content_hash = "sha256:9c57ae20ac5c82c78a280d4c9c28afc3c2f4f8cb610b5ca8277491e13f55a809"
+size = 27806646
+mtime_ms = 1790974267924
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/07a5d10f-bcb3-49c4-a0ca-fd13ae4079f8/60cadb66-7e9e-40c7-add7-1bfeefe072b5"
+storage_version_token = "1790974294765100"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "ayUcMSssN6s9ImiM3Z7QO"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.51_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.51 – ZIP"
+description = "34 Pixel Abstand zwischen Icon und Namen in allen Kategoriebalken, kompatibel mit LG webOS 5. Enthält die fertige IPK."
+logical_id = "2f717dd0-1d8b-43a0-a2c3-f5052605edcc"
+content_hash = "sha256:4e9ebc7df0c39d17c6644911a5efe4ed445a4a6609a31491e27d0b57a58e1e2d"
+size = 27807114
+mtime_ms = 1790974898573
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/2f717dd0-1d8b-43a0-a2c3-f5052605edcc/0b6aff08-eaa5-461e-9dc3-401248e2cc28"
+storage_version_token = "1790974926990288"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "pk2LQOE-hpFoiPBVoVFH3"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.52_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.52 – ZIP"
+description = "Mehr Abstand zwischen Status, Inhalt, Badge und Fußzeile sowie größerer Zeilenabstand für Beschreibungen. Enthält die fertige IPK für LG webOS."
+logical_id = "63a0011c-5782-436c-9ade-0f7fd44b74e0"
+content_hash = "sha256:7ba288693a474828cec79490f9889fe51e48105aa620fd876d53467fba718349"
+size = 27807020
+mtime_ms = 1790975373300
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/63a0011c-5782-436c-9ade-0f7fd44b74e0/bace76d7-c2fd-49a5-b1af-6c63a7083640"
+storage_version_token = "1790975420573387"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "tVq4cXZN0yq6Lgxh87eww"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.53_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.53 – ZIP"
+description = "Gelockerte Buchstabenabstände für Titel, Buttons und Badges. Schriftart und Schriftgrößen unverändert. Enthält die fertige IPK für LG webOS."
+logical_id = "73e849f3-1b58-4c38-8f47-4bbf363c9206"
+content_hash = "sha256:eec877e5f98a75ed7f56c1c4d1f682284f59439e7281a544f1ac6c791f602c1d"
+size = 27806734
+mtime_ms = 1790976705612
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/73e849f3-1b58-4c38-8f47-4bbf363c9206/2e777b69-c67c-48db-9c07-b50cf3448cfd"
+storage_version_token = "1790976728961552"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "qQANWdFga7282iuHuiqBu"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.54_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.54 – ZIP"
+description = "12 Pixel Abstand zwischen Pokal und „Deine Punkte“, kompatibel mit LG webOS. Enthält die fertige IPK."
+logical_id = "af7eb8aa-2430-4864-b376-2fb387ed075a"
+content_hash = "sha256:62a22d118d871cb467daca5ea8ab135005055a87248c241a9b642f5ec1a7252a"
+size = 27806850
+mtime_ms = 1790977261008
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/af7eb8aa-2430-4864-b376-2fb387ed075a/b897065c-e446-48d1-beca-c26819cd6541"
+storage_version_token = "1790977279655406"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "wJe4gD7zw3nnkmpZXVWk3"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.55_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.55"
+description = "Fertige LG-TV-IPK als ZIP. Abgeschlossene einmalige Einkaufslisten werden nicht mehr im Aufgabenbereich angezeigt."
+logical_id = "b91ac3f8-d1ed-4e67-98f5-45218eba3c21"
+content_hash = "sha256:99767d3b05445e6212028ac2231dbd04d88d4016eccbdcd142cb94b14daa9577"
+size = 27809478
+mtime_ms = 1790978286587
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/b91ac3f8-d1ed-4e67-98f5-45218eba3c21/7c12fffe-fe39-4020-a266-4520edd7d217"
+storage_version_token = "1790978318106300"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "BO5tOb_1gzEI2gRZHgbNa"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.56_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.56"
+description = "Fertige LG-TV-IPK mit reduziertem Speicherverbrauch und ohne sekündliche Neuberechnung der gesamten Oberfläche."
+logical_id = "a6e7584d-0ab9-4c54-8c53-969774b14e58"
+content_hash = "sha256:8036c548b676949351b1dbd5749bad388ce67e1c35e09b9b111b2854dbf4a387"
+size = 27809573
+mtime_ms = 1790980868685
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/a6e7584d-0ab9-4c54-8c53-969774b14e58/d6d51e9d-bcad-4d70-a39a-a2137099c825"
+storage_version_token = "1790980913415506"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "qdHdRhXxoQJreYblrpU4i"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.57_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.57"
+description = "Fertige LG-TV-IPK. Die gemeinsame Freigabe zeigt Beiträge und anteilige Punkte je Person."
+logical_id = "05b1719e-573c-43fa-a4d3-389d1a86d6c7"
+content_hash = "sha256:64b7ce682964e8da9843ee5385236975127c5ce83d90c663427347d91639ce07"
+size = 27810571
+mtime_ms = 1791189160144
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/05b1719e-573c-43fa-a4d3-389d1a86d6c7/012dc17c-8541-4889-95a4-b5173c72dab7"
+storage_version_token = "1791189818537188"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "5vhkqgAWomaMncdUiFOTX"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.58_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.58"
+description = "LG-TV-Testpaket mit Home-Navigation über die Zurück-Taste. Sobald du wieder zu Hause bist, am Gerät prüfen."
+logical_id = "0509fffb-e813-4a14-a706-b25a2acaaf9c"
+content_hash = "sha256:2aa1ff4966340f8895ec395d5caa26b6b7bac9b83218e23342bbaa593bb0053d"
+size = 27810176
+mtime_ms = 1791297474108
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/0509fffb-e813-4a14-a706-b25a2acaaf9c/2ba29977-eda5-4eaf-ae97-d25e27d3bb96"
+storage_version_token = "1791297539327844"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "qB8FsmK59di7GuLB9-rIS"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.61_all.ipk"
+type = "unspecified"
+title = "Little Champs TV 1.0.61 – IPK"
+description = "LG-webOS-Paket mit einmaliger Aufgabenbestätigung."
+logical_id = "11deea27-8ffc-48c7-913b-ffa2a8273eaa"
+content_hash = "sha256:e0a9643ed044988bff825489feca5aa6a4e7a60203f779e1315b639649293cd0"
+size = 27859246
+mtime_ms = 1791465635871
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/11deea27-8ffc-48c7-913b-ffa2a8273eaa/b5795bd0-98a9-48c7-ab55-6fa8733fd830"
+storage_version_token = "1791465672153149"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "EUo-BloBgoFXIWkPnIX1v"
+uri = "file://artifacts/little-champs-tv/dist/net.littlechamps.app.tv_1.0.61_all.zip"
+type = "unspecified"
+title = "Little Champs TV 1.0.61 – ZIP"
+description = "ZIP mit der fertigen IPK-Datei."
+logical_id = "bfb0d233-356a-4478-90e4-2c938e7871ea"
+content_hash = "sha256:400c262bca91badd04ff2658561646330d2871e9e11e7507af3137e070d19931"
+size = 27863575
+mtime_ms = 1791465636728
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/bfb0d233-356a-4478-90e4-2c938e7871ea/0b38cdaa-6161-4caf-bdba-f28f051cbd60"
+storage_version_token = "1791465678518993"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "0XBqpFZTKXOk0Y-ysj9N2"
+uri = "file://generated-artifacts/Little-Champs-TV-1.0.61-LG-Einreichungsunterlagen.zip"
+type = "unspecified"
+title = "LG-Einreichungsunterlagen – Gesamtpaket"
+description = "Leitfaden, englischer UX-Ablauf, Store-Texte, QA-Arbeitsliste und unveränderte LG-Originalvorlagen. Entwurf mit gekennzeichneten offenen Punkten."
+logical_id = "35413174-ce9f-4b51-8fad-18b0a3dc706b"
+content_hash = "sha256:9f582a56f222da5e26b6e5c7f190a9a64203ee8d60343d9f2f0c6d1e328ca760"
+size = 2719239
+mtime_ms = 1791634298469
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/35413174-ce9f-4b51-8fad-18b0a3dc706b/ae54efda-f7c5-4f55-80a0-a32517d92154"
+storage_version_token = "1791634318991288"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "a7MM-A82Z5F1B-TTKq6ck"
+uri = "file://generated-artifacts/lg-submission-1.0.61/Seller-Lounge-Leitfaden-DE.pdf"
+type = "pdf"
+title = "Seller Lounge – Anleitung auf Deutsch"
+description = "Fünfseitiger Leitfaden mit Upload-Schritten, Store-Texten und noch erforderlichen Prüfungen."
+logical_id = "3da2e169-29b0-4c55-8de7-5f626bdd5231"
+content_hash = "sha256:e964ce8b4e28e756d31c90822a6697eebfd7a825a8a240bdd0c061883a013723"
+size = 91694
+mtime_ms = 1791634259456
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/3da2e169-29b0-4c55-8de7-5f626bdd5231/1e7c7b54-50b4-46c8-bbad-7f7e10a0773a"
+storage_version_token = "1791634319735368"
+content_type = "application/pdf"
+
+[[outputs]]
+id = "J3365TdM6JXsxWarQbOXh"
+uri = "file://generated-artifacts/lg-submission-1.0.61/Reviewer-UX-Guide-EN.pdf"
+type = "pdf"
+title = "LG-Prüferanleitung – Englisch"
+description = "Prüfablauf für Kopplung, Aufgaben, Skins, Belohnungen und Elternfunktionen. Prüferzugang und reale Screenshots noch ergänzen."
+logical_id = "ad5b043f-75ac-421a-aff7-7c82824a18fe"
+content_hash = "sha256:a4fd11e27e262fddbd47f713364e5f9a86917b33528b99f6700e3c584ea5d900"
+size = 57859
+mtime_ms = 1791634260428
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:64d96e67-20ef-498f-bae9-a996d41f882d/ad5b043f-75ac-421a-aff7-7c82824a18fe/beb07adf-1e74-4fd3-9c54-14046696bebc"
+storage_version_token = "1791634320471752"
+content_type = "application/pdf"

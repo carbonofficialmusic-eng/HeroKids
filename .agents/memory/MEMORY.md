@@ -1,3 +1,4 @@
+- [Legacy API migration boundary](legacy-api-migration-boundary.md) — preserve established client requests and server routes across surfaces; generate new contracts selectively.
 - [iOS Status Bar Black Bar Fix](ios-statusbar-fix.md) — contentInset:'never' + apple-mobile-web-app-status-bar-style:black-translucent eliminates native black bar in WKWebView overlay mode
 - [Replit Dev Auth Fix](replit-dev-auth.md) — Replit preview iframe blocks cookies; dev-token-in-localStorage + X-Dev-Token header is the fix
 - [actingAsMemberId Override in GET /api/tasks](acting-as-member-tasks.md) — GET /api/tasks had wrong condition blocking the actingAs override for local-auth users
@@ -9,7 +10,7 @@
 - [iOS Photo Upload — No Reload Needed](ios-photo-no-reload.md) — kickHeaderRepaint()+kickScrollReset() fully fix WKWebView GPU displacement after camera; full page reload is unnecessary and was removed
 - [Period-blind hasActiveMemberCompletion bug](recurring-task-period-guard.md) — hasActiveMemberCompletion must filter by nextAvailableDate for recurrenceDays/weekly/monthly/yearly tasks or old-period completions block new-period submissions
 - [iOS IAP Spinner — Paywall was the real source](ios-iap-spinner.md) — first-open-paywall.tsx had Loader2 spinner on rcLoading with NO safety timeout; pricing.tsx fix alone was insufficient
-- [iOS IAP Downgrade & Cancel Flow](ios-iap-downgrade-cancel.md) — 6 fixes needed: RC retry loop, Fallback B (unsubscribe_detected_at), client cancel-sync gate removed, CANCELLATION+PRODUCT_CHANGE webhooks, CapApp.openUrl, iOS/web branch split in pricing.tsx
+- [iOS-Aboänderungen und Kündigungen](ios-iap-downgrade-cancel.md) — StoreKit-Verzögerung und geplante Herabstufung berücksichtigen; Kündigung ist kein sofortiger Zugriffsentzug.
 - [Skip CI Convention](skip-ci-convention.md) — `[skip ci]` documents intent but does not reliably stop Xcode Cloud; workflow filters or manual cancellation are required
 - [RevenueCat downgrade verification](revenuecat-downgrade-verification.md) — verify live entitlements before any expiration/billing event removes paid access
 - [Light-only interface design](light-only-interface-design.md) — future visual changes target only Light Mode; the approved Dark Mode must remain unchanged
@@ -43,3 +44,38 @@
 - [Nahtloser Mitgliederwechsel](member-switch-transition.md) — User Switch bleibt als Abdeckung offen, bis das neue Profil im Zieldashboard gerendert ist
 - [Sofort wiederholbare Aufgaben](immediate-task-badge.md) — ein gleichnamiges Badge erklärt den Rücksprung nach Genehmigung; Light orange, Dark blau
 - [Device-Link-Statusfarbe](device-link-status-color.md) — aktive Device-Link-Sitzungen werden rollen- und kontounabhängig gelb dargestellt
+- [Google-Kalender bleibt Einweg-Quelle](google-calendar-one-way.md) — Google liefert Termine; Little Champs verwaltet nur Zuordnung, Punkte, Erledigung und Genehmigung
+- [Punktejournal als Buchhaltungsgrenze](point-accounting-ledger.md) — Punktestände nur atomar mit unveränderlicher Vorher/Nachher-Buchung ändern; alte Abweichungen nicht still korrigieren
+- [Aufgaben-Abschlussgrenze](task-completion-transactions.md) — Reservierungen leben bis zur Entscheidung; Journal-Idempotenz schützt allein weder Abschlusszähler noch kollektive Abläufe.
+- [Ein Anbieter pro aktivem Abo](subscription-provider-lock.md) — Apple und Stripe dürfen nie parallel gebucht werden; Anbieterwechsel erst nach echtem Ablauf auf Free
+- [Nicht zugewiesene Aufgaben sind familienweit](unassigned-family-tasks.md) — ohne Zuweisung gibt es einen gemeinsamen Fortschritt und Abschluss für die ganze Familie
+- [Device Link nur für Kinder](device-link-child-only.md) — Eltern benötigen eigene Konten; alte Gerätesitzungen dürfen bei Rollenwechsel keinen Elternzugriff behalten
+- [Rollenwechsel nur in Familieneinstellungen](role-changes-family-settings.md) — Kinderprofile zeigen keine Rollenwahl; ein Elternkonto im User Switch darf keine Rolle erhöhen
+- [Bestehende Family-Trials beibehalten](existing-family-trials.md) — die Umstellung auf ausdrücklichen Trial-Start setzt alte, automatisch gestartete Trials nicht zurück
+- [Trial-Mitglieder nach Ablauf](trial-member-overflow.md) — Eltern wählen selbst, wen sie pausieren; überschüssige Profile bleiben erhalten und sind bis zur Entscheidung blockiert
+- [Push gehört zu Free](push-free-positioning.md) — Push ist keine Family-Exklusivleistung; Tariftexte sollen Free als Einstieg nennen
+- [Produktionsdaten gezielt bearbeiten](production-db-edit-mode.md) — für einzelne nullable Felder funktioniert die Edit-Ansicht der Produktionsdatenbank
+- [TV-Bildauflösung](tv-image-resolution.md) — die aktuell angesehenen Bilder sind auf dem Fernseher ausreichend scharf; nicht allein für TV hochskalieren
+- [Familien-TV-Anmeldung](family-tv-approval.md) — TV-Code am angemeldeten Handy bestätigen; TV bleibt ein eingeschränktes Familiengerät statt Elternkonto
+- [TV-Zielplattform LG webOS](tv-platform-lg-webos.md) — LG webOS 5 wurde als reales Testziel gewählt; Tizen-Paketierung nicht ohne ausdrücklichen Wunsch wieder einführen
+- [LG-CLI-Geräteverbindung](lg-cli-device-connection.md) — Schlüsselserver und SSH getrennt prüfen; CLI-Verbose kann private Schlüssel ausgeben, generische Fehler nicht überinterpretieren
+- [LG-TV-Skin-Medien](lg-tv-skin-media.md) — optimierte lokale Bilder im webOS-Paket vermeiden die unsichere Fernladung aus file://; iOS-Bündelregel bleibt getrennt
+- [LG-webOS-5-CSS-Kompatibilität](lg-webos-css-compat.md) — Chromium 68 ignoriert clamp()-Größen und kann Bilder dadurch ungewollt in Originalgröße zeigen
+- [LG-webOS-5-JavaScript-Kompatibilität](lg-webos-js-compat.md) — erfolgreiche Vite-Builds garantieren keine Unterstützung neuer Laufzeitmethoden auf Chromium 68
+- [TV-Raster wie auf dem iPad](tv-ipad-grid.md) — Anzahl der Reihen und Spalten am iPad orientieren, nicht die Fernsehbreite für ein dichtes Desktop-Raster nutzen
+- [React-Testlauf und App-Fehler](vitest-tsx-transform.md) — Testsuche, JSX-Transformation und React-Modulidentität prüfen, bevor Runnerfehler als App-Regression gelten.
+- [TV-Aktionsgrenze](tv-action-boundary.md) — am TV sind Freigaben und Nutzung erlaubt, nicht das Anlegen, Bearbeiten oder Löschen von Aufgaben und Shop-Belohnungen.
+- [Drizzle-Zod und Zod-Versionen](drizzle-zod-v4-schema.md) — generierte Schemas erwarten Zod-v4-Felder, selbst wenn andere Teile des Projekts Zod 3 importieren.
+- [LG-TV-Testpakete herunterladen](lg-tv-package-download.md) — IPK-Karten können in der Replit-App nicht herunterladen; ein direkter Dev-HTTPS-Link mit curl-Ausweichweg ist verlässlicher.
+- [TV ohne manuelles Aktualisieren](tv-auto-refresh-policy.md) — Aufgaben, Skins und Belohnungsseiten aktualisieren automatisch; Fehler-Retry bleibt, aber kein allgemeiner Refresh-Button.
+- [TV-Skin-Meldungen nur bei Sternfund](tv-skin-star-messages.md) — Ausrüsten und Aufdecken ohne Stern laufen still; nur ein gefundener Stern öffnet eine Erfolgsmeldung.
+- [LG-TV-Emoji-Icons](lg-tv-emoji-icons.md) — kritische Kategorie-Icons als lokale Bilder bündeln, weil Geräte-Emoji-Schriften Zeichen fehlen lassen können.
+- [TV-Belohnungsbestätigung](tv-reward-confirm-focus.md) — beim Kaufen/Einlösen startet der Fokus auf Blau; andere, besonders stornierende Dialoge bleiben bewusst unverändert.
+- [TV-Auswahl nach Aktionen](tv-action-focus.md) — zuletzt benutzte Karte bei Kindern und Eltern behalten; entfernte Karten führen zur Nachbarkarte, nicht zum Menü.
+- [TV-Speicherdruck](tv-memory-pressure.md) — bei LG-Speicherneustarts keine globalen Sekundentimer; unsichtbare Skin-Bilder freigeben statt dauerhaft behalten.
+- [TV-Familiensprache](tv-family-language.md) — alle neun App-Sprachen übernehmen; vor der Kopplung Gerätesprache, Familieninhalte und Skin-Schriftgrößen bleiben unverändert.
+- [TV-Release-Bereitschaft](tv-release-readiness.md) — gültiges Paket und laufende Website reichen nicht; veröffentlichte TV-Funktionen und echte Kopplung vor LG-Einreichung prüfen.
+- [Workspace-Paketverknüpfungen](pnpm-workspace-relinking.md) — gefilterte Installationen können andere Vite-Artefakte beschädigen; workspace-weit nachinstallieren und betroffene Server neu starten.
+- [TV-Aufgaben einmal bestätigen](tv-task-single-confirmation.md) — nach dem ersten Klick nur eine Bestätigung; das Ergebnis ohne zusätzlichen Bestätigungsklick anzeigen.
+- [Handy-Belohnungen nach Ausrichtung](phone-reward-orientation.md) — kompaktes 2×2-Raster nur im Querformat; Hochformat unverändert lassen.
+- [Unbekannte Vorschaufehler bei Menüs](preview-layout-warnings.md) — originales Browserereignis prüfen; ResizeObserver-Warnungen nicht mit fehlgeschlagenem Profilwechsel verwechseln.

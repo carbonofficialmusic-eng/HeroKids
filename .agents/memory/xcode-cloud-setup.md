@@ -44,3 +44,31 @@ For a closed pre-release train, increase `MARKETING_VERSION`; changing `CURRENT_
 **Why:** A build showing the session-proxy warning was initially mistaken for an Apple-side outage, but Apple had accepted the upload and rejected it because `MARKETING_VERSION` still matched the previously approved version.
 
 **How to apply:** Before changing credentials, certificates, or provisioning, check for Apple's delivery email and compare `MARKETING_VERSION` with the last approved App Store version.
+
+## Replit workspace versus the iOS release repository
+
+The user confirmed that the iOS Xcode Cloud workflow builds the GitHub branch `publish`, not `main`.
+
+**Why:** Repository branches held different source snapshots, so assuming `main` was the release source would update the wrong build input.
+
+**How to apply:** Use `publish` as the confirmed iOS synchronization target unless the user changes the workflow. Still obtain approval for a push and check automatic build/distribution triggers; knowing the branch is not push authorization.
+
+Inspect the GitHub branch used for iOS separately from the current Replit workspace before diagnosing a native build or changing its CI.
+
+**Why:** The Replit workspace was migrated to multiple artifacts, while the connected iOS release repository still had the legacy single-app structure. Its `main` and `publish` branches were different source snapshots. A root-based npm build can therefore be correct for that repository even though the same script is incompatible with the current pnpm workspace.
+
+**How to apply:** Do not blindly push the workspace structure or rewrite Xcode CI to repair a web-only display issue. Check the relevant branch's Capacitor configuration and build scripts first. An enabled remote `server.url` means bundled web assets are not the normal startup surface; old bundled assets alone do not establish why a live layout is old. Checked-in configuration, locally generated configuration, and the actual shipped IPA remain distinct evidence.
+
+When Safari and the installed app differ, compare them on the same device before recommending another deployment or assuming a native cache problem.
+
+**Why:** The user confirmed that the current diagnostic UI and matching loaded/server build identifiers appeared in Safari on the same iPhone while the installed App Store app lacked that UI. A successful web publication does not establish the installed binary's loading configuration.
+
+**How to apply:** Treat browser diagnostics as evidence about that browser only. Inspect the shipped native configuration or obtain diagnostics from a verified native build before choosing between local assets, another origin and native caching as the cause.
+
+## Cross-platform workspace dependencies
+
+Keep the macOS optional native binaries for the web build tools available in the workspace lockfile, even when development runs on Linux.
+
+**Why:** The multi-artifact template excluded Darwin dependencies repository-wide. Xcode Cloud must build the phone web app on macOS, so Linux-only success cannot establish that its dependency installation will work there.
+
+**How to apply:** Review platform-removal overrides whenever changing pnpm configuration or regenerating the lockfile. Keep both Apple Silicon and Intel Mac builds possible. A portable Capacitor copy/resource check is useful, but must never be reported as a successful CocoaPods installation, signed Xcode archive or App Store delivery.

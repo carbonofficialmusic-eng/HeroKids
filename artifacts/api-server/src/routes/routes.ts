@@ -1,0 +1,10191 @@
+import type { Express } from "express";
+import express from "express";
+import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
+import { posix } from "path";
+import { z } from "zod/v4";
+import crypto from "crypto";
+import bcrypt from "bcrypt";
+import Stripe from "stripe";
+import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
+import { storage } from "../storage";
+import { verifyTvParentPin } from "../tvParentPin";
+import { resolveTvManagementParent } from "../tvParentManagement";
+import { sendPushToMembers, queueChatPush, cancelQueuedChatPush, isChildPushQuietHours } from "../apns";
+import { db } from "../db";
+import { setupAuth, isAuthenticated, isDev, setDevTokenActingAs, resolveWsUserId } from "../replitAuth";
+import { generateTokenPair, refreshAccessToken, revokeRefreshToken, registerPushToken, unregisterPushToken } from "../mobileAuth";
+import { ObjectStorageService, ObjectNotFoundError } from "../objectStorage";
+import { shouldKeepCustomPhotoWhenSelectingSkin } from "../shared/avatar-preferences";
+import { getDueDateWindow } from "../shared/due-date-policy";
+import { ObjectPermission } from "../objectAcl";
+import { achievementEngine } from "../achievementEngine";
+import { wsClients, broadcastToFamily, broadcastToFamilyMembers } from "../websocket";
+import { insertFamilyMemberSchema, insertTaskSchema, insertRewardSchema, insertRewardRedemptionSchema, insertChatMessageSchema, insertAchievementDefinitionSchema, insertFamilyGoalSchema, type Family, familyGoals, familyMembers, goalContributions, childDeviceSessions, users, pinboardNotes, starPlacements } from "@workspace/db";
+import { confirmMemberSelection, reserveFullMemberSelection, setMemberPausedWithinLimit } from "../member-pause";
+import { extendActiveLegacyFamilyTrials } from "../trial-duration";
+import { getLockedSelection, getSelectionScope } from "../shared/member-selection";
+import { clampAvailablePoints } from "../shared/point-balance";
+import { getMaxMembers, getMaxMembersForFamily, hasFeature, getMaxSkins, TIER_CONFIG, getAllTiers } from "../shared/tier-config";
+import type { SubscriptionTier, SubscriptionTierLegacy } from "../shared/tier-config";
+import { resolveFallbackD, isFamilySubNewerThanFamilyPro } from "../lib/rc-tier-resolver";
+import {
+  getRevenueCatEntitlements,
+  getRevenueCatNonSubscriptions,
+  getRevenueCatSubscriptions,
+  isRevenueCatVerificationError,
+  isRevenueCatEntitlementActive,
+  resolveRevenueCatSyncVerification,
+  requireVerifiedRevenueCatPayload,
+  type RevenueCatEntitlement,
+  type RevenueCatSubscription,
+  withVerifiedRevenueCatPayload,
+} from "../lib/revenuecat-payload";
+import { excludeOriginDeviceToken, shouldSendTaskPendingPush } from "../task-push-policy";
+import { registerGoogleCalendarRoutes, revokeGoogleCalendarRefreshToken } from "../googleCalendar";
+import {
+  hasActiveAppleSubscription,
+  hasActiveStripeSubscription,
+  resolvePurchaseEligibility,
+  type SubscriptionPurchaseProvider,
+} from "../subscription-provider-policy";
+
+type PushRole = "parent" | "child";
+
+function isSubscriptionTierLegacy(value: unknown): value is SubscriptionTierLegacy {
+  return value === "free" || value === "family" || value === "family_plus" || value === "family_hero";
+}
+
+const pushPolicy: Record<string, { setting: "pushChat" | "pushPinboard" | "pushTasks" | "pushRewards"; roles: PushRole[] }> = {
+  chat_message: { setting: "pushChat", roles: ["parent", "child"] },
+  pinboard_posted: { setting: "pushPinboard", roles: ["parent", "child"] },
+  task_pending: { setting: "pushTasks", roles: ["parent"] },
+  task_rejected: { setting: "pushTasks", roles: ["child"] },
+  reward_redeemed: { setting: "pushRewards", roles: ["parent"] },
+  reward_request: { setting: "pushRewards", roles: ["parent"] },
+  reward_request_approved: { setting: "pushRewards", roles: ["child"] },
+  reward_request_declined: { setting: "pushRewards", roles: ["child"] },
+};
+
+const chatBatchText: Record<string, { one: string; many: string }> = {
+  en: { one: "1 new chat message", many: "{{count}} new chat messages" },
+  de: { one: "1 neue Chat-Nachricht", many: "{{count}} neue Chat-Nachrichten" },
+  fr: { one: "1 nouveau message du chat", many: "{{count}} nouveaux messages du chat" },
+  es: { one: "1 mensaje nuevo del chat", many: "{{count}} mensajes nuevos del chat" },
+  ja: { one: "新しいチャットメッセージ1件", many: "新しいチャットメッセージ{{count}}件" },
+  zh: { one: "1条新聊天消息", many: "{{count}}条新聊天消息" },
+  ko: { one: "새 채팅 메시지 1개", many: "새 채팅 메시지 {{count}}개" },
+  sv: { one: "1 nytt chattmeddelande", many: "{{count}} nya chattmeddelanden" },
+  pt: { one: "1 nova mensagem no chat", many: "{{count}} novas mensagens no chat" },
+};
+
+/** Best-effort APNs delivery: policy/settings and provider failures never affect an API request. */
+async function sendPolicyPush(
+  familyName: string,
+  recipientIds: string[],
+  type: string,
+  title: string,
+  body: string,
+  senderId?: string,
+  excludedDeviceToken?: string,
+) {
+  try {
+    const policy = pushPolicy[type];
+    if (!policy) return;
+    const family = await storage.getFamily(familyName);
+    if (!family || !family[policy.setting]) return;
+    const members = await storage.getFamilyMembersByFamily(familyName);
+    const allowed = new Set(members
+      .filter(m => recipientIds.includes(m.id) && m.id !== senderId && policy.roles.includes(m.role as PushRole)
+        && !(m.role === "child" && family.childPushQuietEnabled && isChildPushQuietHours(
+          new Date(),
+          family.timezone,
+          family.childPushQuietStart,
+          family.childPushQuietEnd,
+        )))
+      .map(m => m.id));
+    if (!allowed.size) return;
+    const tokens = excludeOriginDeviceToken(
+      await storage.getDevicePushTokensForMembers(Array.from(allowed)),
+      excludedDeviceToken,
+    );
+    await sendPushToMembers(tokens, title, body, { notificationType: type, memberId: senderId });
+  } catch (error: any) {
+    console.error(`[APNs] ${type} push error:`, error?.message || error);
+  }
+}
+
+/**
+ * After a tier upgrade, automatically un-pause members that are now within the new tier's member limit.
+ * isPaused is intended only for downgrade-overflow management, so upgrades should clear it where possible.
+ */
+async function autoUnpauseMembersAfterUpgrade(familyName: string, newTier: SubscriptionTierLegacy): Promise<number> {
+  const allMembers = await storage.getFamilyMembersByFamily(familyName);
+  const family = await storage.getFamily(familyName);
+  const lockedIds = family ? getLockedSelection(family) : null;
+  if (lockedIds) return 0; // Subscription refreshes must not override a parent's confirmed choice.
+  const pausedMembers = allMembers.filter(m => m.isPaused);
+  if (pausedMembers.length === 0) return 0;
+
+  const maxMembers = getMaxMembers(newTier);
+  const activeCount = allMembers.filter(m => !m.isPaused).length;
+  const canUnpauseCount = maxMembers === Infinity ? pausedMembers.length : Math.max(0, maxMembers - activeCount);
+  if (canUnpauseCount === 0) return 0;
+
+  const toUnpause = pausedMembers
+    .sort((a, b) => (new Date(a.createdAt ?? 0).getTime()) - (new Date(b.createdAt ?? 0).getTime()))
+    .slice(0, canUnpauseCount);
+
+  for (const m of toUnpause) {
+    await storage.updateFamilyMember(m.id, { isPaused: false });
+  }
+
+  console.log(`✅ Auto-unpaused ${toUnpause.length} member(s) for family "${familyName}" after upgrade to ${newTier}`);
+  return toUnpause.length;
+}
+
+/**
+ * Validate the member selection used by either multi-member task mode.
+ * The API deliberately keeps using sharedMemberIds as the editor-facing
+ * selection, while persistence differs by mode (assignments table versus
+ * the legacy-compatible team array).
+ */
+async function validateTaskMemberSelection(
+  familyName: string,
+  memberIds: string[],
+  isTeamTask: boolean,
+  preservedInactiveIds: string[] = [],
+): Promise<string[]> {
+  const familyMembers = await storage.getFamilyMembersByFamily(familyName);
+  const family = await storage.getFamily(familyName);
+  if (!family) throw new Error("Family not found");
+  const activeMembers = familyMembers
+    .filter(member => !member.isPaused)
+    .sort((a, b) => new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime());
+  const lockedSelection = getLockedSelection(family);
+  const assignableIds = (lockedSelection
+    ? activeMembers.filter(member => lockedSelection.includes(member.id))
+    : activeMembers.slice(0, getMaxMembersForFamily(family))
+  ).map(member => member.id);
+  return validateSelectedTaskMemberIds(
+    memberIds,
+    familyMembers.map(member => member.id),
+    isTeamTask,
+    [...assignableIds, ...preservedInactiveIds],
+  );
+}
+import { calculateAvailableCards, canUnlockSkin, getSkinPosition, isLegacySkin, LEGACY_UNLOCK_THRESHOLD, LEGACY_SKIN_ORDER, MIXED_SKIN_ORDER, TOTAL_HIDDEN_STARS } from "../shared/skin-config";
+import { eq, inArray, and, desc } from "drizzle-orm";
+import "../types";
+import { registerAdminEmailHealthRoutes } from "../adminEmailHealthRoutes";
+import { registerAdminMemberAccountRoutes } from "../adminMemberAccountRoutes";
+import { isValidFactoryResetConfirmation } from "../shared/factory-reset";
+import { createNotificationPreview } from "../notification-preview";
+import {
+  calculateRecurringNextAvailableDate,
+  calculateMemberRecurringNextAvailableDate,
+  hasActiveTeamContribution,
+  resolveMemberDailyTargetState,
+  shouldHideCompletedTaskFromChild,
+  taskStructureChanged,
+  validateSelectedTaskMemberIds,
+  isTeamCompletionInCurrentPeriod,
+  hasEveryTeamMemberSubmitted,
+  resolveCompletionCoordination,
+  taskCompletionCapacityApiFields,
+} from "../task-mode-policy";
+
+// Backend notification translations for all 9 supported languages
+const notificationTranslations: Record<string, Record<string, string>> = {
+  en: {
+    "chat_message.title": "{{name}} in Family Chat",
+    "chat_message.message": "{{preview}}",
+    "pinboard_posted.title": "{{name}} posted on the pinboard",
+    "pinboard_posted.message": "",
+    "task_pending.title": "{{name}} completed \"{{task}}\"",
+    "task_pending.message": "Waiting for approval (+{{points}} points)",
+    "task_completed.title": "{{name}} earned {{points}} points",
+    "task_completed.message": "Task \"{{task}}\" completed",
+    "task_approved.title": "Task approved!",
+    "task_approved.message": "\"{{task}}\" was approved. You earned {{points}} points!",
+    "task_rejected.title": "Task needs revision",
+    "task_rejected.message": "\"{{task}}\" was not approved: {{reason}}",
+    "reward_redeemed.title": "{{name}} redeemed a reward",
+    "reward_redeemed.message": "\"{{reward}}\" for {{points}} points",
+    "reward_request.title": "{{name}} requests a reward",
+    "reward_request.message": "\"{{reward}}\" ({{points}} points)",
+    "reward_sharing_offer.title": "{{name}} offers a reward for sharing",
+    "reward_sharing_offer.message": "\"{{reward}}\" is available to share",
+    "reward_sharing_join.title": "{{name}} joined your shared reward!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "New reward available!",
+    "reward_created.message": "\"{{reward}}\" for {{points}} points",
+    "reward_request_approved.title": "Reward request approved!",
+    "reward_request_approved.message": "\"{{reward}}\" is now available to redeem!",
+    "reward_request_declined.title": "Reward request declined",
+    "reward_request_declined.message": "\"{{reward}}\" was not approved",
+    "task_expired.title": "Task not completed",
+    "task_expired.message": "\"{{task}}\" was not completed in time",
+    "default_reason": "Did not meet expectations",
+  },
+  de: {
+    "chat_message.title": "{{name}} im Familien-Chat",
+    "chat_message.message": "{{preview}}",
+    "pinboard_posted.title": "{{name}} hat an die Pinnwand geschrieben",
+    "pinboard_posted.message": "",
+    "task_pending.title": "{{name}} hat \"{{task}}\" erledigt",
+    "task_pending.message": "Wartet auf Genehmigung (+{{points}} Punkte)",
+    "task_completed.title": "{{name}} hat {{points}} Punkte verdient",
+    "task_completed.message": "Aufgabe \"{{task}}\" erledigt",
+    "task_approved.title": "Aufgabe genehmigt!",
+    "task_approved.message": "\"{{task}}\" wurde genehmigt. Du hast {{points}} Punkte verdient!",
+    "task_rejected.title": "Aufgabe muss überarbeitet werden",
+    "task_rejected.message": "\"{{task}}\" wurde nicht genehmigt: {{reason}}",
+    "reward_redeemed.title": "{{name}} hat eine Belohnung eingelöst",
+    "reward_redeemed.message": "\"{{reward}}\" für {{points}} Punkte",
+    "reward_request.title": "{{name}} wünscht sich eine Belohnung",
+    "reward_request.message": "\"{{reward}}\" ({{points}} Punkte)",
+    "reward_sharing_offer.title": "{{name}} bietet eine Belohnung zum Teilen an",
+    "reward_sharing_offer.message": "\"{{reward}}\" kann geteilt werden",
+    "reward_sharing_join.title": "{{name}} macht bei deiner Belohnung mit!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "Neue Belohnung verfügbar!",
+    "reward_created.message": "\"{{reward}}\" für {{points}} Punkte",
+    "reward_request_approved.title": "Belohnungsanfrage genehmigt!",
+    "reward_request_approved.message": "\"{{reward}}\" kann jetzt eingelöst werden!",
+    "reward_request_declined.title": "Belohnungsanfrage abgelehnt",
+    "reward_request_declined.message": "\"{{reward}}\" wurde nicht genehmigt",
+    "task_expired.title": "Aufgabe nicht erledigt",
+    "task_expired.message": "\"{{task}}\" wurde nicht rechtzeitig erledigt",
+    "default_reason": "Entspricht nicht den Erwartungen",
+  },
+  fr: {
+    "chat_message.title": "{{name}} dans le Chat Familial",
+    "chat_message.message": "{{preview}}",
+    "pinboard_posted.title": "{{name}} a écrit sur le tableau d'affichage",
+    "pinboard_posted.message": "",
+    "task_pending.title": "{{name}} a terminé \"{{task}}\"",
+    "task_pending.message": "En attente d'approbation (+{{points}} points)",
+    "task_completed.title": "{{name}} a gagné {{points}} points",
+    "task_completed.message": "Tâche \"{{task}}\" terminée",
+    "task_approved.title": "Tâche approuvée !",
+    "task_approved.message": "\"{{task}}\" a été approuvée. Tu as gagné {{points}} points !",
+    "task_rejected.title": "Tâche à réviser",
+    "task_rejected.message": "\"{{task}}\" n'a pas été approuvée : {{reason}}",
+    "reward_redeemed.title": "{{name}} a échangé une récompense",
+    "reward_redeemed.message": "\"{{reward}}\" pour {{points}} points",
+    "reward_request.title": "{{name}} souhaite une récompense",
+    "reward_request.message": "\"{{reward}}\" ({{points}} points)",
+    "reward_sharing_offer.title": "{{name}} propose une récompense à partager",
+    "reward_sharing_offer.message": "\"{{reward}}\" est disponible au partage",
+    "reward_sharing_join.title": "{{name}} participe à ta récompense !",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "Nouvelle récompense disponible !",
+    "reward_created.message": "\"{{reward}}\" pour {{points}} points",
+    "reward_request_approved.title": "Demande de récompense approuvée !",
+    "reward_request_approved.message": "\"{{reward}}\" peut maintenant être réclamée !",
+    "reward_request_declined.title": "Demande de récompense refusée",
+    "reward_request_declined.message": "\"{{reward}}\" n'a pas été approuvée",
+    "task_expired.title": "Tâche non terminée",
+    "task_expired.message": "\"{{task}}\" n'a pas été terminée à temps",
+    "default_reason": "Ne répond pas aux attentes",
+  },
+  es: {
+    "chat_message.title": "{{name}} en el Chat Familiar",
+    "chat_message.message": "{{preview}}",
+    "pinboard_posted.title": "{{name}} escribió en el tablón",
+    "pinboard_posted.message": "",
+    "task_pending.title": "{{name}} completó \"{{task}}\"",
+    "task_pending.message": "Esperando aprobación (+{{points}} puntos)",
+    "task_completed.title": "{{name}} ganó {{points}} puntos",
+    "task_completed.message": "Tarea \"{{task}}\" completada",
+    "task_approved.title": "¡Tarea aprobada!",
+    "task_approved.message": "\"{{task}}\" fue aprobada. ¡Ganaste {{points}} puntos!",
+    "task_rejected.title": "Tarea necesita revisión",
+    "task_rejected.message": "\"{{task}}\" no fue aprobada: {{reason}}",
+    "reward_redeemed.title": "{{name}} canjeó una recompensa",
+    "reward_redeemed.message": "\"{{reward}}\" por {{points}} puntos",
+    "reward_request.title": "{{name}} desea una recompensa",
+    "reward_request.message": "\"{{reward}}\" ({{points}} puntos)",
+    "reward_sharing_offer.title": "{{name}} ofrece una recompensa para compartir",
+    "reward_sharing_offer.message": "\"{{reward}}\" está disponible para compartir",
+    "reward_sharing_join.title": "¡{{name}} se unió a tu recompensa compartida!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "¡Nueva recompensa disponible!",
+    "reward_created.message": "\"{{reward}}\" por {{points}} puntos",
+    "reward_request_approved.title": "¡Solicitud de recompensa aprobada!",
+    "reward_request_approved.message": "\"{{reward}}\" ya está disponible para canjear.",
+    "reward_request_declined.title": "Solicitud de recompensa rechazada",
+    "reward_request_declined.message": "\"{{reward}}\" no fue aprobada",
+    "task_expired.title": "Tarea no completada",
+    "task_expired.message": "\"{{task}}\" no se completó a tiempo",
+    "default_reason": "No cumple las expectativas",
+  },
+  ja: {
+    "chat_message.title": "{{name}}がファミリーチャットで",
+    "chat_message.message": "{{preview}}",
+    "pinboard_posted.title": "{{name}}が掲示板に書きました",
+    "pinboard_posted.message": "",
+    "task_pending.title": "{{name}}が「{{task}}」を完了しました",
+    "task_pending.message": "承認待ち (+{{points}}ポイント)",
+    "task_completed.title": "{{name}}が{{points}}ポイントを獲得しました",
+    "task_completed.message": "タスク「{{task}}」完了",
+    "task_approved.title": "タスクが承認されました！",
+    "task_approved.message": "「{{task}}」が承認されました。{{points}}ポイント獲得！",
+    "task_rejected.title": "タスクの修正が必要です",
+    "task_rejected.message": "「{{task}}」は承認されませんでした：{{reason}}",
+    "reward_redeemed.title": "{{name}}がご褒美を交換しました",
+    "reward_redeemed.message": "「{{reward}}」（{{points}}ポイント）",
+    "reward_request.title": "{{name}}がご褒美をリクエストしました",
+    "reward_request.message": "「{{reward}}」（{{points}}ポイント）",
+    "reward_sharing_offer.title": "{{name}}がご褒美を共有しています",
+    "reward_sharing_offer.message": "「{{reward}}」を共有できます",
+    "reward_sharing_join.title": "{{name}}があなたのご褒美に参加しました！",
+    "reward_sharing_join.message": "「{{reward}}」",
+    "reward_created.title": "新しいご褒美が追加されました！",
+    "reward_created.message": "「{{reward}}」（{{points}}ポイント）",
+    "reward_request_approved.title": "ご褒美リクエストが承認されました！",
+    "reward_request_approved.message": "「{{reward}}」を今すぐ交換できます！",
+    "reward_request_declined.title": "ご褒美リクエストが却下されました",
+    "reward_request_declined.message": "「{{reward}}」は承認されませんでした",
+    "task_expired.title": "タスク未完了",
+    "task_expired.message": "「{{task}}」は期限内に完了しませんでした",
+    "default_reason": "期待に沿っていません",
+  },
+  zh: {
+    "chat_message.title": "{{name}} 在家庭聊天中",
+    "chat_message.message": "{{preview}}",
+    "pinboard_posted.title": "{{name}}在留言板上写了内容",
+    "pinboard_posted.message": "",
+    "task_pending.title": "{{name}}完成了「{{task}}」",
+    "task_pending.message": "等待批准 (+{{points}}积分)",
+    "task_completed.title": "{{name}}获得了{{points}}积分",
+    "task_completed.message": "任务「{{task}}」已完成",
+    "task_approved.title": "任务已批准！",
+    "task_approved.message": "「{{task}}」已批准。你获得了{{points}}积分！",
+    "task_rejected.title": "任务需要修改",
+    "task_rejected.message": "「{{task}}」未被批准：{{reason}}",
+    "reward_redeemed.title": "{{name}}兑换了奖励",
+    "reward_redeemed.message": "「{{reward}}」花费{{points}}积分",
+    "reward_request.title": "{{name}}请求了一个奖励",
+    "reward_request.message": "「{{reward}}」（{{points}}积分）",
+    "reward_sharing_offer.title": "{{name}}分享了一个奖励",
+    "reward_sharing_offer.message": "「{{reward}}」可以分享",
+    "reward_sharing_join.title": "{{name}}加入了你的共享奖励！",
+    "reward_sharing_join.message": "「{{reward}}」",
+    "reward_created.title": "新奖励可用！",
+    "reward_created.message": "「{{reward}}」{{points}}积分",
+    "reward_request_approved.title": "奖励申请已批准！",
+    "reward_request_approved.message": "「{{reward}}」现在可以兑换了！",
+    "reward_request_declined.title": "奖励申请已拒绝",
+    "reward_request_declined.message": "「{{reward}}」未获批准",
+    "task_expired.title": "任务未完成",
+    "task_expired.message": "「{{task}}」未在规定时间内完成",
+    "default_reason": "未达到预期",
+  },
+  ko: {
+    "chat_message.title": "{{name}}이(가) 가족 채팅에서",
+    "chat_message.message": "{{preview}}",
+    "pinboard_posted.title": "{{name}}이(가) 게시판에 글을 남겼어요",
+    "pinboard_posted.message": "",
+    "task_pending.title": "{{name}}이(가) \"{{task}}\"을(를) 완료했어요",
+    "task_pending.message": "승인 대기 중 (+{{points}}포인트)",
+    "task_completed.title": "{{name}}이(가) {{points}}포인트를 얻었어요",
+    "task_completed.message": "\"{{task}}\" 작업 완료",
+    "task_approved.title": "작업이 승인되었어요!",
+    "task_approved.message": "\"{{task}}\"이(가) 승인되었어요. {{points}}포인트 획득!",
+    "task_rejected.title": "작업 수정이 필요해요",
+    "task_rejected.message": "\"{{task}}\"이(가) 승인되지 않았어요: {{reason}}",
+    "reward_redeemed.title": "{{name}}이(가) 보상을 교환했어요",
+    "reward_redeemed.message": "\"{{reward}}\" ({{points}}포인트)",
+    "reward_request.title": "{{name}}이(가) 보상을 요청해요",
+    "reward_request.message": "\"{{reward}}\" ({{points}}포인트)",
+    "reward_sharing_offer.title": "{{name}}이(가) 보상을 공유해요",
+    "reward_sharing_offer.message": "\"{{reward}}\"을(를) 공유할 수 있어요",
+    "reward_sharing_join.title": "{{name}}이(가) 공유 보상에 참여했어요!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "새로운 보상 등록!",
+    "reward_created.message": "\"{{reward}}\" {{points}}포인트",
+    "reward_request_approved.title": "보상 요청이 승인되었어요!",
+    "reward_request_approved.message": "\"{{reward}}\"을(를) 이제 교환할 수 있어요!",
+    "reward_request_declined.title": "보상 요청이 거절되었어요",
+    "reward_request_declined.message": "\"{{reward}}\"이(가) 승인되지 않았어요",
+    "task_expired.title": "작업 미완료",
+    "task_expired.message": "\"{{task}}\"이(가) 기한 내에 완료되지 않았어요",
+    "default_reason": "기대에 미치지 못함",
+  },
+  sv: {
+    "chat_message.title": "{{name}} i Familjechatten",
+    "chat_message.message": "{{preview}}",
+    "pinboard_posted.title": "{{name}} skrev på anslagstavlan",
+    "pinboard_posted.message": "",
+    "task_pending.title": "{{name}} slutförde \"{{task}}\"",
+    "task_pending.message": "Väntar på godkännande (+{{points}} poäng)",
+    "task_completed.title": "{{name}} tjänade {{points}} poäng",
+    "task_completed.message": "Uppgift \"{{task}}\" slutförd",
+    "task_approved.title": "Uppgift godkänd!",
+    "task_approved.message": "\"{{task}}\" godkändes. Du tjänade {{points}} poäng!",
+    "task_rejected.title": "Uppgift behöver ändras",
+    "task_rejected.message": "\"{{task}}\" godkändes inte: {{reason}}",
+    "reward_redeemed.title": "{{name}} löste in en belöning",
+    "reward_redeemed.message": "\"{{reward}}\" för {{points}} poäng",
+    "reward_request.title": "{{name}} önskar en belöning",
+    "reward_request.message": "\"{{reward}}\" ({{points}} poäng)",
+    "reward_sharing_offer.title": "{{name}} erbjuder en belöning att dela",
+    "reward_sharing_offer.message": "\"{{reward}}\" finns att dela",
+    "reward_sharing_join.title": "{{name}} gick med i din delade belöning!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "Ny belöning tillgänglig!",
+    "reward_created.message": "\"{{reward}}\" för {{points}} poäng",
+    "reward_request_approved.title": "Belöningsbegäran godkänd!",
+    "reward_request_approved.message": "\"{{reward}}\" kan nu lösas in!",
+    "reward_request_declined.title": "Belöningsbegäran nekad",
+    "reward_request_declined.message": "\"{{reward}}\" godkändes inte",
+    "task_expired.title": "Uppgift inte slutförd",
+    "task_expired.message": "\"{{task}}\" slutfördes inte i tid",
+    "default_reason": "Uppfyller inte förväntningarna",
+  },
+  pt: {
+    "chat_message.title": "{{name}} no Chat Familiar",
+    "chat_message.message": "{{preview}}",
+    "pinboard_posted.title": "{{name}} escreveu no mural",
+    "pinboard_posted.message": "",
+    "task_pending.title": "{{name}} concluiu \"{{task}}\"",
+    "task_pending.message": "Aguardando aprovação (+{{points}} pontos)",
+    "task_completed.title": "{{name}} ganhou {{points}} pontos",
+    "task_completed.message": "Tarefa \"{{task}}\" concluída",
+    "task_approved.title": "Tarefa aprovada!",
+    "task_approved.message": "\"{{task}}\" foi aprovada. Você ganhou {{points}} pontos!",
+    "task_rejected.title": "Tarefa precisa de revisão",
+    "task_rejected.message": "\"{{task}}\" não foi aprovada: {{reason}}",
+    "reward_redeemed.title": "{{name}} resgatou uma recompensa",
+    "reward_redeemed.message": "\"{{reward}}\" por {{points}} pontos",
+    "reward_request.title": "{{name}} solicitou uma recompensa",
+    "reward_request.message": "\"{{reward}}\" ({{points}} pontos)",
+    "reward_sharing_offer.title": "{{name}} oferece uma recompensa para compartilhar",
+    "reward_sharing_offer.message": "\"{{reward}}\" está disponível para compartilhar",
+    "reward_sharing_join.title": "{{name}} entrou na sua recompensa compartilhada!",
+    "reward_sharing_join.message": "\"{{reward}}\"",
+    "reward_created.title": "Nova recompensa disponível!",
+    "reward_created.message": "\"{{reward}}\" por {{points}} pontos",
+    "reward_request_approved.title": "Solicitação de recompensa aprovada!",
+    "reward_request_approved.message": "\"{{reward}}\" já pode ser resgatada!",
+    "reward_request_declined.title": "Solicitação de recompensa recusada",
+    "reward_request_declined.message": "\"{{reward}}\" não foi aprovada",
+    "task_expired.title": "Tarefa não concluída",
+    "task_expired.message": "\"{{task}}\" não foi concluída a tempo",
+    "default_reason": "Não atendeu às expectativas",
+  },
+};
+
+// Helper function to translate notification text
+export function translateNotification(lang: string, key: string, params: Record<string, string | number> = {}): string {
+  const translations = notificationTranslations[lang] || notificationTranslations.en;
+  let text = translations[key] || notificationTranslations.en[key] || key;
+  
+  // Replace all {{param}} placeholders
+  Object.entries(params).forEach(([param, value]) => {
+    text = text.replace(new RegExp(`\\{\\{${param}\\}\\}`, 'g'), String(value));
+  });
+  
+  return text;
+}
+
+// Initialize Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2025-10-29.clover" as Stripe.LatestApiVersion,
+});
+
+// Track uploaded photos to prevent URL spoofing (now using Object Storage instead of multer)
+const uploadedPhotos = new Map<string, { memberId: string; taskId: string; timestamp: number }>();
+
+// Rate limiting for sensitive endpoints
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+}
+const rateLimitStore = new Map<string, RateLimitEntry>();
+
+// Clean up rate limit entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  Array.from(rateLimitStore.entries()).forEach(([key, entry]) => {
+    if (entry.resetTime < now) {
+      rateLimitStore.delete(key);
+    }
+  });
+}, 5 * 60 * 1000);
+
+/**
+ * Rate limiting middleware for sensitive endpoints
+ * @param maxRequests - Maximum requests allowed in the window
+ * @param windowMs - Time window in milliseconds
+ */
+function rateLimit(maxRequests: number, windowMs: number) {
+  return (req: any, res: any, next: any) => {
+    // Use IP + endpoint as key for rate limiting
+    const clientIp = req.ip || req.connection?.remoteAddress || 'unknown';
+    const key = `${clientIp}:${req.path}`;
+    const now = Date.now();
+    
+    let entry = rateLimitStore.get(key);
+    
+    if (!entry || entry.resetTime < now) {
+      // Create new entry or reset expired one
+      entry = { count: 1, resetTime: now + windowMs };
+      rateLimitStore.set(key, entry);
+      return next();
+    }
+    
+    entry.count++;
+    
+    if (entry.count > maxRequests) {
+      const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
+      res.set('Retry-After', String(retryAfter));
+      return res.status(429).json({ 
+        message: "Too many requests, please try again later",
+        retryAfter 
+      });
+    }
+    
+    next();
+  };
+}
+
+function sanitizeAccountForAdmin(user: any) {
+  if (!user) return null;
+  const {
+    passwordHash,
+    emailVerificationTokenHash,
+    emailVerificationTokenExpiresAt,
+    passwordResetTokenHash,
+    passwordResetTokenExpiresAt,
+    ...safeUser
+  } = user;
+  return safeUser;
+}
+
+function sanitizeAccountForClient(user: any) {
+  if (!user) return null;
+  const {
+    passwordHash,
+    emailVerificationTokenHash,
+    emailVerificationTokenExpiresAt,
+    passwordResetTokenHash,
+    passwordResetTokenExpiresAt,
+    pendingEmailVerificationTokenHash,
+    pendingEmailVerificationTokenExpiresAt,
+    ...safeUser
+  } = user;
+  return safeUser;
+}
+
+async function getValidActingAsMemberFromRequest(req: any) {
+  const actingAsMemberId = req.session?.actingAsMemberId;
+  if (!actingAsMemberId) return null;
+
+  const userId = req.user?.claims?.sub;
+  if (!userId) {
+    delete req.session.actingAsMemberId;
+    return null;
+  }
+
+  const realMember = await storage.getFamilyMemberByUserId(userId);
+  if (!realMember || realMember.role !== "parent") {
+    delete req.session.actingAsMemberId;
+    return null;
+  }
+
+  const actingAsMember = await storage.getFamilyMember(actingAsMemberId);
+  if (!actingAsMember || actingAsMember.familyName !== realMember.familyName) {
+    delete req.session.actingAsMemberId;
+    return null;
+  }
+
+  return actingAsMember;
+}
+
+// Device-linked sessions authenticate as the member rather than the account.
+// Parent members still belong to the account that owns their onboarding state.
+function getOnboardingAccountId(req: any): string | null {
+  if (req.user?.authMethod === "device") {
+    return req.user.member?.role === "parent"
+      ? req.user.member.userId || null
+      : null;
+  }
+  return req.user?.claims?.sub || null;
+}
+
+// Helper function to get the current member from a request (supports local accounts, Device sessions, Mobile JWT, and Acting-As sessions)
+async function getCurrentMemberFromRequest(req: any): Promise<{ member: any; isDeviceSession: boolean; isMobileSession: boolean } | null> {
+  // TV authentication has already validated the token, paired family, selected
+  // member, and (for parents) PIN-gated selection in isAuthenticated. Re-fetch
+  // the member so a stale or moved/paused selection cannot cross families.
+  if (req.user?.tvSession && req.user?.member?.id) {
+    const member = await storage.getFamilyMemberById(req.user.member.id);
+    if (
+      !member ||
+      member.isPaused ||
+      member.familyName !== req.user.tvSession.familyName ||
+      member.id !== req.user.tvSession.selectedMemberId
+    ) {
+      return null;
+    }
+    return { member, isDeviceSession: true, isMobileSession: false };
+  }
+
+  // Mobile JWT session: member is directly available
+  if (req.user?.authMethod === "mobile" && req.user?.member) {
+    return { member: req.user.member, isDeviceSession: false, isMobileSession: true };
+  }
+  
+  // Device-linked session: member is directly available
+  if (req.user?.authMethod === "device" && req.user?.member) {
+    return { member: req.user.member, isDeviceSession: true, isMobileSession: false };
+  }
+  
+  // Check if acting as another member (single-device mode)
+  const actingAsMember = await getValidActingAsMemberFromRequest(req);
+  if (actingAsMember) {
+    return { member: actingAsMember, isDeviceSession: false, isMobileSession: false };
+  }
+  
+  // Normal Replit Auth flow
+  const userId = req.user?.claims?.sub;
+  if (!userId) return null;
+  
+  const member = await storage.getFamilyMemberByUserId(userId);
+  return member ? { member, isDeviceSession: false, isMobileSession: false } : null;
+}
+
+// These routes historically resolve a real account by user ID for parent checks.
+// TV sessions intentionally use a synthetic user ID, so resolve the already
+// PIN-validated selected member instead. Keep non-TV identity resolution intact.
+async function getRoleMemberForRequest(req: any) {
+  if (req.user?.tvSession && req.user?.member?.id) {
+    const member = await storage.getFamilyMemberById(req.user.member.id);
+    return member && !member.isPaused && member.familyName === req.user.tvSession.familyName
+      ? member
+      : null;
+  }
+  const userId = req.user?.claims?.sub;
+  return userId ? storage.getFamilyMemberByUserId(userId) : null;
+}
+
+function isTvSessionRequest(req: any): boolean {
+  return !!req.user?.tvSession;
+}
+
+const TV_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const sha256 = (value: string) => crypto.createHash("sha256").update(value).digest("hex");
+
+function makeTvCode(): string {
+  return Array.from({ length: 8 }, () => TV_CODE_ALPHABET[crypto.randomInt(TV_CODE_ALPHABET.length)]).join("");
+}
+
+function getTvBearer(req: any): string | null {
+  if (typeof req.headers.authorization !== "string") return null;
+  const header = req.headers.authorization;
+  const match = /^TV\s+(tv_[a-f0-9]{64})$/i.exec(header) ||
+    /^Bearer\s+(tv_[a-f0-9]{64})$/i.exec(header);
+  return match?.[1] && /^tv_[a-f0-9]{64}$/.test(match[1]) ? match[1] : null;
+}
+
+async function getRealParentForTvManagement(req: any) {
+  return resolveTvManagementParent(req, userId => storage.getFamilyMemberByUserId(userId));
+}
+
+async function resolveTvSession(req: any) {
+  const token = getTvBearer(req);
+  if (!token) return null;
+  const session = await storage.getTvSessionByTokenHash(sha256(token));
+  if (!session) return null;
+  const family = await storage.getFamily(session.familyName);
+  if (!family) return null;
+  const members = (await storage.getFamilyMembersByFamily(session.familyName)).filter((member: any) => !member.isPaused);
+  let member = session.selectedMemberId
+    ? members.find((candidate: any) => candidate.id === session.selectedMemberId)
+    : undefined;
+  if (session.selectedMemberId && !member) {
+    // Clear stale selections (including deleted members); the family token remains usable.
+    await storage.selectTvSessionMember(session.id, session.selectedMemberId, null);
+    member = undefined;
+  }
+  return { session, family, members, member };
+}
+
+function tvAvatarObjectPath(avatarUrl: unknown): string | null {
+  if (typeof avatarUrl !== "string") return null;
+  try {
+    const normalizedPath = new ObjectStorageService().normalizeObjectEntityPath(avatarUrl);
+    // Avatar uploads are stored under the avatars prefix. Do not let this
+    // family-scoped delivery route become a general object-storage proxy.
+    return /^\/objects\/avatars\/[A-Za-z0-9_-]+$/.test(normalizedPath)
+      ? normalizedPath
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function tvTaskProofObjectPath(proofPhotoUrl: unknown): string | null {
+  if (typeof proofPhotoUrl !== "string") return null;
+  try {
+    const normalizedPath = new ObjectStorageService().normalizeObjectEntityPath(proofPhotoUrl);
+    // Task proofs are private objects in this one upload category. Do not turn
+    // completion IDs into an arbitrary object-storage path or proxy.
+    return /^\/objects\/task-proofs\/[A-Za-z0-9_-]+$/.test(normalizedPath)
+      ? normalizedPath
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function tvSessionPayload(context: Awaited<ReturnType<typeof resolveTvSession>>) {
+  if (!context) return { authenticated: false };
+  const serialize = (member: any) => {
+    const avatarObjectPath = tvAvatarObjectPath(member.avatarUrl);
+    return {
+      id: member.id,
+      displayName: member.displayName,
+      role: member.role,
+      avatarUrl: avatarObjectPath
+        ? `/api/tv/members/${encodeURIComponent(member.id)}/avatar`
+        : member.avatarUrl,
+      color: member.color,
+      totalPoints: member.totalPoints,
+      totalEarned: member.totalEarned,
+      activeSkinId: member.activeSkinId,
+      useCustomAvatar: member.useCustomAvatar,
+      usesDefaultPin: member.role === "parent" && !member.pinCode,
+    };
+  };
+  return {
+    authenticated: true,
+    familyName: context.family.familyName,
+    language: context.family.language,
+    selectedMemberId: context.member?.id,
+    members: context.members.map(serialize),
+    ...(context.member ? { member: serialize(context.member) } : {}),
+  };
+}
+
+// Clean up old uploads every hour
+setInterval(() => {
+  const oneHourAgo = Date.now() - (60 * 60 * 1000);
+  Array.from(uploadedPhotos.entries()).forEach(([photoUrl, data]) => {
+    if (data.timestamp < oneHourAgo) {
+      uploadedPhotos.delete(photoUrl);
+    }
+  });
+}, 60 * 60 * 1000);
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // /skins belongs to the root web artifact. Its public assets are copied to
+  // dist/public during the web build; the API's cwd is not that directory.
+  // NOTE: Stripe webhook handler is in server/index.ts (MUST be before express.json())
+  // The webhook endpoint is /api/stripe-webhook (with hyphen, not slash)
+
+  // Auth middleware
+  await setupAuth(app);
+  registerGoogleCalendarRoutes(app);
+
+  // TV family pairing uses a short-lived display code and a separate high-entropy
+  // polling secret. Neither credential is ever placed in a URL.
+  app.post("/api/tv/pair/start", rateLimit(10, 60 * 1000), async (req: any, res) => {
+    try {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const id = crypto.randomUUID();
+        const secret = crypto.randomBytes(32).toString("hex");
+        try {
+          await storage.createTvPairing({
+            id,
+            secretHash: sha256(secret),
+            code: makeTvCode(),
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+          });
+          const pairing = await storage.getTvPairing(id);
+          if (!pairing) throw new Error("Pairing could not be created");
+          res.json({ id, secret, code: pairing.code, expiresAt: pairing.expiresAt });
+          return;
+        } catch (error: any) {
+          // Retry only code collisions; surface all other database failures.
+          if (error?.code !== "23505" || attempt === 4) throw error;
+        }
+      }
+    } catch (error) {
+      console.error("TV pairing start failed");
+      res.status(500).json({ message: "Could not start TV pairing" });
+    }
+  });
+
+  app.post("/api/tv/pair/poll", rateLimit(60, 60 * 1000), async (req: any, res) => {
+    const { id, secret } = req.body || {};
+    if (typeof id !== "string" || typeof secret !== "string" || !/^[a-f0-9]{64}$/.test(secret)) {
+      res.status(400).json({ message: "A pairing id and valid secret are required" });
+      return;
+    }
+    const pairing = await storage.getTvPairing(id);
+    if (!pairing || pairing.secretHash !== sha256(secret)) {
+      res.json({ status: "expired" });
+      return;
+    }
+    if (pairing.status !== "approved" || !pairing.familyName) {
+      if (pairing.expiresAt <= new Date()) {
+        res.json({ status: "expired" });
+        return;
+      }
+      res.json({ status: "pending" });
+      return;
+    }
+
+    const sessionSecret = process.env.SESSION_SECRET;
+    if (!sessionSecret?.trim()) {
+      res.status(503).json({ message: "TV token issuance is unavailable because SESSION_SECRET is not configured" });
+      return;
+    }
+    const tokenDigest = crypto.createHmac("sha256", sessionSecret)
+      .update("littlechamps-tv-session\0")
+      .update(id)
+      .update("\0")
+      .update(Buffer.from(secret, "hex"))
+      .digest("hex");
+    const token = `tv_${tokenDigest}`;
+    const sessionExpiresAt = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000);
+    const claim = await storage.claimTvPairingToken(id, sha256(secret), sha256(token), sessionExpiresAt);
+    res.json(claim ? { status: "approved", tvToken: token } : { status: "expired" });
+  });
+
+  app.post("/api/tv/pair/approve", rateLimit(10, 60 * 1000), isAuthenticated, async (req: any, res) => {
+    const { code, pin } = req.body || {};
+    if (typeof code !== "string" || !/^[A-HJ-NP-Z2-9]{8}$/.test(code) ||
+        typeof pin !== "string" || !/^\d{4}$/.test(pin)) {
+      res.status(400).json({ message: "Enter the 8-character TV code and your 4-digit parent PIN" });
+      return;
+    }
+    const parent = await getRealParentForTvManagement(req);
+    if (!parent) {
+      res.status(403).json({ message: "Sign in to a parent account to approve a TV" });
+      return;
+    }
+    if (!parent.pinCode) {
+      res.status(403).json({ message: "Set a parent PIN in the family settings before approving a TV" });
+      return;
+    }
+    if (!(await storage.validatePin(parent.id, pin))) {
+      res.status(401).json({ message: "Incorrect parent PIN" });
+      return;
+    }
+    const approved = await storage.approveTvPairing(code, parent.familyName);
+    if (!approved) {
+      res.status(410).json({ message: "TV code is invalid, expired, or already approved" });
+      return;
+    }
+    res.json({ success: true });
+  });
+
+  app.get("/api/tv/session", rateLimit(60, 60 * 1000), async (req: any, res) => {
+    const context = await resolveTvSession(req);
+    res.json(tvSessionPayload(context));
+  });
+
+  // TV tokens can read only the current uploaded avatar of a member in their
+  // paired family. They are not treated as authenticated users for /objects.
+  app.get("/api/tv/members/:memberId/avatar", rateLimit(120, 60 * 1000), async (req: any, res) => {
+    const context = await resolveTvSession(req);
+    if (!context) {
+      res.status(401).json({ message: "TV authorization is invalid or revoked" });
+      return;
+    }
+
+    const memberId = Array.isArray(req.params.memberId) ? req.params.memberId[0] : req.params.memberId;
+    const member = context.members.find((candidate: any) => candidate.id === memberId);
+    const objectPath = member && tvAvatarObjectPath(member.avatarUrl);
+    if (!member || !objectPath) {
+      res.sendStatus(404);
+      return;
+    }
+
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+      const [metadata] = await objectFile.getMetadata();
+      res.set({
+        "Content-Type": metadata.contentType || "application/octet-stream",
+        "Content-Length": metadata.size,
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+      });
+      const stream = objectFile.createReadStream();
+      stream.on("error", (error) => {
+        console.error("Error streaming TV member avatar:", error);
+        if (!res.headersSent) res.sendStatus(500);
+      });
+      stream.pipe(res);
+    } catch (error) {
+      if (error instanceof ObjectNotFoundError) {
+        res.sendStatus(404);
+        return;
+      }
+      console.error("Error delivering TV member avatar:", error);
+      if (!res.headersSent) res.sendStatus(500);
+    }
+  });
+
+  // Pending task proof images are readable only by the selected parent
+  // on a TV paired to the family that owns the completion.
+  app.get("/api/tv/task-proofs/:completionId", rateLimit(120, 60 * 1000), async (req: any, res) => {
+    const context = await resolveTvSession(req);
+    if (!context) {
+      res.status(401).json({ message: "TV authorization is invalid or revoked" });
+      return;
+    }
+    if (!context.member || context.member.role !== "parent") {
+      res.status(403).json({ message: "Select a parent profile to view task proofs" });
+      return;
+    }
+
+    const completionId = Array.isArray(req.params.completionId)
+      ? req.params.completionId[0]
+      : req.params.completionId;
+    if (typeof completionId !== "string" || !/^[A-Za-z0-9_-]+$/.test(completionId)) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const completion = await storage.getTaskCompletion(completionId);
+    if (!completion || completion.status !== "pending" || !completion.proofPhotoUrl) {
+      res.sendStatus(404);
+      return;
+    }
+    const [completionMember, task] = await Promise.all([
+      storage.getFamilyMember(completion.memberId),
+      storage.getTask(completion.taskId),
+    ]);
+    if (
+      !completionMember ||
+      completionMember.familyName !== context.session.familyName ||
+      !task ||
+      task.familyName !== context.session.familyName
+    ) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const objectPath = tvTaskProofObjectPath(completion.proofPhotoUrl);
+    if (!objectPath) {
+      res.sendStatus(404);
+      return;
+    }
+
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+      const [metadata] = await objectFile.getMetadata();
+      const contentType = typeof metadata.contentType === "string"
+        ? metadata.contentType.split(";", 1)[0].trim().toLowerCase()
+        : "";
+      if (!/^image\/(?:avif|bmp|gif|heic|heif|jpeg|png|webp)$/.test(contentType)) {
+        res.sendStatus(404);
+        return;
+      }
+      res.set({
+        "Content-Type": contentType,
+        "Content-Length": metadata.size,
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+      });
+      const stream = objectFile.createReadStream();
+      stream.on("error", (error) => {
+        console.error("Error streaming TV task proof:", error);
+        if (!res.headersSent) res.sendStatus(500);
+      });
+      stream.pipe(res);
+    } catch (error) {
+      if (error instanceof ObjectNotFoundError) {
+        res.sendStatus(404);
+        return;
+      }
+      console.error("Error delivering TV task proof:", error);
+      if (!res.headersSent) res.sendStatus(500);
+    }
+  });
+
+  app.post("/api/tv/select-member", rateLimit(10, 60 * 1000), async (req: any, res) => {
+    const context = await resolveTvSession(req);
+    if (!context) {
+      res.status(401).json({ message: "TV authorization is invalid or revoked" });
+      return;
+    }
+    const { memberId, pin } = req.body || {};
+    if (typeof memberId !== "string" || !memberId) {
+      res.status(400).json({ message: "memberId is required" });
+      return;
+    }
+    const target = context.members.find((candidate: any) => candidate.id === memberId);
+    if (!target) {
+      res.status(404).json({ message: "Family member is unavailable" });
+      return;
+    }
+    if (target.role === "parent") {
+      if (typeof pin !== "string" || !/^\d{4}$/.test(pin)) {
+        res.status(401).json({ message: "A parent PIN is required to select this profile", requiresPin: true });
+        return;
+      }
+      if (!(await verifyTvParentPin(target.pinCode, pin, () => storage.validatePin(target.id, pin)))) {
+        res.status(401).json({ message: "Incorrect parent PIN", requiresPin: true });
+        return;
+      }
+    }
+    const selected = await storage.selectTvSessionMember(
+      context.session.id,
+      context.session.selectedMemberId,
+      target.id,
+      { role: target.role, pinCode: target.pinCode },
+    );
+    if (!selected) {
+      res.status(409).json({ message: "TV member selection changed or expired; refresh the session and try again" });
+      return;
+    }
+    res.json(tvSessionPayload(await resolveTvSession(req)));
+  });
+
+  app.post("/api/tv/logout", rateLimit(30, 60 * 1000), async (req: any, res) => {
+    const context = await resolveTvSession(req);
+    if (context) await storage.revokeTvSession(context.session.id);
+    res.json({ success: true });
+  });
+
+  app.get("/api/tv/devices", isAuthenticated, async (req: any, res) => {
+    res.set("Cache-Control", "no-store");
+    const parent = await getRealParentForTvManagement(req);
+    if (!parent) {
+      res.status(403).json({ message: "Only a real parent account can manage family TVs" });
+      return;
+    }
+    const devices = await storage.getActiveTvSessionsForFamily(parent.familyName);
+    res.json({ devices });
+  });
+
+  app.delete("/api/tv/devices/:id", isAuthenticated, async (req: any, res) => {
+    const parent = await getRealParentForTvManagement(req);
+    if (!parent) {
+      res.status(403).json({ message: "Only a real parent account can manage family TVs" });
+      return;
+    }
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const revoked = await storage.revokeTvSessionForFamily(id, parent.familyName);
+    if (!revoked) {
+      res.status(404).json({ message: "TV device not found or already revoked" });
+      return;
+    }
+    res.json({ success: true });
+  });
+
+  // Object Storage: Serve private objects with ACL check
+  app.get("/objects/:objectPath(*)", isAuthenticated, async (req: any, res) => {
+    const userId = req.user?.claims?.sub;
+    const objectStorageService = new ObjectStorageService();
+    
+    // Security: Sanitize path to prevent directory traversal attacks
+    // Use decoded objectPath parameter and normalize to catch encoded traversal attempts
+    const rawObjectPath = req.params.objectPath;
+    
+    // Check for null bytes (common attack vector)
+    if (!rawObjectPath || rawObjectPath.includes('\0')) {
+      console.warn(`Blocked invalid object path: null byte or empty`);
+      return res.status(400).json({ message: "Invalid path" });
+    }
+    
+    // Normalize the path segment to resolve any ".." or "." sequences
+    // This handles URL-encoded attacks like %2e%2e which decode to ".."
+    const normalizedSegment = posix.normalize(rawObjectPath);
+    
+    // After normalization, reject if:
+    // 1. Path contains ".." (trying to escape)
+    // 2. Path starts with "/" (absolute path attempt)
+    // 3. Path starts with ".." (relative escape attempt)
+    if (normalizedSegment.includes('..') || 
+        normalizedSegment.startsWith('/') || 
+        normalizedSegment.startsWith('..')) {
+      console.warn(`Blocked directory traversal attempt: ${rawObjectPath} -> ${normalizedSegment}`);
+      return res.status(400).json({ message: "Invalid path" });
+    }
+    
+    // Construct the sanitized path using the NORMALIZED segment, not the raw input
+    const sanitizedPath = '/objects/' + normalizedSegment;
+    
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(sanitizedPath);
+      const canAccess = await objectStorageService.canAccessObjectEntity({
+        objectFile,
+        userId,
+        requestedPermission: ObjectPermission.READ,
+      });
+      if (!canAccess) {
+        return res.sendStatus(401);
+      }
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error checking object access:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+    return;
+  });
+
+  // Auth routes
+  // Mark onboarding tour as completed for the current user
+  app.post("/api/auth/user/onboarding-complete", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getOnboardingAccountId(req);
+      if (!userId) return res.status(403).json({ message: "Account required" });
+      await storage.updateUserAuthFields(userId, { onboardingCompletedAt: new Date() });
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("Error completing onboarding:", error);
+      res.status(500).json({ message: "Failed to update onboarding status" });
+    }
+    return;
+  });
+
+  // Reset onboarding tour (allow restart)
+  // Self-service account deletion (Apple Guideline 5.1.1v)
+  app.delete("/api/auth/user/account", isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user?.claims?.sub) return res.status(403).json({ message: "Account required" });
+      const userId = req.user.claims.sub;
+
+      // Detach user from any family member record (preserves family/member data)
+      await db.update(familyMembers).set({ userId: null }).where(eq(familyMembers.userId, userId));
+
+      // Delete the user account
+      await db.delete(users).where(eq(users.id, userId));
+
+      // Destroy session
+      req.session?.destroy?.(() => {});
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ message: "Failed to delete account" });
+    }
+    return;
+  });
+
+  app.delete("/api/auth/user/onboarding-complete", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getOnboardingAccountId(req);
+      if (!userId) return res.status(403).json({ message: "Account required" });
+      await storage.updateUserAuthFields(userId, { onboardingCompletedAt: null });
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("Error resetting onboarding:", error);
+      res.status(500).json({ message: "Failed to reset onboarding status" });
+    }
+    return;
+  });
+
+  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+    try {
+      // Check if this is a mobile JWT session
+      if (req.user.authMethod === "mobile" && req.user.member) {
+        const member = req.user.member;
+        res.json({
+          id: `mobile:${member.id}`,
+          email: null,
+          firstName: member.displayName,
+          lastName: null,
+          profileImageUrl: member.avatarUrl,
+          authMethod: "mobile",
+          memberId: member.id,
+          familyName: member.familyName,
+          role: member.role,
+        });
+        return;
+      }
+      
+      // Check if this is a device-linked session
+      if (req.user.authMethod === "device" && req.user.member) {
+        const member = req.user.member;
+        const account = member.role === "parent" && member.userId
+          ? await storage.getUser(member.userId)
+          : null;
+        // Return a user-like object for device sessions
+        res.json({
+          id: `device:${member.id}`,
+          email: null,
+          firstName: member.displayName,
+          lastName: null,
+          profileImageUrl: member.avatarUrl,
+          authMethod: "device",
+          memberId: member.id,
+          familyName: member.familyName,
+          role: member.role,
+          onboardingCompletedAt: account?.onboardingCompletedAt || null,
+        });
+        return;
+      }
+      
+      // Normal account flow
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(sanitizeAccountForClient(user));
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // ============================================
+  // Mobile API Routes (for React Native app)
+  // ============================================
+
+  // Mobile login using device link code (same as web device linking, but returns JWT)
+  // Rate limited: 5 attempts per minute to prevent brute force
+  app.post("/api/mobile/auth/login", rateLimit(5, 60 * 1000), async (req, res) => {
+    try {
+      const { code, deviceId } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ message: "Device link code is required" });
+      }
+
+      // Find and validate the device link code
+      const linkCode = await storage.getDeviceLinkCodeByCode(code.toUpperCase());
+      if (!linkCode) {
+        return res.status(401).json({ message: "Invalid or expired code" });
+      }
+      
+      // Check if code is expired or already consumed
+      const now = new Date();
+      if (linkCode.expiresAt < now || linkCode.consumedAt) {
+        return res.status(401).json({ message: "Invalid or expired code" });
+      }
+
+      // Get the member
+      const member = await storage.getFamilyMember(linkCode.memberId);
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+      if (member.role !== "child") {
+        return res.status(403).json({ message: "Device Link is only available for children. Parents must sign in with an account." });
+      }
+
+      // Mark code as consumed
+      await storage.consumeDeviceLinkCode(linkCode.id);
+
+      // Generate JWT tokens
+      const tokens = await generateTokenPair(member, deviceId);
+
+      res.json({
+        ...tokens,
+        member: {
+          id: member.id,
+          displayName: member.displayName,
+          role: member.role,
+          familyName: member.familyName,
+          avatarUrl: member.avatarUrl,
+          activeSkinId: member.activeSkinId,
+        },
+      });
+    } catch (error) {
+      console.error("Mobile login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+    return;
+  });
+
+  app.post("/api/mobile/auth/login-email", rateLimit(5, 60 * 1000), async (req, res) => {
+    try {
+      const { email, password, deviceId } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const user = await storage.getUserByEmail(String(email).trim().toLowerCase());
+      if (!user || !user.passwordHash || user.isDisabled) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      const isValidPassword = await bcrypt.compare(String(password), user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      const member = await storage.getFamilyMemberByUserId(user.id);
+      if (!member) {
+        return res.status(404).json({ message: "Family profile not found" });
+      }
+
+      await storage.updateUserLastLogin(user.id);
+      const tokens = await generateTokenPair(member, deviceId);
+      res.json({
+        ...tokens,
+        user: sanitizeAccountForClient(user),
+        member: {
+          id: member.id,
+          displayName: member.displayName,
+          role: member.role,
+          familyName: member.familyName,
+          avatarUrl: member.avatarUrl,
+          activeSkinId: member.activeSkinId,
+        },
+      });
+    } catch (error) {
+      console.error("Mobile email login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+    return;
+  });
+
+  // Mobile login using PIN (for returning users in single-device mode)
+  // Rate limited: 5 attempts per minute to prevent brute force
+  app.post("/api/mobile/auth/login-pin", rateLimit(5, 60 * 1000), async (req, res) => {
+    try {
+      const { memberId, pin, deviceId } = req.body;
+      
+      if (!memberId || !pin) {
+        return res.status(400).json({ message: "Member ID and PIN are required" });
+      }
+
+      const member = await storage.getFamilyMember(memberId);
+      if (!member || !member.pinCode) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Verify PIN
+      const isValid = await bcrypt.compare(pin, member.pinCode);
+      if (!isValid) {
+        return res.status(401).json({ message: "Invalid PIN" });
+      }
+
+      // Generate JWT tokens
+      const tokens = await generateTokenPair(member, deviceId);
+
+      res.json({
+        ...tokens,
+        member: {
+          id: member.id,
+          displayName: member.displayName,
+          role: member.role,
+          familyName: member.familyName,
+          avatarUrl: member.avatarUrl,
+          activeSkinId: member.activeSkinId,
+        },
+      });
+    } catch (error) {
+      console.error("Mobile PIN login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+    return;
+  });
+
+  // Refresh access token
+  // Rate limited: 20 per minute (legitimate usage should be infrequent)
+  app.post("/api/mobile/auth/refresh", rateLimit(20, 60 * 1000), async (req, res) => {
+    try {
+      const { refreshToken, deviceId } = req.body;
+      
+      if (!refreshToken) {
+        return res.status(400).json({ message: "Refresh token is required" });
+      }
+
+      const tokens = await refreshAccessToken(refreshToken, deviceId);
+      if (!tokens) {
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
+      }
+
+      res.json(tokens);
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      res.status(500).json({ message: "Token refresh failed" });
+    }
+    return;
+  });
+
+  // Mobile logout (revoke refresh token)
+  app.post("/api/mobile/auth/logout", async (req, res) => {
+    try {
+      const { refreshToken } = req.body;
+      
+      if (refreshToken) {
+        await revokeRefreshToken(refreshToken);
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Mobile logout error:", error);
+      res.status(500).json({ message: "Logout failed" });
+    }
+  });
+
+  // Register push notification token
+  app.post("/api/mobile/push/register", isAuthenticated, async (req: any, res) => {
+    try {
+      const memberResult = await getCurrentMemberFromRequest(req);
+      if (!memberResult) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { token, platform, deviceId } = req.body;
+      
+      if (!token || !platform) {
+        return res.status(400).json({ message: "Token and platform are required" });
+      }
+
+      if (!["ios", "android", "expo"].includes(platform)) {
+        return res.status(400).json({ message: "Invalid platform" });
+      }
+
+      await registerPushToken(memberResult.member.id, token, platform, deviceId);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Push token registration error:", error);
+      res.status(500).json({ message: "Failed to register push token" });
+    }
+    return;
+  });
+
+  // Unregister push notification token
+  app.post("/api/mobile/push/unregister", isAuthenticated, async (req: any, res) => {
+    try {
+      const memberResult = await getCurrentMemberFromRequest(req);
+      if (!memberResult) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Token is required" });
+      }
+
+      await unregisterPushToken(memberResult.member.id, token);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Push token unregistration error:", error);
+      res.status(500).json({ message: "Failed to unregister push token" });
+    }
+    return;
+  });
+
+  // Mobile API info endpoint (no auth required)
+  app.get("/api/mobile/info", (req, res) => {
+    res.json({
+      version: "1.0.0",
+      minAppVersion: "1.0.0",
+      features: ["push_notifications", "offline_mode"],
+      endpoints: {
+        login: "/api/mobile/auth/login",
+        loginPin: "/api/mobile/auth/login-pin",
+        refresh: "/api/mobile/auth/refresh",
+        logout: "/api/mobile/auth/logout",
+        pushRegister: "/api/mobile/push/register",
+        pushUnregister: "/api/mobile/push/unregister",
+      },
+    });
+  });
+
+  // Family routes
+  app.get("/api/families/current", isAuthenticated, async (req: any, res) => {
+    try {
+      let member;
+      
+      // TV session: use only the validated, selected member for the paired family.
+      if (req.user?.tvSession) {
+        member = await getRoleMemberForRequest(req);
+      // Device-linked session: member is directly available
+      } else if (req.user.authMethod === "device" && req.user.member) {
+        member = req.user.member;
+      } else {
+        // Normal Replit Auth flow
+        const userId = req.user.claims.sub;
+        member = await storage.getFamilyMemberByUserId(userId);
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Show the corrected end date even if background initialization has not completed.
+      await extendActiveLegacyFamilyTrials(member.familyName);
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+
+      // TV clients need only the sharing entitlement and trial expiry. Never
+      // expose the rest of the family record (including billing identifiers)
+      // through TV-token authentication.
+      if (req.user?.tvSession) {
+        res.set("Cache-Control", "no-store");
+        const trialActive = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+        return res.json({
+          subscriptionTier: family.subscriptionTier,
+          trialEndsAt: family.trialEndsAt,
+          categoryNames: family.categoryNames,
+          canUseSharedRewards:
+            hasFeature(family.subscriptionTier ?? "free", "sharedRewards") || trialActive,
+        });
+      }
+      
+      const memberCount = await storage.getFamilyMemberCount(member.familyName);
+      const allMembersForLimit = await storage.getFamilyMembersByFamily(member.familyName);
+      const maxMembersForTier = getMaxMembersForFamily(family);
+      const selected = getLockedSelection(family);
+      const activeCount = allMembersForLimit.filter((m: any) => !m.isPaused && (!selected || selected.includes(m.id))).length;
+      const overLimitCount = Math.max(0, activeCount - maxMembersForTier);
+      const selectionRequired = !!getSelectionScope(family) &&
+        memberCount > maxMembersForTier && !selected;
+
+      // Never cache this endpoint — overLimitCount and tier can change at any time
+      // without the underlying DB row changing (e.g. after a cancel-sync or webhook).
+      res.set("Cache-Control", "no-store");
+      res.json({ ...family, memberCount, maxMembersForTier, overLimitCount, selectionRequired });
+    } catch (error) {
+      console.error("Error fetching family:", error);
+      res.status(500).json({ message: "Failed to fetch family" });
+    }
+    return;
+  });
+
+  // Start the one-time 14-day Family feature trial only when a parent explicitly asks.
+  app.post("/api/families/start-trial", isAuthenticated, async (req: any, res) => {
+    try {
+      let member;
+
+      if (req.user.authMethod === "device" && req.user.member) {
+        member = req.user.member;
+      } else {
+        const userId = req.user.claims.sub;
+        member = await storage.getFamilyMemberByUserId(userId);
+      }
+
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can start a family trial" });
+      }
+
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+
+      if (family.subscriptionTier !== "free") {
+        return res.json({ trialActivated: false, reason: "paid_tier", trialEndsAt: family.trialEndsAt });
+      }
+
+      // A trial is strictly one-time. Returning the current state keeps this endpoint idempotent.
+      if (family.trialStartedAt) {
+        const isActive = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+        return res.json({
+          trialActivated: false,
+          reason: isActive ? "already_active" : "already_used",
+          trialEndsAt: family.trialEndsAt,
+        });
+      }
+
+      // Conditional update prevents two simultaneous clicks from granting two trials.
+      const activated = await storage.startFamilyTrial(member.familyName);
+      if (!activated) {
+        const current = await storage.getFamily(member.familyName);
+        return res.json({
+          trialActivated: false,
+          reason: current?.subscriptionTier !== "free" ? "paid_tier" : "already_used",
+          trialEndsAt: current?.trialEndsAt ?? null,
+        });
+      }
+
+      try {
+        await autoUnpauseMembersAfterUpgrade(member.familyName, "family");
+      } catch (error) {
+        console.error("Could not unpause members after trial activation:", error);
+      }
+      res.set("Cache-Control", "no-store");
+      res.json({ trialActivated: true, trialEndsAt: activated.trialEndsAt });
+    } catch (error) {
+      console.error("Error starting family trial:", error);
+      res.status(500).json({ message: "Failed to start family trial" });
+    }
+    return;
+  });
+
+  // Get family settings (includes showLeaderboard)
+  app.get("/api/families/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      let member;
+      
+      // Device-linked session: member is directly available
+      if (req.user.authMethod === "device" && req.user.member) {
+        member = req.user.member;
+      } else {
+        // Normal Replit Auth flow
+        const userId = req.user.claims.sub;
+        member = await storage.getFamilyMemberByUserId(userId);
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Filter sensitive data for children
+      if (member.role === "child") {
+        const { joinCode, weeklyPrize, monthlyPrize, ...safeData } = family;
+        return res.json(safeData);
+      }
+      
+      res.json(family);
+    } catch (error) {
+      console.error("Error fetching family settings:", error);
+      res.status(500).json({ message: "Failed to fetch family settings" });
+    }
+    return;
+  });
+
+  // Zod schema for family settings update
+  const updateFamilySettingsSchema = z.object({
+    showLeaderboard: z.boolean().optional(),
+    pushChat: z.boolean().optional(),
+    pushPinboard: z.boolean().optional(),
+    pushTasks: z.boolean().optional(),
+    pushRewards: z.boolean().optional(),
+    childPushQuietEnabled: z.boolean().optional(),
+    childPushQuietStart: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
+    childPushQuietEnd: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
+    singleDeviceMode: z.boolean().optional(),
+    language: z.enum(["de", "en", "fr", "es", "ja", "zh", "ko", "sv", "pt"]).optional(),
+    timezone: z.string().optional(),
+    weeklyPrize: z.string().nullable().optional(),
+    monthlyPrize: z.string().nullable().optional(),
+    yearlyPrize: z.string().nullable().optional(),
+    skinCardCost: z.number().int().min(40).max(80).refine(val => val % 5 === 0, {
+      message: "skinCardCost must be a multiple of 5"
+    }).optional(),
+    categoryNames: z.object({
+      household: z.string().max(40).optional(),
+      school: z.string().max(40).optional(),
+      selfCare: z.string().max(40).optional(),
+      other: z.string().max(40).optional(),
+    }).nullable().optional(),
+  }).refine(data => 
+    data.showLeaderboard !== undefined || 
+    data.pushChat !== undefined ||
+    data.pushPinboard !== undefined ||
+    data.pushTasks !== undefined ||
+    data.pushRewards !== undefined ||
+    data.childPushQuietEnabled !== undefined ||
+    data.childPushQuietStart !== undefined ||
+    data.childPushQuietEnd !== undefined ||
+    data.singleDeviceMode !== undefined ||
+    data.language !== undefined ||
+    data.timezone !== undefined ||
+    data.weeklyPrize !== undefined ||
+    data.monthlyPrize !== undefined ||
+    data.yearlyPrize !== undefined ||
+    data.skinCardCost !== undefined ||
+    data.categoryNames !== undefined, {
+    message: "At least one setting must be provided"
+  });
+
+  // Update family settings (parents only)
+  app.patch("/api/families/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Only parents can update settings
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update family settings" });
+      }
+      
+      // Validate request body
+      const validation = updateFamilySettingsSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid settings", 
+          errors: validation.error.issues
+        });
+      }
+      
+      const settings = validation.data;
+      
+      await storage.updateFamilySettings(member.familyName, settings);
+      
+      // Broadcast settings change to all family members
+      broadcastToFamily(member.familyName, {
+        type: "settings_updated",
+        settings,
+      });
+      
+      res.json({ message: "Settings updated successfully" });
+    } catch (error) {
+      console.error("Error updating family settings:", error);
+      res.status(500).json({ message: "Failed to update family settings" });
+    }
+    return;
+  });
+
+  // Factory reset - parent only
+  app.post("/api/family/reset", isAuthenticated, async (req: any, res) => {
+    let auditContext: Record<string, unknown> | undefined;
+
+    try {
+      const userId = req.user.claims.sub;
+      const actingMemberId = req.session.actingAsMemberId;
+      
+      const member = actingMemberId 
+        ? await storage.getFamilyMemberById(actingMemberId)
+        : await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can reset the family
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can reset the family" });
+      }
+
+      auditContext = {
+        event: "family_factory_reset",
+        userId,
+        memberId: member.id,
+        memberDisplayName: member.displayName,
+        familyName: member.familyName,
+        ip: req.ip,
+        deviceId: req.get("x-device-id")?.slice(0, 128) || null,
+        userAgent: req.get("user-agent")?.slice(0, 256) || null,
+      };
+
+      if (!isValidFactoryResetConfirmation(req.body?.confirmation, member.familyName)) {
+        console.warn("[AUDIT] Family factory reset rejected", {
+          ...auditContext,
+          result: "invalid_confirmation",
+          timestamp: new Date().toISOString(),
+        });
+        return res.status(400).json({
+          message: "Family name confirmation does not match",
+          code: "INVALID_FACTORY_RESET_CONFIRMATION",
+        });
+      }
+
+      console.warn("[AUDIT] Family factory reset authorized", {
+        ...auditContext,
+        result: "authorized",
+        timestamp: new Date().toISOString(),
+      });
+      
+      // Perform factory reset
+      const { profilePhotoPaths, googleRefreshTokenEncrypted } =
+        await storage.resetFamilyToFactory(member.familyName);
+
+      // The database reset is complete. Tell all connected family clients
+      // immediately so they cannot keep acting on pre-reset stars/skins while
+      // slower object-storage cleanup runs.
+      broadcastToFamily(member.familyName, {
+        type: "factory_reset",
+        message: "Family has been reset to factory settings",
+      });
+
+      console.warn("[AUDIT] Family factory reset completed", {
+        ...auditContext,
+        result: "completed",
+        timestamp: new Date().toISOString(),
+      });
+      res.json({ message: "Family reset to factory settings successfully" });
+
+      // The credentials and mappings are already gone from our database.
+      // Remote revocation is best-effort after commit: an outage at Google
+      // must not leave an otherwise-reset family half reset.
+      if (googleRefreshTokenEncrypted) {
+        void revokeGoogleCalendarRefreshToken(googleRefreshTokenEncrypted).catch((error) => {
+          console.warn("[AUDIT] Factory reset Google Calendar revocation failed", {
+            ...auditContext,
+            result: "google_calendar_revocation_failed",
+            timestamp: new Date().toISOString(),
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
+      }
+
+      // Profile photos are outside the database transaction. Delete them as
+      // best-effort cleanup after responding; failures cannot invalidate the
+      // already successful family reset.
+      void (async () => {
+        const objectStorageService = new ObjectStorageService();
+        const profilePhotoCleanupResults = await Promise.all(
+          profilePhotoPaths.map(async (path) => ({
+            path,
+            deleted: await objectStorageService.deleteObjectEntity(path),
+          })),
+        );
+        const failedProfilePhotoDeletes = profilePhotoCleanupResults.filter((result) => !result.deleted);
+        if (failedProfilePhotoDeletes.length > 0) {
+          console.warn("[AUDIT] Factory reset profile photo cleanup incomplete", {
+            ...auditContext,
+            result: "profile_photo_cleanup_incomplete",
+            timestamp: new Date().toISOString(),
+            failedCount: failedProfilePhotoDeletes.length,
+          });
+        }
+      })().catch((error) => {
+        console.warn("[AUDIT] Factory reset profile photo cleanup failed", {
+          ...auditContext,
+          result: "profile_photo_cleanup_failed",
+          timestamp: new Date().toISOString(),
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
+    } catch (error) {
+      console.error("[AUDIT] Family factory reset failed", {
+        ...auditContext,
+        result: "failed",
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      });
+      console.error("Error resetting family:", error);
+      res.status(500).json({ message: "Failed to reset family" });
+    }
+    return;
+  });
+
+  // Family member routes
+  app.get("/api/family-members/current", isAuthenticated, async (req: any, res) => {
+    try {
+      // Check if we're acting as another member
+      const actingAsMember = await getValidActingAsMemberFromRequest(req);
+      if (actingAsMember) {
+        let hasActiveDeviceSessions = false;
+        if (actingAsMember.role === "child") {
+          const sessions = await storage.getActiveDeviceSessionsForMember(actingAsMember.id);
+          hasActiveDeviceSessions = sessions.length > 0;
+        }
+        return res.json({ ...actingAsMember, hasActiveDeviceSessions });
+      }
+      
+      // Device-linked session: fetch fresh data from DB (session member may be stale)
+      if (req.user.authMethod === "device" && req.user.member) {
+        const freshMember = await storage.getFamilyMemberById(req.user.member.id);
+        if (freshMember) {
+          return res.json({ ...freshMember, hasActiveDeviceSessions: true });
+        }
+        return res.json({ ...req.user.member, hasActiveDeviceSessions: true });
+      }
+      
+      // Normal Replit Auth flow
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      res.json(member);
+    } catch (error) {
+      console.error("Error fetching current family member:", error);
+      res.status(500).json({ message: "Failed to fetch family member" });
+    }
+    return;
+  });
+
+  // Get the real authenticated user's member record (not acting as)
+  app.get("/api/family-members/real", isAuthenticated, async (req: any, res) => {
+    try {
+      // Device-linked session: member is directly available
+      if (req.user.authMethod === "device" && req.user.member) {
+        return res.json(req.user.member);
+      }
+      
+      // Normal Replit Auth flow
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      res.json(member);
+    } catch (error) {
+      console.error("Error fetching real family member:", error);
+      res.status(500).json({ message: "Failed to fetch family member" });
+    }
+    return;
+  });
+
+  // Switch member (parents only)
+  app.post("/api/family-members/switch", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const realMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!realMember) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can switch members
+      if (realMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can switch members" });
+      }
+      
+      const { memberId, pinCode } = req.body;
+      
+      // If no memberId provided, switch back to self
+      if (!memberId) {
+        delete req.session.actingAsMemberId;
+        if (isDev) {
+          const devToken = req.headers["x-dev-token"] as string | undefined;
+          if (devToken) setDevTokenActingAs(devToken, null);
+        }
+        return res.json({ message: "Switched back to self", member: realMember });
+      }
+      
+      // Verify the target member exists and is in the same family
+      const targetMember = await storage.getFamilyMember(memberId);
+      
+      if (!targetMember) {
+        return res.status(404).json({ message: "Target member not found" });
+      }
+      
+      if (targetMember.familyName !== realMember.familyName) {
+        return res.status(403).json({ message: "Cannot switch to member from different family" });
+      }
+      
+      // Get family settings to check if single device mode is enabled
+      const family = await storage.getFamily(realMember.familyName);
+      
+      // If single device mode is enabled and switching to a parent, verify PIN
+      if (family?.singleDeviceMode && targetMember.role === "parent") {
+        if (!pinCode) {
+          return res.status(401).json({ 
+            message: "PIN required for this member",
+            requiresPin: true 
+          });
+        }
+        
+        // If no PIN is set, default PIN is "0000"
+        // If PIN is set, validate it
+        let isValidPin = false;
+        if (!targetMember.pinCode) {
+          // No PIN set - accept default PIN "0000"
+          isValidPin = pinCode === "0000";
+        } else {
+          // PIN is set - validate against stored PIN
+          isValidPin = await storage.validatePin(memberId, pinCode);
+        }
+        
+        if (!isValidPin) {
+          return res.status(401).json({ 
+            message: "Incorrect PIN",
+            requiresPin: true 
+          });
+        }
+      }
+      
+      // Set the session to act as this member
+      req.session.actingAsMemberId = memberId;
+      if (isDev) {
+        const devToken = req.headers["x-dev-token"] as string | undefined;
+        if (devToken) setDevTokenActingAs(devToken, memberId);
+      }
+      
+      res.json({ message: "Switched member successfully", member: targetMember });
+    } catch (error) {
+      console.error("Error switching member:", error);
+      res.status(500).json({ message: "Failed to switch member" });
+    }
+    return;
+  });
+
+  // Set or update PIN code for a family member (parents only)
+  app.patch("/api/family-members/:id/pin", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const realMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!realMember) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can set PIN codes
+      if (realMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can manage PIN codes" });
+      }
+      
+      const { id: targetMemberId } = req.params;
+      const { pinCode } = req.body;
+      
+      // Validate PIN code
+      if (pinCode !== null && pinCode !== undefined && pinCode !== "") {
+        if (!/^\d{4}$/.test(pinCode)) {
+          return res.status(400).json({ message: "PIN must be exactly 4 digits" });
+        }
+      }
+      
+      // Verify the target member exists and is in the same family
+      const targetMember = await storage.getFamilyMember(targetMemberId);
+      
+      if (!targetMember) {
+        return res.status(404).json({ message: "Target member not found" });
+      }
+      
+      if (targetMember.familyName !== realMember.familyName) {
+        return res.status(403).json({ message: "Cannot manage PIN for member from different family" });
+      }
+      
+      // Update PIN code (allow null/empty string to clear PIN)
+      if (pinCode && pinCode.trim() !== "") {
+        await storage.setPinCode(targetMemberId, pinCode);
+      } else {
+        // Clear PIN by setting to null
+        await storage.clearPinCode(targetMemberId);
+      }
+      
+      res.json({ message: "PIN updated successfully" });
+    } catch (error) {
+      console.error("Error updating PIN:", error);
+      res.status(500).json({ message: "Failed to update PIN" });
+    }
+    return;
+  });
+
+  app.get("/api/family-members", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const members = await storage.getFamilyMembersByFamily(result.member.familyName);
+      
+      // For parents, look up linked account emails
+      const isParent = result.member.role === "parent";
+      let accountEmails: Record<string, string> = {};
+      if (isParent) {
+        const userIds = members.filter(m => m.userId).map(m => m.userId as string);
+        if (userIds.length > 0) {
+          const userRecords = await db
+            .select({ id: users.id, email: users.email })
+            .from(users)
+            .where(inArray(users.id, userIds));
+          for (const u of userRecords) {
+            if (u.email) accountEmails[u.id] = u.email;
+          }
+        }
+      }
+
+      // Device-link sessions belong to the member and remain relevant even if
+      // the member later gains an account or changes role.
+      const membersToCheckForDeviceSessions = members;
+      const deviceSessionResults = await Promise.all(
+        membersToCheckForDeviceSessions.map(m =>
+          storage.getActiveDeviceSessionsForMember(m.id).then(s => ({ id: m.id, hasActive: s.length > 0 }))
+        )
+      );
+      const deviceSessionMap = new Map(deviceSessionResults.map(r => [r.id, r.hasActive]));
+
+      // Compute over-limit members based on tier
+      const family = await storage.getFamily(result.member.familyName);
+      if (family) {
+        const maxMembers = getMaxMembersForFamily(family);
+        // Sort by createdAt ascending (oldest = most important = stays active)
+        const sorted = [...members].sort((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return aTime - bTime;
+        });
+        // Explicitly paused members are always blocked; remaining sorted non-paused
+        // members beyond maxMembers are auto-blocked
+        const activeSorted = sorted.filter(m => !m.isPaused);
+        const selected = getLockedSelection(family);
+        const autoOverLimitIds = new Set((selected
+          ? activeSorted.filter(m => !selected.includes(m.id))
+          : activeSorted.slice(maxMembers)).map(m => m.id));
+        const overLimitIds = new Set([
+          ...members.filter(m => m.isPaused).map(m => m.id),
+          ...autoOverLimitIds,
+          ...(selected ? members.filter(m => !selected.includes(m.id)).map(m => m.id) : []),
+        ]);
+        const membersWithLimit = members.map(m => ({
+          ...m,
+          isOverLimit: overLimitIds.has(m.id),
+          accountEmail: isParent && m.userId ? (accountEmails[m.userId] ?? null) : undefined,
+          hasActiveDeviceSessions: deviceSessionMap.get(m.id) ?? false,
+        }));
+        return res.json(membersWithLimit);
+      }
+      
+      res.json(members.map(m => ({
+        ...m,
+        accountEmail: isParent && m.userId ? (accountEmails[m.userId] ?? null) : undefined,
+        hasActiveDeviceSessions: deviceSessionMap.get(m.id) ?? false,
+      })));
+    } catch (error) {
+      console.error("Error fetching family members:", error);
+      res.status(500).json({ message: "Failed to fetch family members" });
+    }
+    return;
+  });
+
+  // Pause / unpause a family member (parent only, for downgrade overflow management)
+  app.patch("/api/family-members/:id/pause", isAuthenticated, async (req: any, res) => {
+    try {
+      const targetId = req.params.id;
+      const isPaused = req.body?.isPaused;
+      if (typeof isPaused !== "boolean") {
+        return res.status(400).json({ message: "isPaused must be a boolean" });
+      }
+
+      let currentMember;
+      if (req.user.authMethod === "device" && req.user.member) {
+        currentMember = req.user.member;
+      } else {
+        const userId = req.user.claims.sub;
+        currentMember = await storage.getFamilyMemberByUserId(userId);
+      }
+
+      if (!currentMember || currentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can pause members" });
+      }
+
+      const target = await storage.getFamilyMember(targetId);
+      if (!target || target.familyName !== currentMember.familyName) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      if (target.id === currentMember.id) {
+        return res.status(403).json({ message: "Cannot pause yourself" });
+      }
+
+      const change = await setMemberPausedWithinLimit(currentMember.familyName, targetId, isPaused);
+
+      if (change.kind === "missing") return res.status(404).json({ message: "Member not found" });
+      if (change.kind === "limit") {
+        return res.status(403).json({
+          message: `Only ${change.limit} members can be active on the current plan. Pause another member or upgrade first.`,
+          code: "MEMBER_LIMIT_REACHED",
+          limit: change.limit,
+        });
+      }
+      if (change.kind === "locked") {
+        return res.status(403).json({ message: "These member slots are reserved until the selection period ends.", code: "MEMBER_SELECTION_LOCKED", lockedUntil: change.until });
+      }
+      if (change.kind === "selection_required") {
+        return res.status(409).json({ message: "Choose and confirm the active members before changing profiles.", code: "MEMBER_SELECTION_REQUIRED" });
+      }
+      res.json(change.member);
+    } catch (error) {
+      console.error("Error updating member pause state:", error);
+      res.status(500).json({ message: "Failed to update member" });
+    }
+    return;
+  });
+
+  app.post("/api/families/member-selection", isAuthenticated, async (req: any, res) => {
+    try {
+      const currentMember = req.user.authMethod === "device" && req.user.member
+        ? req.user.member
+        : await storage.getFamilyMemberByUserId(req.user.claims.sub);
+      if (!currentMember || currentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can choose active members" });
+      }
+      const ids = req.body?.memberIds;
+      if (!Array.isArray(ids) || ids.some((id: unknown) => typeof id !== "string")) {
+        return res.status(400).json({ message: "memberIds must be an array of IDs" });
+      }
+      const choice = await confirmMemberSelection(currentMember.familyName, currentMember.id, ids);
+      if (choice.kind === "missing") return res.status(404).json({ message: "Family not found" });
+      if (choice.kind === "not_needed") return res.status(400).json({ message: "No member selection is needed" });
+      if (choice.kind === "locked") return res.status(403).json({ message: "Member selection is already locked", lockedUntil: choice.until });
+      if (choice.kind === "invalid") return res.status(400).json({ message: `Choose exactly ${choice.limit} members, including your own profile` });
+      res.set("Cache-Control", "no-store");
+      res.json(choice);
+    } catch (error) {
+      console.error("Error confirming member selection:", error);
+      res.status(500).json({ message: "Failed to confirm member selection" });
+    }
+    return;
+  });
+
+  app.post("/api/family-members", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Check if user already has a family member profile
+      const existingMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (existingMember) {
+        // Adding a new member - user must be a parent
+        if (existingMember.role !== "parent") {
+          return res.status(403).json({ message: "Only parents can add family members" });
+        }
+        
+        const parsed = insertFamilyMemberSchema.parse(req.body);
+        const familyName = existingMember.familyName;
+        
+        // Get family for tier checking
+        const family = await storage.getFamily(familyName);
+        if (!family) {
+          return res.status(404).json({ message: "Family not found" });
+        }
+
+        // Reserved seats stay occupied even if an old profile is deleted.
+        if (getLockedSelection(family)) {
+          return res.status(403).json({ message: "Member selection is locked. New profiles can be added after the selection period ends.", code: "MEMBER_SELECTION_LOCKED" });
+        }
+        
+        // Only the explicit administrative override can bypass the profile limit.
+        const bypassTierLimits = process.env.BYPASS_TIER_LIMITS === "true";
+        
+        if (!bypassTierLimits) {
+          const currentCount = await storage.getFamilyMemberCount(familyName);
+          const tier = family.subscriptionTier as SubscriptionTier;
+          const limit = getMaxMembersForFamily(family);
+          
+          if (currentCount >= limit) {
+            return res.status(403).json({
+              message: `Your ${tier} plan is limited to ${limit} members. Upgrade to add more family members.`,
+              currentTier: tier,
+              currentCount,
+              limit,
+            });
+          }
+        }
+        
+        // Create member (no userId - this is a placeholder member)
+        const member = await storage.createFamilyMember({
+          ...parsed,
+          familyName,
+        });
+        await reserveFullMemberSelection(familyName);
+
+        // Broadcast new member to family
+        broadcastToFamily(member.familyName, {
+          type: "member_joined",
+          member,
+        });
+        
+        res.json(member);
+      } else {
+        // Initial setup - creating first member for this user
+        const parsed = insertFamilyMemberSchema.parse(req.body);
+        
+        // Check if family exists, create if not
+        let family = await storage.getFamily(parsed.familyName);
+        let isNewFamily = false;
+        if (!family) {
+          // Generate a cryptographically secure join code for the family.
+          // Uses a 32-character alphanumeric set (no visually ambiguous chars like 0/O/1/I/L).
+          // 32^6 ≈ 1 billion possible codes — ~63× stronger than the prior hex scheme.
+          const crypto = await import('crypto');
+          const JOIN_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+          const joinCodeBytes = crypto.randomBytes(6);
+          const joinCode = Array.from(joinCodeBytes).map(b => JOIN_CODE_CHARS[b % 32]).join('').substring(0, 6);
+          
+          family = await storage.createFamily({
+            familyName: parsed.familyName,
+            joinCode,
+            subscriptionTier: "free",
+          });
+          isNewFamily = true;
+        }
+
+        if (getLockedSelection(family)) {
+          return res.status(403).json({ message: "Member selection is locked. New profiles can be added after the selection period ends.", code: "MEMBER_SELECTION_LOCKED" });
+        }
+        
+        const bypassTierLimits = process.env.BYPASS_TIER_LIMITS === "true";
+        
+        if (!bypassTierLimits) {
+          const currentCount = await storage.getFamilyMemberCount(parsed.familyName);
+          const tier = family.subscriptionTier as SubscriptionTier;
+          const limit = getMaxMembersForFamily(family);
+          
+          if (currentCount >= limit) {
+            return res.status(403).json({
+              message: `Your ${tier} plan is limited to ${limit} members. Upgrade to add more family members.`,
+              currentTier: tier,
+              currentCount,
+              limit,
+            });
+          }
+        }
+        
+        // Create member linked to current user
+        const member = await storage.createFamilyMember({
+          ...parsed,
+          role: "parent",
+          userId, // Associate with authenticated user
+        } as any);
+        await reserveFullMemberSelection(member.familyName);
+        
+        // Auto-seed default achievements for brand new families
+        if (isNewFamily) {
+          try {
+            await storage.seedDefaultAchievements(member.familyName);
+          } catch (seedErr) {
+            console.error("Auto-seed achievements failed (non-fatal):", seedErr);
+          }
+        }
+
+        // Broadcast new member to family
+        broadcastToFamily(member.familyName, {
+          type: "member_joined",
+          member,
+        });
+        
+        res.json(member);
+      }
+    } catch (error: any) {
+      console.error("Error creating family member:", error);
+      res.status(400).json({ message: error.message || "Failed to create family member" });
+    }
+    return;
+  });
+
+  // Join family with join code
+  app.post("/api/join-family", isAuthenticated, rateLimit(10, 60 * 1000), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Validate and parse request body
+      // NOTE: role is intentionally omitted — join-code users are always assigned
+      // the "child" role server-side to prevent privilege escalation.
+      const joinFamilySchema = z.object({
+        joinCode: z.string().length(6, "Join code must be 6 characters"),
+        displayName: z.string().min(1, "Display name is required"),
+        avatarUrl: z.string().min(1, "Avatar is required"),
+        color: z.string().min(1, "Color is required"),
+      });
+      
+      const parsed = joinFamilySchema.parse(req.body);
+      
+      // Normalize join code to uppercase for case-insensitive comparison
+      const normalizedJoinCode = parsed.joinCode.toUpperCase();
+      
+      // Check if user already has a family member profile
+      const existingMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (existingMember) {
+        return res.status(400).json({ message: "You are already part of a family" });
+      }
+      
+      // Find the family with this join code
+      const family = await storage.getFamilyByJoinCode(normalizedJoinCode);
+      
+      if (!family) {
+        return res.status(404).json({ message: "Invalid join code" });
+      }
+
+      if (getLockedSelection(family)) {
+        return res.status(403).json({ message: "This family's member selection is locked until the next selection period.", code: "MEMBER_SELECTION_LOCKED" });
+      }
+      
+      const bypassTierLimits = process.env.BYPASS_TIER_LIMITS === "true";
+      
+      if (!bypassTierLimits) {
+        const currentCount = await storage.getFamilyMemberCount(family.familyName);
+        const tier = family.subscriptionTier as SubscriptionTier;
+        const limit = getMaxMembersForFamily(family);
+        
+        if (currentCount >= limit) {
+          return res.status(403).json({
+            message: `This family's ${tier} plan is limited to ${limit} members. Ask them to upgrade to add more members.`,
+            currentTier: tier,
+            currentCount,
+            limit,
+          });
+        }
+      }
+      
+      // Create new member linked to the user.
+      // Role is always "child" — the join-code flow does not grant parent access.
+      const newMember = await storage.createFamilyMember({
+        familyName: family.familyName,
+        displayName: parsed.displayName,
+        avatarUrl: parsed.avatarUrl,
+        color: parsed.color,
+        role: "child",
+        userId,
+      } as any);
+      await reserveFullMemberSelection(family.familyName);
+      
+      // Broadcast member joined to family
+      broadcastToFamily(newMember.familyName, {
+        type: "member_joined",
+        member: newMember,
+      });
+      
+      res.json(newMember);
+    } catch (error: any) {
+      console.error("Error joining family:", error);
+      res.status(400).json({ message: error.message || "Failed to join family" });
+    }
+    return;
+  });
+
+  app.put("/api/family-members/:memberId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { memberId } = req.params;
+      
+      // Get current member to verify permissions - support device sessions
+      let currentMember;
+      if (req.user.authMethod === "device" && req.user.member) {
+        currentMember = req.user.member;
+      } else if (req.user.authMethod === "mobile" && req.user.member) {
+        currentMember = req.user.member;
+      } else {
+        const userId = req.user.claims.sub;
+        currentMember = await storage.getFamilyMemberByUserId(userId);
+      }
+      
+      if (!currentMember) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get the member being updated
+      const memberToUpdate = await storage.getFamilyMemberById(memberId);
+      
+      if (!memberToUpdate) {
+        return res.status(404).json({ message: "Member to update not found" });
+      }
+      
+      // Verify they're in the same family
+      if (memberToUpdate.familyName !== currentMember.familyName) {
+        return res.status(403).json({ message: "Cannot update members from other families" });
+      }
+      
+      // Only allow updating own profile or if you're a parent
+      if (memberToUpdate.id !== currentMember.id && currentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update other members' profiles" });
+      }
+      
+      // Security: Prevent role changes that could lock out the family
+      if (req.body.role && req.body.role !== memberToUpdate.role) {
+        // A parent's account remains logged in while acting as a child. A role
+        // change must be made outside User Switch from family settings.
+        if (await getValidActingAsMemberFromRequest(req)) {
+          return res.status(403).json({ message: "Switch back to your parent profile to change roles in family settings" });
+        }
+        // Validate role value
+        if (req.body.role !== "parent" && req.body.role !== "child") {
+          return res.status(400).json({ message: "Invalid role. Must be 'parent' or 'child'." });
+        }
+        
+        // Only parents can change roles
+        if (currentMember.role !== "parent") {
+          return res.status(403).json({ message: "Only parents can change member roles" });
+        }
+
+        if (req.body.role === "parent" && memberToUpdate.role === "child") {
+          const linkedDevices = await storage.getActiveDeviceSessionsForMember(memberId);
+          if (linkedDevices.length > 0) {
+            return res.status(409).json({ message: "Disconnect all Device Link sessions before changing this child to a parent" });
+          }
+        }
+        
+        // Prevent self-demotion: parents cannot change their own role to child
+        if (memberToUpdate.id === currentMember.id && req.body.role === "child") {
+          return res.status(400).json({ message: "Parents cannot demote themselves to child. Ask another parent to change your role." });
+        }
+        
+        // Prevent demoting the last parent
+        if (req.body.role === "child" && memberToUpdate.role === "parent") {
+          const allMembers = await storage.getFamilyMembersByFamily(currentMember.familyName);
+          const parentCount = allMembers.filter(m => m.role === "parent").length;
+          
+          if (parentCount <= 1) {
+            return res.status(400).json({ message: "Cannot demote the last parent. At least one parent must remain to manage the family." });
+          }
+        }
+      }
+      
+      // Update the member
+      const updates = {
+        displayName: req.body.displayName,
+        avatarUrl: req.body.avatarUrl,
+        color: req.body.color,
+        role: req.body.role,
+        excludeFromLeaderboard: req.body.excludeFromLeaderboard,
+        useCustomAvatar: req.body.useCustomAvatar,
+      };
+      
+      const updatedMember = await storage.updateFamilyMember(memberId, updates);
+      
+      // Broadcast update to family
+      broadcastToFamily(currentMember.familyName, {
+        type: "member_updated",
+        member: updatedMember,
+      });
+      
+      res.json(updatedMember);
+    } catch (error: any) {
+      console.error("Error updating family member:", error);
+      res.status(400).json({ message: error.message || "Failed to update family member" });
+    }
+    return;
+  });
+
+  // Award bonus points to family members (parents only)
+  app.post("/api/family/award-points", isAuthenticated, async (req: any, res) => {
+    try {
+      let currentMember;
+      if ((req.user.authMethod === "device" || req.user.authMethod === "mobile") && req.user.member) {
+        currentMember = req.user.member;
+      } else {
+        const userId = req.user.claims.sub;
+        currentMember = await storage.getFamilyMemberByUserId(userId);
+      }
+
+      if (!currentMember || currentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can award points" });
+      }
+
+      const { memberIds, points, operationId } = req.body;
+
+      if (!Array.isArray(memberIds) || memberIds.length === 0) {
+        return res.status(400).json({ message: "At least one member must be selected" });
+      }
+      if (typeof points !== "number" || !Number.isInteger(points) || points < 1 || points > 1000) {
+        return res.status(400).json({ message: "Points must be a whole number between 1 and 1,000" });
+      }
+
+      for (const memberId of memberIds) {
+        const target = await storage.getFamilyMember(memberId);
+        if (!target || target.familyName !== currentMember.familyName) {
+          return res.status(403).json({ message: "Cannot award points to members outside your family" });
+        }
+      }
+      // Clients may provide a stable operationId for retry-safe retries.
+      // Without it, a server-generated ID preserves compatibility but cannot
+      // identify a retry of a lost response.
+      const sourceId = typeof operationId === "string" && operationId.trim()
+        ? operationId.trim()
+        : (typeof req.get("x-operation-id") === "string" ? req.get("x-operation-id") : crypto.randomUUID());
+      const awarded = await storage.awardPointsAtomically(
+        memberIds,
+        points,
+        "parent_bonus",
+        `Bonus from ${currentMember.displayName}`,
+        currentMember.id,
+        sourceId,
+      );
+      for (const awardedMember of awarded) {
+        const memberId = awardedMember.id;
+        broadcastToFamily(currentMember.familyName, {
+          type: "points_updated",
+          memberId,
+          addedPoints: points,
+          fromParent: currentMember.displayName,
+        });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error awarding points:", error);
+      res.status(500).json({ message: "Failed to award points" });
+    }
+    return;
+  });
+
+  app.delete("/api/family-members/:memberId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { memberId } = req.params;
+      
+      // Get current member to verify permissions
+      const currentMember = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!currentMember) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete members
+      if (currentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete family members" });
+      }
+      
+      // Get the member being deleted
+      const memberToDelete = await storage.getFamilyMemberById(memberId);
+      
+      if (!memberToDelete) {
+        return res.status(404).json({ message: "Member to delete not found" });
+      }
+      
+      // Verify they're in the same family
+      if (memberToDelete.familyName !== currentMember.familyName) {
+        return res.status(403).json({ message: "Cannot delete members from other families" });
+      }
+
+      // Prevent self-deletion
+      if (memberToDelete.id === currentMember.id) {
+        return res.status(400).json({ message: "Cannot delete yourself" });
+      }
+      
+      // A full family cannot delete a member and immediately reuse that seat
+      // for a different person within the same trial/30-day selection period.
+      await reserveFullMemberSelection(currentMember.familyName, true);
+
+      // Delete the member
+      await storage.deleteFamilyMember(memberId);
+      
+      // Broadcast deletion to family
+      broadcastToFamily(currentMember.familyName, {
+        type: "member_deleted",
+        memberId,
+      });
+      
+      res.json({ message: "Family member deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting family member:", error);
+      res.status(500).json({ message: "Failed to delete family member" });
+    }
+    return;
+  });
+
+  // Get presigned URL for avatar upload (client-side upload to Object Storage)
+  app.post("/api/upload-avatar-url", isAuthenticated, async (req: any, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL("avatars");
+      
+      res.json({ uploadURL });
+    } catch (error: any) {
+      console.error("Error getting avatar upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
+  // Set ACL policy for uploaded avatar - supports Device Sessions
+  app.put("/api/avatar", isAuthenticated, async (req: any, res) => {
+    try {
+      const { avatarUrl } = req.body;
+      
+      if (!avatarUrl) {
+        return res.status(400).json({ message: "avatarUrl is required" });
+      }
+      
+      // Get owner ID for ACL (either userId or device member ID)
+      let ownerId: string;
+      if (req.user.authMethod === "device" && req.user.member) {
+        ownerId = `device:${req.user.member.id}`;
+      } else {
+        ownerId = req.user.claims.sub;
+      }
+      
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        avatarUrl,
+        {
+          owner: ownerId,
+          visibility: "public", // Avatars are public, accessible by everyone
+        }
+      );
+      
+      res.json({ avatarUrl: objectPath });
+    } catch (error: any) {
+      console.error("Error setting avatar ACL:", error);
+      res.status(500).json({ message: "Failed to set avatar ACL" });
+    }
+    return;
+  });
+
+  // Task routes
+  app.get("/api/tasks", isAuthenticated, async (req: any, res) => {
+    try {
+      let realMember;
+      
+      // Device-linked session: member is directly available
+      if (req.user.authMethod === "device" && req.user.member) {
+        realMember = req.user.member;
+      } else {
+        // Normal Replit Auth flow
+        const userId = req.user.claims.sub;
+        realMember = await storage.getFamilyMemberByUserId(userId);
+      }
+      
+      if (!realMember) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Use acting member if available, otherwise use authenticated user (only for non-device sessions)
+      let member = realMember;
+      if (req.session?.actingAsMemberId && req.user.authMethod !== "device") {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        
+        // Security: Validate acting member belongs to same family
+        if (!actingMember || actingMember.familyName !== realMember.familyName) {
+          // Clear invalid session
+          delete req.session.actingAsMemberId;
+        } else {
+          member = actingMember;
+        }
+      }
+      
+      const allTasks = await storage.getTasksByFamily(member.familyName);
+      
+      // For children: filter and enhance tasks based on Multi-Completion mode
+      if (member.role === "child") {
+        const tasksWithMeta = await Promise.allSettled(
+          allTasks.map(async (task) => {
+            try {
+              // Get completion status for this member
+              const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
+              const dailyProgress = task.recurrence === "daily"
+                ? await storage.getDailyTaskProgress(task.id, member.id)
+                : 0;
+              (task as any).dailyProgress = dailyProgress;
+              
+              // For IMMEDIATE tasks: "pending" means task is blocked (waiting for approval)
+              // After approval, getMemberCompletionStatus returns null, so task becomes available again
+              // For other tasks: "approved" means task is completed
+              const hasCompleted = task.recurrence === "immediate" 
+                ? completionStatus === "pending"  // Immediate: blocked while pending
+                : completionStatus === "approved"; // Others: completed when approved
+
+              // DEBUG: log immediate multi-assignment task state
+              if (task.recurrence === 'immediate') {
+                const _assignedIds = await storage.getTaskAssignmentsByTask(task.id);
+                console.log(`[DEBUG immediate] task=${task.id} title="${task.title}" memberId=${member.id} completionStatus=${completionStatus} isSharedTask=${task.isSharedTask} sharedMemberIds=${JSON.stringify(task.sharedMemberIds)} maxCompletions=${task.maxCompletions} taskAssignments=${JSON.stringify(_assignedIds)}`);
+              }
+              
+              // Multi-Completion mode (maxCompletions != null) - Special rules for shared tasks
+              if (task.maxCompletions !== null) {
+                // If task also has shared/assigned targeting, apply membership filter
+                if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+                  if (!task.sharedMemberIds.includes(member.id)) return null;
+                } else {
+                  const mcAssignedIds = await storage.getTaskAssignmentsByTask(task.id);
+                  if (mcAssignedIds.length > 0 && !mcAssignedIds.includes(member.id)) return null;
+                }
+                // Get active completions to show participants
+                const [capacity, completions] = await Promise.all([
+                  storage.getTaskCompletionCapacity(task.id),
+                  storage.getActiveCompletionsByTask(task.id),
+                ]);
+                return {
+                  ...task,
+                  ...taskCompletionCapacityApiFields(capacity),
+                  memberHasCompleted: hasCompleted,
+                  memberCompletionStatus: completionStatus,
+                  completions, // Include participant list for multi-tasks
+                };
+              }
+              
+              // Shared tasks - check each shared member's completion status
+              if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+                // Only show shared tasks to members who are part of the shared group
+                if (!task.sharedMemberIds.includes(member.id)) {
+                  return null;
+                }
+                // For immediate recurrence: keep "approved" visible so "waiting for others" shows
+                const skipReset = task.recurrence === 'immediate';
+                const sharedMemberCompletions = await Promise.all(
+                  task.sharedMemberIds.map(async (memberId: string) => {
+                    const sharedMember = await storage.getFamilyMemberById(memberId);
+                    if (!sharedMember) return null;
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId, undefined, skipReset);
+                    const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
+                      ? await storage.getDailyTaskProgress(task.id, memberId)
+                      : 0;
+                    const memberProgressState = resolveMemberDailyTargetState({
+                      recurrence: task.recurrence,
+                      dailyTarget: task.dailyTarget || 1,
+                      dailyProgress: memberDailyProgress,
+                      status: memberStatus,
+                    });
+                    return {
+                      memberId,
+                      displayName: sharedMember.displayName,
+                      avatarUrl: sharedMember.avatarUrl,
+                      activeSkinId: sharedMember.activeSkinId,
+                      useCustomAvatar: sharedMember.useCustomAvatar,
+                      color: sharedMember.color,
+                      ...memberProgressState,
+                      status: memberStatus,
+                      dailyProgress: memberDailyProgress,
+                    };
+                  })
+                );
+                
+                // allApproved: Only true when ALL members have APPROVED status (not pending)
+                const allApproved = sharedMemberCompletions.filter(m => m?.hasCompleted).length === task.sharedMemberIds.length;
+
+                // For IMMEDIATE recurrence: once all members approved → reset for next round
+                if (task.recurrence === 'immediate' && allApproved) {
+                  const resetCompletions = sharedMemberCompletions.filter(Boolean).map(m => m ? {
+                    ...m, hasCompleted: false, hasSubmitted: false, status: null,
+                  } : null).filter(Boolean);
+                  return {
+                    ...task,
+                    remainingSlots: null,
+                    memberHasCompleted: false,
+                    memberCompletionStatus: null,
+                    completions: [],
+                    sharedMemberCompletions: resetCompletions,
+                  };
+                }
+                
+                // For children: check if THIS member has submitted (to grey out the card while pending/approved)
+                const currentMemberCompletion = sharedMemberCompletions.find(m => m?.memberId === member.id);
+                const thisMemberHasSubmitted = currentMemberCompletion?.hasSubmitted || false;
+                
+                return {
+                  ...task,
+                  remainingSlots: null,
+                  memberHasCompleted: thisMemberHasSubmitted, // Grey out for THIS member if they submitted
+                  memberCompletionStatus: currentMemberCompletion?.status || null,
+                  // Team rounds share one boundary, never a member's individual completion date.
+                  memberNextAvailableDate: task.nextAvailableDate,
+                  completions: [],
+                  sharedMemberCompletions: sharedMemberCompletions.filter(Boolean),
+                };
+              }
+
+              // Check if task is assigned to specific members
+              const assignedMemberIds = await storage.getTaskAssignmentsByTask(task.id);
+              
+              // If task has any explicit assignments, hide it from non-assigned children
+              if (assignedMemberIds.length > 0 && !assignedMemberIds.includes(member.id)) {
+                return null;
+              }
+
+              if (assignedMemberIds.length > 0) {
+                // Explicit assignment task: Each assigned member completes independently, gets full points.
+                // Include single-member assignments so cards can always show who is responsible.
+                // Box grays out for members who submitted (pending/approved), stays active for others
+                const taskCompletions = task.recurrence !== "none" || (task.recurrenceDays ?? 0) > 0
+                  ? await storage.getTaskCompletionsByTask(task.id)
+                  : [];
+                const familyTimezone = (await storage.getFamily(task.familyName))?.timezone || "Europe/Berlin";
+                const assignedMemberCompletions = await Promise.all(
+                  assignedMemberIds.map(async (memberId: string) => {
+                    const assignedMember = await storage.getFamilyMemberById(memberId);
+                    if (!assignedMember) return null;
+                    // Individual assignments repeat independently. For
+                    // immediate tasks an approved completion therefore resets
+                    // only that member instead of waiting for all assignees.
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    const memberNextAvailableDate = calculateMemberRecurringNextAvailableDate({
+                      memberId, status: memberStatus, completions: taskCompletions,
+                      recurrence: task.recurrence, recurrenceDays: task.recurrenceDays,
+                      timezone: familyTimezone,
+                    });
+                    const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
+                      ? await storage.getDailyTaskProgress(task.id, memberId)
+                      : 0;
+                    const memberProgressState = resolveMemberDailyTargetState({
+                      recurrence: task.recurrence,
+                      dailyTarget: task.dailyTarget || 1,
+                      dailyProgress: memberDailyProgress,
+                      status: memberStatus,
+                    });
+                    return {
+                      memberId,
+                      displayName: assignedMember.displayName,
+                      avatarUrl: assignedMember.avatarUrl,
+                      activeSkinId: assignedMember.activeSkinId,
+                      useCustomAvatar: assignedMember.useCustomAvatar,
+                      color: assignedMember.color,
+                      ...memberProgressState,
+                      status: memberStatus,
+                      dailyProgress: memberDailyProgress,
+                      nextAvailableDate: memberNextAvailableDate,
+                    };
+                  })
+                );
+                
+                const validCompletions = assignedMemberCompletions.filter(Boolean);
+                // allCompleted only when ALL have approved status (not just pending)
+                const allCompleted = validCompletions.filter(m => m?.hasCompleted).length === assignedMemberIds.length;
+                
+                // For children: check if THIS member has submitted (to grey out the card while pending/approved)
+                const currentMemberCompletion = validCompletions.find(m => m?.memberId === member.id);
+                const thisMemberHasSubmitted = currentMemberCompletion?.hasSubmitted || false;
+                
+                return {
+                  ...task,
+                  remainingSlots: null,
+                  memberHasCompleted: thisMemberHasSubmitted, // Grey out for THIS member if they submitted
+                  memberCompletionStatus: currentMemberCompletion?.status || null,
+                  memberNextAvailableDate: currentMemberCompletion?.nextAvailableDate || null,
+                  completions: [],
+                  assignedMemberCompletions: validCompletions, // Include for UI to show who completed
+                };
+              }
+              
+              // Safety fallback: if this is a shared task that somehow bypassed all
+              // dedicated shared/assignment paths above, ALWAYS use the member's OWN status —
+              // never the family-wide status — so one member's pending/approved state never
+              // bleeds into another member's card. This catches tasks with isSharedTask=true
+              // but null/empty sharedMemberIds and no taskAssignments entries.
+              if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+                const ownHasSubmitted = completionStatus === "pending" || completionStatus === "approved";
+                return {
+                  ...task,
+                  remainingSlots: null,
+                  memberHasCompleted: ownHasSubmitted,
+                  memberCompletionStatus: completionStatus,
+                  dailyProgress,
+                  completions: [],
+                  sharedMemberCompletions: [],
+                };
+              }
+
+              // Normal mode (maxCompletions == null, single/no assignment) - if ANYONE completes it, it's done for everyone
+              // Use family-wide completion status for normal tasks
+               // Unassigned tasks are family-wide, including daily
+               // multi-execution tasks. Never use the requesting member's
+               // status for this path.
+               const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
+              // For IMMEDIATE tasks: "pending" means blocked, null means available
+              // For one-time tasks with approval: "pending" or "approved" means grayed out
+              // For other tasks: "approved" means completed
+              const familyHasCompleted = task.recurrence === "immediate"
+                ? familyCompletionStatus === "pending"
+                : task.recurrence === "none" && task.requiresApproval
+                  ? (familyCompletionStatus === "pending" || familyCompletionStatus === "approved")
+                  : familyCompletionStatus === "approved";
+              let derivedFamilyNextAvailableDate: Date | null = null;
+              if (familyCompletionStatus === "approved" && (task.recurrence !== "none" || task.recurrenceDays)) {
+                const latestApprovedCompletion = (await storage.getTaskCompletionsByTask(task.id))
+                  .filter(completion => completion.status === "approved" && completion.completedAt)
+                  .sort((a, b) => new Date(b.completedAt ?? 0).getTime() - new Date(a.completedAt ?? 0).getTime())[0];
+                if (latestApprovedCompletion?.completedAt) {
+                  const family = await storage.getFamily(task.familyName);
+                  derivedFamilyNextAvailableDate = calculateRecurringNextAvailableDate({
+                    completedAt: new Date(latestApprovedCompletion.completedAt),
+                    recurrence: task.recurrence,
+                    recurrenceDays: task.recurrenceDays,
+                    timezone: family?.timezone || "Europe/Berlin",
+                  });
+                }
+              }
+              
+              return {
+                ...task,
+                remainingSlots: null,
+                memberHasCompleted: familyHasCompleted, // True if blocked/completed
+                memberCompletionStatus: familyCompletionStatus, // Family-wide status
+                memberNextAvailableDate: derivedFamilyNextAvailableDate,
+                dailyProgress,
+                completions: [], // No participants for non-multi tasks
+              };
+            } catch (err) {
+              console.error(`Error processing task ${task.id}:`, err);
+              return {
+                ...task,
+                remainingSlots: task.maxCompletions !== null ? 0 : null,
+                completionCount: task.completionCount,
+                ...(task.maxCompletions !== null
+                  ? { completionCapacityError: "Unable to calculate remaining completion slots" }
+                  : {}),
+                memberHasCompleted: false,
+                memberCompletionStatus: null,
+                completions: [],
+              };
+            }
+          })
+        );
+        
+        // Extract successful results from settled promises
+        const resolvedTasks = tasksWithMeta
+          .filter((r) => r.status === "fulfilled")
+          .map((r) => (r as PromiseFulfilledResult<any>).value);
+        
+        // Filter logic for different task types:
+        // 1. Archived tasks: Hide for everyone
+        // 2. One-time completed tasks: Hide for everyone. Custom-interval
+        //    tasks also use recurrence="none", so recurrenceDays must be empty.
+        // 3. Recurring tasks: Show even if completed (they will be grayed out in UI)
+        // 4. Active tasks: Always show
+        const filteredTasks = resolvedTasks.filter(
+          (task) => 
+            task !== null &&
+            task.status !== "archived" && // Hide archived
+            !shouldHideCompletedTaskFromChild(task)
+        );
+        
+        // Disable caching for task data
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.json(filteredTasks);
+      } else {
+        // Parents see all tasks with metadata
+        const tasksWithMeta = await Promise.allSettled(
+          allTasks.map(async (task) => {
+            try {
+              // Get completion status for this member
+              const completionStatus = await storage.getMemberCompletionStatus(task.id, member.id);
+              const dailyProgress = task.recurrence === "daily"
+                ? await storage.getDailyTaskProgress(task.id, member.id)
+                : 0;
+              (task as any).dailyProgress = dailyProgress;
+              
+              // For IMMEDIATE tasks: "pending" means task is blocked (waiting for approval)
+              // After approval, getMemberCompletionStatus returns null, so task becomes available again
+              // For other tasks: "approved" means task is completed
+              const hasCompleted = task.recurrence === "immediate" 
+                ? completionStatus === "pending"  // Immediate: blocked while pending
+                : completionStatus === "approved"; // Others: completed when approved
+              
+              // For multi-completion tasks, check if parent has already completed it
+              if (task.maxCompletions !== null) {
+                // Get active completions to show participants
+                const [capacity, completions] = await Promise.all([
+                  storage.getTaskCompletionCapacity(task.id),
+                  storage.getActiveCompletionsByTask(task.id),
+                ]);
+                return {
+                  ...task,
+                  ...taskCompletionCapacityApiFields(capacity),
+                  memberHasCompleted: hasCompleted,
+                  memberCompletionStatus: completionStatus,
+                  completions, // Include participant list for multi-tasks
+                };
+              }
+              
+              // Shared tasks - check each shared member's completion status (parent view)
+              if (task.isSharedTask && task.sharedMemberIds && task.sharedMemberIds.length > 0) {
+                // For immediate recurrence: keep "approved" visible so the progress box stays filled
+                const skipReset = task.recurrence === 'immediate';
+                const sharedMemberCompletions = await Promise.all(
+                  task.sharedMemberIds.map(async (memberId: string) => {
+                    const sharedMember = await storage.getFamilyMemberById(memberId);
+                    if (!sharedMember) return null;
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId, undefined, skipReset);
+                    const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
+                      ? await storage.getDailyTaskProgress(task.id, memberId)
+                      : 0;
+                    const memberProgressState = resolveMemberDailyTargetState({
+                      recurrence: task.recurrence,
+                      dailyTarget: task.dailyTarget || 1,
+                      dailyProgress: memberDailyProgress,
+                      status: memberStatus,
+                    });
+                    return {
+                      memberId,
+                      displayName: sharedMember.displayName,
+                      avatarUrl: sharedMember.avatarUrl,
+                      activeSkinId: sharedMember.activeSkinId,
+                      useCustomAvatar: sharedMember.useCustomAvatar,
+                      color: sharedMember.color,
+                      ...memberProgressState,
+                      status: memberStatus,
+                      dailyProgress: memberDailyProgress,
+                    };
+                  })
+                );
+                
+                // allApproved: Only true when ALL members have APPROVED status (not pending)
+                const allApproved = sharedMemberCompletions.filter(m => m?.hasCompleted).length === task.sharedMemberIds.length;
+                
+                // Check if THIS parent is assigned and has already submitted
+                const isThisParentAssigned = task.sharedMemberIds.includes(member.id);
+                const thisParentCompletion = sharedMemberCompletions.find(m => m?.memberId === member.id);
+                const thisParentHasSubmitted = thisParentCompletion?.hasSubmitted || false;
+                
+                // Grey out if: (a) ALL approved OR (b) this parent is assigned AND has already submitted
+                const shouldGreyOut = allApproved || (isThisParentAssigned && thisParentHasSubmitted);
+                
+                return {
+                  ...task,
+                  remainingSlots: null,
+                  memberHasCompleted: shouldGreyOut,
+                  memberCompletionStatus: thisParentCompletion?.status || (allApproved ? "approved" : completionStatus),
+                  completions: [],
+                  sharedMemberCompletions: sharedMemberCompletions.filter(Boolean),
+                };
+              }
+
+              // Check if task is assigned to specific members (parent view)
+              const assignedMemberIds = await storage.getTaskAssignmentsByTask(task.id);
+              
+              if (assignedMemberIds.length > 0) {
+                // Explicit assignment task: Show parent the status of every assigned member,
+                // including a single assignee.
+                const taskCompletions = await storage.getTaskCompletionsByTask(task.id);
+                const family = await storage.getFamily(task.familyName);
+                const familyTimezone = family?.timezone || "Europe/Berlin";
+                const assignedMemberCompletions = await Promise.all(
+                  assignedMemberIds.map(async (memberId: string) => {
+                    const assignedMember = await storage.getFamilyMemberById(memberId);
+                    if (!assignedMember) return null;
+                    const memberStatus = await storage.getMemberCompletionStatus(task.id, memberId);
+                    const memberDailyProgress = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
+                      ? await storage.getDailyTaskProgress(task.id, memberId)
+                      : 0;
+                    const memberProgressState = resolveMemberDailyTargetState({
+                      recurrence: task.recurrence,
+                      dailyTarget: task.dailyTarget || 1,
+                      dailyProgress: memberDailyProgress,
+                      status: memberStatus,
+                    });
+                    const latestApprovedCompletion = taskCompletions
+                      .filter((completion) => completion.memberId === memberId && completion.status === "approved" && completion.completedAt !== null)
+                      .sort((a, b) => new Date(b.completedAt ?? 0).getTime() - new Date(a.completedAt ?? 0).getTime())[0];
+                    const memberNextAvailableDate = memberStatus === "approved" && latestApprovedCompletion?.completedAt
+                      ? calculateRecurringNextAvailableDate({
+                          completedAt: new Date(latestApprovedCompletion.completedAt),
+                          recurrence: task.recurrence,
+                          recurrenceDays: task.recurrenceDays,
+                          timezone: familyTimezone,
+                        })
+                      : null;
+                    return {
+                      memberId,
+                      displayName: assignedMember.displayName,
+                      avatarUrl: assignedMember.avatarUrl,
+                      activeSkinId: assignedMember.activeSkinId,
+                      useCustomAvatar: assignedMember.useCustomAvatar,
+                      color: assignedMember.color,
+                      ...memberProgressState,
+                      status: memberStatus,
+                      dailyProgress: memberDailyProgress,
+                      nextAvailableDate: memberNextAvailableDate,
+                    };
+                  })
+                );
+                
+                const validCompletions = assignedMemberCompletions.filter(Boolean);
+                // allCompleted only when ALL have approved status (not just pending)
+                const allCompleted = validCompletions.filter(m => m?.hasCompleted).length === assignedMemberIds.length;
+                
+                // Check if THIS parent is assigned and has already submitted
+                const isThisParentAssigned = assignedMemberIds.includes(member.id);
+                const thisParentCompletion = validCompletions.find(m => m?.memberId === member.id);
+                const thisParentHasSubmitted = thisParentCompletion?.hasSubmitted || false;
+                const nextAssignedAvailability = validCompletions
+                  .map(completion => completion?.nextAvailableDate)
+                  .filter((date): date is Date => Boolean(date))
+                  .sort((a, b) => a.getTime() - b.getTime())[0] || null;
+                
+                // Grey out if: (a) ALL completed OR (b) this parent is assigned AND has already submitted
+                const shouldGreyOut = allCompleted || (isThisParentAssigned && thisParentHasSubmitted);
+                
+                return {
+                  ...task,
+                  remainingSlots: null,
+                  memberHasCompleted: shouldGreyOut,
+                  memberCompletionStatus: thisParentCompletion?.status || (allCompleted ? "approved" : null),
+                  memberNextAvailableDate: thisParentCompletion?.nextAvailableDate || (allCompleted ? nextAssignedAvailability : null),
+                  completions: [],
+                  assignedMemberCompletions: validCompletions, // Include for UI to show who completed
+                };
+              }
+              
+              // For non-multi-completion tasks - if ANYONE completes it, it's done for everyone
+              const familyCompletionStatus = await storage.getTaskCompletionStatusForFamily(task.id);
+              // For IMMEDIATE tasks: "pending" means blocked, null means available
+              // For one-time tasks with approval: "pending" or "approved" means grayed out
+              // For other tasks: "approved" means completed
+              const familyHasCompleted = task.recurrence === "immediate"
+                ? familyCompletionStatus === "pending"
+                : task.recurrence === "none" && task.requiresApproval
+                  ? (familyCompletionStatus === "pending" || familyCompletionStatus === "approved")
+                  : familyCompletionStatus === "approved";
+              
+              return {
+                ...task,
+                remainingSlots: null,
+                memberHasCompleted: familyHasCompleted, // True if blocked/completed
+                memberCompletionStatus: familyCompletionStatus, // Family-wide status
+                dailyProgress,
+                completions: [], // No participants for non-multi tasks
+              };
+            } catch (err) {
+              console.error(`Error processing task ${task.id}:`, err);
+              return {
+                ...task,
+                remainingSlots: task.maxCompletions !== null ? 0 : null,
+                completionCount: task.completionCount,
+                ...(task.maxCompletions !== null
+                  ? { completionCapacityError: "Unable to calculate remaining completion slots" }
+                  : {}),
+                memberHasCompleted: false,
+                memberCompletionStatus: null,
+                completions: [],
+              };
+            }
+          })
+        );
+        
+        // Extract successful results from settled promises
+        const resolvedParentTasks = tasksWithMeta
+          .filter((r) => r.status === "fulfilled")
+          .map((r) => (r as PromiseFulfilledResult<any>).value);
+        
+        // Disable caching for task data
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.json(resolvedParentTasks);
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ message: "Failed to fetch tasks" });
+    }
+    return;
+  });
+
+  app.post("/api/tasks", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can create tasks
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can create tasks" });
+      }
+      
+      const parsed = insertTaskSchema.parse(req.body);
+      const isTeamTask = parsed.isSharedTask === true;
+      const usesDailyMultiTask = parsed.recurrence === "daily" && (parsed.dailyTarget || 1) > 1;
+      const selectedMemberIds = await validateTaskMemberSelection(
+        member.familyName,
+        parsed.sharedMemberIds || [],
+        isTeamTask,
+      );
+      // Individual tasks persist selected members as taskAssignments. Team
+      // tasks retain the legacy-compatible sharedMemberIds array.
+      parsed.sharedMemberIds = isTeamTask ? selectedMemberIds : null;
+      
+      // Gate: task assignment to specific members requires Family tier or higher
+      // Gate: shopping list tasks require Family tier or higher
+      if (selectedMemberIds.length > 0 || parsed.isShoppingList || usesDailyMultiTask) {
+        const family = await storage.getFamily(member.familyName);
+        const familyOnTrial = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+        if (selectedMemberIds.length > 0) {
+          if (!family || (family.subscriptionTier === "free" && !familyOnTrial)) {
+            return res.status(403).json({
+              message: "Task assignment requires Family subscription or higher",
+              code: "TIER_REQUIRED",
+            });
+          }
+        }
+        if (parsed.isShoppingList) {
+          if (!family || (!hasFeature(family.subscriptionTier as SubscriptionTier, "shoppingList") && !familyOnTrial)) {
+            return res.status(403).json({
+              message: "Shopping list tasks require a Family subscription or higher",
+              code: "TIER_REQUIRED",
+              feature: "shoppingList",
+            });
+          }
+        }
+        if (usesDailyMultiTask) {
+          if (!family || (!hasFeature(family.subscriptionTier as SubscriptionTier, "multiTask") && !familyOnTrial)) {
+            return res.status(403).json({
+              message: "Multiple daily completions require Family subscription or higher",
+              code: "TIER_REQUIRED",
+              feature: "multiTask",
+            });
+          }
+        }
+      }
+      
+      // Force requiresApproval for immediate recurrence tasks (prevents point farming)
+      if (parsed.recurrence === "immediate") {
+        parsed.requiresApproval = true;
+      }
+      if (parsed.recurrence !== "daily") parsed.dailyTarget = 1;
+
+      const task = await storage.createTask(parsed);
+      await storage.replaceTaskAssignments(task.id, isTeamTask ? [] : selectedMemberIds);
+      const taskWithSelection = await storage.getTask(task.id);
+      
+      // If this is a shopping list task, create the items
+      const rawShoppingItems = req.body.shoppingItems;
+      if (parsed.isShoppingList && Array.isArray(rawShoppingItems) && rawShoppingItems.length > 0) {
+        const itemsToCreate = rawShoppingItems
+          .filter((item: any) => item && typeof item.text === "string" && item.text.trim())
+          .map((item: any, idx: number) => ({
+            taskId: task.id,
+            text: item.text.trim(),
+            sortOrder: item.sortOrder ?? idx,
+            completedByMemberId: null,
+            completedAt: null,
+          }));
+        if (itemsToCreate.length > 0) {
+          await storage.createShoppingListItems(itemsToCreate);
+        }
+      }
+
+      // Broadcast new task to family
+      broadcastToFamily(member.familyName, {
+        type: "task_created",
+        task: taskWithSelection,
+      });
+      
+      res.json(taskWithSelection);
+    } catch (error: any) {
+      console.error("Error creating task:", error);
+      res.status(400).json({ message: error.message || "Failed to create task" });
+    }
+    return;
+  });
+
+  app.put("/api/tasks/:taskId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { taskId } = req.params;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Only parents can update tasks
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update tasks" });
+      }
+
+      // Verify task exists and belongs to the same family
+      const existingTask = await storage.getTask(taskId);
+      if (!existingTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      if (existingTask.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Cannot update tasks from other families" });
+      }
+
+      // Parse and update the task
+      const parsed = insertTaskSchema.partial().parse(req.body);
+      const isTeamTask = parsed.isSharedTask ?? existingTask.isSharedTask;
+      const usesDailyMultiTask =
+        (parsed.recurrence ?? existingTask.recurrence) === "daily"
+        && (parsed.dailyTarget ?? existingTask.dailyTarget ?? 1) > 1;
+      const selectionProvided = Object.prototype.hasOwnProperty.call(req.body, "sharedMemberIds");
+      const previousMemberIds = existingTask.sharedMemberIds
+        || (existingTask.isSharedTask ? [] : await storage.getTaskAssignmentsByTask(taskId));
+      let selectedMemberIds: string[];
+      if (selectionProvided) {
+        selectedMemberIds = parsed.sharedMemberIds || [];
+      } else if (isTeamTask) {
+        // Preserve an existing team's selected members when the editor sends
+        // an unrelated patch.
+        selectedMemberIds = previousMemberIds;
+      } else {
+        // getTask exposes individual selections through sharedMemberIds, but
+        // read directly as well so switching away from team mode clears any
+        // stale assignment rows.
+        selectedMemberIds = existingTask.isSharedTask ? [] : previousMemberIds;
+      }
+      const unchangedAssignment = isTeamTask === existingTask.isSharedTask
+        && selectedMemberIds.length === previousMemberIds.length
+        && selectedMemberIds.every(id => previousMemberIds.includes(id));
+      selectedMemberIds = await validateTaskMemberSelection(
+        member.familyName,
+        selectedMemberIds,
+        isTeamTask,
+        unchangedAssignment ? previousMemberIds : [],
+      );
+      parsed.isSharedTask = isTeamTask;
+      parsed.sharedMemberIds = isTeamTask ? selectedMemberIds : null;
+
+      const structureChange = taskStructureChanged({
+        previousRecurrence: existingTask.recurrence,
+        nextRecurrence: parsed.recurrence ?? existingTask.recurrence,
+        previousRecurrenceDays: existingTask.recurrenceDays,
+        nextRecurrenceDays: Object.prototype.hasOwnProperty.call(parsed, "recurrenceDays")
+          ? parsed.recurrenceDays
+          : existingTask.recurrenceDays,
+        previousDailyTarget: existingTask.dailyTarget || 1,
+        nextDailyTarget: parsed.dailyTarget ?? existingTask.dailyTarget ?? 1,
+        previousIsTeamTask: existingTask.isSharedTask,
+        nextIsTeamTask: isTeamTask,
+        previousMemberIds: existingTask.sharedMemberIds || [],
+        nextMemberIds: selectedMemberIds,
+      });
+      if (structureChange.changed) {
+        // A changed audience or schedule is a new active task configuration.
+        // Do not let a previous completed/locked lifecycle hide the edited task.
+        parsed.status = "active";
+      }
+      if (structureChange.scheduleChanged) {
+        // Old schedule locks must never carry over to the new recurrence.
+        parsed.nextAvailableDate = null;
+      }
+      
+      // Gate: task assignment / shopping list requires Family tier or higher
+      if (selectedMemberIds.length > 0 || parsed.isShoppingList || usesDailyMultiTask) {
+        const family = await storage.getFamily(member.familyName);
+        const familyOnTrialPatch = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+        if (selectedMemberIds.length > 0) {
+          if (!family || (family.subscriptionTier === "free" && !familyOnTrialPatch)) {
+            return res.status(403).json({
+              message: "Task assignment requires Family subscription or higher",
+              code: "TIER_REQUIRED",
+            });
+          }
+        }
+        if (parsed.isShoppingList) {
+          if (!family || (!hasFeature(family.subscriptionTier as SubscriptionTier, "shoppingList") && !familyOnTrialPatch)) {
+            return res.status(403).json({
+              message: "Shopping list tasks require a Family subscription or higher",
+              code: "TIER_REQUIRED",
+              feature: "shoppingList",
+            });
+          }
+        }
+        if (usesDailyMultiTask) {
+          if (!family || (!hasFeature(family.subscriptionTier as SubscriptionTier, "multiTask") && !familyOnTrialPatch)) {
+            return res.status(403).json({
+              message: "Multiple daily completions require Family subscription or higher",
+              code: "TIER_REQUIRED",
+              feature: "multiTask",
+            });
+          }
+        }
+      }
+      
+      // Force requiresApproval for immediate recurrence tasks (prevents point farming)
+      if (parsed.recurrence === "immediate") {
+        parsed.requiresApproval = true;
+      }
+      if ((parsed.recurrence ?? existingTask.recurrence) !== "daily") {
+        parsed.dailyTarget = 1;
+      }
+      
+      const updatedTask = await storage.updateTask(taskId, parsed);
+      // Reconcile only the assignment-table representation. Team and
+      // unassigned tasks must not retain stale individual assignments.
+      await storage.replaceTaskAssignments(taskId, isTeamTask ? [] : selectedMemberIds);
+      const taskWithSelection = await storage.getTask(taskId);
+
+      // If shopping items are provided on edit, replace existing unchecked items
+      const rawShoppingItems = req.body.shoppingItems;
+      if (updatedTask.isShoppingList && Array.isArray(rawShoppingItems)) {
+        await storage.replaceShoppingListItems(taskId, rawShoppingItems
+          .filter((item: any) => item && typeof item.text === "string" && item.text.trim())
+          .map((item: any, idx: number) => ({
+            taskId,
+            text: item.text.trim(),
+            sortOrder: item.sortOrder ?? idx,
+            completedByMemberId: null,
+            completedAt: null,
+          }))
+        );
+      }
+
+      // Broadcast task update to family
+      broadcastToFamily(member.familyName, {
+        type: "task_updated",
+        task: taskWithSelection,
+      });
+
+      res.json(taskWithSelection);
+    } catch (error: any) {
+      console.error("Error updating task:", error);
+      res.status(400).json({ message: error.message || "Failed to update task" });
+    }
+    return;
+  });
+
+  app.delete("/api/tasks/:taskId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { taskId } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete tasks
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete tasks" });
+      }
+      
+      // Get the task to verify it exists and belongs to the same family
+      const task = await storage.getTask(taskId);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      if (task.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Cannot delete tasks from another family" });
+      }
+      
+      // Delete the task
+      await storage.deleteTask(taskId);
+      
+      // Broadcast task deletion to family
+      broadcastToFamily(member.familyName, {
+        type: "task_deleted",
+        taskId,
+      });
+      
+      res.json({ success: true, message: "Task deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting task:", error);
+      res.status(500).json({ message: "Failed to delete task" });
+    }
+    return;
+  });
+
+  // Shopping list: get items for a task
+  app.get("/api/tasks/:taskId/shopping-items", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const { member } = result;
+      const { taskId } = req.params;
+
+      const task = await storage.getTask(taskId);
+      if (!task) return res.status(404).json({ message: "Task not found" });
+      if (task.familyName !== member.familyName) return res.status(403).json({ message: "Forbidden" });
+
+      const [items, members] = await Promise.all([
+        storage.getShoppingListItems(taskId),
+        storage.getFamilyMembersByFamily(member.familyName),
+      ]);
+
+      // Enrich items with checker display info
+      const memberMap = new Map(members.map(m => [m.id, m]));
+      const enriched = items.map(item => ({
+        ...item,
+        completedByMemberName: item.completedByMemberId
+          ? (memberMap.get(item.completedByMemberId)?.displayName ?? null)
+          : null,
+        completedByMemberColor: item.completedByMemberId
+          ? (memberMap.get(item.completedByMemberId)?.color ?? null)
+          : null,
+      }));
+
+      res.json(enriched);
+    } catch (error: any) {
+      console.error("Error fetching shopping items:", error);
+      res.status(500).json({ message: "Failed to fetch shopping items" });
+    }
+    return;
+  });
+
+  // Shopping list: bulk update items (parent only — add/remove/reorder unchecked items)
+  app.patch("/api/tasks/:taskId/shopping-items", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const { member } = result;
+      const { taskId } = req.params;
+
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can edit shopping list items" });
+      }
+
+      const task = await storage.getTask(taskId);
+      if (!task) return res.status(404).json({ message: "Task not found" });
+      if (task.familyName !== member.familyName) return res.status(403).json({ message: "Forbidden" });
+      if (!task.isShoppingList) return res.status(400).json({ message: "Task is not a shopping list" });
+
+      const rawItems = req.body.items;
+      if (!Array.isArray(rawItems)) {
+        return res.status(400).json({ message: "items must be an array" });
+      }
+
+      const validItems = rawItems
+        .filter((item: any) => item && typeof item.text === "string" && item.text.trim())
+        .map((item: any, idx: number) => ({
+          taskId,
+          text: item.text.trim(),
+          sortOrder: item.sortOrder ?? idx,
+          completedByMemberId: null,
+          completedAt: null,
+        }));
+
+      const updatedItems = await storage.replaceShoppingListItems(taskId, validItems);
+
+      broadcastToFamily(member.familyName, {
+        type: "shopping_items_updated",
+        taskId,
+        items: updatedItems,
+      });
+
+      res.json(updatedItems);
+    } catch (error: any) {
+      console.error("Error updating shopping items:", error);
+      res.status(500).json({ message: "Failed to update shopping items" });
+    }
+    return;
+  });
+
+  // Shopping list: toggle an item (check/uncheck)
+  app.patch("/api/shopping-items/:itemId/toggle", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const { member } = result;
+      const { itemId } = req.params;
+
+      const item = await storage.getShoppingListItem(itemId);
+      if (!item) return res.status(404).json({ message: "Item not found" });
+
+      const task = await storage.getTask(item.taskId);
+      if (!task) return res.status(404).json({ message: "Task not found" });
+      if (task.familyName !== member.familyName) return res.status(403).json({ message: "Forbidden" });
+      if (task.status !== "active") return res.status(400).json({ message: "Task is no longer active" });
+
+      const toggleResult = await storage.toggleShoppingListItemAtomically(itemId, member.id);
+      const { item: updatedItem, allCompleted, task: updatedTask } = toggleResult;
+
+      // All observable events follow the task-locked transaction commit.
+      broadcastToFamily(member.familyName, {
+        type: "shopping_item_toggled",
+        taskId: updatedTask.id,
+        item: updatedItem,
+        memberId: member.id,
+        memberDisplayName: member.displayName,
+      });
+
+      if (allCompleted && !updatedTask.requiresApproval) {
+        broadcastToFamily(member.familyName, {
+          type: "shopping_list_completed",
+          taskId: updatedTask.id,
+          task: updatedTask,
+        });
+      } else if (allCompleted) {
+        // Approval required: notify parents so the approvals page refreshes immediately.
+        broadcastToFamily(member.familyName, {
+          type: "task_completion_pending",
+          taskId: updatedTask.id,
+        });
+      }
+
+      res.json({ item: updatedItem, allCompleted });
+    } catch (error: any) {
+      if (error?.message === "Task is not active") {
+        return res.status(409).json({ message: "Task is no longer active" });
+      }
+      if (error?.message === "All completion slots filled") {
+        return res.status(422).json({ message: "All completion slots for this task are already reserved" });
+      }
+      console.error("Error toggling shopping item:", error);
+      res.status(500).json({ message: "Failed to toggle item" });
+    }
+    return;
+  });
+
+  // Manual task reset (for parents to reset recurring tasks manually)
+  app.post("/api/tasks/:taskId/reset", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { taskId } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can reset tasks
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can reset tasks" });
+      }
+      
+      // Get the task to verify it exists and belongs to the same family
+      const task = await storage.getTask(taskId);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      if (task.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Cannot reset tasks from another family" });
+      }
+      
+      // Reset the task (delete all completions and reset counters)
+      await storage.resetTask(taskId);
+      
+      // Get updated task to return
+      const updatedTask = await storage.getTask(taskId);
+      
+      // Broadcast task reset to family
+      broadcastToFamily(member.familyName, {
+        type: "task_updated",
+        task: updatedTask,
+      });
+      
+      res.json({ success: true, message: "Task reset successfully", task: updatedTask });
+    } catch (error: any) {
+      console.error("Error resetting task:", error);
+      res.status(500).json({ message: "Failed to reset task" });
+    }
+    return;
+  });
+
+  // Get presigned URL for task proof upload (client-side upload to Object Storage) - supports Device Sessions
+  app.post("/api/tasks/upload-proof-url", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Check if tier allows photo proof uploads
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      const tier = family.subscriptionTier as SubscriptionTier;
+      const photoOnTrial = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(tier, 'photoProof') && !photoOnTrial) {
+        return res.status(403).json({
+          message: "Photo proof upload requires a Family tier subscription or higher",
+          currentTier: tier,
+          requiredFeature: "photoProof",
+        });
+      }
+      
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL("task-proofs");
+      
+      res.json({ uploadURL });
+    } catch (error: any) {
+      console.error("Error getting task proof upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+    return;
+  });
+
+  // Set ACL policy for uploaded task proof photo - supports Device Sessions
+  app.put("/api/tasks/:taskId/proof-photo", isAuthenticated, async (req: any, res) => {
+    try {
+      const { taskId } = req.params;
+      const { photoUrl } = req.body;
+      
+      if (!photoUrl) {
+        return res.status(400).json({ message: "photoUrl is required" });
+      }
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMember(req.session.actingAsMemberId);
+        if (!actingMember) {
+          delete req.session.actingAsMemberId;
+        } else {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const task = await storage.getTask(taskId);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      if (task.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Task not in your family" });
+      }
+      
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        photoUrl,
+        {
+          owner: member.id, // Use member.id for Device Sessions compatibility
+          visibility: "public", // Task proofs are public so parents can view them in approvals
+        }
+      );
+      
+      // Track this upload to prevent URL spoofing (same as old multer flow)
+      uploadedPhotos.set(objectPath, {
+        memberId: member.id,
+        taskId: taskId,
+        timestamp: Date.now(),
+      });
+      
+      res.json({ photoUrl: objectPath });
+    } catch (error: any) {
+      console.error("Error setting task proof ACL:", error);
+      res.status(500).json({ message: "Failed to set photo ACL" });
+    }
+    return;
+  });
+
+  app.post("/api/tasks/:taskId/complete", isAuthenticated, async (req: any, res) => {
+    try {
+      const { taskId } = req.params;
+      const { proofPhotoUrl } = req.body;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMember(req.session.actingAsMemberId);
+        if (!actingMember) {
+          delete req.session.actingAsMemberId;
+        } else {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Check if member is over the tier limit (downgrade overflow)
+      const memberFamily = await storage.getFamily(member.familyName);
+      if (memberFamily) {
+        const maxMembers = getMaxMembersForFamily(memberFamily);
+        const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+        const sorted = [...allMembers].sort((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return aTime - bTime;
+        });
+        const activeSorted = sorted.filter((m: any) => !m.isPaused);
+        const selected = getLockedSelection(memberFamily);
+        const autoOverLimitIds = new Set((selected
+          ? activeSorted.filter((m: any) => !selected.includes(m.id))
+          : activeSorted.slice(maxMembers)).map((m: any) => m.id));
+        const overLimitIds = new Set([
+          ...allMembers.filter((m: any) => m.isPaused).map((m: any) => m.id),
+          ...autoOverLimitIds,
+          ...(selected ? allMembers.filter((m: any) => !selected.includes(m.id)).map((m: any) => m.id) : []),
+        ]);
+        if (overLimitIds.has(member.id)) {
+          return res.status(403).json({ message: "MEMBER_OVER_LIMIT" });
+        }
+      }
+      
+      const task = await storage.getTask(taskId);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      if (task.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Forbidden: Task not in your family" });
+      }
+      
+      if (task.status !== "active") {
+        return res.status(422).json({ message: "Validation failed: Task is not active" });
+      }
+
+      // Normalize assignment mode once.  Empty legacy shared metadata is
+      // unassigned family-wide, even when isSharedTask was left true.
+      const taskAssignmentIds = await storage.getTaskAssignmentsByTask(taskId);
+      const legacyTeamMemberIds = task.sharedMemberIds?.length ? task.sharedMemberIds : [];
+      const isExplicitTeamTask = task.isSharedTask
+        && (legacyTeamMemberIds.length > 0 || taskAssignmentIds.length > 0);
+      const isFamilyWideTask = taskAssignmentIds.length === 0 && legacyTeamMemberIds.length === 0;
+      const targetTeamMemberIds = legacyTeamMemberIds.length > 0
+        ? legacyTeamMemberIds
+        : (isExplicitTeamTask ? taskAssignmentIds : []);
+
+      // Shopping list tasks complete via item-checking — block the generic complete button
+      if (task.isShoppingList) {
+        return res.status(400).json({
+          message: "Shopping list tasks complete automatically when all items are checked",
+          code: "SHOPPING_LIST_TASK",
+        });
+      }
+      
+      let forceLateDueDateApproval = false;
+      // Fixed appointments are available on their date and for one grace day.
+      // A grace-day submission always needs parent approval.
+      if (task.dueDate && task.recurrence === "none") {
+        const dueDateStr = String(task.dueDate).substring(0, 10);
+        const family = await storage.getFamily(member.familyName);
+        const familyTimezone = family?.timezone || "Europe/Berlin";
+        const { formatInTimeZone } = await import("date-fns-tz");
+        const todayStr = formatInTimeZone(new Date(), familyTimezone, "yyyy-MM-dd");
+        
+        if (dueDateStr > todayStr) {
+          return res.status(422).json({ 
+            message: "Validation failed: Task not yet available",
+            code: "TASK_NOT_YET_AVAILABLE",
+            dueDate: dueDateStr
+          });
+        }
+        
+        const dueDateWindow = getDueDateWindow(dueDateStr, todayStr);
+        
+        if (dueDateWindow.expired) {
+          return res.status(422).json({ 
+            message: "Validation failed: Task deadline has expired",
+            code: "TASK_DEADLINE_EXPIRED",
+            dueDate: dueDateStr
+          });
+        }
+        forceLateDueDateApproval = dueDateWindow.isGraceDay;
+      }
+      
+      // For weekdays tasks, block completion on weekends
+      if (task.recurrence === "weekdays") {
+        const taskFamily = await storage.getFamily(member.familyName);
+        const taskFamilyTimezone = taskFamily?.timezone || "Europe/Berlin";
+        const { toZonedTime } = await import("date-fns-tz");
+        const localNow = toZonedTime(new Date(), taskFamilyTimezone);
+        const dow = localNow.getDay(); // 0=Sun, 6=Sat
+        if (dow === 0 || dow === 6) {
+          return res.status(422).json({ 
+            message: "Validation failed: This task is only available on weekdays (Mon–Fri)",
+            code: "TASK_WEEKEND_UNAVAILABLE"
+          });
+        }
+      }
+
+      // For multi-completion tasks, prevent the same member from completing twice
+      if (task.maxCompletions !== null && task.maxCompletions > 1) {
+        const hasAlreadyCompleted = await storage.hasActiveMemberCompletion(taskId, member.id);
+        if (hasAlreadyCompleted) {
+          return res.status(422).json({ message: "Validation failed: You have already completed this task" });
+        }
+      }
+      
+      // For shared tasks, verify member is assigned and hasn't already completed
+      if (isExplicitTeamTask) {
+        if (!targetTeamMemberIds.includes(member.id)) {
+          return res.status(403).json({ message: "Forbidden: You are not assigned to this shared task" });
+        }
+        
+        const memberStatus = await storage.getMemberCompletionStatus(
+          taskId,
+          member.id,
+          undefined,
+          task.recurrence === "immediate",
+        );
+        if (hasActiveTeamContribution(memberStatus)) {
+          return res.status(422).json({ message: "Validation failed: You have already completed your part of this task" });
+        }
+      }
+
+      // Individual multi-member tasks use taskAssignments rather than the
+      // sharedMemberIds team representation. Enforce membership and the same
+      // per-member duplicate guard before accepting a submission.
+      if (!isExplicitTeamTask && taskAssignmentIds.length > 0) {
+        if (!taskAssignmentIds.includes(member.id)) {
+          return res.status(403).json({ message: "Forbidden: You are not assigned to this task" });
+        }
+        const hasAlreadyCompleted = await storage.hasActiveMemberCompletion(taskId, member.id);
+        if (hasAlreadyCompleted) {
+          return res.status(422).json({ message: "Validation failed: You have already completed your part of this task" });
+        }
+      }
+      
+      // Validate photo proof
+      if (task.requiresProof) {
+        if (!proofPhotoUrl) {
+          return res.status(422).json({ message: "Validation failed: Photo proof is required" });
+        }
+        
+        // Verify the photo was uploaded for this task and family
+        const uploadData = uploadedPhotos.get(proofPhotoUrl);
+        if (!uploadData || uploadData.taskId !== taskId) {
+          return res.status(422).json({ message: "Validation failed: Invalid or expired photo proof" });
+        }
+        
+        // Verify the uploader and completer are both in the same family
+        const uploader = await storage.getFamilyMember(uploadData.memberId);
+        if (!uploader || uploader.familyName !== member.familyName) {
+          return res.status(422).json({ message: "Validation failed: Photo proof from different family" });
+        }
+        
+        // Remove from tracking after verification
+        uploadedPhotos.delete(proofPhotoUrl);
+      }
+      
+      // Each selected member gets the full point value in both assignment
+      // modes. Team mode differs by requiring every contribution before the
+      // task/period is complete, not by splitting points.
+      const pointsPerMember = task.points;
+      
+      // Create completion record (handles approval, points, and completionCount in transaction)
+      let completion: Awaited<ReturnType<typeof storage.createTaskCompletion>>;
+      try {
+        const completionData = {
+          taskId: task.id,
+          memberId: member.id,
+          pointsEarned: pointsPerMember,
+          proofPhotoUrl: proofPhotoUrl || null,
+        };
+        if (task.recurrence === "daily" && (task.dailyTarget || 1) > 1) {
+          const dailyResult = await storage.submitDailyTaskExecution(completionData);
+          if (!dailyResult.completed || !dailyResult.completion) {
+            broadcastToFamily(member.familyName, {
+              type: "task_daily_progress",
+              taskId: task.id,
+              memberId: member.id,
+              executionCount: dailyResult.executionCount,
+              target: dailyResult.target,
+            });
+            return res.json({
+              partial: true,
+              dailyProgress: dailyResult.executionCount,
+              dailyTarget: dailyResult.target,
+            });
+          }
+          completion = dailyResult.completion;
+        } else {
+          const initialCoordination = resolveCompletionCoordination({
+            isTeamTask: isExplicitTeamTask,
+            requiresApproval: task.requiresApproval,
+            forceApproval: forceLateDueDateApproval,
+            allTeamMembersSubmitted: false,
+          });
+          completion = await storage.createTaskCompletion(completionData, {
+            // Team contributions must never award points independently. They
+            // remain pending until the final teammate submits.
+            forceApproval: forceLateDueDateApproval || initialCoordination.deferAwardOnCreate,
+          });
+        }
+      } catch (err: any) {
+        const msg: string = err?.message || "";
+        if (msg === "Member already completed this task") {
+          return res.status(422).json({ message: "Du hast diese Aufgabe bereits erledigt." });
+        }
+        if (msg === "All completion slots filled") {
+          return res.status(422).json({ message: "Alle Plätze für diese Aufgabe sind bereits vergeben." });
+        }
+        if (msg === "Task is not active") {
+          return res.status(422).json({ message: "Validation failed: Task is not active" });
+        }
+        throw err;
+      }
+      
+      // Handle recurring tasks
+      if (task.recurrenceDays || task.recurrence !== "none") {
+        // Immediate recurrence tasks are always available after approval - no waiting period
+        // They are protected by mandatory approval requirement instead
+        if (task.recurrence === "immediate") {
+          // Do nothing - task stays immediately available
+          // The approval requirement prevents point farming
+        } else {
+          // Get updated task to check completion count after the completion was processed
+          const updatedTask = await storage.getTask(taskId);
+          
+          // For multi-completion tasks: only set nextAvailableDate if max completions reached.
+          // For shared tasks: only set when ALL required members have submitted (pending/approved),
+          // so the first member's submission doesn't lock the task for others.
+          // For single tasks: always set immediately.
+          let shouldSetNextAvailableDate: boolean;
+          if (updatedTask?.maxCompletions) {
+            shouldSetNextAvailableDate = (updatedTask.completionCount >= updatedTask.maxCompletions);
+          } else if (isExplicitTeamTask) {
+            // Team mode starts its next shared period only after every selected
+            // member has contributed.
+            const targetIds = (task.sharedMemberIds && task.sharedMemberIds.length > 0)
+              ? task.sharedMemberIds
+              : await storage.getTaskAssignmentsByTask(taskId);
+            if (targetIds.length > 0) {
+              const allCurrentCompletions = await storage.getTaskCompletionsByTask(taskId);
+              const submittedMemberIds = allCurrentCompletions
+                .filter((c: any) => (
+                  (c.status === "pending" || c.status === "approved")
+                  && isTeamCompletionInCurrentPeriod(
+                    c.completedAt,
+                    task.nextAvailableDate ? new Date(task.nextAvailableDate) : null,
+                    new Date(),
+                  )
+                ))
+                .map((c: any) => c.memberId);
+              shouldSetNextAvailableDate = targetIds.every((id: string) => submittedMemberIds.includes(id));
+            } else {
+              shouldSetNextAvailableDate = true;
+            }
+          } else {
+            const individualAssignedIds = await storage.getTaskAssignmentsByTask(taskId);
+            // Individual recurring assignments derive availability from each
+            // member's own completion period and must not apply a global lock.
+            shouldSetNextAvailableDate = individualAssignedIds.length === 0;
+          }
+
+          if (shouldSetNextAvailableDate) {
+            // Calculate next available date based on recurrence
+            const now = new Date();
+            let nextAvailableDate: Date;
+            
+            // Get family timezone for calendar-based resets
+            const family = await storage.getFamily(task.familyName);
+            const familyTimezone = family?.timezone || "Europe/Berlin";
+            
+            if (task.recurrenceDays) {
+              // Custom days interval - set to midnight of the target day in family timezone
+              // Get current date in family timezone and add the specified days
+              const currentDateStr = formatInTimeZone(now, familyTimezone, 'yyyy-MM-dd');
+              const [cYear, cMonth, cDay] = currentDateStr.split('-').map(Number);
+              // Calculate target date by adding recurrenceDays
+              const targetDate = new Date(Date.UTC(cYear, cMonth - 1, cDay + task.recurrenceDays));
+              const targetDateStr = `${targetDate.getUTCFullYear()}-${String(targetDate.getUTCMonth() + 1).padStart(2, '0')}-${String(targetDate.getUTCDate()).padStart(2, '0')} 00:00:00`;
+              nextAvailableDate = fromZonedTime(targetDateStr, familyTimezone);
+            } else {
+              // Standard recurrence (daily/weekdays/weekly/monthly)
+              switch (task.recurrence) {
+                case "daily":
+                  // Calendar-based: Next day 00:00 in family timezone
+                  const dailyDateStr = formatInTimeZone(now, familyTimezone, 'yyyy-MM-dd');
+                  const [dYear, dMonth, dDay] = dailyDateStr.split('-').map(Number);
+                  const nextDayCalc = new Date(Date.UTC(dYear, dMonth - 1, dDay + 1));
+                  const nextDayStr = `${nextDayCalc.getUTCFullYear()}-${String(nextDayCalc.getUTCMonth() + 1).padStart(2, '0')}-${String(nextDayCalc.getUTCDate()).padStart(2, '0')} 00:00:00`;
+                  nextAvailableDate = fromZonedTime(nextDayStr, familyTimezone);
+                  break;
+                case "weekdays": {
+                  // Calendar-based: Next weekday (Mon–Fri) 00:00 in family timezone
+                  // On Friday (5), skip weekend (+3 days to Monday); otherwise +1 day
+                  const wdDateStr = formatInTimeZone(now, familyTimezone, 'yyyy-MM-dd');
+                  const [wYear, wMonth, wDay] = wdDateStr.split('-').map(Number);
+                  const currentDow = toZonedTime(now, familyTimezone).getDay(); // 0=Sun,1=Mon..5=Fri,6=Sat
+                  const daysUntilNextWeekday = currentDow === 5 ? 3 : currentDow === 6 ? 2 : 1;
+                  const nextWdCalc = new Date(Date.UTC(wYear, wMonth - 1, wDay + daysUntilNextWeekday));
+                  const nextWdStr = `${nextWdCalc.getUTCFullYear()}-${String(nextWdCalc.getUTCMonth() + 1).padStart(2, '0')}-${String(nextWdCalc.getUTCDate()).padStart(2, '0')} 00:00:00`;
+                  nextAvailableDate = fromZonedTime(nextWdStr, familyTimezone);
+                  break;
+                }
+                case "weekly":
+                  // Calendar-based: Next Monday 00:00 in family timezone
+                  // Get current day of week directly in family timezone (1=Mon, 7=Sun in 'i' format)
+                  const familyDayOfWeek = parseInt(formatInTimeZone(now, familyTimezone, 'i'), 10);
+                  // Days until next Monday: if Monday(1), add 7; otherwise 8 - dayOfWeek
+                  const daysToNextMonday = familyDayOfWeek === 1 ? 7 : (8 - familyDayOfWeek);
+                  // Get current date in family timezone and add days
+                  const familyDateParts = formatInTimeZone(now, familyTimezone, 'yyyy-MM-dd').split('-').map(Number);
+                  const nextMondayCalc = new Date(Date.UTC(familyDateParts[0], familyDateParts[1] - 1, familyDateParts[2] + daysToNextMonday));
+                  const nextMondayStr = `${nextMondayCalc.getUTCFullYear()}-${String(nextMondayCalc.getUTCMonth() + 1).padStart(2, '0')}-${String(nextMondayCalc.getUTCDate()).padStart(2, '0')} 00:00:00`;
+                  nextAvailableDate = fromZonedTime(nextMondayStr, familyTimezone);
+                  break;
+                case "monthly":
+                  // Calendar-based: 1st of next month 00:00 in family timezone
+                  // Get current year and month in family timezone
+                  const monthlyDateStr = formatInTimeZone(now, familyTimezone, 'yyyy-MM');
+                  const [mYear, mMonth] = monthlyDateStr.split('-').map(Number);
+                  // Calculate next month (handle year rollover)
+                  const nextMonth = mMonth === 12 ? 1 : mMonth + 1;
+                  const nextMonthYear = mMonth === 12 ? mYear + 1 : mYear;
+                  nextAvailableDate = fromZonedTime(`${nextMonthYear}-${String(nextMonth).padStart(2, '0')}-01 00:00:00`, familyTimezone);
+                  break;
+                case "yearly":
+                  // Calendar-based: 1st of January next year 00:00 in family timezone
+                  // Get current year in family timezone using formatInTimeZone
+                  const currentYearStr = formatInTimeZone(now, familyTimezone, 'yyyy');
+                  const nextYearNum = parseInt(currentYearStr, 10) + 1;
+                  // Construct Jan 1 midnight directly as string and pass to fromZonedTime
+                  // fromZonedTime can accept a string directly, interpreting it in the target timezone
+                  nextAvailableDate = fromZonedTime(`${nextYearNum}-01-01 00:00:00`, familyTimezone);
+                  break;
+                default:
+                  // Default to midnight tomorrow in family timezone
+                  const defDateStr = formatInTimeZone(now, familyTimezone, 'yyyy-MM-dd');
+                  const [defYear, defMonth, defDay] = defDateStr.split('-').map(Number);
+                  const defNextDay = new Date(Date.UTC(defYear, defMonth - 1, defDay + 1));
+                  const defNextDayStr = `${defNextDay.getUTCFullYear()}-${String(defNextDay.getUTCMonth() + 1).padStart(2, '0')}-${String(defNextDay.getUTCDate()).padStart(2, '0')} 00:00:00`;
+                  nextAvailableDate = fromZonedTime(defNextDayStr, familyTimezone);
+              }
+            }
+            
+            // Update the task's nextAvailableDate - task stays visible but unavailable
+            await storage.updateTaskNextAvailableDate(taskId, nextAvailableDate);
+          }
+        }
+      } else if (task.maxCompletions === null) {
+        // Check if task is assigned to specific members
+        const assignedMemberIds = await storage.getTaskAssignmentsByTask(taskId);
+        
+        if (isExplicitTeamTask) {
+          // Team mode uses either the legacy audience or assignment rows.
+          const allCompletions = await storage.getTaskCompletionsByTask(taskId);
+          const approvedMemberIds = allCompletions
+            .filter(c => c.status === "approved")
+            .map(c => c.memberId);
+          const allMembersApproved = targetTeamMemberIds.every(id => approvedMemberIds.includes(id));
+          if (allMembersApproved && task.recurrence === "none") {
+            await storage.updateTaskStatus(taskId, "completed");
+          }
+        } else if (assignedMemberIds.length > 1) {
+          // Task assigned to multiple members - check if ALL have APPROVED completions
+          const allCompletions = await storage.getTaskCompletionsByTask(taskId);
+          // Only count APPROVED completions for multi-assignment tasks
+          const approvedCompletions = allCompletions.filter(c => c.status === "approved");
+          const approvedMemberIds = approvedCompletions.map(c => c.memberId);
+          const allMembersApproved = assignedMemberIds.every(id => approvedMemberIds.includes(id));
+          
+          if (allMembersApproved && task.recurrence === "none") {
+            // All assigned members have APPROVED completions - mark task as completed
+            await storage.updateTaskStatus(taskId, "completed");
+          }
+          // If not all approved, task stays active (greyed out for submitted members)
+        } else {
+          // Single assignment or no assignments — only auto-complete non-shared tasks.
+          // isSharedTask=true means other members may still need to submit; don't complete prematurely.
+          if (task.recurrence === "none" && !task.requiresApproval && !forceLateDueDateApproval && !isExplicitTeamTask) {
+            await storage.updateTaskStatus(taskId, "completed");
+          }
+          // If requiresApproval (non-shared), task status is set to "completed" in _approveCompletionInternal
+          // If isSharedTask=true, completion is handled in the approve route or sharedMemberIds path above
+        }
+      }
+      
+      // Get updated member data
+      const updatedMember = await storage.getFamilyMember(member.id);
+      
+      // Coordinate team completion before broadcasting or returning a result.
+      // With approval enabled, the final submission exposes one parent
+      // decision. Without approval, the final submission releases every
+      // teammate's pending completion and awards everyone together.
+      const currentTeamSubmissions = isExplicitTeamTask
+        ? (await storage.getTaskCompletionsByTask(task.id))
+          .filter((item: any) => isTeamCompletionInCurrentPeriod(
+            item.completedAt,
+            task.nextAvailableDate ? new Date(task.nextAvailableDate) : null,
+            new Date(),
+          ))
+        : [];
+      let teamReadyForApproval = true;
+      if (isExplicitTeamTask) {
+        teamReadyForApproval = hasEveryTeamMemberSubmitted(
+          targetTeamMemberIds,
+          currentTeamSubmissions,
+        );
+      }
+      const coordination = resolveCompletionCoordination({
+        isTeamTask: isExplicitTeamTask,
+        requiresApproval: task.requiresApproval,
+        forceApproval: forceLateDueDateApproval,
+        allTeamMembersSubmitted: teamReadyForApproval,
+      });
+
+      if (coordination.autoApproveTeam) {
+        const targetIds = new Set(targetTeamMemberIds);
+        const pendingTeamCompletions = currentTeamSubmissions.filter(
+          (item: any) => item.status === "pending" && targetIds.has(item.memberId),
+        );
+        await storage.autoApproveTaskCompletions(
+          pendingTeamCompletions.map((teamCompletion: any) => teamCompletion.id),
+          task.points,
+        );
+        completion = { ...completion, status: "approved" };
+        // The pre-award status check above still saw pending contributions.
+        // A one-time team task is finished only after the collective payout.
+        if (task.recurrence === "none" && !task.recurrenceDays) {
+          await storage.updateTaskStatus(task.id, "completed");
+        }
+      }
+
+      if (coordination.requestParentApproval && teamReadyForApproval) {
+        // Broadcast pending completion to family (so parents know to approve)
+        broadcastToFamily(member.familyName, {
+          type: "task_completion_pending",
+          taskId: task.id,
+          completionId: completion.id,
+          member: updatedMember,
+          pointsEarned: task.points,
+        });
+        
+        // Get family language for translated notifications
+        const family = await storage.getFamily(member.familyName);
+        const lang = family?.language || "en";
+        
+        // Create notification for each parent (exclude self so you don't get notified about your own task)
+        await storage.createNotificationForParents(member.familyName, {
+          familyName: member.familyName,
+          type: "task_pending",
+          title: translateNotification(lang, "task_pending.title", { name: member.displayName, task: task.title }),
+          message: translateNotification(lang, "task_pending.message", { points: task.points }),
+          relatedTaskId: task.id,
+          relatedMemberId: member.id,
+        }, member.id);
+
+        if (shouldSendTaskPendingPush(member.role)) {
+          const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+          const originDeviceToken = req.get("x-push-device-token")?.trim().slice(0, 256);
+          await sendPolicyPush(member.familyName, allMembers.map(m => m.id), "task_pending",
+            translateNotification(lang, "task_pending.title", { name: member.displayName, task: task.title }),
+            translateNotification(lang, "task_pending.message", { points: task.points }), member.id, originDeviceToken);
+        }
+        
+        // Broadcast notification update
+        broadcastToFamily(member.familyName, { type: "notification_update" });
+      } else if (coordination.autoApproved) {
+        // Broadcast auto-approved completion
+        broadcastToFamily(member.familyName, {
+          type: "task_completion_approved",
+          taskId: task.id,
+          completionId: completion.id,
+          member: updatedMember,
+          pointsEarned: completion.dailyRoundId ? completion.pointsEarned : task.points,
+        });
+        
+        // Get family language for translated notifications
+        const family = await storage.getFamily(member.familyName);
+        const lang = family?.language || "en";
+        
+        // Create notification for each parent (exclude self so you don't get notified about your own task)
+        await storage.createNotificationForParents(member.familyName, {
+          familyName: member.familyName,
+          type: "task_completed",
+          title: translateNotification(lang, "task_completed.title", { name: member.displayName, points: task.points }),
+          message: translateNotification(lang, "task_completed.message", { task: task.title }),
+          relatedTaskId: task.id,
+          relatedMemberId: member.id,
+        }, member.id);
+        
+        // Broadcast notification update
+        broadcastToFamily(member.familyName, { type: "notification_update" });
+      }
+      
+      res.json({
+        success: true,
+        message: isExplicitTeamTask && !teamReadyForApproval
+          ? "Team contribution submitted! Waiting for the other team members."
+          : coordination.requestParentApproval
+            ? "Task completion submitted! Awaiting parent approval."
+            : `Great job! You earned ${completion.dailyRoundId ? completion.pointsEarned : task.points} points!`,
+        completion,
+        isTeamTask: isExplicitTeamTask,
+        teamReadyForApproval: isExplicitTeamTask ? teamReadyForApproval : undefined,
+        autoApproved: coordination.autoApproved,
+      });
+    } catch (error: any) {
+      console.error("Error completing task:", error);
+      res.status(500).json({ message: "Failed to complete task" });
+    }
+    return;
+  });
+
+  // Task approval routes
+  app.get("/api/tasks/completions/pending", isAuthenticated, async (req: any, res) => {
+    try {
+      const member = await getRoleMemberForRequest(req);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can view pending completions
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can view pending completions" });
+      }
+      
+      const pendingCompletions = await storage.getPendingCompletionsByFamily(member.familyName);
+      res.json(pendingCompletions);
+    } catch (error: any) {
+      console.error("Error fetching pending completions:", error);
+      res.status(500).json({ message: "Failed to fetch pending completions" });
+    }
+    return;
+  });
+
+  app.post("/api/tasks/completions/:completionId/approve", isAuthenticated, async (req: any, res) => {
+    try {
+      const { completionId } = req.params;
+      
+      const member = await getRoleMemberForRequest(req);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can approve completions
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can approve task completions" });
+      }
+      
+      // Get the completion to verify it exists and get details
+      const completion = await storage.getTaskCompletion(completionId);
+      if (!completion) {
+        return res.status(404).json({ message: "Task completion not found" });
+      }
+      
+      if (completion.status !== "pending") {
+        return res.status(422).json({ message: "Task completion is not pending" });
+      }
+      
+      // Get the child member to verify they exist and are in the same family
+      const childMember = await storage.getFamilyMember(completion.memberId);
+      if (!childMember) {
+        return res.status(404).json({ message: "Child member not found" });
+      }
+      
+      // Verify both are in the same family
+      if (childMember.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Cannot approve completions from another family" });
+      }
+      
+      // Get task for notifications
+      const task = await storage.getTask(completion.taskId);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      const approvalAssignmentIds = await storage.getTaskAssignmentsByTask(task.id);
+      const approvalLegacyTeamIds = task.sharedMemberIds?.length ? task.sharedMemberIds : [];
+      const approvalIsTeamTask = task.isSharedTask
+        && (approvalLegacyTeamIds.length > 0 || approvalAssignmentIds.length > 0);
+      let approvedRecipientCompletions: any[] = [completion];
+      if (completion.dailyRoundId) {
+        approvedRecipientCompletions = (await storage.getTaskCompletionsByTask(task.id))
+          .filter(item => item.dailyRoundId === completion.dailyRoundId && item.status === "pending");
+      }
+      
+      // Shopping lists and team tasks use one collective approval. Internally
+      // each recipient keeps a completion row so points/history remain
+      // attributable, but this single action approves every pending recipient.
+       if (completion.dailyRoundId) {
+        await storage.approveTaskCompletion(completionId, member.id);
+       } else if (task?.isShoppingList || approvalIsTeamTask) {
+        const collectiveCompletions = (await storage.getTaskCompletionsByTask(task.id))
+          .filter((item: any) => (
+            item.status === "pending"
+            && (
+              task.isShoppingList
+               || (!approvalLegacyTeamIds.length && approvalAssignmentIds.includes(item.memberId))
+               || approvalLegacyTeamIds.includes(item.memberId)
+            )
+          ));
+        approvedRecipientCompletions = collectiveCompletions;
+        if (
+           approvalIsTeamTask
+          && !hasEveryTeamMemberSubmitted(
+            task.sharedMemberIds?.length
+              ? task.sharedMemberIds
+              : await storage.getTaskAssignmentsByTask(task.id),
+            collectiveCompletions,
+          )
+        ) {
+          return res.status(422).json({ message: "Not all team members have submitted yet" });
+        }
+        // Also repairs old collective rows that split the points. The batch
+        // storage decision rechecks pending state and records awards atomically.
+        await storage.approveTaskCompletions(
+          collectiveCompletions.map(item => item.id),
+          member.id,
+          task.points,
+        );
+      } else {
+        // Mark completion as approved - this also awards points via _approveCompletionInternal.
+        await storage.approveTaskCompletion(completionId, member.id);
+      }
+       const approvedPoints = completion.dailyRoundId
+        ? approvedRecipientCompletions.reduce((sum, item) => sum + item.pointsEarned, 0)
+        : task?.isShoppingList || approvalIsTeamTask
+        ? task.points
+        : completion.pointsEarned;
+      
+      // For IMMEDIATE team tasks: when ALL selected members are approved,
+      // delete all completions so the next round starts with a clean slate.
+      // Without this, old "approved" completions from round N bleed into round N+1
+      // causing the task to appear fully completed (0/2) before anyone has submitted.
+       if (task?.recurrence === "immediate" && approvalIsTeamTask) {
+         const targetIds: string[] = approvalLegacyTeamIds.length > 0
+           ? approvalLegacyTeamIds
+           : approvalAssignmentIds;
+
+        if (targetIds.length > 1) {
+          const allCompletionsNow = await storage.getTaskCompletionsByTask(task.id);
+          const approvedMemberIds = allCompletionsNow
+            .filter((c: any) => c.status === "approved")
+            .map((c: any) => c.memberId);
+          const allNowApproved = targetIds.every((id: string) => approvedMemberIds.includes(id));
+          if (allNowApproved) {
+            await storage.deleteTaskCompletionsByTask(task.id);
+          }
+        }
+      }
+
+      // Shopping-list task finalization is persisted inside the task-locked
+      // approval transaction. This route only emits the post-commit event.
+      if (task?.isShoppingList && task.recurrence === "none") {
+        const updatedTask = await storage.getTask(task.id);
+        if (updatedTask?.status === "completed") {
+          broadcastToFamily(member.familyName, {
+            type: "shopping_list_completed",
+            taskId: task.id,
+            task: updatedTask,
+          });
+        }
+      }
+
+      // For shared tasks: _approveCompletionInternal deliberately doesn't auto-complete
+      // isSharedTask=true tasks (to avoid premature completion when first member is approved).
+      // Check here whether ALL required members now have approved completions, and if so,
+      // finalize the task as "completed".
+       if (approvalIsTeamTask && !task.isShoppingList && task.recurrence === "none") {
+        const sharedTargetIds: string[] = (task.sharedMemberIds && task.sharedMemberIds.length > 0)
+          ? task.sharedMemberIds
+          : await storage.getTaskAssignmentsByTask(task.id);
+        if (sharedTargetIds.length > 0) {
+          const latestCompletions = await storage.getTaskCompletionsByTask(task.id);
+          const approvedIds = latestCompletions
+            .filter((c: any) => c.status === "approved")
+            .map((c: any) => c.memberId);
+          const allApproved = sharedTargetIds.every((id: string) => approvedIds.includes(id));
+          if (allApproved) {
+            await storage.updateTaskStatus(task.id, "completed");
+          }
+        }
+      }
+      
+      // Delete proof photo now that the decision is made - it's no longer needed
+      if (completion.proofPhotoUrl) {
+        const objectStorageService = new ObjectStorageService();
+        objectStorageService.deleteObjectEntity(completion.proofPhotoUrl).catch((err: any) => {
+          console.error("Failed to delete proof photo after approval:", err);
+        });
+      }
+      
+      // Delete all "task_pending" notifications for this task (so other parents don't see it anymore)
+      await storage.deleteNotificationsByTypeAndTask(member.familyName, "task_pending", completion.taskId);
+      
+      // Get updated member data
+      const updatedChild = await storage.getFamilyMember(childMember.id);
+      
+      // Broadcast approval to family
+      broadcastToFamily(member.familyName, {
+        type: "task_completion_approved",
+        completionId,
+        taskId: completion.taskId,
+        member: updatedChild,
+        pointsEarned: approvedPoints,
+        approvedBy: member.displayName,
+      });
+      
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      
+      // Create notification for the child who completed the task
+      for (const recipient of approvedRecipientCompletions) {
+      await storage.createNotification({
+        familyName: member.familyName,
+        type: "task_approved",
+        title: translateNotification(lang, "task_approved.title"),
+        message: translateNotification(lang, "task_approved.message", { task: task?.title || "Task", points: completion.dailyRoundId ? recipient.pointsEarned : approvedPoints }),
+        relatedMemberId: member.id,
+        relatedTaskId: completion.taskId,
+        targetMemberId: recipient.memberId,
+      });
+      }
+
+      // task_approved remains an in-app notification only (no APNs alert).
+
+      // Broadcast notification update to refresh child's bell
+      broadcastToFamily(member.familyName, {
+        type: 'notification_update',
+      });
+      
+      // Every shopping-list recipient receives the normal achievement event,
+      // even though the parent approved only one collective request.
+      for (const approvedCompletion of approvedRecipientCompletions) {
+        await achievementEngine.processEvent({
+          type: "task_approved",
+          familyName: member.familyName,
+          memberId: approvedCompletion.memberId,
+          taskId: completion.taskId,
+          pointsEarned: !completion.dailyRoundId && (task?.isShoppingList || approvalIsTeamTask)
+            ? task.points
+            : approvedCompletion.pointsEarned,
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: "Task completion approved!",
+        pointsAwarded: approvedPoints,
+        updatedMember: updatedChild,
+      });
+    } catch (error: any) {
+      console.error("Error approving task completion:", error);
+      res.status(500).json({ message: "Failed to approve task completion" });
+    }
+    return;
+  });
+
+  app.post("/api/tasks/completions/:completionId/reject", isAuthenticated, async (req: any, res) => {
+    try {
+      const { completionId } = req.params;
+      const { reason } = req.body;
+      
+      const member = await getRoleMemberForRequest(req);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can reject completions
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can reject task completions" });
+      }
+      
+      // Get the completion to verify it exists
+      const completion = await storage.getTaskCompletion(completionId);
+      if (!completion) {
+        return res.status(404).json({ message: "Task completion not found" });
+      }
+      
+      if (completion.status !== "pending") {
+        return res.status(422).json({ message: "Task completion is not pending" });
+      }
+      
+      // Get the child member
+      const childMember = await storage.getFamilyMember(completion.memberId);
+      if (!childMember) {
+        return res.status(404).json({ message: "Child member not found" });
+      }
+      
+      // Verify both are in the same family
+      if (childMember.familyName !== member.familyName) {
+        return res.status(403).json({ message: "Cannot reject completions from another family" });
+      }
+      
+      // Shopping lists and team tasks are rejected as one collective request
+      // so no hidden per-recipient approvals remain on the approvals page.
+      const completionTask = await storage.getTask(completion.taskId);
+      if (!completionTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      const rejectionAssignmentIds = completionTask
+        ? await storage.getTaskAssignmentsByTask(completionTask.id)
+        : [];
+      const rejectionLegacyTeamIds = completionTask?.sharedMemberIds?.length
+        ? completionTask.sharedMemberIds
+        : [];
+      const rejectionIsTeamTask = Boolean(completionTask?.isSharedTask
+        && (rejectionLegacyTeamIds.length > 0 || rejectionAssignmentIds.length > 0));
+      let rejectedRecipientIds = [childMember.id];
+      if (completion.dailyRoundId) {
+        rejectedRecipientIds = (await storage.getTaskCompletionsByTask(completion.taskId))
+          .filter(item => item.dailyRoundId === completion.dailyRoundId && item.status === "pending")
+          .map(item => item.memberId);
+        await storage.rejectTaskCompletion(completionId, member.id, reason || "Did not meet expectations");
+      } else if (completionTask?.isShoppingList || rejectionIsTeamTask) {
+        const collectiveCompletions = (await storage.getTaskCompletionsByTask(completion.taskId))
+          .filter((item: any) => (
+            item.status === "pending"
+            && (
+              completionTask.isShoppingList
+               || (!rejectionLegacyTeamIds.length && rejectionAssignmentIds.includes(item.memberId))
+               || rejectionLegacyTeamIds.includes(item.memberId)
+            )
+          ));
+        await storage.rejectTaskCompletions(
+          collectiveCompletions.map(item => item.id),
+          member.id,
+          reason || "Did not meet expectations",
+        );
+        rejectedRecipientIds = collectiveCompletions.map(item => item.memberId);
+      } else {
+        await storage.rejectTaskCompletion(completionId, member.id, reason || "Did not meet expectations");
+      }
+      
+      // Delete proof photo now that the decision is made - it's no longer needed
+      if (completion.proofPhotoUrl) {
+        const objectStorageService = new ObjectStorageService();
+        objectStorageService.deleteObjectEntity(completion.proofPhotoUrl).catch((err: any) => {
+          console.error("Failed to delete proof photo after rejection:", err);
+        });
+      }
+      
+      // Delete all "task_pending" notifications for this task (so other parents don't see it anymore)
+      await storage.deleteNotificationsByTypeAndTask(member.familyName, "task_pending", completion.taskId);
+      
+      // Clear the task's nextAvailableDate so it becomes immediately available again
+      // (For recurring tasks that were set to next recurrence date when completed)
+      await storage.updateTaskNextAvailableDate(completion.taskId, null as any);
+      
+      // Broadcast rejection to family
+      broadcastToFamily(member.familyName, {
+        type: "task_completion_rejected",
+        completionId,
+        taskId: completion.taskId,
+        memberId: childMember.id,
+        rejectedBy: member.displayName,
+        reason: reason || "Did not meet expectations",
+      });
+      
+      // Get the task for the notification message
+      const task = await storage.getTask(completion.taskId);
+      
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      const defaultReason = translateNotification(lang, "default_reason");
+      
+      // Create notification for the child who completed the task
+      for (const recipientId of rejectedRecipientIds) {
+      await storage.createNotification({
+        familyName: member.familyName,
+        type: "task_rejected",
+        title: translateNotification(lang, "task_rejected.title"),
+        message: translateNotification(lang, "task_rejected.message", { task: task?.title || "Task", reason: reason || defaultReason }),
+        relatedMemberId: member.id,
+        relatedTaskId: completion.taskId,
+        targetMemberId: recipientId,
+      });
+      }
+
+      await sendPolicyPush(member.familyName, rejectedRecipientIds, "task_rejected",
+        translateNotification(lang, "task_rejected.title"),
+        translateNotification(lang, "task_rejected.message", { task: task?.title || "Task", reason: reason || defaultReason }),
+        member.id);
+
+      // Broadcast notification update to refresh child's bell
+      broadcastToFamily(member.familyName, {
+        type: 'notification_update',
+      });
+      
+      // Process achievement events
+      for (const recipientId of rejectedRecipientIds) {
+      await achievementEngine.processEvent({
+        type: "task_rejected",
+        familyName: member.familyName,
+        memberId: recipientId,
+        taskId: completion.taskId,
+      });
+      }
+      
+      res.json({
+        success: true,
+        message: "Task completion rejected",
+      });
+    } catch (error: any) {
+      console.error("Error rejecting task completion:", error);
+      res.status(500).json({ message: "Failed to reject task completion" });
+    }
+    return;
+  });
+
+  // Reward routes
+  app.get("/api/rewards", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const rewards = await storage.getRewardsByFamily(result.member.familyName);
+      res.json(rewards);
+    } catch (error) {
+      console.error("Error fetching rewards:", error);
+      res.status(500).json({ message: "Failed to fetch rewards" });
+    }
+    return;
+  });
+
+  app.post("/api/rewards", isAuthenticated, async (req: any, res) => {
+    try {
+      const member = await getRoleMemberForRequest(req);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can create rewards
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can create rewards" });
+      }
+      
+      const parsed = insertRewardSchema.parse(req.body);
+      const reward = await storage.createReward(
+        isTvSessionRequest(req) ? { ...parsed, familyName: member.familyName } : parsed,
+      );
+      
+      // Broadcast new reward to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_created",
+        reward,
+      });
+      
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || 'en';
+      
+      // Notify all children about the new reward
+      await storage.createNotificationForAllChildren(member.familyName, {
+        familyName: member.familyName,
+        type: "reward_created",
+        title: translateNotification(lang, "reward_created.title", {}),
+        message: translateNotification(lang, "reward_created.message", { reward: reward.title, points: reward.pointThreshold }),
+        relatedRewardId: reward.id,
+      });
+      
+      // Broadcast notification update
+      broadcastToFamily(member.familyName, { type: "notification_update" });
+      
+      res.json(reward);
+    } catch (error: any) {
+      console.error("Error creating reward:", error);
+      res.status(400).json({ message: error.message || "Failed to create reward" });
+    }
+    return;
+  });
+
+  // Update a reward
+  app.put("/api/rewards/:rewardId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { rewardId } = req.params;
+      
+      const member = await getRoleMemberForRequest(req);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can edit rewards
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can edit rewards" });
+      }
+      
+      // Verify reward belongs to this family
+      const rewards = await storage.getRewardsByFamily(member.familyName);
+      const reward = rewards.find(r => r.id === rewardId);
+      
+      if (!reward) {
+        return res.status(404).json({ message: "Reward not found" });
+      }
+      
+      const updateData = insertRewardSchema.parse(req.body);
+      const updatedReward = await storage.updateReward(
+        rewardId,
+        isTvSessionRequest(req) ? { ...updateData, familyName: member.familyName } : updateData,
+      );
+      
+      // Broadcast update to all family members
+      broadcastToFamily(member.familyName, {
+        type: "reward_updated",
+        reward: updatedReward,
+      });
+      
+      res.json(updatedReward);
+    } catch (error: any) {
+      console.error("Error updating reward:", error);
+      res.status(400).json({ message: error.message || "Failed to update reward" });
+    }
+    return;
+  });
+
+  // Delete a reward
+  app.delete("/api/rewards/:rewardId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { rewardId } = req.params;
+      
+      const member = await getRoleMemberForRequest(req);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete rewards
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete rewards" });
+      }
+      
+      // Verify reward belongs to this family
+      const rewards = await storage.getRewardsByFamily(member.familyName);
+      const reward = rewards.find(r => r.id === rewardId);
+      
+      if (!reward) {
+        return res.status(404).json({ message: "Reward not found" });
+      }
+      
+      await storage.deleteReward(rewardId);
+      
+      // Broadcast reward deletion to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_deleted",
+        rewardId,
+      });
+      
+      res.json({ message: "Reward deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting reward:", error);
+      res.status(500).json({ message: "Failed to delete reward" });
+    }
+    return;
+  });
+
+  // Redeem a reward - supports Device Sessions
+  app.post("/api/rewards/:rewardId/redeem", isAuthenticated, async (req: any, res) => {
+    console.log('🎯 POST /api/rewards/:rewardId/redeem called');
+    console.log('   rewardId:', req.params.rewardId);
+    
+    try {
+      const { rewardId } = req.params;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // IMPORTANT: Always fetch fresh member data from DB for point calculations
+      // The session member data might be stale (especially for device-linked sessions)
+      let member = await storage.getFamilyMemberById(result.member.id);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      console.log('   Member found:', member.displayName, '(', member.id, ')');
+      console.log('   Member role:', member.role);
+      console.log('   Member totalPoints (fresh from DB):', member.totalPoints);
+      
+      console.log('   Fetching rewards for family:', member.familyName);
+      // Get the reward
+      const rewards = await storage.getRewardsByFamily(member.familyName);
+      console.log('   Found rewards:', rewards.length);
+      const reward = rewards.find(r => r.id === rewardId);
+      
+      console.log('   Reward found:', reward ? `${reward.title} (${reward.id})` : 'null');
+      
+      if (!reward) {
+        console.log('   ❌ Reward not found in family rewards');
+        return res.status(404).json({ message: "Reward not found" });
+      }
+      
+      // Immediate redemption (auto-approved). The balance, ledger,
+      // redemption, counter, and one-time deactivation commit together.
+      console.log('   Redemption - deducting points and auto-approving');
+      const operationId = typeof req.body?.operationId === "string" && req.body.operationId.trim()
+        ? req.body.operationId.trim()
+        : (typeof req.get("x-operation-id") === "string" ? req.get("x-operation-id") : null);
+      const redemption = await storage.redeemRewardAtomically(member.id, reward, null, operationId);
+      const updatedMember = await storage.getFamilyMemberById(member.id);
+      const newTotalPoints = updatedMember?.totalPoints ?? member.totalPoints;
+      
+      // Broadcast redemption to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_redeemed",
+        redemption,
+        member: updatedMember ?? member,
+        rewardDeactivated: reward.oneTimeOnly,
+      });
+      
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      
+      // Create notification for each parent
+      await storage.createNotificationForParents(member.familyName, {
+        familyName: member.familyName,
+        type: "reward_redeemed",
+        title: translateNotification(lang, "reward_redeemed.title", { name: member.displayName }),
+        message: translateNotification(lang, "reward_redeemed.message", { reward: reward.title, points: reward.pointThreshold }),
+        relatedRewardId: reward.id,
+        relatedMemberId: member.id,
+      });
+      const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+      await sendPolicyPush(member.familyName, allMembers.map(m => m.id), "reward_redeemed",
+        translateNotification(lang, "reward_redeemed.title", { name: member.displayName }),
+        translateNotification(lang, "reward_redeemed.message", { reward: reward.title, points: reward.pointThreshold }),
+        member.id);
+
+      // Broadcast notification update
+      broadcastToFamily(member.familyName, { type: "notification_update" });
+      res.json({ 
+        redemption: {
+          ...redemption,
+          rewardTitle: reward.title,
+        },
+        newTotalPoints,
+        message: `Successfully redeemed ${reward.title}!` 
+      });
+    } catch (error: any) {
+      console.error("Error redeeming reward:", error);
+      res.status(500).json({ message: "Failed to redeem reward" });
+    }
+    return;
+  });
+
+  // Get reward redemptions for current family - supports Device Sessions
+  app.get("/api/reward-redemptions", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const redemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
+      
+      // Get all rewards to attach reward titles
+      const rewards = await storage.getRewardsByFamily(member.familyName);
+      const rewardsMap = new Map(rewards.map(r => [r.id, r]));
+      
+      // Attach reward titles and participants (for shared rewards) to redemptions
+      const redemptionsWithDetails = await Promise.all(redemptions.map(async (redemption) => {
+        const base = {
+          ...redemption,
+          rewardTitle: redemption.reward?.title || rewardsMap.get(redemption.rewardId)?.title || "Belohnung",
+          rewardIconEmoji: redemption.reward?.iconEmoji || rewardsMap.get(redemption.rewardId)?.iconEmoji || "🎁",
+        };
+        
+        // Include participants for shared rewards (active or finalized)
+        if (redemption.sharingStatus === "sharing_active" || redemption.sharingStatus === "sharing_finalized") {
+          const participants = await storage.getRewardSharingParticipants(redemption.id);
+          return {
+            ...base,
+            sharingParticipants: participants.map(p => ({
+              id: p.id,
+              memberId: p.memberId,
+              displayName: p.member.displayName,
+              avatarUrl: p.member.avatarUrl,
+              activeSkinId: p.member.activeSkinId,
+              color: p.member.color,
+              pointsContributed: p.pointsContributed,
+            })),
+          };
+        }
+        
+        return base;
+      }));
+      
+      res.json(redemptionsWithDetails);
+    } catch (error) {
+      console.error("Error fetching redemptions:", error);
+      res.status(500).json({ message: "Failed to fetch redemptions" });
+    }
+    return;
+  });
+
+  // Update reward redemption status (parents only)
+  app.patch("/api/reward-redemptions/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      // Get real member (not acting member) to check permissions
+      const member = await getRoleMemberForRequest(req);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Only parents can update redemption status
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update reward status" });
+      }
+
+      // Validate status
+      if (!["pending", "approved", "completed"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be: pending, approved, or completed" });
+      }
+
+      // Get the redemption to verify it belongs to the same family
+      const familyRedemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
+      const redemption = familyRedemptions.find(r => r.id === id);
+
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+
+      // Update the redemption status
+      await storage.updateRewardRedemptionStatus(id, status);
+
+      // If approved, increment rewards redeemed counter (kept for analytics)
+      if (status === "approved" && redemption.status !== "approved") {
+        const fullMember = await storage.getFamilyMemberById(redemption.memberId);
+        if (fullMember) {
+          await storage.incrementRewardsRedeemed(fullMember.id);
+        }
+      }
+
+      // Broadcast update to family
+      broadcastToFamily(member.familyName, {
+        type: "redemption_updated",
+        redemptionId: id,
+        status,
+      });
+
+      res.json({ message: "Redemption status updated successfully", status });
+    } catch (error) {
+      console.error("Error updating redemption:", error);
+      res.status(500).json({ message: "Failed to update redemption" });
+    }
+    return;
+  });
+
+  // Cancel a reward redemption and refund points (parents only)
+  app.delete("/api/reward-redemptions/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      const familyRedemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
+      const redemption = familyRedemptions.find(r => r.id === id);
+
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+
+      if (member.role !== "parent") {
+        // Children can only cancel their own pending, unshared redemptions
+        if (redemption.memberId !== member.id) {
+          return res.status(403).json({ message: "You can only cancel your own redemptions" });
+        }
+        if (redemption.status === "completed") {
+          return res.status(403).json({ message: "Cannot cancel a fulfilled redemption" });
+        }
+        if (redemption.sharingStatus !== "not_shared") {
+          return res.status(403).json({ message: "Cannot cancel a shared redemption" });
+        }
+      }
+
+      const { memberId, pointsRefunded, rewardReactivated } = await storage.cancelRewardRedemption(id);
+
+      const refundedMember = await storage.getFamilyMemberById(memberId);
+
+      broadcastToFamily(member.familyName, {
+        type: "redemption_cancelled",
+        redemptionId: id,
+        memberId,
+        pointsRefunded,
+        member: refundedMember,
+        rewardReactivated,
+      });
+
+      res.json({ 
+        message: "Redemption cancelled and points refunded", 
+        pointsRefunded,
+        memberId,
+      });
+    } catch (error) {
+      console.error("Error cancelling redemption:", error);
+      res.status(500).json({ message: "Failed to cancel redemption" });
+    }
+    return;
+  });
+
+  // Create a reward request (children only) - supports Device Sessions
+  app.post("/api/reward-requests", isAuthenticated, async (req: any, res) => {
+    try {
+      const { title, description, pointThreshold } = req.body;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      if (isTvSessionRequest(req) && member.role !== "child") {
+        return res.status(403).json({ message: "Only children can create reward requests from a TV session" });
+      }
+      
+      // Validate input
+      if (!title || !pointThreshold || pointThreshold < 1) {
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+      
+      // Create the request
+      const request = await storage.createRewardRequest({
+        familyName: member.familyName,
+        requestedBy: member.id,
+        title,
+        description: description || null,
+        pointThreshold,
+        status: "pending",
+      });
+      
+      // Broadcast to family (especially parents)
+      broadcastToFamily(member.familyName, {
+        type: "reward_request_created",
+        request,
+        requester: {
+          id: member.id,
+          displayName: member.displayName,
+          avatarUrl: member.avatarUrl,
+          color: member.color,
+        },
+      });
+      
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      
+      // Create notification for each parent
+      await storage.createNotificationForParents(member.familyName, {
+        familyName: member.familyName,
+        type: "reward_request",
+        title: translateNotification(lang, "reward_request.title", { name: member.displayName }),
+        message: translateNotification(lang, "reward_request.message", { reward: title, points: pointThreshold }),
+        relatedMemberId: member.id,
+      });
+      const requestMembers = await storage.getFamilyMembersByFamily(member.familyName);
+      await sendPolicyPush(member.familyName, requestMembers.map(m => m.id), "reward_request",
+        translateNotification(lang, "reward_request.title", { name: member.displayName }),
+        translateNotification(lang, "reward_request.message", { reward: title, points: pointThreshold }), member.id);
+      
+      // Broadcast notification update
+      broadcastToFamily(member.familyName, { type: "notification_update" });
+      res.status(201).json(request);
+    } catch (error: any) {
+      console.error("Error creating reward request:", error);
+      res.status(500).json({ message: "Failed to create reward request" });
+    }
+    return;
+  });
+
+  // Get all reward requests for the current family - supports Device Sessions
+  app.get("/api/reward-requests", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const requests = await storage.getRewardRequestsByFamily(member.familyName);
+      res.json(requests);
+    } catch (error: any) {
+      console.error("Error fetching reward requests:", error);
+      res.status(500).json({ message: "Failed to fetch reward requests" });
+    }
+    return;
+  });
+
+  // Update a reward request (parents only)
+  app.patch("/api/reward-requests/:requestId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { requestId } = req.params;
+      const { title, description, pointThreshold } = req.body;
+      
+      // Get authenticated user's member (not acting member)
+      const member = await getRoleMemberForRequest(req);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can edit requests
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can edit reward requests" });
+      }
+      
+      // Get the request
+      const requests = await storage.getRewardRequestsByFamily(member.familyName);
+      const request = requests.find(r => r.id === requestId);
+      
+      if (!request) {
+        return res.status(404).json({ message: "Request not found" });
+      }
+      
+      if (request.status !== "pending") {
+        return res.status(400).json({ message: "Only pending requests can be edited" });
+      }
+      
+      // Validate input
+      if (!title || !pointThreshold || pointThreshold < 1) {
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+      
+      // Update the request
+      await storage.updateRewardRequest(requestId, {
+        title,
+        description: description || null,
+        pointThreshold,
+      });
+      
+      // Broadcast the update
+      broadcastToFamily(member.familyName, {
+        type: "reward_request_updated",
+        requestId,
+      });
+      
+      res.json({ message: "Request updated successfully" });
+    } catch (error: any) {
+      console.error("Error updating reward request:", error);
+      res.status(500).json({ message: "Failed to update reward request" });
+    }
+    return;
+  });
+
+  // Approve or decline a reward request (parents only)
+  app.patch("/api/reward-requests/:requestId/:action", isAuthenticated, async (req: any, res) => {
+    try {
+      const { requestId, action } = req.params;
+      
+      if (action !== "approve" && action !== "decline") {
+        return res.status(400).json({ message: "Invalid action" });
+      }
+      
+      // Get authenticated user's member (not acting member)
+      const member = await getRoleMemberForRequest(req);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can approve/decline requests
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can review reward requests" });
+      }
+      
+      // Get the request
+      const requests = await storage.getRewardRequestsByFamily(member.familyName);
+      const request = requests.find(r => r.id === requestId);
+      
+      if (!request) {
+        return res.status(404).json({ message: "Request not found" });
+      }
+      
+      if (request.status !== "pending") {
+        return res.status(400).json({ message: "Request has already been reviewed" });
+      }
+      
+      const newStatus = action === "approve" ? "approved" : "declined";
+      
+      // Update the request status
+      await storage.updateRewardRequestStatus(requestId, newStatus, member.id);
+      
+      // If approved, create the actual reward
+      if (action === "approve") {
+        const reward = await storage.createReward({
+          familyName: member.familyName,
+          title: request.title,
+          description: request.description || null,
+          pointThreshold: request.pointThreshold,
+          isActive: true,
+        });
+        
+        // Broadcast the new reward
+        broadcastToFamily(member.familyName, {
+          type: "reward_created",
+          reward,
+        });
+
+        // Notify the child who made the request
+        try {
+          const family = await storage.getFamily(member.familyName);
+          const lang = family?.language || "en";
+          await storage.createNotification({
+            familyName: member.familyName,
+            type: "reward_request_approved",
+            title: translateNotification(lang, "reward_request_approved.title"),
+            message: translateNotification(lang, "reward_request_approved.message", { reward: request.title }),
+            targetMemberId: request.requestedBy,
+            relatedMemberId: member.id,
+          });
+          // Broadcast notification update so the child's bell refreshes in real time
+          broadcastToFamily(member.familyName, { type: "notification_update" });
+           await sendPolicyPush(member.familyName, [request.requestedBy], "reward_request_approved",
+             translateNotification(lang, "reward_request_approved.title"),
+             translateNotification(lang, "reward_request_approved.message", { reward: request.title }), member.id);
+        } catch (notifErr: any) {
+          console.error("[reward_request_approved] notification error:", notifErr.message);
+        }
+      }
+      
+      // If declined, notify the child who made the request
+      if (action === "decline") {
+        try {
+          const family = await storage.getFamily(member.familyName);
+          const lang = family?.language || "en";
+          await storage.createNotification({
+            familyName: member.familyName,
+            type: "reward_request_declined",
+            title: translateNotification(lang, "reward_request_declined.title"),
+            message: translateNotification(lang, "reward_request_declined.message", { reward: request.title }),
+            targetMemberId: request.requestedBy,
+            relatedMemberId: member.id,
+          });
+          broadcastToFamily(member.familyName, { type: "notification_update" });
+           await sendPolicyPush(member.familyName, [request.requestedBy], "reward_request_declined",
+             translateNotification(lang, "reward_request_declined.title"),
+             translateNotification(lang, "reward_request_declined.message", { reward: request.title }), member.id);
+        } catch (notifErr: any) {
+          console.error("[reward_request_declined] notification error:", notifErr.message);
+        }
+      }
+
+      // Broadcast the request update
+      broadcastToFamily(member.familyName, {
+        type: "reward_request_updated",
+        requestId,
+        status: newStatus,
+      });
+      
+      res.json({ message: `Request ${newStatus}`, status: newStatus });
+    } catch (error: any) {
+      console.error("Error updating reward request:", error);
+      res.status(500).json({ message: "Failed to update reward request" });
+    }
+    return;
+  });
+
+  // Reward sharing routes - supports Device Sessions
+  // Start sharing a reward
+  app.post("/api/rewards/redemptions/:redemptionId/share", isAuthenticated, async (req: any, res) => {
+    try {
+      const { redemptionId } = req.params;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Check tier — shared rewards require Family subscription (or active trial)
+      const family = await storage.getFamily(member.familyName);
+      const sharedOnTrial1 = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(family?.subscriptionTier ?? "free", "sharedRewards") && !sharedOnTrial1) {
+        return res.status(403).json({
+          message: "Shared rewards require a Family subscription",
+          code: "FEATURE_NOT_AVAILABLE",
+        });
+      }
+      
+      // Get the redemption
+      const redemption = await storage.getRewardRedemption(redemptionId);
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      const sharingOwner = await storage.getFamilyMemberById(redemption.memberId);
+      if (!sharingOwner || sharingOwner.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      
+      // Only the person who redeemed can start sharing
+      if (redemption.memberId !== member.id) {
+        return res.status(403).json({ message: "Only the original redeemer can start sharing" });
+      }
+      
+      // Can't share if already sharing or finalized
+      if (redemption.sharingStatus !== "not_shared") {
+        return res.status(400).json({ message: "Reward is already being shared or has been finalized" });
+      }
+      
+      // Start sharing
+      await storage.startRewardSharing(redemptionId);
+      
+      // Create notification for each parent about reward sharing offer
+      const reward = await storage.getRewardById(redemption.rewardId);
+      
+      // Family already fetched above for tier check
+      const lang = family?.language || "en";
+      
+      const sharingNotification = {
+        familyName: member.familyName,
+        type: "reward_sharing" as const,
+        title: translateNotification(lang, "reward_sharing_offer.title", { name: member.displayName }),
+        message: translateNotification(lang, "reward_sharing_offer.message", { reward: reward?.title || "" }),
+        relatedMemberId: member.id,
+        relatedRewardId: redemption.rewardId,
+        isRead: false,
+      };
+      
+      // Notify parents about reward sharing offer
+      await storage.createNotificationForParents(member.familyName, sharingNotification);
+      
+      // Also notify siblings (other children) so they can join
+      await storage.createNotificationForSiblings(member.familyName, sharingNotification, member.id);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_sharing_started",
+        redemptionId,
+        memberId: member.id,
+        memberName: member.displayName,
+      });
+      
+      // Also broadcast notification update
+      broadcastToFamily(member.familyName, {
+        type: "notification_update",
+      });
+      
+      res.json({ message: "Reward sharing started!", redemptionId });
+    } catch (error: any) {
+      console.error("Error starting reward sharing:", error);
+      res.status(500).json({ message: "Failed to start reward sharing" });
+    }
+    return;
+  });
+
+  // Join a shared reward - supports Device Sessions
+  app.post("/api/rewards/redemptions/:redemptionId/join", isAuthenticated, async (req: any, res) => {
+    try {
+      const { redemptionId } = req.params;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Check tier — shared rewards require Family subscription (or active trial)
+      const joinFamily = await storage.getFamily(member.familyName);
+      const sharedOnTrial2 = !!(joinFamily?.trialEndsAt && new Date(joinFamily.trialEndsAt) > new Date());
+      if (!hasFeature(joinFamily?.subscriptionTier ?? "free", "sharedRewards") && !sharedOnTrial2) {
+        return res.status(403).json({
+          message: "Shared rewards require a Family subscription",
+          code: "FEATURE_NOT_AVAILABLE",
+        });
+      }
+      
+      // Get the redemption
+      const redemption = await storage.getRewardRedemption(redemptionId);
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+
+      const redemptionOwner = await storage.getFamilyMemberById(redemption.memberId);
+      if (!redemptionOwner || redemptionOwner.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      
+      // Can only join if sharing is active
+      if (redemption.sharingStatus !== "sharing_active") {
+        return res.status(400).json({ message: "Sharing is not active for this reward" });
+      }
+      
+      // Can't join your own redemption
+      if (redemption.memberId === member.id) {
+        return res.status(400).json({ message: "You can't join your own shared reward" });
+      }
+      
+      // The final, locked allocation determines each member's exact share.
+      // A pre-join estimate can become stale as other members join and used
+      // to reject valid non-divisible splits.
+      
+      // Join the sharing
+      const participant = await storage.joinRewardSharing(redemptionId, member.id);
+      
+      // Get the reward for notification message
+      const reward = await storage.getRewardById(redemption.rewardId);
+      
+      // Get family language for translated notifications
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      
+      // Create notification for the original owner (the child who started sharing)
+      await storage.createNotification({
+        familyName: member.familyName,
+        type: "reward_sharing",
+        title: translateNotification(lang, "reward_sharing_join.title", { name: member.displayName }),
+        message: translateNotification(lang, "reward_sharing_join.message", { reward: reward?.title || "" }),
+        relatedMemberId: member.id,
+        relatedRewardId: redemption.rewardId,
+        targetMemberId: redemption.memberId, // The original owner
+      });
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_sharing_joined",
+        redemptionId,
+        memberId: member.id,
+        memberName: member.displayName,
+      });
+      
+      // Broadcast notification update
+      broadcastToFamily(member.familyName, { type: "notification_update" });
+      
+      res.json({ 
+        message: "You joined the shared reward!", 
+        participant,
+      });
+    } catch (error: any) {
+      console.error("Error joining shared reward:", error);
+      res.status(500).json({ message: "Failed to join shared reward" });
+    }
+    return;
+  });
+
+  // Finalize a shared reward (calculate and distribute costs) - supports Device Sessions
+  app.post("/api/rewards/redemptions/:redemptionId/finalize", isAuthenticated, async (req: any, res) => {
+    try {
+      const { redemptionId } = req.params;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get the redemption
+      const redemption = await storage.getRewardRedemption(redemptionId);
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      const finalizingOwner = await storage.getFamilyMemberById(redemption.memberId);
+      if (!finalizingOwner || finalizingOwner.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      
+      // Only the original redeemer can finalize
+      if (redemption.memberId !== member.id) {
+        return res.status(403).json({ message: "Only the original redeemer can finalize sharing" });
+      }
+      
+      // Can only finalize if sharing is active
+      if (redemption.sharingStatus !== "sharing_active") {
+        return res.status(400).json({ message: "Sharing is not active for this reward" });
+      }
+      
+      // Finalize sharing (this handles all point calculations)
+      await storage.finalizeRewardSharing(redemptionId);
+      
+      // Get updated participants list
+      const participants = await storage.getRewardSharingParticipants(redemptionId);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_sharing_finalized",
+        redemptionId,
+        participants,
+      });
+      
+      res.json({ 
+        message: "Sharing finalized! Points have been distributed.",
+        participants,
+      });
+    } catch (error: any) {
+      console.error("Error finalizing shared reward:", error);
+      res.status(500).json({ message: error.message || "Failed to finalize shared reward" });
+    }
+    return;
+  });
+
+  // Cancel sharing (only works if no one joined yet) - supports Device Sessions
+  app.post("/api/rewards/redemptions/:redemptionId/leave-sharing", isAuthenticated, async (req: any, res) => {
+    try {
+      const { redemptionId } = req.params;
+
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+
+      let member = result.member;
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) member = actingMember;
+      }
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const redemption = await storage.getRewardRedemption(redemptionId);
+      if (!redemption) return res.status(404).json({ message: "Redemption not found" });
+      const sharingOwner = await storage.getFamilyMemberById(redemption.memberId);
+      if (!sharingOwner || sharingOwner.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+
+      await storage.leaveRewardSharing(redemptionId, member.id);
+
+      broadcastToFamily(member.familyName, {
+        type: "reward_sharing_left",
+        redemptionId,
+        memberId: member.id,
+        memberName: member.displayName,
+      });
+
+      res.json({ message: "You left the shared reward." });
+    } catch (error: any) {
+      console.error("Error leaving shared reward:", error);
+      res.status(500).json({ message: error.message || "Failed to leave shared reward" });
+    }
+    return;
+  });
+
+  app.post("/api/rewards/redemptions/:redemptionId/cancel-sharing", isAuthenticated, async (req: any, res) => {
+    try {
+      const { redemptionId } = req.params;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get the redemption
+      const redemption = await storage.getRewardRedemption(redemptionId);
+      if (!redemption) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      const sharingOwner = await storage.getFamilyMemberById(redemption.memberId);
+      if (!sharingOwner || sharingOwner.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Redemption not found" });
+      }
+      
+      // Only the original redeemer can cancel
+      if (redemption.memberId !== member.id) {
+        return res.status(403).json({ message: "Only the original redeemer can cancel sharing" });
+      }
+      
+      // Cancel sharing
+      await storage.cancelRewardSharing(redemptionId);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "reward_sharing_cancelled",
+        redemptionId,
+      });
+      
+      res.json({ 
+        message: "Sharing cancelled. You can now redeem this reward solo.",
+      });
+    } catch (error: any) {
+      console.error("Error cancelling shared reward:", error);
+      res.status(500).json({ message: error.message || "Failed to cancel sharing" });
+    }
+    return;
+  });
+
+  // Get all active shared rewards for family - supports Device Sessions
+  app.get("/api/rewards/shared", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const sharedRewards = await storage.getActiveSharedRewards(member.familyName);
+      
+      res.json(sharedRewards);
+    } catch (error: any) {
+      console.error("Error getting shared rewards:", error);
+      res.status(500).json({ message: "Failed to get shared rewards" });
+    }
+    return;
+  });
+
+  // Skins routes - supports both Replit Auth and Device Sessions
+  app.get("/api/skins", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // For Replit Auth, also check if acting as another member
+      let member = result.member;
+      if (!result.isDeviceSession && req.session.actingAsMemberId) {
+        member = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get family to retrieve skinCardCost and subscription tier
+      const family = await storage.getFamily(member.familyName);
+      const skinCardCost = family?.skinCardCost ?? 60;
+      const maxSkins = getMaxSkins(family?.subscriptionTier ?? "free");
+      
+      const allSkins = await storage.getSkins();
+      const discoveredSkinIds = member.discoveredSkinIds || [];
+      const earnedLegacySkinIds = member.earnedLegacySkinIds || [];
+      
+      // Calculate available discovery cards using new linear system with family's skinCardCost
+      const availableCards = calculateAvailableCards(member.totalEarned, discoveredSkinIds.length, skinCardCost);
+      
+      // Whether the tier's skin limit has been reached
+      const tierLimitReached = discoveredSkinIds.length >= maxSkins;
+      
+      // Skins discovered beyond the Free tier limit are "over-limit":
+      // they stay in the DB but cannot be activated until the family upgrades.
+      // discoveredSkinIds are in discovery order — the first maxSkins are kept usable.
+      const overLimitIds = new Set(discoveredSkinIds.slice(maxSkins));
+
+      // Enrich skins with discovery status for this member
+      const skinsWithStatus = allSkins.map(skin => {
+        // Legacy skins are "discovered" if they're in earnedLegacySkinIds (via stars)
+        // Regular skins are "discovered" if they're in discoveredSkinIds (via manual discovery)
+        const isDiscovered = isLegacySkin(skin.id) 
+          ? earnedLegacySkinIds.includes(skin.id)
+          : discoveredSkinIds.includes(skin.id);
+        const isActive = member.activeSkinId === skin.id;
+        
+        // A discovered regular skin is "over the tier limit" if it was unlocked
+        // while the family had a higher tier and is now beyond the Free cap.
+        const isOverLimit = !isLegacySkin(skin.id) && overLimitIds.has(skin.id);
+
+        // Check if skin can be unlocked based on position, points, AND tier limit
+        // Legacy skins cannot be discovered manually - they are unlocked via stars only
+        const canDiscover = !isDiscovered && !isLegacySkin(skin.id) && !tierLimitReached && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length, skinCardCost);
+        
+        // Get position for ordering (legacy skins have tier 14)
+        const tier = isLegacySkin(skin.id) ? 14 : 1;
+        
+        return {
+          ...skin,
+          isDiscovered,
+          isActive,
+          canDiscover,
+          isOverLimit,
+          tier,
+          position: getSkinPosition(skin.id),
+        };
+      });
+      
+      console.log(`🎨 Skins API: totalEarned=${member.totalEarned}, discovered=${discoveredSkinIds.length}, available=${availableCards}, maxSkins=${maxSkins}, tierLimitReached=${tierLimitReached}`);
+      
+      // Initialize star placements for all members and get star data
+      let starStats = { starsFound: 0, totalStars: 0, earnedLegacySkinIds: [] as string[] };
+      let starPlacements: Record<string, boolean> = {};
+      
+      await storage.initializeStarPlacements(member.id);
+      starStats = await storage.getMemberStarStats(member.id);
+      const placements = await storage.getStarPlacementsByMember(member.id);
+      for (const p of placements) {
+        starPlacements[p.skinId] = p.found;
+      }
+      
+      res.json({
+        skins: skinsWithStatus,
+        totalEarned: member.totalEarned,
+        availableCards,
+        unlockedTier: 999, // Legacy compatibility - all skins are now position-based
+        maxSkins,
+        tierLimitReached,
+        starStats,
+        starPlacements, // { skinId: wasFound } - for mini-star indicators
+      });
+    } catch (error: any) {
+      console.error("Error fetching skins:", error);
+      res.status(500).json({ message: "Failed to fetch skins" });
+    }
+    return;
+  });
+
+  // Hidden seven-tap test helper: unlock the complete skin/star collection for
+  // the currently selected profile. Factory reset returns it to a clean state.
+  app.post("/api/skins/prefetch", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      let member = result.member;
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        member = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+      }
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Ensure this member has exactly the normal placement set before marking
+      // it found, including profiles reset by an older deployed app version.
+      await storage.initializeStarPlacements(member.id);
+      const now = new Date();
+
+      await db.transaction(async (tx) => {
+        await tx.update(familyMembers)
+          .set({
+            unlockedSkins: [...MIXED_SKIN_ORDER, ...LEGACY_SKIN_ORDER],
+            discoveredSkinIds: [...MIXED_SKIN_ORDER],
+            earnedLegacySkinIds: [...LEGACY_SKIN_ORDER],
+            starsFound: TOTAL_HIDDEN_STARS,
+            updatedAt: now,
+          })
+          .where(eq(familyMembers.id, member.id));
+
+        await tx.update(starPlacements)
+          .set({ found: true, foundAt: now })
+          .where(eq(starPlacements.memberId, member.id));
+      });
+
+      broadcastToFamily(member.familyName, {
+        type: "skin_discovered",
+        memberId: member.id,
+        allSkinsUnlocked: true,
+        totalStarsFound: TOTAL_HIDDEN_STARS,
+      });
+
+      res.json({
+        message: "All skins and stars unlocked",
+        starsFound: TOTAL_HIDDEN_STARS,
+        discoveredSkins: MIXED_SKIN_ORDER.length,
+        legacySkins: LEGACY_SKIN_ORDER.length,
+      });
+    } catch (error: any) {
+      console.error("Error unlocking all skins:", error);
+      res.status(500).json({ message: "Failed to unlock all skins" });
+    }
+    return;
+  });
+
+  app.post("/api/skins/discover", isAuthenticated, async (req: any, res) => {
+    try {
+      const { skinId } = req.body;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // For Replit Auth, also check if acting as another member
+      let member = result.member;
+      if (!result.isDeviceSession && req.session.actingAsMemberId) {
+        member = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get family to retrieve skinCardCost
+      const family = await storage.getFamily(member.familyName);
+      const skinCardCost = family?.skinCardCost ?? 60;
+      
+      const allSkins = await storage.getSkins();
+      const skin = allSkins.find(s => s.id === skinId);
+      
+      if (!skin) {
+        return res.status(404).json({ message: "Skin not found" });
+      }
+      
+      // Legacy skins cannot be discovered manually - they are unlocked via stars only
+      if (isLegacySkin(skinId)) {
+        return res.status(403).json({ message: "Legacy skins are unlocked through star collection, not discovery" });
+      }
+      
+      const discoveredSkinIds = member.discoveredSkinIds || [];
+      
+      // Check if already discovered
+      if (discoveredSkinIds.includes(skinId)) {
+        return res.status(400).json({ message: "Skin already discovered" });
+      }
+      
+      // Check tier skin limit — Free (including an active trial) allows five unlocks.
+      const maxSkins = getMaxSkins(family?.subscriptionTier ?? "free");
+      if (discoveredSkinIds.length >= maxSkins) {
+        return res.status(403).json({ 
+          message: "Skin limit reached for your subscription tier",
+          code: "SKIN_LIMIT_REACHED",
+          maxSkins,
+          currentSkins: discoveredSkinIds.length,
+        });
+      }
+      
+      // Check if skin can be unlocked using new position-based system with family's skinCardCost
+      if (!canUnlockSkin(skinId, member.totalEarned, discoveredSkinIds.length, skinCardCost)) {
+        return res.status(403).json({ message: "Not enough points to unlock this skin" });
+      }
+      
+      // Add skin to discovered list
+      const updatedDiscoveredSkins = [...discoveredSkinIds, skinId];
+      await storage.updateFamilyMember(member.id, {
+        discoveredSkinIds: updatedDiscoveredSkins,
+      });
+      
+      // Check for hidden star on this skin card
+      const starResult = await storage.markStarAsFound(member.id, skinId);
+
+      // Trigger star_collector achievement check if a star was found
+      if (starResult.wasStarFound) {
+        await achievementEngine.processEvent({
+          type: "star_found",
+          familyName: member.familyName,
+          memberId: member.id,
+          starsFound: starResult.totalStarsFound,
+        });
+      }
+
+      // Trigger legacy_collector achievement check if a legacy skin was awarded
+      if (starResult.legacySkinAwarded) {
+        await achievementEngine.processEvent({
+          type: "skin_unlocked",
+          familyName: member.familyName,
+          memberId: member.id,
+        });
+      }
+      
+      // Broadcast skin discovery to family (with star info if found)
+      broadcastToFamily(member.familyName, {
+        type: "skin_discovered",
+        memberId: member.id,
+        skinId,
+        starFound: starResult.wasStarFound,
+        totalStarsFound: starResult.totalStarsFound,
+        legacySkinAwarded: starResult.legacySkinAwarded,
+      });
+      
+      // Calculate remaining available cards after discovery (using family's skinCardCost)
+      const remainingCards = calculateAvailableCards(member.totalEarned, updatedDiscoveredSkins.length, skinCardCost);
+      
+      res.json({ 
+        message: "Skin discovered!", 
+        skinId,
+        availableCards: remainingCards,
+        starFound: starResult.wasStarFound,
+        totalStarsFound: starResult.totalStarsFound,
+        legacySkinAwarded: starResult.legacySkinAwarded,
+      });
+    } catch (error: any) {
+      console.error("Error discovering skin:", error);
+      res.status(500).json({ message: "Failed to discover skin" });
+    }
+    return;
+  });
+
+  app.post("/api/skins/select", isAuthenticated, async (req: any, res) => {
+    try {
+      const { skinId } = req.body;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // For Replit Auth, also check if acting as another member
+      let member = result.member;
+      if (!result.isDeviceSession && req.session.actingAsMemberId) {
+        member = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Allow null to reset to default avatar, otherwise verify skin is discovered or earned
+      if (skinId !== null) {
+        const discoveredSkinIds = member.discoveredSkinIds || [];
+        const earnedLegacySkinIds = member.earnedLegacySkinIds || [];
+        
+        // Check both discovered skins and earned legacy skins (from star collection)
+        if (!discoveredSkinIds.includes(skinId) && !earnedLegacySkinIds.includes(skinId)) {
+          return res.status(403).json({ message: "Skin not discovered yet - discover it first!" });
+        }
+
+        // Block activating skins that are over the current tier's skin limit
+        if (!earnedLegacySkinIds.includes(skinId)) {
+          const familyForSkin = await storage.getFamily(member.familyName);
+          const maxSkinsForTier = getMaxSkins(familyForSkin?.subscriptionTier ?? "free");
+          const overLimitIds = new Set(discoveredSkinIds.slice(maxSkinsForTier));
+          if (overLimitIds.has(skinId)) {
+            return res.status(403).json({
+              message: "This skin exceeds your tier's skin limit. Upgrade to activate it.",
+              code: "SKIN_OVER_LIMIT",
+            });
+          }
+        }
+      }
+      
+      // Update the active skin - preserve the user's background preference.
+      // Keep a custom photo only when the member explicitly enabled an uploaded photo.
+      // Default avatars switch to the selected skin automatically.
+      // Only enable background if it was never set before (null/undefined), otherwise respect user's choice
+      const shouldEnableBackground = skinId !== null && member.useThemeBackground == null ? true : undefined;
+      const useCustomAvatar = skinId !== null
+        ? shouldKeepCustomPhotoWhenSelectingSkin(skinId, member.useCustomAvatar, member.avatarUrl)
+        : undefined;
+      await storage.updateFamilyMemberActiveSkin(member.id, {
+        skinId,
+        useCustomAvatar,
+        useThemeBackground: shouldEnableBackground // Only set if never explicitly configured
+      });
+      
+      // Broadcast skin change to family
+      broadcastToFamily(member.familyName, {
+        type: "skin_changed",
+        memberId: member.id,
+        skinId,
+      });
+      
+      res.json({ message: skinId ? "Skin selected" : "Reset to default avatar", skinId });
+    } catch (error: any) {
+      console.error("Error selecting skin:", error);
+      res.status(500).json({ message: "Failed to select skin" });
+    }
+    return;
+  });
+
+  // Toggle theme background (show/hide skin background)
+  app.post("/api/skins/background", isAuthenticated, async (req: any, res) => {
+    try {
+      const { useThemeBackground } = req.body;
+      
+      if (typeof useThemeBackground !== 'boolean') {
+        return res.status(400).json({ message: "useThemeBackground must be a boolean" });
+      }
+      
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      if (!result.isDeviceSession && req.session.actingAsMemberId) {
+        member = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      await storage.updateFamilyMemberThemeBackground(member.id, useThemeBackground);
+      
+      // Broadcast background change to family
+      broadcastToFamily(member.familyName, {
+        type: "background_changed",
+        memberId: member.id,
+        useThemeBackground,
+      });
+      
+      res.json({ message: useThemeBackground ? "Background enabled" : "Background disabled", useThemeBackground });
+    } catch (error: any) {
+      console.error("Error toggling background:", error);
+      res.status(500).json({ message: "Failed to toggle background" });
+    }
+    return;
+  });
+
+  // Star Collection System routes
+  app.get("/api/stars", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Initialize star placements for all members if not already done
+      await storage.initializeStarPlacements(member.id);
+      
+      const starStats = await storage.getMemberStarStats(member.id);
+      const starPlacements = await storage.getStarPlacementsByMember(member.id);
+      
+      // Create a map of skinId -> found status for discovered skins
+      const starMap: Record<string, boolean> = {};
+      for (const placement of starPlacements) {
+        starMap[placement.skinId] = placement.found;
+      }
+      
+      res.json({
+        starsFound: starStats.starsFound,
+        totalStars: starStats.totalStars,
+        earnedLegacySkinIds: starStats.earnedLegacySkinIds,
+        starPlacements: starMap, // { skinId: wasFound } - for showing mini-stars on found skin cards
+      });
+    } catch (error: any) {
+      console.error("Error fetching star stats:", error);
+      res.status(500).json({ message: "Failed to fetch star stats" });
+    }
+    return;
+  });
+
+  app.post("/api/stars/initialize", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Initialize star placements for all members (parents can also collect stars)
+      await storage.initializeStarPlacements(member.id);
+      const starStats = await storage.getMemberStarStats(member.id);
+      
+      res.json({
+        message: "Star placements initialized",
+        starsFound: starStats.starsFound,
+        totalStars: starStats.totalStars,
+        earnedLegacySkinIds: starStats.earnedLegacySkinIds,
+      });
+    } catch (error: any) {
+      console.error("Error initializing stars:", error);
+      res.status(500).json({ message: "Failed to initialize stars" });
+    }
+    return;
+  });
+
+  // Analytics route - Family tier and above
+  app.get("/api/analytics", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Check if parent
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can access analytics" });
+      }
+      
+      // Get family tier and check if analytics is allowed
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Check tier access (Family tier and above)
+      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "advancedAnalytics")) {
+        return res.status(403).json({ 
+          message: "Analytics is only available for Family tier and above",
+          tier: family.subscriptionTier,
+          requiredTier: "family"
+        });
+      }
+      
+      // Fetch analytics data
+      const analytics = await storage.getAnalytics(member.familyName);
+      
+      res.json(analytics);
+    } catch (error: any) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+    return;
+  });
+
+  // Chat endpoints (Family+ and Enterprise tier) - supports Device Sessions
+  app.get("/api/chat", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get family tier and check if chat is allowed
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Check tier access — also allow during active Family trial
+      const chatOnTrial1 = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat") && !chatOnTrial1) {
+        return res.status(403).json({ 
+          message: "Family chat is only available for Family tier and above",
+          tier: family.subscriptionTier,
+          requiredTier: "family"
+        });
+      }
+      
+      // Fetch chat messages with clamped limit
+      const rawLimit = parseInt(req.query.limit as string) || 50;
+      const limit = Math.min(Math.max(rawLimit, 1), 100); // Clamp between 1 and 100
+       const messages = await storage.getChatMessages(member.familyName, member.id, limit);
+      
+      res.json(messages);
+    } catch (error: any) {
+      console.error("Error fetching chat messages:", error);
+      res.status(500).json({ message: "Failed to fetch chat messages" });
+    }
+    return;
+  });
+
+  app.post("/api/chat", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Block sending if acting as a DIFFERENT member (privacy: only own login can write)
+      // Allow if actingAsMemberId === the user's own linked member (parent viewing own profile)
+      if (req.session?.actingAsMemberId) {
+        const realUserId = req.user?.claims?.sub;
+        if (realUserId) {
+          const realLinkedMember = await storage.getFamilyMemberByUserId(realUserId);
+          if (!realLinkedMember || req.session.actingAsMemberId !== realLinkedMember.id) {
+            return res.status(403).json({ message: "acting_as_member" });
+          }
+          // actingAsMemberId === own member → allow (they're effectively themselves)
+        } else {
+          // No userId (unexpected for non-device sessions) — block to be safe
+          return res.status(403).json({ message: "acting_as_member" });
+        }
+      }
+      
+      // Get family tier and check if chat is allowed
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Check tier access — also allow during active Family trial
+      const chatOnTrial2 = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat") && !chatOnTrial2) {
+        return res.status(403).json({ 
+          message: "Family chat is only available for Family tier and above",
+          tier: family.subscriptionTier,
+          requiredTier: "family"
+        });
+      }
+      
+      // Validate request using schema
+       const requestedTargetId = req.body.targetMemberId === undefined || req.body.targetMemberId === null || req.body.targetMemberId === ""
+         ? null
+         : String(req.body.targetMemberId);
+       const allMembers = await storage.getFamilyMembersByFamily(member.familyName);
+       const targetMember = requestedTargetId ? allMembers.find(candidate => candidate.id === requestedTargetId) : undefined;
+       if (requestedTargetId && (!targetMember || targetMember.id === member.id)) {
+         return res.status(400).json({ message: "Invalid chat recipient" });
+       }
+
+       const validationResult = insertChatMessageSchema.safeParse({
+        familyName: member.familyName,
+        memberId: member.id,
+        message: req.body.message,
+         targetMemberId: requestedTargetId,
+         isTargeted: requestedTargetId !== null,
+      });
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid message data",
+          errors: validationResult.error.issues
+        });
+      }
+      
+      // Additional validation for message length
+      if (validationResult.data.message.length > 1000) {
+        return res.status(400).json({ message: "Message too long (max 1000 characters)" });
+      }
+      
+      // Create chat message
+      const newMessage = await storage.createChatMessage(validationResult.data);
+      
+       const chatPayload = {
+        type: "chat_message",
+        message: {
+          id: newMessage.id,
+          message: newMessage.message,
+          createdAt: newMessage.createdAt,
+          memberId: member.id,
+          memberName: member.displayName,
+          memberColor: member.color,
+          memberAvatarUrl: member.avatarUrl,
+          memberActiveSkinId: member.activeSkinId,
+           targetMemberId: newMessage.targetMemberId,
+           isTargeted: newMessage.isTargeted,
+           targetMemberName: targetMember?.displayName || null,
+        },
+       };
+       if (newMessage.targetMemberId) {
+         broadcastToFamilyMembers(member.familyName, chatPayload, client =>
+           client.role === "parent" || client.memberId === member.id || client.memberId === newMessage.targetMemberId
+         );
+       } else {
+         broadcastToFamily(member.familyName, chatPayload);
+       }
+
+      const lang = family.language || "en";
+       const recipientIds = newMessage.targetMemberId
+         ? allMembers.filter(m => m.id === newMessage.targetMemberId).map(m => m.id)
+         : allMembers.filter(m => m.id !== member.id).map(m => m.id);
+      if (family.pushChat) {
+        try {
+          const tokensByMember = await Promise.all(recipientIds.map(async id => ({
+            id, tokens: await storage.getDevicePushTokensForMember(id),
+          })));
+          for (const recipient of tokensByMember) {
+            const recipientMember = allMembers.find(m => m.id === recipient.id);
+             if (recipientMember?.role === "child" && family.childPushQuietEnabled && isChildPushQuietHours(
+              new Date(),
+              family.timezone,
+              family.childPushQuietStart,
+              family.childPushQuietEnd,
+            )) {
+              continue;
+            }
+            queueChatPush(recipient.id, recipient.tokens,
+              translateNotification(lang, "chat_message.title", { name: member.displayName }),
+              count => (chatBatchText[lang] || chatBatchText.en)[count === 1 ? "one" : "many"].replace("{{count}}", String(count)),
+              async () => {
+                const currentFamily = await storage.getFamily(member.familyName);
+                if (!currentFamily?.pushChat) return false;
+                 return recipientMember?.role !== "child"
+                   || !currentFamily.childPushQuietEnabled
+                  || !isChildPushQuietHours(
+                    new Date(),
+                    currentFamily.timezone,
+                    currentFamily.childPushQuietStart,
+                    currentFamily.childPushQuietEnd,
+                  );
+              },
+              newMessage.targetMemberId ? member.id : "all");
+          }
+        } catch (pushErr: any) {
+          console.error("[APNs] chat_message push error:", pushErr?.message || pushErr);
+        }
+      }
+
+      res.status(201).json(newMessage);
+    } catch (error: any) {
+      console.error("Error creating chat message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+    return;
+  });
+
+  // Get pending approvals count (for parents) - supports Device Sessions
+  app.get("/api/tasks/pending-count", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can see pending count
+      if (member.role !== "parent") {
+        return res.json({ count: 0 });
+      }
+      
+      const pendingCompletions = await storage.getPendingCompletionsByFamily(member.familyName);
+      res.json({ count: pendingCompletions.length });
+    } catch (error: any) {
+      console.error("Error fetching pending approvals count:", error);
+      res.status(500).json({ message: "Failed to fetch pending count" });
+    }
+    return;
+  });
+
+  // Get unread message count - supports Device Sessions
+  app.get("/api/chat/unread-count", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get family tier and check if chat is allowed
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Check tier access — also allow during active Family trial
+      const chatOnTrial3 = !!(family.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(family.subscriptionTier as SubscriptionTier, "familyChat") && !chatOnTrial3) {
+        return res.json({ count: 0, conversations: {} }); // Return 0 if feature not available
+      }
+      
+      const unread = await storage.getUnreadMessageCounts(member.id, member.familyName);
+      res.json(unread);
+    } catch (error: any) {
+      console.error("Error getting unread message count:", error);
+      res.status(500).json({ message: "Failed to get unread count" });
+    }
+    return;
+  });
+
+  // Mark chat messages as read - supports Device Sessions
+  app.post("/api/chat/mark-read", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const conversationKey = !req.body?.conversationKey || req.body.conversationKey === "all"
+        ? "all"
+        : String(req.body.conversationKey);
+      if (conversationKey !== "all") {
+        const conversationMember = await storage.getFamilyMemberById(conversationKey);
+        if (!conversationMember || conversationMember.familyName !== member.familyName || conversationMember.id === member.id) {
+          return res.status(400).json({ message: "Invalid chat conversation" });
+        }
+      }
+
+      await storage.updateLastReadChatAt(member.id, conversationKey);
+      cancelQueuedChatPush(member.id, conversationKey);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error marking messages as read:", error);
+      res.status(500).json({ message: "Failed to mark messages as read" });
+    }
+    return;
+  });
+
+  // ===== PINBOARD ROUTES =====
+  app.get("/api/pinboard", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const member = result.member;
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const notes = await db
+        .select({
+          id: pinboardNotes.id,
+          familyName: pinboardNotes.familyName,
+          memberId: pinboardNotes.memberId,
+          message: pinboardNotes.message,
+          createdAt: pinboardNotes.createdAt,
+          updatedAt: pinboardNotes.updatedAt,
+          memberName: familyMembers.displayName,
+          memberColor: familyMembers.color,
+          memberAvatarUrl: familyMembers.avatarUrl,
+        })
+        .from(pinboardNotes)
+        .innerJoin(familyMembers, eq(pinboardNotes.memberId, familyMembers.id))
+        .where(eq(pinboardNotes.familyName, member.familyName))
+        .orderBy(desc(pinboardNotes.updatedAt));
+
+      res.json(notes);
+    } catch (error: any) {
+      console.error("Error fetching pinboard:", error);
+      res.status(500).json({ message: "Failed to fetch pinboard" });
+    }
+    return;
+  });
+
+  app.post("/api/pinboard", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const member = result.member;
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const { message } = req.body;
+      if (!message || typeof message !== "string" || message.trim().length === 0) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+      if (message.length > 150) {
+        return res.status(400).json({ message: "Message too long (max 150 characters)" });
+      }
+
+      // Check max 2 notes per member
+      const existing = await db
+        .select({ id: pinboardNotes.id })
+        .from(pinboardNotes)
+        .where(and(eq(pinboardNotes.familyName, member.familyName), eq(pinboardNotes.memberId, member.id)));
+      if (existing.length >= 2) {
+        return res.status(400).json({ message: "You can have at most 2 notes on the board" });
+      }
+
+      const [note] = await db
+        .insert(pinboardNotes)
+        .values({ familyName: member.familyName, memberId: member.id, message: message.trim() })
+        .returning();
+
+      broadcastToFamily(member.familyName, { type: "pinboard_update" });
+
+      // Notify all other family members about the new pinboard note
+      const family = await storage.getFamily(member.familyName);
+      const lang = family?.language || "en";
+      const messagePreview = createNotificationPreview(note.message);
+      const pinboardNotification = {
+        familyName: member.familyName,
+        type: "pinboard_posted" as const,
+        title: translateNotification(lang, "pinboard_posted.title", { name: member.displayName }),
+        message: messagePreview,
+        relatedMemberId: member.id,
+        isRead: false,
+      };
+      await storage.createNotificationForParents(member.familyName, pinboardNotification, member.id);
+      await storage.createNotificationForSiblings(member.familyName, pinboardNotification, member.id);
+      broadcastToFamily(member.familyName, { type: "notification_update" });
+      const pinboardMembers = await storage.getFamilyMembersByFamily(member.familyName);
+      await sendPolicyPush(member.familyName, pinboardMembers.map(m => m.id), "pinboard_posted",
+        translateNotification(lang, "pinboard_posted.title", { name: member.displayName }),
+        messagePreview, member.id);
+
+      res.status(201).json(note);
+    } catch (error: any) {
+      console.error("Error creating pinboard note:", error);
+      res.status(500).json({ message: "Failed to create note" });
+    }
+    return;
+  });
+
+  app.put("/api/pinboard/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const member = result.member;
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const noteId = parseInt(req.params.id);
+      const { message } = req.body;
+      if (!message || typeof message !== "string" || message.trim().length === 0) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+      if (message.length > 150) {
+        return res.status(400).json({ message: "Message too long" });
+      }
+
+      const [note] = await db
+        .update(pinboardNotes)
+        .set({ message: message.trim(), updatedAt: new Date() })
+        .where(and(eq(pinboardNotes.id, noteId), eq(pinboardNotes.memberId, member.id)))
+        .returning();
+
+      if (!note) return res.status(404).json({ message: "Note not found or not yours" });
+
+      broadcastToFamily(member.familyName, { type: "pinboard_update" });
+      res.json(note);
+    } catch (error: any) {
+      console.error("Error updating pinboard note:", error);
+      res.status(500).json({ message: "Failed to update note" });
+    }
+    return;
+  });
+
+  app.delete("/api/pinboard/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const member = result.member;
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const noteId = parseInt(req.params.id);
+      const [deleted] = await db
+        .delete(pinboardNotes)
+        .where(and(eq(pinboardNotes.id, noteId), eq(pinboardNotes.memberId, member.id)))
+        .returning();
+
+      if (!deleted) return res.status(404).json({ message: "Note not found or not yours" });
+
+      broadcastToFamily(member.familyName, { type: "pinboard_update" });
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error deleting pinboard note:", error);
+      res.status(500).json({ message: "Failed to delete note" });
+    }
+    return;
+  });
+
+  // Get pending reward redemptions count (for parents) - supports Device Sessions
+  app.get("/api/reward-redemptions/pending-count", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can see pending rewards count
+      if (member.role !== "parent") {
+        return res.json({ count: 0 });
+      }
+      
+      const redemptions = await storage.getRewardRedemptionsByFamily(member.familyName);
+      // Count redemptions that need parent attention:
+      // 1. Not yet fulfilled (status !== "completed")
+      // 2. OR sharing is still active (even if status is completed, sharing needs to be finalized)
+      const pendingCount = redemptions.filter(r => 
+        r.status !== "completed" || r.sharingStatus === "sharing_active"
+      ).length;
+      
+      res.json({ count: pendingCount });
+    } catch (error: any) {
+      console.error("Error fetching pending rewards count:", error);
+      res.status(500).json({ message: "Failed to fetch pending rewards count" });
+    }
+    return;
+  });
+
+  // ===== Achievement System =====
+
+  // Get achievement definitions for family - supports Device Sessions
+  app.get("/api/achievements", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const definitions = await storage.getAchievementDefinitionsByFamily(member.familyName);
+      res.json(definitions.filter(d => !d.slug.startsWith("task-streak-")));
+    } catch (error: any) {
+      console.error("Error fetching achievement definitions:", error);
+      res.status(500).json({ message: "Failed to fetch achievement definitions" });
+    }
+    return;
+  });
+
+  // Seed default achievements for family (parent only)
+  app.post("/api/achievements/seed", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can seed achievements
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can seed achievements" });
+      }
+      
+      // Check if achievements already exist
+      const existing = await storage.getAchievementDefinitionsByFamily(member.familyName);
+      if (existing.length > 0) {
+        return res.status(400).json({ message: "Achievements already exist for this family" });
+      }
+      
+      // Create default achievements
+      const definitions = await storage.seedDefaultAchievements(member.familyName);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "achievements_seeded",
+        count: definitions.length,
+      });
+      
+      res.status(201).json({ 
+        message: "Default achievements created successfully",
+        achievements: definitions,
+        count: definitions.length 
+      });
+    } catch (error: any) {
+      console.error("Error seeding achievements:", error);
+      res.status(500).json({ message: "Failed to seed achievements" });
+    }
+    return;
+  });
+
+  // Create achievement definition (parent only)
+  app.post("/api/achievements", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can create achievements
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can create achievements" });
+      }
+      
+      const parsed = insertAchievementDefinitionSchema.parse({
+        ...req.body,
+        familyName: member.familyName,
+      });
+      
+      const definition = await storage.createAchievementDefinition(parsed);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "achievement_created",
+        definition,
+      });
+      
+      res.status(201).json(definition);
+    } catch (error: any) {
+      console.error("Error creating achievement definition:", error);
+      res.status(400).json({ message: error.message || "Failed to create achievement definition" });
+    }
+    return;
+  });
+
+  // Update achievement definition (parent only)
+  app.patch("/api/achievements/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can update achievements
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update achievements" });
+      }
+      
+      // Verify achievement belongs to this family
+      const definitions = await storage.getAchievementDefinitionsByFamily(member.familyName);
+      const existing = definitions.find(d => d.id === id);
+      
+      if (!existing) {
+        return res.status(404).json({ message: "Achievement definition not found" });
+      }
+      
+      const updated = await storage.updateAchievementDefinition(id, req.body);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "achievement_updated",
+        definition: updated,
+      });
+      
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error updating achievement definition:", error);
+      res.status(400).json({ message: error.message || "Failed to update achievement definition" });
+    }
+    return;
+  });
+
+  // Delete achievement definition (parent only)
+  app.delete("/api/achievements/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete achievements
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete achievements" });
+      }
+      
+      // Verify achievement belongs to this family
+      const definitions = await storage.getAchievementDefinitionsByFamily(member.familyName);
+      const existing = definitions.find(d => d.id === id);
+      
+      if (!existing) {
+        return res.status(404).json({ message: "Achievement definition not found" });
+      }
+      
+      await storage.deleteAchievementDefinition(id);
+      
+      // Broadcast to family
+      broadcastToFamily(member.familyName, {
+        type: "achievement_deleted",
+        achievementId: id,
+      });
+      
+      res.json({ message: "Achievement definition deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting achievement definition:", error);
+      res.status(500).json({ message: "Failed to delete achievement definition" });
+    }
+    return;
+  });
+
+  // Get achievement awards history - supports Device Sessions
+  app.get("/api/achievements/awards", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const awards = await storage.getAchievementAwardsByFamily(member.familyName);
+      res.json(awards);
+    } catch (error: any) {
+      console.error("Error fetching achievement awards:", error);
+      res.status(500).json({ message: "Failed to fetch achievement awards" });
+    }
+    return;
+  });
+
+  // Get achievement awards for current member - supports Device Sessions
+  app.get("/api/achievements/my-awards", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const awards = await storage.getAchievementAwardsByMember(member.id);
+      res.json(awards);
+    } catch (error: any) {
+      console.error("Error fetching member achievement awards:", error);
+      res.status(500).json({ message: "Failed to fetch achievement awards" });
+    }
+    return;
+  });
+
+  // ===== Family Goals =====
+  
+  // Get all family goals for the current family - supports Device Sessions
+  app.get("/api/family-goals", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Get family to check tier + timezone
+      const family = await storage.getFamily(member.familyName);
+      const goalsOnTrial = !!(family?.trialEndsAt && new Date(family.trialEndsAt) > new Date());
+      if (!hasFeature(family?.subscriptionTier as SubscriptionTier, "familyGoals") && !goalsOnTrial) {
+        return res.json([]);
+      }
+
+      const goals = await storage.getFamilyGoalsByFamily(member.familyName);
+      
+      // Get family timezone for correct period calculation
+      const familyTimezone = family?.timezone || "Europe/Berlin";
+      const now = new Date();
+      
+      // For each goal, fetch the contributions for the current period
+      const goalsWithContributions = await Promise.all(goals.map(async (goal) => {
+        const period = goal.contributionPeriod === "weekly"
+          ? formatInTimeZone(now, familyTimezone, "RRRR-'W'II")
+          : formatInTimeZone(now, familyTimezone, "yyyy-MM");
+        
+        const contributions = await storage.getGoalContributionsByGoalAndPeriod(goal.id, period);
+        
+        return {
+          ...goal,
+          contributions,
+          currentPeriod: period,
+        };
+      }));
+      
+      res.json(goalsWithContributions);
+    } catch (error: any) {
+      console.error("Error fetching family goals:", error);
+      res.status(500).json({ message: "Failed to fetch family goals" });
+    }
+    return;
+  });
+
+  // Get a specific family goal with contributions - supports Device Sessions
+  app.get("/api/family-goals/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const goal = await storage.getFamilyGoal(id);
+      
+      if (!goal || goal.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Family goal not found" });
+      }
+      
+      // Get family timezone for correct period calculation
+      const family = await storage.getFamily(member.familyName);
+      const familyTimezone = family?.timezone || "Europe/Berlin";
+      
+      // Calculate current period identifier using family's timezone
+      const now = new Date();
+      const period = goal.contributionPeriod === "weekly"
+        ? formatInTimeZone(now, familyTimezone, "RRRR-'W'II")
+        : formatInTimeZone(now, familyTimezone, "yyyy-MM");
+      
+      const contributions = await storage.getGoalContributionsByGoalAndPeriod(id, period);
+      
+      res.json({ goal, contributions, currentPeriod: period });
+    } catch (error: any) {
+      console.error("Error fetching family goal:", error);
+      res.status(500).json({ message: "Failed to fetch family goal" });
+    }
+    return;
+  });
+
+  // Create a new family goal (parents only)
+  app.post("/api/family-goals", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Always use authenticated user - never trust actingMemberId from client
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can create family goals
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can create family goals" });
+      }
+
+      // Check tier access
+      const familyForTier = await storage.getFamily(member.familyName);
+      const createOnTrial = !!(familyForTier?.trialEndsAt && new Date(familyForTier.trialEndsAt) > new Date());
+      if (!hasFeature(familyForTier?.subscriptionTier as SubscriptionTier, "familyGoals") && !createOnTrial) {
+        return res.status(403).json({ message: "Family goals require a Family subscription", requiredTier: "family" });
+      }
+      
+      // Validate request body with Zod
+      const validatedData = insertFamilyGoalSchema.parse({
+        ...req.body,
+        familyName: member.familyName, // Always use authenticated member's family
+        isActive: true,
+      });
+      
+      const goal = await storage.createFamilyGoal(validatedData);
+      
+      // Broadcast to family via WebSocket
+      broadcastToFamily(member.familyName, {
+        type: 'family-goal-created',
+        goal,
+      });
+      
+      res.status(201).json(goal);
+    } catch (error: any) {
+      console.error("Error creating family goal:", error);
+      if (error.name === "ZodError") {
+        return res.status(400).json({ message: "Invalid request data", errors: error.issues });
+      }
+      res.status(500).json({ message: "Failed to create family goal" });
+    }
+    return;
+  });
+
+  // Update a family goal (parents only)
+  app.put("/api/family-goals/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Always use authenticated user
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can update family goals
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can update family goals" });
+      }
+      
+      const goal = await storage.getFamilyGoal(id);
+      
+      if (!goal || goal.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Family goal not found" });
+      }
+      
+      const { title, description, targetPoints, contributionAmount, contributionPeriod, iconEmoji, isActive } = req.body;
+      
+      const updatedGoal = await storage.updateFamilyGoal(id, {
+        title,
+        description,
+        targetPoints,
+        contributionAmount,
+        contributionPeriod,
+        iconEmoji,
+        isActive,
+      });
+      
+      // Broadcast to family via WebSocket
+      broadcastToFamily(member.familyName, {
+        type: 'family-goal-updated',
+        goal: updatedGoal,
+      });
+      
+      res.json(updatedGoal);
+    } catch (error: any) {
+      console.error("Error updating family goal:", error);
+      res.status(500).json({ message: "Failed to update family goal" });
+    }
+    return;
+  });
+
+  // Delete a family goal (parents only)
+  app.delete("/api/family-goals/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Always use authenticated user
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can delete family goals
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can delete family goals" });
+      }
+      
+      const goal = await storage.getFamilyGoal(id);
+      
+      if (!goal || goal.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Family goal not found" });
+      }
+      
+      // Use database transaction to ensure atomicity of refunds and deletion
+      let refundedMemberCount = 0;
+      await db.transaction(async (tx) => {
+        const [lockedGoal] = await tx
+          .select()
+          .from(familyGoals)
+          .where(eq(familyGoals.id, id))
+          .for("update")
+          .limit(1);
+        if (!lockedGoal || lockedGoal.familyName !== member.familyName) {
+          throw new Error("Family goal not found");
+        }
+
+        const contributions = await tx
+          .select()
+          .from(goalContributions)
+          .where(eq(goalContributions.goalId, id));
+        const contributionsByMember = new Map<string, number>();
+        for (const contribution of contributions) {
+          contributionsByMember.set(
+            contribution.memberId,
+            (contributionsByMember.get(contribution.memberId) ?? 0) + contribution.points,
+          );
+        }
+        refundedMemberCount = contributionsByMember.size;
+
+        // Refund points to each contributor within the transaction
+        for (const [memberId, refundAmount] of Array.from(contributionsByMember.entries()).sort(([a], [b]) => a.localeCompare(b))) {
+          await storage.mutatePointBalance(tx, {
+            memberId,
+            deltas: { totalPoints: refundAmount },
+            sourceType: "family_goal_refund",
+            sourceId: id,
+            reason: "Refund from deleted family goal",
+            actorMemberId: member.id,
+            idempotencyKey: `family-goal-refund:${id}:${memberId}`,
+          });
+        }
+        
+        // Delete the goal (contributions will be cascade deleted)
+        await tx
+          .delete(familyGoals)
+          .where(eq(familyGoals.id, id));
+      });
+      
+      // Broadcast to family via WebSocket after successful transaction
+      broadcastToFamily(member.familyName, {
+        type: 'family-goal-deleted',
+        goalId: id,
+      });
+      
+      // Invalidate member queries for point updates
+      if (refundedMemberCount > 0) {
+        broadcastToFamily(member.familyName, {
+          type: 'member-updated',
+        });
+      }
+      
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error deleting family goal:", error);
+      res.status(500).json({ message: "Failed to delete family goal" });
+    }
+    return;
+  });
+
+  // Get ALL contributions for a specific goal (full history) - supports Device Sessions
+  app.get("/api/family-goals/:id/contributions", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) return res.status(401).json({ message: "Unauthorized" });
+      const member = result.member;
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+
+      const goal = await storage.getFamilyGoal(id);
+      if (!goal || goal.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Family goal not found" });
+      }
+
+      const contributions = await storage.getGoalContributionsByGoal(id);
+      res.json(contributions);
+    } catch (error: any) {
+      console.error("Error fetching goal contributions:", error);
+      res.status(500).json({ message: "Failed to fetch goal contributions" });
+    }
+    return;
+  });
+
+  // Contribute points to a family goal - supports Device Sessions
+  app.post("/api/family-goals/:id/contribute", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Support both Replit Auth and Device Sessions
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      let member = result.member;
+      
+      // For Replit Auth, also check if acting as another member
+      if (!result.isDeviceSession && req.session?.actingAsMemberId) {
+        const actingMember = await storage.getFamilyMemberById(req.session.actingAsMemberId);
+        if (actingMember) {
+          member = actingMember;
+        }
+      }
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const goal = await storage.getFamilyGoal(id);
+      
+      if (!goal || goal.familyName !== member.familyName) {
+        return res.status(404).json({ message: "Family goal not found" });
+      }
+
+      // Check tier access
+      const familyForContribute = await storage.getFamily(member.familyName);
+      const contributeOnTrial = !!(familyForContribute?.trialEndsAt && new Date(familyForContribute.trialEndsAt) > new Date());
+      if (!hasFeature(familyForContribute?.subscriptionTier as SubscriptionTier, "familyGoals") && !contributeOnTrial) {
+        return res.status(403).json({ message: "Family goals require a Family subscription", requiredTier: "family" });
+      }
+      
+      // Get family timezone for correct period calculation
+      const family = await storage.getFamily(member.familyName);
+      const familyTimezone = family?.timezone || "Europe/Berlin";
+      
+      const { contribution, goal: updatedGoal, completed } =
+        await storage.contributeToGoalAtomically(id, member.id, familyTimezone, member.id);
+      
+      if (completed) {
+        
+        // Broadcast goal completed event
+        broadcastToFamily(member.familyName, {
+          type: 'family-goal-completed',
+          goalId: id,
+          goalTitle: updatedGoal.title,
+        });
+      }
+      
+      // Broadcast contribution event
+      broadcastToFamily(member.familyName, {
+        type: 'family-goal-contribution',
+        goalId: id,
+        memberId: member.id,
+        contribution,
+      });
+      
+      res.status(201).json(contribution);
+    } catch (error: any) {
+      console.error("Error contributing to family goal:", error);
+      res.status(500).json({ message: "Failed to contribute to family goal" });
+    }
+    return;
+  });
+
+  // ===== Notification Routes (member-based - each member has their own notifications) =====
+  
+  // Get all notifications for the current member
+  // ===== DEVICE PUSH TOKEN ROUTES =====
+  app.post("/api/device-tokens/register", isAuthenticated, async (req: any, res) => {
+    console.log("[Push] /api/device-tokens/register called");
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        console.warn("[Push] device-tokens/register: no member in session (401)");
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const { token, platform = "ios" } = req.body;
+      if (!token || typeof token !== "string") {
+        console.warn("[Push] device-tokens/register: missing token in body");
+        return res.status(400).json({ message: "token is required" });
+      }
+      await storage.upsertDevicePushToken(result.member.id, token, platform);
+      console.log(`[Push] Token registered for member ${result.member.id} (${platform})`);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error registering device token:", error);
+      res.status(500).json({ message: "Failed to register device token" });
+    }
+    return;
+  });
+
+  app.post("/api/device-tokens/unregister", isAuthenticated, async (req: any, res) => {
+    try {
+      const { token } = req.body;
+      if (!token || typeof token !== "string") {
+        return res.status(400).json({ message: "token is required" });
+      }
+      await storage.removeDevicePushToken(token);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error unregistering device token:", error);
+      res.status(500).json({ message: "Failed to unregister device token" });
+    }
+    return;
+  });
+
+  app.get("/api/notifications", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const limit = req.query.limit ? parseInt(req.query.limit) : 50;
+      const notificationsList = await storage.getNotificationsForMember(member.id, limit);
+      
+      res.json(notificationsList);
+    } catch (error: any) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+    return;
+  });
+
+  // Get unread notification count for the current member
+  app.get("/api/notifications/unread-count", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      const count = await storage.getUnreadNotificationCountForMember(member.id);
+      res.json({ count });
+    } catch (error: any) {
+      console.error("Error fetching unread notification count:", error);
+      res.status(500).json({ message: "Failed to fetch notification count" });
+    }
+    return;
+  });
+
+  // Mark a single notification as read
+  app.patch("/api/notifications/:id/read", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      await storage.markNotificationAsRead(id);
+      
+      // Broadcast to update notification counts (but each user still has their own count)
+      broadcastToFamily(member.familyName, {
+        type: 'notification_update',
+      });
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+    return;
+  });
+
+  // Mark all notifications as read for current member
+  app.patch("/api/notifications/read-all", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      await storage.markAllNotificationsAsReadForMember(member.id);
+      
+      // Broadcast to update notification counts
+      broadcastToFamily(member.familyName, {
+        type: 'notification_update',
+      });
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+    return;
+  });
+
+  // Delete a single notification
+  app.delete("/api/notifications/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      await storage.deleteNotification(id);
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ message: "Failed to delete notification" });
+    }
+    return;
+  });
+
+  // Delete all notifications for current member
+  app.delete("/api/notifications", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      await storage.deleteAllNotificationsForMember(member.id);
+      
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error deleting all notifications:", error);
+      res.status(500).json({ message: "Failed to delete all notifications" });
+    }
+    return;
+  });
+
+  // Acknowledge sharing notifications - when initiator has seen the outcome (e.g., closed sharing dialog)
+  app.post("/api/notifications/acknowledge-sharing", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const member = result.member;
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Delete all "reward_sharing" notifications targeted at this member
+      // (i.e., notifications about others joining their shared reward)
+      await storage.deleteNotificationsByTarget(member.familyName, "reward_sharing", member.id);
+      
+      // Broadcast to update notification count
+      broadcastToFamily(member.familyName, {
+        type: "notification_update",
+        memberId: member.id,
+      });
+      
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error acknowledging sharing notifications:", error);
+      res.status(500).json({ message: "Failed to acknowledge sharing notifications" });
+    }
+    return;
+  });
+
+  // ===== Admin Tools =====
+  
+  // Reset family subscription to Free (parent only, for testing)
+  app.post("/api/admin/reset-subscription", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+      
+      // Only parents can reset subscriptions
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can reset subscriptions" });
+      }
+      
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      
+      // Reset to free tier
+      await storage.updateFamily(member.familyName, {
+        subscriptionTier: "free",
+        billingSubscriptionId: null,
+        billingCustomerId: null,
+      });
+      
+      console.log(`🔄 Admin: Subscription reset to Free for family: ${member.familyName}`);
+      
+      // Broadcast subscription update to all family members via WebSocket
+      broadcastToFamily(member.familyName, {
+        type: 'subscription-updated',
+        tier: 'free',
+      });
+      
+      res.json({ 
+        message: "Subscription reset to Free successfully",
+        tier: "free"
+      });
+    } catch (error: any) {
+      console.error("Error resetting subscription:", error);
+      res.status(500).json({ message: "Failed to reset subscription" });
+    }
+    return;
+  });
+
+  // RevenueCat: post-purchase sync (iOS native purchases)
+  app.post("/api/revenuecat-sync", isAuthenticated, async (req: any, res) => {
+    try {
+      const { entitlementId, isLifetime: clientClaimsLifetime } = req.body as { entitlementId?: string; isLifetime?: boolean };
+
+      const userId = req.user.claims?.sub ?? req.user.id;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+      if (member.role !== "parent") return res.status(403).json({ message: "Only parents can manage subscriptions" });
+
+      const family = await storage.getFamily(member.familyName);
+      if (!family) return res.status(404).json({ message: "Family not found" });
+      if (await hasActiveStripeSubscription(family, stripe)) {
+        return res.status(409).json({
+          code: "ACTIVE_STRIPE_SUBSCRIPTION",
+          message: "Dein Abonnement wird über Stripe verwaltet. Tarifwechsel sind deshalb nur in der Web-App möglich. Kündige das Abonnement zunächst über Stripe und warte, bis der bezahlte Zeitraum abgelaufen ist, bevor du ein neues Abonnement über den Apple App Store abschließt.",
+        });
+      }
+
+      const tierMap: Record<string, SubscriptionTierLegacy> = {
+        family: "family",
+        family_pro: "family_hero",
+      };
+      let newTier = entitlementId ? tierMap[entitlementId] : null;
+      if (!newTier) return res.status(400).json({ message: "Unknown entitlement" });
+
+      // Verify the entitlement with RevenueCat's server before trusting the client claim.
+      // RC REST API can lag several seconds behind a fresh StoreKit purchase, so we
+      // poll up to 3 times (2-second gaps) before falling through to the fallbacks.
+      const rcApiKey = process.env.REVENUECAT_API_KEY;
+      if (!rcApiKey) {
+        console.error("[RevenueCat] REVENUECAT_API_KEY not set; rejecting sync request to prevent bypass");
+        return res.status(503).json({ message: "Purchase verification unavailable" });
+      }
+
+      const fetchRCSubscriber = async () => {
+        const r = await fetch(
+          `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(member.familyName)}`,
+          { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } }
+        );
+        if (!r.ok) throw new Error(`RC API ${r.status}`);
+        return requireVerifiedRevenueCatPayload(await r.json());
+      };
+
+      const checkActive = (data: unknown, id: string) => {
+        return isRevenueCatEntitlementActive(getRevenueCatEntitlements(data)[id]);
+      };
+
+      let rcData: unknown;
+      let isEntitlementActive = false;
+      const MAX_ATTEMPTS = 5;
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        try {
+          rcData = await fetchRCSubscriber();
+        } catch (err: any) {
+          console.error(`[RevenueCat] Subscriber API error (attempt ${attempt}):`, err.message);
+          if (isRevenueCatVerificationError(err)) {
+            return res.status(503).json({ message: "Purchase verification unavailable; retry shortly" });
+          }
+          if (attempt === MAX_ATTEMPTS) return res.status(402).json({ message: "Purchase verification failed" });
+          await new Promise(r => setTimeout(r, 2000));
+          continue;
+        }
+        isEntitlementActive = entitlementId ? checkActive(rcData, entitlementId) : false;
+        if (isEntitlementActive) {
+          console.log(`[RevenueCat] Entitlement '${entitlementId}' active on attempt ${attempt}`);
+          break;
+        }
+        if (attempt < MAX_ATTEMPTS) {
+          console.log(`[RevenueCat] Entitlement '${entitlementId}' not yet active (attempt ${attempt}) — retrying in 2s…`);
+          await new Promise(r => setTimeout(r, 2000));
+        }
+      }
+
+      // Fallback A — subscription record: entitlement not yet active but the
+      // subscription record shows a recent purchase (RC REST lag) or a valid
+      // unexpired subscription (restore flow). Window is 30 min.
+      let verifiedViaSubscription = false;
+      const allSubs = getRevenueCatSubscriptions(rcData);
+
+      if (!isEntitlementActive && entitlementId) {
+        const productMap: Record<string, string[]> = {
+          family:     ["com.herokids.family.monthly", "com.herokids.family.yearly"],
+          family_pro: ["com.herokids.familypro.monthly", "com.herokids.familypro.yearly"],
+        };
+        const productIds = productMap[entitlementId] ?? [];
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+        for (const pid of productIds) {
+          const sub = allSubs[pid];
+          if (!sub) continue;
+          const notExpired = sub.expires_date === null ||
+            (sub.expires_date !== undefined && new Date(sub.expires_date) > new Date());
+          const recentlyPurchased = sub.purchase_date !== undefined && new Date(sub.purchase_date) > thirtyMinutesAgo;
+          if (notExpired || recentlyPurchased) {
+            console.log(`[RevenueCat] Entitlement '${entitlementId}' not yet active, but product '${pid}' purchased at ${sub.purchase_date} — accepting via subscription record`);
+            verifiedViaSubscription = true;
+            break;
+          }
+        }
+      }
+
+      // Fallback B — Apple scheduled downgrade OR fresh purchase after cancel:
+      // When downgrading FamilyPro → Family, Apple schedules the switch for the
+      // next renewal period so the family entitlement isn't active yet.
+      // When buying Family fresh after FamilyPro expired, there may also be a brief
+      // RC REST lag. In both cases, if FamilyPro has unsubscribe_detected_at set
+      // (user consciously cancelled it), accept the family claim — it's a lower
+      // tier so there is no security risk.
+      if (!isEntitlementActive && !verifiedViaSubscription && entitlementId === "family") {
+        const familyProSubIds = ["com.herokids.familypro.monthly", "com.herokids.familypro.yearly"];
+        const familyProEverCancelled = familyProSubIds.some(pid => {
+          const s = allSubs[pid];
+          return s?.unsubscribe_detected_at != null;
+        });
+        if (familyProEverCancelled) {
+          console.log(`[RevenueCat] FamilyPro was cancelled for ${member.familyName} — accepting family claim (downgrade / post-cancel purchase)`);
+          verifiedViaSubscription = true;
+        }
+      }
+
+      // Fallback D — user already has an active family_pro subscription in RC while
+      // claiming family. Two scenarios:
+      //
+      // A) Genuine downgrade: user cancelled FamilyPro and purchased Family. Apple
+      //    schedules Family for the next billing period; FamilyPro stays active in RC
+      //    until that date. The subscriber record WILL contain a 'family' subscription
+      //    entry. → Grant 'family' directly (what the user paid for).
+      //
+      // B) Admin-reset scenario: admin set DB to Free but RC subscription is still live
+      //    (not cancelled). Apple won't create a new family subscription on top of an
+      //    active family_pro, so no 'family' subscription entry exists in RC. → Grant
+      //    'family_hero' to reflect what is actually active in RC.
+      if (!isEntitlementActive && !verifiedViaSubscription && entitlementId === "family") {
+        const familyProActive = checkActive(rcData, "family_pro");
+        if (familyProActive) {
+          // Use the shared helper (see server/lib/rc-tier-resolver.ts).
+          // Scenario A: 'family' sub is newer → genuine downgrade, grant 'family'.
+          // Scenario B: 'family_pro' is newer or no 'family' sub → admin-reset, grant 'family_hero'.
+          const resolved = resolveFallbackD(allSubs);
+          if (resolved === "family") {
+            console.log(`[RevenueCat] Fallback D: 'family' sub is newer for ${member.familyName} — downgrade purchase, granting 'family'`);
+            verifiedViaSubscription = true; // newTier stays "family"
+          } else {
+            console.log(`[RevenueCat] Fallback D: 'family_pro' is newer for ${member.familyName} — granting 'family_hero'`);
+            newTier = "family_hero";
+            verifiedViaSubscription = true;
+          }
+        }
+      }
+
+      const syncVerification = resolveRevenueCatSyncVerification(
+        isEntitlementActive,
+        verifiedViaSubscription,
+        req.body?.rcClientConfirmed === true,
+      );
+      if (syncVerification === "retry") {
+        return res.status(503).json({ message: "Purchase verification is pending; retry shortly" });
+      }
+      if (syncVerification === "inactive") {
+        console.warn(`[RevenueCat] Entitlement '${entitlementId}' not active for ${member.familyName} after ${MAX_ATTEMPTS} attempts`);
+        return res.status(403).json({ message: "Entitlement not active" });
+      }
+
+      // Cross-verify lifetime claim: RC returns expires_date=null for non-consumable (lifetime) entitlements
+      const currentEntitlement = entitlementId ? getRevenueCatEntitlements(rcData)[entitlementId] : undefined;
+      const isLifetime = clientClaimsLifetime === true && !verifiedViaSubscription && currentEntitlement?.expires_date === null;
+
+      const { eq } = await import("drizzle-orm");
+      const { families } = await import("../shared/schema");
+      await db.update(families)
+        .set({
+          subscriptionTier: newTier,
+          subscriptionStatus: "active",
+          isAdminGranted: false, // legitimate RC/IAP purchase clears admin-granted flag
+          ...(isLifetime ? { isLifetimePurchase: true } : {}),
+        })
+        .where(eq(families.familyName, member.familyName));
+
+      console.log(`[RevenueCat] Synced: ${member.familyName} → ${newTier}${isLifetime ? " (lifetime)" : ""}`);
+
+      // Auto-unpause members that now fit within the new tier limit
+      try {
+        const { getMaxMembers } = await import("../shared/tier-config");
+        const allMembers = await db.select().from(familyMembers)
+          .where(eq(familyMembers.familyName, member.familyName));
+        const pausedMembers = allMembers.filter((m: any) => m.isPaused);
+        if (pausedMembers.length > 0) {
+          const maxMembers = getMaxMembers(newTier as any);
+          const activeCount = allMembers.filter((m: any) => !m.isPaused).length;
+          const canUnpause = maxMembers === Infinity ? pausedMembers.length : Math.max(0, maxMembers - activeCount);
+          const toUnpause = pausedMembers.slice(0, canUnpause);
+          if (toUnpause.length > 0) {
+            const { inArray } = await import("drizzle-orm");
+            await db.update(familyMembers)
+              .set({ isPaused: false })
+              .where(inArray(familyMembers.id, toUnpause.map((m: any) => m.id)));
+          }
+        }
+      } catch (_) {}
+
+      res.json({ ok: true, tier: newTier });
+    } catch (error: any) {
+      console.error("[RevenueCat] Sync error:", error);
+      res.status(500).json({ message: "Sync failed" });
+    }
+    return;
+  });
+
+  // Auto-downgrade: client detects RC has no active entitlement but server still shows paid
+  app.post("/api/revenuecat-cancel-sync", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub ?? req.user.id;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member) return res.status(404).json({ message: "Family member not found" });
+      if (member.role !== "parent") return res.status(403).json({ message: "Only parents can manage subscriptions" });
+
+      const { eq } = await import("drizzle-orm");
+      const { families } = await import("../shared/schema");
+      const [family] = await db.select().from(families).where(eq(families.familyName, member.familyName));
+      if (!family) return res.status(404).json({ message: "Family not found" });
+
+      // Never downgrade lifetime purchases or admin-granted tiers
+      if (family.isLifetimePurchase) {
+        return res.json({ ok: true, action: "skipped", reason: "lifetime" });
+      }
+      if (family.isAdminGranted) {
+        return res.json({ ok: true, action: "skipped", reason: "admin_granted" });
+      }
+      // Skip only if truly free AND not recently canceled — a "canceled" status
+      // means the DB may have been wrongly downgraded; always check RC in that case.
+      if (family.subscriptionTier === "free" && family.subscriptionStatus !== "canceled") {
+        return res.json({ ok: true, action: "skipped", reason: "already_free" });
+      }
+
+      // Verify with RC REST API that neither entitlement is active
+      const rcApiKey = process.env.REVENUECAT_API_KEY;
+      if (!rcApiKey) return res.status(503).json({ message: "Purchase verification unavailable" });
+
+      const rcRes = await fetch(
+        `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(member.familyName)}`,
+        { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } }
+      );
+      if (!rcRes.ok) {
+        if (rcRes.status === 404) {
+          // Subscriber not found in RC = this family has never made a real IAP purchase.
+          // That means the tier was set manually (admin-granted). Never downgrade.
+          // Also repair the isAdminGranted flag in case it was missing.
+          console.log(`[RC cancel-sync] No RC subscriber for ${member.familyName} — auto-fixing isAdminGranted, skipping downgrade`);
+          await db.update(families)
+            .set({ isAdminGranted: true })
+            .where(eq(families.familyName, member.familyName));
+          return res.json({ ok: true, action: "skipped", reason: "no_rc_subscriber" });
+        }
+        console.error(`[RC cancel-sync] RC API returned ${rcRes.status} for ${member.familyName}`);
+        return res.status(402).json({ message: "Purchase verification failed" });
+      }
+
+      const rcData = requireVerifiedRevenueCatPayload(await rcRes.json());
+      const entitlements = getRevenueCatEntitlements(rcData);
+
+      const isActive = (id: string) => {
+        const e = entitlements[id];
+        return isRevenueCatEntitlementActive(e);
+      };
+
+      // RC keeps entitlements active until the subscription's expires_date even after
+      // a cancellation. Only downgrade when RC confirms the entitlement has truly
+      // expired. Do NOT treat "cancelled but not yet expired" as expired.
+      // Also self-heal: if the DB was wrongly set to a lower tier (e.g. by a stale
+      // CANCELLATION webhook), restore the correct tier from RC now.
+      const tierMap: Record<string, SubscriptionTierLegacy> = { family: "family", family_pro: "family_hero" };
+      const activeEntId = isActive("family_pro") ? "family_pro" : isActive("family") ? "family" : null;
+      if (activeEntId) {
+        const correctTier = tierMap[activeEntId];
+        if (family.subscriptionTier !== correctTier) {
+          console.log(`[RC cancel-sync] Entitlement '${activeEntId}' still active for ${member.familyName} — restoring tier to ${correctTier} (was ${family.subscriptionTier})`);
+          await withVerifiedRevenueCatPayload(rcData, async () => {
+            await db.update(families)
+              .set({ subscriptionTier: correctTier, subscriptionStatus: "canceled", isAdminGranted: false })
+              .where(eq(families.familyName, member.familyName));
+          });
+          return res.json({ ok: true, action: "restored", tier: correctTier });
+        }
+        console.log(`[RC cancel-sync] Entitlement still active for ${member.familyName} — no downgrade`);
+        return res.json({ ok: true, action: "skipped", reason: "still_active" });
+      }
+
+      // No active entitlement → downgrade
+      await withVerifiedRevenueCatPayload(rcData, async () => {
+        await db.update(families)
+          .set({ subscriptionTier: "free", subscriptionStatus: "canceled" })
+          .where(eq(families.familyName, member.familyName));
+      });
+
+      console.log(`[RC cancel-sync] Downgraded ${member.familyName} to free (no active RC entitlement)`);
+      res.json({ ok: true, action: "downgraded" });
+    } catch (error: any) {
+      console.error("[RC cancel-sync] Error:", error);
+      res.status(isRevenueCatVerificationError(error) ? 503 : 500).json({ message: "Sync failed" });
+    }
+    return;
+  });
+
+  // RevenueCat webhook (Apple server-to-server notifications forwarded by RevenueCat)
+  app.post("/api/revenuecat-webhook", async (req: any, res) => {
+    try {
+      const secret = process.env.REVENUECAT_WEBHOOK_SECRET;
+      if (secret) {
+        const auth = req.headers.authorization;
+        if (auth !== secret) {
+          console.warn("[RevenueCat] Webhook: invalid authorization header");
+          return res.status(401).send("Unauthorized");
+        }
+      }
+
+      const event = req.body?.event ?? req.body;
+      const eventType: string = event?.type ?? "";
+      const appUserId: string = event?.app_user_id ?? "";
+      const entitlementIds: string[] = event?.entitlement_ids ?? [];
+      const productId: string = event?.product_id ?? "";
+
+      console.log(`[RevenueCat] Webhook: ${eventType} | user: ${appUserId} | entitlements: ${entitlementIds.join(",")} | product: ${productId}`);
+
+      if (!appUserId) {
+        return res.status(400).send("Missing app_user_id");
+      }
+
+      const { eq, and } = await import("drizzle-orm");
+      const { families } = await import("../shared/schema");
+
+      const tierMap: Record<string, SubscriptionTierLegacy> = {
+        family: "family",
+        family_pro: "family_hero",
+      };
+
+      // RC promotional lifetime grants can contain "lifetime" in their
+      // synthetic product ID; they are not purchased lifetime products.
+      const isLifetime = !productId.startsWith("rc_promo_") && productId.includes("lifetime");
+
+      switch (eventType) {
+        case "INITIAL_PURCHASE":
+        case "NON_RENEWING_PURCHASE":
+        case "RENEWAL":
+        case "UNCANCELLATION":
+        case "PRODUCT_CHANGE": {
+          // PRODUCT_CHANGE fires when Apple's scheduled downgrade/upgrade takes effect.
+          // entitlement_ids reflects the NEW product's entitlement.
+          const entId = entitlementIds.find((e) => tierMap[e]);
+          if (!entId) break;
+          const newTier = tierMap[entId];
+
+          // Guard: only for PRODUCT_CHANGE events (not INITIAL_PURCHASE, RENEWAL, etc.).
+          // If this PRODUCT_CHANGE is to family_pro, verify it isn't a FamilyPro renewal
+          // firing while a 'family' downgrade is in progress.
+          // Uses isFamilySubNewerThanFamilyPro from server/lib/rc-tier-resolver.ts.
+          if (eventType === "PRODUCT_CHANGE" && entId === "family_pro") {
+            const rcApiKey = process.env.REVENUECAT_API_KEY;
+            if (rcApiKey) {
+              try {
+                const rcRes = await fetch(
+                  `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(appUserId)}`,
+                  { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } }
+                );
+                if (rcRes.ok) {
+                  const rcSubData: unknown = await rcRes.json();
+                  const subs = getRevenueCatSubscriptions(rcSubData);
+                  if (isFamilySubNewerThanFamilyPro(subs)) {
+                    console.log(
+                      `[RevenueCat] PRODUCT_CHANGE to family_pro suppressed for ${appUserId}` +
+                      ` — family subscription is newer (downgrade in progress)`
+                    );
+                    break;
+                  }
+                }
+              } catch (err: any) {
+                console.error("[RevenueCat] PRODUCT_CHANGE guard: RC lookup failed:", err.message);
+                // Fall through to normal processing on RC error
+              }
+            }
+          }
+
+          await db.update(families)
+            .set({
+              subscriptionTier: newTier,
+              subscriptionStatus: "active",
+              ...(isLifetime ? { isLifetimePurchase: true } : {}),
+            })
+            .where(eq(families.familyName, appUserId));
+          console.log(`[RevenueCat] ${eventType}: ${appUserId} → ${newTier}`);
+          break;
+        }
+        case "CANCELLATION": {
+          // User cancelled — they keep access until the subscription's expires_date.
+          // Only mark the status; do NOT drop the tier. EXPIRATION fires when access
+          // actually ends and that is when we downgrade to free.
+          await db.update(families)
+            .set({ subscriptionStatus: "canceled" })
+            .where(and(
+              eq(families.familyName, appUserId),
+              eq(families.isLifetimePurchase, false),
+              eq(families.isAdminGranted, false),
+            ));
+          console.log(`[RevenueCat] CANCELLATION: ${appUserId} — status → canceled (tier retained until expiry)`);
+          break;
+        }
+        case "EXPIRATION":
+        case "BILLING_ISSUE": {
+          // An EXPIRATION/BILLING_ISSUE can arrive late for an older purchase.
+          // Never let a delayed event overwrite a newer entitlement: RevenueCat's
+          // current subscriber state is authoritative at the moment we remove access.
+          const [family] = await db.select()
+            .from(families)
+            .where(eq(families.familyName, appUserId));
+          if (!family) {
+            console.warn(`[RevenueCat] ${eventType}: no family found for ${appUserId}`);
+            break;
+          }
+          if (family.isLifetimePurchase || family.isAdminGranted) {
+            console.log(`[RevenueCat] ${eventType}: ${appUserId} is protected from downgrade`);
+            break;
+          }
+
+          const rcApiKey = process.env.REVENUECAT_API_KEY;
+          if (!rcApiKey) {
+            console.error(`[RevenueCat] ${eventType}: no API key available to verify ${appUserId}`);
+            return res.status(503).json({ message: "Purchase verification unavailable" });
+          }
+
+          let rcData: unknown;
+          try {
+            const rcRes = await fetch(
+              `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(appUserId)}`,
+              { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } },
+            );
+            if (!rcRes.ok) {
+              console.error(`[RevenueCat] ${eventType}: RC returned ${rcRes.status} for ${appUserId}; preserving tier`);
+              return res.status(503).json({ message: "Purchase verification failed" });
+            }
+            rcData = requireVerifiedRevenueCatPayload(await rcRes.json());
+          } catch (err: any) {
+            console.error(`[RevenueCat] ${eventType}: RC verification failed for ${appUserId}:`, err.message);
+            return res.status(503).json({ message: "Purchase verification failed" });
+          }
+
+          const currentEntitlements = getRevenueCatEntitlements(rcData);
+          const hasActiveEntitlement = (id: string) => {
+            const entitlement = currentEntitlements[id];
+            return isRevenueCatEntitlementActive(entitlement);
+          };
+          const activeEntitlement = hasActiveEntitlement("family_pro")
+            ? "family_pro"
+            : hasActiveEntitlement("family")
+              ? "family"
+              : null;
+
+          if (activeEntitlement) {
+            const correctTier = tierMap[activeEntitlement];
+            // A later purchase is active: suppress this stale event and repair a
+            // previous bad downgrade in the same operation.
+            await withVerifiedRevenueCatPayload(rcData, async () => {
+              await db.update(families)
+                .set({
+                  subscriptionTier: correctTier,
+                  subscriptionStatus: "active",
+                  isAdminGranted: false,
+                })
+                .where(eq(families.familyName, appUserId));
+            });
+            console.log(
+              `[RevenueCat] ${eventType}: suppressed stale downgrade for ${appUserId}` +
+              ` — '${activeEntitlement}' remains active`,
+            );
+            break;
+          }
+
+          // RevenueCat has confirmed the subscription has truly ended — remove paid access.
+          await withVerifiedRevenueCatPayload(rcData, async () => {
+            await db.update(families)
+              .set({
+                subscriptionTier: "free",
+                subscriptionStatus: eventType === "BILLING_ISSUE" ? "past_due" : "canceled",
+              })
+              .where(and(
+                eq(families.familyName, appUserId),
+                eq(families.isLifetimePurchase, false),
+                eq(families.isAdminGranted, false),
+              ));
+          });
+          console.log(`[RevenueCat] ${eventType}: ${appUserId} → free`);
+          break;
+        }
+        default:
+          console.log(`[RevenueCat] Unhandled event: ${eventType}`);
+      }
+
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error("[RevenueCat] Webhook error:", error);
+      res.status(isRevenueCatVerificationError(error) ? 503 : 500).send("Internal server error");
+    }
+    return;
+  });
+
+  // Verify checkout session and update subscription (workaround for webhook issues)
+  app.post("/api/verify-checkout-session", isAuthenticated, async (req: any, res) => {
+    try {
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+      
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Family member not found" });
+      }
+
+      // Reject replayed checkout sessions using the dedicated consumed-session table
+      const { verifiedCheckoutSessions } = await import("../shared/schema");
+      const { eq: eqVCS } = await import("drizzle-orm");
+      const [existingConsumed] = await db
+        .select({ sessionId: verifiedCheckoutSessions.sessionId })
+        .from(verifiedCheckoutSessions)
+        .where(eqVCS(verifiedCheckoutSessions.sessionId, sessionId))
+        .limit(1);
+      if (existingConsumed) {
+        return res.status(409).json({ message: "Checkout session already processed" });
+      }
+
+      // Fetch the checkout session from Stripe
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      console.log("🔍 Verifying checkout session:", {
+        sessionId: session.id,
+        paymentStatus: session.payment_status,
+        metadata: session.metadata,
+      });
+      
+      // Only process if payment was successful
+      if (session.payment_status !== "paid") {
+        return res.status(400).json({ message: "Payment not completed" });
+      }
+      
+      const familyName = session.metadata?.familyName;
+      const tier = session.metadata?.tier as "free" | "family" | "family_hero";
+      
+      if (!familyName || !tier) {
+        return res.status(400).json({ message: "Invalid session metadata" });
+      }
+      
+      // Verify that this session belongs to the user's family
+      if (familyName !== member.familyName) {
+        return res.status(403).json({ message: "Session does not belong to your family" });
+      }
+      
+      const isLifetime = session.metadata?.billingCycle === "lifetime";
+
+      // For non-lifetime subscriptions, confirm the Stripe subscription is currently active
+      if (!isLifetime) {
+        const stripeSubId = session.subscription as string | null;
+        if (!stripeSubId) {
+          return res.status(400).json({ message: "Missing subscription reference" });
+        }
+        const stripeSub = await stripe.subscriptions.retrieve(stripeSubId);
+        if (!["active", "trialing"].includes(stripeSub.status)) {
+          console.warn(`[Stripe] Subscription ${stripeSubId} status='${stripeSub.status}' — rejecting activation`);
+          return res.status(402).json({ message: "Subscription is not active" });
+        }
+      }
+
+      await storage.updateFamily(familyName, {
+        subscriptionTier: tier,
+        subscriptionStatus: "active",
+        billingSubscriptionId: isLifetime ? null : (session.subscription as string),
+        ...(isLifetime ? { isLifetimePurchase: true } : {}),
+      });
+
+      // Mark session as consumed so it cannot be replayed
+      await db.insert(verifiedCheckoutSessions).values({
+        sessionId,
+        familyName,
+        tier,
+      });
+      
+      console.log(`✅ ${isLifetime ? "Lifetime purchase" : "Subscription"} verified and activated for ${familyName}: ${tier}`);
+      
+      // Auto-unpause members that are now within the new tier's member limit
+      await autoUnpauseMembersAfterUpgrade(familyName, tier);
+      
+      // Broadcast subscription update to all family members
+      broadcastToFamily(familyName, {
+        type: 'subscription-updated',
+        tier,
+      });
+      
+      res.json({ 
+        message: "Subscription activated successfully",
+        tier 
+      });
+    } catch (error: any) {
+      console.error("Error verifying checkout session:", error);
+      res.status(500).json({ message: "Failed to verify checkout session" });
+    }
+    return;
+  });
+
+  // Public endpoint to verify checkout session (no auth required)
+  // Used when user returns from Stripe but session has expired
+  app.post("/api/verify-checkout-public", async (req: any, res) => {
+    try {
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+      
+      // Fetch the checkout session from Stripe first to get the familyName from metadata
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      console.log("🔍 Public verification of checkout session:", {
+        sessionId: session.id,
+        paymentStatus: session.payment_status,
+        metadata: session.metadata,
+      });
+      
+      // Only process if payment was successful
+      if (session.payment_status !== "paid") {
+        return res.status(400).json({ message: "Payment not completed", status: session.payment_status });
+      }
+      
+      const familyName = session.metadata?.familyName;
+      const tier = session.metadata?.tier as "free" | "family" | "family_hero";
+      
+      if (!familyName || !tier) {
+        return res.status(400).json({ message: "Invalid session metadata" });
+      }
+
+      // Reject replayed checkout sessions using the dedicated consumed-session table
+      const { verifiedCheckoutSessions: vcsTable } = await import("../shared/schema");
+      const { eq: eqVCS2 } = await import("drizzle-orm");
+      const [alreadyConsumed] = await db
+        .select({ sessionId: vcsTable.sessionId })
+        .from(vcsTable)
+        .where(eqVCS2(vcsTable.sessionId, sessionId))
+        .limit(1);
+      if (alreadyConsumed) {
+        return res.status(409).json({ message: "Checkout session already processed" });
+      }
+
+      const isLifetime = session.metadata?.billingCycle === "lifetime";
+
+      // For non-lifetime subscriptions, confirm the Stripe subscription is currently active
+      if (!isLifetime) {
+        const stripeSubId = session.subscription as string | null;
+        if (!stripeSubId) {
+          return res.status(400).json({ message: "Missing subscription reference" });
+        }
+        const stripeSub = await stripe.subscriptions.retrieve(stripeSubId);
+        if (!["active", "trialing"].includes(stripeSub.status)) {
+          console.warn(`[Stripe] Public verify: subscription ${stripeSubId} status='${stripeSub.status}' — rejecting`);
+          return res.status(402).json({ message: "Subscription is not active" });
+        }
+      }
+
+      await storage.updateFamily(familyName, {
+        subscriptionTier: tier,
+        subscriptionStatus: "active",
+        billingSubscriptionId: isLifetime ? null : (session.subscription as string),
+        ...(isLifetime ? { isLifetimePurchase: true } : {}),
+      });
+
+      // Mark session as consumed so it cannot be replayed
+      await db.insert(vcsTable).values({
+        sessionId,
+        familyName,
+        tier,
+      });
+      
+      console.log(`✅ Public verification: ${isLifetime ? "Lifetime purchase" : "Subscription"} activated for ${familyName}: ${tier}`);
+      
+      // Auto-unpause members that are now within the new tier's member limit
+      await autoUnpauseMembersAfterUpgrade(familyName, tier);
+      
+      // Broadcast subscription update to all family members
+      broadcastToFamily(familyName, {
+        type: 'subscription-updated',
+        tier,
+      });
+      
+      res.json({ 
+        success: true,
+        message: "Subscription activated successfully",
+        tier,
+        familyName 
+      });
+    } catch (error: any) {
+      console.error("Error in public checkout verification:", error);
+      res.status(500).json({ message: "Failed to verify checkout session" });
+    }
+    return;
+  });
+
+  // ===== Stripe Integration =====
+
+  app.get("/api/subscription/purchase-eligibility", isAuthenticated, async (req: any, res) => {
+    try {
+      const requestedProvider = String(req.query.provider || "") as SubscriptionPurchaseProvider;
+      if (!["apple", "stripe"].includes(requestedProvider)) {
+        return res.status(400).json({ message: "Invalid subscription provider" });
+      }
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member || member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can manage subscriptions" });
+      }
+      const family = await storage.getFamily(member.familyName);
+      if (!family) return res.status(404).json({ message: "Family not found" });
+
+      const [appleActive, stripeActive] = await Promise.all([
+        hasActiveAppleSubscription(family.familyName),
+        hasActiveStripeSubscription(family, stripe),
+      ]);
+      res.json(resolvePurchaseEligibility(requestedProvider, {
+        apple: appleActive,
+        stripe: stripeActive,
+      }));
+    } catch (error: any) {
+      console.error("Subscription provider eligibility check failed:", error?.message || error);
+      res.status(503).json({
+        allowed: false,
+        message: "Dein aktueller Abonnement-Anbieter konnte nicht sicher geprüft werden. Bitte versuche es später erneut.",
+      });
+    }
+    return;
+  });
+  
+  // Create Stripe Checkout Session
+  app.post("/api/create-checkout-session", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { tier, billingCycle = "monthly" } = req.body;
+      
+      if (!tier || !["family", "family_hero"].includes(tier)) {
+        return res.status(400).json({ message: "Invalid subscription tier" });
+      }
+      if (!["monthly", "yearly", "lifetime"].includes(billingCycle)) {
+        return res.status(400).json({ message: "Invalid billing cycle" });
+      }
+      
+      const member = await storage.getFamilyMemberByUserId(userId);
+      if (!member || member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can manage subscriptions" });
+      }
+      
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+
+      const [appleActive, stripeActive] = await Promise.all([
+        hasActiveAppleSubscription(family.familyName),
+        hasActiveStripeSubscription(family, stripe),
+      ]);
+      const eligibility = resolvePurchaseEligibility("stripe", {
+        apple: appleActive,
+        stripe: stripeActive,
+      });
+      if (!eligibility.allowed) {
+        return res.status(409).json(eligibility);
+      }
+      const account = await storage.getUser(userId);
+      
+      const tierConfig = TIER_CONFIG[tier as SubscriptionTier];
+
+      // Pick the right Stripe Price ID based on billing cycle
+      let stripePriceId: string | undefined;
+      if (billingCycle === "yearly") {
+        stripePriceId = tierConfig.stripePriceIdYearly;
+      } else if (billingCycle === "lifetime") {
+        stripePriceId = tierConfig.stripePriceIdLifetime;
+      } else {
+        stripePriceId = tierConfig.stripePriceId;
+      }
+
+      if (!stripePriceId) {
+        return res.status(400).json({ message: "This billing option is not available for purchase" });
+      }
+      
+      // Create or retrieve Stripe customer
+      let customerId = family.billingCustomerId;
+      
+      // Validate existing customer ID — it may be from test mode and invalid in live mode
+      if (customerId) {
+        try {
+          await stripe.customers.retrieve(customerId);
+        } catch (err: any) {
+          if (err?.code === 'resource_missing') {
+            console.warn(`⚠️ Stored Stripe customer ${customerId} not found (likely test-mode ID) — creating new customer`);
+            customerId = null;
+            await storage.updateFamily(family.familyName, { billingCustomerId: null });
+          } else {
+            throw err;
+          }
+        }
+      }
+
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: account?.email || undefined,
+          metadata: {
+            familyName: family.familyName,
+          },
+        });
+        customerId = customer.id;
+        
+        // Update family with customer ID
+        await storage.updateFamily(family.familyName, {
+          billingCustomerId: customerId,
+        });
+      }
+      
+      // Create checkout session
+      // Construct base URL from request (most reliable in all contexts)
+      // Falls back to REPLIT_DOMAINS if needed
+      const host = req.get('host');
+      const protocol = req.protocol || 'https';
+      
+      let baseUrl: string;
+      if (host) {
+        // Use actual request host (works everywhere: dev, production, webhooks)
+        baseUrl = `${protocol}://${host}`;
+      } else if (process.env.REPLIT_DOMAINS) {
+        // Fallback to environment variable
+        baseUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+      } else {
+        // Last resort: localhost (should never happen in production)
+        baseUrl = 'http://localhost:5000';
+        console.warn("⚠️ Using localhost as baseUrl - this may cause redirect issues in production!");
+      }
+      
+      console.log("🌐 Checkout session URLs:", {
+        host,
+        protocol,
+        baseUrl,
+        successUrl: `${baseUrl}/?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${baseUrl}/pricing?canceled=true`,
+      });
+      
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        mode: billingCycle === "lifetime" ? "payment" : "subscription",
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price: stripePriceId,
+            quantity: 1,
+          },
+        ],
+        success_url: `${baseUrl}/?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/pricing?canceled=true`,
+        metadata: {
+          familyName: family.familyName,
+          tier: tier,
+          billingCycle: billingCycle,
+        },
+      });
+      
+      console.log("✅ Checkout session created:", {
+        sessionId: session.id,
+        url: session.url,
+        tier,
+        familyName: family.familyName,
+      });
+      
+      res.json({ sessionId: session.id, url: session.url });
+    } catch (error: any) {
+      console.error("Error creating checkout session:", error);
+      res.status(500).json({ message: error.message || "Failed to create checkout session" });
+    }
+    return;
+  });
+  
+  // NOTE: Stripe webhook is now handled in server/index.ts with express.raw() middleware
+  
+  // Create Stripe Customer Portal Session (for managing/cancelling subscriptions)
+  app.post("/api/create-portal-session", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const member = await storage.getFamilyMemberByUserId(userId);
+
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      // Only parents can manage subscriptions
+      if (member.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can manage subscriptions" });
+      }
+
+      const family = await storage.getFamily(member.familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+
+      // Check if family has a Stripe customer ID
+      if (!family.billingCustomerId) {
+        return res.status(400).json({ message: "No active subscription found" });
+      }
+
+      // Use the actual host from the request - works for both dev and production
+      const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+      const baseUrl = `${protocol}://${req.get('host')}`;
+
+      // Create a portal session
+      const session = await stripe.billingPortal.sessions.create({
+        customer: family.billingCustomerId,
+        return_url: `${baseUrl}/settings`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("Error creating portal session:", error);
+      res.status(500).json({ message: error.message || "Failed to create portal session" });
+    }
+    return;
+  });
+  
+  // ========================================
+  // Device Linking - Allow children to link their account to a new device
+  // ========================================
+
+  // Generate a 6-character alphanumeric code
+  function generateLinkCode(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Avoid confusing chars like 0/O, 1/I
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  // Generate secure token and its bcrypt hash
+  async function generateDeviceToken(): Promise<{ token: string; hash: string }> {
+    const token = crypto.randomBytes(32).toString('hex');
+    const hash = await bcrypt.hash(token, 10);
+    return { token, hash };
+  }
+
+  function getDeviceTokenFromRequest(req: any): string | undefined {
+    const authorization = req.headers?.authorization;
+    const match = typeof authorization === "string" ? /^Device ([^\s]+)$/.exec(authorization) : null;
+    return match?.[1] || req.cookies?.child_device_token;
+  }
+
+  // Parent: Generate a link code for a child member
+  // Rate limited: 10 per minute (code generation should be infrequent)
+  app.post("/api/device-link/generate-code", isAuthenticated, rateLimit(10, 60 * 1000), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const parentMember = await storage.getFamilyMemberByUserId(userId);
+
+      if (!parentMember || parentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can generate link codes" });
+      }
+
+      const { memberId, pin } = req.body;
+      if (!memberId) {
+        return res.status(400).json({ message: "Member ID is required" });
+      }
+
+      // Verify parent's PIN
+      if (!pin) {
+        return res.status(400).json({ message: "PIN is required" });
+      }
+      
+      if (!parentMember.pinCode) {
+        return res.status(400).json({ message: "No PIN set. Please set a PIN first." });
+      }
+
+      const isPinValid = await bcrypt.compare(pin, parentMember.pinCode);
+      if (!isPinValid) {
+        return res.status(401).json({ message: "Invalid PIN" });
+      }
+
+      // Get the child member
+      const childMember = await storage.getFamilyMember(memberId);
+      if (!childMember) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      // Ensure they're in the same family
+      if (childMember.familyName !== parentMember.familyName) {
+        return res.status(403).json({ message: "Member not in your family" });
+      }
+
+      // Ensure it's a child account
+      if (childMember.role !== "child") {
+        return res.status(400).json({ message: "Can only link child accounts" });
+      }
+
+      // Check for existing active code and invalidate it
+      const existingCode = await storage.getActiveDeviceLinkCodeForMember(memberId);
+      if (existingCode) {
+        await storage.deleteDeviceLinkCode(existingCode.id);
+      }
+
+      // Generate new code (valid for 15 minutes)
+      const code = generateLinkCode();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+      const linkCode = await storage.createDeviceLinkCode({
+        memberId,
+        createdByParentId: parentMember.id,
+        code,
+        expiresAt,
+      });
+
+      res.json({
+        code: linkCode.code,
+        expiresAt: linkCode.expiresAt,
+        memberName: childMember.displayName,
+      });
+    } catch (error) {
+      console.error("Error generating link code:", error);
+      res.status(500).json({ message: "Failed to generate link code" });
+    }
+    return;
+  });
+
+  // Public: Verify a link code and create device session (no auth required)
+  // Rate limited: 5 per minute to prevent brute force code guessing
+  app.post("/api/device-link/verify-code", rateLimit(5, 60 * 1000), async (req: any, res) => {
+    try {
+      const { code, deviceLabel, platform } = req.body;
+      if (!code) {
+        return res.status(400).json({ message: "Code is required" });
+      }
+
+      const linkCode = await storage.getDeviceLinkCodeByCode(code.toUpperCase());
+      if (!linkCode) {
+        return res.status(404).json({ message: "Invalid code" });
+      }
+
+      // Check if expired
+      if (new Date() > linkCode.expiresAt) {
+        return res.status(400).json({ message: "Code has expired" });
+      }
+
+      // Check if already consumed
+      if (linkCode.consumedAt) {
+        return res.status(400).json({ message: "Code has already been used" });
+      }
+
+      // Get the member
+      const member = await storage.getFamilyMember(linkCode.memberId);
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+      if (member.role !== "child") {
+        return res.status(403).json({ message: "Device Link is only available for children. Parents must sign in with an account." });
+      }
+
+      // Generate device session token
+      const { token, hash } = await generateDeviceToken();
+
+      // Create device session
+      const session = await storage.createChildDeviceSession({
+        memberId: member.id,
+        tokenHash: hash,
+        deviceLabel: deviceLabel || null,
+      });
+
+      // Mark link code as consumed
+      await storage.consumeDeviceLinkCode(linkCode.id);
+
+      // Set secure cookie with the token
+      // Use sameSite: 'lax' to allow cookie to be sent on same-site navigation
+      const isProduction = process.env.NODE_ENV === 'production';
+      res.cookie('child_device_token', token, {
+        httpOnly: true,
+        secure: isProduction, // Only require HTTPS in production
+        sameSite: 'lax', // Allow cookie on same-site navigation
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        path: '/',
+      });
+
+      const response: Record<string, unknown> = {
+        success: true,
+        memberId: member.id,
+        memberName: member.displayName,
+        familyName: member.familyName,
+      };
+      if (platform === "tv") {
+        response.deviceToken = token;
+      }
+      res.json(response);
+    } catch (error) {
+      console.error("Error verifying link code:", error);
+      res.status(500).json({ message: "Failed to verify code" });
+    }
+    return;
+  });
+
+  // Check if current request has a valid child device session
+  app.get("/api/device-link/session", async (req: any, res) => {
+    // Prevent browser caching - always fetch fresh data
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    
+    try {
+      const authorization = req.headers?.authorization;
+      const deviceTokenMatch = typeof authorization === "string" ? /^Device ([^\s]+)$/.exec(authorization) : null;
+      const token = getDeviceTokenFromRequest(req);
+      const usingDeviceCookie = !deviceTokenMatch && Boolean(req.cookies?.child_device_token);
+      if (!token) {
+        return res.json({ authenticated: false });
+      }
+
+      // Get all active sessions and verify token against each (bcrypt compare)
+      const session = await storage.findValidChildDeviceSession(token);
+
+      if (!session) {
+        // Clear invalid cookie
+        if (usingDeviceCookie) res.clearCookie('child_device_token', { path: '/' });
+        return res.json({ authenticated: false });
+      }
+
+      // Update last seen
+      await storage.updateDeviceSessionLastSeen(session.id);
+
+      // Get member details
+      const member = await storage.getFamilyMember(session.memberId);
+      if (!member || member.role !== "child") {
+        if (usingDeviceCookie) res.clearCookie('child_device_token', { path: '/' });
+        return res.json({ authenticated: false });
+      }
+
+      const linkedFamily = await storage.getFamily(member.familyName);
+      res.json({
+        authenticated: true,
+        memberId: member.id,
+        memberName: member.displayName,
+        familyName: member.familyName,
+        language: linkedFamily?.language || "en",
+        role: member.role,
+        avatarUrl: member.avatarUrl,
+        color: member.color,
+        activeSkinId: member.activeSkinId,
+        discoveredSkinIds: member.discoveredSkinIds,
+        useCustomAvatar: member.useCustomAvatar,
+        totalPoints: member.totalPoints,
+        totalEarned: member.totalEarned,
+        weeklyPoints: member.weeklyPoints,
+        monthlyPoints: member.monthlyPoints,
+      });
+    } catch (error) {
+      console.error("Error checking device session:", error);
+      res.status(500).json({ message: "Failed to check session" });
+    }
+    return;
+  });
+
+  // Child device: Logout (clear session)
+  app.post("/api/device-link/logout", async (req: any, res) => {
+    try {
+      const token = req.cookies?.child_device_token;
+      const authorization = req.headers?.authorization;
+      const deviceTokenMatch = typeof authorization === "string" ? /^Device ([^\s]+)$/.exec(authorization) : null;
+      const deviceToken = deviceTokenMatch?.[1];
+      const tokens = [...new Set([deviceToken, token].filter((value): value is string => Boolean(value)))];
+      for (const presentedToken of tokens) {
+        const session = await storage.findValidChildDeviceSession(presentedToken);
+        if (session) {
+          await storage.revokeDeviceSession(session.id);
+        }
+      }
+
+      res.clearCookie('child_device_token', { path: '/' });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error logging out device:", error);
+      res.status(500).json({ message: "Failed to logout" });
+    }
+  });
+
+  // Parent: Get linked devices for a child member
+  app.get("/api/device-link/devices/:memberId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const parentMember = await storage.getFamilyMemberByUserId(userId);
+
+      if (!parentMember || parentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can view linked devices" });
+      }
+
+      const { memberId } = req.params;
+      const childMember = await storage.getFamilyMember(memberId);
+
+      if (!childMember || childMember.familyName !== parentMember.familyName) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      const sessions = await storage.getActiveDeviceSessionsForMember(memberId);
+      
+      res.json(sessions.map(s => ({
+        id: s.id,
+        deviceLabel: s.deviceLabel,
+        lastSeenAt: s.lastSeenAt,
+        createdAt: s.createdAt,
+      })));
+    } catch (error) {
+      console.error("Error fetching linked devices:", error);
+      res.status(500).json({ message: "Failed to fetch linked devices" });
+    }
+    return;
+  });
+
+  // Parent: Revoke a device session
+  app.delete("/api/device-link/devices/:sessionId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const parentMember = await storage.getFamilyMemberByUserId(userId);
+
+      if (!parentMember || parentMember.role !== "parent") {
+        return res.status(403).json({ message: "Only parents can revoke device access" });
+      }
+
+      const { sessionId } = req.params;
+      
+      // Get session to verify it belongs to a family member
+      const sessions = await db.select()
+        .from(familyMembers)
+        .innerJoin(childDeviceSessions, eq(childDeviceSessions.memberId, familyMembers.id))
+        .where(eq(childDeviceSessions.id, sessionId));
+
+      if (sessions.length === 0) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+
+      const session = sessions[0];
+      if (session.family_members.familyName !== parentMember.familyName) {
+        return res.status(403).json({ message: "Session not in your family" });
+      }
+
+      await storage.revokeDeviceSession(sessionId);
+      
+      // Broadcast to family that device was revoked
+      broadcastToFamily(parentMember.familyName, { type: "device_revoked", sessionId });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error revoking device session:", error);
+      res.status(500).json({ message: "Failed to revoke device access" });
+    }
+    return;
+  });
+
+  // ========================================
+  // End of Device Linking
+  // ========================================
+
+  // ========================================
+  // ========================================
+  // Feature Flags (public read)
+  // ========================================
+
+  app.get("/api/feature-flags", async (_req, res) => {
+    try {
+      const raw = await storage.getAppConfig("review_prompt_enabled");
+      res.json({ review_prompt_enabled: raw === "true" });
+    } catch (error) {
+      console.error("Error fetching feature flags:", error);
+      res.json({ review_prompt_enabled: false });
+    }
+  });
+
+  // Admin Dashboard Routes
+  // ========================================
+
+  // Server-side admin session store: token -> expiry timestamp
+  const adminSessions = new Map<string, number>();
+  const ADMIN_SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
+
+  // Admin magic link store: token -> expiry timestamp (15 min)
+  const adminMagicTokens = new Map<string, number>();
+  const ADMIN_MAGIC_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+  // Periodically evict expired admin sessions
+  setInterval(() => {
+    const now = Date.now();
+    for (const [tok, exp] of adminSessions.entries()) {
+      if (exp < now) adminSessions.delete(tok);
+    }
+  }, 15 * 60 * 1000);
+
+  // Admin authentication middleware
+  const isAdmin = (req: any, res: any, next: any) => {
+    if (!process.env.ADMIN_PASSWORD) {
+      return res.status(500).json({ message: "Admin password not configured" });
+    }
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Admin authentication required" });
+    }
+
+    const token = authHeader.substring(7);
+    const expiry = adminSessions.get(token);
+    if (!expiry || expiry < Date.now()) {
+      adminSessions.delete(token);
+      return res.status(401).json({ message: "Invalid or expired admin session" });
+    }
+
+    next();
+  };
+
+  // Admin login verification — rate-limited to prevent brute-force
+  app.post("/api/admin/login", rateLimit(5, 15 * 60 * 1000), async (req, res) => {
+    try {
+      const { password } = req.body;
+      const envPassword = process.env.ADMIN_PASSWORD;
+
+      if (!envPassword) {
+        return res.status(500).json({ message: "Admin password not configured" });
+      }
+
+      const trimmedPassword = (password || "").trim();
+
+      // Env var is always a master override (plain text match).
+      // DB-stored bcrypt hash is a fallback for UI-changed passwords only when
+      // the plain env var does NOT match (prevents stale DB hash from blocking
+      // a newly rotated secret).
+      const storedHash = await storage.getAppConfig("admin_password_hash");
+      let isValid = false;
+      if (trimmedPassword === envPassword.trim()) {
+        isValid = true;
+      } else if (storedHash) {
+        isValid = await bcrypt.compare(trimmedPassword, storedHash);
+      }
+
+      if (isValid) {
+        const sessionToken = crypto.randomBytes(32).toString("hex");
+        adminSessions.set(sessionToken, Date.now() + ADMIN_SESSION_TTL_MS);
+        res.json({ success: true, token: sessionToken });
+      } else {
+        res.status(401).json({ message: "Invalid admin password" });
+      }
+    } catch (error) {
+      console.error("Admin login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+    return;
+  });
+
+  // Admin forgot password — sends a magic login link to ADMIN_EMAIL
+  app.post("/api/admin/request-magic-link", rateLimit(3, 15 * 60 * 1000), async (req, res) => {
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (!adminEmail) {
+        return res.status(503).json({ message: "ADMIN_EMAIL not configured" });
+      }
+      // Always respond with success to avoid email enumeration
+      const magicToken = crypto.randomBytes(32).toString("hex");
+      adminMagicTokens.set(magicToken, Date.now() + ADMIN_MAGIC_TTL_MS);
+      const baseUrl = process.env.APP_BASE_URL || process.env.PUBLIC_APP_URL || "https://littlechamps.net";
+      const magicUrl = `${baseUrl}/admin?magic_token=${magicToken}`;
+      const { sendAdminMagicLinkEmail } = await import("../email.js");
+      await sendAdminMagicLinkEmail(adminEmail, magicUrl);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Admin magic link error:", error);
+      // Still return success to avoid leaking info
+      res.json({ success: true });
+    }
+    return;
+  });
+
+  // Admin magic link verification — exchange token for an admin session
+  app.post("/api/admin/magic-login", async (req, res) => {
+    try {
+      const { token: magicToken } = req.body;
+      if (!magicToken || typeof magicToken !== "string") {
+        return res.status(400).json({ message: "Invalid token" });
+      }
+      const expiry = adminMagicTokens.get(magicToken);
+      if (!expiry || Date.now() > expiry) {
+        adminMagicTokens.delete(magicToken);
+        return res.status(401).json({ message: "Magic link expired or invalid" });
+      }
+      adminMagicTokens.delete(magicToken); // one-time use
+      const sessionToken = crypto.randomBytes(32).toString("hex");
+      adminSessions.set(sessionToken, Date.now() + ADMIN_SESSION_TTL_MS);
+      res.json({ success: true, token: sessionToken });
+    } catch (error) {
+      console.error("Admin magic login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+    return;
+  });
+
+  // Change admin password
+  app.post("/api/admin/change-password", isAdmin, async (req, res) => {
+    try {
+      const { newPassword } = req.body;
+
+      if (!newPassword || typeof newPassword !== "string" || newPassword.trim().length < 8) {
+        return res.status(400).json({ message: "New password must be at least 8 characters" });
+      }
+
+      // Hash and store new password (no current-password check — admin session is already verified by isAdmin)
+      const newHash = await bcrypt.hash(newPassword.trim(), 12);
+      await storage.setAppConfig("admin_password_hash", newHash);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Admin change-password error:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+    return;
+  });
+
+  // Get all families with member counts and stats
+  app.get("/api/admin/families", isAdmin, async (req, res) => {
+    try {
+      const allFamilies = await storage.getFamilies();
+      
+      // Get member counts for each family
+      const familiesWithStats = await Promise.all(
+        allFamilies.map(async (family) => {
+          const members = await storage.getFamilyMembersByFamily(family.familyName);
+          const tasks = await storage.getTasksByFamily(family.familyName);
+          const rewards = await storage.getRewardsByFamily(family.familyName);
+          
+          const parentCount = members.filter(m => m.role === "parent").length;
+          const childCount = members.filter(m => m.role === "child").length;
+          const totalPoints = members.reduce((sum, m) => sum + m.totalEarned, 0);
+          
+          return {
+            ...family,
+            memberCount: members.length,
+            parentCount,
+            childCount,
+            taskCount: tasks.length,
+            rewardCount: rewards.length,
+            totalPointsEarned: totalPoints,
+          };
+        })
+      );
+
+      res.json(familiesWithStats);
+    } catch (error) {
+      console.error("Error fetching admin families:", error);
+      res.status(500).json({ message: "Failed to fetch families" });
+    }
+  });
+
+  // Get single family details with all members
+  app.get("/api/admin/families/:familyName", isAdmin, async (req, res) => {
+    try {
+      const { familyName } = req.params;
+      const family = await storage.getFamily(familyName);
+
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+
+      const members = await storage.getFamilyMembersByFamily(familyName);
+      const membersWithAccounts = await Promise.all(
+        members.map(async (member) => ({
+          ...member,
+          account: member.userId ? sanitizeAccountForAdmin(await storage.getUser(member.userId)) : null,
+        }))
+      );
+      const tasks = await storage.getTasksByFamily(familyName);
+      const rewards = await storage.getRewardsByFamily(familyName);
+      const accountLinkRepairHistory = (await storage.getRecentAccountLinkRepairHistoryByFamily(familyName, 10)).map((entry) => ({
+        id: entry.id,
+        memberId: entry.memberId,
+        memberDisplayName: entry.memberDisplayName,
+        action: entry.action,
+        oldAccountEmail: entry.oldAccountEmail,
+        newAccountEmail: entry.newAccountEmail,
+        repairedBy: entry.repairedBy,
+        repairedAt: entry.repairedAt,
+      }));
+
+      // Fetch RC Promotional Entitlement status (best-effort; never blocks)
+      let rcPromoStatus: {
+        entitlement: string;
+        expiresDate: string | null;
+        isLifetime: boolean;
+        productIdentifier: string;
+      } | null = null;
+      const rcApiKeyForPromo = process.env.REVENUECAT_API_KEY;
+      if (rcApiKeyForPromo) {
+        try {
+          const rcRes = await fetch(
+            `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(familyName)}`,
+            { headers: { Authorization: `Bearer ${rcApiKeyForPromo}`, "Content-Type": "application/json" } }
+          );
+          if (rcRes.ok) {
+            const rcData: unknown = await rcRes.json();
+            const ents = getRevenueCatEntitlements(rcData);
+            for (const [entId, ent] of Object.entries(ents)) {
+              if (["family", "family_pro"].includes(entId) &&
+                  typeof ent.product_identifier === "string" &&
+                  ent.product_identifier.startsWith("rc_promo_")) {
+                const expiresAt = ent.expires_date ? Date.parse(ent.expires_date) : null;
+                const isActive = expiresAt === null || expiresAt > Date.now();
+                if (isActive) {
+                  rcPromoStatus = {
+                    entitlement: entId,
+                    expiresDate: ent.expires_date ?? null,
+                    // RC represents effectively unbounded promotional access with
+                    // a far-future expiry (e.g. year 2226), not always null.
+                    isLifetime: expiresAt === null || expiresAt - Date.now() > 100 * 365.25 * 24 * 60 * 60 * 1000,
+                    productIdentifier: ent.product_identifier,
+                  };
+                  break;
+                }
+              }
+            }
+          }
+        } catch (_) { /* RC unreachable — omit promo status */ }
+      }
+
+      res.json({
+        family,
+        members: membersWithAccounts,
+        taskCount: tasks.length,
+        rewardCount: rewards.length,
+        accountLinkRepairHistory,
+        rcPromoStatus,
+      });
+    } catch (error) {
+      console.error("Error fetching admin family details:", error);
+      res.status(500).json({ message: "Failed to fetch family details" });
+    }
+    return;
+  });
+
+  registerAdminMemberAccountRoutes(app, isAdmin);
+
+  // Get admin dashboard stats
+  app.get("/api/admin/stats", isAdmin, async (req, res) => {
+    try {
+      const allFamilies = await storage.getFamilies();
+      
+      let totalMembers = 0;
+      let totalTasks = 0;
+      let totalRewards = 0;
+      let totalPointsEarned = 0;
+      const tierCounts: Record<string, number> = {
+        free: 0,
+        family: 0,
+        family_plus: 0,
+        family_hero: 0,
+      };
+
+      for (const family of allFamilies) {
+        tierCounts[family.subscriptionTier] = (tierCounts[family.subscriptionTier] || 0) + 1;
+        const members = await storage.getFamilyMembersByFamily(family.familyName);
+        totalMembers += members.length;
+        totalPointsEarned += members.reduce((sum, m) => sum + m.totalEarned, 0);
+        const tasks = await storage.getTasksByFamily(family.familyName);
+        totalTasks += tasks.length;
+        const rewards = await storage.getRewardsByFamily(family.familyName);
+        totalRewards += rewards.length;
+      }
+
+      res.json({
+        totalFamilies: allFamilies.length,
+        totalMembers,
+        totalTasks,
+        totalRewards,
+        totalPointsEarned,
+        tierCounts,
+      });
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
+  registerAdminEmailHealthRoutes(app, isAdmin);
+
+  // Update family subscription tier (admin override)
+  app.patch("/api/admin/families/:familyName/tier", isAdmin, async (req, res) => {
+    try {
+      const { familyName } = req.params;
+      const { tier } = req.body;
+
+      if (!isSubscriptionTierLegacy(tier)) {
+        return res.status(400).json({ message: "Invalid tier" });
+      }
+
+      const currentFamily = await storage.getFamily(familyName);
+      if (!currentFamily) return res.status(404).json({ message: "Family not found" });
+      if (tier === "free" && currentFamily.isLifetimePurchase) {
+        return res.status(409).json({ message: "LIFETIME_PURCHASE_PROTECTED" });
+      }
+
+      // When downgrading to free, check whether RC has an active subscription.
+      // If so, RC will immediately overwrite the reset — block it unless the
+      // current tier was admin-granted (no real IAP behind it) or force=true.
+      const { force } = req.body;
+      let verifiedResetPayload: unknown;
+      if (tier === "free" && !force) {
+        const { eq } = await import("drizzle-orm");
+        const { families } = await import("../shared/schema");
+        const [family] = await db.select().from(families).where(eq(families.familyName, familyName));
+        if (family && !family.isAdminGranted && family.subscriptionTier !== "free") {
+          const rcApiKey = process.env.REVENUECAT_API_KEY;
+          if (!rcApiKey) {
+            return res.status(503).json({ message: "RevenueCat verification unavailable; family tier unchanged" });
+          }
+          try {
+            const rcRes = await fetch(
+              `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(familyName)}`,
+              { headers: { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" } }
+            );
+            if (rcRes.status !== 404) {
+              if (!rcRes.ok) {
+                return res.status(503).json({ message: "RevenueCat verification failed; family tier unchanged" });
+              }
+              verifiedResetPayload = requireVerifiedRevenueCatPayload(await rcRes.json());
+              const ents = getRevenueCatEntitlements(verifiedResetPayload);
+              const hasActiveRcEnt = ["family", "family_pro"].some(id => {
+                const e = ents[id];
+                return isRevenueCatEntitlementActive(e);
+              });
+              if (hasActiveRcEnt) {
+                const promoOnly = ["family", "family_pro"]
+                  .filter(id => isRevenueCatEntitlementActive(ents[id]))
+                  .every(id => ents[id].product_identifier?.startsWith("rc_promo_"));
+                return res.status(409).json({ message: promoOnly ? "RC_PROMO_ACTIVE" : "RC_ACTIVE" });
+              }
+            }
+          } catch (error) {
+            console.error("[Admin] RevenueCat verification failed; refusing tier reset:", error);
+            return res.status(503).json({ message: "RevenueCat verification failed; family tier unchanged" });
+          }
+        }
+      }
+
+      const updateTier = async () => {
+        await storage.updateFamilyTier(familyName, tier);
+        // Auto-unpause members that are now within the new tier's member limit.
+        await autoUnpauseMembersAfterUpgrade(familyName, tier);
+      };
+      if (verifiedResetPayload !== undefined) {
+        await withVerifiedRevenueCatPayload(verifiedResetPayload, updateTier);
+      } else {
+        await updateTier();
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating family tier:", error);
+      res.status(500).json({ message: "Failed to update tier" });
+    }
+    return;
+  });
+
+  // Grant RC Promotional Entitlement (preferred way to give free access)
+  // Calls the RevenueCat REST API so RC tracks the grant — cancel-sync, webhooks,
+  // and the client SDK will all see it as a legitimate active entitlement.
+  app.post("/api/admin/families/:familyName/promo-entitlement", isAdmin, async (req, res) => {
+    try {
+      const { familyName } = req.params;
+      const { entitlement, duration } = req.body;
+
+      const validEntitlements = ["family", "family_pro"];
+      const validDurations = ["monthly", "three_month", "yearly", "lifetime"];
+
+      if (!validEntitlements.includes(entitlement)) {
+        return res.status(400).json({ message: "Invalid entitlement. Must be 'family' or 'family_pro'" });
+      }
+      if (!validDurations.includes(duration)) {
+        return res.status(400).json({ message: "Invalid duration. Must be 'monthly', 'three_month', 'yearly', or 'lifetime'" });
+      }
+
+      const rcApiKey = process.env.REVENUECAT_API_KEY;
+      if (!rcApiKey) {
+        return res.status(503).json({ message: "RevenueCat API key not configured" });
+      }
+
+      // POST to RC promotional entitlement endpoint
+      const rcRes = await fetch(
+        `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(familyName)}/entitlements/${encodeURIComponent(entitlement)}/promotional`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${rcApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ duration }),
+        }
+      );
+
+      if (!rcRes.ok) {
+        const rcError = await rcRes.json().catch(() => ({}));
+        console.error("[Admin] RC promotional entitlement grant failed:", rcError);
+        return res.status(502).json({ message: "RevenueCat API error", details: rcError });
+      }
+
+      // Map RC entitlement identifier → DB tier
+      const tierMap: Record<string, SubscriptionTierLegacy> = {
+        family: "family",
+        family_pro: "family_hero",
+      };
+      const dbTier = tierMap[entitlement] as "family" | "family_hero";
+
+      // Update DB so the app immediately reflects the granted tier.
+      // IMPORTANT: set isAdminGranted: false (NOT true) so that:
+      //   • cancel-sync will check RC and not skip verification
+      //   • EXPIRATION / BILLING_ISSUE webhooks will fire and downgrade correctly
+      //   • RC remains the authoritative source for the grant lifecycle
+      // The isAdminGranted flag is reserved for manual DB-only overrides that RC
+      // does not know about. Promotional entitlements are RC-tracked; they must
+      // follow the normal RC reconciliation path.
+      const { eq: eqPromo } = await import("drizzle-orm");
+      const { families: familiesTable } = await import("../shared/schema");
+      await db.update(familiesTable).set({
+        subscriptionTier: dbTier,
+        subscriptionStatus: "active",
+        isAdminGranted: false,
+        updatedAt: new Date(),
+      }).where(eqPromo(familiesTable.familyName, familyName));
+      await autoUnpauseMembersAfterUpgrade(familyName, dbTier);
+
+      console.log(`[Admin] Promotional entitlement '${entitlement}' (${duration}) granted to ${familyName} → DB tier: ${dbTier}`);
+      res.json({ success: true, tier: dbTier });
+    } catch (error) {
+      console.error("Error granting promotional entitlement:", error);
+      res.status(500).json({ message: "Failed to grant promotional entitlement" });
+    }
+    return;
+  });
+
+  // End an admin-granted RC promotion. Never remove a paid store purchase or
+  // change the local tier until RC confirms that no entitlement remains active.
+  app.post("/api/admin/families/:familyName/end-promo", isAdmin, async (req, res) => {
+    try {
+      const { familyName } = req.params;
+      const family = await storage.getFamily(familyName);
+      if (!family) return res.status(404).json({ message: "Family not found" });
+      const repairLifetimeFlag = family.isLifetimePurchase && req.body?.confirmIncorrectLifetimeFlag === true;
+      if (family.isLifetimePurchase && !repairLifetimeFlag) {
+        return res.status(409).json({ message: "LIFETIME_PURCHASE_PROTECTED" });
+      }
+      if (family.isAdminGranted) return res.status(409).json({ message: "ADMIN_GRANT_PROTECTED" });
+
+      const rcApiKey = process.env.REVENUECAT_API_KEY;
+      if (!rcApiKey) return res.status(503).json({ message: "RevenueCat API key not configured" });
+      const url = `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(familyName)}`;
+      const headers = { Authorization: `Bearer ${rcApiKey}`, "Content-Type": "application/json" };
+      const readSubscriber = async (): Promise<unknown> => {
+        const response = await fetch(url, { headers });
+        if (!response.ok) throw new Error(`RevenueCat subscriber lookup returned ${response.status}`);
+        return requireVerifiedRevenueCatPayload(await response.json());
+      };
+      const isActiveRevenueCatRecord = (item: RevenueCatEntitlement | RevenueCatSubscription | undefined) =>
+        item !== undefined &&
+        (item.expires_date == null || new Date(item.expires_date).getTime() > Date.now());
+      const promoIds = (data: unknown) => {
+        const entitlements = getRevenueCatEntitlements(data);
+        return (["family", "family_pro"] as const).filter(id =>
+          isActiveRevenueCatRecord(entitlements[id]) && entitlements[id].product_identifier?.startsWith("rc_promo_")
+        );
+      };
+      const hasPaidAccess = (data: unknown) => {
+        const entitlements = getRevenueCatEntitlements(data);
+        if (["family", "family_pro"].some(id =>
+          isActiveRevenueCatRecord(entitlements[id]) && !entitlements[id].product_identifier?.startsWith("rc_promo_")
+        )) return true;
+        // A promotional entitlement can mask an underlying active store purchase.
+        return Object.entries(getRevenueCatSubscriptions(data)).some(([productId, subscription]) =>
+          !productId.startsWith("rc_promo_") && isActiveRevenueCatRecord(subscription)
+        );
+      };
+
+      let subscriber = await readSubscriber();
+      if (repairLifetimeFlag) {
+        // The old webhook could mark rc_promo_*_lifetime as a purchased lifetime
+        // product. Only clear that legacy flag with explicit admin confirmation
+        // AND when neither provider has any evidence of a genuine lifetime sale.
+        const nonSubscriptions = getRevenueCatNonSubscriptions(subscriber);
+        const { verifiedCheckoutSessions } = await import("../shared/schema");
+        const { eq } = await import("drizzle-orm");
+        const stripeCheckouts = await db.select({ sessionId: verifiedCheckoutSessions.sessionId })
+          .from(verifiedCheckoutSessions)
+          .where(eq(verifiedCheckoutSessions.familyName, familyName))
+          .limit(1);
+        if (!nonSubscriptions ||
+            Object.keys(nonSubscriptions).some(id => !id.startsWith("rc_promo_")) ||
+            family.billingCustomerId || family.billingSubscriptionId || stripeCheckouts.length > 0) {
+          return res.status(409).json({ message: "LIFETIME_PURCHASE_UNVERIFIED" });
+        }
+      }
+      if (hasPaidAccess(subscriber)) {
+        return res.status(409).json({ message: "PAID_SUBSCRIPTION_ACTIVE" });
+      }
+      if (promoIds(subscriber).length === 0) {
+        return res.status(409).json({ message: "NO_ACTIVE_PROMO" });
+      }
+
+      // Re-read after each revocation: RC may surface a second promotional
+      // entitlement which had been hidden by the first one.
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const ids = promoIds(subscriber);
+        if (ids.length === 0) break;
+        for (const id of ids) {
+          const revoke = await fetch(`${url}/entitlements/${encodeURIComponent(id)}/revoke_promotionals`, {
+            method: "POST",
+            headers,
+          });
+          if (!revoke.ok) {
+            console.error(`[Admin] RC promo revocation returned ${revoke.status} for ${familyName}`);
+            return res.status(502).json({ message: "RevenueCat did not revoke the promotion; family tier unchanged" });
+          }
+        }
+        subscriber = await readSubscriber();
+      }
+
+      if (promoIds(subscriber).length > 0) {
+        return res.status(502).json({ message: "Promotion is still active in RevenueCat; family tier unchanged" });
+      }
+      if (hasPaidAccess(subscriber)) {
+        return res.status(409).json({ message: "PAID_SUBSCRIPTION_ACTIVE" });
+      }
+
+      const { eq } = await import("drizzle-orm");
+      const { families } = await import("../shared/schema");
+      await withVerifiedRevenueCatPayload(subscriber, async () => {
+        await db.update(families).set({
+          subscriptionTier: "free",
+          subscriptionStatus: "canceled",
+          isAdminGranted: false,
+          ...(repairLifetimeFlag ? { isLifetimePurchase: false } : {}),
+          updatedAt: new Date(),
+        }).where(eq(families.familyName, familyName));
+      });
+
+      console.log(`[Admin] RC promotional access ended for ${familyName} → free`);
+      res.json({ success: true, tier: "free" });
+    } catch (error) {
+      console.error("[Admin] Failed to end RC promotional access:", error);
+      res.status(503).json({ message: "RevenueCat verification failed; family tier unchanged" });
+    }
+    return;
+  });
+
+  // Remove member from family (admin action)
+  app.delete("/api/admin/families/:familyName/members/:memberId", isAdmin, async (req, res) => {
+    try {
+      const { familyName, memberId } = req.params;
+      
+      const member = await storage.getFamilyMember(memberId);
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+      
+      if (member.familyName !== familyName) {
+        return res.status(400).json({ message: "Member not in this family" });
+      }
+
+      // Check if this is the last parent
+      const allMembers = await storage.getFamilyMembersByFamily(familyName);
+      const parents = allMembers.filter(m => m.role === "parent");
+      
+      if (member.role === "parent" && parents.length <= 1) {
+        return res.status(400).json({ message: "Cannot remove the last parent from a family" });
+      }
+      
+      await storage.deleteFamilyMember(memberId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing member:", error);
+      res.status(500).json({ message: "Failed to remove member" });
+    }
+    return;
+  });
+
+  // Temporary: delete a user by Replit user ID
+  app.delete("/api/admin/users/:replitUserId", isAdmin, async (req, res) => {
+    try {
+      const { replitUserId } = req.params;
+      // Detach the login account from any family member before deleting, so the
+      // member record (and the family) are preserved after account removal.
+      await db
+        .update(familyMembers)
+        .set({ userId: null })
+        .where(eq(familyMembers.userId, replitUserId));
+      await db.delete(users).where(eq(users.id, replitUserId));
+      res.json({ success: true, deleted: replitUserId });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Add points to a member (admin action for testing)
+  app.post("/api/admin/members/:memberId/points", isAdmin, async (req, res) => {
+    try {
+      const { memberId } = req.params;
+      const { points, operationId } = req.body;
+      
+      if (typeof points !== 'number' || points <= 0) {
+        return res.status(400).json({ message: "Points must be a positive number" });
+      }
+      
+      const member = await storage.getFamilyMember(memberId);
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+      
+      const [updatedMember] = await storage.awardPointsAtomically(
+        [memberId],
+        points,
+        "admin_adjustment",
+        "Admin points adjustment",
+        null,
+        typeof operationId === "string" && operationId.trim()
+          ? operationId.trim()
+          : (typeof req.get("x-operation-id") === "string" ? req.get("x-operation-id") : crypto.randomUUID()),
+      );
+      
+      // Broadcast update via WebSocket
+      broadcastToFamily(member.familyName, { 
+        type: "points_updated", 
+        memberId,
+        addedPoints: points
+      });
+      
+      res.json({ success: true, newTotalPoints: updatedMember.totalPoints });
+    } catch (error) {
+      console.error("Error adding points:", error);
+      res.status(500).json({ message: "Failed to add points" });
+    }
+    return;
+  });
+
+  // Send admin message to a family (broadcasts via WebSocket only - no chat storage)
+  app.post("/api/admin/families/:familyName/message", isAdmin, async (req, res) => {
+    try {
+      const { familyName } = req.params;
+      const { message, subject } = req.body;
+      
+      if (!message || typeof message !== "string") {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      // Get family to verify it exists
+      const family = await storage.getFamily(familyName);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+
+      // Broadcast admin notification to family via WebSocket
+      broadcastToFamily(familyName, { 
+        type: "admin_message", 
+        message,
+        senderName: "HeroKids Admin",
+        timestamp: new Date().toISOString()
+      });
+
+      // Send email to all parent members with verified email addresses
+      const members = await storage.getFamilyMembersByFamily(familyName);
+      const parents = members.filter(m => m.role === "parent" && m.userId);
+      const emailSubject = subject?.trim() || `Message from HeroKids for family "${familyName}"`;
+      const emailsSent: string[] = [];
+      const emailsFailed: string[] = [];
+
+      for (const parent of parents) {
+        const user = await storage.getUser(parent.userId!);
+        if (!user?.email || !user.isEmailVerified) continue;
+        try {
+          const { sendTransactionalEmail } = await import("../email");
+          await sendTransactionalEmail({
+            to: user.email,
+            subject: emailSubject,
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #7c3aed, #4f46e5); padding: 24px; border-radius: 12px 12px 0 0;">
+                  <h1 style="color: white; margin: 0; font-size: 24px;">HeroKids</h1>
+                  <p style="color: rgba(255,255,255,0.8); margin: 4px 0 0;">Message for the ${familyName} family</p>
+                </div>
+                <div style="background: #f9f9f9; padding: 24px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb;">
+                  <p style="color: #374151; font-size: 16px; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+                  <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+                  <p style="color: #9ca3af; font-size: 13px; margin: 0;">This message was sent by the Little Champs team. Please do not reply to this email — contact us at <a href="mailto:info@littlechamps.net">info@littlechamps.net</a>.</p>
+                </div>
+              </div>
+            `,
+          });
+          emailsSent.push(user.email);
+        } catch (err) {
+          console.error(`Failed to send admin email to ${user.email}:`, err);
+          emailsFailed.push(user.email);
+        }
+      }
+
+      console.log(`📧 Admin message sent to family "${familyName}": ${emailsSent.length} emails sent, ${emailsFailed.length} failed`);
+      res.json({ success: true, emailsSent: emailsSent.length, emailsFailed: emailsFailed.length });
+    } catch (error) {
+      console.error("Error sending admin message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+    return;
+  });
+
+  // Get analytics data for charts
+  app.get("/api/admin/analytics", isAdmin, async (req, res) => {
+    try {
+      const allFamilies = await storage.getFamilies();
+      const allMembers = await storage.getAllFamilyMembers();
+      
+      // Get all task completions for activity data
+      const completionsByFamily: Record<string, number> = {};
+      for (const family of allFamilies) {
+        const completions = await storage.getTaskCompletionsByFamily(family.familyName);
+        completionsByFamily[family.familyName] = completions.length;
+      }
+      
+      // 1. New registrations per week (last 12 weeks)
+      const now = new Date();
+      const weeklyRegistrations: { week: string; count: number }[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - (i * 7) - now.getDay());
+        weekStart.setHours(0, 0, 0, 0);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 7);
+        
+        const count = allMembers.filter(m => {
+          const created = m.createdAt ? new Date(m.createdAt) : null;
+          return created && created >= weekStart && created < weekEnd;
+        }).length;
+        
+        const weekLabel = `KW${Math.ceil((weekStart.getTime() - new Date(weekStart.getFullYear(), 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1}`;
+        weeklyRegistrations.push({ week: weekLabel, count });
+      }
+      
+      // 2. New registrations per month (last 6 months)
+      const monthlyRegistrations: { month: string; count: number }[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+        
+        const count = allMembers.filter(m => {
+          const created = m.createdAt ? new Date(m.createdAt) : null;
+          return created && created >= monthStart && created < monthEnd;
+        }).length;
+        
+        const monthLabel = monthStart.toLocaleDateString('de-DE', { month: 'short', year: '2-digit' });
+        monthlyRegistrations.push({ month: monthLabel, count });
+      }
+      
+      // 3. Most active families (top 10 by completed tasks)
+      const activeFamilies = Object.entries(completionsByFamily)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10)
+        .map(([name, completions]) => ({ name, completions }));
+      
+      // 4. Average points per child
+      const children = allMembers.filter(m => m.role === 'child');
+      const avgPointsPerChild = children.length > 0 
+        ? Math.round(children.reduce((sum, c) => sum + c.totalEarned, 0) / children.length)
+        : 0;
+      
+      // Points distribution by role
+      const parents = allMembers.filter(m => m.role === 'parent');
+      const pointsByRole = [
+        { role: 'Kinder', avgPoints: avgPointsPerChild, count: children.length },
+        { role: 'Eltern', avgPoints: parents.length > 0 ? Math.round(parents.reduce((sum, p) => sum + p.totalEarned, 0) / parents.length) : 0, count: parents.length },
+      ];
+      
+      // 5. Current subscription tier distribution
+      const tierDistribution = [
+        { tier: 'Free', count: allFamilies.filter(f => f.subscriptionTier === 'free').length },
+        { tier: 'Family', count: allFamilies.filter(f => f.subscriptionTier === 'family').length },
+        { tier: 'Family+', count: allFamilies.filter(f => f.subscriptionTier === 'family_plus').length },
+        { tier: 'FamilyPro', count: allFamilies.filter(f => f.subscriptionTier === 'family_hero').length },
+      ];
+      
+      res.json({
+        weeklyRegistrations,
+        monthlyRegistrations,
+        activeFamilies,
+        avgPointsPerChild,
+        pointsByRole,
+        tierDistribution,
+        totalChildren: children.length,
+        totalParents: parents.length,
+      });
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Get skin statistics
+  app.get("/api/admin/skins/stats", isAdmin, async (req, res) => {
+    try {
+      const allSkins = await storage.getSkins();
+      const allMembers = await storage.getAllFamilyMembers();
+      
+      // Count how many times each skin is actively used
+      const skinUsage: Record<string, { count: number; skin: any }> = {};
+      
+      for (const skin of allSkins) {
+        skinUsage[skin.id] = { count: 0, skin };
+      }
+      
+      for (const member of allMembers) {
+        if (member.activeSkinId && skinUsage[member.activeSkinId]) {
+          skinUsage[member.activeSkinId].count++;
+        }
+      }
+      
+      // Sort by usage count
+      const sortedStats = Object.values(skinUsage)
+        .sort((a, b) => b.count - a.count)
+        .map(({ count, skin }) => ({
+          id: skin.id,
+          name: skin.name,
+          description: skin.description,
+          pointsRequired: skin.pointsRequired,
+          bonusPoints: skin.bonusPoints,
+          usageCount: count,
+        }));
+      
+      res.json({
+        totalSkins: allSkins.length,
+        stats: sortedStats,
+      });
+    } catch (error) {
+      console.error("Error fetching skin stats:", error);
+      res.status(500).json({ message: "Failed to fetch skin stats" });
+    }
+  });
+
+  // Add new skin
+  app.post("/api/admin/skins", isAdmin, async (req, res) => {
+    try {
+      const { name, description, pointsRequired, imageUrl, bonusPoints } = req.body;
+      
+      if (!name || !imageUrl) {
+        return res.status(400).json({ message: "name and imageUrl are required" });
+      }
+      
+      const id = `custom_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+      
+      const newSkin = await storage.createSkin({
+        id,
+        name,
+        description: description || null,
+        pointsRequired: pointsRequired || 0,
+        imageUrl,
+        bonusPoints: bonusPoints || 0,
+      });
+      
+      res.json(newSkin);
+    } catch (error) {
+      console.error("Error adding skin:", error);
+      res.status(500).json({ message: "Failed to add skin" });
+    }
+    return;
+  });
+
+  // Delete skin
+  app.delete("/api/admin/skins/:skinId", isAdmin, async (req, res) => {
+    try {
+      const { skinId } = req.params;
+      await storage.deleteSkin(skinId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting skin:", error);
+      res.status(500).json({ message: "Failed to delete skin" });
+    }
+  });
+
+  // ========================================
+  // Data Migration Routes (for syncing dev to production)
+  // ========================================
+  
+  // Export all data as JSON (for backup/migration)
+  app.get("/api/admin/export", isAdmin, async (req, res) => {
+    try {
+      const data = await storage.exportAllData();
+      res.json(data);
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      res.status(500).json({ message: "Failed to export data" });
+    }
+  });
+  
+  // Import data from JSON (for restoring to production)
+  app.post("/api/admin/import", isAdmin, async (req, res) => {
+    try {
+      const { data, skipExisting = true } = req.body;
+      
+      if (!data) {
+        return res.status(400).json({ message: "No data provided" });
+      }
+      
+      const result = await storage.importAllData(data, skipExisting);
+      res.json({ 
+        message: "Data imported successfully", 
+        ...result 
+      });
+    } catch (error: any) {
+      console.error("Error importing data:", error);
+      res.status(500).json({ message: "Failed to import data", error: error.message });
+    }
+    return;
+  });
+
+  // Delete multiple families at once (for cleaning up test families)
+  app.post("/api/admin/delete-families", isAdmin, async (req, res) => {
+    try {
+      const { familyNames } = req.body;
+      
+      if (!familyNames || !Array.isArray(familyNames) || familyNames.length === 0) {
+        return res.status(400).json({ message: "No family names provided" });
+      }
+      
+      let deleted = 0;
+      const errors: string[] = [];
+      
+      for (const familyName of familyNames) {
+        try {
+          await storage.deleteFamily(familyName);
+          deleted++;
+        } catch (err: any) {
+          errors.push(`${familyName}: ${err.message}`);
+        }
+      }
+      
+      res.json({ 
+        message: `Deleted ${deleted} of ${familyNames.length} families`,
+        deleted,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    } catch (error: any) {
+      console.error("Error deleting families:", error);
+      res.status(500).json({ message: "Failed to delete families", error: error.message });
+    }
+    return;
+  });
+
+  // Fix stars for a single member (add missing stars to reach 48 total)
+  app.post("/api/admin/fix-stars/:memberId", isAdmin, async (req, res) => {
+    try {
+      const { memberId } = req.params;
+      
+      const result = await storage.fixMemberStars(memberId);
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error fixing member stars:", error);
+      res.status(500).json({ message: "Failed to fix stars", error: error.message });
+    }
+  });
+  
+  // Get all registered user accounts
+  app.get("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      const allUsers = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          isEmailVerified: users.isEmailVerified,
+          isDisabled: users.isDisabled,
+          createdAt: users.createdAt,
+          lastLoginAt: users.lastLoginAt,
+          linkedMemberId: familyMembers.id,
+          linkedMemberName: familyMembers.displayName,
+          linkedMemberRole: familyMembers.role,
+          linkedFamilyName: familyMembers.familyName,
+        })
+        .from(users)
+        .leftJoin(familyMembers, eq(familyMembers.userId, users.id))
+        .orderBy(desc(users.createdAt));
+
+      res.json(allUsers);
+    } catch (error) {
+      console.error("Error fetching admin users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // ---- Feature Flags (admin read + write) ----
+
+  app.get("/api/admin/feature-flags", isAdmin, async (_req, res) => {
+    try {
+      const raw = await storage.getAppConfig("review_prompt_enabled");
+      res.json({ review_prompt_enabled: raw === "true" });
+    } catch (error) {
+      console.error("Error fetching admin feature flags:", error);
+      res.status(500).json({ message: "Failed to fetch feature flags" });
+    }
+  });
+
+  app.patch("/api/admin/feature-flags", isAdmin, async (req, res) => {
+    try {
+      const { review_prompt_enabled } = req.body as { review_prompt_enabled?: boolean };
+      if (typeof review_prompt_enabled !== "boolean") {
+        return res.status(400).json({ message: "review_prompt_enabled must be a boolean" });
+      }
+      await storage.setAppConfig("review_prompt_enabled", review_prompt_enabled ? "true" : "false");
+      res.json({ review_prompt_enabled });
+    } catch (error) {
+      console.error("Error updating feature flags:", error);
+      res.status(500).json({ message: "Failed to update feature flags" });
+    }
+    return;
+  });
+
+  // ========================================
+  // End of Admin Dashboard Routes
+  // ========================================
+  
+  const httpServer = createServer(app);
+
+  // WebSocket server for real-time updates
+  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+
+  wss.on("connection", (ws: WebSocket, req: any) => {
+    const cookieHeader = req.headers?.cookie as string | undefined;
+    let familyName: string | null = null;
+    let connectedMember: { id: string; role: "parent" | "child" } | null = null;
+    let joined = false;
+
+    ws.on("message", async (message: string) => {
+      try {
+        const data = JSON.parse(message.toString());
+
+        if (data.type === "join_family" && typeof data.familyName === "string" && !joined) {
+          const requestedFamily = data.familyName;
+          const mobileToken = typeof data.token === "string" ? data.token : undefined;
+          const devToken = typeof data.devToken === "string" ? data.devToken : undefined;
+
+          const userId = await resolveWsUserId({
+            cookieHeader,
+            mobileToken,
+            devToken,
+          });
+
+          if (!userId) {
+            ws.close(4401, "Unauthorized");
+            return;
+          }
+
+           let authorizedFamily: string | null = null;
+           let authorizedMember: { id: string; role: "parent" | "child" } | null = null;
+
+          if (userId.startsWith("mobile:")) {
+            const memberId = userId.slice("mobile:".length);
+            const member = await storage.getFamilyMember(memberId);
+             if (member && member.familyName === requestedFamily) {
+              authorizedFamily = requestedFamily;
+               authorizedMember = { id: member.id, role: member.role };
+            }
+          } else if (userId.startsWith("device:")) {
+            const memberId = userId.slice("device:".length);
+            const member = await storage.getFamilyMember(memberId);
+             if (member && member.familyName === requestedFamily) {
+              authorizedFamily = requestedFamily;
+               authorizedMember = { id: member.id, role: member.role };
+            }
+          } else {
+            const member = await storage.getFamilyMemberByUserId(userId);
+             if (member && member.familyName === requestedFamily) {
+              authorizedFamily = requestedFamily;
+               authorizedMember = { id: member.id, role: member.role };
+            }
+          }
+
+          if (!authorizedFamily) {
+            ws.close(4403, "Forbidden");
+            return;
+          }
+
+           if (!authorizedMember) {
+             ws.close(4403, "Forbidden");
+             return;
+           }
+           familyName = authorizedFamily;
+           connectedMember = authorizedMember;
+          joined = true;
+
+          if (!wsClients.has(familyName)) {
+            wsClients.set(familyName, new Set());
+          }
+           wsClients.get(familyName)!.add({ ws, memberId: connectedMember.id, role: connectedMember.role });
+
+          console.log(`Client joined family: ${familyName}`);
+        }
+      } catch (error) {
+        console.error("Error handling WebSocket message:", error);
+      }
+    });
+
+    ws.on("close", () => {
+      if (familyName) {
+         const clients = wsClients.get(familyName);
+        if (clients) {
+           clients.forEach(client => {
+             if (client.ws === ws) clients.delete(client);
+           });
+          if (clients.size === 0) {
+            wsClients.delete(familyName);
+          }
+        }
+        console.log(`Client left family: ${familyName}`);
+      }
+    });
+
+    ws.on("error", (error) => {
+      console.error("WebSocket error:", error);
+    });
+  });
+
+  return httpServer;
+}
