@@ -30,3 +30,11 @@ Der normale Replit-Push ist wieder der gewünschte Arbeitsablauf; der Nutzer hat
 **Why:** Nach Erklärung, dass lokale Dateien und der bisherige Verlauf erhalten bleiben können, hat der Nutzer die vorherige Entscheidung geändert und die Rückkehr zum normalen Workflow gewünscht.
 
 **How to apply:** Den alten lokalen Verlauf separat sichern, `publish` auf der bestehenden GitHub-Historie fortsetzen und lokale Release-Ausschlüsse beibehalten. Alte unbereinigte Zwischencommits nicht hineinmergen. Git-Anmeldung getrennt vom Connector prüfen; keine vollständige Push-Bereitschaft behaupten, solange die normale Git-Anmeldung scheitert. Die Einrichtung allein erlaubt noch keinen echten Push oder neuen Cloud-Build.
+
+## Git-Anmeldung unabhängig vom Verbindungsstatus prüfen
+
+Eine als „Active“ angezeigte GitHub-Verbindung und eine erneute Anmeldung im Replit-Git-Bereich garantieren hier keinen funktionierenden HTTPS-Push aus der Agent-Shell.
+
+**Why:** Die erneuerte Git-Verbindung behob den Shell-Anmeldefehler nicht. Erst die separate Browser-Anmeldung der GitHub CLI und deren Verwendung als Git-Credential-Helper ermöglichten einen erfolgreichen normalen Push-Probelauf. Die funktionierende GitHub-App-Connector-Verbindung musste dafür nicht getrennt werden.
+
+**How to apply:** Den tatsächlich verwendeten Schreibweg prüfen. Bei diesem Anmeldeproblem die GitHub-CLI-Browserautorisierung nutzen, statt wiederholt Verbindungen zu löschen oder Tokens im Chat anzufordern. Nach einer Änderung den Schreibzugriff und einen `git push --dry-run` bestätigen; ein Probelauf erteilt keine Freigabe für einen echten Push.
