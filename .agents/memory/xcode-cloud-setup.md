@@ -39,19 +39,27 @@ For Push Notifications, keep all three native declarations aligned: the producti
 
 If Xcode Cloud produces an App Store IPA and Apple sends an ITMS delivery email, the binary reached App Store Connect even when distribution logs also contain a `Session Proxy Provider` authentication warning. Treat Apple's ITMS message as the actionable failure.
 
+A `Session Proxy Provider` message inside a file named `critical.log` is not sufficient evidence that export failed when the export command ends with `EXPORT SUCCEEDED`. Archive log ZIPs can include successful compilation and exports without the subsequent failed upload or TestFlight post-action.
+
 For a closed pre-release train, increase `MARKETING_VERSION`; changing `CURRENT_PROJECT_VERSION` only changes the internal build number and does not open a new App Store version.
 
-**Why:** A build showing the session-proxy warning was initially mistaken for an Apple-side outage, but Apple had accepted the upload and rejected it because `MARKETING_VERSION` still matched the previously approved version.
+**Why:** A build showing the session-proxy warning was initially mistaken for an Apple-side outage, but Apple had accepted the upload and rejected it because `MARKETING_VERSION` still matched the previously approved version. The user explicitly reported that this versioning failure has recurred in this project.
 
-**How to apply:** Before changing credentials, certificates, or provisioning, check for Apple's delivery email and compare `MARKETING_VERSION` with the last approved App Store version.
+**How to apply:** When a delivery failure recurs, compare `MARKETING_VERSION` with the approved App Store version early, particularly when the user mentions the known versioning issue. Then check terminal statuses and obtain the failed post-action log or Apple's delivery email as needed to confirm the exact rejection. Do not change credentials or provisioning based on the session-proxy warning alone, and do not infer successful overall delivery from a successful archive or export.
 
 ## Replit workspace versus the iOS release repository
 
-The user confirmed that the iOS Xcode Cloud workflow builds the GitHub branch `publish`, not `main`.
+The user confirmed that the iOS Xcode Cloud workflow builds the GitHub branch `publish`, not `main`, and that synchronizing that branch automatically starts a Cloud build.
 
 **Why:** Repository branches held different source snapshots, so assuming `main` was the release source would update the wrong build input.
 
-**How to apply:** Use `publish` as the confirmed iOS synchronization target unless the user changes the workflow. Still obtain approval for a push and check automatic build/distribution triggers; knowing the branch is not push authorization.
+**How to apply:** Use `publish` as the confirmed iOS synchronization target unless the user changes the workflow. Still obtain approval for a push and warn about automatic builds; automatic TestFlight distribution remains a separate setting, not an established fact.
+
+Moving the native workspace in Git does not update the workspace path stored in the existing Xcode Cloud workflow.
+
+**Why:** After the approved multi-artifact synchronization, Cloud still passed the legacy root workspace path to `xcodebuild` and failed with exit 66, even though the new workspace was present on the correct remote branch.
+
+**How to apply:** Update the workflow's project/workspace selection to the canonical phone artifact before retrying. Do not change the source branch, republish the website or reintroduce obsolete generated native output to address a Cloud workspace-selection error. If the UI does not expose this setting clearly, inspect the actual workflow editor rather than inventing a menu location.
 
 Inspect the GitHub branch used for iOS separately from the current Replit workspace before diagnosing a native build or changing its CI.
 
@@ -65,6 +73,12 @@ When Safari and the installed app differ, compare them on the same device before
 
 **How to apply:** Treat browser diagnostics as evidence about that browser only. Inspect the shipped native configuration or obtain diagnostics from a verified native build before choosing between local assets, another origin and native caching as the cause.
 
+The user subsequently confirmed on the installed native app that it loads the online address `https://littlechamps.net`, reports identical loaded/server web identifiers, and displays the updated layouts.
+
+**Why:** This is direct device evidence that the migrated iOS release pipeline produces an app loading the current remote UI. It does not establish why the earlier installed binary showed a different UI.
+
+**How to apply:** Use the confirmed remote-loading behavior as the baseline for future web-only updates; do not assume every layout change requires a new native release. Native configuration, plugin or bundled-resource changes still require a native build. If divergence returns, compare diagnostics from the affected installed app rather than extrapolating from Safari or rebuilding without evidence.
+
 ## Cross-platform workspace dependencies
 
 Keep the macOS optional native binaries for the web build tools available in the workspace lockfile, even when development runs on Linux.
@@ -72,3 +86,11 @@ Keep the macOS optional native binaries for the web build tools available in the
 **Why:** The multi-artifact template excluded Darwin dependencies repository-wide. Xcode Cloud must build the phone web app on macOS, so Linux-only success cannot establish that its dependency installation will work there.
 
 **How to apply:** Review platform-removal overrides whenever changing pnpm configuration or regenerating the lockfile. Keep both Apple Silicon and Intel Mac builds possible. A portable Capacitor copy/resource check is useful, but must never be reported as a successful CocoaPods installation, signed Xcode archive or App Store delivery.
+
+## Yellow custom-script warnings
+
+A yellow Xcode Cloud custom-script step can still have completed successfully. Read its terminal status and warning text before recommending another build.
+
+**Why:** Actual Cloud logs showed successful native resource preparation followed by a warning that a non-executable post-clone script had been run using `/bin/zsh`. Homebrew also warned about its support for the macOS image while continuing installation successfully.
+
+**How to apply:** Track executable permissions for custom CI scripts on subsequent maintenance. Do not rebuild a completed archive solely to remove these warnings, and do not treat successful preparation as proof of successful signing or TestFlight delivery.

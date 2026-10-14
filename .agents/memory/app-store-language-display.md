@@ -8,3 +8,9 @@ Der App Store erkennt die unterstützten Sprachen nicht aus den i18next-Überset
 **Why:** Ein nach Ergänzung der Sprachlisten erstellter und veröffentlichter Build zeigte weiterhin nur Englisch. Apples Bundle-Scanner erkannte die zusätzlichen Sprachen erst zuverlässig, wenn lokalisierte native Ressourcen tatsächlich Teil des Targets sind.
 
 **How to apply:** Halte `*.lproj`-Ressourcen, die Bundle-Lokalisierungsliste und Xcodes bekannte Regionen mit den ausgelieferten Web-Übersetzungen synchron. Stelle sicher, dass die Variant Group in der Resources Build Phase liegt. Änderungen werden erst mit einem neuen Store-Build sichtbar.
+
+Für die App-Store-Texte gehört Portugiesisch zu den angebotenen Sprachen, Türkisch nicht.
+
+**Why:** Der Nutzer hat die irrtümlich angebotene türkische Übersetzung ausdrücklich durch Portugiesisch korrigiert.
+
+**How to apply:** Bei mehrsprachigen Release-Texten Portugiesisch statt Türkisch liefern. Die portugiesische Sprachvariante ist damit noch nicht festgelegt.

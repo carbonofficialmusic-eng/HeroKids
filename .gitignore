@@ -48,3 +48,24 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Local migration copies and obsolete generated native output stay on disk.
+/.migration-backup/
+/ios/
+
+# Uploads are local unless they are explicitly needed by the application.
+# New @assets imports must be committed with their files; git:check verifies this.
+/attached_assets/*
+!/attached_assets/family-goals-icon.png
+!/attached_assets/herokids_tour_both.png
+!/attached_assets/herokids_tour_boy.png
+!/attached_assets/herokids_tour_girl.png
+!/attached_assets/littlechamps_logo_opt.webp
+!/attached_assets/generated_images/
+/attached_assets/generated_images/*
+!/attached_assets/generated_images/Cute_bear_avatar_character_c2930694.png
+!/attached_assets/generated_images/Cute_cat_avatar_character_0fe91690.png
+!/attached_assets/generated_images/Cute_fox_avatar_character_e27462ae.png
+!/attached_assets/generated_images/Cute_lion_avatar_character_5e5b20aa.png
+!/attached_assets/generated_images/Cute_penguin_avatar_character_8788d7ad.png
+!/attached_assets/generated_images/Cute_rabbit_avatar_character_12cf3f2c.png

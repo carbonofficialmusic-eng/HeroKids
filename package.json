@@ -8,6 +8,9 @@
     "test": "pnpm --filter @workspace/little-champs test",
     "ios:prepare": "pnpm --filter @workspace/little-champs run ios:prepare",
     "ios:check": "pnpm --filter @workspace/little-champs run ios:check",
+    "git:setup": "git config core.hooksPath .githooks",
+    "git:check": "pnpm --filter @workspace/scripts run git:check",
+    "git:test": "pnpm --filter @workspace/scripts run git:test",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --workspace-concurrency=1 --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"

@@ -11,6 +11,15 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
 
+## GitHub / iOS release workflow
+
+- Normal release branch: `publish`, tracking `origin/publish`. A push may automatically start Xcode Cloud; get the user's approval before pushing.
+- `pnpm run git:setup` enables the tracked pre-push guard. `pnpm run git:check` checks the committed release tree; `pnpm run git:test` tests the guard.
+- Keep `.migration-backup/`, root `/ios/`, generated output and unused uploads local. These files must not be deleted just to clean up Git.
+- Uploaded files are ignored by default. When importing a new `@assets/...` file, explicitly add the needed file with `git add -f attached_assets/...` and update the `.gitignore` exception if appropriate. The guard blocks missing imported assets and unused uploads.
+- Preserve local history on a `backup/...` branch before history reconciliation. Do not push backup branches, use `git push --all`, force-push, or merge the old unfiltered history into `publish`.
+- GitHub connector access is separate from normal Git authentication. A successful API call or fetch does not prove that the Git pane can push.
+
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
