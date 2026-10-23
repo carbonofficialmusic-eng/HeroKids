@@ -3,11 +3,17 @@ import { parseServerBuild } from "./layout-diagnostics";
 const RELOAD_KEY = "lc-web-refresh-attempt";
 const RELOAD_PARAM = "_lc_web";
 
+function hasNativeUpdater(): boolean {
+  return "__LC_NATIVE_WEB_UPDATE__" in window;
+}
+
 /** Called before rendering, or when resuming without an open editor. Never clears user data. */
 export async function refreshStaleWebBuild(
   loadedBuild: string,
   canReload: () => boolean = () => true,
 ): Promise<boolean> {
+  // The new iOS binary owns refresh safety independently of downloaded JS.
+  if (hasNativeUpdater()) return false;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3000);
   try {
@@ -48,6 +54,7 @@ export async function refreshStaleWebBuild(
 }
 
 export function installWebBuildResumeCheck(loadedBuild: string): () => void {
+  if (hasNativeUpdater()) return () => {};
   let hiddenAt: number | null = null;
   let pending = false;
   let editing = false;

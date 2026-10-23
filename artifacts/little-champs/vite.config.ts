@@ -35,6 +35,9 @@ export default defineConfig({
   plugins: [
     {
       name: 'little-champs-build-info',
+      transformIndexHtml() {
+        return [{ tag: 'meta', attrs: { name: 'lc-web-build', content: webBuild.id }, injectTo: 'head' }];
+      },
       configureServer(server) {
         server.middlewares.use(`${basePath}build-info.json`, (_request, response) => {
           response.setHeader('Content-Type', 'application/json');

@@ -15,6 +15,8 @@
                 BB22CC33DD44EE55FF66BB01 /* AppReviewPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22CC33DD44EE55FF66AA01 /* AppReviewPlugin.swift */; };
                 BB22CC33DD44EE55FF66BB02 /* AppReviewPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = BB22CC33DD44EE55FF66AA02 /* AppReviewPlugin.m */; };
                 AA11BB22CC33DD44EE55FF03 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55AA03 /* ViewController.swift */; };
+                D20000000000000000000001 /* NativeWebUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000011 /* NativeWebUpdater.swift */; };
+                D20000000000000000000002 /* NativeWebUpdateGuard.js in Resources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000012 /* NativeWebUpdateGuard.js */; };
                 504EC30D1FED79650016851F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30B1FED79650016851F /* Main.storyboard */; };
                 504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
                 504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
@@ -33,6 +35,8 @@
                 BB22CC33DD44EE55FF66AA01 /* AppReviewPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppReviewPlugin.swift; sourceTree = "<group>"; };
                 BB22CC33DD44EE55FF66AA02 /* AppReviewPlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppReviewPlugin.m; sourceTree = "<group>"; };
                 AA11BB22CC33DD44EE55AA03 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+                D20000000000000000000011 /* NativeWebUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeWebUpdater.swift; sourceTree = "<group>"; };
+                D20000000000000000000012 /* NativeWebUpdateGuard.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = NativeWebUpdateGuard.js; sourceTree = "<group>"; };
                 504EC30C1FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
                 504EC30E1FED79650016851F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
                 504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -100,6 +104,8 @@
                                 BB22CC33DD44EE55FF66AA01 /* AppReviewPlugin.swift */,
                                 BB22CC33DD44EE55FF66AA02 /* AppReviewPlugin.m */,
                                 AA11BB22CC33DD44EE55AA03 /* ViewController.swift */,
+                                D20000000000000000000011 /* NativeWebUpdater.swift */,
+                                D20000000000000000000012 /* NativeWebUpdateGuard.js */,
                                 504EC30B1FED79650016851F /* Main.storyboard */,
                                 504EC30E1FED79650016851F /* Assets.xcassets */,
                                 504EC3101FED79650016851F /* LaunchScreen.storyboard */,
@@ -196,6 +202,7 @@
                         isa = PBXResourcesBuildPhase;
                         buildActionMask = 2147483647;
                         files = (
+                                D20000000000000000000002 /* NativeWebUpdateGuard.js in Resources */,
                                 504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
                                 50B271D11FEDC1A000F3C39B /* public in Resources */,
                                 504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
@@ -255,6 +262,7 @@
                                 BB22CC33DD44EE55FF66BB01 /* AppReviewPlugin.swift in Sources */,
                                 BB22CC33DD44EE55FF66BB02 /* AppReviewPlugin.m in Sources */,
                                 AA11BB22CC33DD44EE55FF03 /* ViewController.swift in Sources */,
+                                D20000000000000000000001 /* NativeWebUpdater.swift in Sources */,
                         );
                         runOnlyForDeploymentPostprocessing = 0;
                 };

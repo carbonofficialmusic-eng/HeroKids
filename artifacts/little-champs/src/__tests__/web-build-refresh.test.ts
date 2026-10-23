@@ -38,6 +38,14 @@ afterEach(() => {
 });
 
 describe("published web build refresh", () => {
+  it("leaves updates to the bundled guard in the new iOS binary", async () => {
+    Object.assign(window, { __LC_NATIVE_WEB_UPDATE__: {} });
+    cleanup = installWebBuildResumeCheck(oldBuild);
+    resumeAfter(60_000);
+    expect(await refreshStaleWebBuild(oldBuild)).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
+  });
   it("loads a changed build at a cache-busting URL, preserving the route and existing parameters", async () => {
     expect(await refreshStaleWebBuild(oldBuild)).toBe(true);
     const target = new URL(replace.mock.calls[0][0]);

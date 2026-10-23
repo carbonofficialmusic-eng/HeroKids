@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import WebKit
 
 class ViewController: CAPBridgeViewController {
     private enum ServerState: Equatable {
@@ -25,6 +26,8 @@ class ViewController: CAPBridgeViewController {
     private var healthCheckInFlight = false
     private var serverState = ServerState.unknown
     private var activationObserver: NSObjectProtocol?
+    private var backgroundObserver: NSObjectProtocol?
+    private let webUpdater = NativeWebUpdater()
     private var webViewLoadingObservation: NSKeyValueObservation?
     private var webViewNavigationGeneration = 0
 
@@ -50,7 +53,15 @@ class ViewController: CAPBridgeViewController {
             object: nil,
             queue: .main
         ) { [weak self] _ in
+            self?.webUpdater.didBecomeActive()
             self?.checkServerHealth(forceFreshCheck: true)
+        }
+        backgroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.webUpdater.suspend()
         }
     }
 
@@ -64,12 +75,21 @@ class ViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(AppReviewPlugin())
     }
 
+    override func webView(with frame: CGRect, configuration: WKWebViewConfiguration) -> WKWebView {
+        let webView = FreshStartWebView(frame: frame, configuration: configuration)
+        NativeWebUpdater.installGuard(in: webView)
+        return webView
+    }
+
     deinit {
         healthTimer?.invalidate()
         healthTask?.cancel()
         webViewLoadingObservation?.invalidate()
         if let activationObserver {
             NotificationCenter.default.removeObserver(activationObserver)
+        }
+        if let backgroundObserver {
+            NotificationCenter.default.removeObserver(backgroundObserver)
         }
     }
 
@@ -234,7 +254,15 @@ class ViewController: CAPBridgeViewController {
                     case .ready:
                         self.consecutiveFailureCount = 0
                         self.applyServerAvailability(true)
-                        self.scheduleHealthCheck(after: 45)
+                        if let webView = self.webView {
+                            self.webUpdater.check(webView: webView) { [weak self] in
+                                guard let self else { return false }
+                                return UIApplication.shared.applicationState == .active
+                                    && self.presentedViewController == nil
+                                    && !self.webUpdater.isInActivationGracePeriod
+                            }
+                        }
+                        self.scheduleHealthCheck(after: self.webUpdater.isInActivationGracePeriod ? 5 : 45)
                     case .loading:
                         self.scheduleHealthCheck(after: 1)
                     case .failed:

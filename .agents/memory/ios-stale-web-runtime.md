@@ -14,3 +14,9 @@ Der Nutzer bestätigte, dass eine echte Seitennavigation über das Impressum den
 **Why:** Ein neuer nativer Build war für die erfolgreiche Aktualisierung nachweislich nicht nötig. Die bisherige statische Auslieferung setzte keine ausdrückliche Cache-Control für die Startseite; die tatsächliche Geräte-Cacheursache wurde nicht per WebView-Debugger gemessen.
 
 **How to apply:** Die Web-Auslieferung muss HTML und Versionsdatei ausdrücklich ohne Cache liefern. Inhaltlich versionierte JS/CSS-Dateien und Skin-Downloads dürfen weiter gecacht werden. Produktions-Cache-Regeln müssen am tatsächlich verwendeten Artefakt-Dienst greifen, nicht nur am API-Server oder an der Entwicklungs-Vorschau. Aktualisierungen beim Wiederöffnen dürfen keine offenen Dialoge, Kameraabläufe oder Entwürfe verwerfen. Die erstmalige Übernahme einer neuen Aktualisierungslogik in bereits alten Sitzungen ist getrennt von ihrem Verhalten bei späteren Veröffentlichungen zu betrachten.
+
+Der Nutzer hat anschließend ausdrücklich eine native Aktualisierungsabsicherung mit einmalig neuem iOS-Build gewählt. Spätere reine Webänderungen sollen weiter allein per Publish ankommen; die Absicherung darf nicht ausschließlich von bereits aktuellem heruntergeladenem JavaScript abhängen.
+
+**Why:** Auch nach Veröffentlichung der ausdrücklichen No-Store-Auslieferung und der Web-Aktualisierungsprüfung zeigte die installierte App erneut den alten Webstand. Neue Serverregeln können eine bereits alte Seite nicht nachträglich zur Ausführung neuer Prüfungen bringen. Die konkrete WebKit-Cacheursache ist weiterhin nicht am Gerät gemessen.
+
+**How to apply:** Kaltstart und Wiederaufnahme getrennt absichern, Capacitors Navigation-Delegate beibehalten und keine Cookies, Anmeldedaten oder Skin-Caches löschen. Native Projektregistrierung und Web-Prüfungen sind kein Ersatz für einen Xcode-Build und den Vergleich geladener/öffentlicher Webstände auf dem iPhone nach einem weiteren Publish.
