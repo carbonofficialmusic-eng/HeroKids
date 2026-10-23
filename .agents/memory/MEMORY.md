@@ -79,3 +79,4 @@
 - [TV-Aufgaben einmal bestätigen](tv-task-single-confirmation.md) — nach dem ersten Klick nur eine Bestätigung; das Ergebnis ohne zusätzlichen Bestätigungsklick anzeigen.
 - [Handy-Belohnungen nach Ausrichtung](phone-reward-orientation.md) — kompaktes 2×2-Raster nur im Querformat; Hochformat unverändert lassen.
 - [Unbekannte Vorschaufehler bei Menüs](preview-layout-warnings.md) — originales Browserereignis prüfen; ResizeObserver-Warnungen nicht mit fehlgeschlagenem Profilwechsel verwechseln.
+- [Kompakte Aufgaben-Teilnehmer](task-participant-display.md) — drei Teilnehmer zeigen, aktives Switch-Profil zuerst; weitere samt Status über Pfeil ausklappen.

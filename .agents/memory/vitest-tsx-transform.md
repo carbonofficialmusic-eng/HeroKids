@@ -38,3 +38,9 @@ CSS-Regressionstests müssen sicherstellen, dass sie den echten Stylesheet-Text 
 **Why:** Im bestehenden Test-Kontext lieferte auch ein CSS-Rohimport nicht den erwarteten Text. Außerdem wird eine statische Asset-URL über `new URL(..., import.meta.url)` von Vite als Browser-Ressource umgeschrieben und ist dann kein gültiger Node-Dateipfad.
 
 **How to apply:** Stylesheet-Text für solche Tests mit Node-Dateipfadauflösung aus dem Testverzeichnis lesen. Die relevanten Regeln in ihrer ursprünglichen Reihenfolge prüfen, damit CSS-Prioritätsfehler tatsächlich erkannt werden.
+
+Gezielte Vitest-Aufrufe direkt über `pnpm --filter @workspace/little-champs exec vitest run --config vitest.config.ts <Testdatei>` starten.
+
+**Why:** Ein zusätzliches `--` beim Aufruf des vorhandenen Test-Scripts führte dazu, dass der gewünschte Dateifilter nicht griff und auch unabhängige TV-Suites liefen.
+
+**How to apply:** Für fokussierte Prüfungen den direkten Runner-Aufruf verwenden; einen ungeplant breiten Lauf nicht als Beleg für Fehler im geänderten Baustein behandeln.

@@ -18,6 +18,8 @@ import { canRetryRejectedTeamContribution } from "@shared/task-mode";
 import { getDueDateWindow, getLocalDateKey } from "@shared/due-date-policy";
 import { DailyProgressBadge } from "@/components/daily-progress-badge";
 import { formatAppointmentTime } from "@/lib/appointment-time";
+import { visibleTaskParticipants } from "@/lib/task-participants";
+import { TaskParticipantToggle } from "@/components/task-participant-toggle";
 
 
 interface TaskCardProps {
@@ -190,6 +192,12 @@ export function TaskCard({
 }: TaskCardProps) {
   const { t, i18n } = useTranslation();
   const [shoppingListExpanded, setShoppingListExpanded] = useState(false);
+  const [expandedParticipantsFor, setExpandedParticipantsFor] = useState<string | null>(null);
+  const participantContext = `${task.id}:${currentMemberId || ""}`;
+  const participantsExpanded = expandedParticipantsFor === participantContext;
+  const toggleParticipants = () => setExpandedParticipantsFor(
+    participantsExpanded ? null : participantContext,
+  );
   
   // Get locale for date formatting
   const getDateLocale = () => {
@@ -274,6 +282,10 @@ export function TaskCard({
   const assignedMembers = task.assignedMemberCompletions?.length
     ? task.assignedMemberCompletions
     : task.sharedMemberCompletions;
+  const visibleMembers = visibleTaskParticipants(assignedMembers, currentMemberId, participantsExpanded);
+  const visibleAssignedMembers = visibleTaskParticipants(task.assignedMemberCompletions, currentMemberId, participantsExpanded);
+  const visibleSharedMembers = visibleTaskParticipants(task.sharedMemberCompletions, currentMemberId, participantsExpanded);
+  const visibleCompletions = visibleTaskParticipants(task.completions, currentMemberId, participantsExpanded);
   // Family-wide daily multi-tasks do not have member rows to render their
   // progress. Keep the aggregate counter visible in both parent card layouts.
   const unassignedDailyTarget = task.recurrence === "daily" && (task.dailyTarget || 1) > 1
@@ -495,9 +507,10 @@ export function TaskCard({
                 </div>
               )}
               {assignedMembers && assignedMembers.length > 0 && (
-                <p className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
+                <div className="mt-0.5">
+                <p id={`compact-participants-${task.id}`} className="text-[10px] text-muted-foreground leading-tight">
                   {task.isSharedTask ? t("tasks.assignmentModeTeam") : t("tasks.assignmentModeIndividual")}:{" "}
-                  {assignedMembers.map((member) => {
+                  {visibleMembers.map((member) => {
                     const status = member.status === "approved" || member.hasCompleted
                       ? t("tasks.memberStatusApproved")
                       : member.status === "pending" || (member as any).hasSubmitted
@@ -508,6 +521,8 @@ export function TaskCard({
                     return `${member.displayName}: ${status}`;
                   }).join(" · ")}
                 </p>
+                <TaskParticipantToggle total={assignedMembers.length} expanded={participantsExpanded} onToggle={toggleParticipants} controls={`compact-participants-${task.id}`} />
+                </div>
               )}
             </div>
 
@@ -547,7 +562,7 @@ export function TaskCard({
                     <div className="font-medium">
                       {task.isSharedTask ? t("tasks.assignmentModeTeam") : t("tasks.assignmentModeIndividual")}
                     </div>
-                    {assignedMembers.map((member) => {
+                    {visibleTaskParticipants(assignedMembers, currentMemberId, true).map((member) => {
                       const status = member.status === "approved" || member.hasCompleted
                         ? t("tasks.memberStatusApproved")
                         : member.status === "pending" || (member as any).hasSubmitted
@@ -817,11 +832,14 @@ export function TaskCard({
             {/* Multi-Completion Participants */}
             {task.maxCompletions !== null && task.completions && task.completions.length > 0 && (
               <div className="mb-2" data-testid={`participants-${task.id}`}>
-                <p className="text-xs font-medium text-muted-foreground mb-1.5">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                <p className="text-xs font-medium text-muted-foreground">
                   {t('tasks.participants')}:
                 </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {task.completions.map((completion) => (
+                <TaskParticipantToggle total={task.completions.length} expanded={participantsExpanded} onToggle={toggleParticipants} controls={`participant-list-${task.id}`} />
+                </div>
+                <div id={`participant-list-${task.id}`} className="flex flex-wrap gap-1.5">
+                  {visibleCompletions.map((completion) => (
                     <Badge 
                       key={completion.id} 
                       variant="secondary" 
@@ -864,9 +882,12 @@ export function TaskCard({
                       total: task.assignedMemberCompletions.length
                     })}
                   </p>
+                  <div className="ml-auto">
+                    <TaskParticipantToggle total={task.assignedMemberCompletions.length} expanded={participantsExpanded} onToggle={toggleParticipants} controls={`assigned-list-${task.id}`} />
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {task.assignedMemberCompletions.map((member) => {
+                <div id={`assigned-list-${task.id}`} className="flex flex-col items-start gap-1.5">
+                  {visibleAssignedMembers.map((member) => {
                     if (task.dailyTarget > 1) {
                       return (
                         <DailyProgressBadge
@@ -923,9 +944,12 @@ export function TaskCard({
                       total: task.sharedMemberCompletions.length
                     })}
                   </p>
+                  <div className="ml-auto">
+                    <TaskParticipantToggle total={task.sharedMemberCompletions.length} expanded={participantsExpanded} onToggle={toggleParticipants} controls={`shared-list-${task.id}`} />
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {task.sharedMemberCompletions.map((member) => task.dailyTarget > 1 ? (
+                <div id={`shared-list-${task.id}`} className="flex flex-col items-start gap-1.5">
+                  {visibleSharedMembers.map((member) => task.dailyTarget > 1 ? (
                     <DailyProgressBadge
                       key={member.memberId}
                       displayName={member.displayName}

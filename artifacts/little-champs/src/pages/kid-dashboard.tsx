@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { visibleTaskParticipants } from "@/lib/task-participants";
+import { TaskParticipantToggle } from "@/components/task-participant-toggle";
 import { kickScrollReset, kickHeaderRepaint, isPhotoUsed, clearPhotoUsed } from "@/lib/cameraUtils";
 import { isNativePlatform } from "@/lib/platform";
 import { trackEvent } from "@/lib/analytics";
@@ -514,6 +516,14 @@ function TaskCard({
   const { t, i18n } = useTranslation();
   const [showDetails, setShowDetails] = useState(false);
   const [shoppingListExpanded, setShoppingListExpanded] = useState(false);
+  const [expandedParticipantsFor, setExpandedParticipantsFor] = useState<string | null>(null);
+  const participantContext = `${task.id}:${member.id}`;
+  const participantsExpanded = expandedParticipantsFor === participantContext;
+  const toggleParticipants = () => setExpandedParticipantsFor(
+    participantsExpanded ? null : participantContext,
+  );
+  const visibleAssignedMembers = visibleTaskParticipants(task.assignedMemberCompletions, member.id, participantsExpanded);
+  const visibleSharedMembers = visibleTaskParticipants(task.sharedMemberCompletions, member.id, participantsExpanded);
   
   // Determine task state based on memberCompletionStatus
   const completionStatus = task.memberCompletionStatus;
@@ -963,6 +973,7 @@ function TaskCard({
             <div className="space-y-2 text-left">
               {/* Teammates section */}
               <div className="p-2 bg-primary/5 rounded-xl">
+                <div className="flex items-center justify-between gap-2">
                 {task.isSharedTask ? (
                   <Badge className="lc-team-task-label mb-2 gap-1.5 px-3 py-1 text-sm font-bold border">
                     <Users className="h-4 w-4" />
@@ -974,8 +985,10 @@ function TaskCard({
                     {t("tasks.assignmentModeIndividual")}
                   </p>
                 )}
-                <div className="flex flex-wrap justify-center gap-1">
-                  {task.assignedMemberCompletions.map((m) => {
+                <TaskParticipantToggle total={task.assignedMemberCompletions.length} expanded={participantsExpanded} onToggle={toggleParticipants} controls={`kid-assigned-list-${task.id}`} />
+                </div>
+                <div id={`kid-assigned-list-${task.id}`} className="flex flex-col items-start gap-1">
+                  {visibleAssignedMembers.map((m) => {
                     const hasSubmitted = m.hasSubmitted ?? (m.status !== null);
                     if (dailyTarget > 1) {
                       return (
@@ -1037,12 +1050,15 @@ function TaskCard({
             <div className="space-y-2 text-left">
               {/* Teammates section */}
               <div className="p-2 bg-primary/5 rounded-xl">
+                <div className="flex items-center justify-between gap-2">
                 <Badge className="lc-team-task-label mb-2 gap-1.5 px-3 py-1 text-sm font-bold border">
                   <Users className="h-4 w-4" />
                   {t("tasks.sharedTaskLabel")}
                 </Badge>
-                <div className="flex flex-wrap justify-center gap-1">
-                  {task.sharedMemberCompletions.map((m) => dailyTarget > 1 ? (
+                <TaskParticipantToggle total={task.sharedMemberCompletions.length} expanded={participantsExpanded} onToggle={toggleParticipants} controls={`kid-shared-list-${task.id}`} />
+                </div>
+                <div id={`kid-shared-list-${task.id}`} className="flex flex-col items-start gap-1">
+                  {visibleSharedMembers.map((m) => dailyTarget > 1 ? (
                     <div key={m.memberId}>
                       <DailyProgressBadge
                         displayName={m.displayName}
