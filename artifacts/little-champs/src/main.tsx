@@ -5,6 +5,8 @@ import "./i18n";
 import { installPreviewLayoutWarningFilter } from "./lib/preview-layout-warning";
 import { installPhoneLandscapeLayout } from "./lib/phone-landscape";
 import { isNativePlatform } from "./lib/platform";
+import { WEB_BUILD_ID } from "./lib/layout-diagnostics";
+import { refreshStaleWebBuild, installWebBuildResumeCheck } from "./lib/web-build-refresh";
 
 const removePhoneLandscapeLayout = installPhoneLandscapeLayout(isNativePlatform());
 if (import.meta.hot) {
@@ -33,4 +35,10 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+async function startApp() {
+  if (import.meta.env.PROD && await refreshStaleWebBuild(WEB_BUILD_ID)) return;
+  createRoot(document.getElementById("root")!).render(<App />);
+  if (import.meta.env.PROD) installWebBuildResumeCheck(WEB_BUILD_ID);
+}
+
+void startApp();

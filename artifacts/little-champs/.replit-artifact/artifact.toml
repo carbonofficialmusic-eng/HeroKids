@@ -16,12 +16,16 @@ run = "pnpm --filter @workspace/little-champs run dev"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/little-champs", "run", "build" ]
-serve = "static"
-publicDir = "artifacts/little-champs/dist/public"
 
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
+[services.production.run]
+args = [ "node", "artifacts/little-champs/scripts/web-server.mjs" ]
+
+[services.production.run.env]
+PORT = "20042"
+NODE_ENV = "production"
+
+[services.production.health.startup]
+path = "/build-info.json"
 
 [services.env]
 PORT = "20042"

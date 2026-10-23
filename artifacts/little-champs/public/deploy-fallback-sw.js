@@ -26,7 +26,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.mode !== "navigate") return;
 
   event.respondWith(
-    fetch(event.request).then(async (response) => {
+    fetch(event.request, { cache: "no-store" }).then(async (response) => {
       if (response.status < 500) return response;
       return (await caches.match(FALLBACK_URL)) || response;
     }).catch(async () => (
