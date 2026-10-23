@@ -80,3 +80,4 @@
 - [Handy-Belohnungen nach Ausrichtung](phone-reward-orientation.md) — kompaktes 2×2-Raster nur im Querformat; Hochformat unverändert lassen.
 - [Unbekannte Vorschaufehler bei Menüs](preview-layout-warnings.md) — originales Browserereignis prüfen; ResizeObserver-Warnungen nicht mit fehlgeschlagenem Profilwechsel verwechseln.
 - [Kompakte Aufgaben-Teilnehmer](task-participant-display.md) — drei Teilnehmer zeigen, aktives Switch-Profil zuerst; weitere samt Status über Pfeil ausklappen.
+- [Veralteter iOS-Webstand](ios-stale-web-runtime.md) — Online-Adresse und erfolgreiches Publish reichen nicht; geladenen Webstand direkt mit dem Server vergleichen.
