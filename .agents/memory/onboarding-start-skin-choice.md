@@ -17,6 +17,12 @@ Das gelieferte Willkommensmotiv hat acht weitere Sprachfassungen; sie sollen pas
 
 **How to apply:** Bestehende Bildkomposition und Auflösung beibehalten. Bei älteren nativen Bundles darf eine fest eingebettete deutsche Illustration nicht die gewählte fremdsprachige Fassung übersteuern.
 
+Die lokalisierten Startbilder für Eltern und Kinder sollen fest im nativen iOS-Paket enthalten sein, nicht ausschließlich auf der Website.
+
+**Why:** Der Nutzer hat die native Einbindung ausdrücklich als Anforderung bestätigt.
+
+**How to apply:** Bei neuen Sprachbildern sowohl native Ressourcen als auch sprachabhängige Auswahl berücksichtigen. Ein Web-Publish ersetzt keinen neuen nativen Build für geänderte Paketressourcen.
+
 Die Sternverteilung ist von der Gratiswahl unabhängig und darf auch auf den drei angebotenen Startkarten Sterne enthalten. Beim bestätigten Aufdecken des Gratishelden wird ein dort liegender Stern genau einmal angerechnet; die Vorschau oder lokale Markierung allein zählt nicht. Diese Regel gilt für Eltern- und Kinderboard.
 
 Release- und Marketingtexte dürfen keinen garantierten Stern beim Starthelden versprechen.
