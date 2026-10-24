@@ -7,6 +7,12 @@ Neue Mitglieder sollen drei eigene zufällige reguläre Skin-Karten zur Startaus
 
 Die Sternverteilung ist von der Gratiswahl unabhängig und darf auch auf den drei angebotenen Startkarten Sterne enthalten. Beim bestätigten Aufdecken des Gratishelden wird ein dort liegender Stern genau einmal angerechnet; die Vorschau oder lokale Markierung allein zählt nicht. Diese Regel gilt für Eltern- und Kinderboard.
 
+Release- und Marketingtexte dürfen keinen garantierten Stern beim Starthelden versprechen.
+
+**Why:** Der Nutzer hat ausdrücklich korrigiert, dass nicht zwingend ein Stern auf dem gewählten Avatar liegt.
+
+**How to apply:** Die kostenlose Heldenfreischaltung beschreiben; einen Sternfund höchstens bedingt erwähnen, wenn dort tatsächlich ein Stern verborgen ist.
+
 **Why:** Der Nutzer hat ausdrücklich festgelegt, dass zufällig auf angebotenen Startkarten liegende Sterne beim tatsächlichen Entdecken angerechnet werden müssen, unabhängig von der Rolle.
 
 **How to apply:** Bestehende persönliche Sternpositionen bei der Auswahl nicht neu würfeln und den gewählten Gratishelden nicht grundsätzlich ausschließen. Die zwei ungewählten Angebote bleiben verdeckt samt ihren unentdeckten Sternen und zählen erst beim späteren regulären Aufdecken. Insgesamt bleiben es 48 Sterne; Gratiswahl und Wiederholungsanfragen erzeugen keine zusätzlichen Sterne.
