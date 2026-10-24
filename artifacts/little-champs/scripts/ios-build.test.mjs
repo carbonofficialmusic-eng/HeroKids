@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
-import { validateIosBuild } from "./check-ios-build.mjs";
+import { START_ARTWORK_FILES, validateIosBuild } from "./check-ios-build.mjs";
 
 function fixture(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "little-champs-ios-"));
@@ -24,8 +24,9 @@ function fixture(t) {
     write(`${base}/index.html`, '<script src="/assets/phone.js"></script><link href="/assets/phone.css">');
     write(`${base}/assets/phone.js`, "phone-only");
     write(`${base}/assets/phone.css`, "html{color:blue}");
-    write(`${base}/images/welcome-start.webp`, "parent illustration");
-    write(`${base}/images/welcome-kid-start.webp`, "child illustration");
+    for (const image of START_ARTWORK_FILES) {
+      write(`${base}/images/${image}`, `illustration: ${image}`);
+    }
     write(`${base}/build-info.json`, JSON.stringify({ id: "2026-10-14T20:00:00.000Z" }));
   }
   return { directory, write, config };
@@ -158,6 +159,14 @@ test("rejects a fixed starter skin left in the native bundle", (t) => {
   assert.throws(() => validateIosBuild(directory), /must remain online-only/);
 });
 
+for (const language of ["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"]) {
+  test(`requires the ${language} welcome illustration in the native bundle`, (t) => {
+    const { directory } = fixture(t);
+    fs.rmSync(path.join(directory, `ios/App/App/public/images/welcome-start-${language}.webp`));
+    assert.throws(() => validateIosBuild(directory), /ENOENT/);
+  });
+}
+
 test("native artwork is installed before creating the WebView and restricted to the live main frame", () => {
   const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
   const swift = fs.readFileSync(path.join(app, "ios/App/App/ViewController.swift"), "utf8");
@@ -167,6 +176,10 @@ test("native artwork is installed before creating the WebView and restricted to 
   assert.ok(swift.includes('location.hostname !== "littlechamps.net"'));
   assert.ok(swift.includes("injectionTime: .atDocumentStart, forMainFrameOnly: true"));
   assert.ok(swift.includes("__LITTLE_CHAMPS_START_ARTWORK__"));
+  for (const language of ["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"]) {
+    assert.ok(swift.includes(`"${language}"`), `Missing native artwork language: ${language}`);
+  }
+  assert.ok(swift.includes('resources["parent:\\(language)"] = "welcome-start-\\(language)"'));
 });
 
 test("rejects a TV entry point even when both copied HTML files match", (t) => {

@@ -11,6 +11,12 @@ Release- und Review-Texte müssen den neuen Starter-Einstieg für Eltern und Kin
 
 **How to apply:** Beide Rollen im Funktionsumfang und im Review-Testablauf berücksichtigen.
 
+Das gelieferte Willkommensmotiv hat acht weitere Sprachfassungen; sie sollen passend zur gewählten App-Sprache verwendet werden, das deutsche Original bleibt erhalten.
+
+**Why:** Der Nutzer hat die fertigen Übersetzungen als Bilder bereitgestellt, statt eine Neugestaltung oder neue Übersetzung zu beauftragen.
+
+**How to apply:** Bestehende Bildkomposition und Auflösung beibehalten. Bei älteren nativen Bundles darf eine fest eingebettete deutsche Illustration nicht die gewählte fremdsprachige Fassung übersteuern.
+
 Die Sternverteilung ist von der Gratiswahl unabhängig und darf auch auf den drei angebotenen Startkarten Sterne enthalten. Beim bestätigten Aufdecken des Gratishelden wird ein dort liegender Stern genau einmal angerechnet; die Vorschau oder lokale Markierung allein zählt nicht. Diese Regel gilt für Eltern- und Kinderboard.
 
 Release- und Marketingtexte dürfen keinen garantierten Stern beim Starthelden versprechen.

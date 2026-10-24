@@ -83,10 +83,13 @@ class ViewController: CAPBridgeViewController {
     }
 
     /// Merely copying images into public is not enough: server.url loads HTTPS,
-    /// not the bundled site. Publish these two illustrations before its JS runs,
+    /// not the bundled site. Publish the localized illustrations before its JS runs,
     /// without replacing Capacitor's navigation delegate or making network calls.
     private func installBundledStartArtwork(in configuration: WKWebViewConfiguration) {
-        let resources = ["parent": "welcome-start", "child": "welcome-kid-start"]
+        var resources = ["parent": "welcome-start", "child": "welcome-kid-start"]
+        for language in ["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"] {
+            resources["parent:\(language)"] = "welcome-start-\(language)"
+        }
         var artwork: [String: String] = [:]
         for (key, name) in resources {
             guard let url = Bundle.main.url(forResource: name, withExtension: "webp", subdirectory: "public/images"),

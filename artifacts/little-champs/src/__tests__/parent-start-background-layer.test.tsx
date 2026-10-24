@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, expect, it } from "vitest";
+import { act, cleanup, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, expect, it } from "vitest";
+import i18n from "@/i18n";
 import { BackgroundLayerContext } from "@/components/background-layer";
 import { ParentStartBackdrop } from "@/components/parent-start-screen";
 
-afterEach(() => { cleanup(); document.body.innerHTML = ""; });
+beforeEach(async () => { await i18n.changeLanguage("de"); });
+afterEach(async () => { cleanup(); document.body.innerHTML = ""; await i18n.changeLanguage("en"); });
 
 it("paints the welcome artwork in the existing skin background, outside clipped page content", () => {
   const background = document.createElement("div");
@@ -36,4 +38,18 @@ it("attaches the image after the shared background ref becomes available", () =>
     <BackgroundLayerContext.Provider value={background}><ParentStartBackdrop /></BackgroundLayerContext.Provider>,
   );
   expect(background.contains(screen.getByTestId("img-parent-start-background"))).toBe(true);
+});
+
+it("updates the existing backdrop immediately when the app language changes", async () => {
+  const background = document.createElement("div");
+  document.body.appendChild(background);
+  render(
+    <BackgroundLayerContext.Provider value={background}><ParentStartBackdrop /></BackgroundLayerContext.Provider>,
+  );
+  expect(screen.getByTestId("img-parent-start-background").style.backgroundImage).toContain("welcome-start.webp");
+  for (const language of ["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"]) {
+    await act(async () => { await i18n.changeLanguage(language); });
+    expect(screen.getByTestId("img-parent-start-background").style.backgroundImage)
+      .toContain(`welcome-start-${language}.webp`);
+  }
 });

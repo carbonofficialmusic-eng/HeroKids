@@ -3,10 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Plus, ChevronRight, Lock, Loader2 } from "lucide-react";
 import { getSkinBackgroundUrl, getSkinImageUrl } from "@/lib/skins";
 import { BackgroundLayerPortal } from "@/components/background-layer";
-import { getStartArtworkUrl } from "@/lib/start-artwork";
+import { getParentStartArtworkUrl } from "@/lib/start-artwork";
 import "./parent-start-screen.css";
-
-const startBg = getStartArtworkUrl("parent", `${import.meta.env.BASE_URL}images/welcome-start.webp`);
 
 export interface ParentStartScreenProps {
   options: { id: string; name: string }[];
@@ -62,6 +60,8 @@ export function StartSkinCard({ id, name, enabled, selecting, onChoose }: { id: 
 }
 
 export function ParentStartBackdrop() {
+  const { i18n } = useTranslation();
+  const startBg = getParentStartArtworkUrl(i18n.resolvedLanguage || i18n.language || "en");
   return (
     <BackgroundLayerPortal>
     <div className="lc-start__hero" aria-hidden="true">

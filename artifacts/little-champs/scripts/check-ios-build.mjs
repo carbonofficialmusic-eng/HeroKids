@@ -4,6 +4,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+export const START_ARTWORK_FILES = [
+  "welcome-start.webp", "welcome-kid-start.webp",
+  ...["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"].map(lang => `welcome-start-${lang}.webp`),
+];
 
 /** Validate generated resources, not just the TypeScript source configuration. */
 export function validateIosBuild(directory) {
@@ -67,7 +71,7 @@ export function validateIosBuild(directory) {
       `Bundled entry asset is stale: ${relative}`,
     );
   }
-  for (const image of ["welcome-start.webp", "welcome-kid-start.webp"]) {
+  for (const image of START_ARTWORK_FILES) {
     const relative = path.join("images", image);
     assert.deepEqual(
       fs.readFileSync(path.join(bundledDir, relative)),

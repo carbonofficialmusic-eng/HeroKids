@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from "vitest";
-import { getStartArtworkUrl } from "@/lib/start-artwork";
+import { getParentStartArtworkUrl, getStartArtworkUrl } from "@/lib/start-artwork";
 
 const { native } = vi.hoisted(() => ({ native: vi.fn() }));
 vi.mock("@/lib/platform", () => ({ isNativePlatform: native }));
@@ -39,4 +39,41 @@ it("rejects non-image or unexpected injected resource URLs", () => {
   native.mockReturnValue(true);
   window.__LITTLE_CHAMPS_START_ARTWORK__ = { child: "https://unexpected.example/image.webp" };
   expect(getStartArtworkUrl("child", "/online-child.webp")).toBe("/online-child.webp");
+});
+
+it.each(["de", "en", "es", "fr", "ja", "ko", "pt", "sv", "zh"])(
+  "uses the matching %s welcome image on the website",
+  language => {
+    native.mockReturnValue(false);
+    const file = language === "de" ? "welcome-start.webp" : `welcome-start-${language}.webp`;
+    expect(getParentStartArtworkUrl(language)).toBe(`/images/${file}`);
+  },
+);
+
+it.each(["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"])(
+  "uses the bundled %s image in new native builds",
+  language => {
+    native.mockReturnValue(true);
+    window.__LITTLE_CHAMPS_START_ARTWORK__ = {
+      parent: "data:image/webp;base64,Z2VybWFu",
+      [`parent:${language}`]: "data:image/webp;base64,bG9jYWxpemVk",
+    };
+    expect(getParentStartArtworkUrl(language)).toBe("data:image/webp;base64,bG9jYWxpemVk");
+  },
+);
+
+it("does not show a legacy German bundle when another language is selected", () => {
+  native.mockReturnValue(true);
+  window.__LITTLE_CHAMPS_START_ARTWORK__ = { parent: "data:image/webp;base64,Z2VybWFu" };
+  expect(getParentStartArtworkUrl("fr")).toBe("/images/welcome-start-fr.webp");
+  expect(getParentStartArtworkUrl("de")).toBe(window.__LITTLE_CHAMPS_START_ARTWORK__.parent);
+});
+
+it("normalizes regional language codes and follows the English app fallback", () => {
+  native.mockReturnValue(false);
+  expect(getParentStartArtworkUrl("en-GB")).toBe("/images/welcome-start-en.webp");
+  expect(getParentStartArtworkUrl("pt-BR")).toBe("/images/welcome-start-pt.webp");
+  expect(getParentStartArtworkUrl("zh-Hans")).toBe("/images/welcome-start-zh.webp");
+  expect(getParentStartArtworkUrl("DE_de")).toBe("/images/welcome-start.webp");
+  expect(getParentStartArtworkUrl("unknown")).toBe("/images/welcome-start-en.webp");
 });
