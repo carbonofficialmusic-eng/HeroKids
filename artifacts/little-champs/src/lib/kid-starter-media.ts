@@ -1,6 +1,6 @@
 import { isNativePlatform } from "@/lib/platform";
 import { isStandardSkin } from "@shared/skin-config";
-import { getStartArtworkUrl } from "@/lib/start-artwork";
+import { getChildStartArtworkUrl } from "@/lib/start-artwork";
 
 // Dedicated artwork, never a replacement for the regular avatar/background pair.
 const mediaBase = isNativePlatform()
@@ -12,4 +12,6 @@ export function getKidStarterHeroUrl(id: string): string {
 }
 
 export const KID_STARTER_CARD_BACKGROUND_URL = `${mediaBase}card-background.webp`;
-export const KID_STARTER_BANNER_URL = getStartArtworkUrl("child", `${mediaBase}intro-scene.webp`);
+export function getKidStarterBannerUrl(language: string): string {
+  return getChildStartArtworkUrl(language);
+}

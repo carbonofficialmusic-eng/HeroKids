@@ -11,7 +11,7 @@ Release- und Review-Texte müssen den neuen Starter-Einstieg für Eltern und Kin
 
 **How to apply:** Beide Rollen im Funktionsumfang und im Review-Testablauf berücksichtigen.
 
-Das gelieferte Willkommensmotiv hat acht weitere Sprachfassungen; sie sollen passend zur gewählten App-Sprache verwendet werden, das deutsche Original bleibt erhalten.
+Die gelieferten Willkommensmotive für Eltern und Kinder haben jeweils acht weitere Sprachfassungen; sie sollen passend zur gewählten App-Sprache verwendet werden, die deutschen Originale bleiben erhalten.
 
 **Why:** Der Nutzer hat die fertigen Übersetzungen als Bilder bereitgestellt, statt eine Neugestaltung oder neue Übersetzung zu beauftragen.
 

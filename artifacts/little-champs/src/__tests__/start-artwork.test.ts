@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from "vitest";
-import { getParentStartArtworkUrl, getStartArtworkUrl } from "@/lib/start-artwork";
+import { getChildStartArtworkUrl, getParentStartArtworkUrl, getStartArtworkUrl } from "@/lib/start-artwork";
 
 const { native } = vi.hoisted(() => ({ native: vi.fn() }));
 vi.mock("@/lib/platform", () => ({ isNativePlatform: native }));
@@ -18,7 +18,7 @@ it("uses the two on-board illustrations without changing random hero downloads",
   };
   expect(getStartArtworkUrl("parent", "/online-parent.webp")).toBe(window.__LITTLE_CHAMPS_START_ARTWORK__.parent);
   const media = await import("@/lib/kid-starter-media");
-  expect(media.KID_STARTER_BANNER_URL).toBe(window.__LITTLE_CHAMPS_START_ARTWORK__.child);
+  expect(media.getKidStarterBannerUrl("de")).toBe(window.__LITTLE_CHAMPS_START_ARTWORK__.child);
   expect(media.getKidStarterHeroUrl("t-rex")).toBe("https://littlechamps.net/api/kid-starter-media/v1/t-rex.webp");
   expect(media.KID_STARTER_CARD_BACKGROUND_URL).toContain("https://littlechamps.net/api/");
 });
@@ -76,4 +76,35 @@ it("normalizes regional language codes and follows the English app fallback", ()
   expect(getParentStartArtworkUrl("zh-Hans")).toBe("/images/welcome-start-zh.webp");
   expect(getParentStartArtworkUrl("DE_de")).toBe("/images/welcome-start.webp");
   expect(getParentStartArtworkUrl("unknown")).toBe("/images/welcome-start-en.webp");
+  expect(getChildStartArtworkUrl("zh-Hans")).toBe("/images/welcome-kid-start-zh.webp");
+  expect(getChildStartArtworkUrl("ja-JP")).toBe("/images/welcome-kid-start-ja.webp");
+  expect(getChildStartArtworkUrl("unknown")).toBe("/images/welcome-kid-start-en.webp");
+});
+
+it.each(["de", "en", "es", "fr", "ja", "ko", "pt", "sv", "zh"])(
+  "uses the matching %s child illustration on the website",
+  language => {
+    native.mockReturnValue(false);
+    const file = language === "de" ? "welcome-kid-start.webp" : `welcome-kid-start-${language}.webp`;
+    expect(getChildStartArtworkUrl(language)).toBe(`/images/${file}`);
+  },
+);
+
+it.each(["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"])(
+  "uses the bundled %s child illustration in new native builds",
+  language => {
+    native.mockReturnValue(true);
+    window.__LITTLE_CHAMPS_START_ARTWORK__ = {
+      child: "data:image/webp;base64,Z2VybWFu",
+      [`child:${language}`]: "data:image/webp;base64,bG9jYWxpemVk",
+    };
+    expect(getChildStartArtworkUrl(language)).toBe("data:image/webp;base64,bG9jYWxpemVk");
+  },
+);
+
+it("does not reuse the German child bundle for another language on older iOS builds", () => {
+  native.mockReturnValue(true);
+  window.__LITTLE_CHAMPS_START_ARTWORK__ = { child: "data:image/webp;base64,Z2VybWFu" };
+  expect(getChildStartArtworkUrl("fr")).toBe("/images/welcome-kid-start-fr.webp");
+  expect(getChildStartArtworkUrl("de")).toBe(window.__LITTLE_CHAMPS_START_ARTWORK__.child);
 });

@@ -89,6 +89,7 @@ class ViewController: CAPBridgeViewController {
         var resources = ["parent": "welcome-start", "child": "welcome-kid-start"]
         for language in ["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"] {
             resources["parent:\(language)"] = "welcome-start-\(language)"
+            resources["child:\(language)"] = "welcome-kid-start-\(language)"
         }
         var artwork: [String: String] = [:]
         for (key, name) in resources {

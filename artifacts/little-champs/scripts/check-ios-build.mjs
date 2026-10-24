@@ -6,7 +6,9 @@ import { fileURLToPath } from "node:url";
 const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const START_ARTWORK_FILES = [
   "welcome-start.webp", "welcome-kid-start.webp",
-  ...["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"].map(lang => `welcome-start-${lang}.webp`),
+  ...["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"].flatMap(lang => [
+    `welcome-start-${lang}.webp`, `welcome-kid-start-${lang}.webp`,
+  ]),
 ];
 
 /** Validate generated resources, not just the TypeScript source configuration. */

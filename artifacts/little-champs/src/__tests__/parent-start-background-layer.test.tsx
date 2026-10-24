@@ -4,6 +4,7 @@ import { afterEach, beforeEach, expect, it } from "vitest";
 import i18n from "@/i18n";
 import { BackgroundLayerContext } from "@/components/background-layer";
 import { ParentStartBackdrop } from "@/components/parent-start-screen";
+import { ChildStarterBackdrop } from "@/components/child-starter-heroes";
 
 beforeEach(async () => { await i18n.changeLanguage("de"); });
 afterEach(async () => { cleanup(); document.body.innerHTML = ""; await i18n.changeLanguage("en"); });
@@ -44,12 +45,17 @@ it("updates the existing backdrop immediately when the app language changes", as
   const background = document.createElement("div");
   document.body.appendChild(background);
   render(
-    <BackgroundLayerContext.Provider value={background}><ParentStartBackdrop /></BackgroundLayerContext.Provider>,
+    <BackgroundLayerContext.Provider value={background}>
+      <ParentStartBackdrop /><ChildStarterBackdrop />
+    </BackgroundLayerContext.Provider>,
   );
   expect(screen.getByTestId("img-parent-start-background").style.backgroundImage).toContain("welcome-start.webp");
+  expect(screen.getByTestId("img-starter-banner").getAttribute("src")).toContain("welcome-kid-start.webp");
   for (const language of ["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"]) {
     await act(async () => { await i18n.changeLanguage(language); });
     expect(screen.getByTestId("img-parent-start-background").style.backgroundImage)
       .toContain(`welcome-start-${language}.webp`);
+    expect(screen.getByTestId("img-starter-banner").getAttribute("src"))
+      .toContain(`welcome-kid-start-${language}.webp`);
   }
 });

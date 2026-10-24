@@ -6,7 +6,7 @@ import { BackgroundLayerPortal } from "@/components/background-layer";
 import { isStandardSkin } from "@shared/skin-config";
 import {
   getKidStarterHeroUrl,
-  KID_STARTER_BANNER_URL,
+  getKidStarterBannerUrl,
   KID_STARTER_CARD_BACKGROUND_URL,
 } from "@/lib/kid-starter-media";
 import "./child-starter-heroes.css";
@@ -74,11 +74,12 @@ function HeroCard({ id, name, selected, disabled, onSelect, onReady }: {
 }
 
 export function ChildStarterBackdrop() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const bannerUrl = getKidStarterBannerUrl(i18n.resolvedLanguage || i18n.language || "en");
   return (
     <BackgroundLayerPortal>
       <div className="lc-kh-hero">
-        <img src={KID_STARTER_BANNER_URL} className="lc-kh-hero__art" data-testid="img-starter-banner"
+        <img src={bannerUrl} className="lc-kh-hero__art" data-testid="img-starter-banner"
           alt={t("kidStart.bannerAlt", "Wähle deinen ersten Helden. Finde die 48 Sterne und schalte die Little Champs Legacy frei.")}
           title={t("kidStart.bannerTitle", "Wähle deinen ersten Helden")} />
       </div>

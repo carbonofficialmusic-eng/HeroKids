@@ -160,11 +160,13 @@ test("rejects a fixed starter skin left in the native bundle", (t) => {
 });
 
 for (const language of ["en", "es", "fr", "ja", "ko", "pt", "sv", "zh"]) {
-  test(`requires the ${language} welcome illustration in the native bundle`, (t) => {
-    const { directory } = fixture(t);
-    fs.rmSync(path.join(directory, `ios/App/App/public/images/welcome-start-${language}.webp`));
-    assert.throws(() => validateIosBuild(directory), /ENOENT/);
-  });
+  for (const stem of ["welcome-start", "welcome-kid-start"]) {
+    test(`requires ${stem}-${language} in the native bundle`, (t) => {
+      const { directory } = fixture(t);
+      fs.rmSync(path.join(directory, `ios/App/App/public/images/${stem}-${language}.webp`));
+      assert.throws(() => validateIosBuild(directory), /ENOENT/);
+    });
+  }
 }
 
 test("native artwork is installed before creating the WebView and restricted to the live main frame", () => {
@@ -180,6 +182,7 @@ test("native artwork is installed before creating the WebView and restricted to 
     assert.ok(swift.includes(`"${language}"`), `Missing native artwork language: ${language}`);
   }
   assert.ok(swift.includes('resources["parent:\\(language)"] = "welcome-start-\\(language)"'));
+  assert.ok(swift.includes('resources["child:\\(language)"] = "welcome-kid-start-\\(language)"'));
 });
 
 test("rejects a TV entry point even when both copied HTML files match", (t) => {

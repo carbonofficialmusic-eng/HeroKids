@@ -3,10 +3,11 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, it, vi } from "vitest";
 import { ChildStarterHeroes, ChildStarterBackdrop } from "@/components/child-starter-heroes";
 import { BackgroundLayerContext } from "@/components/background-layer";
-import { getKidStarterHeroUrl, KID_STARTER_BANNER_URL } from "@/lib/kid-starter-media";
+import { getKidStarterHeroUrl, getKidStarterBannerUrl } from "@/lib/kid-starter-media";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
+    i18n: { language: "de", resolvedLanguage: "de" },
     t: (_key: string, options?: string | { defaultValue?: string; name?: string; count?: number }) =>
       typeof options === "string" ? options : (options?.defaultValue || _key)
         .replace("{{name}}", options?.name || "").replace("{{count}}", String(options?.count ?? 0)),
@@ -109,8 +110,8 @@ it("puts the exact supplied artwork in the shared background layer, not a second
   );
   const artwork = screen.getByTestId("img-starter-banner");
   expect(layer.contains(artwork)).toBe(true);
-  expect(artwork.getAttribute("src")).toBe(KID_STARTER_BANNER_URL);
-  expect(KID_STARTER_BANNER_URL).toContain("/intro-scene.webp");
+  expect(artwork.getAttribute("src")).toBe(getKidStarterBannerUrl("de"));
+  expect(getKidStarterBannerUrl("de")).toContain("/images/welcome-kid-start.webp");
   unmount();
   expect(layer.children).toHaveLength(0);
   layer.remove();
