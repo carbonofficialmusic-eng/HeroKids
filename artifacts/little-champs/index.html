@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <script>
-      (function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.classList.add(t);})();
+      (function(){var t='dark';try{t=localStorage.getItem('theme')||'dark';}catch(e){}document.documentElement.classList.add(t);})();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
     <title>Little Champs - Gamified Family Task Management</title>
@@ -17,6 +17,7 @@
     <meta name="apple-mobile-web-app-title" content="Little Champs" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;family=Fredoka:wght@700&amp;display=swap">
     <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap">
     
     <!-- Open Graph / Facebook -->
@@ -51,7 +52,64 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <style>
+      @keyframes lc-bootstrap-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+      }
+      .lc-bootstrap-logo { width: 96px; height: 96px; object-fit: contain; animation: lc-bootstrap-pulse 2s ease-in-out infinite; }
+      @media (prefers-reduced-motion: reduce) {
+        .lc-bootstrap-logo { animation: none; }
+      }
+    </style>
+    <div id="root">
+      <div id="lc-bootstrap" role="status" aria-label="Little Champs wird geladen" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;background:#000;color:#fff;font:16px/1.5 system-ui,sans-serif;text-align:center">
+        <img class="lc-bootstrap-logo" src="%BASE_URL%images/little-champs-logo.webp" width="96" height="96" alt="Little Champs" fetchpriority="high" />
+        <span id="lc-bootstrap-message" hidden></span>
+        <span id="lc-bootstrap-details" hidden style="max-width:100%;overflow-wrap:anywhere;font-size:13px;color:#d5dfec"></span>
+        <button id="lc-bootstrap-retry" type="button" hidden style="border:0;border-radius:12px;padding:12px 24px;background:#ffd264;color:#342300;font:700 16px system-ui,sans-serif">Erneut laden</button>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var retry = document.getElementById('lc-bootstrap-retry');
+        function reloadPage(automatic) {
+          var url = new URL(window.location.href);
+          url.searchParams.set('lc_reload', String(Date.now()));
+          if (automatic) url.searchParams.set('lc_boot_retry', '1');
+          window.location.replace(url.href);
+        }
+        retry.onclick = function () { reloadPage(false); };
+        var timer = setTimeout(function () {
+          var message = document.getElementById('lc-bootstrap-message');
+          if (!message || !retry) return;
+          var details = document.getElementById('lc-bootstrap-details');
+          if (details && details.textContent) return;
+          // One automatic recovery for a stalled module graph. Keep the URL
+          // marker until React starts, so a persistent failure cannot loop.
+          if (!new URL(window.location.href).searchParams.has('lc_boot_retry')) {
+            reloadPage(true);
+            return;
+          }
+          message.textContent = 'Der Seitenstart dauert ungewöhnlich lange. Bitte versuche es erneut.';
+          message.hidden = false;
+          retry.hidden = false;
+        }, 15000);
+        // Stop the watchdog once React has replaced the bootstrap content.
+        var observer = new MutationObserver(function () {
+          if (document.getElementById('lc-bootstrap')) return;
+          clearTimeout(timer);
+          observer.disconnect();
+          var url = new URL(window.location.href);
+          if (url.searchParams.has('lc_boot_retry')) {
+            url.searchParams.delete('lc_boot_retry');
+            url.searchParams.delete('lc_reload');
+            window.history.replaceState(window.history.state, '', url.href);
+          }
+        });
+        observer.observe(document.getElementById('root'), { childList: true });
+      })();
+    </script>
+    <script type="module" src="/src/bootstrap.ts"></script>
   </body>
 </html>

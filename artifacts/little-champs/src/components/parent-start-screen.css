@@ -1,0 +1,37 @@
+.lc-dashboard-start{--lc-navy:222 62% 11%;--lc-navy2:224 52% 18%;--lc-gold:44 96% 56%;--lc-ink:220 40% 96%}
+.lc-start{color:hsl(var(--lc-ink));position:relative;min-width:0;font-family:inherit}
+/* The shared fixed skin layer starts 60px above the viewport. Do not nest a
+   second fixed layer inside the dashboard's clipped scrolling content. */
+.lc-start__hero{position:absolute;top:calc(60px + var(--header-h) + var(--sat, env(safe-area-inset-top)));right:0;bottom:0;left:0;pointer-events:none;overflow:hidden;background:linear-gradient(180deg,hsl(222 62% 11%),hsl(226 58% 8%))}
+.lc-start__artwork{position:relative;width:100%;height:54.58984375vw;aspect-ratio:1024/559;background-size:cover;background-position:center top;background-repeat:no-repeat}
+.lc-start__spacer{height:36.42578125vw;pointer-events:none}
+.lc-start__artwork{overflow:hidden}
+@media (max-width:640px){.lc-start__artwork{height:87.34375vw;aspect-ratio:640/559}.lc-start__spacer{height:58.28125vw}}
+.lc-start__artwork::after{content:"";position:absolute;inset:auto 0 0 0;height:22%;background:linear-gradient(transparent,hsl(222 62% 11%));pointer-events:none}
+/* Reserve the artwork only down to its subtitle, at source image row 373. */
+.lc-start__body{max-width:720px;margin:0 auto;padding:.75rem 0 1rem;position:relative;z-index:1;display:flex;flex-direction:column;gap:.85rem}
+/* Split the removed button's height above and below the unlocked cards. */
+.lc-start--unlocked .lc-start__body{padding-top:calc(.75rem + (58px + .85rem)/2);padding-bottom:calc(1rem + (58px + .85rem)/2)}
+.lc-start__cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem}
+.lc-card{position:relative;border-radius:14px;overflow:hidden;border:1.5px solid hsl(210 70% 60%/.45);background:hsl(var(--lc-navy2));
+  display:block;width:100%;aspect-ratio:4/3.4;padding:0;color:inherit;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+.lc-card:disabled{cursor:not-allowed}
+.lc-card:not(:disabled):hover{transform:translateY(-2px)}
+.lc-card--ready{border-color:hsl(var(--lc-gold));box-shadow:0 0 0 2px hsl(var(--lc-gold)/.35)}
+.lc-card__bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lc-card__avatar{position:absolute;right:6px;top:6px;width:34%;aspect-ratio:1;border-radius:50%;object-fit:cover;border:2px solid hsl(var(--lc-gold));background:hsl(var(--lc-navy))}
+.lc-card__foot{position:absolute;inset:auto 0 0 0;padding:.35rem .45rem;background:hsl(222 60% 10%/.82);display:flex;align-items:center;justify-content:space-between;gap:.25rem}
+.lc-card__name{min-width:0;font-weight:700;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-card__state{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;font-size:.7rem;background:hsl(var(--lc-navy2))}
+.lc-card__retry{font-size:.7rem;padding:.2rem .55rem;border-radius:999px;background:hsl(var(--lc-gold));color:hsl(var(--lc-navy));font-weight:700}
+.lc-skel{background:linear-gradient(90deg,hsl(var(--lc-navy2)),hsl(224 45% 26%),hsl(var(--lc-navy2)));background-size:200% 100%;animation:lc-sh 1.3s linear infinite}
+@keyframes lc-sh{to{background-position:-200% 0}}
+.lc-start__cta{display:flex;align-items:center;gap:.8rem;width:100%;min-height:58px;border-radius:16px;padding:.5rem 1rem;
+  background:linear-gradient(180deg,hsl(46 98% 62%),hsl(40 95% 52%));color:hsl(25 60% 18%);font-weight:800;font-size:1.05rem;
+  border:2px solid hsl(48 100% 75%);box-shadow:0 6px 22px hsl(44 96% 50%/.3)}
+.lc-start__cta:disabled{opacity:.85;cursor:default}
+.lc-start__cta-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:hsl(30 60% 30%/.85);color:hsl(48 100% 80%)}
+.lc-start__cta span.lc-grow{flex:1;text-align:center}
+.lc-start__err{color:hsl(4 90% 75%);font-size:.85rem;text-align:center;margin:0}
+.lc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.lc-skel{animation:none}.lc-card{transition:none}}

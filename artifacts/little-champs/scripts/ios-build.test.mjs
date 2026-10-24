@@ -24,6 +24,8 @@ function fixture(t) {
     write(`${base}/index.html`, '<script src="/assets/phone.js"></script><link href="/assets/phone.css">');
     write(`${base}/assets/phone.js`, "phone-only");
     write(`${base}/assets/phone.css`, "html{color:blue}");
+    write(`${base}/images/welcome-start.webp`, "parent illustration");
+    write(`${base}/images/welcome-kid-start.webp`, "child illustration");
     write(`${base}/build-info.json`, JSON.stringify({ id: "2026-10-14T20:00:00.000Z" }));
   }
   return { directory, write, config };
@@ -76,6 +78,31 @@ test("rejects a missing Capacitor sync result", (t) => {
   assert.throws(() => validateIosBuild(directory), /ENOENT/);
 });
 
+test("rejects a missing or stale bundled start illustration", (t) => {
+  const { directory, write } = fixture(t);
+  write("ios/App/App/public/images/welcome-kid-start.webp", "outdated child image");
+  assert.throws(() => validateIosBuild(directory), /Bundled start illustration is stale/);
+  fs.rmSync(path.join(directory, "ios/App/App/public/images/welcome-kid-start.webp"));
+  assert.throws(() => validateIosBuild(directory), /ENOENT/);
+});
+
+test("rejects a fixed starter skin left in the native bundle", (t) => {
+  const { directory, write } = fixture(t);
+  write("ios/App/App/public/skins/avatars/junior-champion.png", "unwanted starter");
+  assert.throws(() => validateIosBuild(directory), /must remain online-only/);
+});
+
+test("native artwork is installed before creating the WebView and restricted to the live main frame", () => {
+  const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  const swift = fs.readFileSync(path.join(app, "ios/App/App/ViewController.swift"), "utf8");
+  const install = swift.indexOf("installBundledStartArtwork(in: configuration)");
+  assert.ok(install >= 0 && install < swift.indexOf("let webView = FreshStartWebView"));
+  assert.ok(swift.includes('subdirectory: "public/images"'));
+  assert.ok(swift.includes('location.hostname !== "littlechamps.net"'));
+  assert.ok(swift.includes("injectionTime: .atDocumentStart, forMainFrameOnly: true"));
+  assert.ok(swift.includes("__LITTLE_CHAMPS_START_ARTWORK__"));
+});
+
 test("rejects a TV entry point even when both copied HTML files match", (t) => {
   const { directory, write } = fixture(t);
   for (const base of ["dist/public", "ios/App/App/public"]) {
@@ -110,10 +137,8 @@ test("skin trimming uses current artifact paths from any working directory", (t)
   ], { cwd: os.tmpdir() });
   for (const category of ["avatars", "backgrounds"]) {
     const bundled = path.join(directory, "ios/App/App/public/skins", category);
-    assert.deepEqual(fs.readdirSync(bundled), ["junior-champion.png"]);
-    assert.deepEqual(
-      fs.readFileSync(path.join(bundled, "junior-champion.png")),
-      fs.readFileSync(path.join(app, "public/skins", category, "junior-champion.png")),
-    );
+    assert.deepEqual(fs.readdirSync(bundled), []);
+    assert.ok(fs.existsSync(path.join(app, "public/skins", category, "junior-champion.png")),
+      "The server must still provide the historic starter");
   }
 });

@@ -4,3 +4,6 @@
 # No need to store the pnpm store twice.
 /generated-artifacts/
 .local
+
+# Local reference screenshot, not an application resource.
+/attached_assets/IMG_3100_1792821260896.png

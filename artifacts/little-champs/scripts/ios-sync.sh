@@ -25,7 +25,7 @@ rm -rf ios/App/App/public
 pnpm exec cap sync ios
 
 echo ""
-echo "==> Keeping only the starter skin avatar and background in the local iOS bundle..."
+echo "==> Removing all skin avatars and backgrounds from the local iOS bundle..."
 bash "$SCRIPT_DIR/trim-ios-background-assets.sh"
 
 INFO_PLIST="ios/App/App/Info.plist"

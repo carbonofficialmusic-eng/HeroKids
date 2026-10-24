@@ -9,6 +9,8 @@ import bcrypt from "bcrypt";
 import Stripe from "stripe";
 import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 import { storage } from "../storage";
+import { chooseStartSkin, createFirstStartTask } from "../start-skin-onboarding";
+import { isStartPending } from "../start-skin-policy";
 import { verifyTvParentPin } from "../tvParentPin";
 import { resolveTvManagementParent } from "../tvParentManagement";
 import { sendPushToMembers, queueChatPush, cancelQueuedChatPush, isChildPushQuietHours } from "../apns";
@@ -3242,8 +3244,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/tasks", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const member = await storage.getFamilyMemberByUserId(userId);
+      const result = await getCurrentMemberFromRequest(req);
+      const member = result ? await storage.getFamilyMemberById(result.member.id) : null;
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
@@ -3254,7 +3256,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only parents can create tasks" });
       }
       
-      const parsed = insertTaskSchema.parse(req.body);
+      const parsed = insertTaskSchema.parse({
+        ...req.body, familyName: member.familyName, createdBy: member.id,
+      });
       const isTeamTask = parsed.isSharedTask === true;
       const usesDailyMultiTask = parsed.recurrence === "daily" && (parsed.dailyTarget || 1) > 1;
       const selectedMemberIds = await validateTaskMemberSelection(
@@ -3305,13 +3309,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       if (parsed.recurrence !== "daily") parsed.dailyTarget = 1;
 
-      const task = await storage.createTask(parsed);
-      await storage.replaceTaskAssignments(task.id, isTeamTask ? [] : selectedMemberIds);
+      const isFirstStartTask = isStartPending(member);
+      const task = isFirstStartTask
+        ? await createFirstStartTask(member.id, parsed, isTeamTask ? [] : selectedMemberIds, req.body.shoppingItems)
+        : await storage.createTask(parsed);
+      if (!isFirstStartTask) await storage.replaceTaskAssignments(task.id, isTeamTask ? [] : selectedMemberIds);
       const taskWithSelection = await storage.getTask(task.id);
       
       // If this is a shopping list task, create the items
       const rawShoppingItems = req.body.shoppingItems;
-      if (parsed.isShoppingList && Array.isArray(rawShoppingItems) && rawShoppingItems.length > 0) {
+      if (!isFirstStartTask && parsed.isShoppingList && Array.isArray(rawShoppingItems) && rawShoppingItems.length > 0) {
         const itemsToCreate = rawShoppingItems
           .filter((item: any) => item && typeof item.text === "string" && item.text.trim())
           .map((item: any, idx: number) => ({
@@ -5896,6 +5903,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Skins routes - supports both Replit Auth and Device Sessions
+  app.post("/api/onboarding/start-skin", isAuthenticated, async (req: any, res) => {
+    try {
+      const result = await getCurrentMemberFromRequest(req);
+      if (!result || req.user?.tvSession) return res.status(403).json({ message: "Unauthorized" });
+      const { skinId, memberId } = z.object({ skinId: z.string().min(1), memberId: z.string().min(1) }).parse(req.body);
+      if (memberId !== result.member.id) return res.status(409).json({ message: "PROFILE_CHANGED" });
+      const choice = await chooseStartSkin(result.member.id, result.member.familyName, skinId);
+      let updated = choice.member;
+      if (choice.starFound) {
+        await achievementEngine.processEvent({
+          type: "star_found", familyName: updated.familyName,
+          memberId: updated.id, starsFound: updated.starsFound,
+        });
+      }
+      if (choice.legacySkinAwarded) {
+        await achievementEngine.processEvent({
+          type: "skin_unlocked", familyName: updated.familyName, memberId: updated.id,
+        });
+      }
+      if (choice.starFound) {
+        // Achievement processing can itself award points. Do not overwrite
+        // its fresh profile state with the pre-achievement transaction result.
+        const refreshed = await storage.getFamilyMemberById(updated.id);
+        if (!refreshed) throw new Error("MEMBER_UNAVAILABLE");
+        updated = refreshed;
+      }
+      broadcastToFamily(updated.familyName, { type: "member_updated", member: updated });
+      if (choice.starFound) {
+        broadcastToFamily(updated.familyName, {
+          type: "skin_discovered", memberId: updated.id, skinId,
+          starFound: true, totalStarsFound: updated.starsFound,
+          legacySkinAwarded: choice.legacySkinAwarded,
+        });
+      }
+      return res.json(updated);
+    } catch (error: any) {
+      const message = error?.message || "START_SKIN_FAILED";
+      return res.status(message === "FIRST_TASK_REQUIRED" || message === "START_ALREADY_COMPLETED" ? 409 : 400)
+        .json({ message });
+    }
+  });
+
   app.get("/api/skins", isAuthenticated, async (req: any, res) => {
     try {
       // Support both Replit Auth and Device Sessions
@@ -5924,7 +5973,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const earnedLegacySkinIds = member.earnedLegacySkinIds || [];
       
       // Calculate available discovery cards using new linear system with family's skinCardCost
-      const availableCards = calculateAvailableCards(member.totalEarned, discoveredSkinIds.length, skinCardCost);
+      const availableCards = isStartPending(member) ? 0 : calculateAvailableCards(member.totalEarned, discoveredSkinIds.length, skinCardCost);
       
       // Whether the tier's skin limit has been reached
       const tierLimitReached = discoveredSkinIds.length >= maxSkins;
@@ -5949,7 +5998,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Check if skin can be unlocked based on position, points, AND tier limit
         // Legacy skins cannot be discovered manually - they are unlocked via stars only
-        const canDiscover = !isDiscovered && !isLegacySkin(skin.id) && !tierLimitReached && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length, skinCardCost);
+        const canDiscover = !isStartPending(member) && !isDiscovered && !isLegacySkin(skin.id) && !tierLimitReached && canUnlockSkin(skin.id, member.totalEarned, discoveredSkinIds.length, skinCardCost);
         
         // Get position for ordering (legacy skins have tier 14)
         const tier = isLegacySkin(skin.id) ? 14 : 1;
@@ -6011,6 +6060,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
       }
+      if (isStartPending(member)) {
+        return res.status(409).json({ message: "Choose your start card first", code: "START_SKIN_REQUIRED" });
+      }
 
       // Ensure this member has exactly the normal placement set before marking
       // it found, including profiles reset by an older deployed app version.
@@ -6071,6 +6123,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!member) {
         return res.status(404).json({ message: "Family member not found" });
+      }
+      // The free card is claimed only through the profile-locked start endpoint.
+      if (isStartPending(member)) {
+        return res.status(409).json({ message: "Choose your start card first", code: "START_SKIN_REQUIRED" });
       }
       
       // Get family to retrieve skinCardCost

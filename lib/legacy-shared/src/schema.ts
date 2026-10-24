@@ -170,6 +170,10 @@ export const familyMembers = pgTable("family_members", {
   starsFound: integer("stars_found").notNull().default(0), // Number of hidden stars found (48 total, every 4 = 1 HeroKids Legacy avatar)
   earnedLegacySkinIds: text("earned_legacy_skin_ids").array().notNull().default(sql`ARRAY[]::text[]`), // HeroKids Legacy avatars earned through star collection
   activeSkinId: varchar("active_skin_id"), // Currently selected skin
+  startSkinOptions: text("start_skin_options").array(), // null = existing profile, never re-enrol
+  freeStarterSkinId: varchar("free_starter_skin_id"),
+  firstTaskCreatedAt: timestamp("first_task_created_at"),
+  startCompletedAt: timestamp("start_completed_at"),
   useCustomAvatar: boolean("use_custom_avatar").notNull().default(false), // Use custom avatar instead of skin avatar (background stays from skin)
   useThemeBackground: boolean("use_theme_background").notNull().default(true), // Show themed background from active skin (can be disabled to keep avatar only)
   avatarHistory: jsonb("avatar_history").$type<string[]>().default(sql`'[]'::jsonb`), // Last 3 uploaded avatar URLs for quick selection
@@ -196,6 +200,10 @@ export const familyMembersRelations = relations(familyMembers, ({ one, many }) =
 }));
 
 export const insertFamilyMemberSchema = createInsertSchema(familyMembers).omit({
+  startSkinOptions: true,
+  freeStarterSkinId: true,
+  firstTaskCreatedAt: true,
+  startCompletedAt: true,
   id: true,
   userId: true, // Populated from authenticated session
   totalEarned: true,

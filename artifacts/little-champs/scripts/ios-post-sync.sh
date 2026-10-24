@@ -48,5 +48,5 @@ fi
 echo "Done. Open Xcode and build the app."
 
 echo ""
-echo "Keeping only the starter skin background in the local iOS bundle..."
+echo "Removing all skin avatars and backgrounds from the local iOS bundle..."
 bash "$SCRIPT_DIR/trim-ios-background-assets.sh"

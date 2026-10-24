@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe("skin asset URLs", () => {
-  it("uses the first free skin as the bundled starter asset", () => {
+  it("retains the historic starter ID for existing profiles", () => {
     expect(STARTER_SKIN_ID).toBe("junior-champion");
     expect(MIXED_SKIN_ORDER[0]).toBe(STARTER_SKIN_ID);
   });
@@ -29,17 +29,17 @@ describe("skin asset URLs", () => {
     );
   });
 
-  it("keeps starter assets local but loads other skin assets from the server on native", () => {
+  it("loads every skin asset, including the historic starter, online on native", () => {
     vi.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
 
     expect(getSkinImageUrl("junior-champion")).toBe(
-      "/skins/avatars/junior-champion.png?v=10",
+      "https://littlechamps.net/skins/avatars/junior-champion.png?v=10",
     );
     expect(getSkinImageUrl("brave-explorer")).toBe(
       "https://littlechamps.net/skins/avatars/brave-explorer.png?v=10",
     );
     expect(getSkinBackgroundUrl("junior-champion")).toBe(
-      "/skins/backgrounds/junior-champion.png?v=21",
+      "https://littlechamps.net/skins/backgrounds/junior-champion.png?v=21",
     );
     expect(getSkinBackgroundUrl("brave-explorer")).toBe(
       "https://littlechamps.net/skins/backgrounds/brave-explorer.png?v=21",

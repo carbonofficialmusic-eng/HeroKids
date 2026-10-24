@@ -39,7 +39,6 @@ import { getAvatarUrl } from "@/lib/skins";
 import { FEEDBACK_MAILTO } from "@/lib/feedback";
 import { isValidFactoryResetConfirmation } from "@shared/factory-reset";
 import { GoogleCalendarSettings } from "@/components/google-calendar-settings";
-import { LayoutDiagnostics } from "@/components/layout-diagnostics";
 
 type FamilyMemberWithLimit = FamilyMember & { isOverLimit?: boolean; accountEmail?: string | null; hasActiveDeviceSessions?: boolean };
 
@@ -349,6 +348,8 @@ export default function Settings() {
       // Factory reset replaces all family/game state. Drop every member-scoped
       // cache entry before reloading so no pre-reset stars or skins survive.
       queryClient.clear();
+      localStorage.removeItem("herokids_seen_paywall");
+      localStorage.removeItem("herokids_seen_member_onboarding");
       // Ensure dark theme persists after reset, then force a full page reload
       // so the inline theme script in index.html runs fresh and avoids a white flash.
       localStorage.setItem("theme", "dark");
@@ -1465,7 +1466,6 @@ export default function Settings() {
           )}
 
           {/* Feedback */}
-          {activeSection === "help" && <LayoutDiagnostics />}
           {activeSection === "help" && <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -1656,7 +1656,7 @@ export default function Settings() {
           </Card>}
 
           {/* Factory Reset Settings */}
-          {activeSection === "help" && <Card className="lc-settings-danger border-destructive/50">
+          {activeSection === "app" && <Card className="lc-settings-danger border-destructive/50">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-5 w-5 text-destructive" />

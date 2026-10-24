@@ -38,3 +38,9 @@ Eine als „Active“ angezeigte GitHub-Verbindung und eine erneute Anmeldung im
 **Why:** Die erneuerte Git-Verbindung behob den Shell-Anmeldefehler nicht. Erst die separate Browser-Anmeldung der GitHub CLI und deren Verwendung als Git-Credential-Helper ermöglichten einen erfolgreichen normalen Push-Probelauf. Die funktionierende GitHub-App-Connector-Verbindung musste dafür nicht getrennt werden.
 
 **How to apply:** Den tatsächlich verwendeten Schreibweg prüfen. Bei diesem Anmeldeproblem die GitHub-CLI-Browserautorisierung nutzen, statt wiederholt Verbindungen zu löschen oder Tokens im Chat anzufordern. Nach einer Änderung den Schreibzugriff und einen `git push --dry-run` bestätigen; ein Probelauf erteilt keine Freigabe für einen echten Push.
+
+Die Replit-Git-Oberfläche kann einen lokal vom Release-Hook gestoppten Push als allgemeines „PUSH_REJECTED“ mit Hinweis auf fehlende Remote-Commits anzeigen.
+
+**Why:** Der Remote hatte keine zusätzlichen Commits; erst der Push-Probelauf zeigte die tatsächliche Ablehnung wegen eines unbenutzten Uploads in der ausgehenden Historie.
+
+**How to apply:** Vor Pull-, Merge- oder History-Reparaturen fetch und Ahead/Behind prüfen und die konkrete Ausgabe von `git push --dry-run` ansehen. Den Release-Hook nicht umgehen. Auch ein nur in Zwischencommits vorhandener Upload kann die Prüfung blockieren; vor einer neuen sauberen Release-Linie den unveröffentlichten lokalen Verlauf sichern und die Vorgehensweise abstimmen.

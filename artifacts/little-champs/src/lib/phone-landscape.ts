@@ -55,7 +55,7 @@ export function installPhoneLandscapeLayout(native: boolean): () => void {
   update();
   window.addEventListener("resize", onChange);
   window.addEventListener("orientationchange", onChange);
-  window.screen.orientation?.addEventListener("change", onChange);
+  window.screen.orientation?.addEventListener?.("change", onChange);
   document.addEventListener("visibilitychange", onVisible);
   document.addEventListener("resume", onChange);
 
@@ -63,7 +63,7 @@ export function installPhoneLandscapeLayout(native: boolean): () => void {
     clearTimeout(settledTimer);
     window.removeEventListener("resize", onChange);
     window.removeEventListener("orientationchange", onChange);
-    window.screen.orientation?.removeEventListener("change", onChange);
+    window.screen.orientation?.removeEventListener?.("change", onChange);
     document.removeEventListener("visibilitychange", onVisible);
     document.removeEventListener("resume", onChange);
     document.documentElement.classList.remove("lc-phone-landscape");

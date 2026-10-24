@@ -27,16 +27,32 @@ if (!basePath) {
   );
 }
 
-export default defineConfig({
+export default defineConfig(async ({ mode }) => {
+  const bundledDevelopment = mode === 'preview-development';
+  let previewBuild = String(Date.now());
+  return {
   base: basePath,
   define: {
     'import.meta.env.VITE_LC_WEB_BUILD': JSON.stringify(webBuild.id),
+    ...(bundledDevelopment ? {
+      'import.meta.env.DEV': 'true',
+      'import.meta.env.PROD': 'false',
+    } : {}),
   },
   plugins: [
     {
       name: 'little-champs-build-info',
+      buildStart() {
+        previewBuild = String(Date.now());
+      },
       transformIndexHtml() {
-        return [{ tag: 'meta', attrs: { name: 'lc-web-build', content: webBuild.id }, injectTo: 'head' }];
+        return [
+          { tag: 'meta', attrs: { name: 'lc-web-build', content: webBuild.id }, injectTo: 'head' as const },
+          ...(bundledDevelopment ? [
+            { tag: 'meta', attrs: { name: 'lc-preview-build', content: previewBuild, 'data-check-url': `${basePath}preview-build.json` }, injectTo: 'head' as const },
+            { tag: 'script', attrs: { src: `${basePath}preview-refresh.js`, defer: true }, injectTo: 'body' as const },
+          ] : []),
+        ];
       },
       configureServer(server) {
         server.middlewares.use(`${basePath}build-info.json`, (_request, response) => {
@@ -46,6 +62,13 @@ export default defineConfig({
         });
       },
       generateBundle() {
+        if (bundledDevelopment) {
+          this.emitFile({
+            type: 'asset',
+            fileName: 'preview-build-pending.json',
+            source: JSON.stringify({ id: previewBuild }),
+          });
+        }
         this.emitFile({
           type: 'asset',
           fileName: 'build-info.json',
@@ -89,6 +112,9 @@ export default defineConfig({
   },
   server: {
     port,
+    warmup: {
+      clientFiles: ['./src/main.tsx', './src/pages/dashboard.tsx'],
+    },
     strictPort: true,
     host: '0.0.0.0',
     allowedHosts: true,
@@ -98,7 +124,9 @@ export default defineConfig({
   },
   preview: {
     port,
+    strictPort: true,
     host: '0.0.0.0',
     allowedHosts: true,
   },
+  };
 });

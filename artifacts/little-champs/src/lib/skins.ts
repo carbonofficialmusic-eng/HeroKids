@@ -1,16 +1,13 @@
 import { resolveAvatarUrl } from "@/lib/avatarAssets";
 import { isNativePlatform } from "@/lib/platform";
-import { STARTER_SKIN_ID } from "@shared/skin-config";
 
-// Only the free starter avatar/background remain part of the local iOS web
-// bundle. Other skin assets are loaded after discovery from the production
-// server. Web builds keep relative URLs so they use their own host.
+// No skin media is bundled with iOS. The three authorized start previews and
+// revealed cards load online; web builds use their own host.
 const NATIVE_SKIN_ASSET_ORIGIN = "https://littlechamps.net";
 
 export function getSkinImageUrl(skinId: string): string {
   const path = `/skins/avatars/${skinId}.png?v=${AVATAR_VERSION}`;
-  const hasLocalNativeAsset = skinId === STARTER_SKIN_ID;
-  return isNativePlatform() && !hasLocalNativeAsset
+  return isNativePlatform()
     ? `${NATIVE_SKIN_ASSET_ORIGIN}${path}`
     : path;
 }
@@ -24,8 +21,7 @@ const BACKGROUND_VERSION = 21;
 
 export function getSkinBackgroundUrl(skinId: string): string {
   const path = `/skins/backgrounds/${skinId}.png?v=${BACKGROUND_VERSION}`;
-  const hasLocalNativeAsset = skinId === STARTER_SKIN_ID;
-  return isNativePlatform() && !hasLocalNativeAsset
+  return isNativePlatform()
     ? `${NATIVE_SKIN_ASSET_ORIGIN}${path}`
     : path;
 }
@@ -48,7 +44,7 @@ function loadImageIntoHttpCache(url: string): Promise<void> {
  * cache. Locked cards never call this helper.
  */
 export function cacheRevealedSkinAssets(skinId: string): Promise<void> {
-  if (!isNativePlatform() || skinId === STARTER_SKIN_ID) {
+  if (!isNativePlatform()) {
     return Promise.resolve();
   }
   const existingDownload = revealedAssetDownloads.get(skinId);

@@ -76,9 +76,44 @@ class ViewController: CAPBridgeViewController {
     }
 
     override func webView(with frame: CGRect, configuration: WKWebViewConfiguration) -> WKWebView {
+        installBundledStartArtwork(in: configuration)
         let webView = FreshStartWebView(frame: frame, configuration: configuration)
         NativeWebUpdater.installGuard(in: webView)
         return webView
+    }
+
+    /// Merely copying images into public is not enough: server.url loads HTTPS,
+    /// not the bundled site. Publish these two illustrations before its JS runs,
+    /// without replacing Capacitor's navigation delegate or making network calls.
+    private func installBundledStartArtwork(in configuration: WKWebViewConfiguration) {
+        let resources = ["parent": "welcome-start", "child": "welcome-kid-start"]
+        var artwork: [String: String] = [:]
+        for (key, name) in resources {
+            guard let url = Bundle.main.url(forResource: name, withExtension: "webp", subdirectory: "public/images"),
+                  let data = try? Data(contentsOf: url) else {
+                NSLog("[StartArtwork] Missing bundled illustration: %@", name)
+                assertionFailure("Missing bundled start illustration: \(name)")
+                return
+            }
+            artwork[key] = "data:image/webp;base64," + data.base64EncodedString()
+        }
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: artwork),
+              let json = String(data: jsonData, encoding: .utf8) else {
+            assertionFailure("Could not prepare bundled start illustrations")
+            return
+        }
+        let source = """
+        (() => {
+          if (location.protocol !== "https:" || location.hostname !== "littlechamps.net") return;
+          if (window.__LITTLE_CHAMPS_START_ARTWORK__) return;
+          Object.defineProperty(window, "__LITTLE_CHAMPS_START_ARTWORK__", {
+            value: Object.freeze(\(json)), writable: false, configurable: false
+          });
+        })();
+        """
+        configuration.userContentController.addUserScript(WKUserScript(
+            source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true
+        ))
     }
 
     deinit {

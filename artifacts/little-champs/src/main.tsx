@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import { AppErrorBoundary } from "@/components/app-error-boundary";
 import "./index.css";
 import "./i18n";
 import { installPreviewLayoutWarningFilter } from "./lib/preview-layout-warning";
@@ -37,7 +38,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
 
 async function startApp() {
   if (import.meta.env.PROD && await refreshStaleWebBuild(WEB_BUILD_ID)) return;
-  createRoot(document.getElementById("root")!).render(<App />);
+  createRoot(document.getElementById("root")!).render(<AppErrorBoundary><App /></AppErrorBoundary>);
   if (import.meta.env.PROD) installWebBuildResumeCheck(WEB_BUILD_ID);
 }
 

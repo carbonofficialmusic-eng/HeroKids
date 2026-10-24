@@ -21,6 +21,7 @@ import { SwitchMemberDialog } from "@/components/switch-member-dialog";
 import { MemberPauseDialog } from "@/components/member-pause-dialog";
 import { TaskCompletionDialog } from "@/components/task-completion-dialog";
 import { SuccessCelebration } from "@/components/success-celebration";
+import { StartSkinCelebration } from "@/components/start-skin-celebration";
 import { ProfileMenu } from "@/components/profile-menu";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { MemberOnboardingModal } from "@/components/member-onboarding-modal";
@@ -60,18 +61,21 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { apiRequest, queryClient, getDevHeaders } from "@/lib/queryClient";
 import { scrollFieldIntoView } from "@/lib/keyboard-scroll";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import type { Family, FamilyMember, Task, Reward, RewardRequest, FamilyGoal, GoalContribution } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/skins";
 import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
 import { hasFeature } from "@shared/tier-config";
 import type { SubscriptionTier } from "@shared/tier-config";
 import { celebrateTaskCompletion } from "@/lib/confetti";
-import logoUrl from "@assets/littlechamps_logo_opt.webp";
+import { APP_LOGO_URL as logoUrl } from "@/lib/brand-assets";
+import { AppLoadingScreen } from "@/components/app-loading-screen";
 import familyGoalsIcon from "@assets/family-goals-icon.png";
 import { ACHIEVEMENT_BADGES } from "@/lib/achievement-badges";
 import { getLocalDateKey, isFixedAppointment, sortFixedAppointments } from "@shared/due-date-policy";
 import { UpcomingAppointments } from "@/components/upcoming-appointments";
+import { ParentStartBackdrop, ParentStartScreen } from "@/components/parent-start-screen";
+import { useStartSkin } from "@/hooks/useStartSkin";
 
 // Custom hook for sticky sidebar on desktop
 
@@ -121,9 +125,11 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
+  const search = useSearch();
   const { height: vvHeight, offsetTop: vvOffsetTop } = useVisualViewport();
   const [orientationLayoutEpoch, setOrientationLayoutEpoch] = useState(0);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [startCelebrationMemberId, setStartCelebrationMemberId] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
@@ -172,21 +178,6 @@ export default function Dashboard() {
   const [chatBarCollapsed, setChatBarCollapsed] = useState(() => {
     try { return localStorage.getItem("herokids_chatbar_collapsed") === "true"; } catch { return false; }
   });
-
-  // Show onboarding tour for parents who haven't completed it yet.
-  // Fires LAST in the onboarding sequence: only after plan-selection paywall
-  // and member-onboarding modal have both been dismissed.
-  const tourUser = user; // alias to avoid lint warning about conditional hook
-  useEffect(() => {
-    if (tourUser && !tourUser.onboardingCompletedAt) {
-      if (showPaywall) return;        // wait for plan selection first
-      if (showMemberOnboarding) return; // wait for member onboarding second
-      const timer = setTimeout(() => setShowTour(true), 800);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tourUser?.id, tourUser?.onboardingCompletedAt, showPaywall, showMemberOnboarding]);
 
 
   useEffect(() => {
@@ -344,6 +335,32 @@ export default function Dashboard() {
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
   });
+  const start = useStartSkin(member);
+  const startBlocksOverlays = !member || start.visible || (!!member.startSkinOptions && !user?.onboardingCompletedAt);
+
+  useEffect(() => {
+    if (!member || member.role !== "parent") return;
+    const params = new URLSearchParams(search);
+    if (params.get("createTask") !== "1") return;
+    setSelectedTask(null);
+    setTaskDialogOpen(true);
+    // Consume the action so closing the dialog or reloading does not reopen it.
+    params.delete("createTask");
+    navigate(`/dashboard${params.size ? `?${params.toString()}` : ""}`, { replace: true });
+  }, [member?.id, member?.role, search, navigate]);
+
+  useEffect(() => {
+    setShowTour(false);
+    setShowPaywall(false);
+    setShowMemberOnboarding(false);
+  }, [member?.id]);
+
+  useEffect(() => {
+    if (!user || user.onboardingCompletedAt || member?.role !== "parent") return;
+    if (start.visible || !start.tourReady || showPaywall || showMemberOnboarding || anyDialogOpen) return;
+    const timer = setTimeout(() => setShowTour(true), 800);
+    return () => clearTimeout(timer);
+  }, [user?.id, user?.onboardingCompletedAt, member?.id, member?.role, start.visible, start.tourReady, showPaywall, showMemberOnboarding, anyDialogOpen]);
 
   // Fetch real user's member record (to determine permissions)
   const { data: realMember } = useQuery<FamilyMember>({
@@ -382,6 +399,7 @@ export default function Dashboard() {
   // Guard 3: waits until the paywall is dismissed (no simultaneous overlays).
   useEffect(() => {
     if (!member || member.role !== "parent") return;
+    if (startBlocksOverlays) return;
     if (familyMembersLoading) return;
     if (showPaywall) return; // paywall takes precedence — wait until it's dismissed
     // Skip if family already has at least one child member
@@ -392,7 +410,7 @@ export default function Dashboard() {
     const timer = setTimeout(() => setShowMemberOnboarding(true), 800);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [member?.id, member?.role, familyMembersLoading, familyMembers.length, showPaywall]);
+  }, [member?.id, member?.role, familyMembersLoading, familyMembers.length, showPaywall, startBlocksOverlays]);
 
   // Fetch tasks
   const { data: tasks = [] } = useQuery<Task[]>({
@@ -492,6 +510,7 @@ export default function Dashboard() {
   // Fires FIRST in the onboarding sequence — no dependency on tour completion.
   useEffect(() => {
     if (!familyData) return; // wait until family data is loaded
+    if (startBlocksOverlays) return;
     if (familyData.subscriptionTier !== "free") return; // already paid – skip
     if (member?.role !== "parent") return; // only parents see the paywall
     try {
@@ -500,7 +519,7 @@ export default function Dashboard() {
     const timer = setTimeout(() => setShowPaywall(true), 600);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [member?.id, member?.role, familyData?.subscriptionTier]);
+  }, [member?.id, member?.role, familyData?.subscriptionTier, startBlocksOverlays]);
 
   // Trigger native iOS review prompt once user has been on a paid tier for ≥30 days
   useAppReview({
@@ -803,8 +822,15 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
       setTaskDialogOpen(false);
       setSelectedTask(null);
+      if (member && start.visible && !start.taskCreated) {
+        setStartCelebrationMemberId(member.id);
+      }
+    },
+    onError: (error: Error) => {
+      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
     },
   });
 
@@ -1196,14 +1222,7 @@ export default function Dashboard() {
   });
 
   if (memberLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p className="text-muted-foreground">{t("common.loading")}</p>
-        </div>
-      </div>
-    );
+    return <AppLoadingScreen />;
   }
 
   if (!member) {
@@ -1352,7 +1371,8 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="lc-dashboard min-h-screen overflow-x-clip">
+    <div className={`lc-dashboard min-h-screen overflow-x-clip ${start.visible ? "lc-dashboard-start" : ""}`}>
+      {start.visible && <ParentStartBackdrop />}
       {/* Header — position:fixed so it never scrolls away in WKWebView */}
       <header
         data-app-header
@@ -1420,13 +1440,28 @@ export default function Dashboard() {
         </div>
       </header>
 
+      <StartSkinCelebration
+        open={start.visible && !!member && startCelebrationMemberId === member.id}
+        onClose={() => setStartCelebrationMemberId(null)}
+      />
       <div
-        className={`container mx-auto max-w-7xl py-8 overflow-x-clip ${isParent ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))]" : ""}`}
-        style={{ paddingTop: 'calc(var(--header-h) + var(--sat, env(safe-area-inset-top)) + 1rem)', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}
+        className={`container mx-auto max-w-7xl py-8 overflow-x-clip ${start.visible ? "relative z-[1]" : ""} ${isParent ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))]" : ""}`}
+        style={{ paddingTop: `calc(var(--header-h) + var(--sat, env(safe-area-inset-top)) + ${start.visible ? "0rem" : "1rem"})`, paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}
       >
         {isParent ? (
           /* Parent View */
-          <div ref={containerRef} className="lc-dashboard-responsive-layout grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
+          <div ref={containerRef} className={`lc-dashboard-responsive-layout grid grid-cols-1 lg:grid-cols-3 ${start.visible ? "gap-x-8 gap-y-0" : "gap-8"} relative`}>
+            {start.visible && member && (
+              <ParentStartScreen
+                key={member.id}
+                options={start.options}
+                taskCreated={start.taskCreated}
+                selecting={start.selecting}
+                error={start.error}
+                onChoose={start.choose}
+                onCreateTask={() => { setSelectedTask(null); setTaskDialogOpen(true); }}
+              />
+            )}
             {/* Keep the trial banner in the mobile grid when the member warning is also shown,
                 so both messages have their own space instead of overlapping. */}
             {isParent && familyData?.trialEndsAt && familyData.subscriptionTier === "free" && (() => {
@@ -1479,12 +1514,16 @@ export default function Dashboard() {
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6 min-w-0">
               {/* Logo and Profile Section */}
-              <div>
+              {!start.visible && <div>
                 <div className="mb-4 flex justify-center">
                   <img 
                     src={logoUrl} 
                     alt="Little Champs Logo" 
-                    className="h-36 w-auto object-contain cursor-pointer"
+                    width={144}
+                    height={144}
+                    loading="eager"
+                    decoding="sync"
+                    className="h-36 w-36 object-contain cursor-pointer"
                     data-testid="img-dashboard-logo"
                     onClick={handleDebugTap}
                   />
@@ -1543,7 +1582,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>}
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3">
@@ -2264,7 +2303,10 @@ export default function Dashboard() {
                 <img 
                   src={logoUrl} 
                   alt="Little Champs Logo" 
-                  className="h-44 w-auto object-contain cursor-pointer"
+                  width={176}
+                  height={176}
+                  loading="eager"
+                  className="h-44 w-44 object-contain cursor-pointer"
                   data-testid="img-dashboard-logo-child"
                   onClick={handleDebugTap}
                 />
@@ -2789,7 +2831,7 @@ export default function Dashboard() {
       )}
 
       {/* Onboarding Tour */}
-      {showTour && isParent && (
+      {showTour && isParent && !start.visible && start.tourReady && (
         <OnboardingTour onClose={() => setShowTour(false)} />
       )}
 

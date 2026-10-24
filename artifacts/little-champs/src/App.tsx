@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { Switch, Route, useLocation, Router as WouterRouter } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
-import logoUrl from "@assets/littlechamps_logo_opt.webp";
+import { APP_LOGO_URL as logoUrl } from "@/lib/brand-assets";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -14,35 +14,40 @@ import { isNativePlatform } from "@/lib/platform";
 import { apiRequest } from "@/lib/queryClient";
 import { getBackgroundUrl } from "@/lib/skins";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import NotFound from "@/pages/not-found";
-import Landing from "@/pages/landing";
-import NativeLoginScreen from "@/pages/native-login";
+import { BackgroundLayerContext } from "@/components/background-layer";
 import Dashboard from "@/pages/dashboard";
-import KidDashboard from "@/pages/kid-dashboard";
-import KidDashboardOld from "@/pages/kid-dashboard-old";
 import AutoRedirect from "@/pages/auto-redirect";
-import Pricing from "@/pages/pricing";
-import Analytics from "@/pages/analytics";
-import Chat from "@/pages/chat";
-import Approvals from "@/pages/approvals";
-import RewardsBoard from "@/pages/rewards-board";
-import Settings from "@/pages/settings";
-import SkinsGallery from "@/pages/skins-gallery";
-import Achievements from "@/pages/achievements";
-import FamilyGoals from "@/pages/family-goals";
-import MyRewards from "@/pages/my-rewards";
-import ActiveRewards from "@/pages/active-rewards";
-import MyAchievements from "@/pages/my-achievements";
-import LinkDevice from "@/pages/link-device";
-import Admin from "@/pages/admin";
-import Privacy from "@/pages/privacy";
-import Impressum from "@/pages/impressum";
-import Terms from "@/pages/terms";
-import Contact from "@/pages/contact";
-import IosTest from "@/pages/ios-test";
-import AccountPage from "@/pages/account";
-import AuthClose from "@/pages/auth-close";
-import CalendarPage from "@/pages/calendar";
+import { AppLoadingScreen } from "@/components/app-loading-screen";
+
+// Keep the parent dashboard and initial redirect in the bundled app entry.
+// Only secondary routes load on demand; the first dashboard must not suspend.
+const NotFound = lazy(() => import("@/pages/not-found"));
+const Landing = lazy(() => import("@/pages/landing"));
+const NativeLoginScreen = lazy(() => import("@/pages/native-login"));
+const KidDashboard = lazy(() => import("@/pages/kid-dashboard"));
+const KidDashboardOld = lazy(() => import("@/pages/kid-dashboard-old"));
+const Pricing = lazy(() => import("@/pages/pricing"));
+const Analytics = lazy(() => import("@/pages/analytics"));
+const Chat = lazy(() => import("@/pages/chat"));
+const Approvals = lazy(() => import("@/pages/approvals"));
+const RewardsBoard = lazy(() => import("@/pages/rewards-board"));
+const Settings = lazy(() => import("@/pages/settings"));
+const SkinsGallery = lazy(() => import("@/pages/skins-gallery"));
+const Achievements = lazy(() => import("@/pages/achievements"));
+const FamilyGoals = lazy(() => import("@/pages/family-goals"));
+const MyRewards = lazy(() => import("@/pages/my-rewards"));
+const ActiveRewards = lazy(() => import("@/pages/active-rewards"));
+const MyAchievements = lazy(() => import("@/pages/my-achievements"));
+const LinkDevice = lazy(() => import("@/pages/link-device"));
+const Admin = lazy(() => import("@/pages/admin"));
+const Privacy = lazy(() => import("@/pages/privacy"));
+const Impressum = lazy(() => import("@/pages/impressum"));
+const Terms = lazy(() => import("@/pages/terms"));
+const Contact = lazy(() => import("@/pages/contact"));
+const IosTest = lazy(() => import("@/pages/ios-test"));
+const AccountPage = lazy(() => import("@/pages/account"));
+const AuthClose = lazy(() => import("@/pages/auth-close"));
+const CalendarPage = lazy(() => import("@/pages/calendar"));
 
 interface FamilyMember {
   id: number;
@@ -60,6 +65,7 @@ function RedirectToLanding() {
 }
 
 function BackgroundWrapper({ children }: { children: React.ReactNode }) {
+  const [backgroundLayer, setBackgroundLayer] = useState<HTMLDivElement | null>(null);
   const { isAuthenticated } = useAuth();
   
   const { data: member } = useQuery<FamilyMember>({
@@ -97,11 +103,12 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
   }, [backgroundUrl, currentBg]);
 
   return (
+    <BackgroundLayerContext.Provider value={backgroundLayer}>
     <div className="min-h-full" data-skin-background={shouldShowBackground ? "visible" : "hidden"}>
       {/* Background container - extends 60px above layout viewport so it always
           covers the native status-bar zone even when iOS sets the WKWebView
           layout viewport origin to y=safe-area-inset-top instead of y=0. */}
-      <div className="fixed inset-x-0 bottom-0 pointer-events-none" style={{ zIndex: 0, top: '-60px' }}>
+      <div ref={setBackgroundLayer} data-background-layer className="fixed inset-x-0 bottom-0 pointer-events-none" style={{ zIndex: 0, top: '-60px' }}>
         {previousBg && (
           <img 
             src={previousBg}
@@ -155,6 +162,7 @@ function BackgroundWrapper({ children }: { children: React.ReactNode }) {
         {children}
       </div>
     </div>
+    </BackgroundLayerContext.Provider>
   );
 }
 
@@ -549,15 +557,7 @@ function Router() {
   // Show nothing while loading to prevent 404 flash.
   // authTimedOut is the safety valve for slow/hanging networks.
   if (isLoading && !authTimedOut) {
-    return (
-      <BackgroundWrapper>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          </div>
-        </div>
-      </BackgroundWrapper>
-    );
+    return <AppLoadingScreen />;
   }
 
   if (!isAuthenticated) {
@@ -761,7 +761,9 @@ function App() {
           <LanguageProvider>
             <ServerStatusGuard>
               <Toaster />
-              <Router />
+              <Suspense fallback={<AppLoadingScreen />}>
+                <Router />
+              </Suspense>
             </ServerStatusGuard>
           </LanguageProvider>
         </TooltipProvider>

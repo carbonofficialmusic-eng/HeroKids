@@ -33,7 +33,13 @@ export const LANG_USER_KEY = 'herokids_lang_user';
 
 function detectLanguage(): string {
   // Only trust an explicit user choice, not auto-set values.
-  const explicit = localStorage.getItem(LANG_USER_KEY);
+  let explicit: string | null = null;
+  try {
+    explicit = localStorage.getItem(LANG_USER_KEY);
+  } catch {
+    // Embedded/private browsers may deny storage. Language detection must
+    // never prevent the entire app module from starting.
+  }
   if (explicit && SUPPORTED.includes(explicit)) return explicit;
 
   // Fall back to browser language.

@@ -38,6 +38,20 @@ export function validateIosBuild(directory) {
       `Bundled entry asset is stale: ${relative}`,
     );
   }
+  for (const image of ["welcome-start.webp", "welcome-kid-start.webp"]) {
+    const relative = path.join("images", image);
+    assert.deepEqual(
+      fs.readFileSync(path.join(bundledDir, relative)),
+      fs.readFileSync(path.join(webDir, relative)),
+      `Bundled start illustration is stale: ${image}`,
+    );
+  }
+  const skinsDir = path.join(bundledDir, "skins");
+  if (fs.existsSync(skinsDir)) {
+    const skinImages = fs.readdirSync(skinsDir, { recursive: true })
+      .filter(name => /\.(png|jpe?g|webp|gif)$/i.test(name));
+    assert.deepEqual(skinImages, [], "Game skins and their backgrounds must remain online-only");
+  }
   return { appId: config.appId, serverUrl: config.server.url, webBuild: build.id };
 }
 

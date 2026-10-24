@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --config vite.config.ts --host 0.0.0.0",
+    "dev": "node scripts/dev-preview.mjs",
+    "dev:unbundled": "vite --config vite.config.ts --host 0.0.0.0",
     "build": "vite build --config vite.config.ts",
     "ios:prepare": "node scripts/prepare-ios.mjs",
     "ios:check": "node scripts/check-ios-build.mjs",

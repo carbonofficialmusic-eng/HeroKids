@@ -1,3 +1,4 @@
+import { AppLoadingScreen } from "@/components/app-loading-screen";
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { visibleTaskParticipants } from "@/lib/task-participants";
 import { TaskParticipantToggle } from "@/components/task-participant-toggle";
@@ -93,12 +94,15 @@ import { Leaderboard } from "@/components/leaderboard";
 import { Pinboard } from "@/components/pinboard";
 import { getAvatarUrl } from "@/lib/skins";
 import { hasFeature, canUseSharedRewards, type SubscriptionTier } from "@shared/tier-config";
-import { TOTAL_HIDDEN_STARS } from "@shared/skin-config";
+import { TOTAL_HIDDEN_STARS, isLegacySkin } from "@shared/skin-config";
 import { getDueDateWindow, getLocalDateKey, isFixedAppointment, sortFixedAppointments } from "@shared/due-date-policy";
 import { isTaskAssignedToMember } from "@shared/task-assignment-visibility";
 import { shouldCelebrateTaskSubmission } from "@shared/task-mode";
 import logoUrl from "@assets/littlechamps_logo_opt.webp";
 import { UpcomingAppointments } from "@/components/upcoming-appointments";
+import { ChildStarterBackdrop, ChildStarterHeroes } from "@/components/child-starter-heroes";
+import { ChildStarterCelebration, type ChildStarterSelection } from "@/components/child-starter-celebration";
+import { useStartSkin } from "@/hooks/useStartSkin";
 
 // Extended Task type with metadata from API
 interface TaskWithMeta extends Task {
@@ -1659,6 +1663,10 @@ export default function KidDashboard() {
 
   // Build member object from device session if available
   const memberFromDeviceSession: FamilyMember | undefined = isDeviceAuthenticated && deviceSession?.memberId ? {
+    startSkinOptions: null,
+    freeStarterSkinId: null,
+    firstTaskCreatedAt: null,
+    startCompletedAt: null,
     id: deviceSession.memberId,
     familyName: deviceSession.familyName || "",
     displayName: deviceSession.memberName || "",
@@ -1689,6 +1697,15 @@ export default function KidDashboard() {
 
   // Use API member (fresh data) with fallback to device session data
   const member = memberFromApi || memberFromDeviceSession;
+  const kidStart = useStartSkin(member);
+  const [kidStarterSelection, setKidStarterSelection] = useState<ChildStarterSelection | null>(null);
+  // Child-only starter: shown while pending, held through the image-ready transition.
+  const kidStarterHeldFor = useRef<string | null>(null);
+  const kidStarterActive = member?.role === "child" && !!member.startSkinOptions && (kidStart.pending || kidStart.selecting);
+  if (kidStarterActive) kidStarterHeldFor.current = member!.id;
+  else if (kidStarterHeldFor.current && (kidStarterHeldFor.current !== member?.id || kidStart.tourReady)) kidStarterHeldFor.current = null;
+  // Held through the image-ready crossfade only for the member who saw the offer.
+  const showKidStarter = kidStarterActive || (kidStarterHeldFor.current === member?.id && !kidStart.tourReady && !kidStart.error);
   const memberLoading = memberApiLoading || deviceSessionLoading;
 
   // WebSocket connection for real-time updates
@@ -2083,11 +2100,7 @@ export default function KidDashboard() {
   // Show loading state — use same fixed container so WKWebView never sees a layout shift
   const isLoading = userLoading || deviceSessionLoading || memberLoading;
   if (isLoading) {
-    return (
-      <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <AppLoadingScreen />;
   }
 
   // If not logged in via either method
@@ -2396,7 +2409,24 @@ export default function KidDashboard() {
       <div style={{ paddingTop: 'calc(var(--header-h) + var(--sat, env(safe-area-inset-top)))' }}>
       <div className="container mx-auto max-w-7xl pt-4 pb-[calc(8rem+env(safe-area-inset-bottom))] relative" style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
       <div className="lc-dashboard-responsive-layout grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      <div className="lg:col-span-2 space-y-8 min-w-0 overflow-hidden">
+      <div className={`${showKidStarter ? "lg:col-span-3" : "lg:col-span-2"} space-y-8 min-w-0 overflow-hidden`}>
+        {showKidStarter ? (
+          <><ChildStarterBackdrop />
+          <ChildStarterHeroes
+            key={`${member.id}:${kidStart.options.map(option => option.id).join(",")}`}
+            options={kidStart.options}
+            starsFound={member.starsFound ?? 0}
+            selecting={kidStart.selecting}
+            transitioning={!kidStart.pending && !kidStart.selecting}
+            error={kidStart.error}
+            onChoose={skinId => {
+              setKidStarterSelection({ memberId: member.id, skinId });
+              kidStart.choose(skinId);
+            }}
+            legacyCount={new Set((member.earnedLegacySkinIds ?? []).filter(isLegacySkin)).size}
+            rewardCount={new Set([...myRedemptions, ...joinedSharedRewards].map(reward => String(reward.id))).size}
+          /></>
+        ) : (<>
         {/* Little Champs Logo */}
         <div className="flex justify-center">
           <img 
@@ -2474,6 +2504,7 @@ export default function KidDashboard() {
             </div>
           </div>
         </div>
+        </>)}
 
         {/* Special Achievement Rewards Section */}
         {specialRewards.length > 0 && (
@@ -3556,6 +3587,12 @@ export default function KidDashboard() {
         </DialogContent>
       </Dialog>
 
+      <ChildStarterCelebration
+        member={member}
+        selection={kidStarterSelection}
+        ready={kidStart.tourReady && !showKidStarter && !kidStart.selecting}
+        onClose={() => setKidStarterSelection(null)}
+      />
       <GoalCompletedModal
         goal={completedGoal}
         onClose={() => setCompletedGoal(null)}

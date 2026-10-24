@@ -21,6 +21,7 @@ import type { FamilyMember, Family } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { CachedImage } from "@/lib/image-cache";
+import { StartSkinChoice } from "@/components/start-skin-choice";
 
 // Custom hook for sticky sidebar on desktop
 function useStickyPreview(isDesktop: boolean) {
@@ -607,6 +608,7 @@ export default function SkinsGallery() {
     <>
       <div className="lc-skins-gallery min-h-screen p-4" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))', paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))' }}>
         <div className="max-w-7xl mx-auto">
+          <StartSkinChoice member={memberData} />
           {/* Header */}
           <div className="lc-skins-header flex flex-wrap items-center justify-between gap-2 mb-3">
             <Link href={dashboardUrl}>

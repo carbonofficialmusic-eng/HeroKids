@@ -20,6 +20,7 @@ import { DailyProgressBadge } from "@/components/daily-progress-badge";
 import { formatAppointmentTime } from "@/lib/appointment-time";
 import { visibleTaskParticipants } from "@/lib/task-participants";
 import { TaskParticipantToggle } from "@/components/task-participant-toggle";
+import { CompactTaskParticipantNames } from "@/components/compact-task-participant-names";
 
 
 interface TaskCardProps {
@@ -508,19 +509,7 @@ export function TaskCard({
               )}
               {assignedMembers && assignedMembers.length > 0 && (
                 <div className="mt-0.5">
-                <p id={`compact-participants-${task.id}`} className="text-[10px] text-muted-foreground leading-tight">
-                  {task.isSharedTask ? t("tasks.assignmentModeTeam") : t("tasks.assignmentModeIndividual")}:{" "}
-                  {visibleMembers.map((member) => {
-                    const status = member.status === "approved" || member.hasCompleted
-                      ? t("tasks.memberStatusApproved")
-                      : member.status === "pending" || (member as any).hasSubmitted
-                        ? submittedMemberStatus
-                        : member.status === "rejected"
-                          ? t("tasks.memberStatusRejected")
-                          : t("tasks.memberStatusOpen");
-                    return `${member.displayName}: ${status}`;
-                  }).join(" · ")}
-                </p>
+                <CompactTaskParticipantNames id={`compact-participants-${task.id}`} members={visibleMembers} />
                 <TaskParticipantToggle total={assignedMembers.length} expanded={participantsExpanded} onToggle={toggleParticipants} controls={`compact-participants-${task.id}`} />
                 </div>
               )}

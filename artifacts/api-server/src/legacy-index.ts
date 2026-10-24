@@ -6,6 +6,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes/routes";
 import healthRouter from "./routes/health";
+import kidStarterMediaRouter from "./routes/kid-starter-media";
 import { logger } from "./lib/logger";
 const log = (message: string) => logger.info(message);
 import http from "http";
@@ -34,6 +35,7 @@ app.use("/api", (req, res, next) =>
 );
 
 app.use("/api", healthRouter);
+app.use("/api/kid-starter-media/v1", kidStarterMediaRouter);
 
 // CRITICAL: Stripe webhook with custom raw body parser
 app.post("/api/stripe-webhook",
@@ -813,6 +815,9 @@ async function migrateExistingMembersForTestPhase() {
     let alreadyMigrated = 0;
 
     for (const member of allMembers) {
+      // Personal starters must never receive the historic extra free card or
+      // have their new star placement rewritten by this legacy startup job.
+      if (member.startSkinOptions) continue;
       let discoveredSkinIds = (member.discoveredSkinIds as string[]) || [];
       let needsSkinUpdate = false;
 
@@ -979,6 +984,11 @@ async function migrateLegacyMultiTasksToIndividualMode() {
 }
 
 (async () => {
+  await db.execute(sql`ALTER TABLE family_members
+    ADD COLUMN IF NOT EXISTS start_skin_options text[],
+    ADD COLUMN IF NOT EXISTS free_starter_skin_id varchar,
+    ADD COLUMN IF NOT EXISTS first_task_created_at timestamp,
+    ADD COLUMN IF NOT EXISTS start_completed_at timestamp`);
   // Required for every completion read/write; finish this additive migration
   // before accepting requests. Existing awards and progress are left intact.
   await db.execute(sql`ALTER TABLE task_completions

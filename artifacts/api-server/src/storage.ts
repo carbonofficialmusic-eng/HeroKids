@@ -110,6 +110,7 @@ import { allocateRewardShares } from "@shared/reward-sharing";
 import { allocateDailyTaskPoints } from "./daily-task-allocation";
 import { getPendingProofAttachments } from "./pendingCompletionAttachments";
 import { z } from "zod/v4";
+import { createStartSkinOptions, createStartStarPositions, getFreeStarterId, isStartPending } from "./start-skin-policy";
 
 type CategoryNames = NonNullable<Family["categoryNames"]>;
 
@@ -1032,18 +1033,28 @@ export class DatabaseStorage implements IStorage {
   private readonly STARTER_SKIN_ID = "junior-champion";
 
   async createFamilyMember(memberData: InsertFamilyMember): Promise<FamilyMember> {
-    // New members start with the first skin unlocked as a teaser
+    // Only this creation boundary enrols profiles. Nullable columns leave old
+    // profiles untouched; caller-supplied progress can never bypass the flow.
     const memberWithStarterSkin = {
       ...memberData,
-      discoveredSkinIds: [this.STARTER_SKIN_ID],
+      startSkinOptions: createStartSkinOptions(),
+      freeStarterSkinId: null,
+      firstTaskCreatedAt: null,
+      startCompletedAt: null,
+      discoveredSkinIds: [],
+      unlockedSkins: [],
+      earnedLegacySkinIds: [],
+      starsFound: 0,
+      activeSkinId: null,
     };
     
-    const [member] = await db
-      .insert(familyMembers)
-      .values(memberWithStarterSkin as any)
-      .returning();
-    
-    return member;
+    return db.transaction(async tx => {
+      const [member] = await tx.insert(familyMembers)
+        .values(memberWithStarterSkin as any).returning();
+      await tx.insert(starPlacements).values(createStartStarPositions()
+        .map(skinId => ({ memberId: member.id, skinId, found: false })));
+      return member;
+    });
   }
 
   async getFamilyMemberById(id: string): Promise<FamilyMember | undefined> {
@@ -1062,6 +1073,10 @@ export class DatabaseStorage implements IStorage {
       totalPoints,
       weeklyPoints,
       monthlyPoints,
+      startSkinOptions,
+      freeStarterSkinId,
+      firstTaskCreatedAt,
+      startCompletedAt,
       ...safeUpdates
     } = updates as Partial<InsertFamilyMember> & Record<string, unknown>;
     if (pinCode !== undefined) {
@@ -4033,22 +4048,6 @@ export class DatabaseStorage implements IStorage {
         return { profilePhotoPaths: [], googleRefreshTokenEncrypted: null }; // No members, nothing to reset
       }
 
-      // Prepare a complete clean set of hidden-star positions before deleting
-      // any family data. Factory reset must leave every member immediately
-      // usable; it must not depend on a later /api/stars or /api/skins request
-      // to lazily repair missing placements.
-      const allSkinRows = await tx.select({ id: skins.id }).from(skins);
-      const existingSkinIds = new Set(allSkinRows.map(skin => skin.id));
-      // Only place stars on standard skins that the gallery can actually
-      // render. Obsolete DB rows must never receive an unreachable star.
-      const starEligibleSkinIds = MIXED_SKIN_ORDER
-        .filter((id: string) => id !== STARTER_SKIN_ID && existingSkinIds.has(id));
-      if (starEligibleSkinIds.length < TOTAL_HIDDEN_STARS) {
-        throw new Error(
-          `Factory reset requires ${TOTAL_HIDDEN_STARS} star-eligible skins, found ${starEligibleSkinIds.length}`,
-        );
-      }
-
       // Get all family tasks (we'll need task IDs for assignments)
       const familyTasks = await tx
         .select()
@@ -4141,7 +4140,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       // 14. Reset all family member stats to zero (including PIN codes, starsFound, Legacy skins, and profile photos)
-      // Give everyone the starter skin as a teaser, and assign a random default avatar icon
+      // Re-enrol every profile in the personal start choice, with no fixed gift.
       const DEFAULT_AVATARS = ["default:fox", "default:bear", "default:rabbit", "default:cat", "default:penguin", "default:lion"];
       
       for (const memberId of memberIds) {
@@ -4179,7 +4178,11 @@ export class DatabaseStorage implements IStorage {
             monthlyPoints: 0,
             rewardsRedeemed: 0,
             unlockedSkins: [],
-            discoveredSkinIds: [STARTER_SKIN_ID],
+            discoveredSkinIds: [],
+            startSkinOptions: createStartSkinOptions(),
+            freeStarterSkinId: null,
+            firstTaskCreatedAt: null,
+            startCompletedAt: null,
             earnedLegacySkinIds: [], // Reset HeroKids Legacy avatars earned through stars
             activeSkinId: null, // No skin selected - use avatarUrl instead
             useThemeBackground: true,
@@ -4192,17 +4195,13 @@ export class DatabaseStorage implements IStorage {
           })
           .where(eq(familyMembers.id, memberId));
 
-        // Create all hidden-star positions inside the same transaction. Every
-        // position starts undiscovered, so immediately after reset both the
-        // dashboard and skins page see 0/TOTAL_HIDDEN_STARS consistently.
-        const shuffledSkinIds = [...starEligibleSkinIds].sort(() => Math.random() - 0.5);
-        await tx.insert(starPlacements).values(
-          shuffledSkinIds.slice(0, TOTAL_HIDDEN_STARS).map(skinId => ({
-            memberId,
-            skinId,
-            found: false,
-          })),
-        );
+        // Positions are allocated atomically with the free choice, so its
+        // selected card can never consume one of the 48 attainable stars.
+      }
+      const accountIds = members.map(member => member.userId).filter((id): id is string => !!id);
+      if (accountIds.length) {
+        await tx.update(users).set({ onboardingCompletedAt: null })
+          .where(inArray(users.id, accountIds));
       }
 
       // 15. Create default achievements using shared template (only Weekly Champion and Perfect Week enabled)
@@ -5065,12 +5064,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async initializeStarPlacements(memberId: string): Promise<void> {
+    const member = await this.getFamilyMember(memberId);
+    if (!member || isStartPending(member)) return;
+    // Personal starters can contain a legitimately found star. Only the old
+    // automatically unlocked fixed starter remains excluded for legacy profiles.
+    const freeStarterId = member.startSkinOptions ? null : getFreeStarterId(member);
     // Get all standard (non-legacy) skins from database, excluding the starter skin
     const allSkins = await db.select({ id: skins.id }).from(skins);
     const allSkinIds = new Set(allSkins.map(s => s.id));
     const standardSkinIds = allSkins
       .map(s => s.id)
-      .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID);
+      .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== freeStarterId);
     
     if (standardSkinIds.length < TOTAL_HIDDEN_STARS) {
       console.warn(`Only ${standardSkinIds.length} standard skins available for star placement (need ${TOTAL_HIDDEN_STARS})`);
@@ -5083,7 +5087,7 @@ export class DatabaseStorage implements IStorage {
     // These skins can never be "discovered" so stars on them are permanently unreachable
     const invalidPlacements = existing.filter(p => 
       this.LEGACY_SKIN_IDS.includes(p.skinId) || 
-      p.skinId === this.STARTER_SKIN_ID ||
+      p.skinId === freeStarterId ||
       !allSkinIds.has(p.skinId)
     );
     
@@ -5129,20 +5133,24 @@ export class DatabaseStorage implements IStorage {
     if (!member) {
       return { totalPlacements: 0, added: 0, message: "Member not found" };
     }
+    if (isStartPending(member)) {
+      return { totalPlacements: 0, added: 0, message: "Choose your starter first" };
+    }
+    const freeStarterId = member.startSkinOptions ? null : getFreeStarterId(member);
 
     // Get all skins to validate placements
     const allSkins = await db.select({ id: skins.id }).from(skins);
     const allSkinIds = new Set(allSkins.map(s => s.id));
     const standardSkinIds = allSkins
       .map(s => s.id)
-      .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== this.STARTER_SKIN_ID);
+      .filter(id => !this.LEGACY_SKIN_IDS.includes(id) && id !== freeStarterId);
 
     const existing = await this.getStarPlacementsByMember(memberId);
     
     // STEP 1: Remove invalid placements (Legacy skins, starter skin, or non-existent skins)
     const invalidPlacements = existing.filter(p => 
       this.LEGACY_SKIN_IDS.includes(p.skinId) || 
-      p.skinId === this.STARTER_SKIN_ID ||
+      p.skinId === freeStarterId ||
       !allSkinIds.has(p.skinId)
     );
     
@@ -5321,6 +5329,9 @@ export class DatabaseStorage implements IStorage {
 
   async getMemberStarStats(memberId: string): Promise<{ starsFound: number; totalStars: number; earnedLegacySkinIds: string[] }> {
     const member = await this.getFamilyMember(memberId);
+    if (member && isStartPending(member)) {
+      return { starsFound: 0, totalStars: TOTAL_HIDDEN_STARS, earnedLegacySkinIds: [] };
+    }
     const placements = await this.getStarPlacementsByMember(memberId);
     
     // Count actual found stars from placements (not member counter which can be out of sync)

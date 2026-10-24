@@ -59,11 +59,14 @@ export function useWebSocket(familyName: string | null, mobileToken?: string, op
               // Remove every cached response and reload so other connected
               // devices cannot continue displaying pre-reset stars or skins.
               queryClient.clear();
+              localStorage.removeItem("herokids_seen_paywall");
+              localStorage.removeItem("herokids_seen_member_onboarding");
               window.location.replace("/");
               break;
 
             case "task_created":
             case "task_updated":
+              queryClient.invalidateQueries({ queryKey: ["/api/family-members/current"] });
               // Invalidate tasks and pending count
               queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
               queryClient.invalidateQueries({ queryKey: ["/api/tasks/pending-count"] });

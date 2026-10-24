@@ -25,7 +25,7 @@
 - [Termin vs. Wiederholungsintervall](task-date-semantics.md) — „Termin“ gilt nur für ein über den Kalender festgelegtes Datum, nie für den nächsten Intervallzeitpunkt
 - [Frontend-Build erkennt freie Variablen nicht](frontend-runtime-validation.md) — Vite/esbuild kann trotz fehlender Imports oder falschem Komponenten-Scope erfolgreich bauen
 - [Gesperrte Belohnungen nach Theme](locked-reward-theme-split.md) — Light Mode nutzt helle Karten mit blauem Fortschritt; nur Dark Mode nutzt vollständig stahlblaue Karten
-- [Native Skin-Downloads](native-skin-downloads.md) — nur der Starter-Skin wird gebündelt; weitere Avatare und Hintergründe laden seriell erst nach dem Aufdecken
+- [Native Skin-Downloads](native-skin-downloads.md) — bisher Starter lokal; beim neuen Einstieg alle Skins online, drei erlaubte Startvorschauen vorab.
 - [Punkte-Rückerstattungen](point-refund-invariant.md) — Rückerstattungen müssen exakt einmal erfolgen und dürfen verfügbare Punkte nie über den Lebenszeitverdienst erhöhen
 - [Eingelöste Belohnungen bleiben erhalten](redeemed-reward-archive.md) — Shop-Löschung archiviert nur die Vorlage; Einlösung, Anzeige und Aktionen bleiben bestehen
 - [App-Store-Version zurückstufen](app-store-version-downgrade.md) — höhere TestFlight-Versionsreihen müssen entfernt oder abgelaufen sein, bevor eine niedrigere Version auswählbar wird
@@ -81,3 +81,5 @@
 - [Unbekannte Vorschaufehler bei Menüs](preview-layout-warnings.md) — originales Browserereignis prüfen; ResizeObserver-Warnungen nicht mit fehlgeschlagenem Profilwechsel verwechseln.
 - [Kompakte Aufgaben-Teilnehmer](task-participant-display.md) — drei Teilnehmer zeigen, aktives Switch-Profil zuerst; weitere samt Status über Pfeil ausklappen.
 - [Veralteter iOS-Webstand](ios-stale-web-runtime.md) — Online-Adresse und erfolgreiches Publish reichen nicht; geladenen Webstand direkt mit dem Server vergleichen.
+- [Persönlicher Skin zum Einstieg](onboarding-start-skin-choice.md) — drei zufällige Startkarten pro neuem Mitglied; Eltern-Tour erst nach vollständig geschlossenem Startbildschirm.
+- [Einmaliger Kinder-Einstieg](child-starter-scope.md) — Heldenlayout nur bis zur ersten Wahl; transparente Originale und neue Hintergründe ausschließlich für Einstiegskarten.
