@@ -28,7 +28,7 @@ type Mapping = { calendarId: string; calendarName: string; memberId: string; def
 type Status = { connected?: boolean; active?: boolean; email?: string; lastSyncAt?: string | null; lastError?: string | null; mappings?: Mapping[] };
 
 export function GoogleCalendarSettings({ members, subscriptionTier = "free", onTrial = false }: { members: FamilyMember[]; subscriptionTier?: SubscriptionTierLegacy; onTrial?: boolean }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [mappings, setMappings] = useState<Mapping[]>([]);
@@ -210,7 +210,7 @@ export function GoogleCalendarSettings({ members, subscriptionTier = "free", onT
               <div className="space-y-3">
                 <p className="text-sm">{status.email ? t("googleCalendar.connectedAs", "Verbunden als {{email}}", { email: status.email }) : t("googleCalendar.connected", "Google ist verbunden.")}</p>
                 {status.lastError && <div className="flex gap-2 rounded-md border border-destructive/40 p-3 text-sm text-destructive"><AlertTriangle className="h-4 w-4 shrink-0" />{status.lastError}</div>}
-                {status.lastSyncAt && <p className="text-xs text-muted-foreground">{t("googleCalendar.lastSync", "Letzte Synchronisierung")}: {new Date(status.lastSyncAt).toLocaleString()}</p>}
+                {status.lastSyncAt && <p className="text-xs text-muted-foreground">{t("googleCalendar.lastSync", "Letzte Synchronisierung")}: {new Date(status.lastSyncAt).toLocaleString(i18n.language)}</p>}
                 <div className="flex flex-wrap gap-2"><Button onClick={() => sync.mutate()} disabled={sync.isPending}><RefreshCw className="mr-2 h-4 w-4" />{t("googleCalendar.sync", "Jetzt synchronisieren")}</Button><Button variant="outline" onClick={() => { setStep(1); loadCalendars(); }}>{t("googleCalendar.editMapping", "Zuordnung bearbeiten")}</Button><Button variant="destructive" onClick={() => disconnect.mutate()} disabled={disconnect.isPending}><Unlink className="mr-2 h-4 w-4" />{t("googleCalendar.disconnect", "Trennen")}</Button></div>
                 {disconnect.isError && <p className="text-sm text-destructive">{t("googleCalendar.disconnectError", "Die Verbindung konnte nicht sicher getrennt werden. Bitte versuche es erneut.")}</p>}
               </div>

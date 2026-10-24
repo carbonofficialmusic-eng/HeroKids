@@ -874,18 +874,16 @@ export default function Settings() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Tv className="h-5 w-5 text-primary" />
-                  <CardTitle>{i18n.language.startsWith("de") ? "Familien-TV anmelden" : "Connect family TV"}</CardTitle>
+                  <CardTitle>{t("familyTv.title")}</CardTitle>
                 </div>
                 <CardDescription>
-                  {i18n.language.startsWith("de")
-                    ? "Zeige einen Anmeldecode auf dem Fernseher an und bestätige ihn hier mit deiner Eltern-PIN. Danach können Familienmitglieder am TV wechseln."
-                    : "Show a sign-in code on your TV, then approve it here with your parent PIN. Family members can then switch on the TV."}
+                  {t("familyTv.intro")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button onClick={() => setTvApproveDialogOpen(true)} data-testid="button-connect-family-tv">
                   <Tv className="h-4 w-4 mr-2" />
-                  {i18n.language.startsWith("de") ? "TV-Code bestätigen" : "Approve TV code"}
+                  {t("familyTv.open")}
                 </Button>
               </CardContent>
             </Card>

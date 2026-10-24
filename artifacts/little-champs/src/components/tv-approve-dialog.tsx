@@ -13,45 +13,6 @@ interface TvApproveDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const messages = {
-  de: {
-    title: "Familien-TV anmelden",
-    description: "Öffne Little Champs TV auf dem Fernseher. Gib den dort angezeigten Code und deine Eltern-PIN ein, um diesen Fernseher für deine Familie freizugeben.",
-    code: "Code vom Fernseher",
-    pin: "Deine Eltern-PIN",
-    pinHint: "Lege zuerst eine eigene Eltern-PIN in den Familieneinstellungen fest. Ohne eingerichtete PIN ist keine TV-Freigabe möglich.",
-    confirm: "Fernseher freigeben",
-    confirming: "Wird freigegeben…",
-    success: "Freigabe gesendet. Der Fernseher verbindet sich jetzt; er erscheint gleich unten in der Liste.",
-    error: "Die Freigabe hat nicht funktioniert. Prüfe Code und PIN und versuche es erneut.",
-    connected: "Angemeldete Fernseher",
-    none: "Noch kein Familien-TV angemeldet.",
-    disconnect: "Abmelden",
-    disconnectConfirm: "Ja, TV abmelden",
-    cancel: "Abbrechen",
-    disconnectHint: "Der Fernseher verliert sofort den Familienzugang und muss danach erneut freigegeben werden.",
-    lastUsed: "Zuletzt verwendet",
-  },
-  en: {
-    title: "Connect family TV",
-    description: "Open Little Champs TV on your television. Enter the code shown there and your parent PIN to approve this TV for your family.",
-    code: "Code from the TV",
-    pin: "Your parent PIN",
-    pinHint: "Set a personal parent PIN in Family Settings first. A TV cannot be approved without a configured PIN.",
-    confirm: "Approve TV",
-    confirming: "Approving…",
-    success: "Approval sent. The TV is connecting and will appear below shortly.",
-    error: "The TV could not be approved. Check the code and PIN and try again.",
-    connected: "Connected TVs",
-    none: "No family TVs connected yet.",
-    disconnect: "Sign out",
-    disconnectConfirm: "Yes, sign out TV",
-    cancel: "Cancel",
-    disconnectHint: "This TV immediately loses family access and must be approved again.",
-    lastUsed: "Last used",
-  },
-};
-
 interface TvDevice {
   id: string;
   createdAt: string;
@@ -59,12 +20,11 @@ interface TvDevice {
 }
 
 export function TvApproveDialog({ open, onOpenChange }: TvApproveDialogProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
-  const text = i18n.language.startsWith("de") ? messages.de : messages.en;
   const [code, setCode] = useState("");
   const [pin, setPin] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<"" | "success" | "error" | "disconnectError">("");
   const [success, setSuccess] = useState(false);
   const [confirmDisconnect, setConfirmDisconnect] = useState<string | null>(null);
 
@@ -95,11 +55,11 @@ export function TvApproveDialog({ open, onOpenChange }: TvApproveDialogProps) {
     onSuccess: () => {
       setSuccess(true);
       setPin("");
-      setMessage(text.success);
+      setMessage("success");
       void queryClient.invalidateQueries({ queryKey: ["/api/tv/devices"] });
     },
-    onError: (error: Error) => {
-      setMessage(error.message || text.error);
+    onError: () => {
+      setMessage("error");
     },
   });
   const disconnect = useMutation({
@@ -110,20 +70,20 @@ export function TvApproveDialog({ open, onOpenChange }: TvApproveDialogProps) {
       setConfirmDisconnect(null);
       void queryClient.invalidateQueries({ queryKey: ["/api/tv/devices"] });
     },
-    onError: (error: Error) => setMessage(error.message),
+    onError: () => setMessage("disconnectError"),
   });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Tv className="h-5 w-5" />{text.title}</DialogTitle>
-          <DialogDescription>{text.description}</DialogDescription>
+          <DialogTitle className="flex items-center gap-2"><Tv className="h-5 w-5" />{t("familyTv.title")}</DialogTitle>
+          <DialogDescription>{t("familyTv.description")}</DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); approve.mutate(); }}>
           {!success && <>
             <div className="space-y-2">
-              <Label htmlFor="tv-approval-code">{text.code}</Label>
+              <Label htmlFor="tv-approval-code">{t("familyTv.code")}</Label>
               <Input
                 id="tv-approval-code"
                 value={code}
@@ -137,7 +97,7 @@ export function TvApproveDialog({ open, onOpenChange }: TvApproveDialogProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tv-approval-pin">{text.pin}</Label>
+              <Label htmlFor="tv-approval-pin">{t("familyTv.pin")}</Label>
               <Input
                 id="tv-approval-pin"
                 type="password"
@@ -149,37 +109,37 @@ export function TvApproveDialog({ open, onOpenChange }: TvApproveDialogProps) {
                 autoComplete="off"
                 data-testid="input-tv-approval-pin"
               />
-              <p className="text-xs text-muted-foreground">{text.pinHint}</p>
+              <p className="text-xs text-muted-foreground">{t("familyTv.pinHint")}</p>
             </div>
           </>}
-          {message && <p role={success ? "status" : "alert"} className={`text-sm ${success ? "text-emerald-700" : "text-destructive"}`}>{message}</p>}
+          {message && <p role={success ? "status" : "alert"} className={`text-sm ${success ? "text-emerald-700" : "text-destructive"}`}>{t(`familyTv.${message}`)}</p>}
           {!success && <Button type="submit" className="w-full" disabled={code.length !== 8 || pin.length !== 4 || approve.isPending} data-testid="button-tv-approve">
-            {approve.isPending ? text.confirming : text.confirm}
+            {approve.isPending ? t("familyTv.confirming") : t("familyTv.confirm")}
           </Button>}
         </form>
         <div className="space-y-3 border-t pt-4">
-          <h3 className="font-semibold">{text.connected}</h3>
+          <h3 className="font-semibold">{t("familyTv.connected")}</h3>
           {devices.isLoading && <p className="text-sm text-muted-foreground">…</p>}
           {devices.isError && <Button variant="outline" size="sm" onClick={() => void devices.refetch()}>
-            {i18n.language.startsWith("de") ? "Fernseher erneut laden" : "Reload TVs"}
+            {t("familyTv.reload")}
           </Button>}
-          {devices.data?.devices.length === 0 && <p className="text-sm text-muted-foreground">{text.none}</p>}
+          {devices.data?.devices.length === 0 && <p className="text-sm text-muted-foreground">{t("familyTv.none")}</p>}
           {devices.data?.devices.map((device) => (
             <div key={device.id} className="rounded-xl border p-3 space-y-2">
               <div className="flex justify-between gap-3 text-sm">
                 <span className="font-medium">TV · {new Date(device.createdAt).toLocaleDateString(i18n.language)}</span>
                 <span className="text-muted-foreground">{device.id.slice(0, 8)}</span>
               </div>
-              <p className="text-xs text-muted-foreground">{text.lastUsed}: {new Date(device.lastSeenAt).toLocaleString(i18n.language)}</p>
+              <p className="text-xs text-muted-foreground">{t("familyTv.lastUsed")}: {new Date(device.lastSeenAt).toLocaleString(i18n.language)}</p>
               {confirmDisconnect === device.id ? (
                 <div className="space-y-2">
-                  <p className="text-xs text-destructive">{text.disconnectHint}</p>
+                  <p className="text-xs text-destructive">{t("familyTv.disconnectHint")}</p>
                   <div className="flex gap-2">
-                    <Button type="button" size="sm" variant="destructive" disabled={disconnect.isPending} onClick={() => disconnect.mutate(device.id)}>{text.disconnectConfirm}</Button>
-                    <Button type="button" size="sm" variant="outline" onClick={() => setConfirmDisconnect(null)}>{text.cancel}</Button>
+                    <Button type="button" size="sm" variant="destructive" disabled={disconnect.isPending} onClick={() => disconnect.mutate(device.id)}>{t("familyTv.disconnectConfirm")}</Button>
+                    <Button type="button" size="sm" variant="outline" onClick={() => setConfirmDisconnect(null)}>{t("familyTv.cancel")}</Button>
                   </div>
                 </div>
-              ) : <Button type="button" size="sm" variant="outline" onClick={() => setConfirmDisconnect(device.id)}>{text.disconnect}</Button>}
+              ) : <Button type="button" size="sm" variant="outline" onClick={() => setConfirmDisconnect(device.id)}>{t("familyTv.disconnect")}</Button>}
             </div>
           ))}
         </div>
