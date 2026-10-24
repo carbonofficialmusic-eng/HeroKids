@@ -5,6 +5,12 @@ description: Bestätigte Produktrichtung für einen neuen Eltern-Einstieg mit dr
 
 Neue Mitglieder sollen drei eigene zufällige reguläre Skin-Karten zur Startauswahl erhalten; verschiedene Mitglieder dürfen unterschiedliche Angebote haben. Eine gewählte Karte wird kostenlos ausgerüstet, die zwei übrigen werden wieder verdeckt und regulär aufdeckbar. Bestehende Mitglieder behalten ihren bisherigen Stand.
 
+Release- und Review-Texte müssen den neuen Starter-Einstieg für Eltern und Kinder beschreiben, nicht nur für Kinder.
+
+**Why:** Der Nutzer hat die fälschliche Beschränkung der App-Review-Anleitung auf Kinder ausdrücklich korrigiert.
+
+**How to apply:** Beide Rollen im Funktionsumfang und im Review-Testablauf berücksichtigen.
+
 Die Sternverteilung ist von der Gratiswahl unabhängig und darf auch auf den drei angebotenen Startkarten Sterne enthalten. Beim bestätigten Aufdecken des Gratishelden wird ein dort liegender Stern genau einmal angerechnet; die Vorschau oder lokale Markierung allein zählt nicht. Diese Regel gilt für Eltern- und Kinderboard.
 
 Release- und Marketingtexte dürfen keinen garantierten Stern beim Starthelden versprechen.

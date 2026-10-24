@@ -3,6 +3,12 @@ name: Factory Reset für Skins und Sterne
 description: Verbindliche Ausgangslage für profilgetrennte Skin- und Sternstände nach einem Familien-Reset.
 ---
 
+Für App-Review-Anleitungen ist ein Factory Reset der vom Nutzer gewünschte einfachste Weg, den Starter-Einstieg erneut auszulösen.
+
+**Why:** Der Nutzer möchte, dass Apple die Starter-Funktion für Eltern und Kinder ohne Anlegen neuer Profile prüfen kann.
+
+**How to apply:** Den aktuellen Menüpfad aus der App prüfen und in der Anleitung nennen. Deutlich auf den irreversiblen Verlust von Familiendaten hinweisen und den Reset ausschließlich für die bereitgestellte Testfamilie empfehlen.
+
 **Rule:** Ein Factory Reset setzt jedes Familienmitglied unabhängig auf 0 gefundene Sterne, keine entdeckten oder Legacy-Skins, keinen aktiven Skin und aktivierten Theme-Hintergrund zurück. Jedes Profil erhält eine neue persönliche Dreierauswahl; Eltern beginnen wieder beim Startbildschirm mit erster Aufgabe, Kartenauswahl und Tour. Die 48 Sternpositionen entstehen erst atomar bei der Kartenauswahl, außerhalb der gewählten Gratis-Karte.
 
 **Why:** Globale Client-Caches und verzögert erzeugte Sternpositionen führten nach Profilwechseln zu widersprüchlichen Sternzahlen und Freischaltungen. Eine versteckte Produktions-Testfunktion konnte außerdem dauerhaft alle Skins eines Profils freischalten.
