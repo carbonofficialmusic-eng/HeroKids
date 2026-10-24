@@ -26,12 +26,41 @@ export function validateIosBuild(directory) {
   assert.equal(bundledBuild.id, build.id, "Bundled build identifier is stale");
   assert.ok(typeof build.id === "string" && Number.isFinite(Date.parse(build.id)), "Missing web build identifier");
 
-  const assets = [...index.matchAll(/(?:src|href)=["'](\/assets\/[^"'?#]+\.(?:js|css))["']/g)];
-  assert.ok(assets.some(([, asset]) => asset.endsWith(".js")), "Missing phone JavaScript entry point");
-  assert.ok(assets.some(([, asset]) => asset.endsWith(".css")), "Missing phone stylesheet");
-  for (const [, asset] of assets) {
-    const relative = asset.slice(1);
-    assert.ok(!relative.split("/").includes(".."), "Invalid entry asset path");
+  const assets = new Set(
+    [...index.matchAll(/(?:src|href)=["']\/(assets\/[^"'?#]+\.(?:js|css))["']/g)]
+      .map(([, asset]) => asset),
+  );
+  assert.ok([...assets].some(asset => asset.endsWith(".js")), "Missing phone JavaScript entry point");
+
+  // The bootstrap imports main dynamically, so Vite loads its CSS through JS
+  // rather than an HTML link. Follow the build manifest instead of requiring
+  // a static stylesheet link or guessing hashed chunk names from minified JS.
+  const manifestFile = path.join(webDir, ".vite/manifest.json");
+  if (fs.existsSync(manifestFile)) {
+    const manifest = readJson(manifestFile);
+    const roots = Object.keys(manifest)
+      .filter(key => manifest[key].isEntry && assets.has(manifest[key].file));
+    assert.ok(roots.length > 0, "Build manifest does not match the phone entry point");
+    const visited = new Set();
+    function collect(key) {
+      if (visited.has(key)) return;
+      visited.add(key);
+      assert.ok(Object.hasOwn(manifest, key), `Missing build manifest dependency: ${key}`);
+      const chunk = manifest[key];
+      assets.add(chunk.file);
+      for (const css of chunk.css ?? []) assets.add(css);
+      for (const dependency of [...(chunk.imports ?? []), ...(chunk.dynamicImports ?? [])]) {
+        collect(dependency);
+      }
+    }
+    for (const root of roots) collect(root);
+  }
+
+  assert.ok([...assets].some(asset => typeof asset === "string" && asset.endsWith(".css")), "Missing phone stylesheet");
+  for (const relative of assets) {
+    assert.ok(typeof relative === "string" && /^assets\/[^?#]+\.(js|css)$/.test(relative) &&
+      !relative.includes("\\") && !relative.split("/").some(part => part === ".." || part === "."),
+    "Invalid entry asset path");
     assert.deepEqual(
       fs.readFileSync(path.join(bundledDir, relative)),
       fs.readFileSync(path.join(webDir, relative)),

@@ -40,6 +40,72 @@ test("accepts freshly synchronized phone assets and the live startup URL", (t) =
   });
 });
 
+function dynamicFixture(t) {
+  const result = fixture(t);
+  for (const base of ["dist/public", "ios/App/App/public"]) {
+    result.write(`${base}/index.html`, '<script type="module" src="/assets/phone.js"></script>');
+    result.write(`${base}/assets/main.js`, "dynamically loaded main");
+  }
+  const manifest = {
+    "index.html": { file: "assets/phone.js", isEntry: true, dynamicImports: ["src/main.tsx"] },
+    "src/main.tsx": { file: "assets/main.js", css: ["assets/phone.css"], imports: ["index.html"] },
+  };
+  result.write("dist/public/.vite/manifest.json", JSON.stringify(manifest));
+  return { ...result, manifest };
+}
+
+test("accepts CSS loaded by the dynamic bootstrap and handles shared cycles", (t) => {
+  const { directory } = dynamicFixture(t);
+  assert.equal(validateIosBuild(directory).appId, "app.herokids.com");
+});
+
+test("rejects stale dynamically loaded CSS", (t) => {
+  const { directory, write } = dynamicFixture(t);
+  write("ios/App/App/public/assets/phone.css", "stale dynamic CSS");
+  assert.throws(() => validateIosBuild(directory), /Bundled entry asset is stale/);
+});
+
+test("rejects a missing dynamically loaded stylesheet", (t) => {
+  const { directory } = dynamicFixture(t);
+  fs.rmSync(path.join(directory, "ios/App/App/public/assets/phone.css"));
+  assert.throws(() => validateIosBuild(directory), /ENOENT/);
+});
+
+test("rejects a stale dynamically loaded JavaScript chunk", (t) => {
+  const { directory, write } = dynamicFixture(t);
+  write("ios/App/App/public/assets/main.js", "stale dynamic JavaScript");
+  assert.throws(() => validateIosBuild(directory), /Bundled entry asset is stale/);
+});
+
+test("rejects a manifest from another entry point", (t) => {
+  const { directory, manifest, write } = dynamicFixture(t);
+  manifest["index.html"].file = "assets/unrelated.js";
+  write("dist/public/.vite/manifest.json", JSON.stringify(manifest));
+  assert.throws(() => validateIosBuild(directory), /manifest does not match/);
+});
+
+test("rejects unresolved manifest dependencies", (t) => {
+  const { directory, manifest, write } = dynamicFixture(t);
+  manifest["src/main.tsx"].dynamicImports = ["missing.tsx"];
+  write("dist/public/.vite/manifest.json", JSON.stringify(manifest));
+  assert.throws(() => validateIosBuild(directory), /Missing build manifest dependency/);
+});
+
+test("rejects unsafe paths in a dynamically loaded chunk", (t) => {
+  const { directory, manifest, write } = dynamicFixture(t);
+  manifest["src/main.tsx"].file = "assets/../../outside.js";
+  write("dist/public/.vite/manifest.json", JSON.stringify(manifest));
+  assert.throws(() => validateIosBuild(directory), /Invalid entry asset path/);
+});
+
+test("unrelated CSS files do not satisfy the stylesheet requirement", (t) => {
+  const { directory, manifest, write } = dynamicFixture(t);
+  delete manifest["src/main.tsx"].css;
+  manifest["unused.tsx"] = { file: "assets/unused.js", css: ["assets/phone.css"] };
+  write("dist/public/.vite/manifest.json", JSON.stringify(manifest));
+  assert.throws(() => validateIosBuild(directory), /Missing phone stylesheet/);
+});
+
 test("rejects a silently switched local/offline startup", (t) => {
   const { directory, config, write } = fixture(t);
   delete config.server.url;

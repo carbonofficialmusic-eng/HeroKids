@@ -107,6 +107,7 @@ export default defineConfig(async ({ mode }) => {
   },
   root: path.resolve(import.meta.dirname),
   build: {
+    manifest: true,
     outDir: path.resolve(import.meta.dirname, 'dist/public'),
     emptyOutDir: true,
   },

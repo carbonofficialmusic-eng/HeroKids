@@ -94,3 +94,11 @@ A yellow Xcode Cloud custom-script step can still have completed successfully. R
 **Why:** Actual Cloud logs showed successful native resource preparation followed by a warning that a non-executable post-clone script had been run using `/bin/zsh`. Homebrew also warned about its support for the macOS image while continuing installation successfully.
 
 **How to apply:** Track executable permissions for custom CI scripts on subsequent maintenance. Do not rebuild a completed archive solely to remove these warnings, and do not treat successful preparation as proof of successful signing or TestFlight delivery.
+
+## Resource checks against actual production output
+
+Before sending native packaging changes to Xcode Cloud, exercise portable resource validation against a real production web build, not only hand-written test fixtures.
+
+**Why:** A valid dynamic bootstrap loaded the main stylesheet through JavaScript. Simplified fixtures linked CSS directly in HTML, hiding an incorrect validation assumption that stopped the Cloud build after synchronization had already succeeded.
+
+**How to apply:** Include the production dependency graph when validating copied resources. Keep missing/stale-file checks strict, but do not assume the HTML alone lists every required stylesheet. A passing portable check still does not establish a successful macOS archive or signing.
